@@ -61,4 +61,9 @@
       </column>
     </createTable>
   </changeSet>
+  <changeSet author="Steve Dickinson" id="6">
+    <addForeignKeyConstraint baseColumnNames="address_id" baseTableName="person_address" constraintName="fk_person_address_address" referencedColumnNames="id" referencedTableName="address" />
+    <addForeignKeyConstraint baseColumnNames="county_id" baseTableName="address" constraintName="fk_address_county_id" referencedColumnNames="id" referencedTableName="county" />
+    <addForeignKeyConstraint baseColumnNames="country_id" baseTableName="address" constraintName="fk_address_country_id" referencedColumnNames="id" referencedTableName="country" />
+  </changeSet>
 </databaseChangeLog>

@@ -16,6 +16,7 @@ services:
       POSTGRES_SCHEMA_NAME: ${POSTGRES_SCHEMA_NAME:-public}
       POSTGRES_USERNAME: ${POSTGRES_SCHEMA_USERNAME:-postgres}
       POSTGRES_PASSWORD: ${POSTGRES_SCHEMA_PASSWORD:-ppp}
+      
   dangerous-dogs-act-api-postgres:
     image: postgres:16.0-alpine
     environment:
@@ -24,6 +25,3 @@ services:
       POSTGRES_PASSWORD: ppp
     volumes:
       - postgres_data:/var/lib/postgres/data
-
-volumes:
-  postgres_data: {}

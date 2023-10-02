@@ -15,9 +15,9 @@ services:
       - ./jest.config.js:/home/node/jest.config.js
       - ./package.json:/home/node/package.json
 
-    dangerous-dogs-act-api-postgres:
+  dangerous-dogs-act-api-postgres:
     volumes:
-      - postgres_data:/var/lib/postgresql/data
+    - postgres_data:/var/lib/postgresql/data
 
-    volumes:
-      postgres_data:
+volumes:
+  postgres_data: {}

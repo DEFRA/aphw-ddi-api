@@ -51,4 +51,12 @@
       <column name="last_name" type="VARCHAR(24)" />
     </createTable>
   </changeSet>
+  <changeSet author="Steve Dickinson" id="6">
+    <addForeignKeyConstraint baseColumnNames="title_id" baseTableName="person" constraintName="fk_person_title_id" referencedColumnNames="id" referencedTableName="title" />
+    <addForeignKeyConstraint baseColumnNames="person_id" baseTableName="registered_person" constraintName="fk_registered_person_person_id" referencedColumnNames="id" referencedTableName="person" />
+    <addForeignKeyConstraint baseColumnNames="dog_id" baseTableName="registered_person" constraintName="fk_registered_person_dog_id" referencedColumnNames="id" referencedTableName="dog" />
+    <addForeignKeyConstraint baseColumnNames="person_type_id" baseTableName="registered_person" constraintName="fk_registered_person_person_type_id" referencedColumnNames="id" referencedTableName="person_type" />
+    <addForeignKeyConstraint baseColumnNames="person_id" baseTableName="person_address" constraintName="fk_person_address_person" referencedColumnNames="id" referencedTableName="person" />
+    <addForeignKeyConstraint baseColumnNames="person_id" baseTableName="person_contact" constraintName="fk_person_contact_person" referencedColumnNames="id" referencedTableName="person" />
+  </changeSet>
 </databaseChangeLog>

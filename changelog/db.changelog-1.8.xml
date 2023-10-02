@@ -39,4 +39,8 @@
       </column>
     </createTable>
   </changeSet>
+  <changeSet author="Steve Dickinson" id="5">
+    <addForeignKeyConstraint baseColumnNames="contact_id" baseTableName="person_contact" constraintName="fk_person_contact_contact" referencedColumnNames="id" referencedTableName="contact" />
+    <addForeignKeyConstraint baseColumnNames="contact_type_id" baseTableName="contact" constraintName="fk_contact_contact_type_id" referencedColumnNames="id" referencedTableName="contact_type" />
+  </changeSet>
 </databaseChangeLog>
