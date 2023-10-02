@@ -1,0 +1,42 @@
+<?xml version="1.1" encoding="utf-8" standalone="no"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog" xmlns:ext="http://www.liquibase.org/xml/ns/dbchangelog-ext" xmlns:pro="http://www.liquibase.org/xml/ns/pro" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog-ext http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-ext.xsd http://www.liquibase.org/xml/ns/pro http://www.liquibase.org/xml/ns/pro/liquibase-pro-3.9.xsd http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.9.xsd">
+  <changeSet author="Steve Dickinson" id="1">
+    <tagDatabase tag="v1.3.0" />
+  </changeSet>
+  <changeSet author="Steve Dickinson" id="2">
+    <createTable tableName="contactType">
+      <column autoIncrement="true" name="id" type="INTEGER">
+        <constraints nullable="false" primaryKey="true" primaryKeyName="contact_type_pkey" />
+      </column>
+      <column name="contactType" type="VARCHAR(24)">
+        <constraints nullable="false" unique="true" uniqueConstraintName="contact_type_ukey" />
+      </column>
+    </createTable>
+  </changeSet>
+  <changeSet author="Steve Dickinson" id="3">
+    <createTable tableName="contact">
+      <column autoIncrement="true" name="id" type="INTEGER">
+        <constraints nullable="false" primaryKey="true" primaryKeyName="contact_pkey" />
+      </column>
+      <column name="contact" type="VARCHAR(24)">
+        <constraints nullable="false" unique="true" uniqueConstraintName="contact_ukey" />
+      </column>
+      <column name="contactTypeId" type="INTEGER">
+        <constraints nullable="false" />
+      </column>
+    </createTable>
+  </changeSet>
+  <changeSet author="Steve Dickinson" id="4">
+    <createTable tableName="personContact">
+      <column autoIncrement="true" name="id" type="INTEGER">
+        <constraints nullable="false" primaryKey="true" primaryKeyName="person_contact_pkey" />
+      </column>
+      <column name="personId" type="INTEGER">
+        <constraints nullable="false" />
+      </column>
+      <column name="contactId" type="INTEGER">
+        <constraints nullable="false" />
+      </column>
+    </createTable>
+  </changeSet>
+</databaseChangeLog>

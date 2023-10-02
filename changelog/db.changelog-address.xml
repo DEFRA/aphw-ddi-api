@@ -1,0 +1,64 @@
+<?xml version="1.1" encoding="utf-8" standalone="no"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog" xmlns:ext="http://www.liquibase.org/xml/ns/dbchangelog-ext" xmlns:pro="http://www.liquibase.org/xml/ns/pro" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog-ext http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-ext.xsd http://www.liquibase.org/xml/ns/pro http://www.liquibase.org/xml/ns/pro/liquibase-pro-3.9.xsd http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.9.xsd">
+  <changeSet author="Steve Dickinson" id="1">
+    <tagDatabase tag="v1.3.0" />
+  </changeSet>
+  <changeSet author="Steve Dickinson" id="2">
+    <createTable tableName="country">
+      <column autoIncrement="true" name="id" type="INTEGER">
+        <constraints nullable="false" primaryKey="true" primaryKeyName="country_pkey" />
+      </column>
+      <column name="country" type="VARCHAR(24)">
+        <constraints nullable="false" unique="true" uniqueConstraintName="country_name_ukey" />
+      </column>
+    </createTable>
+  </changeSet>
+  <changeSet author="Steve Dickinson" id="3">
+    <createTable tableName="county">
+      <column autoIncrement="true" name="id" type="INTEGER">
+        <constraints nullable="false" primaryKey="true" primaryKeyName="county_pkey" />
+      </column>
+      <column name="county" type="VARCHAR(24)">
+        <constraints nullable="false" unique="true" uniqueConstraintName="county_name_ukey" />
+      </column>
+    </createTable>
+  </changeSet>
+  <changeSet author="Steve Dickinson" id="4">
+    <createTable tableName="address">
+      <column autoIncrement="true" name="id" type="INTEGER">
+        <constraints nullable="false" primaryKey="true" primaryKeyName="address_pkey" />
+      </column>
+      <column name="addressLine1" type="VARCHAR(24)">
+        <constraints nullable="false" unique="true" uniqueConstraintName="address_line_1_ukey" />
+      </column>
+      <column name="addressLine2" type="VARCHAR(24)">
+        <constraints nullable="false" unique="true" uniqueConstraintName="address_line_2_ukey" />
+      </column>
+      <column name="addressLine3" type="VARCHAR(24)">
+        <constraints nullable="false" unique="true" uniqueConstraintName="address_line_3_ukey" />
+      </column>
+      <column name="postcode" type="VARCHAR(24)">
+        <constraints nullable="false" unique="true" uniqueConstraintName="postcode_ukey" />
+      </column>
+      <column name="countyId" type="INTEGER">
+        <constraints nullable="false" />
+      </column>
+      <column name="countryId" type="INTEGER">
+        <constraints nullable="false" />
+      </column>
+    </createTable>
+  </changeSet>
+  <changeSet author="Steve Dickinson" id="5">
+    <createTable tableName="personAddress">
+      <column autoIncrement="true" name="id" type="INTEGER">
+        <constraints nullable="false" primaryKey="true" primaryKeyName="person_address_pkey" />
+      </column>
+      <column name="personId" type="INTEGER">
+        <constraints nullable="false" />
+      </column>
+      <column name="addressId" type="INTEGER">
+        <constraints nullable="false" />
+      </column>
+    </createTable>
+  </changeSet>
+</databaseChangeLog>
