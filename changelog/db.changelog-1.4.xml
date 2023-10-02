@@ -1,0 +1,52 @@
+<?xml version="1.1" encoding="utf-8" standalone="no"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog" xmlns:ext="http://www.liquibase.org/xml/ns/dbchangelog-ext" xmlns:pro="http://www.liquibase.org/xml/ns/pro" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog-ext http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-ext.xsd http://www.liquibase.org/xml/ns/pro http://www.liquibase.org/xml/ns/pro/liquibase-pro-3.9.xsd http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.9.xsd">
+  <changeSet author="Shaun Fitzsimons" id="2">
+    <createTable tableName="dog">
+      <column name="id" type="INTEGER">
+        <constraints nullable="false" primaryKey="true" primaryKeyName="dog_pkey" />
+      </column>
+      <column name="dog_breed_id" type="INTEGER">
+        <constraints nullable="false" />
+      </column>
+      <column name="status_id" type="INTEGER">
+        <constraints nullable="false" />
+      </column>
+      <column name="insurance_id" type="INTEGER">
+        <constraints nullable="true" />
+      </column>
+      <column name="name" type="VARCHAR(32)">
+        <constraints nullable="false" />
+      </column>
+      <column name="birth_date" type="date">
+        <constraints nullable="false" />
+      </column>
+      <column name="tattoo" type="VARCHAR(32)">
+        <constraints nullable="true" />
+      </column>
+      <column name="microchip_number" type="VARCHAR(24)">
+        <constraints nullable="true" />
+      </column>
+      <column name="microchip_type_id" type="INTEGER">
+        <constraints nullable="true" />
+      </column>
+      <column name="colour" type="VARCHAR(16)">
+        <constraints nullable="false" />
+      </column>
+      <column name="sex" type="VARCHAR(10)">
+        <constraints nullable="false" />
+      </column>
+      <column name="exported" type="BOOLEAN">
+        <constraints nullable="false" />
+      </column>
+    </createTable>
+  </changeSet>
+  <changeSet author="Shaun Fitzsimons" id="3">
+    <addForeignKeyConstraint baseColumnNames="dog_breed_id" baseTableName="dog" constraintName="fk_dog_breed" referencedColumnNames="id" referencedTableName="dog_breed" />
+    <addForeignKeyConstraint baseColumnNames="status_id" baseTableName="dog" constraintName="fk_dog_status" referencedColumnNames="id" referencedTableName="status" />
+    <addForeignKeyConstraint baseColumnNames="insurance_id" baseTableName="dog" constraintName="fk_dog_insurance" referencedColumnNames="id" referencedTableName="insurance" />
+    <addForeignKeyConstraint baseColumnNames="microchip_type_id" baseTableName="dog" constraintName="fk_dog_microchip_type" referencedColumnNames="id" referencedTableName="microchip_type" />
+  </changeSet>
+  <changeSet author="Shaun Fitzsimons" id="1">
+    <tagDatabase tag="v1.4.0" />
+  </changeSet>
+</databaseChangeLog>
