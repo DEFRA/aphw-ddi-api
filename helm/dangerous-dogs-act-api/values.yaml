@@ -11,6 +11,10 @@ labels:
 appInsights:
   connectionString:
 
+azureIdentity:
+  clientID: not-a-real-clientID
+  resourceID: not-a-real-resourceID
+
 containerConfigMap:
   name: dangerous-dogs-act-api-config-map
 
@@ -27,6 +31,13 @@ container:
   limitCpu: 100m
   port: 3000
 
+postgresService:
+  postgresDb: dangerous_dogs_register
+  postgresqlHost: dangerous-dogs-act-api-postgres
+  postgresPort: 5432
+  postgresSchema: public
+  postgresUser: postgres
+
 livenessProbe:
   path: /healthz
   port: 3000
@@ -42,3 +53,5 @@ readinessProbe:
   periodSeconds: 10
   failureThreshold: 3
   timeoutSeconds: 5
+
+aadPodIdentity: true

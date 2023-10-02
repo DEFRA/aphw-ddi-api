@@ -14,16 +14,23 @@
     "start:debug": "nodemon --inspect-brk=0.0.0.0 --ext js --legacy-watch app/index.js"
   },
   "author": "Defra",
-  "contributors": [],
+  "contributors": [
+    "Shaun Fitzsimons shaun.fitzsimmons@defra.gov.uk",
+    "Steve Dickinson steve.dickinson@defra.gov.uk"
+  ],
   "license": "OGL-UK-3.0",
   "dependencies": {
+    "@azure/identity": "2.0.5",
     "@hapi/hapi": "20.2.2",
-    "applicationinsights": "2.3.5"
+    "applicationinsights": "2.3.5",
+    "pg": "8.7.3",
+    "pg-hstore": "2.3.4",
+    "sequelize": "6.29.0"
   },
   "devDependencies": {
     "jest": "29.2.2",
     "jest-junit": "14.0.1",
-    "nodemon": "2.0.20",
+    "nodemon": "^3.0.1",
     "standard": "17.0.0"
   },
   "standard": {
