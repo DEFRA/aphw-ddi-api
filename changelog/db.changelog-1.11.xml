@@ -2,7 +2,7 @@
 <databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog" xmlns:ext="http://www.liquibase.org/xml/ns/dbchangelog-ext" xmlns:pro="http://www.liquibase.org/xml/ns/pro" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog-ext http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-ext.xsd http://www.liquibase.org/xml/ns/pro http://www.liquibase.org/xml/ns/pro/liquibase-pro-3.9.xsd http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.9.xsd">
   <changeSet author="Shaun Fitzsimons" id="2">
     <createTable tableName="document_type">
-      <column name="id" type="INTEGER">
+      <column autoIncrement="true" name="id" type="INTEGER">
         <constraints nullable="false" primaryKey="true" primaryKeyName="document_type_pkey" />
       </column>
       <column name="type" type="VARCHAR(32)">
@@ -10,7 +10,7 @@
       </column>
     </createTable>
     <createTable tableName="document">
-      <column name="id" type="INTEGER">
+      <column autoIncrement="true" name="id" type="INTEGER">
         <constraints nullable="false" primaryKey="true" primaryKeyName="document_pkey" />
       </column>
       <column name="registration_id" type="INTEGER">
@@ -29,7 +29,7 @@
   </changeSet>
   <changeSet author="Shaun Fitzsimons" id="3">
     <addForeignKeyConstraint baseColumnNames="registration_id" baseTableName="document" constraintName="fk_document_registration" referencedColumnNames="id" referencedTableName="registration" />
-    <addForeignKeyConstraint baseColumnNames="document_type_id" baseTableName="document_type" constraintName="fk_document_document_type" referencedColumnNames="id" referencedTableName="document_type" />
+    <addForeignKeyConstraint baseColumnNames="document_type_id" baseTableName="document" constraintName="fk_document_document_type" referencedColumnNames="id" referencedTableName="document_type" />
   </changeSet>
   <changeSet author="Shaun Fitzsimons" id="1">
     <tagDatabase tag="v1.11.0" />

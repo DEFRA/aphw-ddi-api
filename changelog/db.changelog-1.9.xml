@@ -14,27 +14,27 @@
     </createTable>
   </changeSet>
   <changeSet author="Steve Dickinson" id="3">
-    <createTable tableName="personType">
+    <createTable tableName="person_type">
       <column autoIncrement="true" name="id" type="INTEGER">
         <constraints nullable="false" primaryKey="true" primaryKeyName="person_type_pkey" />
       </column>
-      <column name="personType" type="VARCHAR(24)">
+      <column name="person_type" type="VARCHAR(24)">
         <constraints nullable="false" unique="true" uniqueConstraintName="person_type_ukey" />
       </column>
     </createTable>
   </changeSet>
   <changeSet author="Steve Dickinson" id="4">
-    <createTable tableName="registeredPerson">
+    <createTable tableName="registered_person">
       <column autoIncrement="true" name="id" type="INTEGER">
         <constraints nullable="false" primaryKey="true" primaryKeyName="registered_person_pkey" />
       </column>
-      <column name="personId" type="INTEGER">
+      <column name="person_id" type="INTEGER">
         <constraints nullable="false" />
       </column>
-      <column name="dogId" type="INTEGER">
+      <column name="dog_id" type="INTEGER">
         <constraints nullable="false" />
       </column>
-      <column name="personTypeId" type="INTEGER">
+      <column name="person_type_id" type="INTEGER">
         <constraints nullable="false" />
       </column>
     </createTable>
@@ -44,11 +44,11 @@
       <column autoIncrement="true" name="id" type="INTEGER">
         <constraints nullable="false" primaryKey="true" primaryKeyName="person_pkey" />
       </column>
-      <column name="titleId" type="INTEGER">
+      <column name="title_id" type="INTEGER">
         <constraints nullable="false" />
       </column>
-      <column name="firstName" type="VARCHAR(24)" />
-      <column name="lastName" type="VARCHAR(24)" />
+      <column name="first_name" type="VARCHAR(24)" />
+      <column name="last_name" type="VARCHAR(24)" />
     </createTable>
   </changeSet>
 </databaseChangeLog>

@@ -4,11 +4,11 @@
     <tagDatabase tag="v1.8.0" />
   </changeSet>
   <changeSet author="Steve Dickinson" id="2">
-    <createTable tableName="contactType">
+    <createTable tableName="contact_type">
       <column autoIncrement="true" name="id" type="INTEGER">
         <constraints nullable="false" primaryKey="true" primaryKeyName="contact_type_pkey" />
       </column>
-      <column name="contactType" type="VARCHAR(24)">
+      <column name="contact_type" type="VARCHAR(24)">
         <constraints nullable="false" unique="true" uniqueConstraintName="contact_type_ukey" />
       </column>
     </createTable>
@@ -21,20 +21,20 @@
       <column name="contact" type="VARCHAR(24)">
         <constraints nullable="false" unique="true" uniqueConstraintName="contact_ukey" />
       </column>
-      <column name="contactTypeId" type="INTEGER">
+      <column name="contact_type_id" type="INTEGER">
         <constraints nullable="false" />
       </column>
     </createTable>
   </changeSet>
   <changeSet author="Steve Dickinson" id="4">
-    <createTable tableName="personContact">
+    <createTable tableName="person_contact">
       <column autoIncrement="true" name="id" type="INTEGER">
         <constraints nullable="false" primaryKey="true" primaryKeyName="person_contact_pkey" />
       </column>
-      <column name="personId" type="INTEGER">
+      <column name="person_id" type="INTEGER">
         <constraints nullable="false" />
       </column>
-      <column name="contactId" type="INTEGER">
+      <column name="contact_id" type="INTEGER">
         <constraints nullable="false" />
       </column>
     </createTable>

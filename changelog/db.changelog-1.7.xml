@@ -28,35 +28,35 @@
       <column autoIncrement="true" name="id" type="INTEGER">
         <constraints nullable="false" primaryKey="true" primaryKeyName="address_pkey" />
       </column>
-      <column name="addressLine1" type="VARCHAR(24)">
+      <column name="address_line_1" type="VARCHAR(24)">
         <constraints nullable="false" unique="true" uniqueConstraintName="address_line_1_ukey" />
       </column>
-      <column name="addressLine2" type="VARCHAR(24)">
+      <column name="address_line_2" type="VARCHAR(24)">
         <constraints nullable="false" unique="true" uniqueConstraintName="address_line_2_ukey" />
       </column>
-      <column name="addressLine3" type="VARCHAR(24)">
+      <column name="address_line_3" type="VARCHAR(24)">
         <constraints nullable="false" unique="true" uniqueConstraintName="address_line_3_ukey" />
       </column>
       <column name="postcode" type="VARCHAR(24)">
         <constraints nullable="false" unique="true" uniqueConstraintName="postcode_ukey" />
       </column>
-      <column name="countyId" type="INTEGER">
+      <column name="county_id" type="INTEGER">
         <constraints nullable="false" />
       </column>
-      <column name="countryId" type="INTEGER">
+      <column name="country_id" type="INTEGER">
         <constraints nullable="false" />
       </column>
     </createTable>
   </changeSet>
   <changeSet author="Steve Dickinson" id="5">
-    <createTable tableName="personAddress">
+    <createTable tableName="person_address">
       <column autoIncrement="true" name="id" type="INTEGER">
         <constraints nullable="false" primaryKey="true" primaryKeyName="person_address_pkey" />
       </column>
-      <column name="personId" type="INTEGER">
+      <column name="person_id" type="INTEGER">
         <constraints nullable="false" />
       </column>
-      <column name="addressId" type="INTEGER">
+      <column name="address_id" type="INTEGER">
         <constraints nullable="false" />
       </column>
     </createTable>
