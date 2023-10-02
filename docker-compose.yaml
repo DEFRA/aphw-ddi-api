@@ -1,10 +1,10 @@
 services:
-  ffc-template-node:
+  dangerous-dogs-act-api:
     build:
       context: .
       target: production
-    image: ffc-template-node
-    container_name: ffc-template-node
+    image: dangerous-dogs-act-api
+    container_name: dangerous-dogs-act-api
     environment:
-      APPINSIGHTS_CLOUDROLE: ffc-template-node-local
+      APPINSIGHTS_CLOUDROLE: dangerous-dogs-act-api-local
       APPINSIGHTS_CONNECTIONSTRING: ${APPINSIGHTS_CONNECTIONSTRING}

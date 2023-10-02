@@ -1,0 +1,8 @@
+{{- include "ffc-helm-library.deployment" (list . "dangerous-dogs-act-api.deployment") -}}
+{{- define "dangerous-dogs-act-api.deployment" -}}
+spec:
+  template:
+    spec:
+      containers:
+      - {{ include "ffc-helm-library.container" (list . "dangerous-dogs-act-api.container") }}
+{{- end -}}
