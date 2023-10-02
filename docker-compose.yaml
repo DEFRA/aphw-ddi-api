@@ -5,6 +5,25 @@ services:
       target: production
     image: dangerous-dogs-act-api
     container_name: dangerous-dogs-act-api
+    depends_on:
+      - dangerous-dogs-act-api-postgres
     environment:
       APPINSIGHTS_CLOUDROLE: dangerous-dogs-act-api-local
       APPINSIGHTS_CONNECTIONSTRING: ${APPINSIGHTS_CONNECTIONSTRING}
+      POSTGRES_DB: dangerous_dogs_register
+      POSTGRES_HOST: ${POSTGRES_HOST:-dangerous-dogs-act-api-postgres}
+      POSTGRES_PORT: 5432
+      POSTGRES_SCHEMA_NAME: ${POSTGRES_SCHEMA_NAME:-public}
+      POSTGRES_USERNAME: ${POSTGRES_SCHEMA_USERNAME:-postgres}
+      POSTGRES_PASSWORD: ${POSTGRES_SCHEMA_PASSWORD:-ppp}
+  dangerous-dogs-act-api-postgres:
+    image: postgres:16.0-alpine
+    environment:
+      POSTGRES_DB: dangerous_dogs_register
+      POSTGRES_USERNAME: postgres
+      POSTGRES_PASSWORD: ppp
+    volumes:
+      - postgres_data:/var/lib/postgres/data
+
+volumes:
+  postgres_data: {}
