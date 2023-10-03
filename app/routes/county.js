@@ -1,10 +1,10 @@
-const { County } = require('../data')
+const { county } = require('../data')
 
 module.exports = {
   method: 'GET',
   path: '/counties',
   handler: async (request, h) => {
-    const counties = await County.findAll()    
+    const counties = await county.findAll()    
     return h.response({ counties }).code(200)
   }
 }
