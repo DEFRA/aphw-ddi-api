@@ -8,5 +8,8 @@ module.exports = (sequelize, DataTypes) => {
     freezeTableName: true,
     timestamps: false
   })
+  country.associate = (models) => {
+    country.hasMany(models.address, { foreignKey: 'country_id', as: 'addresses' })
+  }
   return country
 }
