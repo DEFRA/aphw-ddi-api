@@ -9,23 +9,19 @@ module.exports = (sequelize, DataTypes) => {
     },
     address_line_1: {
       type: DataTypes.STRING(24),
-      allowNull: false,
-      unique: 'address_line_1_ukey'
+      allowNull: false
     },
     address_line_2: {
       type: DataTypes.STRING(24),
-      allowNull: false,
-      unique: 'address_line_2_ukey'
+      allowNull: true
     },
     address_line_3: {
       type: DataTypes.STRING(24),
-      allowNull: false,
-      unique: 'address_line_3_ukey'
+      allowNull: true
     },
     postcode: {
       type: DataTypes.STRING(24),
-      allowNull: false,
-      unique: 'postcode_ukey'
+      allowNull: false
     },
     county_id: {
       type: DataTypes.INTEGER,
