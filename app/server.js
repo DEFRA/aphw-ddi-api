@@ -6,8 +6,8 @@ const server = Hapi.server({
 })
 
 const routes = [].concat(
-  require('./routes/country'),
-  require('./routes/county'),
+  require('./routes/countries'),
+  require('./routes/counties'),
   require('./routes/healthy'),
   require('./routes/healthz')
 )

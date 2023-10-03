@@ -5,6 +5,7 @@ module.exports = {
   path: '/counties',
   handler: async (request, h) => {
     const counties = await county.findAll()    
+
     return h.response({ counties }).code(200)
   }
 }
