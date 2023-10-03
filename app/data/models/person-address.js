@@ -22,26 +22,26 @@ module.exports = (sequelize, DataTypes) => {
     timestamps: false,
     indexes: [
       {
-        name: "person_address_pkey",
+        name: 'person_address_pkey',
         unique: true,
         fields: [
-          { name: "id" },
+          { name: 'id' }
         ]
-      },
+      }
     ]
-  });
+  })
 
   personAddress.associate = models => {
     personAddress.belongsTo(models.address, {
-      as: "address",
-      foreignKey: "address_id"
+      as: 'address',
+      foreignKey: 'address_id'
     })
-    
+
     personAddress.belongsTo(models.person, {
-      as: "person",
-      foreignKey: "person_id"
+      as: 'person',
+      foreignKey: 'person_id'
     })
   }
 
   return personAddress
-};
+}

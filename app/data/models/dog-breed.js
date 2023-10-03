@@ -10,7 +10,7 @@ module.exports = (sequelize, DataTypes) => {
     breed: {
       type: DataTypes.STRING(32),
       allowNull: false,
-      unique: "breed_name_ukey"
+      unique: 'breed_name_ukey'
     },
     active: {
       type: DataTypes.BOOLEAN,
@@ -23,28 +23,28 @@ module.exports = (sequelize, DataTypes) => {
     timestamps: false,
     indexes: [
       {
-        name: "breed_name_ukey",
+        name: 'breed_name_ukey',
         unique: true,
         fields: [
-          { name: "breed" },
+          { name: 'breed' }
         ]
       },
       {
-        name: "breed_pkey",
+        name: 'breed_pkey',
         unique: true,
         fields: [
-          { name: "id" },
+          { name: 'id' }
         ]
-      },
+      }
     ]
-  });
+  })
 
   dogBreed.associate = models => {
     dogBreed.hasMany(models.dog, {
-      as: "dogs",
-      foreignKey: "dog_breed_id"
+      as: 'dogs',
+      foreignKey: 'dog_breed_id'
     })
   }
 
   return dogBreed
-};
+}

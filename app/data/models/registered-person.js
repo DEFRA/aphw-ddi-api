@@ -26,31 +26,31 @@ module.exports = (sequelize, DataTypes) => {
     timestamps: false,
     indexes: [
       {
-        name: "registered_person_pkey",
+        name: 'registered_person_pkey',
         unique: true,
         fields: [
-          { name: "id" },
+          { name: 'id' }
         ]
-      },
+      }
     ]
-  });
+  })
 
   registeredPerson.associate = models => {
     registeredPerson.belongsTo(models.dog, {
-      as: "dog",
-      foreignKey: "dog_id"
+      as: 'dog',
+      foreignKey: 'dog_id'
     })
 
     registeredPerson.belongsTo(models.person, {
-      as: "person",
-      foreignKey: "person_id"
+      as: 'person',
+      foreignKey: 'person_id'
     })
 
     registeredPerson.belongsTo(models.person_type, {
-      as: "person_type",
-      foreignKey: "person_type_id"
+      as: 'person_type',
+      foreignKey: 'person_type_id'
     })
   }
 
   return registeredPerson
-};
+}

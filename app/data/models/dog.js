@@ -74,41 +74,46 @@ module.exports = (sequelize, DataTypes) => {
     timestamps: false,
     indexes: [
       {
-        name: "dog_pkey",
+        name: 'dog_pkey',
         unique: true,
         fields: [
-          { name: "id" },
+          { name: 'id' }
         ]
-      },
+      }
     ]
-  });
+  })
 
   dog.associate = models => {
+    dog.hasMany(models.registered_person, {
+      as: 'registered_person',
+      foreignKey: 'dog_id'
+    })
+
     dog.hasOne(models.registration, {
-      as: "registration",
-      foreignKey: "dog_id"
+      as: 'registration',
+      foreignKey: 'dog_id'
     })
-    
+
     dog.belongsTo(models.dog_breed, {
-      as: "dog_breed",
-      foreignKey: "dog_breed_id"
+      as: 'dog_breed',
+      foreignKey: 'dog_breed_id'
     })
-    
+
     dog.belongsTo(models.insurance, {
-      as: "insurance",
-      foreignKey: "insurance_id"
+      as: 'insurance',
+      foreignKey: 'insurance_id'
     })
 
     dog.belongsTo(models.microchip_type, {
-      as: "microchip_type",
-      foreignKey: "microchip_type_id"
+      as: 'microchip_type',
+      foreignKey: 'microchip_type_id'
     })
 
     dog.belongsTo(models.status, {
-      as: "status",
-      foreignKey: "status_id"
+      as: 'status',
+      foreignKey: 'status_id'
     })
   }
 
   return dog
-};
+}

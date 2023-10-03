@@ -26,36 +26,36 @@ module.exports = (sequelize, DataTypes) => {
     timestamps: false,
     indexes: [
       {
-        name: "person_pkey",
+        name: 'person_pkey',
         unique: true,
         fields: [
-          { name: "id" },
+          { name: 'id' }
         ]
-      },
+      }
     ]
-  });
+  })
 
   person.associate = models => {
     person.hasMany(models.person_address, {
-      as: "person_addresses",
-      foreignKey: "person_id"
+      as: 'addresses',
+      foreignKey: 'person_id'
     })
 
     person.hasMany(models.person_contact, {
-      as: "person_contacts",
-      foreignKey: "person_id"
+      as: 'person_contacts',
+      foreignKey: 'person_id'
     })
 
     person.hasMany(models.registered_person, {
-      as: "registered_people",
-      foreignKey: "person_id"
+      as: 'registered_people',
+      foreignKey: 'person_id'
     })
 
     person.belongsTo(models.title, {
-      as: "title",
-      foreignKey: "title_id"
+      as: 'title',
+      foreignKey: 'title_id'
     })
   }
 
   return person
-};
+}
