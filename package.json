@@ -23,6 +23,8 @@
     "@azure/identity": "^2.0.5",
     "@hapi/hapi": "20.2.2",
     "applicationinsights": "2.3.5",
+    "graphi": "^9.0.2",
+    "graphql-fields": "^2.0.3",
     "pg": "^8.11.3",
     "pg-hstore": "^2.3.4",
     "sequelize": "^6.33.0"
