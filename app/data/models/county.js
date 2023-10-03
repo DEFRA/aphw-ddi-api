@@ -10,7 +10,7 @@ module.exports = (sequelize, DataTypes) => {
     county: {
       type: DataTypes.STRING(24),
       allowNull: false,
-      unique: "county_name_ukey"
+      unique: 'county_name_ukey'
     }
   }, {
     sequelize,
@@ -19,28 +19,28 @@ module.exports = (sequelize, DataTypes) => {
     timestamps: false,
     indexes: [
       {
-        name: "county_name_ukey",
+        name: 'county_name_ukey',
         unique: true,
         fields: [
-          { name: "county" },
+          { name: 'county' }
         ]
       },
       {
-        name: "county_pkey",
+        name: 'county_pkey',
         unique: true,
         fields: [
-          { name: "id" },
+          { name: 'id' }
         ]
-      },
+      }
     ]
-  });
+  })
 
   county.associate = models => {
     county.hasMany(models.address, {
-      as: "addresses",
-      foreignKey: "county_id"
+      as: 'addresses',
+      foreignKey: 'county_id'
     })
   }
 
   return county
-};
+}
