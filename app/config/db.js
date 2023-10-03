@@ -1,8 +1,19 @@
 const { Sequelize } = require('sequelize')
+const { DefaultAzureCredential } = require('@azure/identity')
+
+const isProd = () => {
+  return process.env.NODE_ENV === 'production'
+}
 
 const hooks = {
   beforeConnect: async (cfg) => {
     console.time('[Performance] [db] connect')
+
+    if (isProd()) {
+      const credential = new DefaultAzureCredential()
+      const accessToken = await credential.getToken('https://ossrdbms-aad.database.windows.net', { requestOptions: { timeout: 1000 } })
+      cfg.password = accessToken.token
+    }
   },
   afterConnect: async (cfg) => {
     console.timeEnd('[Performance] [db] connect')
@@ -26,7 +37,7 @@ const dbConfig = {
   },
   dialect: 'postgres',
   dialectOptions: {
-    ssl: false
+    ssl: isProd()
   },
   hooks,
   host: process.env.POSTGRES_HOST,
