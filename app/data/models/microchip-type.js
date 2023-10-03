@@ -1,5 +1,5 @@
 module.exports = (sequelize, DataTypes) => {
-  const county = sequelize.define('county', {
+  const microchipType = sequelize.define('microchip_type', {
     id: {
       autoIncrement: true,
       autoIncrementIdentity: true,
@@ -7,40 +7,40 @@ module.exports = (sequelize, DataTypes) => {
       allowNull: false,
       primaryKey: true
     },
-    county: {
-      type: DataTypes.STRING(24),
+    type: {
+      type: DataTypes.STRING(32),
       allowNull: false,
-      unique: "county_name_ukey"
+      unique: "microchip_type_ukey"
     }
   }, {
     sequelize,
-    tableName: 'county',
+    tableName: 'microchip_type',
     schema: 'public',
     timestamps: false,
     indexes: [
       {
-        name: "county_name_ukey",
-        unique: true,
-        fields: [
-          { name: "county" },
-        ]
-      },
-      {
-        name: "county_pkey",
+        name: "microchip_type_pkey",
         unique: true,
         fields: [
           { name: "id" },
         ]
       },
+      {
+        name: "microchip_type_ukey",
+        unique: true,
+        fields: [
+          { name: "type" },
+        ]
+      },
     ]
   });
 
-  county.associate = models => {
-    county.hasMany(models.address, {
-      as: "addresses",
-      foreignKey: "county_id"
+  microchipType.associate = models => {
+    microchipType.hasMany(models.dog, {
+      as: "dogs",
+      foreignKey: "microchip_type_id"
     })
   }
 
-  return county
+  return microchipType
 };

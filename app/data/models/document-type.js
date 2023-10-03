@@ -1,5 +1,5 @@
 module.exports = (sequelize, DataTypes) => {
-  const county = sequelize.define('county', {
+  const documentType = sequelize.define('document_type', {
     id: {
       autoIncrement: true,
       autoIncrementIdentity: true,
@@ -7,40 +7,40 @@ module.exports = (sequelize, DataTypes) => {
       allowNull: false,
       primaryKey: true
     },
-    county: {
-      type: DataTypes.STRING(24),
+    type: {
+      type: DataTypes.STRING(32),
       allowNull: false,
-      unique: "county_name_ukey"
+      unique: "document_type_ukey"
     }
   }, {
     sequelize,
-    tableName: 'county',
+    tableName: 'document_type',
     schema: 'public',
     timestamps: false,
     indexes: [
       {
-        name: "county_name_ukey",
-        unique: true,
-        fields: [
-          { name: "county" },
-        ]
-      },
-      {
-        name: "county_pkey",
+        name: "document_type_pkey",
         unique: true,
         fields: [
           { name: "id" },
         ]
       },
+      {
+        name: "document_type_ukey",
+        unique: true,
+        fields: [
+          { name: "type" },
+        ]
+      },
     ]
   });
 
-  county.associate = models => {
-    county.hasMany(models.address, {
-      as: "addresses",
-      foreignKey: "county_id"
+  documentType.associate = models => {
+    documentType.hasMany(models.document, {
+      as: "documents",
+      foreignKey: "document_type_id"
     })
   }
 
-  return county
+  return documentType
 };

@@ -1,5 +1,5 @@
 module.exports = (sequelize, DataTypes) => {
-  const county = sequelize.define('county', {
+  const status = sequelize.define('status', {
     id: {
       autoIncrement: true,
       autoIncrementIdentity: true,
@@ -7,26 +7,30 @@ module.exports = (sequelize, DataTypes) => {
       allowNull: false,
       primaryKey: true
     },
-    county: {
+    status: {
       type: DataTypes.STRING(24),
       allowNull: false,
-      unique: "county_name_ukey"
+      unique: "status_name_ukey"
+    },
+    status_type: {
+      type: DataTypes.STRING(24),
+      allowNull: false
     }
   }, {
     sequelize,
-    tableName: 'county',
+    tableName: 'status',
     schema: 'public',
     timestamps: false,
     indexes: [
       {
-        name: "county_name_ukey",
+        name: "status_name_ukey",
         unique: true,
         fields: [
-          { name: "county" },
+          { name: "status" },
         ]
       },
       {
-        name: "county_pkey",
+        name: "status_pkey",
         unique: true,
         fields: [
           { name: "id" },
@@ -35,12 +39,13 @@ module.exports = (sequelize, DataTypes) => {
     ]
   });
 
-  county.associate = models => {
-    county.hasMany(models.address, {
-      as: "addresses",
-      foreignKey: "county_id"
+  
+  status.associate = models => {
+    status.hasMany(models.dog, {
+      as: "dogs",
+      foreignKey: "status_id"
     })
   }
 
-  return county
+  return status
 };

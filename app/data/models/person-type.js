@@ -1,5 +1,5 @@
 module.exports = (sequelize, DataTypes) => {
-  const county = sequelize.define('county', {
+  const personType = sequelize.define('person_type', {
     id: {
       autoIncrement: true,
       autoIncrementIdentity: true,
@@ -7,40 +7,40 @@ module.exports = (sequelize, DataTypes) => {
       allowNull: false,
       primaryKey: true
     },
-    county: {
+    person_type: {
       type: DataTypes.STRING(24),
       allowNull: false,
-      unique: "county_name_ukey"
+      unique: "person_type_ukey"
     }
   }, {
     sequelize,
-    tableName: 'county',
+    tableName: 'person_type',
     schema: 'public',
     timestamps: false,
     indexes: [
       {
-        name: "county_name_ukey",
-        unique: true,
-        fields: [
-          { name: "county" },
-        ]
-      },
-      {
-        name: "county_pkey",
+        name: "person_type_pkey",
         unique: true,
         fields: [
           { name: "id" },
         ]
       },
+      {
+        name: "person_type_ukey",
+        unique: true,
+        fields: [
+          { name: "person_type" },
+        ]
+      },
     ]
   });
 
-  county.associate = models => {
-    county.hasMany(models.address, {
-      as: "addresses",
-      foreignKey: "county_id"
+  personType.associate = models => {
+    personType.hasMany(models.registered_person, {
+      as: "registered_people",
+      foreignKey: "person_type_id"
     })
   }
 
-  return county
+  return personType
 };

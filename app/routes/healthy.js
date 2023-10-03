@@ -1,7 +1,7 @@
 module.exports = {
   method: 'GET',
   path: '/healthy',
-  handler: (request, h) => {
+  handler: async (request, h) => {   
     return h.response('ok').code(200)
   }
 }

@@ -1,28 +1,21 @@
 const fs = require('fs')
 const path = require('path')
-const { Sequelize, DataTypes } = require('sequelize')
-const dbConfig = require('../config/database')
+const sequelize = require('../config/db')
+const { DataTypes } = require('sequelize')
 const modelPath = path.join(__dirname, 'models')
-const db = {}
 
-const sequelize = new Sequelize(dbConfig.database, dbConfig.username, dbConfig.password, dbConfig)
-
-fs.readdirSync(modelPath)
-  .filter(file => {
-    return (file.indexOf('.') !== 0) && (file !== 'index.js') && (file.slice(-3) === '.js')
-  })
-  .forEach(file => {
-    const model = require(path.join(modelPath, file))(sequelize, DataTypes)
-    db[model.name] = model
-  })
-
-Object.keys(db).forEach(modelName => {
-  if (db[modelName].associate) {
-    db[modelName].associate(db)
+const initModels = () => {
+  fs.readdirSync(modelPath)
+    .filter(file => (file.indexOf('.') !== 0) && (file !== 'index.js') && (file.slice(-3) === '.js'))
+    .forEach(file => require(path.join(modelPath, file))(sequelize, DataTypes))
+  
+  const models = sequelize.models
+  
+  Object.keys(models).forEach(modelName => models[modelName].associate?.(models))
+  
+  return {
+    ...models,
   }
-})
+}
 
-db.sequelize = sequelize
-db.Sequelize = Sequelize
-
-module.exports = db
+module.exports = initModels()
