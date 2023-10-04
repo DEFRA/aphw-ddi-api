@@ -1,10 +1,11 @@
 const Hapi = require('@hapi/hapi')
 const Graphi = require('graphi')
 const schema = require('./graphql/registration-schema')
+const config = require('./config')
 
 async function createServer () {
   const server = Hapi.server({
-    port: process.env.PORT,
+    port: config.port,
     routes: {
       validate: {
         options: {
