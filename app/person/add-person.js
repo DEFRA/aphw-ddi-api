@@ -13,8 +13,6 @@ const addPeople = async (people) => {
 
       person.person_reference = createReferenceNumber()
 
-      console.log(person.person_reference)
-
       const createdPerson = await sequelize.models.person.create(person, { transaction: t })
       const createdAddress = await sequelize.models.address.create(person.address, { transaction: t })
 

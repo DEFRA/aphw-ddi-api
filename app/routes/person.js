@@ -23,7 +23,6 @@ module.exports = [{
     validate: {
       payload: schema,
       failAction: async (request, h, error) => {
-        console.log(error)
         return h.response().code(400).takeover()
       }
     },
