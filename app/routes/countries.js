@@ -4,7 +4,12 @@ module.exports = {
   method: 'GET',
   path: '/countries',
   handler: async (request, h) => {
-    const countries = await country.findAll()
-    return h.response({ countries }).code(200)
+    const countries = await country.findAll({
+      attributes: [ 'country' ]
+    })
+
+    return h.response({
+      countries: countries.map(country => country.country)
+    }).code(200)
   }
 }

@@ -9,7 +9,11 @@ services:
     container_name: dangerous-dogs-act-api-development
     ports:
       - "3001:3000"
+<<<<<<< HEAD
       - "9229:9229"
+=======
+      - "9230:9230"
+>>>>>>> fa312b0 (Add person reference)
     volumes:
       - ./app:/home/node/app
       - ./package.json:/home/node/package.json

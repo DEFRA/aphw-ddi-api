@@ -18,6 +18,10 @@ module.exports = (sequelize, DataTypes) => {
     last_name: {
       type: DataTypes.STRING(24),
       allowNull: true
+    },
+    person_reference: {
+      type: DataTypes.STRING(24),
+      allowNull: false
     }
   }, {
     sequelize,

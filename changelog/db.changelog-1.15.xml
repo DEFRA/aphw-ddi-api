@@ -1,21 +1,5 @@
 <?xml version="1.1" encoding="utf-8" standalone="no"?>
 <databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog" xmlns:ext="http://www.liquibase.org/xml/ns/dbchangelog-ext" xmlns:pro="http://www.liquibase.org/xml/ns/pro" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog-ext http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-ext.xsd http://www.liquibase.org/xml/ns/pro http://www.liquibase.org/xml/ns/pro/liquibase-pro-3.9.xsd http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.9.xsd">
-<<<<<<< HEAD
-  <changeSet author="Shaun Fitzsimons" id="1">
-    <tagDatabase tag="v1.14.0" />
-  </changeSet>
-  <changeSet author="Steve Dickinson" id="2">
-    <createTable tableName="search_index">
-      <column autoIncrement="true" name="id" type="INTEGER">
-        <constraints nullable="false" primaryKey="true" primaryKeyName="search_index_pkey" />
-      </column>
-      <column name="search" type="TSVector">
-        <constraints nullable="false" unique="false" />
-      </column>
-    </createTable>
-  </changeSet>
-</databaseChangeLog>
-=======
   <changeSet author="Shaun Fitzsimons" id="2">
     <addColumn tableName="person">
       <column name="person_reference" type="VARCHAR(24)">
@@ -24,7 +8,6 @@
     </addColumn>
   </changeSet>
   <changeSet author="Shaun Fitzsimons" id="1">
-    <tagDatabase tag="v1.13.0" />
+    <tagDatabase tag="v1.15.0" />
   </changeSet>
 </databaseChangeLog>
->>>>>>> fa312b0 (Add person reference)
