@@ -18,22 +18,21 @@ module.exports = (sequelize, DataTypes) => {
     timestamps: false,
     indexes: [
       {
-        name: "police_force_pkey",
+        name: 'police_force_pkey',
         unique: true,
         fields: [
-          { name: "id" },
+          { name: 'id' }
         ]
-      },
+      }
     ]
-  });
+  })
 
-  
   policeForce.associate = models => {
     policeForce.hasMany(models.registration, {
-      as: "registrations",
-      foreignKey: "police_force_id"
+      as: 'registrations',
+      foreignKey: 'police_force_id'
     })
   }
 
   return policeForce
-};
+}

@@ -10,7 +10,7 @@ module.exports = (sequelize, DataTypes) => {
     person_type: {
       type: DataTypes.STRING(24),
       allowNull: false,
-      unique: "person_type_ukey"
+      unique: 'person_type_ukey'
     }
   }, {
     sequelize,
@@ -19,28 +19,28 @@ module.exports = (sequelize, DataTypes) => {
     timestamps: false,
     indexes: [
       {
-        name: "person_type_pkey",
+        name: 'person_type_pkey',
         unique: true,
         fields: [
-          { name: "id" },
+          { name: 'id' }
         ]
       },
       {
-        name: "person_type_ukey",
+        name: 'person_type_ukey',
         unique: true,
         fields: [
-          { name: "person_type" },
+          { name: 'person_type' }
         ]
-      },
+      }
     ]
-  });
+  })
 
   personType.associate = models => {
     personType.hasMany(models.registered_person, {
-      as: "registered_people",
-      foreignKey: "person_type_id"
+      as: 'registered_people',
+      foreignKey: 'person_type_id'
     })
   }
 
   return personType
-};
+}

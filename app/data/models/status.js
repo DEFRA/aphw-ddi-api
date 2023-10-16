@@ -10,7 +10,7 @@ module.exports = (sequelize, DataTypes) => {
     status: {
       type: DataTypes.STRING(24),
       allowNull: false,
-      unique: "status_name_ukey"
+      unique: 'status_name_ukey'
     },
     status_type: {
       type: DataTypes.STRING(24),
@@ -23,29 +23,28 @@ module.exports = (sequelize, DataTypes) => {
     timestamps: false,
     indexes: [
       {
-        name: "status_name_ukey",
+        name: 'status_name_ukey',
         unique: true,
         fields: [
-          { name: "status" },
+          { name: 'status' }
         ]
       },
       {
-        name: "status_pkey",
+        name: 'status_pkey',
         unique: true,
         fields: [
-          { name: "id" },
+          { name: 'id' }
         ]
-      },
+      }
     ]
-  });
+  })
 
-  
   status.associate = models => {
     status.hasMany(models.dog, {
-      as: "dogs",
-      foreignKey: "status_id"
+      as: 'dogs',
+      foreignKey: 'status_id'
     })
   }
 
   return status
-};
+}

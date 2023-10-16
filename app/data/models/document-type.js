@@ -10,7 +10,7 @@ module.exports = (sequelize, DataTypes) => {
     type: {
       type: DataTypes.STRING(32),
       allowNull: false,
-      unique: "document_type_ukey"
+      unique: 'document_type_ukey'
     }
   }, {
     sequelize,
@@ -19,28 +19,28 @@ module.exports = (sequelize, DataTypes) => {
     timestamps: false,
     indexes: [
       {
-        name: "document_type_pkey",
+        name: 'document_type_pkey',
         unique: true,
         fields: [
-          { name: "id" },
+          { name: 'id' }
         ]
       },
       {
-        name: "document_type_ukey",
+        name: 'document_type_ukey',
         unique: true,
         fields: [
-          { name: "type" },
+          { name: 'type' }
         ]
-      },
+      }
     ]
-  });
+  })
 
   documentType.associate = models => {
     documentType.hasMany(models.document, {
-      as: "documents",
-      foreignKey: "document_type_id"
+      as: 'documents',
+      foreignKey: 'document_type_id'
     })
   }
 
   return documentType
-};
+}

@@ -10,7 +10,7 @@ module.exports = (sequelize, DataTypes) => {
     type: {
       type: DataTypes.STRING(32),
       allowNull: false,
-      unique: "microchip_type_ukey"
+      unique: 'microchip_type_ukey'
     }
   }, {
     sequelize,
@@ -19,28 +19,28 @@ module.exports = (sequelize, DataTypes) => {
     timestamps: false,
     indexes: [
       {
-        name: "microchip_type_pkey",
+        name: 'microchip_type_pkey',
         unique: true,
         fields: [
-          { name: "id" },
+          { name: 'id' }
         ]
       },
       {
-        name: "microchip_type_ukey",
+        name: 'microchip_type_ukey',
         unique: true,
         fields: [
-          { name: "type" },
+          { name: 'type' }
         ]
-      },
+      }
     ]
-  });
+  })
 
   microchipType.associate = models => {
     microchipType.hasMany(models.dog, {
-      as: "dogs",
-      foreignKey: "microchip_type_id"
+      as: 'dogs',
+      foreignKey: 'microchip_type_id'
     })
   }
 
   return microchipType
-};
+}

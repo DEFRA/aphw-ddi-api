@@ -10,7 +10,7 @@ module.exports = (sequelize, DataTypes) => {
     country: {
       type: DataTypes.STRING(24),
       allowNull: false,
-      unique: "country_name_ukey"
+      unique: 'country_name_ukey'
     }
   }, {
     sequelize,
@@ -19,28 +19,28 @@ module.exports = (sequelize, DataTypes) => {
     timestamps: false,
     indexes: [
       {
-        name: "country_name_ukey",
+        name: 'country_name_ukey',
         unique: true,
         fields: [
-          { name: "country" },
+          { name: 'country' }
         ]
       },
       {
-        name: "country_pkey",
+        name: 'country_pkey',
         unique: true,
         fields: [
-          { name: "id" },
+          { name: 'id' }
         ]
-      },
+      }
     ]
-  });
+  })
 
   country.associate = models => {
     country.hasMany(models.address, {
-      as: "addresses",
-      foreignKey: "country_id"
+      as: 'addresses',
+      foreignKey: 'country_id'
     })
   }
 
   return country
-};
+}

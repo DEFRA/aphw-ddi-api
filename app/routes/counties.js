@@ -5,7 +5,7 @@ module.exports = {
   path: '/counties',
   handler: async (request, h) => {
     const counties = await county.findAll({
-      attributes: [ 'county' ]
+      attributes: ['county']
     })
 
     return h.response({

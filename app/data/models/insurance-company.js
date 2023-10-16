@@ -10,7 +10,7 @@ module.exports = (sequelize, DataTypes) => {
     company_name: {
       type: DataTypes.STRING(32),
       allowNull: false,
-      unique: "insurance_company_ukey"
+      unique: 'insurance_company_ukey'
     }
   }, {
     sequelize,
@@ -19,28 +19,28 @@ module.exports = (sequelize, DataTypes) => {
     timestamps: false,
     indexes: [
       {
-        name: "insurance_company_pkey",
+        name: 'insurance_company_pkey',
         unique: true,
         fields: [
-          { name: "id" },
+          { name: 'id' }
         ]
       },
       {
-        name: "insurance_company_ukey",
+        name: 'insurance_company_ukey',
         unique: true,
         fields: [
-          { name: "company_name" },
+          { name: 'company_name' }
         ]
-      },
+      }
     ]
-  });
+  })
 
   insuranceCompany.associate = models => {
     insuranceCompany.hasMany(models.insurance, {
-      as: "insurances",
-      foreignKey: "company_id"
+      as: 'insurances',
+      foreignKey: 'company_id'
     })
   }
 
   return insuranceCompany
-};
+}

@@ -1,4 +1,4 @@
-const { Op } = require("sequelize");
+const { Op } = require('sequelize')
 const sequelize = require('../config/db')
 
 const getMicrochipType = async type => {
@@ -10,6 +10,6 @@ const getMicrochipType = async type => {
       }
     }
   })
-} 
+}
 
 module.exports = getMicrochipType

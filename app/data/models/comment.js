@@ -31,21 +31,21 @@ module.exports = (sequelize, DataTypes) => {
     timestamps: false,
     indexes: [
       {
-        name: "comment_pkey",
+        name: 'comment_pkey',
         unique: true,
         fields: [
-          { name: "id" },
+          { name: 'id' }
         ]
-      },
+      }
     ]
-  });
+  })
 
   comment.associate = models => {
     comment.belongsTo(models.registration, {
-      as: "registration",
-      foreignKey: "registration_id"
+      as: 'registration',
+      foreignKey: 'registration_id'
     })
   }
 
   return comment
-};
+}

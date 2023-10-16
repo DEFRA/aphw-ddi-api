@@ -10,7 +10,7 @@ module.exports = (sequelize, DataTypes) => {
     contact_type: {
       type: DataTypes.STRING(24),
       allowNull: false,
-      unique: "contact_type_ukey"
+      unique: 'contact_type_ukey'
     }
   }, {
     sequelize,
@@ -19,28 +19,28 @@ module.exports = (sequelize, DataTypes) => {
     timestamps: false,
     indexes: [
       {
-        name: "contact_type_pkey",
+        name: 'contact_type_pkey',
         unique: true,
         fields: [
-          { name: "id" },
+          { name: 'id' }
         ]
       },
       {
-        name: "contact_type_ukey",
+        name: 'contact_type_ukey',
         unique: true,
         fields: [
-          { name: "contact_type" },
+          { name: 'contact_type' }
         ]
-      },
+      }
     ]
-  });
+  })
 
   contactType.associate = models => {
     contactType.hasMany(models.contact, {
-      as: "contacts",
-      foreignKey: "contact_type_id"
+      as: 'contacts',
+      foreignKey: 'contact_type_id'
     })
   }
 
   return contactType
-};
+}

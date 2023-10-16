@@ -39,21 +39,21 @@ module.exports = (sequelize, DataTypes) => {
     timestamps: false,
     indexes: [
       {
-        name: "document_pkey",
+        name: 'document_pkey',
         unique: true,
         fields: [
-          { name: "id" },
+          { name: 'id' }
         ]
-      },
+      }
     ]
-  });
+  })
 
   document.associate = models => {
     document.belongsTo(models.document_type, {
-      as: "document_type",
-      foreignKey: "document_type_id"
+      as: 'document_type',
+      foreignKey: 'document_type_id'
     })
   }
 
   return document
-};
+}

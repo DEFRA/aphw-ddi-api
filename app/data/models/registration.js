@@ -14,7 +14,7 @@ module.exports = (sequelize, DataTypes) => {
         model: 'dog',
         key: 'id'
       },
-      unique: "registration_dog_ukey"
+      unique: 'registration_dog_ukey'
     },
     status_id: {
       type: DataTypes.INTEGER,
@@ -48,53 +48,53 @@ module.exports = (sequelize, DataTypes) => {
     timestamps: false,
     indexes: [
       {
-        name: "registration_dog_ukey",
+        name: 'registration_dog_ukey',
         unique: true,
         fields: [
-          { name: "dog_id" },
+          { name: 'dog_id' }
         ]
       },
       {
-        name: "registration_pkey",
+        name: 'registration_pkey',
         unique: true,
         fields: [
-          { name: "id" },
+          { name: 'id' }
         ]
-      },
+      }
     ]
-  });
+  })
 
   registration.associate = models => {
     registration.belongsTo(models.dog, {
-      as: "dog",
-      foreignKey: "dog_id"
+      as: 'dog',
+      foreignKey: 'dog_id'
     })
 
     registration.belongsTo(models.police_force, {
-      as: "police_force",
-      foreignKey: "police_force_id"
+      as: 'police_force',
+      foreignKey: 'police_force_id'
     })
 
     registration.hasMany(models.comment, {
-      as: "comments",
-      foreignKey: "registration_id"
+      as: 'comments',
+      foreignKey: 'registration_id'
     })
 
     registration.hasMany(models.document, {
-      as: "documents",
-      foreignKey: "registration_id"
+      as: 'documents',
+      foreignKey: 'registration_id'
     })
 
     registration.hasMany(models.notification, {
-      as: "notifications",
-      foreignKey: "registration_id"
+      as: 'notifications',
+      foreignKey: 'registration_id'
     })
 
     registration.belongsTo(models.status, {
-      as: "status",
-      foreignKey: "status_id"
+      as: 'status',
+      foreignKey: 'status_id'
     })
   }
 
   return registration
-};
+}

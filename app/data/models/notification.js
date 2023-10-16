@@ -35,21 +35,21 @@ module.exports = (sequelize, DataTypes) => {
     timestamps: false,
     indexes: [
       {
-        name: "notification_pkey",
+        name: 'notification_pkey',
         unique: true,
         fields: [
-          { name: "id" },
+          { name: 'id' }
         ]
-      },
+      }
     ]
-  });
+  })
 
   notification.associate = models => {
     notification.belongsTo(models.notification_type, {
-      as: "notification_type",
-      foreignKey: "notification_type_id"
+      as: 'notification_type',
+      foreignKey: 'notification_type_id'
     })
   }
 
   return notification
-};
+}

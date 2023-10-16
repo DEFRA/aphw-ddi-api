@@ -10,7 +10,7 @@ module.exports = (sequelize, DataTypes) => {
     policy_number: {
       type: DataTypes.STRING(32),
       allowNull: false,
-      unique: "insurance_policy_number_ukey"
+      unique: 'insurance_policy_number_ukey'
     },
     company_id: {
       type: DataTypes.INTEGER,
@@ -31,33 +31,33 @@ module.exports = (sequelize, DataTypes) => {
     timestamps: false,
     indexes: [
       {
-        name: "insurance_pkey",
+        name: 'insurance_pkey',
         unique: true,
         fields: [
-          { name: "id" },
+          { name: 'id' }
         ]
       },
       {
-        name: "insurance_policy_number_ukey",
+        name: 'insurance_policy_number_ukey',
         unique: true,
         fields: [
-          { name: "policy_number" },
+          { name: 'policy_number' }
         ]
-      },
+      }
     ]
-  });
+  })
 
   insurance.associate = models => {
     insurance.hasMany(models.dog, {
-      as: "dogs",
-      foreignKey: "insurance_id"
+      as: 'dogs',
+      foreignKey: 'insurance_id'
     })
 
     insurance.belongsTo(models.insurance_company, {
-      as: "company",
-      foreignKey: "company_id"
+      as: 'company',
+      foreignKey: 'company_id'
     })
   }
 
   return insurance
-};
+}

@@ -22,26 +22,26 @@ module.exports = (sequelize, DataTypes) => {
     timestamps: false,
     indexes: [
       {
-        name: "person_contact_pkey",
+        name: 'person_contact_pkey',
         unique: true,
         fields: [
-          { name: "id" },
+          { name: 'id' }
         ]
-      },
+      }
     ]
-  });
+  })
 
   personContact.associate = models => {
     personContact.belongsTo(models.contact, {
-      as: "contact",
-      foreignKey: "contact_id"
+      as: 'contact',
+      foreignKey: 'contact_id'
     })
 
     personContact.belongsTo(models.person, {
-      as: "person",
-      foreignKey: "person_id"
+      as: 'person',
+      foreignKey: 'person_id'
     })
   }
 
   return personContact
-};
+}

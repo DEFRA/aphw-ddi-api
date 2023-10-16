@@ -1,4 +1,4 @@
-const { Op } = require("sequelize");
+const { Op } = require('sequelize')
 const sequelize = require('../config/db')
 
 const getPoliceForce = async name => {
@@ -10,6 +10,6 @@ const getPoliceForce = async name => {
       }
     }
   })
-} 
+}
 
 module.exports = getPoliceForce

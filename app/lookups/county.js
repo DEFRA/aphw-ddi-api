@@ -1,4 +1,4 @@
-const { Op } = require("sequelize");
+const { Op } = require('sequelize')
 const sequelize = require('../config/db')
 
 const getCounty = async county => {
@@ -10,6 +10,6 @@ const getCounty = async county => {
       }
     }
   })
-} 
+}
 
 module.exports = getCounty

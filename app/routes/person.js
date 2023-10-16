@@ -30,7 +30,7 @@ module.exports = [{
     handler: async (request, h) => {
       const payload = request.payload
       const references = await addPerson(payload.people)
-  
+
       return h.response({ references }).code(200)
     }
   }

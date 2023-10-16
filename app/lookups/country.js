@@ -1,4 +1,4 @@
-const { Op } = require("sequelize");
+const { Op } = require('sequelize')
 const sequelize = require('../config/db')
 
 const getCountry = async country => {
@@ -10,6 +10,6 @@ const getCountry = async country => {
       }
     }
   })
-} 
+}
 
 module.exports = getCountry

@@ -1,4 +1,4 @@
-const { Op } = require("sequelize");
+const { Op } = require('sequelize')
 const sequelize = require('../config/db')
 
 const statusIdentifer = 'DOG'
@@ -12,6 +12,6 @@ const getDogStatus = async () => {
       }
     }
   })
-} 
+}
 
 module.exports = getDogStatus

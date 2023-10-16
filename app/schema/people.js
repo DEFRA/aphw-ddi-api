@@ -15,6 +15,6 @@ const schema = Joi.object({
         country: Joi.string().required()
       })
     }))
-  }).required()
+}).required()
 
 module.exports = schema

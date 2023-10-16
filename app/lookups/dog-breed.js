@@ -1,4 +1,4 @@
-const { Op } = require("sequelize");
+const { Op } = require('sequelize')
 const sequelize = require('../config/db')
 
 const getBreed = async breed => {
@@ -10,6 +10,6 @@ const getBreed = async breed => {
       }
     }
   })
-} 
+}
 
 module.exports = getBreed

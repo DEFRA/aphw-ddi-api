@@ -1,4 +1,4 @@
-const { Op } = require("sequelize");
+const { Op } = require('sequelize')
 const sequelize = require('../config/db')
 
 const getInsuranceCompany = async company => {
@@ -10,6 +10,6 @@ const getInsuranceCompany = async company => {
       }
     }
   })
-} 
+}
 
 module.exports = getInsuranceCompany
