@@ -23,14 +23,6 @@ module.exports = (sequelize, DataTypes) => {
         key: 'id'
       }
     },
-    insurance_id: {
-      type: DataTypes.INTEGER,
-      allowNull: true,
-      references: {
-        model: 'insurance',
-        key: 'id'
-      }
-    },
     name: {
       type: DataTypes.STRING(32),
       allowNull: false
@@ -99,9 +91,9 @@ module.exports = (sequelize, DataTypes) => {
       foreignKey: 'dog_breed_id'
     })
 
-    dog.belongsTo(models.insurance, {
+    dog.hasMany(models.insurance, {
       as: 'insurance',
-      foreignKey: 'insurance_id'
+      foreignKey: 'dog_id'
     })
 
     dog.belongsTo(models.microchip_type, {

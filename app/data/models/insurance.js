@@ -48,9 +48,9 @@ module.exports = (sequelize, DataTypes) => {
   })
 
   insurance.associate = models => {
-    insurance.hasMany(models.dog, {
+    insurance.belongsTo(models.dog, {
       as: 'dogs',
-      foreignKey: 'insurance_id'
+      foreignKey: 'dog_id'
     })
 
     insurance.belongsTo(models.insurance_company, {
