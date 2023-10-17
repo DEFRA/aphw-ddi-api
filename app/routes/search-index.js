@@ -1,13 +1,12 @@
-const { search, addToSearchIndex } = require('../register/search-index')
+const { search } = require('../register/search-index')
 
 module.exports = [{
   method: 'GET',
-  path: '/search/{id}',
+  path: '/search/{reference}',
   handler: async (request, h) => {
-    await addToSearchIndex()
     let searchIndex = null
     try {
-      searchIndex = await search()
+      searchIndex = await search(request.params.reference)
     } catch (e) {
       console.log(e)
     }

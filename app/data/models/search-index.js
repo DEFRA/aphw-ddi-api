@@ -10,6 +10,12 @@ module.exports = (sequelize, DataTypes) => {
     search: {
       type: DataTypes.TSVECTOR,
       allowNull: false
+    },
+    reference_number: {
+      type: DataTypes.STRING
+    },
+    json: {
+      type: DataTypes.JSONB
     }
   }, {
     sequelize,
