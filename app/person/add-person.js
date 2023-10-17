@@ -1,5 +1,5 @@
 const sequelize = require('../config/db')
-const { getTitle, getCounty, getCountry } = require('../lookups')
+const { getTitle, getCounty, getCountry, getContactType } = require('../lookups')
 const createReferenceNumber = require('../lib/create-registration-number')
 
 const addPeople = async (people) => {
@@ -15,6 +15,19 @@ const addPeople = async (people) => {
 
       const createdPerson = await sequelize.models.person.create(person, { transaction: t })
       const createdAddress = await sequelize.models.address.create(person.address, { transaction: t })
+
+      for (const contact of person.contacts) {
+        contact.contact_type_id = (await getContactType(contact.type)).id
+
+        const createdContact = await sequelize.models.contact.create(contact, { transaction: t })
+
+        const personContact = {
+          person_id: createdPerson.id,
+          contact_id: createdContact.id
+        }
+
+        await sequelize.models.person_contact.create(personContact, { transaction: t })
+      }
 
       references.push(person.person_reference)
 

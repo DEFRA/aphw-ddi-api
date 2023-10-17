@@ -4,7 +4,7 @@ module.exports = [{
   method: 'GET',
   path: '/search/{id}',
   handler: async (request, h) => {
-    // await addToSearchIndex()
+    await addToSearchIndex()
     let searchIndex = null
     try {
       searchIndex = await search()

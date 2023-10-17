@@ -13,7 +13,13 @@ const schema = Joi.object({
         postcode: Joi.string().required(),
         county: Joi.string().required(),
         country: Joi.string().required()
-      })
+      }).required(),
+      contacts: Joi.array().items(
+        Joi.object({
+          type: Joi.string().required(),
+          contact: Joi.string().required()
+        }).required()
+      ).optional()
     }))
 }).required()
 

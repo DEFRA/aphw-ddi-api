@@ -8,6 +8,7 @@ const getPersonType = require('./person-type')
 const getPoliceForce = require('./police-force')
 const getDogStatus = require('./dog-status')
 const getRegistrationStatus = require('./registration-status')
+const getContactType = require('./contact-type')
 
 module.exports = {
   getTitle,
@@ -19,5 +20,6 @@ module.exports = {
   getPersonType,
   getPoliceForce,
   getDogStatus,
-  getRegistrationStatus
+  getRegistrationStatus,
+  getContactType
 }
