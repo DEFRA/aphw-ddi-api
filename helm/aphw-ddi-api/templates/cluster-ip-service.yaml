@@ -1,0 +1,3 @@
+{{- include "ffc-helm-library.cluster-ip-service" (list . "aphw-ddi-api.cluster-ip-service") -}}
+{{- define "aphw-ddi-api.cluster-ip-service" -}}
+{{- end -}}

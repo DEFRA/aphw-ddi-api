@@ -2,11 +2,11 @@
 # that test output is saved to the host
 
 services:
-  dangerous-dogs-act-api:
+  aphw-ddi-api:
     build:
       target: development
-    image: dangerous-dogs-act-api-development
-    container_name: dangerous-dogs-act-api-test
+    image: aphw-ddi-api-development
+    container_name: aphw-ddi-api-test
     command: npm run test
     volumes:
       - ./app:/home/node/app
@@ -15,7 +15,7 @@ services:
       - ./jest.config.js:/home/node/jest.config.js
       - ./package.json:/home/node/package.json
 
-  dangerous-dogs-act-api-postgres:
+  aphw-ddi-api-postgres:
     volumes:
     - postgres_data:/var/lib/postgresql/data
 

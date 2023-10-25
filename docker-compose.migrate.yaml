@@ -1,7 +1,7 @@
 version: '3.8'
 
 x-common-migration: &common-migration
-  POSTGRES_HOST: ${POSTGRES_HOST:-dangerous-dogs-act-api-postgres}
+  POSTGRES_HOST: ${POSTGRES_HOST:-aphw-ddi-api-postgres}
   SCHEMA_ROLE: ${POSTGRES_SCHEMA_ROLE:-postgres}
   SCHEMA_USERNAME: ${POSTGRES_SCHEMA_USERNAME:-postgres}
   SCHEMA_PASSWORD: ${POSTGRES_SCHEMA_PASSWORD:-ppp}
@@ -21,7 +21,7 @@ services:
     entrypoint: >
       sh -c "/scripts/migration/database-up"
     depends_on:
-      - dangerous-dogs-act-api-postgres
+      - aphw-ddi-api-postgres
     volumes:
       - ./changelog:/liquibase/changelog
       - ./scripts:/scripts
@@ -33,12 +33,12 @@ services:
     entrypoint: >
       sh -c "/scripts/migration/database-down"
     depends_on:
-      - dangerous-dogs-act-api-postgres
+      - aphw-ddi-api-postgres
     volumes:
       - ./changelog:/liquibase/changelog
       - ./scripts:/scripts
 
-  dangerous-dogs-act-api-postgres:
+  aphw-ddi-api-postgres:
     image: postgres:16.0-alpine
     environment: *common-postgres
     volumes:

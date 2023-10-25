@@ -1,8 +1,8 @@
 {
-  "name": "dangerous-dogs-act-api",
+  "name": "aphw-ddi-api",
   "version": "0.2.0",
   "description": "API to manage CRUD / query functions for dangerous dogs register",
-  "homepage": "https://github.com/DEFRA/dangerous-dogs-act-api",
+  "homepage": "https://github.com/DEFRA/aphw-ddi-api",
   "main": "app/index.js",
   "scripts": {
     "pretest": "npm run test:lint",
@@ -23,7 +23,7 @@
     "@azure/identity": "^2.0.5",
     "@hapi/hapi": "20.2.2",
     "applicationinsights": "2.3.5",
-    "graphi": "9.0.2",
+    "graphi": "^9.1.0",
     "graphql-fields": "^2.0.3",
     "joi": "^17.11.0",
     "pg": "^8.11.3",

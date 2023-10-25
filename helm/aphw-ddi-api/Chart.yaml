@@ -1,6 +1,6 @@
 apiVersion: v2
 description: API to expose CRUD / query endpoints for the dangerous dogs register
-name: dangerous-dogs-act-api
+name: aphw-ddi-api
 # this version is automatically updated in the build pipeline
 version: 1.0.0
 dependencies:

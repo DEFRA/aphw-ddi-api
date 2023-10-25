@@ -2,11 +2,11 @@
 # to provide dependencies and expose ports for local testing
 
 services:
-  dangerous-dogs-act-api:
+  aphw-ddi-api:
     build:
       target: development
-    image: dangerous-dogs-act-api-development
-    container_name: dangerous-dogs-act-api-development
+    image: aphw-ddi-api-development
+    container_name: aphw-ddi-api-development
     ports:
       - "3001:3000"
       - "9230:9229"
@@ -14,7 +14,7 @@ services:
       - ./app:/home/node/app
       - ./package.json:/home/node/package.json
 
-  dangerous-dogs-act-api-postgres:
+  aphw-ddi-api-postgres:
     ports:
       - "5432:5432"
     volumes:

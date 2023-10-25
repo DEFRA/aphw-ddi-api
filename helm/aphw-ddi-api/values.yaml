@@ -1,9 +1,9 @@
 environment: production
 environmentCode:
-name: dangerous-dogs-act-api
-namespace: dangerous-dogs
-workstream: dangerous-dogs
-image: dangerous-dogs-act-api
+name: aphw-ddi-api
+namespace: aphw-ddi
+workstream: aphw-ddi
+image: aphw-ddi-api
 
 labels:
   component: service
@@ -16,10 +16,10 @@ azureIdentity:
   resourceID: not-a-real-resourceID
 
 containerConfigMap:
-  name: dangerous-dogs-act-api-config-map
+  name: aphw-ddi-api-config-map
 
 containerSecret:
-  name: dangerous-dogs-act-api-container-secret
+  name: aphw-ddi-api-container-secret
   type: Opaque
 
 deployment: {}
@@ -33,7 +33,7 @@ container:
 
 postgresService:
   postgresDb: dangerous_dogs_register
-  postgresqlHost: dangerous-dogs-act-api-postgres
+  postgresqlHost: aphw-ddi-api-postgres
   postgresPort: 5432
   postgresSchema: public
   postgresUser: postgres
