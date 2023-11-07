@@ -1,0 +1,19 @@
+<?xml version="1.1" encoding="utf-8" standalone="no"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog" xmlns:ext="http://www.liquibase.org/xml/ns/dbchangelog-ext" xmlns:pro="http://www.liquibase.org/xml/ns/pro" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog-ext http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-ext.xsd http://www.liquibase.org/xml/ns/pro http://www.liquibase.org/xml/ns/pro/liquibase-pro-3.9.xsd http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.9.xsd">
+  <changeSet author="Shaun Fitzsimons" id="2">
+    <createTable tableName="status">
+      <column autoIncrement="true" name="id" type="INTEGER">
+        <constraints nullable="false" primaryKey="true" primaryKeyName="status_pkey" />
+      </column>
+      <column name="status" type="VARCHAR(24)">
+        <constraints nullable="false" unique="true" uniqueConstraintName="status_name_ukey" />
+      </column>
+      <column name="status_type" type="VARCHAR(24)">
+        <constraints nullable="false" unique="false" />
+      </column>
+    </createTable>
+  </changeSet>
+  <changeSet author="Shaun Fitzsimons" id="1">
+    <tagDatabase tag="v1.3.0" />
+  </changeSet>
+</databaseChangeLog>

@@ -1,0 +1,33 @@
+<?xml version="1.1" encoding="utf-8" standalone="no"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog" xmlns:ext="http://www.liquibase.org/xml/ns/dbchangelog-ext" xmlns:pro="http://www.liquibase.org/xml/ns/pro" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog-ext http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-ext.xsd http://www.liquibase.org/xml/ns/pro http://www.liquibase.org/xml/ns/pro/liquibase-pro-3.9.xsd http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.9.xsd">
+  <changeSet author="Shaun Fitzsimons" id="2">
+    <createTable tableName="registration">
+      <column autoIncrement="true" name="id" type="INTEGER">
+        <constraints nullable="false" primaryKey="true" primaryKeyName="registration_pkey" />
+      </column>
+      <column name="dog_id" type="INTEGER">
+        <constraints nullable="false" unique="true" uniqueConstraintName="registration_dog_ukey" />
+      </column>
+      <column name="status_id" type="INTEGER">
+        <constraints nullable="false" />
+      </column>
+      <column name="police_force_id" type="INTEGER">
+        <constraints nullable="false" />
+      </column>
+      <column name="created_on" defaultValueComputed="now()" type="TIMESTAMP WITH TIME ZONE">
+        <constraints nullable="false" />
+      </column>
+      <column name="time_limit" type="TIMESTAMP WITH TIME ZONE">
+        <constraints nullable="false" />
+      </column>
+    </createTable>
+  </changeSet>
+  <changeSet author="Shaun Fitzsimons" id="3">
+    <addForeignKeyConstraint baseColumnNames="dog_id" baseTableName="registration" constraintName="fk_registration_dog" referencedColumnNames="id" referencedTableName="dog" />
+    <addForeignKeyConstraint baseColumnNames="status_id" baseTableName="registration" constraintName="fk_registration_status" referencedColumnNames="id" referencedTableName="status" />
+    <addForeignKeyConstraint baseColumnNames="police_force_id" baseTableName="registration" constraintName="fk_registration_police_force" referencedColumnNames="id" referencedTableName="police_force" />
+  </changeSet>
+  <changeSet author="Shaun Fitzsimons" id="1">
+    <tagDatabase tag="v1.6.0" />
+  </changeSet>
+</databaseChangeLog>

@@ -1,0 +1,6 @@
+version: '3.8'
+
+networks:
+  default:
+    external:
+      name: dangerous-dogs-act

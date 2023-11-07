@@ -1,5 +1,5 @@
 services:
-  dangerous-dogs-act-api:
+  aphw-ddi-api:
     command: npm run test:debug
     ports:
       - "9229:9229"
