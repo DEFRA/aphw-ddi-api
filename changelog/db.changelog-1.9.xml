@@ -1,0 +1,62 @@
+<?xml version="1.1" encoding="utf-8" standalone="no"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog" xmlns:ext="http://www.liquibase.org/xml/ns/dbchangelog-ext" xmlns:pro="http://www.liquibase.org/xml/ns/pro" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog-ext http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-ext.xsd http://www.liquibase.org/xml/ns/pro http://www.liquibase.org/xml/ns/pro/liquibase-pro-3.9.xsd http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.9.xsd">
+  <changeSet author="Steve Dickinson" id="1">
+    <tagDatabase tag="v1.9.0" />
+  </changeSet>
+  <changeSet author="Steve Dickinson" id="2">
+    <createTable tableName="title">
+      <column autoIncrement="true" name="id" type="INTEGER">
+        <constraints nullable="false" primaryKey="true" primaryKeyName="title_pkey" />
+      </column>
+      <column name="title" type="VARCHAR(24)">
+        <constraints nullable="false" unique="true" uniqueConstraintName="title_ukey" />
+      </column>
+    </createTable>
+  </changeSet>
+  <changeSet author="Steve Dickinson" id="3">
+    <createTable tableName="person_type">
+      <column autoIncrement="true" name="id" type="INTEGER">
+        <constraints nullable="false" primaryKey="true" primaryKeyName="person_type_pkey" />
+      </column>
+      <column name="person_type" type="VARCHAR(24)">
+        <constraints nullable="false" unique="true" uniqueConstraintName="person_type_ukey" />
+      </column>
+    </createTable>
+  </changeSet>
+  <changeSet author="Steve Dickinson" id="4">
+    <createTable tableName="registered_person">
+      <column autoIncrement="true" name="id" type="INTEGER">
+        <constraints nullable="false" primaryKey="true" primaryKeyName="registered_person_pkey" />
+      </column>
+      <column name="person_id" type="INTEGER">
+        <constraints nullable="false" />
+      </column>
+      <column name="dog_id" type="INTEGER">
+        <constraints nullable="false" />
+      </column>
+      <column name="person_type_id" type="INTEGER">
+        <constraints nullable="false" />
+      </column>
+    </createTable>
+  </changeSet>
+  <changeSet author="Steve Dickinson" id="5">
+    <createTable tableName="person">
+      <column autoIncrement="true" name="id" type="INTEGER">
+        <constraints nullable="false" primaryKey="true" primaryKeyName="person_pkey" />
+      </column>
+      <column name="title_id" type="INTEGER">
+        <constraints nullable="false" />
+      </column>
+      <column name="first_name" type="VARCHAR(24)" />
+      <column name="last_name" type="VARCHAR(24)" />
+    </createTable>
+  </changeSet>
+  <changeSet author="Steve Dickinson" id="6">
+    <addForeignKeyConstraint baseColumnNames="title_id" baseTableName="person" constraintName="fk_person_title_id" referencedColumnNames="id" referencedTableName="title" />
+    <addForeignKeyConstraint baseColumnNames="person_id" baseTableName="registered_person" constraintName="fk_registered_person_person_id" referencedColumnNames="id" referencedTableName="person" />
+    <addForeignKeyConstraint baseColumnNames="dog_id" baseTableName="registered_person" constraintName="fk_registered_person_dog_id" referencedColumnNames="id" referencedTableName="dog" />
+    <addForeignKeyConstraint baseColumnNames="person_type_id" baseTableName="registered_person" constraintName="fk_registered_person_person_type_id" referencedColumnNames="id" referencedTableName="person_type" />
+    <addForeignKeyConstraint baseColumnNames="person_id" baseTableName="person_address" constraintName="fk_person_address_person" referencedColumnNames="id" referencedTableName="person" />
+    <addForeignKeyConstraint baseColumnNames="person_id" baseTableName="person_contact" constraintName="fk_person_contact_person" referencedColumnNames="id" referencedTableName="person" />
+  </changeSet>
+</databaseChangeLog>

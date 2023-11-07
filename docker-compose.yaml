@@ -1,10 +1,27 @@
 services:
-  dangerous-dogs-act-api:
+  aphw-ddi-api:
     build:
       context: .
       target: production
-    image: dangerous-dogs-act-api
-    container_name: dangerous-dogs-act-api
+    image: aphw-ddi-api
+    container_name: aphw-ddi-api
+    depends_on:
+      - aphw-ddi-api-postgres
     environment:
-      APPINSIGHTS_CLOUDROLE: dangerous-dogs-act-api-local
+      APPINSIGHTS_CLOUDROLE: aphw-ddi-api-local
       APPINSIGHTS_CONNECTIONSTRING: ${APPINSIGHTS_CONNECTIONSTRING}
+      POSTGRES_DB: dangerous_dogs_register
+      POSTGRES_HOST: ${POSTGRES_HOST:-aphw-ddi-api-postgres}
+      POSTGRES_PORT: 5432
+      POSTGRES_SCHEMA_NAME: ${POSTGRES_SCHEMA_NAME:-public}
+      POSTGRES_USERNAME: ${POSTGRES_SCHEMA_USERNAME:-postgres}
+      POSTGRES_PASSWORD: ${POSTGRES_SCHEMA_PASSWORD:-ppp}
+      
+  aphw-ddi-api-postgres:
+    image: postgres:16.0-alpine
+    environment:
+      POSTGRES_DB: dangerous_dogs_register
+      POSTGRES_USERNAME: postgres
+      POSTGRES_PASSWORD: ppp
+    volumes:
+      - postgres_data:/var/lib/postgres/data

@@ -1,4 +1,4 @@
-# dangerous-dogs-act-api
+# aphw-ddi-api
 
 API to manage CRUD / query functions for dangerous dogs register.
 

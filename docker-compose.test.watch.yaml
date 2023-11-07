@@ -1,5 +1,5 @@
 services:
-  dangerous-dogs-act-api:
+  aphw-ddi-api:
     command: >
       sh -c "npm run test:watch"
     volumes:
