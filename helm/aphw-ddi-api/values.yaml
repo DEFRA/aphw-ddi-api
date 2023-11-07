@@ -30,6 +30,9 @@ container:
   limitMemory: 100Mi
   limitCpu: 100m
   port: 3000
+  azureStorageConnectionString: dummy
+  azureStorageUseConnectionString: false
+  azureStorageAccountName: dummy
 
 postgresService:
   postgresDb: dangerous_dogs_register
