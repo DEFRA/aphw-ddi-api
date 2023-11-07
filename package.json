@@ -24,7 +24,7 @@
     "@azure/storage-blob": "12.13.0",
     "@hapi/hapi": "20.2.2",
     "applicationinsights": "2.3.5",
-    "graphi": "^9.1.0",
+    "graphi": "^9.0.2",
     "graphql-fields": "^2.0.3",
     "joi": "^17.11.0",
     "pg": "^8.11.3",
