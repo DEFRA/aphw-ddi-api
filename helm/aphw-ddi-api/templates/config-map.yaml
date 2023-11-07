@@ -8,4 +8,5 @@ data:
   POSTGRES_HOST: {{ quote .Values.postgresService.postgresqlHost }}
   POSTGRES_PORT: {{ quote .Values.postgresService.postgresPort }}
   POSTGRES_SCHEMA_NAME: {{ quote .Values.postgresService.postgresSchema }}
+  AZURE_STORAGE_USE_CONNECTION_STRING: {{ quote .Values.container.azureStorageUseConnectionString }}
 {{- end -}}
