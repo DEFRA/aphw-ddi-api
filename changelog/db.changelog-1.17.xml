@@ -6,7 +6,7 @@
   </changeSet>
   <changeSet author="Shaun Fitzsimons" id="3">
     <addColumn tableName="insurance">
-      <column name="dog_id" type="INTEGER">
+      <column name="dog_id" type="uuid">
         <constraints nullable="false" unique="false" />
       </column>
     </addColumn>

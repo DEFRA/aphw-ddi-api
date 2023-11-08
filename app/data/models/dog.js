@@ -7,6 +7,10 @@ module.exports = (sequelize, DataTypes) => {
       allowNull: false,
       primaryKey: true
     },
+    orig_id: {
+      type: DataTypes.INTEGER,
+      allowNull: false
+    },
     dog_breed_id: {
       type: DataTypes.INTEGER,
       allowNull: false,
@@ -29,7 +33,7 @@ module.exports = (sequelize, DataTypes) => {
     },
     birth_date: {
       type: DataTypes.DATEONLY,
-      allowNull: false
+      allowNull: true
     },
     tattoo: {
       type: DataTypes.STRING(32),
@@ -49,11 +53,11 @@ module.exports = (sequelize, DataTypes) => {
     },
     colour: {
       type: DataTypes.STRING(16),
-      allowNull: false
+      allowNull: true
     },
     sex: {
       type: DataTypes.STRING(10),
-      allowNull: false
+      allowNull: true
     },
     exported: {
       type: DataTypes.BOOLEAN,
