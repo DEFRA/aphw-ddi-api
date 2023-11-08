@@ -9,6 +9,9 @@ const process = async (maxRecords) => {
   let rowsProcessed = 0
   let rowsInError = 0
   let rowsIntoDb = 0
+
+  const xlBullyBreedId = (await getBreed('XL Bully')).dataValues.id
+
   await sequelize.transaction(async (t) => {
     const backlogRows = await sequelize.models.backlog.findAll({
       limit: maxRecords,
@@ -21,28 +24,13 @@ const process = async (maxRecords) => {
       return { rowsProcessed, rowsInError, rowsIntoDb }
     }
 
-    const xlBullyBreedId = (await getBreed('XL Bully')).dataValues.id
-
-    // Copy dog records
+    // Create dog records in DB
     for (let i = 0; i < backlogRows.length; i++) {
       rowsProcessed++
       try {
         const jsonObj = backlogRows[i].dataValues.json
 
-        const dog = {
-          id: uuidv4(),
-          orig_id: jsonObj.dogIndexNumber,
-          name: jsonObj.dogName,
-          dog_breed_id: xlBullyBreedId,
-          status_id: 1,
-          birth_date: jsonObj.dogDateOfBirth,
-          tattoo: jsonObj.tattoo,
-          microchip_number: jsonObj.microchipNumber,
-          microchip_type_id: 1, // TODO (await getMicrochipType(jsonObj.microchipType)).dataValues.id,
-          colour: jsonObj.colour,
-          sex: jsonObj.sex,
-          exported: jsonObj?.dogExported === 'Yes'
-        }
+        const dog = buildDog(jsonObj, xlBullyBreedId)
         const validationErrors = importSchema.isValidImportedDog(dog)
         if (validationErrors.error !== undefined) {
           // console.log(`validation [${i}]`, validationErrors)
@@ -62,6 +50,23 @@ const process = async (maxRecords) => {
   })
 
   return { rowsProcessed, rowsInError, rowsIntoDb }
+}
+
+const buildDog = (jsonObj, breedId) => {
+  return {
+    id: uuidv4(),
+    orig_id: jsonObj.dogIndexNumber,
+    name: jsonObj.dogName,
+    dog_breed_id: breedId,
+    status_id: 1,
+    birth_date: jsonObj.dogDateOfBirth,
+    tattoo: jsonObj.tattoo,
+    microchip_number: jsonObj.microchipNumber,
+    microchip_type_id: 1, // TODO (await getMicrochipType(jsonObj.microchipType)).dataValues.id,
+    colour: jsonObj.colour,
+    sex: jsonObj.sex,
+    exported: jsonObj?.dogExported === 'Yes'
+  }
 }
 
 module.exports = {
