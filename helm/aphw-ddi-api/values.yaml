@@ -33,6 +33,7 @@ container:
   azureStorageConnectionString: dummy
   azureStorageUseConnectionString: false
   azureStorageAccountName: dummy
+  azureStorageCreateContainers: false
 
 postgresService:
   postgresDb: dangerous_dogs_index

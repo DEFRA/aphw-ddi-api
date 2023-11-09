@@ -19,8 +19,9 @@ services:
       - aphw-ddi-api-azurite
 
   aphw-ddi-api-azurite:
+    command: "azurite-blob --skipApiVersionCheck --loose --blobHost 0.0.0.0 -l data"
     volumes:
-      - azurite_data:/data
+      - azurite_data:/opt/azurite/data
     ports:
       - "10000:10000"
 
