@@ -13,8 +13,6 @@ const parseBlob = async (blobFilename) => {
 
 const saveParsedToBacklog = async (parseResult) => {
   sequelize.transaction(async (t) => {
-    await populateStaticData()
-
     // Delete rows that have not yet moved to the proper base tables
     await sequelize.models.backlog.destroy({
       where: {
@@ -28,23 +26,6 @@ const saveParsedToBacklog = async (parseResult) => {
       await sequelize.models.backlog.create({ json: row, errors: error, status: error.length ? 'IMPORT_ERROR' : 'IMPORTED' }, { transaction: t })
     }
   })
-}
-
-const populateStaticData = async () => {
-  const breedCount = await sequelize.models.dog_breed.count()
-  if (breedCount === 0) {
-    await sequelize.models.dog_breed.create({ id: 1, breed: 'XL Bully', active: true })
-  }
-
-  const mTypeCount = await sequelize.models.microchip_type.count()
-  if (mTypeCount === 0) {
-    await sequelize.models.microchip_type.create({ id: 1, type: 'Identichip' })
-  }
-
-  const statusCount = await sequelize.models.status.count()
-  if (statusCount === 0) {
-    await sequelize.models.status.create({ id: 1, status: 'IMPORTED_ACCESS_DB', status_type: 'IMPORTED' })
-  }
 }
 
 module.exports = {

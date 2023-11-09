@@ -7,9 +7,13 @@ module.exports = (sequelize, DataTypes) => {
       allowNull: false,
       primaryKey: true
     },
-    orig_id: {
-      type: DataTypes.INTEGER,
+    dog_reference: {
+      type: DataTypes.UUID,
       allowNull: false
+    },
+    orig_index_number: {
+      type: DataTypes.INTEGER,
+      allowNull: true
     },
     dog_breed_id: {
       type: DataTypes.INTEGER,

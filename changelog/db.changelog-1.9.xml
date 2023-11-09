@@ -31,7 +31,7 @@
       <column name="person_id" type="INTEGER">
         <constraints nullable="false" />
       </column>
-      <column name="dog_id" type="uuid">
+      <column name="dog_id" type="INTEGER">
         <constraints nullable="false" />
       </column>
       <column name="person_type_id" type="INTEGER">

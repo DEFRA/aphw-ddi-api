@@ -2,11 +2,8 @@
 <databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog" xmlns:ext="http://www.liquibase.org/xml/ns/dbchangelog-ext" xmlns:pro="http://www.liquibase.org/xml/ns/pro" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog-ext http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-ext.xsd http://www.liquibase.org/xml/ns/pro http://www.liquibase.org/xml/ns/pro/liquibase-pro-3.9.xsd http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.9.xsd">
   <changeSet author="Shaun Fitzsimons" id="2">
     <createTable tableName="dog">
-      <column name="id" type="uuid">
+      <column autoIncrement="true" name="id" type="INTEGER">
         <constraints nullable="false" primaryKey="true" primaryKeyName="dog_pkey" />
-      </column>
-      <column name="orig_id" type="INTEGER">
-        <constraints nullable="false" />
       </column>
       <column name="dog_breed_id" type="INTEGER">
         <constraints nullable="false" />
@@ -32,7 +29,7 @@
       <column name="microchip_type_id" type="INTEGER">
         <constraints nullable="true" />
       </column>
-      <column name="colour" type="VARCHAR(50)">
+      <column name="colour" type="VARCHAR(16)">
         <constraints nullable="false" />
       </column>
       <column name="sex" type="VARCHAR(10)">

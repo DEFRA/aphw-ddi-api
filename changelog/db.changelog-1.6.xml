@@ -5,7 +5,7 @@
       <column autoIncrement="true" name="id" type="INTEGER">
         <constraints nullable="false" primaryKey="true" primaryKeyName="registration_pkey" />
       </column>
-      <column name="dog_id" type="uuid">
+      <column name="dog_id" type="INTEGER">
         <constraints nullable="false" unique="true" uniqueConstraintName="registration_dog_ukey" />
       </column>
       <column name="status_id" type="INTEGER">
