@@ -35,7 +35,7 @@ container:
   azureStorageAccountName: dummy
 
 postgresService:
-  postgresDb: dangerous_dogs_register
+  postgresDb: dangerous_dogs_index
   postgresqlHost: aphw-ddi-api-postgres
   postgresPort: 5432
   postgresSchema: public

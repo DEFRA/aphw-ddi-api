@@ -39,7 +39,6 @@ const addPeople = async (people) => {
         }
 
         await sequelize.models.person_contact.create(personContact, { transaction: t })
-
       }
 
       references.push(person.person_reference)
