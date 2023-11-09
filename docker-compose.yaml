@@ -36,3 +36,6 @@ services:
     command: "azurite-blob --skipApiVersionCheck --loose --blobHost 0.0.0.0"
     labels:
       com.docker.compose.pay.role: aphw-ddi-api-azurite
+
+volumes:
+  postgres_data:
