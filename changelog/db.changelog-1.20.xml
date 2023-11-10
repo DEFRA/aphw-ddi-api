@@ -1,0 +1,59 @@
+<?xml version="1.1" encoding="utf-8" standalone="no"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog" xmlns:ext="http://www.liquibase.org/xml/ns/dbchangelog-ext" xmlns:pro="http://www.liquibase.org/xml/ns/pro" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog-ext http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-ext.xsd http://www.liquibase.org/xml/ns/pro http://www.liquibase.org/xml/ns/pro/liquibase-pro-3.9.xsd http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.9.xsd">
+  <changeSet author="J Barnsley" id="1">
+    <tagDatabase tag="v1.20" />
+  </changeSet>
+  <changeSet author="J Barnsley" id="2">
+    <insert tableName="contact_type">
+      <column name="contact_type" value="Phone" />
+    </insert>
+    <insert tableName="contact_type">
+      <column name="contact_type" value="Email" />
+    </insert>
+  </changeSet>
+  <changeSet author="J Barnsley" id="3">
+    <insert tableName="title">
+      <column name="title" value="Dr" />
+    </insert>
+    <insert tableName="title">
+      <column name="title" value="Mr" />
+    </insert>
+    <insert tableName="title">
+      <column name="title" value="Mrs" />
+    </insert>
+    <insert tableName="title">
+      <column name="title" value="Ms" />
+    </insert>
+    <insert tableName="title">
+      <column name="title" value="Miss" />
+    </insert>
+  </changeSet>
+  <changeSet author="J Barnsley" id="4">
+    <loadData file="changelog/seed/county.csv"
+      tableName="county">
+      <column name="county" type="STRING" header="county" />
+    </loadData>
+  </changeSet>
+  <changeSet author="J Barnsley" id="5">
+    <modifyDataType
+      columnName="address_line_1"
+      newDataType="varchar(50)"
+      tableName="address" />
+    <modifyDataType
+      columnName="address_line_2"
+      newDataType="varchar(50)"
+      tableName="address" />
+    <modifyDataType
+      columnName="address_line_3"
+      newDataType="varchar(50)"
+      tableName="address" />
+  </changeSet>
+  <changeSet author="J Barnsley" id="6">
+    <insert tableName="person_type">
+      <column name="person_type" value="Owner" />
+    </insert>
+    <insert tableName="person_type">
+      <column name="person_type" value="Keeper" />
+    </insert>
+  </changeSet>
+</databaseChangeLog>

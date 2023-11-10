@@ -27,12 +27,16 @@ const createFakePeople = async (maxRecords) => {
 }
 
 const buildPerson = (jsonObj) => {
+  jsonObj.title = faker.person.prefix().replace('.', '')
   jsonObj.firstName = faker.person.firstName()
   jsonObj.lastName = faker.person.lastName()
   jsonObj.addressLine1 = faker.location.streetAddress()
-  jsonObj.postcodePart1 = `${faker.string.alpha({ length: 2 })}${faker.number.int({ min: 1, max: 32 })}`
-  jsonObj.postcodePart2 = `${faker.number.int({ min: 1, max: 9 })}${faker.string.alpha({ length: 2 })}`
+  jsonObj.postcodePart1 = `${faker.string.alpha({ length: 2, casing: 'upper' })}${faker.number.int({ min: 1, max: 32 })}`
+  jsonObj.postcodePart2 = `${faker.number.int({ min: 1, max: 9 })}${faker.string.alpha({ length: 2, casing: 'upper' })}`
+  jsonObj.county = jsonObj.county || faker.location.county()
   jsonObj.microchipNumber = jsonObj?.microchipType !== 'N/A' ? faker.string.numeric({ length: 15 }) : null
+  jsonObj.phone1 = jsonObj.phone1 === 'x' ? faker.phone.number() : jsonObj.phone1
+  jsonObj.phone2 = jsonObj.phone2 === 'x' ? (faker.number.int(4) === 2 ? faker.phone.number() : null) : jsonObj.phone2
   return jsonObj
 }
 
