@@ -5,6 +5,7 @@ const routes = [].concat(
   require('../routes/healthy'),
   require('../routes/healthz'),
   require('../routes/import-access-db'),
+  require('../routes/fake-backlog'),
   require('../routes/process-backlog'),
   require('../routes/person'),
   require('../routes/search-index')
