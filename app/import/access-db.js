@@ -2,7 +2,7 @@ const storage = require('../storage')
 const readExcelFile = require('read-excel-file/node')
 const accessDbSchema = require('./access-db-schema')
 const sequelize = require('../config/db')
-const sequelizePkg = require('sequelize')
+const { Op } = require('sequelize')
 
 const parseBlob = async (blobFilename) => {
   const files = await storage.getInboundFileList()
@@ -16,7 +16,9 @@ const saveParsedToBacklog = async (parseResult) => {
     // Delete rows that have not yet moved to the proper base tables
     await sequelize.models.backlog.destroy({
       where: {
-        status: { [sequelizePkg.Op.in]: ['IMPORTED', 'IMPORT_ERROR'] }
+        status: {
+          [Op.in]: ['IMPORTED', 'IMPORT_ERROR']
+        }
       }
     })
     // Insert rows into backlog
