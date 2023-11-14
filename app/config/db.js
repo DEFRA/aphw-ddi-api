@@ -55,4 +55,11 @@ const dbConfig = {
 
 const sequelize = new Sequelize(dbConfig.database, dbConfig.username, dbConfig.password, dbConfig)
 
+try {
+  sequelize.authenticate()
+  console.log('Connected to DB')
+} catch (error) {
+  console.error(error)
+}
+
 module.exports = sequelize
