@@ -14,10 +14,10 @@ services:
       - ./test-output:/home/node/test-output
       - ./jest.config.js:/home/node/jest.config.js
       - ./package.json:/home/node/package.json
+    depends_on:
+        - aphw-ddi-api-azurite
+    environment:
+      AZURE_STORAGE_CONNECTION_STRING: "DefaultEndpointsProtocol=http;AccountName=devstoreaccount1;AccountKey=Eby8vdM02xNOcqFlqUwJPLlmEtlCDXJ1OUzFT50uSRZ6IFsuFq2UVErCz4I6tq/K1SZFPTOtr/KBHBeksoGMGw==;BlobEndpoint=http://aphw-ddi-api-azurite:10000/devstoreaccount1"
 
-  aphw-ddi-api-postgres:
-    volumes:
-    - postgres_data:/var/lib/postgresql/data
-
-volumes:
-  postgres_data: {}
+  aphw-ddi-api-azurite:
+    image: mcr.microsoft.com/azure-storage/azurite:3.23.0

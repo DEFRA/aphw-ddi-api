@@ -1,10 +1,10 @@
-const { personStandard } = require('./persons')
+const { personMatchCodesStandard } = require('./persons')
 const generatePersonMatchCodes = require('../../../../../app/import/person-match-codes')
 
 describe('PersonMatchCodes test', () => {
   test('generatePersonMatchCodes returns firstname and lastname only by default', () => {
     const config = {}
-    const matchCodes = generatePersonMatchCodes(personStandard, config)
+    const matchCodes = generatePersonMatchCodes(personMatchCodesStandard, config)
     expect(matchCodes).not.toBe(null)
     expect(matchCodes.length).toBe(1)
     expect(matchCodes[0]).toBe('john^smith')
@@ -12,7 +12,7 @@ describe('PersonMatchCodes test', () => {
 
   test('generatePersonMatchCodes returns firstname and lastname swapped', () => {
     const config = { includeSwappedNames: true }
-    const matchCodes = generatePersonMatchCodes(personStandard, config)
+    const matchCodes = generatePersonMatchCodes(personMatchCodesStandard, config)
     expect(matchCodes).not.toBe(null)
     expect(matchCodes.length).toBe(2)
     expect(matchCodes[0]).toBe('john^smith')
@@ -21,7 +21,7 @@ describe('PersonMatchCodes test', () => {
 
   test('generatePersonMatchCodes returns algo 1 codes', () => {
     const config = { includeFuzzyAlgo1: true }
-    const matchCodes = generatePersonMatchCodes(personStandard, config)
+    const matchCodes = generatePersonMatchCodes(personMatchCodesStandard, config)
     expect(matchCodes).not.toBe(null)
     expect(matchCodes.length).toBe(3)
     expect(matchCodes[0]).toBe('john^smith')
@@ -31,7 +31,7 @@ describe('PersonMatchCodes test', () => {
 
   test('generatePersonMatchCodes returns algo 1 codes with swaps', () => {
     const config = { includeFuzzyAlgo1: true, includeSwappedNames: true }
-    const matchCodes = generatePersonMatchCodes(personStandard, config)
+    const matchCodes = generatePersonMatchCodes(personMatchCodesStandard, config)
     expect(matchCodes).not.toBe(null)
     expect(matchCodes.length).toBe(6)
     expect(matchCodes[0]).toBe('john^smith')
@@ -44,7 +44,7 @@ describe('PersonMatchCodes test', () => {
 
   test('generatePersonMatchCodes returns algo 2 codes', () => {
     const config = { includeFuzzyAlgo2: true }
-    const matchCodes = generatePersonMatchCodes(personStandard, config)
+    const matchCodes = generatePersonMatchCodes(personMatchCodesStandard, config)
     expect(matchCodes).not.toBe(null)
     expect(matchCodes.length).toBe(2)
     expect(matchCodes[0]).toBe('john^smith')
@@ -53,7 +53,7 @@ describe('PersonMatchCodes test', () => {
 
   test('generatePersonMatchCodes returns algo 2 codes with swaps', () => {
     const config = { includeFuzzyAlgo2: true, includeSwappedNames: true }
-    const matchCodes = generatePersonMatchCodes(personStandard, config)
+    const matchCodes = generatePersonMatchCodes(personMatchCodesStandard, config)
     expect(matchCodes).not.toBe(null)
     expect(matchCodes.length).toBe(4)
     expect(matchCodes[0]).toBe('john^smith')

@@ -1,7 +1,18 @@
 const sequelize = require('../config/db')
 const { v4: uuidv4 } = require('uuid')
-const { getBreed } = require('../lookups')
-const { getMicrochipType } = require('../lookups')
+const importDogSchema = require('./imported-dog-schema')
+const importPersonSchema = require('./imported-person-schema')
+const addPeople = require('../person/add-person')
+const addDog = require('../dog/add-dog')
+const { getTitle, getCounty, getCountry, getBreed, getMicrochipType } = require('../lookups')
+const { dbLogErrorToBacklog, dbFindAll, dbFindOne, dbUpdate } = require('../lib/db-functions')
+
+const getBacklogRows = async (maxRecords) => {
+  return await dbFindAll(sequelize.models.backlog, {
+    limit: maxRecords,
+    where: { status: 'IMPORTED' }
+  })
+}
 
 const buildDog = async (jsonObj, personRef) => ({
   dog_reference: uuidv4(),
@@ -20,7 +31,7 @@ const buildDog = async (jsonObj, personRef) => ({
 })
 
 const lookupPersonIdByRef = async (ref) => {
-  return (await sequelize.models.person.findOne({ where: { person_reference: ref } })).id
+  return (await dbFindOne(sequelize.models.person, { where: { person_reference: ref } })).id
 }
 
 const getBreedIfValid = async (jsonObj) => {
@@ -68,9 +79,106 @@ const buildContacts = (jsonObj) => {
   return contacts
 }
 
+const validateAndInsertDog = async (dog, row, notSuppliedMicrochipType) => {
+  // Validate lookups
+  if (!await areDogLookupsValid(row, dog)) {
+    return false
+  }
+  dog.microchip_number = dog.microchip_type_id === notSuppliedMicrochipType ? 'N/A' : dog.microchip_number
+  const validationErrors = importDogSchema.isValidImportedDog(dog)
+  if (validationErrors.error !== undefined) {
+    await dbLogErrorToBacklog(row, validationErrors.error.details)
+    return false
+  } else {
+    // TODO - check if dog already exists - need to confirm criteria to use for this
+    await addDog(dog)
+    await dbUpdate(row, { status: row.status + '_AND_DOG', errors: [] })
+    return true
+  }
+}
+
+const areDogLookupsValid = async (row, dog) => {
+  const lookupErrors = []
+  const dogBreed = await getBreed(dog.breed)
+  if (dogBreed) {
+    dog.dog_breed_id = dogBreed.id
+    delete dog.breed
+  } else {
+    lookupErrors.push(`Invalid 'breed' value of '${dog.breed}'`)
+  }
+  const microchipType = await getMicrochipType(dog.microchip_type)
+  if (microchipType) {
+    dog.microchip_type_id = microchipType.id
+    delete dog.microchip_type
+  } else {
+    lookupErrors.push(`Invalid 'microchipType' value of '${dog.microchipType}'`)
+  }
+  if (lookupErrors.length > 0) {
+    await dbLogErrorToBacklog(row, JSON.stringify(lookupErrors))
+    return false
+  }
+  return true
+}
+
+const validateAndInsertPerson = async (person, row, cache) => {
+  // Validate schema
+  const validationErrors = importPersonSchema.isValidImportedPerson(person)
+  if (validationErrors.error !== undefined) {
+    await dbLogErrorToBacklog(row, validationErrors.error.details)
+    return null
+  } else {
+    // Validate lookups
+    if (!await arePersonLookupsValid(row, person)) {
+      return null
+    }
+    // Check if person already exists. If so, just return their person_reference
+    cache.addMatchCodes(person)
+    const existingPersonRef = cache.getPersonRefIfAlreadyExists(person)
+    if (!existingPersonRef) {
+      await addPeople([person])
+      cache.addPerson(person)
+      await dbUpdate(row, { status: 'PROCESSED_NEW_PERSON', errors: [] })
+    } else {
+      await dbUpdate(row, { status: 'PROCESSED_EXISTING_PERSON', errors: [] })
+    }
+  }
+  return person.person_reference
+}
+
+const arePersonLookupsValid = async (row, person) => {
+  const lookupErrors = []
+  if ((await getTitle(person.title)) == null) {
+    lookupErrors.push(`Invalid 'title' value of '${person.title}'`)
+  }
+  if ((await getCounty(person.address.county)) == null) {
+    lookupErrors.push(`Invalid 'county' value of '${person.address.county}'`)
+  }
+  if ((await getCountry(person.address.country)) == null) {
+    lookupErrors.push(`Invalid 'country' value of '${person.address.country}'`)
+  }
+  if (lookupErrors.length > 0) {
+    await dbLogErrorToBacklog(row, JSON.stringify(lookupErrors))
+    return false
+  }
+  return true
+}
+
+const warmUpCache = async (cache) => {
+  const personRows = await dbFindAll(sequelize.models.person, {
+    attributes: ['first_name', 'last_name', 'person_reference']
+  })
+  cache.prepopulate(personRows)
+}
+
 module.exports = {
+  getBacklogRows,
   buildDog,
   buildPerson,
   getBreedIfValid,
-  getMicrochipTypeIfValid
+  getMicrochipTypeIfValid,
+  areDogLookupsValid,
+  arePersonLookupsValid,
+  warmUpCache,
+  validateAndInsertDog,
+  validateAndInsertPerson
 }
