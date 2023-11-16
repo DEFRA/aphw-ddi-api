@@ -1,89 +1,57 @@
-const sequelize = require('../config/db')
-const { v4: uuidv4 } = require('uuid')
-const getBreed = require('../lookups/dog-breed')
-const getMicrochipType = require('../lookups/microchip-type')
-const importSchema = require('./imported-dog-schema')
+const { getMicrochipType } = require('../lookups')
+const PersonCache = require('./person-cache')
+const { buildDog, buildPerson, warmUpCache, validateAndInsertPerson, validateAndInsertDog, getBacklogRows } = require('./backlog-functions')
+const { dbLogErrorToBacklog } = require('../lib/db-functions')
 
-const process = async (maxRecords) => {
-  maxRecords = maxRecords || 99999
-  let rowsProcessed = 0
-  let rowsInError = 0
-  let rowsIntoDb = 0
+let rowsProcessed
+let rowsInError
+let dogRowsIntoDb
+let peopleRowsIntoDb
+
+const process = async (config) => {
+  config.maxRecords = config.maxRecords || 99999
+  rowsProcessed = 0
+  rowsInError = 0
+  dogRowsIntoDb = 0
+  peopleRowsIntoDb = 0
 
   const notSuppliedMicrochipType = (await getMicrochipType('N/A')).id
 
-  await sequelize.transaction(async (t) => {
-    const backlogRows = await sequelize.models.backlog.findAll({
-      limit: maxRecords,
-      where: {
-        status: 'IMPORTED'
-      }
-    })
+  const backlogRows = await getBacklogRows(config.maxRecords)
 
-    if (backlogRows.length === 0) {
-      return { rowsProcessed, rowsInError, rowsIntoDb }
-    }
+  if (backlogRows.length === 0) {
+    return { rowsProcessed, rowsInError, dogRowsIntoDb, peopleRowsIntoDb }
+  }
 
-    // Create dog records in DB
-    for (let i = 0; i < backlogRows.length; i++) {
-      rowsProcessed++
-      try {
-        const jsonObj = backlogRows[i].dataValues.json
+  const personCache = new PersonCache(config)
+  await warmUpCache(personCache)
 
-        const dog = await buildDog(jsonObj, notSuppliedMicrochipType)
-        const validationErrors = importSchema.isValidImportedDog(dog)
-        if (validationErrors.error !== undefined) {
-          // console.log(`validation [${i}]`, validationErrors)
-          rowsInError++
-          await backlogRows[i].update({ status: 'PROCESSING_ERROR', errors: validationErrors.error.details })
-        } else {
-          await sequelize.models.dog.create(dog)
-          await backlogRows[i].update({ status: 'PROCESSED', errors: [] })
-          rowsIntoDb++
-        }
-      } catch (e) {
-        console.log(e)
+  // Create records in DB from backlog data
+  for (let i = 0; i < backlogRows.length; i++) {
+    rowsProcessed++
+    try {
+      const backlogRow = backlogRows[i]
+      const jsonObj = backlogRow.dataValues.json
+
+      // Create person first. Dog object then holds a link to newly-created person
+      // so linkage can be achieved
+      const person = buildPerson(jsonObj)
+      const createdPersonRef = await validateAndInsertPerson(person, backlogRow, personCache)
+      if (createdPersonRef) {
+        peopleRowsIntoDb = peopleRowsIntoDb + (backlogRow.status === 'PROCESSED_NEW_PERSON' ? 1 : 0)
+        const dog = await buildDog(jsonObj, createdPersonRef)
+        await validateAndInsertDog(dog, backlogRow, notSuppliedMicrochipType) ? dogRowsIntoDb++ : rowsInError++
+      } else {
         rowsInError++
-        await backlogRows[i].update({ status: 'PROCESSING_ERROR', errors: [{ error: `${e.message} ${e.stack}` }] })
       }
+    } catch (e) {
+      console.log(e)
+      await dbLogErrorToBacklog(backlogRows[i], [{ error: `${e.message} ${e.stack}` }])
+      rowsInError++
     }
-  })
-
-  return { rowsProcessed, rowsInError, rowsIntoDb }
-}
-
-const buildDog = async (jsonObj, notSuppliedMicrochipType) => ({
-  dog_reference: uuidv4(),
-  orig_index_number: jsonObj.dogIndexNumber,
-  name: jsonObj.dogName,
-  dog_breed_id: await getBreedIfValid(jsonObj),
-  status_id: 1,
-  birth_date: jsonObj.dogDateOfBirth,
-  tattoo: jsonObj.tattoo,
-  microchip_number: jsonObj.microchipNumber,
-  microchip_type_id: (await getMicrochipTypeIfValid(jsonObj)) ?? notSuppliedMicrochipType,
-  colour: jsonObj.colour,
-  sex: jsonObj.sex,
-  exported: jsonObj?.dogExported === 'Yes'
-})
-
-const getBreedIfValid = async (jsonObj) => {
-  const breed = await getBreed(jsonObj.breed)
-  if (breed) {
-    return breed.id
   }
-  throw new Error(`Invalid breed: ${jsonObj.breed}`)
-}
 
-const getMicrochipTypeIfValid = async (jsonObj) => {
-  if (!jsonObj.microchipType) {
-    return null
-  }
-  const microchipType = await getMicrochipType(jsonObj.microchipType)
-  if (microchipType) {
-    return microchipType.id
-  }
-  throw new Error(`Invalid microchip type: ${jsonObj.microchipType}`)
+  return { rowsProcessed, rowsInError, dogRowsIntoDb, peopleRowsIntoDb }
 }
 
 module.exports = {
