@@ -21,7 +21,8 @@ module.exports = {
     return h.response({
       rowsProcessed: res.rowsProcessed,
       rowsInError: res.rowsInError,
-      rowsIntoDb: res.rowsIntoDb
+      dogRowsIntoDb: res.dogRowsIntoDb,
+      peopleRowsIntoDb: res.peopleRowsIntoDb
     }).code(200)
   }
 }

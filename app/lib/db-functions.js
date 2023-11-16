@@ -1,5 +1,6 @@
 const dbLogErrorToBacklog = async (row, errorObj) => {
-  await row.update({ status: 'PROCESSING_ERROR', errors: errorObj })
+  const newStatus = row.status.startsWith('PROCESSED') ? `${row.status} then PROCESSING_ERROR` : 'PROCESSING_ERROR'
+  await row.update({ status: newStatus, errors: errorObj })
 }
 
 const dbFindAll = async (model, options) => {
