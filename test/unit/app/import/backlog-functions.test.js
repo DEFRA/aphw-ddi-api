@@ -1,4 +1,4 @@
-const { getBreedIfValid, getMicrochipTypeIfValid, buildPerson, areDogLookupsValid, arePersonLookupsValid, getBacklogRows, validateAndInsertDog, validateAndInsertPerson } = require('../../../../app/import/backlog-functions')
+const { getBreedIfValid, getMicrochipTypeIfValid, buildPerson, areDogLookupsValid, arePersonLookupsValid, getBacklogRows, isDogValid, isPersonValid } = require('../../../../app/import/backlog-functions')
 
 jest.mock('../../../../app/lookups')
 const { getBreed, getMicrochipType, getTitle, getCounty, getCountry } = require('../../../../app/lookups')
@@ -112,17 +112,17 @@ describe('BacklogFunctions test', () => {
     expect(res).toBe(true)
   })
 
-  test('validateAndInsertDog should return false when lookups not valid', async () => {
+  test('isDogValid should return false when lookups not valid', async () => {
     const row = {}
     const dog = { breed: 'invalid' }
-    const res = await validateAndInsertDog(dog, row, 1)
+    const res = await isDogValid(dog, row, 1)
     expect(res).toBe(false)
   })
 
-  test('validateAndInsertPerson should return null when lookups not valid', async () => {
+  test('isPersonValid should return false when lookups not valid', async () => {
     const row = {}
     const person = { first_name: 'valid', address: { county: 'Test County', country: 'England' } }
-    const res = await validateAndInsertPerson(person, row, new PersonCache())
-    expect(res).toBe(null)
+    const res = await isPersonValid(person, row, new PersonCache())
+    expect(res).toBe(false)
   })
 })

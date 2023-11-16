@@ -14,7 +14,7 @@ const getBacklogRows = async (maxRecords) => {
   })
 }
 
-const buildDog = async (jsonObj, personRef) => ({
+const buildDog = (jsonObj) => ({
   dog_reference: uuidv4(),
   orig_index_number: jsonObj.dogIndexNumber,
   name: jsonObj.dogName,
@@ -26,8 +26,7 @@ const buildDog = async (jsonObj, personRef) => ({
   microchip_number: jsonObj.microchipNumber,
   colour: jsonObj.colour,
   sex: jsonObj.sex,
-  exported: jsonObj?.dogExported === 'Yes',
-  owner: await lookupPersonIdByRef(personRef)
+  exported: jsonObj?.dogExported === 'Yes'
 })
 
 const lookupPersonIdByRef = async (ref) => {
@@ -79,7 +78,7 @@ const buildContacts = (jsonObj) => {
   return contacts
 }
 
-const validateAndInsertDog = async (dog, row, notSuppliedMicrochipType) => {
+const isDogValid = async (dog, row, notSuppliedMicrochipType) => {
   // Validate lookups
   if (!await areDogLookupsValid(row, dog)) {
     return false
@@ -89,12 +88,14 @@ const validateAndInsertDog = async (dog, row, notSuppliedMicrochipType) => {
   if (validationErrors.error !== undefined) {
     await dbLogErrorToBacklog(row, validationErrors.error.details)
     return false
-  } else {
-    // TODO - check if dog already exists - need to confirm criteria to use for this
-    await addDog(dog)
-    await dbUpdate(row, { status: row.status + '_AND_DOG', errors: [] })
-    return true
   }
+  return true
+}
+
+const insertDog = async (dog, row) => {
+  // TODO - check if dog already exists - need to confirm criteria to use for this
+  await addDog(dog)
+  await dbUpdate(row, { status: row.status + '_AND_DOG', errors: [] })
 }
 
 const areDogLookupsValid = async (row, dog) => {
@@ -120,29 +121,33 @@ const areDogLookupsValid = async (row, dog) => {
   return true
 }
 
-const validateAndInsertPerson = async (person, row, cache) => {
+const isPersonValid = async (person, row) => {
   // Validate schema
   const validationErrors = importPersonSchema.isValidImportedPerson(person)
   if (validationErrors.error !== undefined) {
     await dbLogErrorToBacklog(row, validationErrors.error.details)
-    return null
-  } else {
-    // Validate lookups
-    if (!await arePersonLookupsValid(row, person)) {
-      return null
-    }
-    // Check if person already exists. If so, just return their person_reference
-    cache.addMatchCodes(person)
-    const existingPersonRef = cache.getPersonRefIfAlreadyExists(person)
-    if (!existingPersonRef) {
-      await addPeople([person])
-      cache.addPerson(person)
-      await dbUpdate(row, { status: 'PROCESSED_NEW_PERSON', errors: [] })
-    } else {
-      await dbUpdate(row, { status: 'PROCESSED_EXISTING_PERSON', errors: [] })
-    }
+    return false
   }
-  return person.person_reference
+
+  // Validate lookups
+  if (!await arePersonLookupsValid(row, person)) {
+    return false
+  }
+  return true
+}
+
+const insertPerson = async (person, row, cache) => {
+  // Check if person already exists. If so, just return their person_reference
+  cache.addMatchCodes(person)
+  const existingPersonRef = cache.getPersonRefIfAlreadyExists(person)
+  if (!existingPersonRef) {
+    await addPeople([person])
+    cache.addPerson(person)
+    await dbUpdate(row, { status: 'PROCESSED_NEW_PERSON', errors: [] })
+  } else {
+    await dbUpdate(row, { status: 'PROCESSED_EXISTING_PERSON', errors: [] })
+  }
+  return existingPersonRef ?? person.person_reference
 }
 
 const arePersonLookupsValid = async (row, person) => {
@@ -172,6 +177,7 @@ const warmUpCache = async (cache) => {
 
 module.exports = {
   getBacklogRows,
+  lookupPersonIdByRef,
   buildDog,
   buildPerson,
   getBreedIfValid,
@@ -179,6 +185,8 @@ module.exports = {
   areDogLookupsValid,
   arePersonLookupsValid,
   warmUpCache,
-  validateAndInsertDog,
-  validateAndInsertPerson
+  isDogValid,
+  insertDog,
+  isPersonValid,
+  insertPerson
 }
