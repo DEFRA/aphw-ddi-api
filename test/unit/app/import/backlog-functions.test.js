@@ -1,12 +1,12 @@
-const { getBreedIfValid, getMicrochipTypeIfValid, buildPerson, areDogLookupsValid, arePersonLookupsValid, getBacklogRows, validateAndInsertDog, validateAndInsertPerson } = require('../../../../../app/import/backlog-functions')
+const { getBreedIfValid, getMicrochipTypeIfValid, buildPerson, areDogLookupsValid, arePersonLookupsValid, getBacklogRows, validateAndInsertDog, validateAndInsertPerson } = require('../../../../app/import/backlog-functions')
 
-jest.mock('../../../../../app/lookups')
-const { getBreed, getMicrochipType, getTitle, getCounty, getCountry } = require('../../../../../app/lookups')
+jest.mock('../../../../app/lookups')
+const { getBreed, getMicrochipType, getTitle, getCounty, getCountry } = require('../../../../app/lookups')
 
-jest.mock('../../../../../app/lib/db-functions')
-const { dbLogErrorToBacklog, dbFindAll } = require('../../../../../app/lib/db-functions')
+jest.mock('../../../../app/lib/db-functions')
+const { dbLogErrorToBacklog, dbFindAll } = require('../../../../app/lib/db-functions')
 
-const PersonCache = require('../../../../../app/import/person-cache')
+const PersonCache = require('../../../../app/import/person-cache')
 
 describe('BacklogFunctions test', () => {
   beforeEach(() => {
@@ -52,18 +52,18 @@ describe('BacklogFunctions test', () => {
     expect(res).toBe(456)
   })
 
-  test('buildPerson calls buildContacts and adds phone1', async () => {
+  test('buildPerson calls buildContacts and adds phone1', () => {
     const payload = { phone1: '123456' }
-    const res = await buildPerson(payload)
+    const res = buildPerson(payload)
     expect(res).not.toBe(null)
     expect(res.contacts.length).toBe(1)
     expect(res.contacts[0].contact).toBe('123456')
     expect(res.contacts[0].type).toBe('Phone')
   })
 
-  test('buildPerson calls buildContacts and adds phone2', async () => {
+  test('buildPerson calls buildContacts and adds phone2', () => {
     const payload = { phone2: '234567' }
-    const res = await buildPerson(payload)
+    const res = buildPerson(payload)
     expect(res).not.toBe(null)
     expect(res.contacts.length).toBe(1)
     expect(res.contacts[0].contact).toBe('234567')

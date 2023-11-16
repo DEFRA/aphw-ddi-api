@@ -1,5 +1,5 @@
 const { personMatchCodesStandard, personMatchCodesStandardMatch, personMatchCodesOther, personMatchCodesNoCodes } = require('./persons')
-const PersonCache = require('../../../../../app/import/person-cache')
+const PersonCache = require('../../../../app/import/person-cache')
 
 describe('PersonCache test', () => {
   let cache
