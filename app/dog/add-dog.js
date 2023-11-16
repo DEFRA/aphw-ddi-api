@@ -6,7 +6,6 @@ const addRegisteredPerson = async (personId, personTypeId, dogId, t) => {
     dog_id: dogId,
     person_type_id: personTypeId
   }
-
   await sequelize.models.registered_person.create(registeredPerson, { transaction: t })
 }
 

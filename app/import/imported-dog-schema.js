@@ -12,7 +12,9 @@ const dogSchema = Joi.object({
   microchip_type_id: Joi.number().required(),
   colour: Joi.string().required(),
   sex: Joi.string().required(),
-  exported: Joi.boolean().required()
+  exported: Joi.boolean().required(),
+  owner: Joi.number(),
+  keeper: Joi.number()
 })
 
 // Validate schema

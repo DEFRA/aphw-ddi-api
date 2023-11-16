@@ -16,9 +16,7 @@ const saveParsedToBacklog = async (parseResult) => {
     // Delete rows that have not yet moved to the proper base tables
     await sequelize.models.backlog.destroy({
       where: {
-        status: {
-          [Op.in]: ['IMPORTED', 'IMPORT_ERROR']
-        }
+        status: { [Op.in]: ['IMPORTED', 'IMPORT_ERROR'] }
       }
     })
     // Insert rows into backlog
