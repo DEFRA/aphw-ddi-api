@@ -19,42 +19,51 @@ const addPeople = async (people) => {
 
   await sequelize.transaction(async (t) => {
     for (const person of people) {
-      person.title_id = (await getTitle(person.title)).id
-      person.address.county_id = (await getCounty(person.address.county)).id
-      person.address.country_id = (await getCountry(person.address.country)).id
-
-      person.person_reference = createReferenceNumber()
-
-      const createdPerson = await sequelize.models.person.create(person, { transaction: t })
-      const createdAddress = await sequelize.models.address.create(person.address, { transaction: t })
-
-      for (const contact of person.contacts) {
-        contact.contact_type_id = (await getContactType(contact.type)).id
-
-        const createdContact = await sequelize.models.contact.create(contact, { transaction: t })
-
-        const personContact = {
-          person_id: createdPerson.id,
-          contact_id: createdContact.id
-        }
-
-        await sequelize.models.person_contact.create(personContact, { transaction: t })
-      }
-
-      references.push(person.person_reference)
-
-      const personAddress = {
-        person_id: createdPerson.id,
-        address_id: createdAddress.id
-      }
-
-      await sequelize.models.person_address.create(personAddress, { transaction: t })
-
-      await addToSearchIndex(person)
+      references.push(await addPerson(person, t))
     }
   })
 
   return references
 }
 
-module.exports = addPeople
+const addPerson = async (person, t) => {
+  await sequelize.transaction(async (t) => {
+    person.title_id = (await getTitle(person.title)).id
+    person.address.county_id = (await getCounty(person.address.county)).id
+    person.address.country_id = (await getCountry(person.address.country)).id
+
+    person.person_reference = createReferenceNumber()
+
+    const createdPerson = await sequelize.models.person.create(person, { transaction: t })
+    const createdAddress = await sequelize.models.address.create(person.address, { transaction: t })
+
+    for (const contact of person.contacts) {
+      contact.contact_type_id = (await getContactType(contact.type)).id
+
+      const createdContact = await sequelize.models.contact.create(contact, { transaction: t })
+
+      const personContact = {
+        person_id: createdPerson.id,
+        contact_id: createdContact.id
+      }
+
+      await sequelize.models.person_contact.create(personContact, { transaction: t })
+    }
+
+    const personAddress = {
+      person_id: createdPerson.id,
+      address_id: createdAddress.id
+    }
+
+    await sequelize.models.person_address.create(personAddress, { transaction: t })
+
+    await addToSearchIndex(person)
+  })
+
+  return person.person_reference
+}
+
+module.exports = {
+  addPeople,
+  addPerson
+}
