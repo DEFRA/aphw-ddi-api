@@ -3,6 +3,7 @@ const nysiis = require('talisman/phonetics/nysiis')
 const fuzzyAlgo2 = nysiis.refined
 
 const generatePersonMatchCodes = (person, config) => {
+  config = config || { includeSwappedNames: false, includeFuzzyAlgo1: false, includeFuzzyAlgo2: false }
   const matchCodes = []
   const firstName = person.first_name.toLowerCase()
   const lastName = person.last_name.toLowerCase()
