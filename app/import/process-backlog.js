@@ -1,6 +1,6 @@
 const { getMicrochipType } = require('../lookups')
 const PersonCache = require('./person-cache')
-const { buildDog, buildPerson, warmUpCache, validateAndInsertPerson, validateAndInsertDog, getBacklogRows } = require('./backlog-functions')
+const { buildDog, buildPerson, warmUpCache, isPersonValid, insertPerson, isDogValid, insertDog, getBacklogRows, lookupPersonIdByRef } = require('./backlog-functions')
 const { dbLogErrorToBacklog } = require('../lib/db-functions')
 
 let rowsProcessed
@@ -36,11 +36,15 @@ const process = async (config) => {
       // Create person first. Dog object then holds a link to newly-created person
       // so linkage can be achieved
       const person = buildPerson(jsonObj)
-      const createdPersonRef = await validateAndInsertPerson(person, backlogRow, personCache)
-      if (createdPersonRef) {
+      const dog = buildDog(jsonObj)
+      if (await isPersonValid(person, backlogRow) && await isDogValid(dog, backlogRow, notSuppliedMicrochipType)) {
+        const createdPersonRef = await insertPerson(person, backlogRow, personCache)
         peopleRowsIntoDb = peopleRowsIntoDb + (backlogRow.status === 'PROCESSED_NEW_PERSON' ? 1 : 0)
-        const dog = await buildDog(jsonObj, createdPersonRef)
-        await validateAndInsertDog(dog, backlogRow, notSuppliedMicrochipType) ? dogRowsIntoDb++ : rowsInError++
+        if (createdPersonRef) {
+          dog.owner = await lookupPersonIdByRef(createdPersonRef)
+          await insertDog(dog, backlogRow)
+          dogRowsIntoDb++
+        }
       } else {
         rowsInError++
       }

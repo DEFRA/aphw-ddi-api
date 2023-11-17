@@ -1,10 +1,17 @@
-const { getBreedIfValid, getMicrochipTypeIfValid, buildPerson, areDogLookupsValid, arePersonLookupsValid, getBacklogRows, validateAndInsertDog, validateAndInsertPerson } = require('../../../../app/import/backlog-functions')
+const { getBreedIfValid, getMicrochipTypeIfValid, buildPerson, areDogLookupsValid, arePersonLookupsValid, getBacklogRows, isDogValid, isPersonValid, insertPerson, insertDog } = require('../../../../app/import/backlog-functions')
+const { personWithAddress } = require('./persons')
 
 jest.mock('../../../../app/lookups')
 const { getBreed, getMicrochipType, getTitle, getCounty, getCountry } = require('../../../../app/lookups')
 
 jest.mock('../../../../app/lib/db-functions')
-const { dbLogErrorToBacklog, dbFindAll } = require('../../../../app/lib/db-functions')
+const { dbLogErrorToBacklog, dbFindAll, dbUpdate } = require('../../../../app/lib/db-functions')
+
+jest.mock('../../../../app/person/add-person')
+const addPerson = require('../../../../app/person/add-person')
+
+jest.mock('../../../../app/dog/add-dog')
+const addDog = require('../../../../app/dog/add-dog')
 
 const PersonCache = require('../../../../app/import/person-cache')
 
@@ -112,17 +119,48 @@ describe('BacklogFunctions test', () => {
     expect(res).toBe(true)
   })
 
-  test('validateAndInsertDog should return false when lookups not valid', async () => {
+  test('isDogValid should return false when lookups not valid', async () => {
     const row = {}
     const dog = { breed: 'invalid' }
-    const res = await validateAndInsertDog(dog, row, 1)
+    const res = await isDogValid(dog, row, 1)
     expect(res).toBe(false)
   })
 
-  test('validateAndInsertPerson should return null when lookups not valid', async () => {
+  test('isPersonValid should return false when lookups not valid', async () => {
     const row = {}
     const person = { first_name: 'valid', address: { county: 'Test County', country: 'England' } }
-    const res = await validateAndInsertPerson(person, row, new PersonCache())
-    expect(res).toBe(null)
+    const res = await isPersonValid(person, row, new PersonCache())
+    expect(res).toBe(false)
+  })
+
+  test('insertPerson should add new person', async () => {
+    const row = {}
+    const person = personWithAddress
+    addPerson.mockResolvedValue()
+    dbUpdate.mockResolvedValue()
+    const res = await insertPerson(person, row, new PersonCache())
+    expect(res).toBe('REF1')
+    expect(dbUpdate).toHaveBeenCalledWith(row, { status: 'PROCESSED_NEW_PERSON', errors: [] })
+  })
+
+  test('insertPerson should not add existing person', async () => {
+    const row = {}
+    const person = personWithAddress
+    const cache = new PersonCache()
+    cache.addPerson(person)
+    addPerson.mockResolvedValue()
+    dbUpdate.mockResolvedValue()
+    const res = await insertPerson(person, row, cache)
+    expect(res).toBe('REF1')
+    expect(dbUpdate).toHaveBeenCalledWith(row, { status: 'PROCESSED_EXISTING_PERSON', errors: [] })
+  })
+
+  test('insertDog should add new dog', async () => {
+    const row = { status: 'PERSON' }
+    const dog = { name: 'Fido' }
+    addDog.mockResolvedValue()
+    dbUpdate.mockResolvedValue()
+    await insertDog(dog, row)
+    expect(dbUpdate).toHaveBeenCalledWith(row, { status: 'PERSON_AND_DOG', errors: [] })
   })
 })
