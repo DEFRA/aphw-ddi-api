@@ -1,8 +1,9 @@
-// const { doDogsExistById } = require('../dog/dogs-exist')
+const { getAllDogIds } = require('../dog/get-dog')
 const { isValidRobotSchema } = require('./robot-schema')
 
 const processRobotImport = async (dogsAndPeople) => {
   const errors = []
+  const warnings = []
 
   /// Validate schema
   const validationErrors = isValidRobotSchema(dogsAndPeople)
@@ -11,32 +12,26 @@ const processRobotImport = async (dogsAndPeople) => {
     return { errors }
   }
 
-  // sequelize.transaction(async (t) => {
-  // Determine which dogs already exist
-  console.log('data.dogs', dogsAndPeople.data[0].dogs)
-  const dogIds = dogsAndPeople.data[0].dogs.map(x => x.indexNumber)
-  // const existingDogIds = await doDogsExistById(dogIds)
+  // Construct set of which dogs already exist
+  const existingDogIds = new Set(await getAllDogIds())
 
-  console.log('dogIds', dogIds)
-  // console.log('errors', errors)
-  /*
-    for (const dog of dogsAndPeople.dogs) {
-      const existingDog = dog.indexNumber ? await getDogById(dog.indexNumber) : null
-      if (existingDog) {
-        errors.push(`Dog index number ${dog.indexNumber} already exists`)
-        continue
-      }
-      const createdDog = await sequelize.models.dog.create(dog, { transaction: t })
+  sequelize.transaction(async (t) => {
 
-      }
+    for (const row of dogsAndPeople.data) {
+      for (const dog of dogsAndPeople.dogs) {
+        if (!existingDogIds.has(dog.indexNumber)) {
+          await sequelize.models.dog.create(dog, { transaction: t })
+        } else {
+          warnings.push(`Dog index number ${dog.indexNumber} already exists`)
+        }
 
-      }
-      for (const person of dogsAndPeople.people) {
-        await addRegisteredPerson(person, (await getPersonType(person.type)).id, createdDog.id, t)
+        }
+        for (const person of dogsAndPeople.people) {
+          await addRegisteredPerson(person, (await getPersonType(person.type)).id, createdDog.id, t)
+        }
       }
     }
-    */
-  // })
+  })
 }
 
 module.exports = {

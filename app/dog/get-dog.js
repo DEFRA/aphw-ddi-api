@@ -42,6 +42,11 @@ const getDogById = async (id) => {
   })
 }
 
+const getAllDogIds = async () => {
+  return db.dog.findAll({ attributes: ['orig_index_number'] })
+}
+
 module.exports = {
-  getDogById
+  getDogById,
+  getAllDogIds
 }
