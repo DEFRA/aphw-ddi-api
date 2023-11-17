@@ -24,15 +24,16 @@ const processRobotImport = async (dogsAndPeople) => {
         !existingDogIds.has(dog.indexNumber)
           ? await sequelize.models.dog.create(dog, { transaction: t })
           : errors.push(`Dog index number ${dog.indexNumber} already exists`)
-        for (const person of row.people) {
-          await addPerson(person, t)
-          await sequelize.models.registered_person.create({
-            person_id: person.id,
-            dog_id: dog.id,
-            person_type_id: (await getPersonType(person.type)).id
-          }, {
-            transaction: t
-          })
+        if (errors.length === 0) {
+          for (const person of row.people) {
+            await addPerson(person, t)
+            const registeredPerson = {
+              person_id: person.id,
+              dog_id: dog.id,
+              person_type_id: (await getPersonType(person.type)).id
+            }
+            await sequelize.models.registered_person.create(registeredPerson, { transaction: t })
+          }
         }
       }
     }
