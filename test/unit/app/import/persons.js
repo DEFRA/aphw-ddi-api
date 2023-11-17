@@ -25,9 +25,26 @@ const personMatchCodesNoCodes = {
   person_reference: 'PREF_NC1'
 }
 
+const personWithAddress = {
+  title: 'Mr',
+  first_name: 'Andrew',
+  last_name: 'Robinson',
+  address: {
+    address_line_1: 'address line 1',
+    address_line_2: '',
+    address_line_3: 'Testington',
+    county: 'Northumberland',
+    postcode: 'TS1 1TS',
+    country: 'England'
+  },
+  contacts: [],
+  person_reference: 'REF1'
+}
+
 module.exports = {
   personMatchCodesStandard,
   personMatchCodesStandardMatch,
   personMatchCodesOther,
-  personMatchCodesNoCodes
+  personMatchCodesNoCodes,
+  personWithAddress
 }
