@@ -1,43 +1,116 @@
 const sequelize = require('../config/db')
+const { v4: uuidv4 } = require('uuid')
+const { parseDateAsDDMMYYYY } = require('../lib/date-functions')
 const { getAllDogIds } = require('../dog/get-dog')
 const { isValidRobotSchema } = require('./robot-schema')
 const { addPerson } = require('../../app/person/add-person')
-const { getPersonType } = require('../../app/lookups')
+const { getPersonType, getBreed } = require('../../app/lookups')
+const { dbCreate } = require('../../app/lib/db-functions')
+
+let xlBullyBreedId
+let existingDogIds
+let stats
+const newStatusId = 1
 
 const processRobotImport = async (dogsAndPeople) => {
-  const errors = []
-  const created = []
-
-  /// Validate schema
-  const validationErrors = isValidRobotSchema(dogsAndPeople)
-  if (validationErrors.error !== undefined) {
-    validationErrors.error.details.map(x => errors.push(x.message))
-    return { errors }
+  stats = {
+    errors: [],
+    created: []
   }
 
-  // Construct set of which dogs already exist
-  const existingDogIds = new Set(await getAllDogIds())
+  try {
+    /// Validate schema
+    const validationErrors = isValidRobotSchema(dogsAndPeople)
+    if (validationErrors.error !== undefined) {
+      validationErrors.error.details.map(x => stats.errors.push(x.message))
+      return { stats }
+    }
 
-  sequelize.transaction(async (t) => {
-    for (const row of dogsAndPeople.data) {
-      for (const dog of row.dogs) {
-        !existingDogIds.has(dog.indexNumber)
-          ? await sequelize.models.dog.create(dog, { transaction: t })
-          : errors.push(`Dog index number ${dog.indexNumber} already exists`)
-        if (errors.length === 0) {
-          for (const person of row.people) {
-            await addPerson(person, t)
-            const registeredPerson = {
-              person_id: person.id,
-              dog_id: dog.id,
-              person_type_id: (await getPersonType(person.type)).id
-            }
-            await sequelize.models.registered_person.create(registeredPerson, { transaction: t })
+    xlBullyBreedId = (await getBreed('XL Bully')).id
+
+    // Construct set of which dog ids already exist
+    existingDogIds = new Set((await getAllDogIds()).map((x) => `${x.id}`))
+
+    await sequelize.transaction(async (t) => {
+      const createdDogIds = []
+      for (const row of dogsAndPeople.data) {
+        for (const dog of row.dogs) {
+          if (stats.errors.length === 0) {
+            createdDogIds.push(await processDog(dog, t))
           }
         }
+
+        for (const person of row.people) {
+          if (stats.errors.length === 0) {
+            await processPerson(person, createdDogIds, t)
+          }
+        }
+
+        if (stats.errors.length > 0) {
+          throw new Error('Processing aborted')
+        }
       }
+    })
+  } catch (e) {
+    console.log(e)
+    stats.errors.push(`Error: ${e.message}`)
+  }
+  return { stats }
+}
+
+const mapDogFields = (dog) => ({
+  id: parseInt(dog.indexNumber),
+  orig_index_number: dog.indexNumber,
+  name: dog.name,
+  birth_date: parseDateAsDDMMYYYY(dog.dateOfBirth),
+  colour: dog.colour,
+  sex: dog.sex,
+  microchip_number: dog.microchipNumber,
+  dog_breed_id: xlBullyBreedId,
+  status_id: newStatusId,
+  exported: false,
+  dog_reference: uuidv4()
+})
+
+const mapPersonFields = (person) => ({
+  id: person.id,
+  first_name: person.firstName,
+  last_name: person.lastName,
+  address: {
+    address_line_1: person.address.addressLine1,
+    address_line_2: person.address.addressLine2,
+    address_line_3: person.address.townOrCity,
+    county: person.address.county,
+    postcode: person.address.postcode,
+    country: person.address.country
+  },
+  contacts: person.contacts
+})
+
+const processDog = async (dog, t) => {
+  if (existingDogIds.has(dog.indexNumber)) {
+    stats.errors.push(`Dog index number ${dog.indexNumber} already exists`)
+    return dog.indexNumber
+  }
+  const newDog = mapDogFields(dog)
+  const insertedDog = await dbCreate(sequelize.models.dog, newDog, { transaction: t })
+  stats.created.push(`New dog index number ${insertedDog.id} created`)
+  return insertedDog.id
+}
+
+const processPerson = async (person, dogIds, t) => {
+  const newPerson = mapPersonFields(person)
+  const insertedPerson = await addPerson(newPerson, t)
+  stats.created.push(`Created person ${insertedPerson.id}`)
+  for (const dogId of dogIds) {
+    const registeredPerson = {
+      person_id: insertedPerson.id,
+      dog_id: dogId,
+      person_type_id: (await getPersonType(person.type)).id
     }
-  })
+    await dbCreate(sequelize.models.registered_person, registeredPerson, { transaction: t })
+    stats.created.push(`Linked person ${insertedPerson.id} to dog ${dogId}`)
+  }
 }
 
 module.exports = {

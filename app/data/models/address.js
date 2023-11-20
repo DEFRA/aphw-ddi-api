@@ -25,7 +25,7 @@ module.exports = (sequelize, DataTypes) => {
     },
     county_id: {
       type: DataTypes.INTEGER,
-      allowNull: false
+      allowNull: true
     },
     country_id: {
       type: DataTypes.INTEGER,

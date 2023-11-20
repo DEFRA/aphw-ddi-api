@@ -24,7 +24,7 @@ const robotSchema = Joi.object({
       }),
       contacts: Joi.array().items(Joi.object({
         type: Joi.string().required(),
-        value: Joi.string().required()
+        contact: Joi.string().required()
       }))
     })),
     policeForce: Joi.string().required()

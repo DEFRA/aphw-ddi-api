@@ -43,7 +43,7 @@ const getDogById = async (id) => {
 }
 
 const getAllDogIds = async () => {
-  return db.dog.findAll({ attributes: ['orig_index_number'] })
+  return db.dog.findAll({ attributes: ['id'] })
 }
 
 module.exports = {

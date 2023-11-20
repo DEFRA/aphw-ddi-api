@@ -6,7 +6,7 @@ module.exports = [{
   handler: async (request, h) => {
     const payload = JSON.parse(request.payload)
     const res = await processRobotImport(payload)
-    if (res?.errors?.length > 0) {
+    if (res?.stats?.errors?.length > 0) {
       return h.response(res).code(400)
     }
     return h.response(res).code(200)
