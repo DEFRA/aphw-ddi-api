@@ -36,8 +36,8 @@ describe('RobotImport test', () => {
     expect(res.stats.errors.length).toBe(0)
     expect(res.stats.created.length).toBe(3)
     expect(res.stats.created[0]).toBe('New dog index number 1234 created')
-    expect(res.stats.created[1]).toBe('Created person 5566')
-    expect(res.stats.created[2]).toBe('Linked person 5566 to dog 1234')
+    expect(res.stats.created[1]).toBe('Created person id 5566')
+    expect(res.stats.created[2]).toBe('Linked person id 5566 to dog id 1234')
   })
 
   test('Should return error when existing dog', async () => {

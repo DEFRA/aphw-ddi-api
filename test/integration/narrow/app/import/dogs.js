@@ -1,6 +1,6 @@
 const testBacklogDog = {
   dog_reference: 'a3591a41-0398-4f13-9a1d-3054b5aef6a2',
-  orig_index_number: 12345,
+  index_number: 12345,
   name: 'Fido',
   breed: 'Pit Bull Terrier',
   status_id: 1,

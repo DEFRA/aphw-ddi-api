@@ -61,8 +61,7 @@ const processRobotImport = async (dogsAndPeople) => {
 }
 
 const mapDogFields = (dog) => ({
-  id: parseInt(dog.indexNumber),
-  orig_index_number: dog.indexNumber,
+  index_number: dog.indexNumber,
   name: dog.name,
   birth_date: dayjs(dog.dateOfBirth, 'DD/MM/YYYY', true).isValid() ? dayjs(dog.dateOfBirth, 'DD/MM/YYYY').toDate() : null,
   colour: dog.colour,
@@ -94,17 +93,15 @@ const processDog = async (dog, t) => {
     return dog.indexNumber
   }
   const newDog = mapDogFields(dog)
-  console.log('dog in', dog)
-  console.log('dog out', newDog)
   const insertedDog = await dbCreate(sequelize.models.dog, newDog, { transaction: t })
-  stats.created.push(`New dog index number ${insertedDog.id} created`)
+  stats.created.push(`New dog index number ${newDog.index_number} created`)
   return insertedDog.id
 }
 
 const processPerson = async (person, dogIds, t) => {
   const newPerson = mapPersonFields(person)
   const insertedPerson = await addPerson(newPerson, t)
-  stats.created.push(`Created person ${insertedPerson.id}`)
+  stats.created.push(`Created person id ${insertedPerson.id}`)
   for (const dogId of dogIds) {
     const registeredPerson = {
       person_id: insertedPerson.id,
@@ -112,7 +109,7 @@ const processPerson = async (person, dogIds, t) => {
       person_type_id: (await getPersonType(person.type)).id
     }
     await dbCreate(sequelize.models.registered_person, registeredPerson, { transaction: t })
-    stats.created.push(`Linked person ${insertedPerson.id} to dog ${dogId}`)
+    stats.created.push(`Linked person id ${insertedPerson.id} to dog id ${dogId}`)
   }
 }
 
