@@ -19,10 +19,15 @@ const dbCreate = async (model, entity, options) => {
   return await model.create(entity, options)
 }
 
+const dbDelete = async (model, options) => {
+  return await model.destroy(options)
+}
+
 module.exports = {
   dbLogErrorToBacklog,
   dbFindAll,
   dbFindOne,
   dbUpdate,
-  dbCreate
+  dbCreate,
+  dbDelete
 }
