@@ -27,7 +27,7 @@ const robotSchema = Joi.object({
         contact: Joi.string().required()
       }))
     })),
-    policeForce: Joi.string().required()
+    policeForce: Joi.string().optional()
   }))
 })
 

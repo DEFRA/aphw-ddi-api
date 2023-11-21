@@ -1,6 +1,6 @@
 const sequelize = require('../config/db')
 const { v4: uuidv4 } = require('uuid')
-const { parseDateAsDDMMYYYY } = require('../lib/date-functions')
+const dayjs = require('dayjs')
 const { getAllDogIds } = require('../dog/get-dog')
 const { isValidRobotSchema } = require('./robot-schema')
 const { addPerson } = require('../../app/person/add-person')
@@ -62,7 +62,7 @@ const mapDogFields = (dog) => ({
   id: parseInt(dog.indexNumber),
   orig_index_number: dog.indexNumber,
   name: dog.name,
-  birth_date: parseDateAsDDMMYYYY(dog.dateOfBirth),
+  birth_date: dayjs(dog.dateOfBirth, 'DD/MM/YYYY', true).isValid() ? dayjs(dog.dateOfBirth, 'DD/MM/YYYY').toDate() : null,
   colour: dog.colour,
   sex: dog.sex,
   microchip_number: dog.microchipNumber,
@@ -73,7 +73,6 @@ const mapDogFields = (dog) => ({
 })
 
 const mapPersonFields = (person) => ({
-  id: person.id,
   first_name: person.firstName,
   last_name: person.lastName,
   address: {

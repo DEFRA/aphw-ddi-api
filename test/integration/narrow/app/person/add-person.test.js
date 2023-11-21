@@ -52,7 +52,6 @@ describe('AddPerson test', () => {
     dbCreate.mockResolvedValue(examplePerson)
     getPersonType.mockResolvedValue({ id: 1 })
     const res = await addPeople(examplePeople)
-    console.log('res', res)
     expect(res).not.toBe(null)
     expect(res.length).toBe(2)
     expect(res[0].id).toBe(1122)
