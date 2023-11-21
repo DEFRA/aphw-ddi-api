@@ -1,6 +1,8 @@
 const sequelize = require('../config/db')
 const { v4: uuidv4 } = require('uuid')
 const dayjs = require('dayjs')
+const customParseFormat = require('dayjs/plugin/customParseFormat')
+dayjs.extend(customParseFormat)
 const { getAllDogIds } = require('../dog/get-dog')
 const { isValidRobotSchema } = require('./robot-schema')
 const { addPerson } = require('../../app/person/add-person')
@@ -92,6 +94,8 @@ const processDog = async (dog, t) => {
     return dog.indexNumber
   }
   const newDog = mapDogFields(dog)
+  console.log('dog in', dog)
+  console.log('dog out', newDog)
   const insertedDog = await dbCreate(sequelize.models.dog, newDog, { transaction: t })
   stats.created.push(`New dog index number ${insertedDog.id} created`)
   return insertedDog.id
