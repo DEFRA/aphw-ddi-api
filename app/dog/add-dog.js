@@ -10,7 +10,7 @@ const addRegisteredPerson = async (personId, personTypeId, dogId, t) => {
 }
 
 const addDog = async (dog) => {
-  sequelize.transaction(async (t) => {
+  await sequelize.transaction(async (t) => {
     const createdDog = await sequelize.models.dog.create(dog, { transaction: t })
 
     if (dog.owner) {

@@ -12,7 +12,7 @@ const parseBlob = async (blobFilename) => {
 }
 
 const saveParsedToBacklog = async (parseResult) => {
-  sequelize.transaction(async (t) => {
+  await sequelize.transaction(async (t) => {
     // Delete rows that have not yet moved to the proper base tables
     await sequelize.models.backlog.destroy({
       where: {
