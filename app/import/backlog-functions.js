@@ -2,7 +2,7 @@ const sequelize = require('../config/db')
 const { v4: uuidv4 } = require('uuid')
 const importDogSchema = require('./imported-dog-schema')
 const importPersonSchema = require('./imported-person-schema')
-const addPeople = require('../person/add-person')
+const { addPeople } = require('../person/add-person')
 const addDog = require('../dog/add-dog')
 const { getTitle, getCounty, getCountry, getBreed, getMicrochipType } = require('../lookups')
 const { dbLogErrorToBacklog, dbFindAll, dbFindOne, dbUpdate } = require('../lib/db-functions')
@@ -16,7 +16,7 @@ const getBacklogRows = async (maxRecords) => {
 
 const buildDog = (jsonObj) => ({
   dog_reference: uuidv4(),
-  orig_index_number: jsonObj.dogIndexNumber,
+  index_number: jsonObj.dogIndexNumber,
   name: jsonObj.dogName,
   breed: jsonObj.breed,
   status_id: 1,

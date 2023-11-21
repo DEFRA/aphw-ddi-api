@@ -15,9 +15,14 @@ const dbUpdate = async (row, options) => {
   return await row.update(options)
 }
 
+const dbCreate = async (model, entity, options) => {
+  return await model.create(entity, options)
+}
+
 module.exports = {
   dbLogErrorToBacklog,
   dbFindAll,
   dbFindOne,
-  dbUpdate
+  dbUpdate,
+  dbCreate
 }

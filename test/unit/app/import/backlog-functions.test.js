@@ -8,7 +8,7 @@ jest.mock('../../../../app/lib/db-functions')
 const { dbLogErrorToBacklog, dbFindAll, dbUpdate } = require('../../../../app/lib/db-functions')
 
 jest.mock('../../../../app/person/add-person')
-const addPerson = require('../../../../app/person/add-person')
+const { addPeople } = require('../../../../app/person/add-person')
 
 jest.mock('../../../../app/dog/add-dog')
 const addDog = require('../../../../app/dog/add-dog')
@@ -136,7 +136,7 @@ describe('BacklogFunctions test', () => {
   test('insertPerson should add new person', async () => {
     const row = {}
     const person = personWithAddress
-    addPerson.mockResolvedValue()
+    addPeople.mockResolvedValue([])
     dbUpdate.mockResolvedValue()
     const res = await insertPerson(person, row, new PersonCache())
     expect(res).toBe('REF1')
@@ -148,7 +148,7 @@ describe('BacklogFunctions test', () => {
     const person = personWithAddress
     const cache = new PersonCache()
     cache.addPerson(person)
-    addPerson.mockResolvedValue()
+    addPeople.mockResolvedValue([])
     dbUpdate.mockResolvedValue()
     const res = await insertPerson(person, row, cache)
     expect(res).toBe('REF1')
