@@ -11,8 +11,8 @@ module.exports = (sequelize, DataTypes) => {
       type: DataTypes.UUID,
       allowNull: false
     },
-    orig_index_number: {
-      type: DataTypes.INTEGER,
+    index_number: {
+      type: DataTypes.STRING(20),
       allowNull: true
     },
     dog_breed_id: {
