@@ -4,7 +4,7 @@ const importDogSchema = require('./imported-dog-schema')
 const importPersonSchema = require('./imported-person-schema')
 const { addPeople } = require('../person/add-person')
 const addDog = require('../dog/add-dog')
-const { getTitle, getCounty, getCountry, getBreed, getMicrochipType } = require('../lookups')
+const { getCounty, getCountry, getBreed, getMicrochipType } = require('../lookups')
 const { dbLogErrorToBacklog, dbFindAll, dbFindOne, dbUpdate } = require('../lib/db-functions')
 
 const getBacklogRows = async (maxRecords) => {
@@ -53,7 +53,6 @@ const getMicrochipTypeIfValid = async (jsonObj) => {
 }
 
 const buildPerson = (jsonObj) => ({
-  title: jsonObj.title,
   first_name: jsonObj.firstName,
   last_name: jsonObj.lastName,
   address: {
@@ -152,9 +151,6 @@ const insertPerson = async (person, row, cache) => {
 
 const arePersonLookupsValid = async (row, person) => {
   const lookupErrors = []
-  if ((await getTitle(person.title)) == null) {
-    lookupErrors.push(`Invalid 'title' value of '${person.title}'`)
-  }
   if ((await getCounty(person.address.county)) == null) {
     lookupErrors.push(`Invalid 'county' value of '${person.address.county}'`)
   }

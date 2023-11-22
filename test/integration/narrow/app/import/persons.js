@@ -1,5 +1,4 @@
 const testBacklogPerson = {
-  title: 'Mr',
   first_name: 'Andrew',
   last_name: 'Robinson',
   address: {

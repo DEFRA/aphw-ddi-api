@@ -19,10 +19,10 @@ module.exports = {
       console.log(e)
     }
     return h.response({
-      rowsProcessed: res.rowsProcessed,
-      rowsInError: res.rowsInError,
-      dogRowsIntoDb: res.dogRowsIntoDb,
-      peopleRowsIntoDb: res.peopleRowsIntoDb
+      rowsProcessed: res.stats.rowsProcessed,
+      rowsInError: res.stats.rowsInError,
+      dogRowsIntoDb: res.stats.dogRowsIntoDb,
+      peopleRowsIntoDb: res.stats.peopleRowsIntoDb
     }).code(200)
   }
 }

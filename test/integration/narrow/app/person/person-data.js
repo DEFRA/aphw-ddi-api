@@ -22,7 +22,7 @@ const examplePerson = {
   ]
 }
 
-const examplePersonWithTitleAndCounty = {
+const examplePersonWithCounty = {
   id: 2233,
   title: 'Mr',
   type: 'owner',
@@ -50,11 +50,11 @@ const examplePersonWithTitleAndCounty = {
 
 const examplePeople = [
   examplePerson,
-  examplePersonWithTitleAndCounty
+  examplePersonWithCounty
 ]
 
 module.exports = {
   examplePerson,
-  examplePersonWithTitleAndCounty,
+  examplePersonWithCounty,
   examplePeople
 }

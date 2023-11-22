@@ -2,7 +2,7 @@ const { getBreedIfValid, getMicrochipTypeIfValid, buildPerson, areDogLookupsVali
 const { personWithAddress } = require('./persons')
 
 jest.mock('../../../../app/lookups')
-const { getBreed, getMicrochipType, getTitle, getCounty, getCountry } = require('../../../../app/lookups')
+const { getBreed, getMicrochipType, getCounty, getCountry } = require('../../../../app/lookups')
 
 jest.mock('../../../../app/lib/db-functions')
 const { dbLogErrorToBacklog, dbFindAll, dbUpdate } = require('../../../../app/lib/db-functions')
@@ -98,7 +98,6 @@ describe('BacklogFunctions test', () => {
   })
 
   test('arePersonLookupsValid should return false if errors', async () => {
-    getTitle.mockResolvedValue(null)
     getCounty.mockResolvedValue(null)
     getCountry.mockResolvedValue(null)
     dbLogErrorToBacklog.mockResolvedValue(null)
@@ -109,7 +108,6 @@ describe('BacklogFunctions test', () => {
   })
 
   test('arePersonLookupsValid should return true if no errors', async () => {
-    getTitle.mockResolvedValue({ id: 1 })
     getCounty.mockResolvedValue({ id: 2 })
     getCountry.mockResolvedValue({ id: 3 })
     dbLogErrorToBacklog.mockResolvedValue(null)
