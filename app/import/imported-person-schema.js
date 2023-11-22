@@ -1,7 +1,6 @@
 const Joi = require('joi')
 
 const personSchema = Joi.object({
-  title: Joi.string().required(),
   first_name: Joi.string().required(),
   last_name: Joi.string().required(),
   address: Joi.object({

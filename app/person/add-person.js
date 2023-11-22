@@ -1,9 +1,9 @@
 const sequelize = require('../config/db')
-const { getTitle, getCounty, getCountry, getContactType } = require('../lookups')
+const { getCounty, getCountry, getContactType } = require('../lookups')
 const createReferenceNumber = require('../lib/create-registration-number')
 const { dbCreate } = require('../../app/lib/db-functions')
 
-const addToSearchIndex = async (person) => {
+const addToSearchIndex = async (person, t) => {
   await dbCreate(sequelize.models.search_index, {
     search: sequelize.fn('to_tsvector', `${person.person_reference} ${person.first_name} ${person.last_name}`),
     reference_number: person.person_reference,
@@ -12,35 +12,36 @@ const addToSearchIndex = async (person) => {
       lastName: person.last_name,
       postcode: person.address.postcode
     }
-  })
+  }, { transaction: t })
 }
 
-const addPeople = async (people) => {
+const addPeople = async (people, t) => {
   const references = []
-
-  await sequelize.transaction(async (t) => {
+  if (t) {
     for (const person of people) {
       references.push(await addPerson(person, t))
     }
-  })
-
+  } else {
+    await sequelize.transaction(async (t) => {
+      for (const person of people) {
+        references.push(await addPerson(person, t))
+      }
+    })
+  }
   return references
 }
 
 const addPerson = async (person, t) => {
-  let res
   if (t) {
-    res = await addPersonInsideExistingTransaction(person, t)
+    return await addPersonInsideExistingTransaction(person, t)
   } else {
-    await sequelize.transaction(async (t) => {
-      res = await addPersonInsideExistingTransaction(person, t)
+    return await sequelize.transaction(async (t) => {
+      return await addPersonInsideExistingTransaction(person, t)
     })
   }
-  return res
 }
 
 const addPersonInsideExistingTransaction = async (person, t) => {
-  person.title_id = person?.title ? (await getTitle(person.title)).id : null
   person.address.county_id = person.address?.county ? (await getCounty(person.address.county)).id : null
   person.address.country_id = (await getCountry(person.address.country)).id
 
@@ -69,7 +70,7 @@ const addPersonInsideExistingTransaction = async (person, t) => {
 
   await dbCreate(sequelize.models.person_address, personAddress, { transaction: t })
 
-  await addToSearchIndex(person)
+  await addToSearchIndex(person, t)
 
   return { person_reference: createdPerson.person_reference, id: createdPerson.id }
 }

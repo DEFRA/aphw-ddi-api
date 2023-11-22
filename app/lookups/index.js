@@ -1,4 +1,3 @@
-const getTitle = require('./title')
 const getCountry = require('./country')
 const getCounty = require('./county')
 const getBreed = require('./dog-breed')
@@ -11,7 +10,6 @@ const getRegistrationStatus = require('./registration-status')
 const getContactType = require('./contact-type')
 
 module.exports = {
-  getTitle,
   getCounty,
   getCountry,
   getBreed,

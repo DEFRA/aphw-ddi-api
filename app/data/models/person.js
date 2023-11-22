@@ -7,10 +7,6 @@ module.exports = (sequelize, DataTypes) => {
       allowNull: false,
       primaryKey: true
     },
-    title_id: {
-      type: DataTypes.INTEGER,
-      allowNull: true
-    },
     first_name: {
       type: DataTypes.STRING(24),
       allowNull: true
@@ -53,11 +49,6 @@ module.exports = (sequelize, DataTypes) => {
     person.hasMany(models.registered_person, {
       as: 'registered_people',
       foreignKey: 'person_id'
-    })
-
-    person.belongsTo(models.title, {
-      as: 'title',
-      foreignKey: 'title_id'
     })
   }
 

@@ -3,10 +3,6 @@ const db = require('../data')
 const getPersonById = async (id) => {
   return db.person.findByPk(id, {
     include: [{
-      model: db.title,
-      as: 'title'
-    },
-    {
       model: db.person_address,
       as: 'addresses',
       include: {
@@ -32,10 +28,6 @@ const getPersonByRef = async (ref) => {
   return db.person.findOne({
     where: { person_reference: ref },
     include: [{
-      model: db.title,
-      as: 'title'
-    },
-    {
       model: db.person_address,
       as: 'addresses',
       include: {
