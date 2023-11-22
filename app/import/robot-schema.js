@@ -1,11 +1,11 @@
-const Joi = require('joi').extend(require('@joi/date'))
+const Joi = require('joi')
 
 const robotSchema = Joi.object({
   data: Joi.array().items(Joi.object({
     dogs: Joi.array().items(Joi.object({
       indexNumber: Joi.number().required(),
       name: Joi.string().required(),
-      dateOfBirth: Joi.date().format('DD/MM/YYYY').required(),
+      dateOfBirth: Joi.date().iso().required(),
       colour: Joi.string().required(),
       sex: Joi.string().required(),
       neutered: Joi.string().required(),

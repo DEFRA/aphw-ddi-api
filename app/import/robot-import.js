@@ -63,7 +63,7 @@ const processRobotImport = async (dogsAndPeople) => {
 const mapDogFields = (dog) => ({
   index_number: dog.indexNumber,
   name: dog.name,
-  birth_date: dayjs(dog.dateOfBirth, 'DD/MM/YYYY', true).isValid() ? dayjs(dog.dateOfBirth, 'DD/MM/YYYY').toDate() : null,
+  birth_date: dog.dateOfBirth,
   colour: dog.colour,
   sex: dog.sex,
   microchip_number: dog.microchipNumber,
