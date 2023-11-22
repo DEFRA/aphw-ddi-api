@@ -1,18 +1,4 @@
 const accessDbSchema = {
-  ID: {
-    prop: 'id',
-    type: Number,
-    required: true
-  },
-  //  'M-Person Number': {
-  //    prop: 'personNumber',
-  //    type: Number,
-  //    required: true
-  //  },
-  'M-Title': {
-    prop: 'title',
-    type: String
-  },
   'M-First Name': {
     prop: 'firstName',
     type: String,
@@ -70,16 +56,8 @@ const accessDbSchema = {
     prop: 'email',
     type: String
   },
-  'M-Fax': {
-    prop: 'fax',
-    type: String
-  },
   'M-Comments-Owner': {
     prop: 'comments',
-    type: String
-  },
-  Designation: {
-    prop: 'designation',
     type: String
   },
   'D-Index Number': {
@@ -104,20 +82,12 @@ const accessDbSchema = {
     prop: 'yearOfDeath',
     type: Number
   },
-  Active: {
-    prop: 'active',
-    type: String
-  },
   'D-Name': {
     prop: 'dogName',
     type: String
   },
   Breed: {
     prop: 'breed',
-    type: String
-  },
-  'Breed Cross': {
-    prop: 'breedCross',
     type: String
   },
   'D-Date of Birth': {
@@ -138,10 +108,6 @@ const accessDbSchema = {
   },
   'D-Microchip Number': {
     prop: 'microchipNumber',
-    type: String
-  },
-  'Microchip Type': {
-    prop: 'microchipType',
     type: String
   },
   'D-Identification Valid': {
@@ -186,23 +152,6 @@ const accessDbSchema = {
       'STA'
     ]
   },
-  'D-Certificate Printed': {
-    prop: 'certificatePrinted',
-    type: String,
-    oneOf: [
-      'Yes',
-      'No',
-      'STA'
-    ]
-  },
-  'D-Print Certificate': {
-    prop: 'printCertificate',
-    type: String,
-    oneOf: [
-      'Yes',
-      'No'
-    ]
-  },
   'D-Dog Exported': {
     prop: 'dogExported',
     type: String,
@@ -212,12 +161,8 @@ const accessDbSchema = {
     ]
   },
   'D-Insurance Expiry Date': {
-    prop: 'insuranceExpiryDate',
+    prop: 'insuranceRenewalDate',
     type: Date
-  },
-  'D-Insurance Renewal': {
-    prop: 'insuranceRenewal',
-    type: String
   },
   'Insurance Company': {
     prop: 'insuranceCompany',
@@ -227,28 +172,9 @@ const accessDbSchema = {
     prop: 'policyNumber',
     type: String
   },
-  'Record Completed': {
-    prop: 'recordCompleted',
-    type: String
-  },
-  Stage: {
-    prop: 'stage',
-    type: String
-  },
   'Time Limit': {
     prop: 'timeLimit',
     type: String
-  },
-  'Documentation Destroyed': {
-    prop: 'documentationDestroyed',
-    type: String,
-    oneOf: [
-      'Yes',
-      'No',
-      'Ye',
-      'Yed',
-      'OK'
-    ]
   },
   'D-Interim Exemption Scheme': {
     prop: 'interimExcemptionScheme',
