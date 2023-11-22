@@ -3,10 +3,6 @@ const db = require('../data')
 const getPersonById = async (id) => {
   return db.person.findByPk(id, {
     include: [{
-      model: db.title,
-      as: 'title'
-    },
-    {
       model: db.person_address,
       as: 'addresses',
       include: {

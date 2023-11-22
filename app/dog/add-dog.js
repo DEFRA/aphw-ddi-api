@@ -1,4 +1,5 @@
 const sequelize = require('../config/db')
+const { dbCreate } = require('../lib/db-functions')
 
 const addRegisteredPerson = async (personId, personTypeId, dogId, t) => {
   const registeredPerson = {
@@ -6,12 +7,12 @@ const addRegisteredPerson = async (personId, personTypeId, dogId, t) => {
     dog_id: dogId,
     person_type_id: personTypeId
   }
-  await sequelize.models.registered_person.create(registeredPerson, { transaction: t })
+  await dbCreate(sequelize.models.registered_person, registeredPerson, { transaction: t })
 }
 
 const addDog = async (dog) => {
-  sequelize.transaction(async (t) => {
-    const createdDog = await sequelize.models.dog.create(dog, { transaction: t })
+  await sequelize.transaction(async (t) => {
+    const createdDog = await dbCreate(sequelize.models.dog, dog, { transaction: t })
 
     if (dog.owner) {
       await addRegisteredPerson(dog.owner, 1, createdDog.id, t)
