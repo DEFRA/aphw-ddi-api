@@ -58,4 +58,9 @@ readinessProbe:
   failureThreshold: 3
   timeoutSeconds: 5
 
+ingress:
+  class: nginx
+  endpoint: aphw-ddi-api
+  server: example.com
+
 aadPodIdentity: true
