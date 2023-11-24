@@ -1,9 +1,8 @@
 jest.mock('../../../../../app/import/backlog-functions')
-const { buildDog, buildPerson, warmUpCache, isPersonValid, insertPerson, isDogValid, insertDog, getBacklogRows } = require('../../../../../app/import/backlog-functions')
+const { buildDog, buildPerson, warmUpCache, isPersonValid, insertPerson, isDogValid, insertDog, getBacklogRows, createRegistration, isRegistrationValid, addComment } = require('../../../../../app/import/backlog-functions')
 jest.mock('../../../../../app/lib/db-functions')
 const { dbLogErrorToBacklog } = require('../../../../../app/lib/db-functions')
 jest.mock('../../../../../app/lookups')
-const { getMicrochipType } = require('../../../../../app/lookups')
 const { testBacklogPerson } = require('./persons')
 const { testBacklogDog } = require('./dogs')
 const backlogRows = require('./mock-backlog-rows')
@@ -11,7 +10,6 @@ const { process } = require('../../../../../app/import/process-backlog')
 
 describe('ProcessBacklog test', () => {
   test('Should return zero stats when no rows', async () => {
-    getMicrochipType.mockResolvedValue({ id: 9 })
     warmUpCache.mockResolvedValue()
     buildPerson.mockReturnValue(testBacklogPerson)
     isPersonValid.mockResolvedValue(true)
@@ -28,7 +26,6 @@ describe('ProcessBacklog test', () => {
   })
 
   test('Main loop should run without errors', async () => {
-    getMicrochipType.mockResolvedValue({ id: 9 })
     warmUpCache.mockResolvedValue(null)
     buildPerson.mockReturnValue(testBacklogPerson)
     isPersonValid.mockResolvedValue(true)
@@ -37,6 +34,9 @@ describe('ProcessBacklog test', () => {
     isDogValid.mockResolvedValue(true)
     insertDog.mockResolvedValue()
     dbLogErrorToBacklog.mockResolvedValue()
+    isRegistrationValid.mockResolvedValue(true)
+    createRegistration.mockResolvedValue(999)
+    addComment.mockResolvedValue()
     getBacklogRows.mockResolvedValue(backlogRows)
     const res = await process({})
     expect(res.stats).not.toBe(null)
@@ -46,7 +46,6 @@ describe('ProcessBacklog test', () => {
   })
 
   test('Should log error when inserting invalid dog', async () => {
-    getMicrochipType.mockResolvedValue({ id: 9 })
     warmUpCache.mockResolvedValue(null)
     buildPerson.mockReturnValue(testBacklogPerson)
     isPersonValid.mockResolvedValue(true)
@@ -64,7 +63,6 @@ describe('ProcessBacklog test', () => {
   })
 
   test('Should log error when inserting invalid person', async () => {
-    getMicrochipType.mockResolvedValue({ id: 9 })
     warmUpCache.mockResolvedValue(null)
     buildPerson.mockReturnValue(testBacklogPerson)
     isPersonValid.mockResolvedValue(false)
@@ -82,7 +80,6 @@ describe('ProcessBacklog test', () => {
   })
 
   test('Should log error when exception thrown', async () => {
-    getMicrochipType.mockResolvedValue({ id: 9 })
     warmUpCache.mockResolvedValue(null)
     buildPerson.mockImplementation(() => { throw new Error('dummy error') })
     isPersonValid.mockResolvedValue(true)

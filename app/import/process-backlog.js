@@ -1,7 +1,7 @@
-const { getMicrochipType } = require('../lookups')
 const PersonCache = require('./person-cache')
-const { buildDog, buildPerson, warmUpCache, isPersonValid, insertPerson, isDogValid, insertDog, getBacklogRows, lookupPersonIdByRef } = require('./backlog-functions')
+const { buildDog, buildPerson, warmUpCache, isPersonValid, insertPerson, isDogValid, insertDog, getBacklogRows, lookupPersonIdByRef, isRegistrationValid, createRegistration, addComment } = require('./backlog-functions')
 const { dbLogErrorToBacklog } = require('../lib/db-functions')
+const { cleanseRow } = require('./cleanse-backlog.js')
 
 let stats
 
@@ -13,8 +13,6 @@ const process = async (config) => {
     dogRowsIntoDb: 0,
     peopleRowsIntoDb: 0
   }
-
-  const notSuppliedMicrochipType = (await getMicrochipType('N/A')).id
 
   const backlogRows = await getBacklogRows(config.maxRecords)
 
@@ -29,19 +27,25 @@ const process = async (config) => {
   for (const backlogRow of backlogRows) {
     stats.rowsProcessed++
     try {
-      const jsonObj = backlogRow.dataValues.json
+      const jsonObj = await cleanseRow(backlogRow)
 
       // Create person first. Dog object then holds a link to newly-created person
       // so linkage can be achieved
       const person = buildPerson(jsonObj)
       const dog = buildDog(jsonObj)
-      if (await isPersonValid(person, backlogRow) && await isDogValid(dog, backlogRow, notSuppliedMicrochipType)) {
-        const createdPersonRef = await insertPerson(person, backlogRow, personCache)
-        stats.peopleRowsIntoDb = stats.peopleRowsIntoDb + (backlogRow.status === 'PROCESSED_NEW_PERSON' ? 1 : 0)
-        if (createdPersonRef) {
-          dog.owner = await lookupPersonIdByRef(createdPersonRef)
-          await insertDog(dog, backlogRow)
-          stats.dogRowsIntoDb++
+      if (await isPersonValid(person, backlogRow) && await isDogValid(dog, backlogRow) && await isRegistrationValid(jsonObj, backlogRow)) {
+        if (!config.validateOnly) {
+          const createdPersonRef = await insertPerson(person, backlogRow, personCache)
+          stats.peopleRowsIntoDb = stats.peopleRowsIntoDb + (backlogRow.status === 'PROCESSED_NEW_PERSON' ? 1 : 0)
+          if (createdPersonRef) {
+            dog.owner = await lookupPersonIdByRef(createdPersonRef)
+            const dogId = await insertDog(dog, backlogRow)
+            const regId = await createRegistration(dogId, 1, jsonObj.policeForce, backlogRow)
+            if (jsonObj.comments) {
+              await addComment(jsonObj.comments, regId)
+            }
+            stats.dogRowsIntoDb++
+          }
         }
       } else {
         stats.rowsInError++

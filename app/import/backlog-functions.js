@@ -4,10 +4,14 @@ const importDogSchema = require('./imported-dog-schema')
 const importPersonSchema = require('./imported-person-schema')
 const { addPeople } = require('../person/add-person')
 const addDog = require('../dog/add-dog')
-const { getCounty, getCountry, getBreed, getMicrochipType } = require('../lookups')
-const { dbLogErrorToBacklog, dbFindAll, dbFindOne, dbUpdate } = require('../lib/db-functions')
+const { getCounty, getCountry, getBreed, getPoliceForce } = require('../lookups')
+const { dbLogErrorToBacklog, dbLogWarningToBacklog, dbFindAll, dbFindOne, dbUpdate, dbCreate } = require('../lib/db-functions')
 
 const getBacklogRows = async (maxRecords) => {
+  // TODO - refine criteria using json attributes
+  // e.g. exclude dead dogs where yearOfDead is less than 2003
+  // e.g. exclude dogs where insureanceExiryDate is older than 01/01/2010
+  // e.g. exclude breedType '
   return await dbFindAll(sequelize.models.backlog, {
     limit: maxRecords,
     where: { status: 'IMPORTED' }
@@ -22,7 +26,6 @@ const buildDog = (jsonObj) => ({
   status_id: 1,
   birth_date: jsonObj.dogDateOfBirth,
   tattoo: jsonObj.tattoo,
-  microchip_type: jsonObj.microchipType,
   microchip_number: jsonObj.microchipNumber,
   colour: jsonObj.colour,
   sex: jsonObj.sex,
@@ -41,17 +44,6 @@ const getBreedIfValid = async (jsonObj) => {
   throw new Error(`Invalid breed: ${jsonObj.breed}`)
 }
 
-const getMicrochipTypeIfValid = async (jsonObj) => {
-  if (!jsonObj.microchipType) {
-    return null
-  }
-  const microchipType = await getMicrochipType(jsonObj.microchipType)
-  if (microchipType) {
-    return microchipType.id
-  }
-  throw new Error(`Invalid microchip type: ${jsonObj.microchipType}`)
-}
-
 const buildPerson = (jsonObj) => ({
   first_name: jsonObj.firstName,
   last_name: jsonObj.lastName,
@@ -63,7 +55,8 @@ const buildPerson = (jsonObj) => ({
     postcode: `${jsonObj.postcodePart1} ${jsonObj.postcodePart2}`,
     country: jsonObj.country
   },
-  contacts: buildContacts(jsonObj)
+  contacts: buildContacts(jsonObj),
+  birth_date: jsonObj.person_date_of_birth
 })
 
 const buildContacts = (jsonObj) => {
@@ -77,12 +70,11 @@ const buildContacts = (jsonObj) => {
   return contacts
 }
 
-const isDogValid = async (dog, row, notSuppliedMicrochipType) => {
+const isDogValid = async (dog, row) => {
   // Validate lookups
   if (!await areDogLookupsValid(row, dog)) {
     return false
   }
-  dog.microchip_number = dog.microchip_type_id === notSuppliedMicrochipType ? 'N/A' : dog.microchip_number
   const validationErrors = importDogSchema.isValidImportedDog(dog)
   if (validationErrors.error !== undefined) {
     await dbLogErrorToBacklog(row, validationErrors.error.details)
@@ -93,8 +85,9 @@ const isDogValid = async (dog, row, notSuppliedMicrochipType) => {
 
 const insertDog = async (dog, row) => {
   // TODO - check if dog already exists - need to confirm criteria to use for this
-  await addDog(dog)
-  await dbUpdate(row, { status: row.status + '_AND_DOG', errors: [] })
+  const dogId = await addDog(dog)
+  await dbUpdate(row, { status: row.status + '_AND_DOG', errors: '' })
+  return dogId
 }
 
 const areDogLookupsValid = async (row, dog) => {
@@ -106,15 +99,17 @@ const areDogLookupsValid = async (row, dog) => {
   } else {
     lookupErrors.push(`Invalid 'breed' value of '${dog.breed}'`)
   }
-  const microchipType = await getMicrochipType(dog.microchip_type)
-  if (microchipType) {
-    dog.microchip_type_id = microchipType.id
-    delete dog.microchip_type
-  } else {
-    lookupErrors.push(`Invalid 'microchipType' value of '${dog.microchipType}'`)
+  if (dog.microchip_number == null) {
+    await dbLogWarningToBacklog(row, 'Microchip number is missing')
+  }
+  if (dog.tattoo == null) {
+    await dbLogWarningToBacklog(row, 'Tatoo is missing')
+  }
+  if (dog.birth_date == null) {
+    await dbLogWarningToBacklog(row, 'Dog DOB is missing')
   }
   if (lookupErrors.length > 0) {
-    await dbLogErrorToBacklog(row, JSON.stringify(lookupErrors))
+    await dbLogErrorToBacklog(row, lookupErrors)
     return false
   }
   return true
@@ -142,9 +137,9 @@ const insertPerson = async (person, row, cache) => {
   if (!existingPersonRef) {
     await addPeople([person])
     cache.addPerson(person)
-    await dbUpdate(row, { status: 'PROCESSED_NEW_PERSON', errors: [] })
+    await dbUpdate(row, { status: 'PROCESSED_NEW_PERSON', errors: '' })
   } else {
-    await dbUpdate(row, { status: 'PROCESSED_EXISTING_PERSON', errors: [] })
+    await dbUpdate(row, { status: 'PROCESSED_EXISTING_PERSON', errors: '' })
   }
   return existingPersonRef ?? person.person_reference
 }
@@ -152,7 +147,10 @@ const insertPerson = async (person, row, cache) => {
 const arePersonLookupsValid = async (row, person) => {
   const lookupErrors = []
   if ((await getCounty(person.address.county)) == null) {
-    lookupErrors.push(`Invalid 'county' value of '${person.address.county}'`)
+    await dbLogWarningToBacklog(row, `Invalid 'county' value of '${person.address.county}'`)
+  }
+  if (person.address.postcode && person.address.postcode.toLowerCase().indexOf('xxx') > -1) {
+    await dbLogWarningToBacklog(row, `Invalid 'postcode' value of '${person.address.postcode}'`)
   }
   if ((await getCountry(person.address.country)) == null) {
     lookupErrors.push(`Invalid 'country' value of '${person.address.country}'`)
@@ -162,6 +160,28 @@ const arePersonLookupsValid = async (row, person) => {
     return false
   }
   return true
+}
+
+const isRegistrationValid = async (jsonObj, row) => {
+  const policeForce = await getPoliceForce(jsonObj.policeForce)
+  if (policeForce == null) {
+    await dbLogErrorToBacklog(row, `Invalid 'policeForce' value of '${jsonObj.policeForce}'`)
+    return false
+  }
+  return true
+}
+
+const createRegistration = async (dogId, statusId, policeForceName, row) => {
+  const registration = {
+    dog_id: dogId,
+    police_force_id: (await getPoliceForce(policeForceName)).id,
+    status_id: statusId
+  }
+  return (await dbCreate(sequelize.models.registration, registration)).id
+}
+
+const addComment = async (comment, registrationId) => {
+  return (await dbCreate(sequelize.models.comment, { registration_id: registrationId, comment })).id
 }
 
 const warmUpCache = async (cache) => {
@@ -177,12 +197,14 @@ module.exports = {
   buildDog,
   buildPerson,
   getBreedIfValid,
-  getMicrochipTypeIfValid,
   areDogLookupsValid,
   arePersonLookupsValid,
   warmUpCache,
   isDogValid,
   insertDog,
   isPersonValid,
-  insertPerson
+  insertPerson,
+  createRegistration,
+  isRegistrationValid,
+  addComment
 }

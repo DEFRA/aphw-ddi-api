@@ -1,11 +1,11 @@
-const { getBreedIfValid, getMicrochipTypeIfValid, buildPerson, areDogLookupsValid, arePersonLookupsValid, getBacklogRows, isDogValid, isPersonValid, insertPerson, insertDog } = require('../../../../app/import/backlog-functions')
+const { getBreedIfValid, buildPerson, areDogLookupsValid, arePersonLookupsValid, getBacklogRows, isDogValid, isPersonValid, insertPerson, insertDog, isRegistrationValid, createRegistration, addComment } = require('../../../../app/import/backlog-functions')
 const { personWithAddress } = require('./persons')
 
 jest.mock('../../../../app/lookups')
-const { getBreed, getMicrochipType, getCounty, getCountry } = require('../../../../app/lookups')
+const { getBreed, getCounty, getCountry, getPoliceForce } = require('../../../../app/lookups')
 
 jest.mock('../../../../app/lib/db-functions')
-const { dbLogErrorToBacklog, dbFindAll, dbUpdate } = require('../../../../app/lib/db-functions')
+const { dbLogErrorToBacklog, dbFindAll, dbUpdate, dbCreate } = require('../../../../app/lib/db-functions')
 
 jest.mock('../../../../app/person/add-person')
 const { addPeople } = require('../../../../app/person/add-person')
@@ -39,26 +39,6 @@ describe('BacklogFunctions test', () => {
     expect(res).toBe(123)
   })
 
-  test('getMicrochipTypeIfValid returns null if missing input', async () => {
-    getMicrochipType.mockResolvedValue(null)
-    const payload = { microchipTypexxx: 'not-valid' }
-    const res = await getMicrochipTypeIfValid(payload)
-    expect(res).toBe(null)
-  })
-
-  test('getMicrochipTypeIfValid throws error if invalid', async () => {
-    getMicrochipType.mockResolvedValue(null)
-    const payload = { microchipType: 'not-valid' }
-    await expect(getMicrochipTypeIfValid(payload)).rejects.toThrow('Invalid microchip type: not-valid')
-  })
-
-  test('getMicrochipTypeIfValid returns id if found', async () => {
-    getMicrochipType.mockResolvedValue({ id: 456 })
-    const payload = { microchipType: 'valid' }
-    const res = await getMicrochipTypeIfValid(payload)
-    expect(res).toBe(456)
-  })
-
   test('buildPerson calls buildContacts and adds phone1', () => {
     const payload = { phone1: '123456' }
     const res = buildPerson(payload)
@@ -79,7 +59,6 @@ describe('BacklogFunctions test', () => {
 
   test('areDogLookupsValid should return false if errors', async () => {
     getBreed.mockResolvedValue(null)
-    getMicrochipType.mockResolvedValue(null)
     dbLogErrorToBacklog.mockResolvedValue(null)
     const row = {}
     const dog = { breed: 'invalid' }
@@ -89,7 +68,6 @@ describe('BacklogFunctions test', () => {
 
   test('areDogLookupsValid should return true if no errors', async () => {
     getBreed.mockResolvedValue({ id: 1 })
-    getMicrochipType.mockResolvedValue({ id: 2 })
     dbLogErrorToBacklog.mockResolvedValue(null)
     const row = {}
     const dog = { breed: 'valid' }
@@ -138,7 +116,7 @@ describe('BacklogFunctions test', () => {
     dbUpdate.mockResolvedValue()
     const res = await insertPerson(person, row, new PersonCache())
     expect(res).toBe('REF1')
-    expect(dbUpdate).toHaveBeenCalledWith(row, { status: 'PROCESSED_NEW_PERSON', errors: [] })
+    expect(dbUpdate).toHaveBeenCalledWith(row, { status: 'PROCESSED_NEW_PERSON', errors: '' })
   })
 
   test('insertPerson should not add existing person', async () => {
@@ -150,7 +128,7 @@ describe('BacklogFunctions test', () => {
     dbUpdate.mockResolvedValue()
     const res = await insertPerson(person, row, cache)
     expect(res).toBe('REF1')
-    expect(dbUpdate).toHaveBeenCalledWith(row, { status: 'PROCESSED_EXISTING_PERSON', errors: [] })
+    expect(dbUpdate).toHaveBeenCalledWith(row, { status: 'PROCESSED_EXISTING_PERSON', errors: '' })
   })
 
   test('insertDog should add new dog', async () => {
@@ -159,6 +137,38 @@ describe('BacklogFunctions test', () => {
     addDog.mockResolvedValue()
     dbUpdate.mockResolvedValue()
     await insertDog(dog, row)
-    expect(dbUpdate).toHaveBeenCalledWith(row, { status: 'PERSON_AND_DOG', errors: [] })
+    expect(dbUpdate).toHaveBeenCalledWith(row, { status: 'PERSON_AND_DOG', errors: '' })
+  })
+
+  test('isRegistrationValid should return false when lookups not valid', async () => {
+    getPoliceForce.mockResolvedValue(null)
+    const rowObj = {}
+    const row = { policeForce: 'invalid' }
+    const res = await isRegistrationValid(row, rowObj)
+    expect(res).toBe(false)
+  })
+
+  test('isRegistrationValid should return true when lookup is valid', async () => {
+    getPoliceForce.mockResolvedValue({ id: 1 })
+    const rowObj = {}
+    const row = { policeForce: 'valid' }
+    const res = await isRegistrationValid(row, rowObj)
+    expect(res).toBe(true)
+  })
+
+  test('createRegistration should call dbCreate', async () => {
+    getPoliceForce.mockResolvedValue({ id: 1 })
+    dbCreate.mockResolvedValue({ id: 12345 })
+    const rowObj = {}
+    const res = await createRegistration(1, 2, 'police force', rowObj)
+    expect(dbCreate).toHaveBeenCalledTimes(1)
+    expect(res).toBe(12345)
+  })
+
+  test('addComment should call dbCreate', async () => {
+    dbCreate.mockResolvedValue({ id: 123456 })
+    const res = await addComment('my comment text', 1)
+    expect(dbCreate).toHaveBeenCalledTimes(1)
+    expect(res).toBe(123456)
   })
 })

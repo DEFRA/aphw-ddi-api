@@ -1,5 +1,5 @@
 const sequelize = require('../config/db')
-const { getCounty, getCountry, getContactType } = require('../lookups')
+const { getCountry, getContactType } = require('../lookups')
 const createReferenceNumber = require('../lib/create-registration-number')
 const { dbCreate } = require('../../app/lib/db-functions')
 
@@ -42,7 +42,6 @@ const addPerson = async (person, t) => {
 }
 
 const addPersonInsideExistingTransaction = async (person, t) => {
-  person.address.county_id = person.address?.county ? (await getCounty(person.address.county)).id : null
   person.address.country_id = (await getCountry(person.address.country)).id
 
   person.person_reference = createReferenceNumber()

@@ -35,12 +35,5 @@ module.exports = (sequelize, DataTypes) => {
     ]
   })
 
-  county.associate = models => {
-    county.hasMany(models.address, {
-      as: 'addresses',
-      foreignKey: 'county_id'
-    })
-  }
-
   return county
 }
