@@ -20,4 +20,82 @@
       newDataType="varchar(30)"
       tableName="address" />
   </changeSet>
+  <changeSet author="J Barnsley" id="5">
+    <addColumn tableName="backlog">
+      <column name="warnings" type="TEXT">
+        <constraints nullable="true" />
+      </column>
+    </addColumn>
+  </changeSet>
+  <changeSet author="J Barnsley" id="6">
+    <dropForeignKeyConstraint
+      baseTableName="dog"  
+      constraintName="fk_dog_microchip_type"/> 
+  </changeSet>
+  <changeSet author="J Barnsley" id="7">
+    <dropColumn
+      columnName="microchip_type_id"
+      tableName="dog" />
+  </changeSet>
+  <changeSet author="J Barnsley" id="8">
+      <dropTable
+      cacadeConstraints="true"
+      tableName="microchip_type" />
+  </changeSet>
+  <changeSet author="J Barnsley" id="9">
+    <insert tableName="dog_breed">
+      <column name="breed" value="Dogo Argentino" />
+      <column name="active" value="true" />
+    </insert>
+  </changeSet>
+  <changeSet author="J Barnsley" id="10">
+    <dropNotNullConstraint
+      columnName="birth_date"
+      tableName="dog" />
+  </changeSet>
+  <changeSet author="J Barnsley" id="11">
+    <dropNotNullConstraint
+      columnName="colour"
+      tableName="dog" />
+    <dropNotNullConstraint
+      columnName="sex"
+      tableName="dog" />
+  </changeSet>
+    <changeSet author="J Barnsley" id="12">
+      <modifyDataType
+      columnName="first_name"
+      newDataType="varchar(30)"
+      tableName="person" />
+  </changeSet>
+  <changeSet author="J Barnsley" id="13">
+      <addUniqueConstraint
+      columnNames="index_number"  
+      constraintName="dog_index_number_ukey"  
+      tableName="dog"  
+      validate="true"/>
+  </changeSet>
+  <changeSet author="J Barnsley" id="14">
+    <addColumn tableName="person">
+      <column name="birth_date" type="date">
+        <constraints nullable="true" />
+      </column>
+    </addColumn>
+  </changeSet>
+  <changeSet author="J Barnsley" id="15">
+    <dropNotNullConstraint
+      columnName="time_limit"
+      tableName="registration" />
+  </changeSet>
+  <changeSet author="J Barnsley" id="16">
+    <loadData file="changelog/seed/police-force.csv"
+      tableName="police_force">
+      <column name="name" type="STRING" header="name" />
+    </loadData>
+  </changeSet>
+  <changeSet author="J Barnsley" id="17">
+      <modifyDataType
+      columnName="errors"
+      newDataType="TEXT"
+      tableName="backlog" />
+  </changeSet>
 </databaseChangeLog>

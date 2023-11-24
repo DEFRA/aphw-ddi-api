@@ -18,6 +18,10 @@ module.exports = (sequelize, DataTypes) => {
     person_reference: {
       type: DataTypes.STRING(24),
       allowNull: false
+    },
+    birth_date: {
+      type: DataTypes.DATEONLY,
+      allowNull: true
     }
   }, {
     sequelize,

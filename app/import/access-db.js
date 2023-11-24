@@ -2,8 +2,7 @@ const storage = require('../storage')
 const readExcelFile = require('read-excel-file/node')
 const accessDbSchema = require('./access-db-schema')
 const sequelize = require('../config/db')
-const { Op } = require('sequelize')
-const { dbCreate, dbDelete } = require('../lib/db-functions')
+const { dbCreate } = require('../lib/db-functions')
 
 const parseBlob = async (blobFilename) => {
   const files = await storage.getInboundFileList()
@@ -14,17 +13,10 @@ const parseBlob = async (blobFilename) => {
 
 const saveParsedToBacklog = async (parseResult) => {
   await sequelize.transaction(async (t) => {
-    // Delete rows that have not yet moved to the proper base tables
-    await dbDelete(sequelize.models.backlog, {
-      where: {
-        status: { [Op.in]: ['IMPORTED', 'IMPORT_ERROR'] }
-      },
-      transaction: t
-    })
     // Insert rows into backlog
-    for (let i = 1; i < parseResult.rows.length; i++) {
+    for (let i = 0; i < parseResult.rows.length; i++) {
       const row = parseResult.rows[i]
-      const error = parseResult.errors.filter(x => x.row === i)
+      const error = parseResult.errors.filter(x => x.row === i + 2).join(', ')
       await dbCreate(sequelize.models.backlog, { json: row, errors: error, status: error.length ? 'IMPORT_ERROR' : 'IMPORTED' }, { transaction: t })
     }
   })

@@ -47,14 +47,6 @@ module.exports = (sequelize, DataTypes) => {
       type: DataTypes.STRING(24),
       allowNull: true
     },
-    microchip_type_id: {
-      type: DataTypes.INTEGER,
-      allowNull: true,
-      references: {
-        model: 'microchip_type',
-        key: 'id'
-      }
-    },
     colour: {
       type: DataTypes.STRING(16),
       allowNull: true
@@ -102,11 +94,6 @@ module.exports = (sequelize, DataTypes) => {
     dog.hasMany(models.insurance, {
       as: 'insurance',
       foreignKey: 'dog_id'
-    })
-
-    dog.belongsTo(models.microchip_type, {
-      as: 'microchip_type',
-      foreignKey: 'microchip_type_id'
     })
 
     dog.belongsTo(models.status, {

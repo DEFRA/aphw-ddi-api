@@ -12,12 +12,16 @@ module.exports = (sequelize, DataTypes) => {
       allowNull: false
     },
     errors: {
-      type: DataTypes.JSONB,
+      type: DataTypes.TEXT,
       allowNull: false
     },
     status: {
       type: DataTypes.TEXT,
       allowNull: false
+    },
+    warnings: {
+      type: DataTypes.TEXT,
+      allowNull: true
     }
   }, {
     sequelize,
