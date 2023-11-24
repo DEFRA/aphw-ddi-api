@@ -62,12 +62,12 @@ describe('RobotImport test', () => {
     addPerson.mockResolvedValue(examplePerson)
     getPersonType.mockResolvedValue({ id: 1 })
     const clonedData = JSON.parse(JSON.stringify(importOneDogOnePerson))
-    clonedData.data[0].dogs[0].dateOfBirth = '32/13/2020'
+    clonedData.data[0].dogs[0].dateOfBirth = '2020-13-32'
     const res = await processRobotImport(clonedData)
     expect(res).not.toBe(null)
     expect(res.stats.errors.length).toBe(1)
     expect(res.stats.created.length).toBe(0)
-    expect(res.stats.errors[0]).toBe('"data[0].dogs[0].dateOfBirth" must be in DD/MM/YYYY format')
+    expect(res.stats.errors[0]).toBe('"data[0].dogs[0].dateOfBirth" must be in ISO 8601 date format')
   })
 
   test('Should return error when invalid dog DOB 2', async () => {
@@ -78,12 +78,12 @@ describe('RobotImport test', () => {
     addPerson.mockResolvedValue(examplePerson)
     getPersonType.mockResolvedValue({ id: 1 })
     const clonedData = JSON.parse(JSON.stringify(importOneDogOnePerson))
-    clonedData.data[0].dogs[0].dateOfBirth = '31/01/202'
+    clonedData.data[0].dogs[0].dateOfBirth = '202-01-31'
     const res = await processRobotImport(clonedData)
     expect(res).not.toBe(null)
     expect(res.stats.errors.length).toBe(1)
     expect(res.stats.created.length).toBe(0)
-    expect(res.stats.errors[0]).toBe('"data[0].dogs[0].dateOfBirth" must be in DD/MM/YYYY format')
+    expect(res.stats.errors[0]).toBe('"data[0].dogs[0].dateOfBirth" must be in ISO 8601 date format')
   })
 
   test('Should return error when invalid schema', async () => {
