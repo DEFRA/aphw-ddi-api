@@ -1,0 +1,36 @@
+<?xml version="1.1" encoding="utf-8" standalone="no"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog" xmlns:ext="http://www.liquibase.org/xml/ns/dbchangelog-ext" xmlns:pro="http://www.liquibase.org/xml/ns/pro" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog-ext http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-ext.xsd http://www.liquibase.org/xml/ns/pro http://www.liquibase.org/xml/ns/pro/liquibase-pro-3.9.xsd http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.9.xsd">
+  <changeSet author="Shaun Fitzsimons" id="1">
+    <tagDatabase tag="v1.25" />
+  </changeSet>
+  <changeSet author="Shaun Fitzsimons" id="2">
+    <dropColumn
+      columnName="index_number"
+      tableName="dog" />
+  </changeSet>
+  <changeSet author="Shaun Fitzsimons" id="3">
+    <addColumn tableName="dog">
+      <column name="index_number_base"
+        type="INTEGER"
+        autoIncrement="true"
+        startWith="300000">
+        <constraints nullable="false" 
+          unique="true"
+          uniqueConstraintName="index_number_base_ukey" />
+      </column>
+    </addColumn>
+  </changeSet>
+  <changeSet author="Shaun Fitzsimons" id="4">
+    <sqlFile path="sql/changelog-1.25/index_number_generate.sql" relativeToChangelogFile="true" />
+    <rollback>
+      <dropColumn
+        columnName="index_number"
+        tableName="dog" />
+    </rollback>
+  </changeSet>
+  <changeSet author="Shaun Fitzsimons" id="5">
+    <createIndex indexName="index_number_index" tableName="dog">
+      <column name="index_number" />
+    </createIndex>
+  </changeSet>
+</databaseChangeLog>
