@@ -5,7 +5,7 @@ const importOneDogOnePerson = {
         {
           indexNumber: '1234',
           name: 'Pluto',
-          dateOfBirth: '23/11/2022',
+          dateOfBirth: '2022-11-23',
           colour: 'Brown',
           sex: 'Male',
           neutered: 'Yes',
@@ -48,7 +48,7 @@ const importTwoDogsOnePerson = {
         {
           indexNumber: '1234',
           name: 'Pluto',
-          dateOfBirth: '23/11/2022',
+          dateOfBirth: '2022-11-23',
           colour: 'Brown',
           sex: 'Male',
           neutered: 'Yes',
@@ -57,7 +57,7 @@ const importTwoDogsOnePerson = {
         {
           indexNumber: '2345',
           name: 'Fido',
-          dateOfBirth: '23/11/2022',
+          dateOfBirth: '2022-11-23',
           colour: 'Brown',
           sex: 'Male',
           neutered: 'Yes',
@@ -100,7 +100,7 @@ const invalidImportSchema = {
       dogs: [
         {
           indexNumber: '1234',
-          dateOfBirth: '23/11/2022',
+          dateOfBirth: '2022-11-23',
           colour: 'Brown',
           sex: 'Male',
           neutered: 'Yes',
@@ -139,7 +139,7 @@ const exampleDog = {
   id: 1234,
   indexNumber: '1234',
   name: 'Pluto',
-  dateOfBirth: '23/11/2022',
+  dateOfBirth: '2022-11-23',
   colour: 'Brown',
   sex: 'Male',
   neutered: 'Yes',
