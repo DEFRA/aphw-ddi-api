@@ -11,17 +11,19 @@ const addRegisteredPerson = async (personId, personTypeId, dogId, t) => {
 }
 
 const addDog = async (dog) => {
+  let newDog
   await sequelize.transaction(async (t) => {
-    const createdDog = await dbCreate(sequelize.models.dog, dog, { transaction: t })
+    newDog = await dbCreate(sequelize.models.dog, dog, { transaction: t })
 
     if (dog.owner) {
-      await addRegisteredPerson(dog.owner, 1, createdDog.id, t)
+      await addRegisteredPerson(dog.owner, 1, newDog.id, t)
     }
 
     if (dog.keeper) {
-      await addRegisteredPerson(dog.keeper, 2, createdDog.id, t)
+      await addRegisteredPerson(dog.keeper, 2, newDog.id, t)
     }
   })
+  return newDog.id
 }
 
 module.exports = addDog

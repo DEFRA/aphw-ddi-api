@@ -26,7 +26,7 @@ module.exports = (sequelize, DataTypes) => {
     },
     police_force_id: {
       type: DataTypes.INTEGER,
-      allowNull: false,
+      allowNull: true,
       references: {
         model: 'police_force',
         key: 'id'
@@ -39,7 +39,7 @@ module.exports = (sequelize, DataTypes) => {
     },
     time_limit: {
       type: DataTypes.DATE,
-      allowNull: false
+      allowNull: true
     }
   }, {
     sequelize,

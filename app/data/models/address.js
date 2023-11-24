@@ -23,8 +23,8 @@ module.exports = (sequelize, DataTypes) => {
       type: DataTypes.STRING(24),
       allowNull: false
     },
-    county_id: {
-      type: DataTypes.INTEGER,
+    county: {
+      type: DataTypes.STRING(30),
       allowNull: true
     },
     country_id: {
@@ -84,11 +84,6 @@ module.exports = (sequelize, DataTypes) => {
     address.belongsTo(models.country, {
       as: 'country',
       foreignKey: 'country_id'
-    })
-
-    address.belongsTo(models.county, {
-      as: 'county',
-      foreignKey: 'county_id'
     })
   }
 
