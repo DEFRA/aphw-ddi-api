@@ -7,7 +7,7 @@ module.exports = {
     const breeds = await getBreeds()
 
     return h.response({
-      breeds: breeds.map(breed => breed.breed)
+      breeds
     }).code(200)
   }
 }
