@@ -9,7 +9,8 @@ const routes = [].concat(
   require('../routes/robot-import'),
   require('../routes/person'),
   require('../routes/search-index'),
-  require('../routes/police-forces')
+  require('../routes/police-forces'),
+  require('../routes/dog-breeds')
 )
 
 module.exports = {
