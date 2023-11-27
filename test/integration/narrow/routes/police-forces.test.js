@@ -37,13 +37,9 @@ describe('Police force endpoint', () => {
     const { forces } = JSON.parse(response.payload)
 
     expect(forces).toHaveLength(3)
-    expect(forces).toContain('Northern Constabulary')
-    expect(forces).toContain('Southern Constabulary')
-    expect(forces).toContain('Eastern Constabulary')
-  })
-
-  afterEach(async () => {
-    await server.stop()
+    expect(forces).toContainEqual({ id: 1, name: 'Northern Constabulary' })
+    expect(forces).toContainEqual({ id: 2, name: 'Southern Constabulary' })
+    expect(forces).toContainEqual({ id: 3, name: 'Eastern Constabulary' })
   })
 
   test('GET /police-force route returns 500 if db error', async () => {

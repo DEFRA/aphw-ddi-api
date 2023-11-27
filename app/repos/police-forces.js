@@ -3,7 +3,7 @@ const sequelize = require('../config/db')
 const getForces = async () => {
   try {
     const forces = await sequelize.models.police_force.findAll({
-      attributes: ['name']
+      attributes: ['id', 'name']
     })
 
     return forces

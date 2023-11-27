@@ -7,7 +7,7 @@ module.exports = {
     const forces = await getForces()
 
     return h.response({
-      forces: forces.map(force => force.name)
+      forces
     }).code(200)
   }
 }
