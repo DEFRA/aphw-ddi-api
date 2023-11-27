@@ -9,7 +9,7 @@ x-common-migration: &common-migration
 
 x-common-postgres: &common-postgres
   POSTGRES_PORT: 5432
-  POSTGRES_DB: ${POSTGRES_DB:-dangerous_dogs_register}
+  POSTGRES_DB: ${POSTGRES_DB:-aphw-ddi}
   POSTGRES_USERNAME: ${POSTGRES_ADMIN_USERNAME:-postgres}
   POSTGRES_PASSWORD: ${POSTGRES_ADMIN_PASSWORD:-ppp}
 
@@ -39,7 +39,7 @@ services:
       - ./scripts:/scripts
 
   aphw-ddi-api-postgres:
-    image: postgres:16.0-alpine
+    image: postgres:11.22-alpine
     environment: *common-postgres
     volumes:
       - postgres_data:/var/lib/postgresql/data

@@ -13,7 +13,7 @@ module.exports = (sequelize, DataTypes) => {
     },
     index_number: {
       type: DataTypes.STRING(20),
-      allowNull: true
+      allowNull: false
     },
     dog_breed_id: {
       type: DataTypes.INTEGER,

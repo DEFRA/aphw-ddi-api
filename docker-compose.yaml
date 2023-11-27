@@ -15,7 +15,7 @@ services:
       AZURE_STORAGE_USE_CONNECTION_STRING: "true"
       AZURE_STORAGE_CREATE_CONTAINERS: "true"
       AZURE_STORAGE_CONNECTION_STRING: "UseDevelopmentStorage=true"
-      POSTGRES_DB: dangerous_dogs_register
+      POSTGRES_DB: aphw-ddi
       POSTGRES_HOST: ${POSTGRES_HOST:-aphw-ddi-api-postgres}
       POSTGRES_PORT: 5432
       POSTGRES_SCHEMA_NAME: ${POSTGRES_SCHEMA_NAME:-public}
@@ -23,9 +23,9 @@ services:
       POSTGRES_PASSWORD: ${POSTGRES_SCHEMA_PASSWORD:-ppp}
       
   aphw-ddi-api-postgres:
-    image: postgres:16.0-alpine
+    image: postgres:11.22-alpine
     environment:
-      POSTGRES_DB: dangerous_dogs_register
+      POSTGRES_DB: aphw-ddi
       POSTGRES_USERNAME: postgres
       POSTGRES_PASSWORD: ppp
     volumes:
