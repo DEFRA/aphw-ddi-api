@@ -6,7 +6,7 @@ const getForces = async () => {
       attributes: ['name']
     })
   } catch (e) {
-    console.error(`Error retrieving police forces: ${e}`)
+    console.log(`Error retrieving police forces: ${e}`)
     throw e
   }
 }
