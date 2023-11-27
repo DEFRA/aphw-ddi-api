@@ -21,16 +21,22 @@
     </addColumn>
   </changeSet>
   <changeSet author="Shaun Fitzsimons" id="4">
-    <sqlFile path="sql/changelog-1.25/index_number_generate.sql" relativeToChangelogFile="true" />
-    <rollback>
-      <dropColumn
-        columnName="index_number"
-        tableName="dog" />
-    </rollback>
-  </changeSet>
-  <changeSet author="Shaun Fitzsimons" id="5">
-    <createIndex indexName="index_number_index" tableName="dog">
+    <addColumn tableName="dog">
+      <column name="index_number"
+        type="VARCHAR(20)">
+        <constraints nullable="true"
+          unique="true"
+          uniqueConstraintName="index_number_ukey" />
+      </column>
+    </addColumn>
+    <createIndex indexName="index_number_idx" tableName="dog">
       <column name="index_number" />
     </createIndex>
+  </changeSet>
+  <changeSet author="Shaun Fitzsimons" id="5">
+    <sqlFile splitStatements="false" path="sql/changelog-1.25/index_number_generate.sql" relativeToChangelogFile="true" />
+    <rollback>
+      <sqlFile path="sql/changelog-1.25/index_number_generate_rollback.sql" relativeToChangelogFile="true" />
+    </rollback>
   </changeSet>
 </databaseChangeLog>
