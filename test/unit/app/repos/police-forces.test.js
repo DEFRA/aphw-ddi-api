@@ -11,7 +11,7 @@ describe('Police force repo', () => {
 
   const sequelize = require('../../../../app/config/db')
 
-  const { getForces } = require('../../../../app/repos/police-forces')
+  const { getPoliceForces } = require('../../../../app/repos/police-forces')
 
   beforeEach(async () => {
     jest.clearAllMocks()
@@ -20,7 +20,7 @@ describe('Police force repo', () => {
   test('getForces should return police forces', async () => {
     sequelize.models.police_force.findAll.mockResolvedValue(mockForces)
 
-    const forces = await getForces()
+    const forces = await getPoliceForces()
 
     expect(forces).toHaveLength(3)
     expect(forces).toContainEqual({ id: 1, name: 'Northern Constabulary' })
@@ -31,6 +31,6 @@ describe('Police force repo', () => {
   test('getForces should throw if error', async () => {
     sequelize.models.police_force.findAll.mockRejectedValue(new Error('Test error'))
 
-    await expect(getForces()).rejects.toThrow('Test error')
+    await expect(getPoliceForces()).rejects.toThrow('Test error')
   })
 })

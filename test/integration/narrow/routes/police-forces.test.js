@@ -5,7 +5,7 @@ describe('Police force endpoint', () => {
   let server
 
   jest.mock('../../../../app/repos/police-forces')
-  const { getForces } = require('../../../../app/repos/police-forces')
+  const { getPoliceForces } = require('../../../../app/repos/police-forces')
 
   beforeEach(async () => {
     jest.clearAllMocks()
@@ -14,7 +14,7 @@ describe('Police force endpoint', () => {
   })
 
   test('GET /police-force route returns 200', async () => {
-    getForces.mockResolvedValue(mockForces)
+    getPoliceForces.mockResolvedValue(mockForces)
 
     const options = {
       method: 'GET',
@@ -26,7 +26,7 @@ describe('Police force endpoint', () => {
   })
 
   test('GET /police-force route returns forces', async () => {
-    getForces.mockResolvedValue(mockForces)
+    getPoliceForces.mockResolvedValue(mockForces)
 
     const options = {
       method: 'GET',
@@ -34,16 +34,16 @@ describe('Police force endpoint', () => {
     }
 
     const response = await server.inject(options)
-    const { forces } = JSON.parse(response.payload)
+    const { policeForces } = JSON.parse(response.payload)
 
-    expect(forces).toHaveLength(3)
-    expect(forces).toContainEqual({ id: 1, name: 'Northern Constabulary' })
-    expect(forces).toContainEqual({ id: 2, name: 'Southern Constabulary' })
-    expect(forces).toContainEqual({ id: 3, name: 'Eastern Constabulary' })
+    expect(policeForces).toHaveLength(3)
+    expect(policeForces).toContainEqual({ id: 1, name: 'Northern Constabulary' })
+    expect(policeForces).toContainEqual({ id: 2, name: 'Southern Constabulary' })
+    expect(policeForces).toContainEqual({ id: 3, name: 'Eastern Constabulary' })
   })
 
   test('GET /police-force route returns 500 if db error', async () => {
-    getForces.mockRejectedValue(new Error('Test error'))
+    getPoliceForces.mockRejectedValue(new Error('Test error'))
 
     const options = {
       method: 'GET',

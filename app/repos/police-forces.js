@@ -1,12 +1,12 @@
 const sequelize = require('../config/db')
 
-const getForces = async () => {
+const getPoliceForces = async () => {
   try {
-    const forces = await sequelize.models.police_force.findAll({
+    const policeForces = await sequelize.models.police_force.findAll({
       attributes: ['id', 'name']
     })
 
-    return forces
+    return policeForces
   } catch (e) {
     console.log(`Error retrieving police forces: ${e}`)
     throw e
@@ -14,5 +14,5 @@ const getForces = async () => {
 }
 
 module.exports = {
-  getForces
+  getPoliceForces
 }
