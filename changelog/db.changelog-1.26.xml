@@ -1,0 +1,27 @@
+<?xml version="1.1" encoding="utf-8" standalone="no"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog" xmlns:ext="http://www.liquibase.org/xml/ns/dbchangelog-ext" xmlns:pro="http://www.liquibase.org/xml/ns/pro" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog-ext http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-ext.xsd http://www.liquibase.org/xml/ns/pro http://www.liquibase.org/xml/ns/pro/liquibase-pro-3.9.xsd http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.9.xsd">
+  <changeSet author="J Barnsley" id="1">
+    <tagDatabase tag="v1.26" />
+  </changeSet>
+  <changeSet author="J Barnsley" id="2">
+    <createTable tableName="court">
+      <column autoIncrement="true" name="id" type="INTEGER">
+        <constraints nullable="false" primaryKey="true" primaryKeyName="court_pkey" />
+      </column>
+      <column name="name" type="VARCHAR(50)">
+        <constraints nullable="false" unique="true" uniqueConstraintName="court_name_ukey" />
+      </column>
+    </createTable>
+  </changeSet>
+  <changeSet author="J Barnsley" id="3">
+    <insert tableName="court">
+      <column name="name" value="Dummy court 1" />
+    </insert>
+    <insert tableName="court">
+      <column name="name" value="Dummy court 2" />
+    </insert>
+    <insert tableName="court">
+      <column name="name" value="Dummy court 3" />
+    </insert>
+  </changeSet>
+</databaseChangeLog>

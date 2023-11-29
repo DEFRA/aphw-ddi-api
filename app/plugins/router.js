@@ -10,6 +10,7 @@ const routes = [].concat(
   require('../routes/person'),
   require('../routes/search-index'),
   require('../routes/police-forces'),
+  require('../routes/courts'),
   require('../routes/dog-breeds')
 )
 

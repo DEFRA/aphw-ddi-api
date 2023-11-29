@@ -1,13 +1,13 @@
-const { getForces } = require('../repos/police-forces')
+const { getPoliceForces } = require('../repos/police-forces')
 
 module.exports = {
   method: 'GET',
   path: '/police-forces',
   handler: async (request, h) => {
-    const forces = await getForces()
+    const policeForces = await getPoliceForces()
 
     return h.response({
-      forces
+      policeForces
     }).code(200)
   }
 }

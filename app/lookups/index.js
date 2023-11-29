@@ -7,6 +7,7 @@ const getPoliceForce = require('./police-force')
 const getDogStatus = require('./dog-status')
 const getRegistrationStatus = require('./registration-status')
 const getContactType = require('./contact-type')
+const getCourt = require('./court')
 
 module.exports = {
   getCounty,
@@ -17,5 +18,6 @@ module.exports = {
   getPoliceForce,
   getDogStatus,
   getRegistrationStatus,
-  getContactType
+  getContactType,
+  getCourt
 }
