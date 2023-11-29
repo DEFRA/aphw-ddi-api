@@ -1,0 +1,495 @@
+<?xml version="1.1" encoding="utf-8" standalone="no"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog" xmlns:ext="http://www.liquibase.org/xml/ns/dbchangelog-ext" xmlns:pro="http://www.liquibase.org/xml/ns/pro" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog-ext http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-ext.xsd http://www.liquibase.org/xml/ns/pro http://www.liquibase.org/xml/ns/pro/liquibase-pro-3.9.xsd http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.9.xsd">
+  <changeSet author="J Barnsley" id="1">
+    <tagDatabase tag="v1.27" />
+  </changeSet>
+  <changeSet author="J Barnsley" id="2">
+    <insert tableName="dog_breed">
+      <column name="breed" value="Fila Brasileiro" />
+      <column name="active" value="true" />
+    </insert>
+    <insert tableName="dog_breed">
+      <column name="breed" value="Japanese Tosa" />
+      <column name="active" value="true" />
+    </insert>
+    <insert tableName="dog_breed">
+      <column name="breed" value="Pit Bull Terrier" />
+      <column name="active" value="true" />
+    </insert>
+    <insert tableName="dog_breed">
+      <column name="breed" value="XL Bully" />
+      <column name="active" value="true" />
+    </insert>
+    <insert tableName="dog_breed">
+      <column name="breed" value="Dogo Argentino" />
+      <column name="active" value="true" />
+    </insert>
+  </changeSet>
+  <changeSet author="J Barnsley" id="3">
+    <insert tableName="status">
+      <column name="status" value="IMPORTED_DOG" />
+      <column name="status_type" value="IMPORT" />
+    </insert>
+    <insert tableName="status">
+      <column name="status" value="IMPORTED_DOG_AND_PERSON" />
+      <column name="status_type" value="IMPORT" />
+    </insert>
+  </changeSet>
+  <changeSet author="J Barnsley" id="4">
+    <insert tableName="county">
+      <column name="county" value="Bedfordshire" />
+    </insert>
+    <insert tableName="county">
+      <column name="county" value="Berkshire" />
+    </insert>
+    <insert tableName="county">
+      <column name="county" value="Bristol" />
+    </insert>
+    <insert tableName="county">
+      <column name="county" value="Buckinghamshire" />
+    </insert>
+    <insert tableName="county">
+      <column name="county" value="Cambridgeshire" />
+    </insert>
+    <insert tableName="county">
+      <column name="county" value="Cheshire" />
+    </insert>
+    <insert tableName="county">
+      <column name="county" value="City of London" />
+    </insert>
+    <insert tableName="county">
+      <column name="county" value="Cornwall" />
+    </insert>
+    <insert tableName="county">
+      <column name="county" value="County Durham" />
+    </insert>
+    <insert tableName="county">
+      <column name="county" value="Cumbria" />
+    </insert>
+    <insert tableName="county">
+      <column name="county" value="Derbyshire" />
+    </insert>
+    <insert tableName="county">
+      <column name="county" value="Devon" />
+    </insert>
+    <insert tableName="county">
+      <column name="county" value="Dorset" />
+    </insert>
+    <insert tableName="county">
+      <column name="county" value="East Sussex" />
+    </insert>
+    <insert tableName="county">
+      <column name="county" value="East Yorkshire" />
+    </insert>
+    <insert tableName="county">
+      <column name="county" value="Essex" />
+    </insert>
+    <insert tableName="county">
+      <column name="county" value="Gloucestershire" />
+    </insert>
+    <insert tableName="county">
+      <column name="county" value="Greater London" />
+    </insert>
+    <insert tableName="county">
+      <column name="county" value="Greater Manchester" />
+    </insert>
+    <insert tableName="county">
+      <column name="county" value="Hampshire" />
+    </insert>
+    <insert tableName="county">
+      <column name="county" value="Herefordshire" />
+    </insert>
+    <insert tableName="county">
+      <column name="county" value="Hertfordshire" />
+    </insert>
+    <insert tableName="county">
+      <column name="county" value="Isle of Wight" />
+    </insert>
+    <insert tableName="county">
+      <column name="county" value="Kent" />
+    </insert>
+    <insert tableName="county">
+      <column name="county" value="Lancashire" />
+    </insert>
+    <insert tableName="county">
+      <column name="county" value="Leicestershire" />
+    </insert>
+    <insert tableName="county">
+      <column name="county" value="Lincolnshire" />
+    </insert>
+    <insert tableName="county">
+      <column name="county" value="Merseyside" />
+    </insert>
+    <insert tableName="county">
+      <column name="county" value="Norfolk" />
+    </insert>
+    <insert tableName="county">
+      <column name="county" value="North Yorkshire" />
+    </insert>
+    <insert tableName="county">
+      <column name="county" value="Northamptonshire" />
+    </insert>
+    <insert tableName="county">
+      <column name="county" value="Northumberland" />
+    </insert>
+    <insert tableName="county">
+      <column name="county" value="Nottinghamshire" />
+    </insert>
+    <insert tableName="county">
+      <column name="county" value="Oxfordshire" />
+    </insert>
+    <insert tableName="county">
+      <column name="county" value="Rutland" />
+    </insert>
+    <insert tableName="county">
+      <column name="county" value="Shropshire" />
+    </insert>
+    <insert tableName="county">
+      <column name="county" value="Somerset" />
+    </insert>
+    <insert tableName="county">
+      <column name="county" value="South Yorkshire" />
+    </insert>
+    <insert tableName="county">
+      <column name="county" value="Staffordshire" />
+    </insert>
+    <insert tableName="county">
+      <column name="county" value="Suffolk" />
+    </insert>
+    <insert tableName="county">
+      <column name="county" value="Surrey" />
+    </insert>
+    <insert tableName="county">
+      <column name="county" value="Tyne and Wear" />
+    </insert>
+    <insert tableName="county">
+      <column name="county" value="Warwickshire" />
+    </insert>
+    <insert tableName="county">
+      <column name="county" value="West Berkshire" />
+    </insert>
+    <insert tableName="county">
+      <column name="county" value="West Midlands" />
+    </insert>
+    <insert tableName="county">
+      <column name="county" value="West Sussex" />
+    </insert>
+    <insert tableName="county">
+      <column name="county" value="West Yorkshire" />
+    </insert>
+    <insert tableName="county">
+      <column name="county" value="Wiltshire" />
+    </insert>
+    <insert tableName="county">
+      <column name="county" value="Worcestershire" />
+    </insert>
+    <insert tableName="county">
+      <column name="county" value="Flintshire" />
+    </insert>
+    <insert tableName="county">
+      <column name="county" value="Glamorgan" />
+    </insert>
+    <insert tableName="county">
+      <column name="county" value="Merionethshire" />
+    </insert>
+    <insert tableName="county">
+      <column name="county" value="Monmouthshire" />
+    </insert>
+    <insert tableName="county">
+      <column name="county" value="Montgomeryshire" />
+    </insert>
+    <insert tableName="county">
+      <column name="county" value="Pembrokeshire" />
+    </insert>
+    <insert tableName="county">
+      <column name="county" value="Radnorshire" />
+    </insert>
+    <insert tableName="county">
+      <column name="county" value="Anglesey" />
+    </insert>
+    <insert tableName="county">
+      <column name="county" value="Breconshire" />
+    </insert>
+    <insert tableName="county">
+      <column name="county" value="Caernarvonshire" />
+    </insert>
+    <insert tableName="county">
+      <column name="county" value="Cardiganshire" />
+    </insert>
+    <insert tableName="county">
+      <column name="county" value="Carmarthenshire" />
+    </insert>
+    <insert tableName="county">
+      <column name="county" value="Denbighshire" />
+    </insert>
+    <insert tableName="county">
+      <column name="county" value="Aberdeen City" />
+    </insert>
+    <insert tableName="county">
+      <column name="county" value="Aberdeenshire" />
+    </insert>
+    <insert tableName="county">
+      <column name="county" value="Angus" />
+    </insert>
+    <insert tableName="county">
+      <column name="county" value="Argyll and Bute" />
+    </insert>
+    <insert tableName="county">
+      <column name="county" value="City of Edinburgh" />
+    </insert>
+    <insert tableName="county">
+      <column name="county" value="Clackmannanshire" />
+    </insert>
+    <insert tableName="county">
+      <column name="county" value="Dumfries and Galloway" />
+    </insert>
+    <insert tableName="county">
+      <column name="county" value="Dundee City" />
+    </insert>
+    <insert tableName="county">
+      <column name="county" value="East Ayrshire" />
+    </insert>
+    <insert tableName="county">
+      <column name="county" value="East Dunbartonshire" />
+    </insert>
+    <insert tableName="county">
+      <column name="county" value="East Lothian" />
+    </insert>
+    <insert tableName="county">
+      <column name="county" value="East Renfrewshire" />
+    </insert>
+    <insert tableName="county">
+      <column name="county" value="Eilean Siar" />
+    </insert>
+    <insert tableName="county">
+      <column name="county" value="Falkirk" />
+    </insert>
+    <insert tableName="county">
+      <column name="county" value="Fife" />
+    </insert>
+    <insert tableName="county">
+      <column name="county" value="Glasgow City" />
+    </insert>
+    <insert tableName="county">
+      <column name="county" value="Highland" />
+    </insert>
+    <insert tableName="county">
+      <column name="county" value="Inverclyde" />
+    </insert>
+    <insert tableName="county">
+      <column name="county" value="Midlothian" />
+    </insert>
+    <insert tableName="county">
+      <column name="county" value="Moray" />
+    </insert>
+    <insert tableName="county">
+      <column name="county" value="North Ayrshire" />
+    </insert>
+    <insert tableName="county">
+      <column name="county" value="North Lanarkshire" />
+    </insert>
+    <insert tableName="county">
+      <column name="county" value="Orkney Islands" />
+    </insert>
+    <insert tableName="county">
+      <column name="county" value="Perth and Kinross" />
+    </insert>
+    <insert tableName="county">
+      <column name="county" value="Renfrewshire" />
+    </insert>
+    <insert tableName="county">
+      <column name="county" value="Scottish Borders" />
+    </insert>
+    <insert tableName="county">
+      <column name="county" value="Shetland Islands" />
+    </insert>
+    <insert tableName="county">
+      <column name="county" value="South Ayrshire" />
+    </insert>
+    <insert tableName="county">
+      <column name="county" value="South Lanarkshire" />
+    </insert>
+    <insert tableName="county">
+      <column name="county" value="Stirling" />
+    </insert>
+    <insert tableName="county">
+      <column name="county" value="West Dunbartonshire" />
+    </insert>
+    <insert tableName="county">
+      <column name="county" value="West Lothian" />
+    </insert>
+    <insert tableName="county">
+      <column name="county" value="Antrim" />
+    </insert>
+    <insert tableName="county">
+      <column name="county" value="Armagh" />
+    </insert>
+    <insert tableName="county">
+      <column name="county" value="Down" />
+    </insert>
+    <insert tableName="county">
+      <column name="county" value="Fermanagh" />
+    </insert>
+    <insert tableName="county">
+      <column name="county" value="Derry and Londonderry" />
+    </insert>
+    <insert tableName="county">
+      <column name="county" value="Tyrone" />
+    </insert>
+  </changeSet>
+  <changeSet author="J Barnsley" id="5">
+    <insert tableName="police_force">
+      <column name="name" value="Avon and Somerset Constabulary" />
+    </insert>
+    <insert tableName="police_force">
+      <column name="name" value="Bedfordshire Police" />
+    </insert>
+    <insert tableName="police_force">
+      <column name="name" value="Cambridgeshire Constabulary" />
+    </insert>
+    <insert tableName="police_force">
+      <column name="name" value="Central Scotland Police" />
+    </insert>
+    <insert tableName="police_force">
+      <column name="name" value="Cheshire Constabulary" />
+    </insert>
+    <insert tableName="police_force">
+      <column name="name" value="City of London Police" />
+    </insert>
+    <insert tableName="police_force">
+      <column name="name" value="Cleveland Police" />
+    </insert>
+    <insert tableName="police_force">
+      <column name="name" value="Cumbria Constabulary" />
+    </insert>
+    <insert tableName="police_force">
+      <column name="name" value="Derbyshire Constabulary" />
+    </insert>
+    <insert tableName="police_force">
+      <column name="name" value="Devon and Cornwall Police" />
+    </insert>
+    <insert tableName="police_force">
+      <column name="name" value="Dorset Police" />
+    </insert>
+    <insert tableName="police_force">
+      <column name="name" value="Dumfries and Galloway Constabulary" />
+    </insert>
+    <insert tableName="police_force">
+      <column name="name" value="Durham Constabulary" />
+    </insert>
+    <insert tableName="police_force">
+      <column name="name" value="Dyfed-Powys Police" />
+    </insert>
+    <insert tableName="police_force">
+      <column name="name" value="Essex Police" />
+    </insert>
+    <insert tableName="police_force">
+      <column name="name" value="Fife Constabulary" />
+    </insert>
+    <insert tableName="police_force">
+      <column name="name" value="Gloucestershire Constabulary" />
+    </insert>
+    <insert tableName="police_force">
+      <column name="name" value="Grampian Police" />
+    </insert>
+    <insert tableName="police_force">
+      <column name="name" value="Greater Manchester Police" />
+    </insert>
+    <insert tableName="police_force">
+      <column name="name" value="Gwent Police" />
+    </insert>
+    <insert tableName="police_force">
+      <column name="name" value="Hampshire Constabulary" />
+    </insert>
+    <insert tableName="police_force">
+      <column name="name" value="Hertfordshire Constabulary" />
+    </insert>
+    <insert tableName="police_force">
+      <column name="name" value="Humberside Police" />
+    </insert>
+    <insert tableName="police_force">
+      <column name="name" value="Kent Police" />
+    </insert>
+    <insert tableName="police_force">
+      <column name="name" value="Lancashire Constabulary" />
+    </insert>
+    <insert tableName="police_force">
+      <column name="name" value="Leicestershire Police" />
+    </insert>
+    <insert tableName="police_force">
+      <column name="name" value="Lincolnshire Police" />
+    </insert>
+    <insert tableName="police_force">
+      <column name="name" value="Lothian and Borders Police" />
+    </insert>
+    <insert tableName="police_force">
+      <column name="name" value="Merseyside Police" />
+    </insert>
+    <insert tableName="police_force">
+      <column name="name" value="Metropolitan Police Service" />
+    </insert>
+    <insert tableName="police_force">
+      <column name="name" value="Norfolk Constabulary" />
+    </insert>
+    <insert tableName="police_force">
+      <column name="name" value="North Wales Police" />
+    </insert>
+    <insert tableName="police_force">
+      <column name="name" value="North Yorkshire Police" />
+    </insert>
+    <insert tableName="police_force">
+      <column name="name" value="Northamptonshire Police" />
+    </insert>
+    <insert tableName="police_force">
+      <column name="name" value="Northern Constabulary" />
+    </insert>
+    <insert tableName="police_force">
+      <column name="name" value="Northumbria Police" />
+    </insert>
+    <insert tableName="police_force">
+      <column name="name" value="Nottinghamshire Police" />
+    </insert>
+    <insert tableName="police_force">
+      <column name="name" value="South Wales Police" />
+    </insert>
+    <insert tableName="police_force">
+      <column name="name" value="South Yorkshire Police" />
+    </insert>
+    <insert tableName="police_force">
+      <column name="name" value="Staffordshire Police" />
+    </insert>
+    <insert tableName="police_force">
+      <column name="name" value="Strathclyde Police" />
+    </insert>
+    <insert tableName="police_force">
+      <column name="name" value="Suffolk Constabulary" />
+    </insert>
+    <insert tableName="police_force">
+      <column name="name" value="Surrey Police" />
+    </insert>
+    <insert tableName="police_force">
+      <column name="name" value="Sussex Police" />
+    </insert>
+    <insert tableName="police_force">
+      <column name="name" value="Tayside Police" />
+    </insert>
+    <insert tableName="police_force">
+      <column name="name" value="Thames Valley Police" />
+    </insert>
+    <insert tableName="police_force">
+      <column name="name" value="Warwickshire Police" />
+    </insert>
+    <insert tableName="police_force">
+      <column name="name" value="West Mercia Police" />
+    </insert>
+    <insert tableName="police_force">
+      <column name="name" value="West Midlands Police" />
+    </insert>
+    <insert tableName="police_force">
+      <column name="name" value="West Yorkshire Police" />
+    </insert>
+    <insert tableName="police_force">
+      <column name="name" value="Wiltshire Police" />
+    </insert>
+  </changeSet>
+</databaseChangeLog>
