@@ -43,17 +43,11 @@
       tableName="microchip_type" />
   </changeSet>
   <changeSet author="J Barnsley" id="9">
-    <insert tableName="dog_breed">
-      <column name="breed" value="Dogo Argentino" />
-      <column name="active" value="true" />
-    </insert>
-  </changeSet>
-  <changeSet author="J Barnsley" id="10">
     <dropNotNullConstraint
       columnName="birth_date"
       tableName="dog" />
   </changeSet>
-  <changeSet author="J Barnsley" id="11">
+  <changeSet author="J Barnsley" id="10">
     <dropNotNullConstraint
       columnName="colour"
       tableName="dog" />
@@ -61,38 +55,32 @@
       columnName="sex"
       tableName="dog" />
   </changeSet>
-    <changeSet author="J Barnsley" id="12">
+    <changeSet author="J Barnsley" id="11">
       <modifyDataType
       columnName="first_name"
       newDataType="varchar(30)"
       tableName="person" />
   </changeSet>
-  <changeSet author="J Barnsley" id="13">
+  <changeSet author="J Barnsley" id="12">
       <addUniqueConstraint
       columnNames="index_number"  
       constraintName="dog_index_number_ukey"  
       tableName="dog"  
       validate="true"/>
   </changeSet>
-  <changeSet author="J Barnsley" id="14">
+  <changeSet author="J Barnsley" id="13">
     <addColumn tableName="person">
       <column name="birth_date" type="date">
         <constraints nullable="true" />
       </column>
     </addColumn>
   </changeSet>
-  <changeSet author="J Barnsley" id="15">
+  <changeSet author="J Barnsley" id="14">
     <dropNotNullConstraint
       columnName="time_limit"
       tableName="registration" />
   </changeSet>
-  <changeSet author="J Barnsley" id="16">
-    <loadData file="changelog/seed/police-force.csv"
-      tableName="police_force">
-      <column name="name" type="STRING" header="name" />
-    </loadData>
-  </changeSet>
-  <changeSet author="J Barnsley" id="17">
+  <changeSet author="J Barnsley" id="15">
       <modifyDataType
       columnName="errors"
       newDataType="TEXT"

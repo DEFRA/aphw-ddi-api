@@ -29,20 +29,4 @@
       newDataType="varchar(50)"
       tableName="dog" />
   </changeSet>
-  <changeSet author="J Barnsley" id="5">
-    <loadData file="changelog/seed/dog-breed.csv"
-      tableName="dog_breed">
-      <column name="breed" type="STRING" header="breed" />
-      <column name="active" type="BOOLEAN" header="active" />
-    </loadData>
-    <loadData file="changelog/seed/microchip-type.csv"
-      tableName="microchip_type">
-      <column name="type" type="STRING" header="type" />
-    </loadData>
-    <loadData file="changelog/seed/status.csv"
-      tableName="status">
-      <column name="status" type="STRING" header="status" />
-      <column name="status_type" type="STRING" header="status_type" />
-    </loadData>
-  </changeSet>
 </databaseChangeLog>
