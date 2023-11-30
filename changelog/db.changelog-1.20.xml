@@ -29,12 +29,6 @@
     </insert>
   </changeSet>
   <changeSet author="J Barnsley" id="4">
-    <loadData file="changelog/seed/county.csv"
-      tableName="county">
-      <column name="county" type="STRING" header="county" />
-    </loadData>
-  </changeSet>
-  <changeSet author="J Barnsley" id="5">
     <modifyDataType
       columnName="address_line_1"
       newDataType="varchar(50)"
@@ -48,7 +42,7 @@
       newDataType="varchar(50)"
       tableName="address" />
   </changeSet>
-  <changeSet author="J Barnsley" id="6">
+  <changeSet author="J Barnsley" id="5">
     <insert tableName="person_type">
       <column name="person_type" value="Owner" />
     </insert>

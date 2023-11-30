@@ -8,20 +8,9 @@
       <column autoIncrement="true" name="id" type="INTEGER">
         <constraints nullable="false" primaryKey="true" primaryKeyName="court_pkey" />
       </column>
-      <column name="name" type="VARCHAR(50)">
+      <column name="name" type="VARCHAR(80)">
         <constraints nullable="false" unique="true" uniqueConstraintName="court_name_ukey" />
       </column>
     </createTable>
-  </changeSet>
-  <changeSet author="J Barnsley" id="3">
-    <insert tableName="court">
-      <column name="name" value="Dummy court 1" />
-    </insert>
-    <insert tableName="court">
-      <column name="name" value="Dummy court 2" />
-    </insert>
-    <insert tableName="court">
-      <column name="name" value="Dummy court 3" />
-    </insert>
   </changeSet>
 </databaseChangeLog>
