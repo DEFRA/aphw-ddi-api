@@ -11,23 +11,28 @@
   </changeSet>
   <changeSet author="J Barnsley" id="2">
     <insert tableName="dog_breed">
-      <column name="breed" value="Fila Brasileiro" />
-      <column name="active" value="true" />
-    </insert>
-    <insert tableName="dog_breed">
-      <column name="breed" value="Japanese Tosa" />
-      <column name="active" value="true" />
-    </insert>
-    <insert tableName="dog_breed">
-      <column name="breed" value="Pit Bull Terrier" />
-      <column name="active" value="true" />
-    </insert>
-    <insert tableName="dog_breed">
+      <column name="id" value="1" />
       <column name="breed" value="XL Bully" />
       <column name="active" value="true" />
     </insert>
     <insert tableName="dog_breed">
+      <column name="id" value="2" />
+      <column name="breed" value="Pit Bull Terrier" />
+      <column name="active" value="true" />
+    </insert>
+    <insert tableName="dog_breed">
+      <column name="id" value="3" />
+      <column name="breed" value="Japanese Tosa" />
+      <column name="active" value="true" />
+    </insert>
+    <insert tableName="dog_breed">
+      <column name="id" value="4" />
       <column name="breed" value="Dogo Argentino" />
+      <column name="active" value="true" />
+    </insert>
+    <insert tableName="dog_breed">
+      <column name="id" value="5" />
+      <column name="breed" value="Fila Brasileiro" />
       <column name="active" value="true" />
     </insert>
   </changeSet>
