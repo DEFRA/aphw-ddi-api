@@ -1,0 +1,46 @@
+<?xml version="1.1" encoding="utf-8" standalone="no"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+  xmlns:ext="http://www.liquibase.org/xml/ns/dbchangelog-ext"
+  xmlns:pro="http://www.liquibase.org/xml/ns/pro"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog-ext http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-ext.xsd
+                      http://www.liquibase.org/xml/ns/pro http://www.liquibase.org/xml/ns/pro/liquibase-pro-3.9.xsd
+                      http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.9.xsd">
+  <changeSet author="Shaun Fitzsimons" id="1">
+    <tagDatabase tag="v1.28" />
+  </changeSet>
+  <changeSet author="Shaun Fitzsimons" id="2">
+    <addColumn tableName="dog_breed">
+      <column name="order" type="INTEGER" defaultValue="0">
+        <constraints nullable="false" unique="false" />
+      </column>
+    </addColumn>
+  </changeSet>
+  <changeSet author="Shaun Fitzsimons" id="3">
+    <insert tableName="dog_breed">
+      <column name="order" value="1" />
+      <column name="breed" value="XL Bully" />
+      <column name="active" value="true" />
+    </insert>
+    <insert tableName="dog_breed">
+      <column name="order" value="2" />
+      <column name="breed" value="Pit Bull Terrier" />
+      <column name="active" value="true" />
+    </insert>
+    <insert tableName="dog_breed">
+      <column name="order" value="3" />
+      <column name="breed" value="Japanese Tosa" />
+      <column name="active" value="true" />
+    </insert>
+    <insert tableName="dog_breed">
+      <column name="order" value="4" />
+      <column name="breed" value="Dogo Argentino" />
+      <column name="active" value="true" />
+    </insert>
+    <insert tableName="dog_breed">
+      <column name="order" value="5" />
+      <column name="breed" value="Fila Brasileiro" />
+      <column name="active" value="true" />
+    </insert>
+  </changeSet>
+</databaseChangeLog>
