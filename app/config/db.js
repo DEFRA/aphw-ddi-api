@@ -48,8 +48,6 @@ const dbConfig = {
   }
 }
 
-console.log(dbConfig.schema)
-
 const sequelize = new Sequelize(dbConfig.database, dbConfig.username, dbConfig.password, dbConfig)
 
 module.exports = sequelize

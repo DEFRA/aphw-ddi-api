@@ -15,6 +15,10 @@ module.exports = (sequelize, DataTypes) => {
     active: {
       type: DataTypes.BOOLEAN,
       allowNull: false
+    },
+    display_order: {
+      type: DataTypes.INTEGER,
+      allowNull: false
     }
   }, {
     sequelize,
