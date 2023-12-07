@@ -2,7 +2,8 @@ const Joi = require('joi')
 
 const schema = Joi.object({
   owner: Joi.object({
-    name: Joi.string().required(),
+    firstName: Joi.string().required(),
+    lastName: Joi.string().required(),
     dateOfBirth: Joi.string().required(),
     address: Joi.object({
       addressLine1: Joi.string().required(),
@@ -13,7 +14,7 @@ const schema = Joi.object({
     enforcementDetails: Joi.object({
       court: Joi.string().required(),
       policeForce: Joi.string().required(),
-      legislationOfficer: Joi.string().required()
+      legislationOfficer: Joi.string().optional()
     }).required()
   }).required(),
   dogs: Joi.array().items(Joi.object({
