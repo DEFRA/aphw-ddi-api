@@ -32,13 +32,33 @@ module.exports = (sequelize, DataTypes) => {
         key: 'id'
       }
     },
+    court_id: {
+      type: DataTypes.INTEGER,
+      allowNull: true,
+      references: {
+        model: 'court',
+        key: 'id'
+      }
+    },
     created_on: {
       type: DataTypes.DATE,
       allowNull: false,
       defaultValue: sequelize.fn('now')
     },
+    cdo_issued: {
+      type: DataTypes.DATE,
+      allowNull: false
+    },
+    cdo_expiry: {
+      type: DataTypes.DATE,
+      allowNull: false
+    },
     time_limit: {
       type: DataTypes.DATE,
+      allowNull: true
+    },
+    legislation_officer: {
+      type: DataTypes.STRING(64),
       allowNull: true
     }
   }, {
@@ -72,6 +92,11 @@ module.exports = (sequelize, DataTypes) => {
     registration.belongsTo(models.police_force, {
       as: 'police_force',
       foreignKey: 'police_force_id'
+    })
+
+    registration.belongsTo(models.court, {
+      as: 'court',
+      foreignKey: 'court_id'
     })
 
     registration.hasMany(models.comment, {

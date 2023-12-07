@@ -11,7 +11,8 @@ const routes = [].concat(
   require('../routes/search-index'),
   require('../routes/police-forces'),
   require('../routes/courts'),
-  require('../routes/dog-breeds')
+  require('../routes/dog-breeds'),
+  require('../routes/cdo')
 )
 
 module.exports = {
