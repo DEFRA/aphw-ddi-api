@@ -1,4 +1,4 @@
-const { getBreeds } = require('../repos/dog')
+const { getBreeds } = require('../repos/dogs')
 
 module.exports = {
   method: 'GET',

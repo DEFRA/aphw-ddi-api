@@ -11,7 +11,7 @@ describe('Dog repo', () => {
 
   const sequelize = require('../../../../app/config/db')
 
-  const { getBreeds } = require('../../../../app/repos/dog')
+  const { getBreeds } = require('../../../../app/repos/dogs')
 
   beforeEach(async () => {
     jest.clearAllMocks()

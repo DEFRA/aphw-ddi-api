@@ -5,7 +5,7 @@ describe('Dog breeds endpoint', () => {
   let server
 
   jest.mock('../../../../app/repos/dog')
-  const { getBreeds } = require('../../../../app/repos/dog')
+  const { getBreeds } = require('../../../../app/repos/dogs')
 
   beforeEach(async () => {
     jest.clearAllMocks()
