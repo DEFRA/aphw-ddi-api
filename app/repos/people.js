@@ -25,12 +25,23 @@ const createPeople = async (owners, transaction) => {
         country_id: 1
       }, { transaction })
 
+      const createdAddress = await sequelize.models.address.findByPk(address.id, {
+        include: [{
+          attributes: ['country'],
+          model: sequelize.models.country,
+          as: 'country'
+        }],
+        raw: true,
+        nest: true,
+        transaction
+      })
+
       await sequelize.models.person_address.create({
         person_id: person.id,
         address_id: address.id
       }, { transaction })
 
-      createdPeople.push(person)
+      createdPeople.push({ ...person.dataValues, address: createdAddress })
     }
 
     return createdPeople

@@ -1,6 +1,6 @@
 const sequelize = require('../config/db')
-const { Op } = require('sequelize')
 const { v4: uuidv4 } = require('uuid')
+const { getBreed } = require('../lookups')
 
 const getBreeds = async () => {
   try {
@@ -19,28 +19,6 @@ const getBreeds = async () => {
   }
 }
 
-const lookupBreed = async (breed) => {
-  try {
-    const dogBreed = await sequelize.models.dog_breed.findOne({
-      attributes: ['id'],
-      where: {
-        breed: {
-          [Op.iLike]: `%${breed}%`
-        }
-      }
-    })
-
-    if (!dogBreed) {
-      throw new Error(`Dog breed ${breed} not found`)
-    }
-
-    return dogBreed
-  } catch (err) {
-    console.error(`Error looking up dog breed: ${err}`)
-    throw err
-  }
-}
-
 const createDogs = async (dogs, owners, enforcement, transaction) => {
   if (!transaction) {
     return sequelize.transaction(async (t) => createDogs(dogs, owners, enforcement, t))
@@ -50,9 +28,9 @@ const createDogs = async (dogs, owners, enforcement, transaction) => {
     const createdDogs = []
 
     for (const dog of dogs) {
-      const breed = await lookupBreed(dog.breed)
+      const breed = await getBreed(dog.breed)
 
-      const createdDog = await sequelize.models.dog.create({
+      const dogEntity = await sequelize.models.dog.create({
         name: dog.name,
         dog_breed_id: breed.id,
         exported: false,
@@ -60,8 +38,19 @@ const createDogs = async (dogs, owners, enforcement, transaction) => {
         dog_reference: uuidv4()
       }, { transaction })
 
-      const registration = await sequelize.models.registration.create({
-        dog_id: createdDog.id,
+      const dogResult = await sequelize.models.dog.findByPk(dogEntity.id, {
+        include: [{
+          attributes: ['breed'],
+          model: sequelize.models.dog_breed,
+          as: 'dog_breed'
+        }],
+        raw: true,
+        nest: true,
+        transaction
+      })
+
+      const registrationEntity = await sequelize.models.registration.create({
+        dog_id: dogEntity.id,
         cdo_issued: dog.cdoIssued,
         cdo_expiry: dog.cdoExpiry,
         police_force_id: enforcement.policeForce,
@@ -69,15 +58,31 @@ const createDogs = async (dogs, owners, enforcement, transaction) => {
         status_id: 1
       }, { transaction })
 
+      const createdRegistration = await sequelize.models.registration.findByPk(registrationEntity.id, {
+        include: [{
+          attributes: ['name'],
+          model: sequelize.models.police_force,
+          as: 'police_force'
+        },
+        {
+          attributes: ['name'],
+          model: sequelize.models.court,
+          as: 'court'
+        }],
+        raw: true,
+        nest: true,
+        transaction
+      })
+
       for (const owner of owners) {
         await sequelize.models.registered_person.create({
           person_id: owner.id,
-          dog_id: createdDog.id,
+          dog_id: dogEntity.id,
           person_type_id: 1,
         }, { transaction })
       }
 
-      createdDogs.push({ ...createdDog.dataValues, ...registration.dataValues })
+      createdDogs.push({ ...dogResult, registration: createdRegistration })
     }
 
     return createdDogs
@@ -89,6 +94,5 @@ const createDogs = async (dogs, owners, enforcement, transaction) => {
 
 module.exports = {
   getBreeds,
-  lookupBreed,
   createDogs
 }
