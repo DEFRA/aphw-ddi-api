@@ -11,7 +11,7 @@
   </changeSet>
   <changeSet author="Shaun Fitzsimons" id="2">
     <addColumn tableName="dog_breed">
-      <column name="order" type="INTEGER" defaultValue="0">
+      <column name="display_order" type="INTEGER" defaultValue="0">
         <constraints nullable="false" unique="false" />
       </column>
     </addColumn>
