@@ -3,18 +3,6 @@ const { getCountry, getContactType } = require('../lookups')
 const createReferenceNumber = require('../lib/create-registration-number')
 const { dbCreate } = require('../../app/lib/db-functions')
 
-const addToSearchIndex = async (person, t) => {
-  await dbCreate(sequelize.models.search_index, {
-    search: sequelize.fn('to_tsvector', `${person.person_reference} ${person.first_name} ${person.last_name}`),
-    reference_number: person.person_reference,
-    json: {
-      firstName: person.first_name,
-      lastName: person.last_name,
-      postcode: person.address.postcode
-    }
-  }, { transaction: t })
-}
-
 const addPeople = async (people, t) => {
   const references = []
   if (t) {
@@ -68,8 +56,6 @@ const addPersonInsideExistingTransaction = async (person, t) => {
   }
 
   await dbCreate(sequelize.models.person_address, personAddress, { transaction: t })
-
-  await addToSearchIndex(person, t)
 
   return { person_reference: createdPerson.person_reference, id: createdPerson.id }
 }

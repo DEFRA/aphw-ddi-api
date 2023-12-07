@@ -1,23 +1,16 @@
-const { search } = require('../register/search-index')
+const { search } = require('../register/search-basic')
 
 module.exports = [{
   method: 'GET',
-  path: '/search/{reference}',
+  path: '/search/{type}/{terms}',
   handler: async (request, h) => {
-    let searchIndex = null
+    let results = null
     try {
-      searchIndex = await search(request.params.reference)
+      results = await search(request.params.type, request.params.terms)
     } catch (e) {
       console.log(e)
     }
 
-    return h.response({ searchIndex }).code(200)
-  }
-},
-{
-  method: 'POST',
-  path: '/search',
-  handler: async (request, h) => {
-    return h.response('ok').code(200)
+    return h.response({ results }).code(200)
   }
 }]
