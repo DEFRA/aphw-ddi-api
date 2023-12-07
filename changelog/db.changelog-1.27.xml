@@ -10,28 +10,6 @@
     <tagDatabase tag="v1.27" />
   </changeSet>
   <changeSet author="J Barnsley" id="2">
-    <insert tableName="dog_breed">
-      <column name="breed" value="Fila Brasileiro" />
-      <column name="active" value="true" />
-    </insert>
-    <insert tableName="dog_breed">
-      <column name="breed" value="Japanese Tosa" />
-      <column name="active" value="true" />
-    </insert>
-    <insert tableName="dog_breed">
-      <column name="breed" value="Pit Bull Terrier" />
-      <column name="active" value="true" />
-    </insert>
-    <insert tableName="dog_breed">
-      <column name="breed" value="XL Bully" />
-      <column name="active" value="true" />
-    </insert>
-    <insert tableName="dog_breed">
-      <column name="breed" value="Dogo Argentino" />
-      <column name="active" value="true" />
-    </insert>
-  </changeSet>
-  <changeSet author="J Barnsley" id="3">
     <insert tableName="status">
       <column name="status" value="IMPORTED_DOG" />
       <column name="status_type" value="IMPORT" />
@@ -41,7 +19,7 @@
       <column name="status_type" value="IMPORT" />
     </insert>
   </changeSet>
-  <changeSet author="J Barnsley" id="4">
+  <changeSet author="J Barnsley" id="3">
     <insert tableName="county">
       <column name="county" value="Bedfordshire" />
     </insert>
@@ -343,7 +321,7 @@
       <column name="county" value="Tyrone" />
     </insert>
   </changeSet>
-  <changeSet author="J Barnsley" id="5">
+  <changeSet author="J Barnsley" id="4">
     <insert tableName="police_force">
       <column name="name" value="Avon and Somerset Constabulary" />
     </insert>
@@ -498,7 +476,7 @@
       <column name="name" value="Wiltshire Police" />
     </insert>
   </changeSet>
-  <changeSet author="J Barnsley" id="6">
+  <changeSet author="J Barnsley" id="7">
     <insert tableName="court">
       <column name="name" value="Aberystwyth Justice Centre" />
     </insert>

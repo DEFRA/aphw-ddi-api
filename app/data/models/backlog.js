@@ -26,7 +26,6 @@ module.exports = (sequelize, DataTypes) => {
   }, {
     sequelize,
     tableName: 'backlog',
-    schema: 'public',
     timestamps: false,
     indexes: [
       {

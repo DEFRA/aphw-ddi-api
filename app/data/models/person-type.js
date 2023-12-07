@@ -15,7 +15,6 @@ module.exports = (sequelize, DataTypes) => {
   }, {
     sequelize,
     tableName: 'person_type',
-    schema: 'public',
     timestamps: false,
     indexes: [
       {
