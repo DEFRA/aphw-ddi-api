@@ -78,7 +78,7 @@ const createDogs = async (dogs, owners, enforcement, transaction) => {
         await sequelize.models.registered_person.create({
           person_id: owner.id,
           dog_id: dogEntity.id,
-          person_type_id: 1,
+          person_type_id: 1
         }, { transaction })
       }
 
