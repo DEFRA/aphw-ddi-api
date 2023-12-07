@@ -27,7 +27,6 @@ module.exports = (sequelize, DataTypes) => {
   }, {
     sequelize,
     tableName: 'insurance',
-    schema: 'public',
     timestamps: false,
     indexes: [
       {

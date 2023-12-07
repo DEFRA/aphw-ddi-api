@@ -44,7 +44,6 @@ module.exports = (sequelize, DataTypes) => {
   }, {
     sequelize,
     tableName: 'registration',
-    schema: 'public',
     timestamps: false,
     indexes: [
       {

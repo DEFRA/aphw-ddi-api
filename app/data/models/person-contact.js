@@ -18,7 +18,6 @@ module.exports = (sequelize, DataTypes) => {
   }, {
     sequelize,
     tableName: 'person_contact',
-    schema: 'public',
     timestamps: false,
     indexes: [
       {
