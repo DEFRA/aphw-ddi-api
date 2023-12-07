@@ -1,6 +1,5 @@
 const { Sequelize } = require('sequelize')
 const { DefaultAzureCredential } = require('@azure/identity')
-const { schema } = require('../schema/people')
 
 const isProd = () => {
   return process.env.NODE_ENV === 'production'
