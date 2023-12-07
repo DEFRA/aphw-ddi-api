@@ -55,6 +55,7 @@ const createDogs = async (dogs, owners, enforcement, transaction) => {
         cdo_expiry: dog.cdoExpiry,
         police_force_id: enforcement.policeForce,
         court_id: enforcement.court,
+        legislation_officer: enforcement.legislationOfficer,
         status_id: 1
       }, { transaction })
 

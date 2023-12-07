@@ -1,3 +1,4 @@
+const { cdoCreateDto } = require('../dto/cdo')
 const { createCdo } = require('../repos/cdo')
 const cdoCreateSchema = require('../schema/cdo/create')
 
@@ -14,7 +15,9 @@ module.exports = [{
       }
     },
     handler: async (request, h) => {
-      const res = await createCdo(request.payload)
+      const created = await createCdo(request.payload)
+
+      const res = cdoCreateDto(created)
 
       return h.response(res).code(200)
     }

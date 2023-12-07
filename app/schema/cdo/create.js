@@ -10,12 +10,12 @@ const schema = Joi.object({
       addressLine2: Joi.string().optional().allow('').allow(null),
       town: Joi.string().required(),
       postcode: Joi.string().required()
-    }).required(),
-    enforcementDetails: Joi.object({
-      court: Joi.string().required(),
-      policeForce: Joi.string().required(),
-      legislationOfficer: Joi.string().optional()
     }).required()
+  }).required(),
+  enforcementDetails: Joi.object({
+    court: Joi.string().required(),
+    policeForce: Joi.string().required(),
+    legislationOfficer: Joi.string().optional()
   }).required(),
   dogs: Joi.array().items(Joi.object({
     breed: Joi.string().required(),

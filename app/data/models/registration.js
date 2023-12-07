@@ -56,6 +56,10 @@ module.exports = (sequelize, DataTypes) => {
     time_limit: {
       type: DataTypes.DATE,
       allowNull: true
+    },
+    legislation_officer: {
+      type: DataTypes.STRING(64),
+      allowNull: true
     }
   }, {
     sequelize,

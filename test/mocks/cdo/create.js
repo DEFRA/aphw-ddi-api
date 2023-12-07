@@ -7,11 +7,12 @@ const payload = {
       addressLine1: '14 Fake Street',
       town: 'Fake Town',
       postcode: 'FA1 2KE'
-    },
-    enforcementDetails: {
-      policeForce: '1',
-      court: '1'
     }
+  },
+  enforcementDetails: {
+    policeForce: '1',
+    court: '1',
+    legislationOfficer: 'John Smith'
   },
   dogs: [
     {
