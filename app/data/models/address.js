@@ -34,7 +34,6 @@ module.exports = (sequelize, DataTypes) => {
   }, {
     sequelize,
     tableName: 'address',
-    schema: 'public',
     timestamps: false,
     indexes: [
       {

@@ -62,7 +62,6 @@ module.exports = (sequelize, DataTypes) => {
   }, {
     sequelize,
     tableName: 'dog',
-    schema: 'public',
     timestamps: false,
     indexes: [
       {

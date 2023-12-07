@@ -20,7 +20,6 @@ module.exports = (sequelize, DataTypes) => {
   }, {
     sequelize,
     tableName: 'search_index',
-    schema: 'public',
     timestamps: false,
     indexes: [
       {

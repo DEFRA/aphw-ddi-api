@@ -27,7 +27,6 @@ module.exports = (sequelize, DataTypes) => {
   }, {
     sequelize,
     tableName: 'comment',
-    schema: 'public',
     timestamps: false,
     indexes: [
       {
