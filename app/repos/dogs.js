@@ -41,9 +41,9 @@ const lookupBreed = async (breed) => {
   }
 }
 
-const createDogs = async (dogs, owners, transaction) => {
+const createDogs = async (dogs, owners, enforcement, transaction) => {
   if (!transaction) {
-    return sequelize.transaction(async (t) => createDogs(dogs, owners, t))
+    return sequelize.transaction(async (t) => createDogs(dogs, owners, enforcement, t))
   }
 
   try {
@@ -60,6 +60,15 @@ const createDogs = async (dogs, owners, transaction) => {
         dog_reference: uuidv4()
       }, { transaction })
 
+      const registration = await sequelize.models.registration.create({
+        dog_id: createdDog.id,
+        cdo_issued: dog.cdoIssued,
+        cdo_expiry: dog.cdoExpiry,
+        police_force_id: enforcement.policeForce,
+        court_id: enforcement.court,
+        status_id: 1
+      }, { transaction })
+
       for (const owner of owners) {
         await sequelize.models.registered_person.create({
           person_id: owner.id,
@@ -68,7 +77,7 @@ const createDogs = async (dogs, owners, transaction) => {
         }, { transaction })
       }
 
-      createdDogs.push(createdDog)
+      createdDogs.push({ ...createdDog.dataValues, ...registration.dataValues })
     }
 
     return createdDogs

@@ -6,7 +6,7 @@ const createCdo = async (data) => {
   try {
     return sequelize.transaction(async (t) => {
       const owners = await createPeople([data.owner], t)
-      const dogs = await createDogs(data.dogs, owners, t)
+      const dogs = await createDogs(data.dogs, owners, data.owner.enforcementDetails, t)
 
       return {
         owner: owners[0],
