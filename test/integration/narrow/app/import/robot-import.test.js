@@ -12,6 +12,9 @@ const { addPerson } = require('../../../../../app/person/add-person')
 jest.mock('../../../../../app/lib/db-functions')
 const { dbCreate } = require('../../../../../app/lib/db-functions')
 
+jest.mock('../../../../../app/repos/search')
+const { addToSearchIndex } = require('../../../../../app/repos/search')
+
 const { importOneDogOnePerson, invalidImportSchema, exampleDog, examplePerson } = require('./robot-import-data')
 
 describe('RobotImport test', () => {
@@ -31,6 +34,7 @@ describe('RobotImport test', () => {
     dbCreate.mockResolvedValue(exampleDog)
     addPerson.mockResolvedValue(examplePerson)
     getPersonType.mockResolvedValue({ id: 1 })
+    addToSearchIndex.mockResolvedValue()
     const res = await processRobotImport(importOneDogOnePerson)
     expect(res).not.toBe(null)
     expect(res.stats.errors.length).toBe(0)

@@ -15,6 +15,9 @@ describe('CDO repo', () => {
 
   const { createCdo } = require('../../../../app/repos/cdo')
 
+  jest.mock('../../../../app/repos/search')
+  const { addToSearchIndex } = require('../../../../app/repos/search')
+
   beforeEach(async () => {
     jest.clearAllMocks()
   })
@@ -43,6 +46,7 @@ describe('CDO repo', () => {
 
     createPeople.mockResolvedValue(owners)
     createDogs.mockResolvedValue(dogs)
+    addToSearchIndex.mockResolvedValue()
 
     const cdo = await createCdo(mockCdoPayload, {})
 

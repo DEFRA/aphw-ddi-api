@@ -8,6 +8,7 @@ const { isValidRobotSchema } = require('./robot-schema')
 const { addPerson } = require('../../app/person/add-person')
 const { getPersonType, getBreed } = require('../../app/lookups')
 const { dbCreate } = require('../../app/lib/db-functions')
+const { addToSearchIndex } = require('../repos/search')
 
 let xlBullyBreedId
 let existingDogIds
@@ -45,6 +46,12 @@ const processRobotImport = async (dogsAndPeople) => {
         for (const person of row.people) {
           if (stats.errors.length === 0) {
             await processPerson(person, createdDogIds, t)
+          }
+        }
+
+        for (const person of row.people) {
+          for (const dog of row.dogs) {
+            await addToSearchIndex(person, dog, t)
           }
         }
 

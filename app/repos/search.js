@@ -12,7 +12,7 @@ const addToSearchIndex = async (person, dog, transaction) => {
     json: {
       firstName: person.first_name,
       lastName: person.last_name,
-      address: buildAddress(person.addresses),
+      address: buildAddress(person),
       dogIndex: dog.index_number,
       dogName: dog.name,
       microchipNumber: dog.microchip_number
@@ -20,19 +20,20 @@ const addToSearchIndex = async (person, dog, transaction) => {
   }, { transaction })
 }
 
-const buildAddress = (addresses) => {
+const buildAddress = (person) => {
+  const address = person?.addresses?.address ? person.addresses.address : person.address
   const addrParts = []
-  if (addresses?.address?.address_line_1) {
-    addrParts.push(addresses.address.address_line_1)
+  if (address?.address_line_1) {
+    addrParts.push(address.address_line_1)
   }
-  if (addresses?.address?.address_line_2) {
-    addrParts.push(addresses.address.address_line_2)
+  if (address?.address_line_2) {
+    addrParts.push(address.address_line_2)
   }
-  if (addresses?.address?.town) {
-    addrParts.push(addresses.address.town)
+  if (address?.town) {
+    addrParts.push(address.town)
   }
-  if (addresses?.address?.postcode) {
-    addrParts.push(addresses.address.postcode)
+  if (address?.postcode) {
+    addrParts.push(address.postcode)
   }
   return addrParts.join(', ')
 }
