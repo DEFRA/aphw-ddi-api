@@ -9,7 +9,7 @@ const createCdo = async (data, transaction) => {
 
   try {
     const owners = await createPeople([data.owner], transaction)
-    const dogs = await createDogs(data.dogs, owners, data.owner.enforcementDetails, transaction)
+    const dogs = await createDogs(data.dogs, owners, data.enforcementDetails, transaction)
 
     return {
       owner: owners[0],
