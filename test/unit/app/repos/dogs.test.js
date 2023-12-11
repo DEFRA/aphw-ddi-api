@@ -27,7 +27,7 @@ describe('Dog repo', () => {
 
   const sequelize = require('../../../../app/config/db')
 
-  const { getBreeds, createDogs } = require('../../../../app/repos/dogs')
+  const { getBreeds, createDogs, addImportedDog } = require('../../../../app/repos/dogs')
 
   beforeEach(async () => {
     jest.clearAllMocks()
@@ -156,5 +156,19 @@ describe('Dog repo', () => {
     const dogs = mockCdoPayload.dogs
 
     await expect(createDogs(dogs, owners, enforcement, {})).rejects.toThrow('Test error')
+  })
+
+  test('addImportedDog should create dog', async () => {
+    sequelize.models.dog.create.mockResolvedValue({ id: 123, breed: 'breed', name: 'Bruno' })
+
+    const dog = {
+      id: 123,
+      name: 'Bruno',
+      owner: { firstName: 'John', lastName: 'Smith' }
+    }
+
+    await addImportedDog(dog, {})
+    expect(sequelize.models.dog.create).toHaveBeenCalledTimes(1)
+    expect(sequelize.models.registered_person.create).toHaveBeenCalledTimes(1)
   })
 })

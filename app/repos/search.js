@@ -39,5 +39,6 @@ const buildAddress = (person) => {
 }
 
 module.exports = {
-  addToSearchIndex
+  addToSearchIndex,
+  buildAddress
 }
