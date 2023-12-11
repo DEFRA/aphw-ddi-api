@@ -1,9 +1,10 @@
 const sequelize = require('../config/db')
 const { v4: uuidv4 } = require('uuid')
+const dayjs = require('dayjs')
 const importDogSchema = require('./imported-dog-schema')
 const importPersonSchema = require('./imported-person-schema')
 const { addPeople } = require('../person/add-person')
-const addDog = require('../dog/add-dog')
+const { addImportedDog } = require('../repos/dogs')
 const { getCounty, getCountry, getBreed, getPoliceForce } = require('../lookups')
 const { dbLogErrorToBacklog, dbLogWarningToBacklog, dbFindAll, dbFindOne, dbUpdate, dbCreate } = require('../lib/db-functions')
 
@@ -33,7 +34,19 @@ const buildDog = (jsonObj) => ({
 })
 
 const lookupPersonIdByRef = async (ref) => {
-  return (await dbFindOne(sequelize.models.person, { where: { person_reference: ref } })).id
+  return await dbFindOne(sequelize.models.person, {
+    where: { person_reference: ref },
+    include: [{
+      model: sequelize.models.person_address,
+      as: 'addresses',
+      include: {
+        model: sequelize.models.address,
+        as: 'address'
+      }
+    }],
+    raw: true,
+    nest: true
+  })
 }
 
 const getBreedIfValid = async (jsonObj) => {
@@ -50,7 +63,7 @@ const buildPerson = (jsonObj) => ({
   address: {
     address_line_1: jsonObj.addressLine1,
     address_line_2: jsonObj.addressLine2,
-    address_line_3: jsonObj.addressLine3,
+    town: jsonObj.town,
     county: jsonObj.county,
     postcode: `${jsonObj.postcodePart1} ${jsonObj.postcodePart2}`,
     country: jsonObj.country
@@ -85,7 +98,7 @@ const isDogValid = async (dog, row) => {
 
 const insertDog = async (dog, row) => {
   // TODO - check if dog already exists - need to confirm criteria to use for this
-  const dogId = await addDog(dog)
+  const dogId = await addImportedDog(dog)
   await dbUpdate(row, { status: row.status + '_AND_DOG', errors: '' })
   return dogId
 }
@@ -168,14 +181,21 @@ const isRegistrationValid = async (jsonObj, row) => {
     await dbLogErrorToBacklog(row, `Invalid 'policeForce' value of '${jsonObj.policeForce}'`)
     return false
   }
+  if (jsonObj.notificationDate === null || jsonObj.notificationDate === undefined) {
+    await dbLogErrorToBacklog(row, 'Missing notificationDate')
+    return false
+  }
   return true
 }
 
-const createRegistration = async (dogId, statusId, policeForceName, row) => {
+const createRegistration = async (dogId, statusId, jsonObj) => {
   const registration = {
     dog_id: dogId,
-    police_force_id: (await getPoliceForce(policeForceName)).id,
-    status_id: statusId
+    police_force_id: (await getPoliceForce(jsonObj.policeForce)).id,
+    status_id: statusId,
+    cdo_issued: jsonObj.notificationDate,
+    cdo_expiry: dayjs(jsonObj.notificationDate).add(2, 'month'),
+    court_id: 1
   }
   return (await dbCreate(sequelize.models.registration, registration)).id
 }

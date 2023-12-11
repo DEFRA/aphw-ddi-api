@@ -1,4 +1,4 @@
-const addDog = require('../dog/add-dog')
+const { addImportedDog } = require('../repos/dogs')
 const { getDogById } = require('../dog/get-dog')
 
 module.exports = [{
@@ -21,7 +21,7 @@ module.exports = [{
   path: '/dog',
   handler: async (request, h) => {
     const payload = JSON.parse(request.payload)
-    await addDog(payload.dog)
+    await addImportedDog(payload.dog)
 
     return h.response('ok').code(200)
   }

@@ -15,10 +15,6 @@ module.exports = (sequelize, DataTypes) => {
       type: DataTypes.STRING(50),
       allowNull: true
     },
-    address_line_3: {
-      type: DataTypes.STRING(50),
-      allowNull: true
-    },
     town: {
       type: DataTypes.STRING(50),
       allowNull: false
@@ -55,10 +51,10 @@ module.exports = (sequelize, DataTypes) => {
         ]
       },
       {
-        name: 'address_line_3_ukey',
+        name: 'town_ukey',
         unique: true,
         fields: [
-          { name: 'address_line_3' }
+          { name: 'town' }
         ]
       },
       {

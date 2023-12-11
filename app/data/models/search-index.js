@@ -11,8 +11,13 @@ module.exports = (sequelize, DataTypes) => {
       type: DataTypes.TSVECTOR,
       allowNull: false
     },
-    reference_number: {
-      type: DataTypes.STRING
+    person_id: {
+      type: DataTypes.INTEGER,
+      allowNull: true
+    },
+    dog_id: {
+      type: DataTypes.INTEGER,
+      allowNull: true
     },
     json: {
       type: DataTypes.JSONB

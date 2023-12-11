@@ -1,6 +1,7 @@
 const sequelize = require('../config/db')
 const { createPeople } = require('./people')
 const { createDogs } = require('./dogs')
+const { addToSearchIndex } = require('./search')
 
 const createCdo = async (data, transaction) => {
   if (!transaction) {
@@ -10,6 +11,12 @@ const createCdo = async (data, transaction) => {
   try {
     const owners = await createPeople([data.owner], transaction)
     const dogs = await createDogs(data.dogs, owners, data.enforcementDetails, transaction)
+
+    for (const owner of owners) {
+      for (const dog of dogs) {
+        await addToSearchIndex(owner, dog, transaction)
+      }
+    }
 
     return {
       owner: owners[0],
