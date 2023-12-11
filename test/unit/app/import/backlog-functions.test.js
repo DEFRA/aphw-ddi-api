@@ -11,7 +11,7 @@ jest.mock('../../../../app/person/add-person')
 const { addPeople } = require('../../../../app/person/add-person')
 
 jest.mock('../../../../app/repos/dogs')
-const addImportedDog = require('../../../../app/repos/dogs')
+const { addImportedDog } = require('../../../../app/repos/dogs')
 
 const PersonCache = require('../../../../app/import/person-cache')
 
@@ -143,7 +143,7 @@ describe('BacklogFunctions test', () => {
   test('isRegistrationValid should return false when lookups not valid', async () => {
     getPoliceForce.mockResolvedValue(null)
     const rowObj = {}
-    const row = { policeForce: 'invalid' }
+    const row = { policeForce: 'invalid', notificationDate: null }
     const res = await isRegistrationValid(row, rowObj)
     expect(res).toBe(false)
   })
@@ -151,7 +151,7 @@ describe('BacklogFunctions test', () => {
   test('isRegistrationValid should return true when lookup is valid', async () => {
     getPoliceForce.mockResolvedValue({ id: 1 })
     const rowObj = {}
-    const row = { policeForce: 'valid' }
+    const row = { policeForce: 'valid', notificationDate: new Date(2023, 1, 1) }
     const res = await isRegistrationValid(row, rowObj)
     expect(res).toBe(true)
   })

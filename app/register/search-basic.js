@@ -25,7 +25,7 @@ const search = async (type, terms) => {
 
   if (type === 'dog') {
     return mappedResults
-  } else {
+  } else if (type === 'owner') {
     // Owner
     const groupedResults = groupOwners(mappedResults)
     return groupedResults
