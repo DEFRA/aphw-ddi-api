@@ -15,7 +15,7 @@ const schema = Joi.object({
   enforcementDetails: Joi.object({
     court: Joi.string().required(),
     policeForce: Joi.string().required(),
-    legislationOfficer: Joi.string().optional()
+    legislationOfficer: Joi.string().allow(null).allow('').optional()
   }).required(),
   dogs: Joi.array().items(Joi.object({
     breed: Joi.string().required(),

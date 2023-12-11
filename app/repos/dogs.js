@@ -5,9 +5,9 @@ const { getBreed } = require('../lookups')
 const getBreeds = async () => {
   try {
     const breeds = await sequelize.models.dog_breed.findAll({
-      attributes: ['id', 'breed', 'order'],
+      attributes: ['id', 'breed', 'display_order'],
       order: [
-        ['order', 'ASC'],
+        ['display_order', 'ASC'],
         ['breed', 'ASC']
       ]
     })
