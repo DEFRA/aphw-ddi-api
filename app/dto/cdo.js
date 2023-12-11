@@ -20,8 +20,8 @@ const cdoCreateDto = (data) => ({
     indexNumber: d.index_number,
     name: d.name,
     breed: d.dog_breed.breed,
-    cdoIssued: d.cdo_issued,
-    cdoExpiry: d.cdo_expiry
+    cdoIssued: d.registration.cdo_issued,
+    cdoExpiry: d.registration.cdo_expiry
   }))
 })
 
