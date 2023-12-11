@@ -10,8 +10,8 @@ const { dbLogErrorToBacklog, dbFindAll, dbUpdate, dbCreate } = require('../../..
 jest.mock('../../../../app/person/add-person')
 const { addPeople } = require('../../../../app/person/add-person')
 
-jest.mock('../../../../app/dog/add-dog')
-const addDog = require('../../../../app/dog/add-dog')
+jest.mock('../../../../app/repos/dogs')
+const addImportedDog = require('../../../../app/repos/dogs')
 
 const PersonCache = require('../../../../app/import/person-cache')
 
@@ -134,7 +134,7 @@ describe('BacklogFunctions test', () => {
   test('insertDog should add new dog', async () => {
     const row = { status: 'PERSON' }
     const dog = { name: 'Fido' }
-    addDog.mockResolvedValue()
+    addImportedDog.mockResolvedValue()
     dbUpdate.mockResolvedValue()
     await insertDog(dog, row)
     expect(dbUpdate).toHaveBeenCalledWith(row, { status: 'PERSON_AND_DOG', errors: '' })

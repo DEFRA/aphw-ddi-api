@@ -9,11 +9,11 @@ module.exports = (sequelize, DataTypes) => {
     },
     dog_reference: {
       type: DataTypes.UUID,
-      allowNull: false
+      allowNull: true
     },
     index_number: {
       type: DataTypes.STRING(20),
-      allowNull: false
+      allowNull: true
     },
     dog_breed_id: {
       type: DataTypes.INTEGER,

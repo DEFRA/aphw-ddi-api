@@ -14,20 +14,63 @@ const search = async (type, terms) => {
         [Op.match]: sequelize.fn('to_tsquery', termsQuery)
       }
     }
-    /*
-    include: [{
-      model: sequelize.models.dog,
-      required: true
-    }]
-    */
   })
 
-  console.log('results', results)
   const mappedResults = results.map(x => {
-    return { indexNumber: x.reference_number }
+    const res = x.json
+    res.dogId = x.dog_id
+    res.personId = x.person_id
+    return res
   })
 
-  return mappedResults
+  if (type === 'dog') {
+    return mappedResults
+  } else {
+    // Owner
+    const groupedResults = groupOwners(mappedResults)
+    return groupedResults
+  }
+}
+
+const groupBy = (list, keyGetter) => {
+  const map = new Map()
+  list.forEach((item) => {
+    const key = keyGetter(item)
+    const collection = map.get(key)
+    if (!collection) {
+      map.set(key, [item])
+    } else {
+      collection.push(item)
+    }
+  })
+  return map
+}
+
+const groupOwners = results => {
+  if (!results || results.length === 0) {
+    return []
+  }
+
+  const owners = groupBy(results, x => x.personId)
+
+  const groupedResults = []
+  owners.forEach((value, key) => {
+    groupedResults.push({
+      personId: value[0].personId,
+      firstName: value[0].firstName,
+      lastName: value[0].lastName,
+      address: value[0].address,
+      dogs: value.map(y => {
+        return {
+          dogId: y.dogId,
+          dogIndex: y.dogIndex,
+          dogName: y.dogName,
+          microchipNumber: y.microchipNumber
+        }
+      })
+    })
+  })
+  return groupedResults
 }
 
 module.exports = {

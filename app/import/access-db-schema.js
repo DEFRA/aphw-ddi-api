@@ -19,7 +19,7 @@ const accessDbSchema = {
     type: String
   },
   'M-Address Line 3': {
-    prop: 'addressLine3',
+    prop: 'town',
     type: String
   },
   'M-County': {

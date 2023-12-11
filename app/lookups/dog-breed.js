@@ -2,7 +2,7 @@ const { Op } = require('sequelize')
 const sequelize = require('../config/db')
 
 const getBreed = async breed => {
-  return await sequelize.models.dog_breed.findOne({
+  return sequelize.models.dog_breed.findOne({
     attributes: ['id'],
     where: {
       breed: {

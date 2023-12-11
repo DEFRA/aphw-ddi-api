@@ -79,7 +79,7 @@ const mapPersonFields = (person) => ({
   address: {
     address_line_1: person.address.addressLine1,
     address_line_2: person.address.addressLine2,
-    address_line_3: person.address.townOrCity,
+    town: person.address.townOrCity,
     county: person.address.county,
     postcode: person.address.postcode,
     country: person.address.country

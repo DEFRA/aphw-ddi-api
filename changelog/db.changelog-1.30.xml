@@ -7,13 +7,12 @@
                       http://www.liquibase.org/xml/ns/pro http://www.liquibase.org/xml/ns/pro/liquibase-pro-3.9.xsd
                       http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.9.xsd">
   <changeSet author="Shaun Fitzsimons" id="1">
-    <tagDatabase tag="v1.29" />
+    <tagDatabase tag="v1.30" />
   </changeSet>
-  <changeSet author="Shaun Fitzsimons" id="3">
-    <addColumn tableName="address">
-      <column name="town" type="VARCHAR(50)">
-        <constraints nullable="false" unique="false" />
-      </column>
-    </addColumn>
+  <changeSet author="Shaun Fitzsimons" id="2">
+    <insert tableName="status">
+      <column name="status" value="ACTIVE" />
+      <column name="status_type" value="DOG" />
+    </insert>
   </changeSet>
 </databaseChangeLog>

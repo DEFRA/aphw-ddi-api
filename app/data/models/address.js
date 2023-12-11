@@ -8,16 +8,16 @@ module.exports = (sequelize, DataTypes) => {
       primaryKey: true
     },
     address_line_1: {
-      type: DataTypes.STRING(24),
+      type: DataTypes.STRING(50),
       allowNull: false
     },
     address_line_2: {
-      type: DataTypes.STRING(24),
+      type: DataTypes.STRING(50),
       allowNull: true
     },
-    address_line_3: {
-      type: DataTypes.STRING(24),
-      allowNull: true
+    town: {
+      type: DataTypes.STRING(50),
+      allowNull: false
     },
     postcode: {
       type: DataTypes.STRING(24),
@@ -51,10 +51,10 @@ module.exports = (sequelize, DataTypes) => {
         ]
       },
       {
-        name: 'address_line_3_ukey',
+        name: 'town_ukey',
         unique: true,
         fields: [
-          { name: 'address_line_3' }
+          { name: 'town' }
         ]
       },
       {
