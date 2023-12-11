@@ -26,10 +26,6 @@ const getDogById = async (id) => {
               attribute: ['country'],
               model: db.country,
               as: 'country'
-            },
-            {
-              model: db.county,
-              as: 'county'
             }]
           }
         }

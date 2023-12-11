@@ -8,6 +8,7 @@ const { isValidRobotSchema } = require('./robot-schema')
 const { addPerson } = require('../../app/person/add-person')
 const { getPersonType, getBreed } = require('../../app/lookups')
 const { dbCreate } = require('../../app/lib/db-functions')
+const { addToSearchIndex } = require('../repos/search')
 
 let xlBullyBreedId
 let existingDogIds
@@ -48,6 +49,12 @@ const processRobotImport = async (dogsAndPeople) => {
           }
         }
 
+        for (const person of row.people) {
+          for (const dog of row.dogs) {
+            await addToSearchIndex(person, dog, t)
+          }
+        }
+
         if (stats.errors.length > 0) {
           throw new Error('Processing aborted')
         }
@@ -79,7 +86,7 @@ const mapPersonFields = (person) => ({
   address: {
     address_line_1: person.address.addressLine1,
     address_line_2: person.address.addressLine2,
-    address_line_3: person.address.townOrCity,
+    town: person.address.townOrCity,
     county: person.address.county,
     postcode: person.address.postcode,
     country: person.address.country

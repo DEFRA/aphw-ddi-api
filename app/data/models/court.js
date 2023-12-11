@@ -34,12 +34,5 @@ module.exports = (sequelize, DataTypes) => {
     ]
   })
 
-  court.associate = models => {
-    court.hasMany(models.registration, {
-      as: 'courts',
-      foreignKey: 'court_id'
-    })
-  }
-
   return court
 }
