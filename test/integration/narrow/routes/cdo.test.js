@@ -42,8 +42,6 @@ describe('CDO endpoint', () => {
           dog_breed: {
             breed: 'Test Breed'
           },
-          cdo_issued: '2020-01-01',
-          cdo_expiry: '2020-02-01',
           registration: {
             police_force: {
               name: 'Test Police Force'
@@ -51,6 +49,8 @@ describe('CDO endpoint', () => {
             court: {
               name: 'Test Court'
             },
+            cdo_issued: '2020-01-01',
+            cdo_expiry: '2020-02-01',
             legislation_officer: 'Test Officer'
           }
         }
