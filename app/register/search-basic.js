@@ -60,14 +60,13 @@ const groupOwners = results => {
       firstName: value[0].firstName,
       lastName: value[0].lastName,
       address: value[0].address,
-      dogs: value.map(y => {
-        return {
-          dogId: y.dogId,
-          dogIndex: y.dogIndex,
-          dogName: y.dogName,
-          microchipNumber: y.microchipNumber
-        }
+      dogs: value.map(y => ({
+        dogId: y.dogId,
+        dogIndex: y.dogIndex,
+        dogName: y.dogName,
+        microchipNumber: y.microchipNumber
       })
+      )
     })
   })
   return groupedResults
