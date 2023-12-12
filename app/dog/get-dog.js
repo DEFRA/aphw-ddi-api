@@ -34,7 +34,9 @@ const getDogById = async (id) => {
         model: db.person_type,
         as: 'person_type'
       }]
-    }]
+    }],
+    raw: true,
+    nest: true
   })
 }
 

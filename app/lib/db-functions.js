@@ -2,7 +2,7 @@ const dbLogErrorToBacklog = async (row, errorObj) => {
   const newStatus = row.status.startsWith('PROCESSED') ? `${row.status} then PROCESSING_ERROR` : 'PROCESSING_ERROR'
   if (typeof errorObj === 'object') {
     const errors = []
-    errorObj.forEach(e => errors.push(!e.message ? e : e.message))
+    errorObj.forEach(e => errors.push(!e.message ? (e.error ? e.error : e) : e.message))
     const errorText = errors.join(', ')
     await row.update({ status: newStatus, errors: errorText })
   } else {
