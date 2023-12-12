@@ -51,7 +51,7 @@ const processRobotImport = async (dogsAndPeople) => {
 
         for (const person of row.people) {
           for (const dog of row.dogs) {
-            await addToSearchIndex(person, dog, t)
+            await addToSearchIndex(person, dog.id, t)
           }
         }
 

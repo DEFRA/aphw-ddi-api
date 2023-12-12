@@ -11,6 +11,10 @@ module.exports = (sequelize, DataTypes) => {
       type: DataTypes.UUID,
       allowNull: true
     },
+    index_number_base: {
+      type: DataTypes.INTEGER,
+      allowNull: true
+    },
     index_number: {
       type: DataTypes.STRING(20),
       allowNull: true

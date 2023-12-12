@@ -47,7 +47,7 @@ const process = async (config) => {
               await addComment(jsonObj.comments, regId)
             }
             dog.id = dogId
-            await addToSearchIndex(rereadPerson, dog)
+            await addToSearchIndex(rereadPerson, dog.id)
             stats.dogRowsIntoDb++
           }
         }
@@ -56,7 +56,7 @@ const process = async (config) => {
       }
     } catch (e) {
       console.log(e)
-      await dbLogErrorToBacklog(backlogRow, [{ error: `${e.message} ${e.stack}` }])
+      await dbLogErrorToBacklog(backlogRow, [{ error: `${e} ${e?.parent} ${e?.parent?.detail}` }])
       stats.rowsInError++
     }
   }

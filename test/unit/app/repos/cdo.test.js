@@ -1,5 +1,8 @@
 const mockCdoPayload = require('../../../mocks/cdo/create')
 
+jest.mock('../../../../app/dog/get-dog')
+const { getDogById } = require('../../../../app/dog/get-dog')
+
 describe('CDO repo', () => {
   jest.mock('../../../../app/config/db', () => ({
     transaction: jest.fn()
@@ -13,10 +16,10 @@ describe('CDO repo', () => {
   jest.mock('../../../../app/repos/dogs')
   const { createDogs } = require('../../../../app/repos/dogs')
 
-  const { createCdo } = require('../../../../app/repos/cdo')
-
   jest.mock('../../../../app/repos/search')
   const { addToSearchIndex } = require('../../../../app/repos/search')
+
+  const { createCdo } = require('../../../../app/repos/cdo')
 
   beforeEach(async () => {
     jest.clearAllMocks()
@@ -34,6 +37,8 @@ describe('CDO repo', () => {
 
     createPeople.mockResolvedValue(owners)
     createDogs.mockResolvedValue(dogs)
+    addToSearchIndex.mockResolvedValue()
+    getDogById.mockResolvedValue({ id: 1, index_number: 'ED1' })
 
     await createCdo(mockCdoPayload, {})
 
@@ -47,6 +52,7 @@ describe('CDO repo', () => {
     createPeople.mockResolvedValue(owners)
     createDogs.mockResolvedValue(dogs)
     addToSearchIndex.mockResolvedValue()
+    getDogById.mockResolvedValue({ id: 1, index_number: 'ED1' })
 
     const cdo = await createCdo(mockCdoPayload, {})
 
