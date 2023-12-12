@@ -1,5 +1,4 @@
 const sequelize = require('../config/db')
-const { getDogById } = require('../../app/dog/get-dog')
 
 const addToSearchIndex = async (person, dog, transaction) => {
   if (!transaction) {
