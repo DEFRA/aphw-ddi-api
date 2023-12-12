@@ -1,13 +1,10 @@
 const sequelize = require('../config/db')
 const { getDogById } = require('../../app/dog/get-dog')
 
-const addToSearchIndex = async (person, dogId, transaction) => {
+const addToSearchIndex = async (person, dog, transaction) => {
   if (!transaction) {
-    return sequelize.transaction((t) => addToSearchIndex(person, dogId, t))
+    return sequelize.transaction((t) => addToSearchIndex(person, dog, t))
   }
-
-  // Dog must be re-read to retrieve proper index_number value
-  const dog = await getDogById(dogId)
 
   await sequelize.models.search_index.create({
     search: sequelize.fn('to_tsvector', `${person.id} ${person.first_name} ${person.last_name} ${buildAddress(person)} ${dog.index_number} ${dog.name} ${dog.microchip_number}`),

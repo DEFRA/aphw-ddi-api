@@ -21,7 +21,7 @@ const getBacklogRows = async (maxRecords) => {
 
 const buildDog = (jsonObj) => ({
   dog_reference: uuidv4(),
-  index_number_base: jsonObj.dogIndexNumber,
+  id: jsonObj.dogIndexNumber,
   name: jsonObj.dogName,
   breed: jsonObj.breed,
   status_id: 1,
