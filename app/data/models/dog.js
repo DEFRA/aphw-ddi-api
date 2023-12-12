@@ -13,7 +13,8 @@ module.exports = (sequelize, DataTypes) => {
     },
     index_number_base: {
       type: DataTypes.INTEGER,
-      allowNull: true
+      allowNull: false,
+      unique: true
     },
     index_number: {
       type: DataTypes.STRING(20),
