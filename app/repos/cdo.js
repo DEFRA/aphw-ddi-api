@@ -14,7 +14,7 @@ const createCdo = async (data, transaction) => {
 
     for (const owner of owners) {
       for (const dog of dogs) {
-        await addToSearchIndex(owner, dog.id, transaction)
+        await addToSearchIndex(owner, dog, transaction)
       }
     }
 
