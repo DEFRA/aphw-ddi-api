@@ -16,8 +16,8 @@ const saveParsedToBacklog = async (parseResult) => {
     // Insert rows into backlog
     for (let i = 0; i < parseResult.rows.length; i++) {
       const row = parseResult.rows[i]
-      const error = parseResult.errors.filter(x => x.row === i + 2).join(', ')
-      await dbCreate(sequelize.models.backlog, { json: row, errors: error, status: error.length ? 'IMPORT_ERROR' : 'IMPORTED' }, { transaction: t })
+      const error = parseResult.errors.filter(x => x.row === i + 2)
+      await dbCreate(sequelize.models.backlog, { json: row, errors: JSON.stringify(error), status: error.length ? 'IMPORT_ERROR' : 'IMPORTED' }, { transaction: t })
     }
   })
 }

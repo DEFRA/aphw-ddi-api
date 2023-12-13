@@ -16,6 +16,9 @@ describe('Search repo', () => {
 
   const { addToSearchIndex, buildAddress } = require('../../../../app/repos/search')
 
+  const { dbFindByPk } = require('../../../../app/lib/db-functions')
+  jest.mock('../../../../app/lib/db-functions')
+
   beforeEach(async () => {
     jest.clearAllMocks()
   })
@@ -38,7 +41,9 @@ describe('Search repo', () => {
       microchipNumber: 123456789012345
     }
 
-    await addToSearchIndex(person, dog, {})
+    dbFindByPk.mockResolvedValue(dog)
+
+    await addToSearchIndex(person, dog.id, {})
 
     expect(sequelize.models.search_index.create).toHaveBeenCalledTimes(1)
   })

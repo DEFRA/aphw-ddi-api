@@ -34,11 +34,16 @@ const dbDelete = async (model, options) => {
   return await model.destroy(options)
 }
 
+const dbFindByPk = async (model, id, options) => {
+  return await model.findByPk(id, options)
+}
+
 module.exports = {
   dbLogErrorToBacklog,
   dbLogWarningToBacklog,
   dbFindAll,
   dbFindOne,
+  dbFindByPk,
   dbUpdate,
   dbCreate,
   dbDelete

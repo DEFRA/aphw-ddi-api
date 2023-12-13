@@ -1,9 +1,12 @@
 const sequelize = require('../config/db')
+const { dbFindByPk } = require('../lib/db-functions')
 
-const addToSearchIndex = async (person, dog, transaction) => {
+const addToSearchIndex = async (person, dogId, transaction) => {
   if (!transaction) {
-    return sequelize.transaction((t) => addToSearchIndex(person, dog, t))
+    return sequelize.transaction((t) => addToSearchIndex(person, dogId, t))
   }
+
+  const dog = await dbFindByPk(sequelize.models.dog, dogId, { raw: true, nest: true, transaction })
 
   await sequelize.models.search_index.create({
     search: sequelize.fn('to_tsvector', `${person.id} ${person.first_name} ${person.last_name} ${buildAddress(person)} ${dog.index_number} ${dog.name} ${dog.microchip_number}`),
