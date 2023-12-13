@@ -46,6 +46,16 @@
     <addForeignKeyConstraint baseColumnNames="insurance_id" baseTableName="dog" constraintName="fk_dog_insurance" referencedColumnNames="id" referencedTableName="insurance" />
     <addForeignKeyConstraint baseColumnNames="microchip_type_id" baseTableName="dog" constraintName="fk_dog_microchip_type" referencedColumnNames="id" referencedTableName="microchip_type" />
   </changeSet>
+  <changeSet author="Shaun Fitzsimons" id="4">
+    <sql dbms="postgresql">
+      ALTER SEQUENCE dog_id_seq RESTART WITH 300000;
+    </sql>
+    <rollback>
+      <sql dbms="postgresql">
+        ALTER SEQUENCE dog_id_seq RESTART WITH 1;
+      </sql>
+    </rollback>
+  </changeSet>
   <changeSet author="Shaun Fitzsimons" id="1">
     <tagDatabase tag="v1.4.0" />
   </changeSet>
