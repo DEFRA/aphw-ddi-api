@@ -50,8 +50,8 @@ const processRobotImport = async (dogsAndPeople) => {
         }
 
         for (const person of row.people) {
-          for (const dog of row.dogs) {
-            await addToSearchIndex(person, dog.id, t)
+          for (const dogId of createdDogIds) {
+            await addToSearchIndex(person, dogId, t)
           }
         }
 
@@ -68,7 +68,7 @@ const processRobotImport = async (dogsAndPeople) => {
 }
 
 const mapDogFields = (dog) => ({
-  index_number: dog.indexNumber,
+  id: dog.indexNumber,
   name: dog.name,
   birth_date: dog.dateOfBirth,
   colour: dog.colour,
@@ -101,7 +101,7 @@ const processDog = async (dog, t) => {
   }
   const newDog = mapDogFields(dog)
   const insertedDog = await dbCreate(sequelize.models.dog, newDog, { transaction: t })
-  stats.created.push(`New dog index number ${newDog.index_number} created`)
+  stats.created.push(`New dog index number ED${newDog.id} created`)
   return insertedDog.id
 }
 

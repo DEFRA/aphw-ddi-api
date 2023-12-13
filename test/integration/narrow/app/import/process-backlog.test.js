@@ -34,7 +34,7 @@ describe('ProcessBacklog test', () => {
     insertPerson.mockResolvedValue('REF1')
     buildDog.mockReturnValue(testBacklogDog)
     isDogValid.mockResolvedValue(true)
-    insertDog.mockResolvedValue()
+    insertDog.mockResolvedValue(123)
     dbLogErrorToBacklog.mockResolvedValue()
     isRegistrationValid.mockResolvedValue(true)
     createRegistration.mockResolvedValue(999)
