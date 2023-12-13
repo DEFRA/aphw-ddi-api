@@ -1,14 +1,14 @@
 const { addImportedDog } = require('../repos/dogs')
-const { getDogById } = require('../dog/get-dog')
+const { getDogByIndexNumber } = require('../dog/get-dog')
 
 module.exports = [{
   method: 'GET',
-  path: '/dog/{id}',
+  path: '/dog/{indexNumber}',
   handler: async (request, h) => {
-    const id = request.params.id
+    const indexNumber = request.params.indexNumber
     let dog = null
     try {
-      dog = await getDogById(id)
+      dog = await getDogByIndexNumber(indexNumber)
     } catch (e) {
       console.log(e)
     }
