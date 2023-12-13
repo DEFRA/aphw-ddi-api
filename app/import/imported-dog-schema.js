@@ -2,7 +2,7 @@ const Joi = require('joi')
 
 const dogSchema = Joi.object({
   dog_reference: Joi.string().required(),
-  index_number_base: Joi.number().required(),
+  id: Joi.number().required(),
   dog_breed_id: Joi.number().required(),
   status_id: Joi.number().required(),
   name: Joi.string().required(),
