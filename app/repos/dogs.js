@@ -113,14 +113,68 @@ const addImportedDog = async (dog, transaction) => {
     await addImportedRegisteredPerson(dog.owner, 1, newDog.id, transaction)
   }
 
-  if (dog.keeper) {
-    await addImportedRegisteredPerson(dog.keeper, 2, newDog.id, transaction)
-  }
   return newDog.id
+}
+
+const getDogByIndexNumber = async (indexNumber) => {
+  const dog = await sequelize.models.dog.findOne({
+    where: { index_number: indexNumber },
+    include: [{
+      model: sequelize.models.registered_person,
+      as: 'registered_person',
+      include: [{
+        model: sequelize.models.person,
+        as: 'person',
+        include: [{
+          model: sequelize.models.person_address,
+          as: 'addresses',
+          include: [{
+            model: sequelize.models.address,
+            as: 'address',
+            include: [{
+              attribute: ['country'],
+              model: sequelize.models.country,
+              as: 'country'
+            }]
+          }]
+        },
+        {
+          model: sequelize.models.person_contact,
+          as: 'person_contacts',
+          include: [{
+            model: sequelize.models.contact,
+            as: 'contact'
+          }]
+        }]
+      },
+      {
+        model: sequelize.models.person_type,
+        as: 'person_type'
+      }]
+    },
+    {
+      model: sequelize.models.dog_breed,
+      as: 'dog_breed'
+    },
+    {
+      model: sequelize.models.status,
+      as: 'status'
+    }]
+  })
+  // Workaround due to Sequelize bug when using 'raw: true'
+  // Multiple rows aren't returned from an array when using 'raw: true'
+  // so the temporary solution is to omit 'raw: true'
+  return dog
+}
+
+const getAllDogIds = async () => {
+  return sequelize.models.dog.findAll({ attributes: ['id'] })
 }
 
 module.exports = {
   getBreeds,
   createDogs,
-  addImportedDog
+  addImportedDog,
+  getAllDogIds,
+  getDogByIndexNumber
 }

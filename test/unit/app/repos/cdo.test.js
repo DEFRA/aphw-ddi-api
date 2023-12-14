@@ -1,11 +1,13 @@
 const mockCdoPayload = require('../../../mocks/cdo/create')
 
-jest.mock('../../../../app/dog/get-dog')
-const { getDogById } = require('../../../../app/dog/get-dog')
-
 describe('CDO repo', () => {
   jest.mock('../../../../app/config/db', () => ({
-    transaction: jest.fn()
+    transaction: jest.fn(),
+    models: {
+      dog: {
+        findOne: jest.fn()
+      }
+    }
   }))
 
   const sequelize = require('../../../../app/config/db')
@@ -14,12 +16,12 @@ describe('CDO repo', () => {
   const { createPeople } = require('../../../../app/repos/people')
 
   jest.mock('../../../../app/repos/dogs')
-  const { createDogs } = require('../../../../app/repos/dogs')
+  const { createDogs, getDogByIndexNumber } = require('../../../../app/repos/dogs')
 
   jest.mock('../../../../app/repos/search')
   const { addToSearchIndex } = require('../../../../app/repos/search')
 
-  const { createCdo } = require('../../../../app/repos/cdo')
+  const { createCdo, getCdo } = require('../../../../app/repos/cdo')
 
   beforeEach(async () => {
     jest.clearAllMocks()
@@ -38,7 +40,7 @@ describe('CDO repo', () => {
     createPeople.mockResolvedValue(owners)
     createDogs.mockResolvedValue(dogs)
     addToSearchIndex.mockResolvedValue()
-    getDogById.mockResolvedValue({ id: 1, index_number: 'ED1' })
+    getDogByIndexNumber.mockResolvedValue({ id: 1, index_number: 'ED1' })
 
     await createCdo(mockCdoPayload, {})
 
@@ -52,7 +54,7 @@ describe('CDO repo', () => {
     createPeople.mockResolvedValue(owners)
     createDogs.mockResolvedValue(dogs)
     addToSearchIndex.mockResolvedValue()
-    getDogById.mockResolvedValue({ id: 1, index_number: 'ED1' })
+    getDogByIndexNumber.mockResolvedValue({ id: 1, index_number: 'ED1' })
 
     const cdo = await createCdo(mockCdoPayload, {})
 
@@ -64,5 +66,14 @@ describe('CDO repo', () => {
     createPeople.mockRejectedValue(new Error('Test error'))
 
     await expect(createCdo(mockCdoPayload, {})).rejects.toThrow('Test error')
+  })
+
+  test('getCdo should return CDO', async () => {
+    sequelize.models.dog.findOne.mockResolvedValue({ id: 123, breed: 'breed', name: 'Bruno' })
+
+    const res = await getCdo('ED123')
+    expect(sequelize.models.dog.findOne).toHaveBeenCalledTimes(1)
+    expect(res).not.toBe(null)
+    expect(res.id).toBe(123)
   })
 })

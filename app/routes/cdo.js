@@ -1,8 +1,22 @@
 const { cdoCreateDto } = require('../dto/cdo')
-const { createCdo } = require('../repos/cdo')
+const { createCdo, getCdo } = require('../repos/cdo')
 const cdoCreateSchema = require('../schema/cdo/create')
 
 module.exports = [{
+  method: 'GET',
+  path: '/cdo/{indexNumber}',
+  handler: async (request, h) => {
+    const indexNumber = request.params.indexNumber
+    try {
+      const cdo = await getCdo(indexNumber)
+      return h.response({ cdo }).code(200)
+    } catch (e) {
+      console.log(e)
+      return h.response().code(500)
+    }
+  }
+},
+{
   method: 'POST',
   path: '/cdo',
   options: {
