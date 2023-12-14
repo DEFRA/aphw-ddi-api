@@ -163,8 +163,8 @@ const getDogByIndexNumber = async (indexNumber) => {
   })
   // Workaround due to Sequelize bug when using 'raw: true'
   // Multiple rows aren't returned from an array when using 'raw: true'
-  // so the temporary solution is to omit 'raw: true' and parse the JSON yourself
-  return JSON.parse(JSON.stringify(dog))
+  // so the temporary solution is to omit 'raw: true'
+  return dog
 }
 
 const getAllDogIds = async () => {

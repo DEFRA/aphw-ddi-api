@@ -14,7 +14,7 @@ module.exports = [{
   path: '/dog',
   handler: async (request, h) => {
     if (!request.payload?.dog) {
-      return h.response('bad request').code(400)
+      return h.response().code(400)
     }
 
     await addImportedDog(request.payload.dog)
