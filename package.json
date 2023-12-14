@@ -26,8 +26,6 @@
     "@joi/date": "2.1.0",
     "applicationinsights": "2.3.5",
     "dayjs": "^1.11.10",
-    "graphi": "^9.0.2",
-    "graphql-fields": "^2.0.3",
     "joi": "^17.11.0",
     "pg": "^8.11.3",
     "pg-hstore": "^2.3.4",

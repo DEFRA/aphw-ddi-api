@@ -37,6 +37,9 @@ const buildAddress = (person) => {
   }
   if (address?.postcode) {
     addrParts.push(address.postcode)
+    if (address.postcode.indexOf(' ') > -1) {
+      addrParts.push(address.postcode.replaceAll(' ', ''))
+    }
   }
   return addrParts.join(', ')
 }

@@ -1,5 +1,5 @@
-jest.mock('../../../../app/dog/get-dog')
-const { getDogById } = require('../../../../app/dog/get-dog')
+jest.mock('../../../../app/repos/dogs')
+const { getDogByIndexNumber } = require('../../../../app/repos/dogs')
 
 describe('Search repo', () => {
   jest.mock('../../../../app/config/db', () => ({
@@ -25,7 +25,7 @@ describe('Search repo', () => {
 
   test('addToSearchIndex should call create', async () => {
     sequelize.models.search_index.create.mockResolvedValue()
-    getDogById.mockResolvedValue({ id: 1, index_number: 'ED1' })
+    getDogByIndexNumber.mockResolvedValue({ id: 1, index_number: 'ED1' })
 
     const person = {
       id: 123,
