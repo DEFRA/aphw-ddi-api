@@ -3,8 +3,8 @@ const { processRobotImport } = require('../../../../../app/import/robot-import')
 jest.mock('../../../../../app/lookups')
 const { getBreed, getCountry, getPersonType } = require('../../../../../app/lookups')
 
-jest.mock('../../../../../app/dog/get-dog')
-const { getAllDogIds } = require('../../../../../app/dog/get-dog')
+jest.mock('../../../../../app/repos/dogs')
+const { getAllDogIds } = require('../../../../../app/repos/dogs')
 
 jest.mock('../../../../../app/person/add-person')
 const { addPerson } = require('../../../../../app/person/add-person')
