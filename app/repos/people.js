@@ -51,6 +51,39 @@ const createPeople = async (owners, transaction) => {
   }
 }
 
+const getPersonByReference = async (reference, transaction) => {
+  try {
+    const person = await sequelize.models.person.findOne({
+      where: {
+        person_reference: reference
+      },
+      order: [
+        [{ model: sequelize.models.person_address, as: 'addresses' }, 'id', 'DESC']
+      ],
+      include: [{
+        model: sequelize.models.person_address,
+        as: 'addresses',
+        include: [{
+          model: sequelize.models.address,
+          as: 'address',
+          include: [{
+            attribute: ['country'],
+            model: sequelize.models.country,
+            as: 'country'
+          }]
+        }]
+      }],
+      transaction
+    })
+
+    return person
+  } catch (err) {
+    console.error(`Error getting person by reference: ${err}`)
+    throw err
+  }
+}
+
 module.exports = {
-  createPeople
+  createPeople,
+  getPersonByReference
 }
