@@ -2,7 +2,12 @@ const mockCdoPayload = require('../../../mocks/cdo/create')
 
 describe('CDO repo', () => {
   jest.mock('../../../../app/config/db', () => ({
-    transaction: jest.fn()
+    transaction: jest.fn(),
+    models: {
+      registration: {
+        findOne: jest.fn()
+      }
+    }
   }))
 
   const sequelize = require('../../../../app/config/db')
@@ -16,7 +21,7 @@ describe('CDO repo', () => {
   jest.mock('../../../../app/repos/search')
   const { addToSearchIndex } = require('../../../../app/repos/search')
 
-  const { createCdo } = require('../../../../app/repos/cdo')
+  const { createCdo, getCdo } = require('../../../../app/repos/cdo')
 
   beforeEach(async () => {
     jest.clearAllMocks()
@@ -61,5 +66,14 @@ describe('CDO repo', () => {
     createPeople.mockRejectedValue(new Error('Test error'))
 
     await expect(createCdo(mockCdoPayload, {})).rejects.toThrow('Test error')
+  })
+
+  test('getCdo should return CDO', async () => {
+    sequelize.models.registration.findOne.mockResolvedValue({ id: 123, breed: 'breed', name: 'Bruno' })
+
+    const res = await getCdo('ED123')
+    expect(sequelize.models.registration.findOne).toHaveBeenCalledTimes(1)
+    expect(res).not.toBe(null)
+    expect(res.id).toBe(123)
   })
 })

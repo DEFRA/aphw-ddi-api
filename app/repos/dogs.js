@@ -113,9 +113,6 @@ const addImportedDog = async (dog, transaction) => {
     await addImportedRegisteredPerson(dog.owner, 1, newDog.id, transaction)
   }
 
-  if (dog.keeper) {
-    await addImportedRegisteredPerson(dog.keeper, 2, newDog.id, transaction)
-  }
   return newDog.id
 }
 
