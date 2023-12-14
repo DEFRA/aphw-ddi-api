@@ -1,6 +1,6 @@
 const Joi = require('joi')
-const { getPersonByReference } = require("../repos/people")
-const { personDto } = require("../dto/person")
+const { getPersonByReference } = require('../repos/people')
+const { personDto } = require('../dto/person')
 
 module.exports = [{
   method: 'GET',
@@ -12,7 +12,7 @@ module.exports = [{
       }),
       failAction: (request, h, error) => {
         return h.response().code(400).takeover()
-      },
+      }
     },
     handler: async (request, h) => {
       const ref = request.params.reference
