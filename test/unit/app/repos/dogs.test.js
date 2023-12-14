@@ -12,7 +12,9 @@ describe('Dog repo', () => {
       },
       dog: {
         findByPk: jest.fn(),
-        create: jest.fn()
+        create: jest.fn(),
+        findOne: jest.fn(),
+        findAll: jest.fn()
       },
       registration: {
         findByPk: jest.fn(),
@@ -27,7 +29,7 @@ describe('Dog repo', () => {
 
   const sequelize = require('../../../../app/config/db')
 
-  const { getBreeds, createDogs, addImportedDog } = require('../../../../app/repos/dogs')
+  const { getBreeds, createDogs, addImportedDog, getDogByIndexNumber, getAllDogIds } = require('../../../../app/repos/dogs')
 
   beforeEach(async () => {
     jest.clearAllMocks()
@@ -158,6 +160,19 @@ describe('Dog repo', () => {
     await expect(createDogs(dogs, owners, enforcement, {})).rejects.toThrow('Test error')
   })
 
+  test('addImportedDog should create new transaction if none passed', async () => {
+    sequelize.models.dog.create.mockResolvedValue({ id: 123, breed: 'breed', name: 'Bruno' })
+
+    const dog = {
+      id: 123,
+      name: 'Bruno',
+      owner: { firstName: 'John', lastName: 'Smith' }
+    }
+
+    await addImportedDog(dog)
+    expect(sequelize.transaction).toHaveBeenCalledTimes(1)
+  })
+
   test('addImportedDog should create dog', async () => {
     sequelize.models.dog.create.mockResolvedValue({ id: 123, breed: 'breed', name: 'Bruno' })
 
@@ -170,5 +185,26 @@ describe('Dog repo', () => {
     await addImportedDog(dog, {})
     expect(sequelize.models.dog.create).toHaveBeenCalledTimes(1)
     expect(sequelize.models.registered_person.create).toHaveBeenCalledTimes(1)
+    expect(sequelize.transaction).toHaveBeenCalledTimes(0)
+  })
+
+  test('getDogByIndexNumber should return dog', async () => {
+    sequelize.models.dog.findOne.mockResolvedValue({ id: 123, breed: 'breed', name: 'Bruno' })
+
+    const res = await getDogByIndexNumber('ED123')
+    expect(sequelize.models.dog.findOne).toHaveBeenCalledTimes(1)
+    expect(res).not.toBe(null)
+    expect(res.id).toBe(123)
+  })
+
+  test('getAllDogIds should return dog ids', async () => {
+    sequelize.models.dog.findAll.mockResolvedValue([123, 456])
+
+    const res = await getAllDogIds()
+    expect(sequelize.models.dog.findAll).toHaveBeenCalledTimes(1)
+    expect(res).not.toBe(null)
+    expect(res.length).toBe(2)
+    expect(res[0]).toBe(123)
+    expect(res[1]).toBe(456)
   })
 })

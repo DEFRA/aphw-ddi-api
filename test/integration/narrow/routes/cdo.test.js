@@ -5,12 +5,24 @@ describe('CDO endpoint', () => {
   let server
 
   jest.mock('../../../../app/repos/cdo')
-  const { createCdo } = require('../../../../app/repos/cdo')
+  const { createCdo, getCdo } = require('../../../../app/repos/cdo')
 
   beforeEach(async () => {
     jest.clearAllMocks()
     server = await createServer()
     await server.initialize()
+  })
+
+  test('GET /cdo/ED123 route returns 200', async () => {
+    getCdo.mockResolvedValue({ id: 123, indexNumber: 'ED123' })
+
+    const options = {
+      method: 'GET',
+      url: '/cdo/ED123'
+    }
+
+    const response = await server.inject(options)
+    expect(response.statusCode).toBe(200)
   })
 
   test('POST /cdo route returns 200 with valid payload', async () => {

@@ -1,18 +1,11 @@
-const { addImportedDog } = require('../repos/dogs')
-const { getDogById } = require('../dog/get-dog')
+const { addImportedDog, getDogByIndexNumber } = require('../repos/dogs')
 
 module.exports = [{
   method: 'GET',
-  path: '/dog/{id}',
+  path: '/dog/{indexNumber}',
   handler: async (request, h) => {
-    const id = request.params.id
-    let dog = null
-    try {
-      dog = await getDogById(id)
-    } catch (e) {
-      console.log(e)
-    }
-
+    const indexNumber = request.params.indexNumber
+    const dog = await getDogByIndexNumber(indexNumber)
     return h.response({ dog }).code(200)
   }
 },
@@ -20,8 +13,11 @@ module.exports = [{
   method: 'POST',
   path: '/dog',
   handler: async (request, h) => {
-    const payload = JSON.parse(request.payload)
-    await addImportedDog(payload.dog)
+    if (!request.payload?.dog) {
+      return h.response().code(400)
+    }
+
+    await addImportedDog(request.payload.dog)
 
     return h.response('ok').code(200)
   }
