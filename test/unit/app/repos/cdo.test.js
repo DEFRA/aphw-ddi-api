@@ -4,7 +4,7 @@ describe('CDO repo', () => {
   jest.mock('../../../../app/config/db', () => ({
     transaction: jest.fn(),
     models: {
-      registration: {
+      dog: {
         findOne: jest.fn()
       }
     }
@@ -69,10 +69,10 @@ describe('CDO repo', () => {
   })
 
   test('getCdo should return CDO', async () => {
-    sequelize.models.registration.findOne.mockResolvedValue({ id: 123, breed: 'breed', name: 'Bruno' })
+    sequelize.models.dog.findOne.mockResolvedValue({ id: 123, breed: 'breed', name: 'Bruno' })
 
     const res = await getCdo('ED123')
-    expect(sequelize.models.registration.findOne).toHaveBeenCalledTimes(1)
+    expect(sequelize.models.dog.findOne).toHaveBeenCalledTimes(1)
     expect(res).not.toBe(null)
     expect(res.id).toBe(123)
   })
