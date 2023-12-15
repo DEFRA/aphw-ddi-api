@@ -4,7 +4,8 @@ describe('People repo', () => {
   jest.mock('../../../../app/config/db', () => ({
     models: {
       person: {
-        create: jest.fn()
+        create: jest.fn(),
+        findOne: jest.fn()
       },
       address: {
         create: jest.fn(),
@@ -19,7 +20,7 @@ describe('People repo', () => {
 
   const sequelize = require('../../../../app/config/db')
 
-  const { createPeople } = require('../../../../app/repos/people')
+  const { createPeople, getPersonByReference } = require('../../../../app/repos/people')
 
   beforeEach(async () => {
     jest.clearAllMocks()
@@ -108,5 +109,51 @@ describe('People repo', () => {
     sequelize.models.person.create.mockRejectedValue(new Error('Test error'))
 
     await expect(createPeople(people, {})).rejects.toThrow('Test error')
+  })
+
+  test('getPersonByReference should return person', async () => {
+    sequelize.models.person.findOne.mockResolvedValue({
+      dataValues: {
+        id: 1,
+        first_name: 'First',
+        last_name: 'Last',
+        person_reference: '1234',
+        addresses: [
+          {
+            id: 1,
+            address_line_1: 'Address 1',
+            address_line_2: 'Address 2',
+            town: 'Town',
+            postcode: 'Postcode'
+          }
+        ]
+      }
+    })
+
+    const person = await getPersonByReference('1234')
+
+    expect(person).toEqual({
+      dataValues: {
+        id: 1,
+        first_name: 'First',
+        last_name: 'Last',
+        person_reference: '1234',
+        addresses: [
+          {
+            id: 1,
+            address_line_1: 'Address 1',
+            address_line_2: 'Address 2',
+            town: 'Town',
+            postcode: 'Postcode'
+          }
+        ]
+      }
+    })
+  })
+
+  test('getPersonByReference should throw if error', async () => {
+    sequelize.models.person.findOne.mockRejectedValue(new Error('Test error'))
+
+    await expect(getPersonByReference('1234')).rejects.toThrow('Test error')
   })
 })
