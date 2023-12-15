@@ -57,14 +57,14 @@ describe('Search repo', () => {
           address_line_1: 'addr1',
           address_line_2: 'addr2',
           town: 'town',
-          postcode: 'postcode'
+          postcode: 'post code'
         }
       }
     }
 
     const parts = await buildAddress(person)
 
-    expect(parts).toBe('addr1, addr2, town, postcode')
+    expect(parts).toBe('addr1, addr2, town, post code, postcode')
   })
 
   test('buildAddress should return parts', async () => {
