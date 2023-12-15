@@ -1,6 +1,6 @@
 const Joi = require('joi')
-const { getPersonByReference } = require('../repos/people')
-const { personDto } = require('../dto/person')
+const { getPersonByReference, getPersonAndDogsByReference } = require('../repos/people')
+const { personDto, personAndDogsDto } = require('../dto/person')
 
 module.exports = [{
   method: 'GET',
@@ -16,13 +16,16 @@ module.exports = [{
     },
     handler: async (request, h) => {
       const ref = request.params.reference
-      const person = await getPersonByReference(ref)
+      const includeDogs = request.query.includeDogs === 'true'
+      const person = includeDogs ? await getPersonAndDogsByReference(ref) : await getPersonByReference(ref)
 
       if (person === null) {
         return h.response().code(204)
       }
 
-      return h.response(personDto(person)).code(200)
+      const result = includeDogs ? personAndDogsDto(person) : personDto(person)
+
+      return h.response(result).code(200)
     }
   }
 }]

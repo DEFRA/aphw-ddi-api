@@ -83,7 +83,63 @@ const getPersonByReference = async (reference, transaction) => {
   }
 }
 
+const getPersonAndDogsByReference = async (reference, transaction) => {
+  try {
+    const person = await sequelize.models.registered_person.findAll({
+      include: [{
+        model: sequelize.models.person,
+        where: { person_reference: reference },
+        as: 'person',
+        include: [{
+          model: sequelize.models.person_address,
+          as: 'addresses',
+          order: [
+            [{ model: sequelize.models.person_address, as: 'addresses' }, 'id', 'DESC']
+          ],
+          include: [{
+            model: sequelize.models.address,
+            as: 'address',
+            include: [{
+              attribute: ['country'],
+              model: sequelize.models.country,
+              as: 'country'
+            }]
+          }]
+        },
+        {
+          model: sequelize.models.person_contact,
+          as: 'person_contacts',
+          separate: true, // workaround to prevent 'contact_type_id' being truncated to 'contact_type_i'
+          include: [{
+            model: sequelize.models.contact,
+            as: 'contact'
+          }]
+        }]
+      },
+      {
+        model: sequelize.models.dog,
+        as: 'dog',
+        include: [{
+          model: sequelize.models.dog_breed,
+          as: 'dog_breed'
+        },
+        {
+          model: sequelize.models.status,
+          as: 'status'
+        }]
+      }],
+      transaction
+    })
+
+    return person
+  } catch (err) {
+    console.error(`Error getting person and dogs by reference: ${err}`)
+    throw err
+  }
+}
+
 module.exports = {
   createPeople,
-  getPersonByReference
+  getPersonByReference,
+  getPersonAndDogsByReference
 }

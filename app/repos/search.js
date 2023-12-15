@@ -9,7 +9,7 @@ const addToSearchIndex = async (person, dogId, transaction) => {
   const dog = await dbFindByPk(sequelize.models.dog, dogId, { raw: true, nest: true, transaction })
 
   await sequelize.models.search_index.create({
-    search: sequelize.fn('to_tsvector', `${person.id} ${person.first_name} ${person.last_name} ${buildAddress(person)} ${dog.index_number} ${dog.name} ${dog.microchip_number}`),
+    search: sequelize.fn('to_tsvector', `${person.person_reference} ${person.first_name} ${person.last_name} ${buildAddress(person)} ${dog.index_number} ${dog.name} ${dog.microchip_number}`),
     person_id: person.id,
     dog_id: dog.id,
     json: {
@@ -18,7 +18,8 @@ const addToSearchIndex = async (person, dogId, transaction) => {
       address: buildAddress(person),
       dogIndex: dog.index_number,
       dogName: dog.name,
-      microchipNumber: dog.microchip_number
+      microchipNumber: dog.microchip_number,
+      personReference: person.person_reference
     }
   }, { transaction })
 }
