@@ -62,7 +62,7 @@ describe('Search repo', () => {
       }
     }
 
-    const parts = await buildAddress(person)
+    const parts = await buildAddress(person, true)
 
     expect(parts).toBe('addr1, addr2, town, post code, postcode')
   })
