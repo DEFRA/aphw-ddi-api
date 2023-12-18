@@ -83,4 +83,23 @@ describe('Search repo', () => {
 
     expect(parts).toBe('addr1, addr2, town, postcode')
   })
+
+  test('buildAddress should return parts without alternate', async () => {
+    const person = {
+      firstName: 'John',
+      lastName: 'Smith',
+      addresses: {
+        address: {
+          address_line_1: 'addr1',
+          address_line_2: 'addr2',
+          town: 'town',
+          postcode: 'post code'
+        }
+      }
+    }
+
+    const parts = await buildAddress(person)
+
+    expect(parts).toBe('addr1, addr2, town, post code')
+  })
 })
