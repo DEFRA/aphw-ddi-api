@@ -1,4 +1,4 @@
-const { addImportedDog, updateDog, getDogByIndexNumber } = require('../repos/dogs')
+const { addImportedDog, getDogByIndexNumber } = require('../repos/dogs')
 
 module.exports = [{
   method: 'GET',
@@ -20,18 +20,5 @@ module.exports = [{
     await addImportedDog(request.payload.dog)
 
     return h.response('ok').code(200)
-  }
-},
-{
-  method: 'PUT',
-  path: '/dog',
-  handler: async (request, h) => {
-    if (!request.payload) {
-      return h.response().code(400)
-    }
-
-    const updatedDog = await updateDog(request.payload)
-
-    return h.response(updatedDog).code(200)
   }
 }]
