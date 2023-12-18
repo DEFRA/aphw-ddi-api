@@ -57,6 +57,7 @@ const groupOwners = results => {
   owners.forEach((value, key) => {
     groupedResults.push({
       personId: value[0].personId,
+      personReference: value[0].personReference,
       firstName: value[0].firstName,
       lastName: value[0].lastName,
       address: value[0].address,
