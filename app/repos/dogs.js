@@ -116,6 +116,37 @@ const addImportedDog = async (dog, transaction) => {
   return newDog.id
 }
 
+const updateDog = async (dogWithUpdates, transaction) => {
+  if (!transaction) {
+    return sequelize.transaction(async (t) => updateDog(dogWithUpdates, t))
+  }
+
+  const dogFromDB = await getDogByIndexNumber(dogWithUpdates.indexNumber)
+
+  const breeds = await getBreeds()
+
+  updateDogFields(dogFromDB, dogWithUpdates, breeds)
+
+  await dogFromDB.save({ transaction })
+
+  return dogFromDB
+}
+
+const updateDogFields = (dbDog, dog, breeds) => {
+  dbDog.dog_breed_id = breeds.filter(x => x.breed === dog.breed)[0].id
+  // dbDog.status_id = dto.statusId
+  dbDog.name = dog.name
+  dbDog.birth_date = dog.dateOfBirth
+  dbDog.death_date = dog.dateOfDeath
+  dbDog.tattoo = dog.tattoo
+  dbDog.microchip_number = dog.microchipNumber
+  // dbDog.microchip_number2: dto.microchipNumber2
+  dbDog.colour = dog.colour
+  dbDog.sex = dog.sex
+  dbDog.exported_date = dog.dateExported
+  dbDog.stolen_date = dog.dateStolen
+}
+
 const getDogByIndexNumber = async (indexNumber) => {
   const dog = await sequelize.models.dog.findOne({
     where: { index_number: indexNumber },
@@ -175,6 +206,7 @@ module.exports = {
   getBreeds,
   createDogs,
   addImportedDog,
+  updateDog,
   getAllDogIds,
   getDogByIndexNumber
 }
