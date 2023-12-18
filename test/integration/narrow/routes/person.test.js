@@ -3,7 +3,7 @@ describe('CDO endpoint', () => {
   let server
 
   jest.mock('../../../../app/repos/people')
-  const { getPersonByReference } = require('../../../../app/repos/people')
+  const { getPersonByReference, getPersonAndDogsByReference } = require('../../../../app/repos/people')
 
   beforeEach(async () => {
     jest.clearAllMocks()
@@ -66,6 +66,91 @@ describe('CDO endpoint', () => {
     const response = await server.inject(options)
 
     expect(response.statusCode).toBe(204)
+  })
+
+  test('GET /person route with param includeDogs returns 200 with valid payload', async () => {
+    const options = {
+      method: 'GET',
+      url: '/person/ABC123?includeDogs=true'
+    }
+
+    getPersonAndDogsByReference.mockResolvedValue([
+      {
+        id: 1,
+        person_id: 1,
+        dog_id: 100,
+        person: {
+          first_name: 'John',
+          last_name: 'Doe',
+          birth_date: '1990-01-01',
+          person_reference: 'ABC123',
+          addresses: [{
+            address: {
+              address_line_1: '1 Test Street',
+              address_line_2: 'Test2',
+              town: 'Test town',
+              postcode: 'TS1 1TS',
+              country: { country: 'England' }
+            }
+          }],
+          person_contacts: [
+            { contact: { id: 1, contact: 'phone' } }
+          ]
+        },
+        dog: {
+          id: 1, name: 'dog1', dog_breed: { breed: 'breed1' }, status: { status: 'NEW' }
+        }
+      },
+      {
+        id: 1,
+        person_id: 1,
+        dog_id: 100,
+        person: {
+          first_name: 'John',
+          last_name: 'Doe',
+          birth_date: '1990-01-01',
+          person_reference: 'ABC123',
+          addresses: [{
+            address: {
+              address_line_1: '1 Test Street',
+              address_line_2: 'Test2',
+              town: 'Test town',
+              postcode: 'TS1 1TS',
+              country: { country: 'England' }
+            }
+          }],
+          person_contacts: [
+            { contact: { id: 1, contact: 'phone' } }
+          ]
+        },
+        dog: {
+          id: 2, name: 'dog2', dog_breed: { breed: 'breed2' }, status: { status: 'NEW' }
+        }
+      }
+    ]
+    )
+
+    const response = await server.inject(options)
+
+    expect(response.statusCode).toBe(200)
+    expect(response.result).toEqual({
+      firstName: 'John',
+      lastName: 'Doe',
+      birthDate: '1990-01-01',
+      personReference: 'ABC123',
+      address: {
+        addressLine1: '1 Test Street',
+        addressLine2: 'Test2',
+        town: 'Test town',
+        postcode: 'TS1 1TS',
+        country: 'England'
+      },
+      contacts: [{ contact: { id: 1, contact: 'phone' } }],
+      dogs: [
+        { id: 1, breed: 'breed1', name: 'dog1', status: 'NEW' },
+        { id: 2, breed: 'breed2', name: 'dog2', status: 'NEW' }
+      ]
+    })
   })
 
   afterEach(async () => {

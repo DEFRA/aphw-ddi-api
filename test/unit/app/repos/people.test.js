@@ -13,6 +13,12 @@ describe('People repo', () => {
       },
       person_address: {
         create: jest.fn()
+      },
+      registered_person: {
+        findAll: jest.fn()
+      },
+      dog: {
+        findAll: jest.fn()
       }
     },
     transaction: jest.fn()
@@ -20,7 +26,7 @@ describe('People repo', () => {
 
   const sequelize = require('../../../../app/config/db')
 
-  const { createPeople, getPersonByReference } = require('../../../../app/repos/people')
+  const { createPeople, getPersonByReference, getPersonAndDogsByReference } = require('../../../../app/repos/people')
 
   beforeEach(async () => {
     jest.clearAllMocks()
@@ -155,5 +161,67 @@ describe('People repo', () => {
     sequelize.models.person.findOne.mockRejectedValue(new Error('Test error'))
 
     await expect(getPersonByReference('1234')).rejects.toThrow('Test error')
+  })
+
+  test('getPersonAndDogsByReference should return person and dogs', async () => {
+    sequelize.models.registered_person.findAll.mockResolvedValue({
+      dataValues: {
+        person: [
+          {
+            id: 1,
+            first_name: 'First',
+            last_name: 'Last',
+            person_reference: '1234',
+            addresses: [
+              {
+                id: 1,
+                address_line_1: 'Address 1',
+                address_line_2: 'Address 2',
+                town: 'Town',
+                postcode: 'Postcode'
+              }
+            ],
+            dogs: [
+              { id: 1, name: 'dog1' },
+              { id: 2, name: 'dog2' }
+            ]
+          }
+        ]
+      }
+    })
+
+    const personAndDogs = await getPersonAndDogsByReference('P-1234')
+
+    expect(personAndDogs).toEqual({
+      dataValues: {
+        person: [
+          {
+            id: 1,
+            first_name: 'First',
+            last_name: 'Last',
+            person_reference: '1234',
+            addresses: [
+              {
+                id: 1,
+                address_line_1: 'Address 1',
+                address_line_2: 'Address 2',
+                town: 'Town',
+                postcode: 'Postcode'
+              }
+            ],
+            dogs: [
+              { id: 1, name: 'dog1' },
+              { id: 2, name: 'dog2' }
+            ]
+          }
+        ]
+      }
+    })
+  })
+
+  test('getPersonAndDogsByReference should throw if error', async () => {
+    sequelize.models.registered_person.findAll.mockRejectedValue(new Error('Test error'))
+
+    await expect(getPersonAndDogsByReference('P-1234')).rejects.toThrow('Test error')
   })
 })
