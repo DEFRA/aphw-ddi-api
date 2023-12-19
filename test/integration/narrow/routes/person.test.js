@@ -3,7 +3,7 @@ describe('CDO endpoint', () => {
   let server
 
   jest.mock('../../../../app/repos/people')
-  const { getPersonByReference, getPersonAndDogsByReference } = require('../../../../app/repos/people')
+  const { getPersonByReference, getPersonAndDogsByReference, updatePerson } = require('../../../../app/repos/people')
 
   beforeEach(async () => {
     jest.clearAllMocks()
@@ -34,6 +34,15 @@ describe('CDO endpoint', () => {
             }
           }
         }
+      ],
+      person_contacts: [
+        {
+          contact: {
+            id: 1,
+            contact_type: { contact_type: 'Email' },
+            contact: 'test@example.com'
+          }
+        }
       ]
     })
 
@@ -51,6 +60,13 @@ describe('CDO endpoint', () => {
         town: 'Test',
         postcode: 'TE1 1ST',
         country: 'England'
+      },
+      contacts: {
+        emails: [
+          'test@example.com'
+        ],
+        primaryTelephones: [],
+        secondaryTelephones: []
       }
     })
   })
@@ -151,6 +167,111 @@ describe('CDO endpoint', () => {
         { id: 2, breed: 'breed2', name: 'dog2', status: 'NEW' }
       ]
     })
+  })
+
+  test('PUT /person route returns 200 with valid payload', async () => {
+    const options = {
+      method: 'PUT',
+      url: '/person',
+      payload: {
+        personReference: 'ABC123',
+        firstName: 'John',
+        lastName: 'Doe',
+        dateOfBirth: '1990-01-01',
+        address: {
+          addressLine1: '1 Test Street',
+          addressLine2: 'Test',
+          town: 'Test',
+          postcode: 'TE1 1ST',
+          country: 'England'
+        }
+      }
+    }
+
+    updatePerson.mockResolvedValue({
+      person_reference: 'ABC123',
+      first_name: 'John',
+      last_name: 'Doe',
+      birth_date: '1990-01-01',
+      addresses: [{
+        address: {
+          address_line_1: '1 Test Street',
+          address_line_2: 'Test',
+          town: 'Test',
+          postcode: 'TE1 1ST',
+          country: { country: 'England' }
+        }
+      }]
+    })
+
+    const response = await server.inject(options)
+
+    expect(response.statusCode).toBe(200)
+    expect(updatePerson).toHaveBeenCalledTimes(1)
+    expect(response.result).toEqual({
+      personReference: 'ABC123',
+      firstName: 'John',
+      lastName: 'Doe',
+      birthDate: '1990-01-01',
+      address: {
+        addressLine1: '1 Test Street',
+        addressLine2: 'Test',
+        town: 'Test',
+        postcode: 'TE1 1ST',
+        country: 'England'
+      },
+      contacts: []
+    })
+  })
+
+  test('PUT /person route returns 400 with invalid payload', async () => {
+    const options = {
+      method: 'PUT',
+      url: '/person',
+      payload: {
+        firstName: 'John',
+        lastName: 'Doe',
+        address: {
+          addressLine1: '1 Test Street',
+          addressLine2: 'Test',
+          town: 'Test',
+          postcode: 'TE1 1ST',
+          country: 'England'
+        }
+      }
+    }
+
+    const response = await server.inject(options)
+
+    expect(response.statusCode).toBe(400)
+  })
+
+  test('PUT /person route returns 400 if person not found', async () => {
+    const options = {
+      method: 'PUT',
+      url: '/person',
+      payload: {
+        personReference: 'ABC123',
+        firstName: 'John',
+        lastName: 'Doe',
+        dateOfBirth: '1990-01-01',
+        address: {
+          addressLine1: '1 Test Street',
+          addressLine2: 'Test',
+          town: 'Test',
+          postcode: 'TE1 1ST',
+          country: 'England'
+        }
+      }
+    }
+
+    updatePerson.mockRejectedValue({
+      type: 'NOT_FOUND'
+    })
+
+    const response = await server.inject(options)
+
+    expect(response.statusCode).toBe(400)
   })
 
   afterEach(async () => {
