@@ -131,7 +131,6 @@ const updatePerson = async (person, transaction) => {
         existingAddress.town !== person.address.town ||
         existingAddress.postcode !== person.address.postcode ||
         existingAddress.country.country !== person.address.country) {
-      
       const country = await getCountry(person.address.country)
 
       const address = await sequelize.models.address.create({
