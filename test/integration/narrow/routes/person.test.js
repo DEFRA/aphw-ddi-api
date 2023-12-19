@@ -34,6 +34,15 @@ describe('CDO endpoint', () => {
             }
           }
         }
+      ],
+      person_contacts: [
+        {
+          contact: {
+            id: 1,
+            contact_type: { contact_type: 'Email' },
+            contact: 'test@example.com'
+          }
+        }
       ]
     })
 
@@ -52,7 +61,13 @@ describe('CDO endpoint', () => {
         postcode: 'TE1 1ST',
         country: 'England'
       },
-      contacts: []
+      contacts: {
+        emails: [
+          'test@example.com'
+        ],
+        primaryTelephones: [],
+        secondaryTelephones: []
+      }
     })
   })
 

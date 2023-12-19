@@ -409,4 +409,64 @@ describe('People repo', () => {
 
     expect(sequelize.models.address.create).not.toHaveBeenCalled()
   })
+
+  test('updatePerson change in email should create new entry', async () => {
+    const person = {
+      personReference: '1234',
+      firstName: 'First',
+      lastName: 'Last',
+      dateOfBirth: '1990-01-01',
+      address: {
+        addressLine1: 'Address 1',
+        addressLine2: 'Address 2',
+        town: 'Town',
+        postcode: 'Postcode',
+        country: 'England'
+      },
+      email: 'test_3@example.com'
+    }
+
+    sequelize.models.person.findOne.mockResolvedValue({
+      id: 1,
+      first_name: 'First',
+      last_name: 'Last',
+      person_reference: '1234',
+      addresses: [
+        {
+          address: {
+            id: 1,
+            address_line_1: 'Address 1',
+            address_line_2: 'Address 2',
+            town: 'Town',
+            postcode: 'Postcode',
+            country: { id: 1, country: 'England' }
+          }
+        }
+      ],
+      person_contacts: [
+        {
+          contact: {
+            id: 1,
+            contact: 'test@example.com',
+            contact_type: { id: 2, contact_type: 'Email' }
+          }
+        }
+      ]
+    })
+
+    sequelize.models.contact.create.mockResolvedValue({
+      id: 2,
+      contact: 'test_3@example.com'
+    })
+
+    sequelize.models.person_contact.create.mockResolvedValue({
+      id: 2,
+      person_id: 1,
+      contact_id: 2
+    })
+
+    await updatePerson(person, {})
+
+    expect(sequelize.models.contact.create).toHaveBeenCalledTimes(1)
+  })
 })
