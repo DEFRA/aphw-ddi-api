@@ -9,6 +9,7 @@ module.exports = [{
     const indexNumber = request.params.indexNumber
     try {
       const cdo = await getCdo(indexNumber)
+      console.log('route cdo', cdo)
       return h.response({ cdo }).code(200)
     } catch (e) {
       console.log(e)

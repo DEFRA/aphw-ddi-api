@@ -1,0 +1,42 @@
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog" xmlns:ext="http://www.liquibase.org/xml/ns/dbchangelog-ext" xmlns:pro="http://www.liquibase.org/xml/ns/pro" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog-ext http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-ext.xsd http://www.liquibase.org/xml/ns/pro http://www.liquibase.org/xml/ns/pro/liquibase-pro-3.9.xsd http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.9.xsd">
+  <changeSet author="J Barnsley" id="1">
+    <tagDatabase tag="v1.34.0" />
+  </changeSet>
+  <changeSet author="J Barnsley" id="2">
+    <addColumn tableName="dog">
+      <column name="death_date" type="DATE" />
+      <column name="exported_date" type="DATE" />
+      <column name="stolen_date" type="DATE" />
+    </addColumn>
+    <dropColumn columnName="exported" tableName="dog" />
+    <dropColumn columnName="microchip_number" tableName="dog" />
+  </changeSet>
+  <changeSet author="J Barnsley" id="3">
+    <createTable tableName="microchip">
+      <column autoIncrement="true" name="id" type="INTEGER">
+        <constraints nullable="false" primaryKey="true" primaryKeyName="microchip_pkey" />
+      </column>
+      <column name="microchip_number" type="VARCHAR(24)">
+        <constraints nullable="false" />
+      </column>
+      <column name="display_order" type="INTEGER">
+        <constraints nullable="false" />
+      </column>
+    </createTable>
+    <createTable tableName="dog_microchip">
+      <column autoIncrement="true" name="id" type="INTEGER">
+        <constraints nullable="false" primaryKey="true" primaryKeyName="dog_microchip_pkey" />
+      </column>
+      <column name="dog_id" type="INTEGER">
+        <constraints nullable="false" />
+      </column>
+      <column name="microchip_id" type="INTEGER">
+        <constraints nullable="false" />
+      </column>
+    </createTable>
+  </changeSet>
+  <changeSet author="J Barnsley" id="4">
+    <addForeignKeyConstraint baseColumnNames="microchip_id" baseTableName="dog_microchip" constraintName="fk_dog_microchip_microchip" referencedColumnNames="id" referencedTableName="microchip" />
+    <addForeignKeyConstraint baseColumnNames="dog_id" baseTableName="dog_microchip" constraintName="fk_dog_microchip_dog" referencedColumnNames="id" referencedTableName="dog" />
+  </changeSet>
+</databaseChangeLog>

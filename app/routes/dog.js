@@ -1,12 +1,18 @@
 const { addImportedDog, updateDog, getDogByIndexNumber } = require('../repos/dogs')
+const { dogDto } = require('../dto/dog')
 
 module.exports = [{
   method: 'GET',
   path: '/dog/{indexNumber}',
   handler: async (request, h) => {
     const indexNumber = request.params.indexNumber
-    const dog = await getDogByIndexNumber(indexNumber)
-    return h.response({ dog }).code(200)
+    try {
+      const dog = await getDogByIndexNumber(indexNumber)
+      return h.response({ dog: dogDto(dog) }).code(200)
+    } catch (e) {
+      console.log(e)
+      throw e
+    }
   }
 },
 {

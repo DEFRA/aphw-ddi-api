@@ -109,6 +109,19 @@ const addImportedDog = async (dog, transaction) => {
 
   const newDog = await sequelize.models.dog.create(dog, { transaction })
 
+  if (dog.microchip_number) {
+    const microchip = {
+      microchip_number: dog.microchip_number,
+      display_order: 1
+    }
+    const newMicrochip = await sequelize.models.microchip.create(microchip, { transaction })
+    const dogMicrochip = {
+      dog_id: newDog.id,
+      microchip_id: newMicrochip.id
+    }
+    await sequelize.models.dog_microchip.create(dogMicrochip, { transaction })
+  }
+
   if (dog.owner) {
     await addImportedRegisteredPerson(dog.owner, 1, newDog.id, transaction)
   }
@@ -186,6 +199,14 @@ const getDogByIndexNumber = async (indexNumber) => {
     {
       model: sequelize.models.dog_breed,
       as: 'dog_breed'
+    },
+    {
+      model: sequelize.models.dog_microchip,
+      as: 'dog_microchips',
+      include: [{
+        model: sequelize.models.microchip,
+        as: 'microchip'
+      }]
     },
     {
       model: sequelize.models.status,
