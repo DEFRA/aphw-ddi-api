@@ -188,7 +188,11 @@ const getPersonAndDogsByReference = async (reference, transaction) => {
           separate: true,
           include: [{
             model: sequelize.models.contact,
-            as: 'contact'
+            as: 'contact',
+            include: [{
+              model: sequelize.models.contact_type,
+              as: 'contact_type'
+            }]
           }]
         }]
       },
