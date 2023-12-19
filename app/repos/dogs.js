@@ -187,7 +187,11 @@ const getDogByIndexNumber = async (indexNumber) => {
           as: 'person_contacts',
           include: [{
             model: sequelize.models.contact,
-            as: 'contact'
+            as: 'contact',
+            include: [{
+              model: sequelize.models.contact_type,
+              as: 'contact_type'
+            }]
           }]
         }]
       },

@@ -56,7 +56,11 @@ const getCdo = async (indexNumber) => {
           separate: true, // workaround to prevent 'contact_type_id' being truncated to 'contact_type_i'
           include: [{
             model: sequelize.models.contact,
-            as: 'contact'
+            as: 'contact',
+            include: [{
+              model: sequelize.models.contact_type,
+              as: 'contact_type'
+            }]
           }]
         }]
       },
