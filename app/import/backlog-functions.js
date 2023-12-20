@@ -80,6 +80,9 @@ const buildContacts = (jsonObj) => {
   if (jsonObj.phone2) {
     contacts.push({ type: 'Phone', contact: jsonObj.phone2 })
   }
+  if (jsonObj.email) {
+    contacts.push({ type: 'Email', contact: jsonObj.email })
+  }
   return contacts
 }
 

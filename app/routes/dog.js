@@ -36,8 +36,13 @@ module.exports = [{
       return h.response().code(400)
     }
 
-    const updatedDog = await updateDog(request.payload)
+    try {
+      const updatedDog = await updateDog(request.payload)
 
-    return h.response(updatedDog).code(200)
+      return h.response(updatedDog).code(200)
+    } catch (e) {
+      console.log(`Error updating dog: ${e}`)
+      throw e
+    }
   }
 }]

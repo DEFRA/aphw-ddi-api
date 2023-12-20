@@ -39,4 +39,17 @@
     <addForeignKeyConstraint baseColumnNames="microchip_id" baseTableName="dog_microchip" constraintName="fk_dog_microchip_microchip" referencedColumnNames="id" referencedTableName="microchip" />
     <addForeignKeyConstraint baseColumnNames="dog_id" baseTableName="dog_microchip" constraintName="fk_dog_microchip_dog" referencedColumnNames="id" referencedTableName="dog" />
   </changeSet>
+  <changeSet author="J Barnsley" id="5">
+    <createIndex indexName="dog_microchip_dog_idx" tableName="dog_microchip">
+      <column name="dog_id" />
+    </createIndex>
+  </changeSet>
+  <changeSet author="J Barnsley" id="6">
+    <createIndex indexName="search_index_dog_idx" tableName="search_index">
+      <column name="dog_id" />
+    </createIndex>
+    <createIndex indexName="search_index_person_idx" tableName="search_index">
+      <column name="person_id" />
+    </createIndex>
+  </changeSet>
 </databaseChangeLog>

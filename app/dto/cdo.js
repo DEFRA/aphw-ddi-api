@@ -1,3 +1,5 @@
+const { getMicrochip } = require('./dto-helper')
+
 const cdoCreateDto = (data) => ({
   owner: {
     firstName: data.owner.first_name,
@@ -25,6 +27,50 @@ const cdoCreateDto = (data) => ({
   }))
 })
 
+const cdoViewDto = (data) => {
+  const person = data.registered_person[0].person
+  return {
+    person: {
+      firstName: person.first_name,
+      lastName: person.last_name,
+      dateOfBirth: person.birth_date,
+      addresses: person.addresses,
+      person_contacts: person.person_contacts
+    },
+    dog: {
+      id: data.id,
+      dogReference: data.dog_reference,
+      indexNumber: data.index_number,
+      name: data.name,
+      breed: data.dog_breed.breed,
+      status: data.status.status,
+      dateOfBirth: data.birth_date,
+      dateOfDeath: data.death_date,
+      tattoo: data.tattoo,
+      colour: data.colour,
+      sex: data.sex,
+      dateExported: data.exported_date,
+      dateStolen: data.stolen_date,
+      microchipNumber: getMicrochip(data, 1),
+      microchipNumber2: getMicrochip(data, 2)
+    },
+    exemption: {
+      cdoIssued: data.registration.cdo_issued,
+      cdoExpiry: data.registration.cdo_expiry,
+      court: data.registration.court.name,
+      policeForce: data.registration.police_force.name,
+      legislationOfficer: data.registration.legislation_officer,
+      applicationFeePaid: null,
+      insuranceCompany: null,
+      insuranceReneewalDate: null,
+      neuteringCofirmed: null,
+      microchipVerified: null
+    },
+    insurance: data.insurance
+  }
+}
+
 module.exports = {
-  cdoCreateDto
+  cdoCreateDto,
+  cdoViewDto
 }
