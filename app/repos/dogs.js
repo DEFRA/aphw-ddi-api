@@ -272,5 +272,6 @@ module.exports = {
   addImportedDog,
   updateDog,
   getAllDogIds,
-  getDogByIndexNumber
+  getDogByIndexNumber,
+  updateDogFields
 }

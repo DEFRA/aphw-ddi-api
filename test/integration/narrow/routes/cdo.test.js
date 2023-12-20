@@ -46,6 +46,18 @@ describe('CDO endpoint', () => {
     expect(response.statusCode).toBe(200)
   })
 
+  test('GET /cdo/ED123 route returns 500 when error', async () => {
+    getCdo.mockImplementation(() => { throw new Error('cdo error') })
+
+    const options = {
+      method: 'GET',
+      url: '/cdo/ED123'
+    }
+
+    const response = await server.inject(options)
+    expect(response.statusCode).toBe(500)
+  })
+
   test('POST /cdo route returns 200 with valid payload', async () => {
     const options = {
       method: 'POST',

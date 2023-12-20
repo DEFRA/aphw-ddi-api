@@ -32,7 +32,7 @@ module.exports = [{
   method: 'PUT',
   path: '/dog',
   handler: async (request, h) => {
-    if (!request.payload) {
+    if (!request.payload?.indexNumber) {
       return h.response().code(400)
     }
 

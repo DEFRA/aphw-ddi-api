@@ -29,7 +29,7 @@ describe('Dog repo', () => {
 
   const sequelize = require('../../../../app/config/db')
 
-  const { getBreeds, createDogs, addImportedDog, getDogByIndexNumber, getAllDogIds } = require('../../../../app/repos/dogs')
+  const { getBreeds, createDogs, addImportedDog, getDogByIndexNumber, getAllDogIds, updateDogFields } = require('../../../../app/repos/dogs')
 
   beforeEach(async () => {
     jest.clearAllMocks()
@@ -206,5 +206,33 @@ describe('Dog repo', () => {
     expect(res.length).toBe(2)
     expect(res[0]).toBe(123)
     expect(res[1]).toBe(456)
+  })
+
+  test('updateDogFields should update fields', () => {
+    const dbDog = {}
+    const breeds = [
+      { breed: 'breed1', id: 123 }
+    ]
+    const payload = {
+      breed: 'breed1',
+      name: 'dog name',
+      dateOfBirth: new Date(2000, 1, 1),
+      dateOfDeath: new Date(2015, 2, 2),
+      tattoo: 'tattoo',
+      colour: 'colour',
+      sex: 'Male',
+      dateExported: new Date(2018, 3, 3),
+      dateStolen: new Date(2019, 4, 4)
+    }
+    updateDogFields(dbDog, payload, breeds)
+    expect(dbDog.dog_breed_id).toBe(123)
+    expect(dbDog.name).toBe('dog name')
+    expect(dbDog.birth_date).toEqual(new Date(2000, 1, 1))
+    expect(dbDog.death_date).toEqual(new Date(2015, 2, 2))
+    expect(dbDog.tattoo).toBe('tattoo')
+    expect(dbDog.colour).toBe('colour')
+    expect(dbDog.sex).toBe('Male')
+    expect(dbDog.exported_date).toEqual(new Date(2018, 3, 3))
+    expect(dbDog.stolen_date).toEqual(new Date(2019, 4, 4))
   })
 })
