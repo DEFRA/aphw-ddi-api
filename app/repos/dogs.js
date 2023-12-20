@@ -169,7 +169,7 @@ const updateDogFields = (dbDog, payload, breeds) => {
 const updateMicrochips = async (dogFromDb, payload, transaction) => {
   const existingMicrochip1 = await getMicrochipDetails(dogFromDb.id, 1)
   const existingMicrochip2 = await getMicrochipDetails(dogFromDb.id, 2)
-  if (existingMicrochip1 !== payload.microchipNumber) {
+  if (existingMicrochip1?.microchip_number !== payload.microchipNumber) {
     if (existingMicrochip1) {
       existingMicrochip1.microchip_number = payload.microchipNumber
       await existingMicrochip1.save({ transaction })
@@ -177,7 +177,7 @@ const updateMicrochips = async (dogFromDb, payload, transaction) => {
       await createMicrochip(payload.microchipNumber, dogFromDb.id, 1, transaction)
     }
   }
-  if (existingMicrochip2 !== payload.microchipNumber2) {
+  if (existingMicrochip2?.microchip_number !== payload.microchipNumber2) {
     if (existingMicrochip2) {
       existingMicrochip2.microchip_number = payload.microchipNumber2
       await existingMicrochip2.save({ transaction })
@@ -273,5 +273,6 @@ module.exports = {
   updateDog,
   getAllDogIds,
   getDogByIndexNumber,
-  updateDogFields
+  updateDogFields,
+  updateMicrochips
 }
