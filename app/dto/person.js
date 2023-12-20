@@ -1,3 +1,20 @@
+const addContacts = (contacts) => {
+  const emails = contacts.filter(entry => entry.contact.contact_type.contact_type === 'Email')
+    .sort((a, b) => b.id - a.id)
+
+  const primaryTelephones = contacts.filter(entry => entry.contact.contact_type.contact_type === 'Phone')
+    .sort((a, b) => b.id - a.id)
+
+  const secondaryTelephones = contacts.filter(entry => entry.contact.contact_type.contact_type === 'SecondaryPhone')
+    .sort((a, b) => b.id - a.id)
+
+  return {
+    emails: emails.map((email) => email.contact.contact),
+    primaryTelephones: primaryTelephones.map((phone) => phone.contact.contact),
+    secondaryTelephones: secondaryTelephones.map((phone) => phone.contact.contact)
+  }
+}
+
 const personDto = (person) => ({
   firstName: person.first_name,
   lastName: person.last_name,
@@ -9,7 +26,8 @@ const personDto = (person) => ({
     town: person.addresses[0].address.town,
     postcode: person.addresses[0].address.postcode,
     country: person.addresses[0].address.country.country
-  }
+  },
+  contacts: person.person_contacts ? addContacts(person.person_contacts) : []
 })
 
 const personAndDogsDto = (personAndDogs) => ({

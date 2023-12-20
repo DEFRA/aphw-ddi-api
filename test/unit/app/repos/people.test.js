@@ -1,3 +1,4 @@
+const { when } = require('jest-when')
 const { owner: mockOwner } = require('../../../mocks/cdo/create')
 
 describe('People repo', () => {
@@ -5,7 +6,8 @@ describe('People repo', () => {
     models: {
       person: {
         create: jest.fn(),
-        findOne: jest.fn()
+        findOne: jest.fn(),
+        update: jest.fn()
       },
       address: {
         create: jest.fn(),
@@ -19,6 +21,12 @@ describe('People repo', () => {
       },
       dog: {
         findAll: jest.fn()
+      },
+      person_contact: {
+        create: jest.fn()
+      },
+      contact: {
+        create: jest.fn()
       }
     },
     transaction: jest.fn()
@@ -26,10 +34,19 @@ describe('People repo', () => {
 
   const sequelize = require('../../../../app/config/db')
 
-  const { createPeople, getPersonByReference, getPersonAndDogsByReference } = require('../../../../app/repos/people')
+  jest.mock('../../../../app/lookups')
+  const { getContactType, getCountry } = require('../../../../app/lookups')
+
+  const { createPeople, getPersonByReference, getPersonAndDogsByReference, updatePerson } = require('../../../../app/repos/people')
 
   beforeEach(async () => {
     jest.clearAllMocks()
+
+    when(getContactType).calledWith('Phone').mockResolvedValue({ id: 1 })
+    when(getContactType).calledWith('Email').mockResolvedValue({ id: 2 })
+    when(getContactType).calledWith('SecondaryPhone').mockResolvedValue({ id: 3 })
+
+    when(getCountry).calledWith('England').mockResolvedValue({ id: 1 })
   })
 
   test('createPeople should start new transaction if none passed', async () => {
@@ -223,5 +240,233 @@ describe('People repo', () => {
     sequelize.models.registered_person.findAll.mockRejectedValue(new Error('Test error'))
 
     await expect(getPersonAndDogsByReference('P-1234')).rejects.toThrow('Test error')
+  })
+
+  test('updatePerson should start new transaction if none passed', async () => {
+    const person = {
+      personReference: '1234',
+      firstName: 'First',
+      lastName: 'Last',
+      dateOfBirth: '1990-01-01',
+      address: {
+        addressLine1: 'Address 1',
+        addressLine2: 'Address 2',
+        town: 'Town',
+        postcode: 'Postcode',
+        country: 'England'
+      },
+      email: 'test@example.com'
+    }
+
+    await updatePerson(person)
+
+    expect(sequelize.transaction).toHaveBeenCalledTimes(1)
+  })
+
+  test('updatePerson should not start new transaction if passed', async () => {
+    const person = {
+      personReference: '1234',
+      firstName: 'First',
+      lastName: 'Last',
+      dateOfBirth: '1990-01-01',
+      address: {
+        addressLine1: 'Address 1',
+        addressLine2: 'Address 2',
+        town: 'Town',
+        postcode: 'Postcode',
+        country: 'England'
+      }
+    }
+
+    sequelize.models.person.findOne.mockResolvedValue({
+      id: 1,
+      first_name: 'First',
+      last_name: 'Last',
+      person_reference: '1234',
+      addresses: [
+        {
+          address: {
+            id: 1,
+            address_line_1: 'Address 1',
+            address_line_2: 'Address 2',
+            town: 'Town',
+            postcode: 'Postcode',
+            country: { country: 'England' }
+          }
+        }
+      ],
+      person_contacts: []
+    })
+
+    await updatePerson(person, {})
+
+    expect(sequelize.transaction).toHaveBeenCalledTimes(0)
+  })
+
+  test('updatePerson change in address should create new entry', async () => {
+    const person = {
+      personReference: '1234',
+      firstName: 'First',
+      lastName: 'Last',
+      dateOfBirth: '1990-01-01',
+      address: {
+        addressLine1: 'Address 1',
+        addressLine2: 'Address 2',
+        town: 'New Town',
+        postcode: 'Postcode',
+        country: 'England'
+      }
+    }
+
+    sequelize.models.person.findOne.mockResolvedValue({
+      id: 1,
+      first_name: 'First',
+      last_name: 'Last',
+      person_reference: '1234',
+      addresses: [
+        {
+          address: {
+            id: 1,
+            address_line_1: 'Address 1',
+            address_line_2: 'Address 2',
+            town: 'Town',
+            postcode: 'Postcode',
+            country: { id: 1, country: 'England' }
+          }
+        }
+      ],
+      person_contacts: []
+    })
+
+    sequelize.models.address.findByPk.mockResolvedValue({
+      id: 1,
+      address_line_1: 'Address 1',
+      address_line_2: 'Address 2',
+      town: 'Town',
+      postcode: 'Postcode',
+      country: { id: 1, country: 'England' }
+    })
+
+    sequelize.models.address.create.mockResolvedValue({
+      id: 2,
+      address_line_1: 'Address 1',
+      address_line_2: 'Address 2',
+      town: 'Town',
+      postcode: 'Postcode',
+      country: { id: 1, country: 'England' }
+    })
+
+    await updatePerson(person, {})
+
+    expect(sequelize.models.address.create).toHaveBeenCalledTimes(1)
+  })
+
+  test('updatePerson no change in address should not create new entry', async () => {
+    const person = {
+      personReference: '1234',
+      firstName: 'First',
+      lastName: 'Last',
+      dateOfBirth: '1990-01-01',
+      address: {
+        addressLine1: 'Address 1',
+        addressLine2: 'Address 2',
+        town: 'Town',
+        postcode: 'Postcode',
+        country: 'England'
+      }
+    }
+
+    sequelize.models.person.findOne.mockResolvedValue({
+      id: 1,
+      first_name: 'First',
+      last_name: 'Last',
+      person_reference: '1234',
+      addresses: [
+        {
+          address: {
+            id: 1,
+            address_line_1: 'Address 1',
+            address_line_2: 'Address 2',
+            town: 'Town',
+            postcode: 'Postcode',
+            country: { id: 1, country: 'England' }
+          }
+        }
+      ],
+      person_contacts: []
+    })
+
+    sequelize.models.address.findByPk.mockResolvedValue({
+      id: 1,
+      address_line_1: 'Address 1',
+      address_line_2: 'Address 2',
+      town: 'Town',
+      postcode: 'Postcode',
+      country: { id: 1, country: 'England' }
+    })
+
+    await updatePerson(person, {})
+
+    expect(sequelize.models.address.create).not.toHaveBeenCalled()
+  })
+
+  test('updatePerson change in email should create new entry', async () => {
+    const person = {
+      personReference: '1234',
+      firstName: 'First',
+      lastName: 'Last',
+      dateOfBirth: '1990-01-01',
+      address: {
+        addressLine1: 'Address 1',
+        addressLine2: 'Address 2',
+        town: 'Town',
+        postcode: 'Postcode',
+        country: 'England'
+      },
+      email: 'test_3@example.com'
+    }
+
+    sequelize.models.person.findOne.mockResolvedValue({
+      id: 1,
+      first_name: 'First',
+      last_name: 'Last',
+      person_reference: '1234',
+      addresses: [
+        {
+          address: {
+            id: 1,
+            address_line_1: 'Address 1',
+            address_line_2: 'Address 2',
+            town: 'Town',
+            postcode: 'Postcode',
+            country: { id: 1, country: 'England' }
+          }
+        }
+      ],
+      person_contacts: [
+        {
+          contact: {
+            id: 1,
+            contact: 'test@example.com',
+            contact_type: { id: 2, contact_type: 'Email' }
+          }
+        }
+      ]
+    })
+
+    sequelize.models.contact.create.mockResolvedValue({
+      id: 2,
+      contact: 'test_3@example.com'
+    })
+
+    sequelize.models.person_contact.create.mockResolvedValue({
+      id: 2,
+      person_id: 1,
+      contact_id: 2
+    })
+
+    await updatePerson(person, {})
+
+    expect(sequelize.models.contact.create).toHaveBeenCalledTimes(1)
   })
 })

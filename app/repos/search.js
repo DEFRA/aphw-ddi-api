@@ -74,8 +74,46 @@ const updateSearchIndexDog = async (dog, transaction) => {
   }
 }
 
+const updateSearchIndexPerson = async (person, transaction) => {
+  const indexRows = await sequelize.models.search_index.findAll({
+    where: { person_id: person.id },
+    transaction
+  })
+
+  for (const indexRow of indexRows) {
+    if (indexRow.json.firstName !== person.firstName ||
+        indexRow.json.lastName !== person.lastName ||
+        indexRow.json.address.address_line_1 !== person.address.addressLine1 ||
+        indexRow.json.address.address_line_2 !== person.address.addressLine2 ||
+        indexRow.json.address.town !== person.address.town ||
+        indexRow.json.address.postcode !== person.address.postcode) {
+      const partialPerson = {
+        person_reference: person.personReference,
+        first_name: person.firstName,
+        last_name: person.lastName,
+        address: {
+          address_line_1: person.address.address_line_1 ?? person.address.addressLine1,
+          address_line_2: person.address.address_line_2 ?? person.address.addressLine2,
+          town: person.address.town,
+          postcode: person.address.postcode
+        }
+      }
+      const partialDog = {
+        index_number: indexRow.json.dogIndex,
+        name: indexRow.json.dogName,
+        microchip_number: indexRow.json.microchipNumber,
+        microchip_number2: indexRow.json.microchipNumber2
+      }
+      indexRow.search = buildIndexColumn(partialPerson, partialDog)
+      indexRow.json = buildJsonColumn(partialPerson, partialDog)
+      await indexRow.save({ transaction })
+    }
+  }
+}
+
 module.exports = {
   addToSearchIndex,
   buildAddressString,
-  updateSearchIndexDog
+  updateSearchIndexDog,
+  updateSearchIndexPerson
 }

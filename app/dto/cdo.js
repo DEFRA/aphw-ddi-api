@@ -31,6 +31,8 @@ const cdoViewDto = (data) => {
   const person = data.registered_person[0].person
   return {
     person: {
+      id: person.id,
+      personReference: person.person_reference,
       firstName: person.first_name,
       lastName: person.last_name,
       dateOfBirth: person.birth_date,
