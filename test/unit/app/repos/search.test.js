@@ -5,7 +5,9 @@ describe('Search repo', () => {
   jest.mock('../../../../app/config/db', () => ({
     models: {
       search_index: {
-        create: jest.fn()
+        create: jest.fn(),
+        save: jest.fn(),
+        findAll: jest.fn()
       }
     },
     transaction: jest.fn(),
@@ -14,7 +16,7 @@ describe('Search repo', () => {
 
   const sequelize = require('../../../../app/config/db')
 
-  const { addToSearchIndex, buildAddressString } = require('../../../../app/repos/search')
+  const { addToSearchIndex, buildAddressString, updateSearchIndexDog, updateSearchIndexPerson } = require('../../../../app/repos/search')
 
   const { dbFindByPk } = require('../../../../app/lib/db-functions')
   jest.mock('../../../../app/lib/db-functions')
@@ -87,5 +89,42 @@ describe('Search repo', () => {
     const parts = await buildAddressString(address)
 
     expect(parts).toBe('addr1, addr2, town, post code')
+  })
+
+  test('UpdateSearchIndexDog should call search_index save for each row', async () => {
+    const mockSave = jest.fn()
+    sequelize.models.search_index.findAll.mockResolvedValue([
+      { dog_id: 1, person_id: 1, search: '12345', json: '{ dogName: \'Bruno\' }', save: mockSave },
+      { dog_id: 2, person_id: 2, search: '34567', json: '{ dogName: \'Fido\' }', save: mockSave }
+    ])
+
+    const dog = {
+      id: 1,
+      dogIndex: 123,
+      dogName: 'Bruno2',
+      microchipNumber: 123456789012345
+    }
+
+    await updateSearchIndexDog(dog, {})
+
+    expect(mockSave).toHaveBeenCalledTimes(2)
+  })
+
+  test('UpdateSearchIndexPerson should call search_index save for each row', async () => {
+    const mockSave = jest.fn()
+    sequelize.models.search_index.findAll.mockResolvedValue([
+      { dog_id: 1, person_id: 1, search: '12345', json: '{ dogName: \'Bruno\', firstName: \'John\' }', save: mockSave }
+    ])
+
+    const person = {
+      id: 1,
+      dogIndex: 123,
+      firstName: 'Mark',
+      address: {}
+    }
+
+    await updateSearchIndexPerson(person, {})
+
+    expect(mockSave).toHaveBeenCalledTimes(1)
   })
 })
