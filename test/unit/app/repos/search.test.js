@@ -14,7 +14,7 @@ describe('Search repo', () => {
 
   const sequelize = require('../../../../app/config/db')
 
-  const { addToSearchIndex, buildAddress } = require('../../../../app/repos/search')
+  const { addToSearchIndex, buildAddressString } = require('../../../../app/repos/search')
 
   const { dbFindByPk } = require('../../../../app/lib/db-functions')
   jest.mock('../../../../app/lib/db-functions')
@@ -31,7 +31,9 @@ describe('Search repo', () => {
       id: 123,
       firstName: 'John',
       lastName: 'Smith',
-      address: '123 some address'
+      address: {
+        address_line_1: '123 some address'
+      }
     }
 
     const dog = {
@@ -48,57 +50,41 @@ describe('Search repo', () => {
     expect(sequelize.models.search_index.create).toHaveBeenCalledTimes(1)
   })
 
-  test('buildAddress should return parts', async () => {
-    const person = {
-      firstName: 'John',
-      lastName: 'Smith',
-      addresses: {
-        address: {
-          address_line_1: 'addr1',
-          address_line_2: 'addr2',
-          town: 'town',
-          postcode: 'post code'
-        }
-      }
+  test('buildAddressString should return parts', async () => {
+    const address = {
+      address_line_1: 'addr1',
+      address_line_2: 'addr2',
+      town: 'town',
+      postcode: 'post code'
     }
 
-    const parts = await buildAddress(person, true)
+    const parts = await buildAddressString(address, true)
 
     expect(parts).toBe('addr1, addr2, town, post code, postcode')
   })
 
-  test('buildAddress should return parts', async () => {
-    const person = {
-      firstName: 'John',
-      lastName: 'Smith',
-      address: {
-        address_line_1: 'addr1',
-        address_line_2: 'addr2',
-        town: 'town',
-        postcode: 'postcode'
-      }
+  test('buildAddressString should return parts 2', async () => {
+    const address = {
+      address_line_1: 'addr1',
+      address_line_2: 'addr2',
+      town: 'town',
+      postcode: 'postcode'
     }
 
-    const parts = await buildAddress(person)
+    const parts = await buildAddressString(address)
 
     expect(parts).toBe('addr1, addr2, town, postcode')
   })
 
-  test('buildAddress should return parts without alternate', async () => {
-    const person = {
-      firstName: 'John',
-      lastName: 'Smith',
-      addresses: {
-        address: {
-          address_line_1: 'addr1',
-          address_line_2: 'addr2',
-          town: 'town',
-          postcode: 'post code'
-        }
-      }
+  test('buildAddressString should return parts without alternate', async () => {
+    const address = {
+      address_line_1: 'addr1',
+      address_line_2: 'addr2',
+      town: 'town',
+      postcode: 'post code'
     }
 
-    const parts = await buildAddress(person)
+    const parts = await buildAddressString(address)
 
     expect(parts).toBe('addr1, addr2, town, post code')
   })

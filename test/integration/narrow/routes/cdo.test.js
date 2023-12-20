@@ -14,7 +14,28 @@ describe('CDO endpoint', () => {
   })
 
   test('GET /cdo/ED123 route returns 200', async () => {
-    getCdo.mockResolvedValue({ id: 123, indexNumber: 'ED123' })
+    getCdo.mockResolvedValue({
+      id: 123,
+      indexNumber: 'ED123',
+      dog_breed: {
+        breed: 'breed1'
+      },
+      status: {
+        status: 'NEW'
+      },
+      registration: {
+        court: {
+          name: 'court1'
+        },
+        police_force: {
+          name: 'force1'
+        }
+      },
+      registered_person: [{
+        person: {
+        }
+      }]
+    })
 
     const options = {
       method: 'GET',

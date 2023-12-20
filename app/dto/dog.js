@@ -4,7 +4,7 @@ const dogDto = (data) => ({
   id: data.id,
   indexNumber: data.index_number,
   name: data.name,
-  breed: data.dog_breed.breed,
+  breed: data.dog_breed?.breed ?? data.breed,
   colour: data.colour,
   sex: data.sex,
   dateOfBirth: data.birth_date,
