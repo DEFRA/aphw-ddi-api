@@ -163,8 +163,8 @@ describe('CDO endpoint', () => {
       },
       contacts: [{ contact: { id: 1, contact: 'phone' } }],
       dogs: [
-        { id: 1, breed: 'breed1', name: 'dog1', status: 'NEW' },
-        { id: 2, breed: 'breed2', name: 'dog2', status: 'NEW' }
+        { id: 1, microchipNumber: null, microchipNumber2: null, breed: 'breed1', name: 'dog1', status: 'NEW' },
+        { id: 2, microchipNumber: null, microchipNumber2: null, breed: 'breed2', name: 'dog2', status: 'NEW' }
       ]
     })
   })

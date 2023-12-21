@@ -5,7 +5,9 @@ describe('Search repo', () => {
   jest.mock('../../../../app/config/db', () => ({
     models: {
       search_index: {
-        create: jest.fn()
+        create: jest.fn(),
+        save: jest.fn(),
+        findAll: jest.fn()
       }
     },
     transaction: jest.fn(),
@@ -14,7 +16,7 @@ describe('Search repo', () => {
 
   const sequelize = require('../../../../app/config/db')
 
-  const { addToSearchIndex, buildAddress } = require('../../../../app/repos/search')
+  const { addToSearchIndex, buildAddressString, updateSearchIndexDog, updateSearchIndexPerson } = require('../../../../app/repos/search')
 
   const { dbFindByPk } = require('../../../../app/lib/db-functions')
   jest.mock('../../../../app/lib/db-functions')
@@ -31,7 +33,9 @@ describe('Search repo', () => {
       id: 123,
       firstName: 'John',
       lastName: 'Smith',
-      address: '123 some address'
+      address: {
+        address_line_1: '123 some address'
+      }
     }
 
     const dog = {
@@ -48,58 +52,79 @@ describe('Search repo', () => {
     expect(sequelize.models.search_index.create).toHaveBeenCalledTimes(1)
   })
 
-  test('buildAddress should return parts', async () => {
-    const person = {
-      firstName: 'John',
-      lastName: 'Smith',
-      addresses: {
-        address: {
-          address_line_1: 'addr1',
-          address_line_2: 'addr2',
-          town: 'town',
-          postcode: 'post code'
-        }
-      }
+  test('buildAddressString should return parts', async () => {
+    const address = {
+      address_line_1: 'addr1',
+      address_line_2: 'addr2',
+      town: 'town',
+      postcode: 'post code'
     }
 
-    const parts = await buildAddress(person, true)
+    const parts = await buildAddressString(address, true)
 
     expect(parts).toBe('addr1, addr2, town, post code, postcode')
   })
 
-  test('buildAddress should return parts', async () => {
-    const person = {
-      firstName: 'John',
-      lastName: 'Smith',
-      address: {
-        address_line_1: 'addr1',
-        address_line_2: 'addr2',
-        town: 'town',
-        postcode: 'postcode'
-      }
+  test('buildAddressString should return parts 2', async () => {
+    const address = {
+      address_line_1: 'addr1',
+      address_line_2: 'addr2',
+      town: 'town',
+      postcode: 'postcode'
     }
 
-    const parts = await buildAddress(person)
+    const parts = await buildAddressString(address)
 
     expect(parts).toBe('addr1, addr2, town, postcode')
   })
 
-  test('buildAddress should return parts without alternate', async () => {
-    const person = {
-      firstName: 'John',
-      lastName: 'Smith',
-      addresses: {
-        address: {
-          address_line_1: 'addr1',
-          address_line_2: 'addr2',
-          town: 'town',
-          postcode: 'post code'
-        }
-      }
+  test('buildAddressString should return parts without alternate', async () => {
+    const address = {
+      address_line_1: 'addr1',
+      address_line_2: 'addr2',
+      town: 'town',
+      postcode: 'post code'
     }
 
-    const parts = await buildAddress(person)
+    const parts = await buildAddressString(address)
 
     expect(parts).toBe('addr1, addr2, town, post code')
+  })
+
+  test('UpdateSearchIndexDog should call search_index save for each row', async () => {
+    const mockSave = jest.fn()
+    sequelize.models.search_index.findAll.mockResolvedValue([
+      { dog_id: 1, person_id: 1, search: '12345', json: '{ dogName: \'Bruno\' }', save: mockSave },
+      { dog_id: 2, person_id: 2, search: '34567', json: '{ dogName: \'Fido\' }', save: mockSave }
+    ])
+
+    const dog = {
+      id: 1,
+      dogIndex: 123,
+      dogName: 'Bruno2',
+      microchipNumber: 123456789012345
+    }
+
+    await updateSearchIndexDog(dog, {})
+
+    expect(mockSave).toHaveBeenCalledTimes(2)
+  })
+
+  test('UpdateSearchIndexPerson should call search_index save for each row', async () => {
+    const mockSave = jest.fn()
+    sequelize.models.search_index.findAll.mockResolvedValue([
+      { dog_id: 1, person_id: 1, search: '12345', json: '{ dogName: \'Bruno\', firstName: \'John\' }', save: mockSave }
+    ])
+
+    const person = {
+      id: 1,
+      dogIndex: 123,
+      firstName: 'Mark',
+      address: {}
+    }
+
+    await updateSearchIndexPerson(person, {})
+
+    expect(mockSave).toHaveBeenCalledTimes(1)
   })
 })

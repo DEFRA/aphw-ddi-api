@@ -37,6 +37,9 @@ describe('People repo', () => {
   jest.mock('../../../../app/lookups')
   const { getContactType, getCountry } = require('../../../../app/lookups')
 
+  jest.mock('../../../../app/repos/search')
+  const { updateSearchIndexPerson } = require('../../../../app/repos/search')
+
   const { createPeople, getPersonByReference, getPersonAndDogsByReference, updatePerson } = require('../../../../app/repos/people')
 
   beforeEach(async () => {
@@ -243,6 +246,8 @@ describe('People repo', () => {
   })
 
   test('updatePerson should start new transaction if none passed', async () => {
+    updateSearchIndexPerson.mockResolvedValue()
+
     const person = {
       personReference: '1234',
       firstName: 'First',
@@ -264,6 +269,8 @@ describe('People repo', () => {
   })
 
   test('updatePerson should not start new transaction if passed', async () => {
+    updateSearchIndexPerson.mockResolvedValue()
+
     const person = {
       personReference: '1234',
       firstName: 'First',
@@ -304,6 +311,8 @@ describe('People repo', () => {
   })
 
   test('updatePerson change in address should create new entry', async () => {
+    updateSearchIndexPerson.mockResolvedValue()
+
     const person = {
       personReference: '1234',
       firstName: 'First',
@@ -362,6 +371,8 @@ describe('People repo', () => {
   })
 
   test('updatePerson no change in address should not create new entry', async () => {
+    updateSearchIndexPerson.mockResolvedValue()
+
     const person = {
       personReference: '1234',
       firstName: 'First',
@@ -411,6 +422,8 @@ describe('People repo', () => {
   })
 
   test('updatePerson change in email should create new entry', async () => {
+    updateSearchIndexPerson.mockResolvedValue()
+
     const person = {
       personReference: '1234',
       firstName: 'First',
