@@ -158,8 +158,4 @@ describe('CDO endpoint', () => {
 
     expect(response.statusCode).toBe(500)
   })
-
-  afterEach(async () => {
-    await server.stop()
-  })
 })
