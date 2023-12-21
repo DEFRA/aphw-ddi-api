@@ -1,6 +1,8 @@
 const sequelize = require('../config/db')
 const { v4: uuidv4 } = require('uuid')
 const { getBreed } = require('../lookups')
+const { updateSearchIndexDog } = require('../repos/search')
+const { updateMicrochips, createMicrochip } = require('./microchip')
 
 const getBreeds = async () => {
   try {
@@ -109,11 +111,47 @@ const addImportedDog = async (dog, transaction) => {
 
   const newDog = await sequelize.models.dog.create(dog, { transaction })
 
+  if (dog.microchip_number) {
+    await createMicrochip(dog.microchip_number, newDog.id, transaction)
+  }
+
   if (dog.owner) {
     await addImportedRegisteredPerson(dog.owner, 1, newDog.id, transaction)
   }
 
   return newDog.id
+}
+
+const updateDog = async (payload, transaction) => {
+  if (!transaction) {
+    return sequelize.transaction(async (t) => updateDog(payload, t))
+  }
+
+  const dogFromDB = await getDogByIndexNumber(payload.indexNumber)
+
+  const breeds = await getBreeds()
+
+  updateDogFields(dogFromDB, payload, breeds)
+
+  await updateMicrochips(dogFromDB, payload, transaction)
+
+  await dogFromDB.save({ transaction })
+
+  await updateSearchIndexDog(payload, transaction)
+
+  return dogFromDB
+}
+
+const updateDogFields = (dbDog, payload, breeds) => {
+  dbDog.dog_breed_id = breeds.filter(x => x.breed === payload.breed)[0].id
+  dbDog.name = payload.name
+  dbDog.birth_date = payload.dateOfBirth
+  dbDog.death_date = payload.dateOfDeath
+  dbDog.tattoo = payload.tattoo
+  dbDog.colour = payload.colour
+  dbDog.sex = payload.sex
+  dbDog.exported_date = payload.dateExported
+  dbDog.stolen_date = payload.dateStolen
 }
 
 const getDogByIndexNumber = async (indexNumber) => {
@@ -161,6 +199,14 @@ const getDogByIndexNumber = async (indexNumber) => {
       as: 'dog_breed'
     },
     {
+      model: sequelize.models.dog_microchip,
+      as: 'dog_microchips',
+      include: [{
+        model: sequelize.models.microchip,
+        as: 'microchip'
+      }]
+    },
+    {
       model: sequelize.models.status,
       as: 'status'
     }]
@@ -179,6 +225,9 @@ module.exports = {
   getBreeds,
   createDogs,
   addImportedDog,
+  updateDog,
   getAllDogIds,
-  getDogByIndexNumber
+  getDogByIndexNumber,
+  updateDogFields,
+  updateMicrochips
 }

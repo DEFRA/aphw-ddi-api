@@ -39,12 +39,12 @@ module.exports = (sequelize, DataTypes) => {
       type: DataTypes.DATEONLY,
       allowNull: true
     },
-    tattoo: {
-      type: DataTypes.STRING(32),
+    death_date: {
+      type: DataTypes.DATEONLY,
       allowNull: true
     },
-    microchip_number: {
-      type: DataTypes.STRING(24),
+    tattoo: {
+      type: DataTypes.STRING(32),
       allowNull: true
     },
     colour: {
@@ -55,9 +55,13 @@ module.exports = (sequelize, DataTypes) => {
       type: DataTypes.STRING(10),
       allowNull: true
     },
-    exported: {
-      type: DataTypes.BOOLEAN,
-      allowNull: false
+    exported_date: {
+      type: DataTypes.DATEONLY,
+      allowNull: true
+    },
+    stolen_date: {
+      type: DataTypes.DATEONLY,
+      allowNull: true
     }
   }, {
     sequelize,
@@ -98,6 +102,11 @@ module.exports = (sequelize, DataTypes) => {
     dog.belongsTo(models.status, {
       as: 'status',
       foreignKey: 'status_id'
+    })
+
+    dog.hasMany(models.dog_microchip, {
+      as: 'dog_microchips',
+      foreignKey: 'dog_id'
     })
   }
 

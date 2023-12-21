@@ -3,7 +3,7 @@ describe('Dog endpoint', () => {
   let server
 
   jest.mock('../../../../app/repos/dogs')
-  const { getDogByIndexNumber, addImportedDog } = require('../../../../app/repos/dogs')
+  const { getDogByIndexNumber, addImportedDog, updateDog } = require('../../../../app/repos/dogs')
 
   beforeEach(async () => {
     jest.clearAllMocks()
@@ -57,6 +57,48 @@ describe('Dog endpoint', () => {
       method: 'POST',
       url: '/dog',
       payload: { dog: { name: 'Bruno' } }
+    }
+
+    const response = await server.inject(options)
+
+    expect(response.statusCode).toBe(200)
+  })
+
+  test('PUT /dog route returns 400 with invalid payload', async () => {
+    updateDog.mockResolvedValue()
+
+    const options = {
+      method: 'PUT',
+      url: '/dog',
+      payload: {}
+    }
+
+    const response = await server.inject(options)
+
+    expect(response.statusCode).toBe(400)
+  })
+
+  test('PUT /dog route returns 500 with db error', async () => {
+    updateDog.mockImplementation(() => { throw new Error('dog error') })
+
+    const options = {
+      method: 'PUT',
+      url: '/dog',
+      payload: { indexNumber: 'ABC123' }
+    }
+
+    const response = await server.inject(options)
+
+    expect(response.statusCode).toBe(500)
+  })
+
+  test('PUT /dog route returns 200 with valid payload', async () => {
+    updateDog.mockResolvedValue()
+
+    const options = {
+      method: 'PUT',
+      url: '/dog',
+      payload: { indexNumber: 'ABC123' }
     }
 
     const response = await server.inject(options)

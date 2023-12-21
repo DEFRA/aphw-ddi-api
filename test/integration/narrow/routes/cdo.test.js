@@ -14,7 +14,28 @@ describe('CDO endpoint', () => {
   })
 
   test('GET /cdo/ED123 route returns 200', async () => {
-    getCdo.mockResolvedValue({ id: 123, indexNumber: 'ED123' })
+    getCdo.mockResolvedValue({
+      id: 123,
+      indexNumber: 'ED123',
+      dog_breed: {
+        breed: 'breed1'
+      },
+      status: {
+        status: 'NEW'
+      },
+      registration: {
+        court: {
+          name: 'court1'
+        },
+        police_force: {
+          name: 'force1'
+        }
+      },
+      registered_person: [{
+        person: {
+        }
+      }]
+    })
 
     const options = {
       method: 'GET',
@@ -23,6 +44,18 @@ describe('CDO endpoint', () => {
 
     const response = await server.inject(options)
     expect(response.statusCode).toBe(200)
+  })
+
+  test('GET /cdo/ED123 route returns 500 when error', async () => {
+    getCdo.mockImplementation(() => { throw new Error('cdo error') })
+
+    const options = {
+      method: 'GET',
+      url: '/cdo/ED123'
+    }
+
+    const response = await server.inject(options)
+    expect(response.statusCode).toBe(500)
   })
 
   test('POST /cdo route returns 200 with valid payload', async () => {

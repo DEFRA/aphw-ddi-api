@@ -1,6 +1,7 @@
 const sequelize = require('../config/db')
 const createRegistrationNumber = require('../lib/create-registration-number')
 const { getCountry, getContactType } = require('../lookups')
+const { updateSearchIndexPerson } = require('./search')
 
 const createPeople = async (owners, transaction) => {
   if (!transaction) {
@@ -151,7 +152,12 @@ const updatePerson = async (person, transaction) => {
     await updateContact(existing, 'Phone', person.primaryTelephone, transaction)
     await updateContact(existing, 'SecondaryPhone', person.secondaryTelephone, transaction)
 
-    return getPersonByReference(person.personReference, transaction)
+    const updatedPerson = await getPersonByReference(person.personReference, transaction)
+
+    person.id = updatedPerson.id
+    await updateSearchIndexPerson(person, transaction)
+
+    return updatedPerson
   } catch (err) {
     console.error(`Error updating person: ${err}`)
     throw err
@@ -205,6 +211,15 @@ const getPersonAndDogsByReference = async (reference, transaction) => {
         {
           model: sequelize.models.status,
           as: 'status'
+        },
+        {
+          model: sequelize.models.dog_microchip,
+          as: 'dog_microchips',
+          order: [['id', 'ASC']],
+          include: [{
+            model: sequelize.models.microchip,
+            as: 'microchip'
+          }]
         }]
       }],
       transaction

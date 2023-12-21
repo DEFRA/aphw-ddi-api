@@ -96,6 +96,17 @@ const getCdo = async (indexNumber) => {
         model: sequelize.models.insurance_company,
         as: 'company'
       }
+    },
+    {
+      model: sequelize.models.dog_microchip,
+      as: 'dog_microchips',
+      order: [
+        ['id', 'ASC']
+      ],
+      include: [{
+        model: sequelize.models.microchip,
+        as: 'microchip'
+      }]
     }]
   })
 
