@@ -7,7 +7,25 @@ const addToSearchIndex = async (person, dogId, transaction) => {
     return sequelize.transaction((t) => addToSearchIndex(person, dogId, t))
   }
 
-  const dog = await dbFindByPk(sequelize.models.dog, dogId, { raw: true, nest: true, transaction })
+  const dog = await dbFindByPk(sequelize.models.dog, dogId, {
+    include: [{
+      model: sequelize.models.status,
+      as: 'status'
+    },
+    {
+      model: sequelize.models.dog_microchip,
+      as: 'dog_microchips',
+      order: [['id', 'ASC']],
+      include: [{
+        model: sequelize.models.microchip,
+        as: 'microchip'
+      }]
+    }],
+    nest: true,
+    transaction
+  })
+
+  applyMicrochips(dog)
 
   await sequelize.models.search_index.create({
     search: buildIndexColumn(person, dog),
@@ -29,9 +47,19 @@ const buildJsonColumn = (person, dog) => {
     address: buildAddressObject(person),
     dogIndex: dog.index_number,
     dogName: dog.name,
+    dogStatus: dog.status?.status ?? dog.status,
     microchipNumber: dog.microchip_number,
     microchipNumber2: dog.microchip_number2,
     personReference: person.person_reference
+  }
+}
+
+const applyMicrochips = (dog) => {
+  if (dog.dog_microchips?.length > 0) {
+    dog.microchip_number = dog.dog_microchips[0].microchip?.microchip_number
+  }
+  if (dog.dog_microchips?.length > 1) {
+    dog.microchip_number2 = dog.dog_microchips[1].microchip?.microchip_number
   }
 }
 
@@ -64,6 +92,7 @@ const updateSearchIndexDog = async (dog, transaction) => {
       const partialDog = {
         index_number: dog.indexNumber,
         name: dog.name,
+        status: indexRow.json.dogStatus,
         microchip_number: dog.microchipNumber,
         microchip_number2: dog.microchipNumber2
       }

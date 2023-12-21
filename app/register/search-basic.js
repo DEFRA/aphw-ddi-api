@@ -66,7 +66,8 @@ const groupOwners = results => {
         dogId: y.dogId,
         dogIndex: y.dogIndex,
         dogName: y.dogName,
-        microchipNumber: y.microchipNumber
+        microchipNumber: y.microchipNumber,
+        dogStatus: y.dogStatus
       })
       )
     })

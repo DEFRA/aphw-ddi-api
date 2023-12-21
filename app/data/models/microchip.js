@@ -10,10 +10,6 @@ module.exports = (sequelize, DataTypes) => {
     microchip_number: {
       type: DataTypes.STRING(24),
       allowNull: false
-    },
-    display_order: {
-      type: DataTypes.INTEGER,
-      allowNull: false
     }
   }, {
     sequelize,

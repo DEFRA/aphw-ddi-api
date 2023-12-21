@@ -2,6 +2,7 @@ const sequelize = require('../config/db')
 const { v4: uuidv4 } = require('uuid')
 const { getBreed } = require('../lookups')
 const { updateSearchIndexDog } = require('../repos/search')
+const { updateMicrochips, createMicrochip } = require('./microchip')
 
 const getBreeds = async () => {
   try {
@@ -111,7 +112,7 @@ const addImportedDog = async (dog, transaction) => {
   const newDog = await sequelize.models.dog.create(dog, { transaction })
 
   if (dog.microchip_number) {
-    await createMicrochip(dog.microchip_number, newDog.id, 1, transaction)
+    await createMicrochip(dog.microchip_number, newDog.id, transaction)
   }
 
   if (dog.owner) {
@@ -119,19 +120,6 @@ const addImportedDog = async (dog, transaction) => {
   }
 
   return newDog.id
-}
-
-const createMicrochip = async (microchipNumber, dogId, displayOrder, transaction) => {
-  const microchip = {
-    microchip_number: microchipNumber,
-    display_order: displayOrder
-  }
-  const newMicrochip = await sequelize.models.microchip.create(microchip, { transaction })
-  const dogMicrochip = {
-    dog_id: dogId,
-    microchip_id: newMicrochip.id
-  }
-  await sequelize.models.dog_microchip.create(dogMicrochip, { transaction })
 }
 
 const updateDog = async (payload, transaction) => {
@@ -164,39 +152,6 @@ const updateDogFields = (dbDog, payload, breeds) => {
   dbDog.sex = payload.sex
   dbDog.exported_date = payload.dateExported
   dbDog.stolen_date = payload.dateStolen
-}
-
-const updateMicrochips = async (dogFromDb, payload, transaction) => {
-  const existingMicrochip1 = await getMicrochipDetails(dogFromDb.id, 1)
-  const existingMicrochip2 = await getMicrochipDetails(dogFromDb.id, 2)
-  if (existingMicrochip1?.microchip_number !== payload.microchipNumber) {
-    if (existingMicrochip1) {
-      existingMicrochip1.microchip_number = payload.microchipNumber
-      await existingMicrochip1.save({ transaction })
-    } else {
-      await createMicrochip(payload.microchipNumber, dogFromDb.id, 1, transaction)
-    }
-  }
-  if (existingMicrochip2?.microchip_number !== payload.microchipNumber2) {
-    if (existingMicrochip2) {
-      existingMicrochip2.microchip_number = payload.microchipNumber2
-      await existingMicrochip2.save({ transaction })
-    } else {
-      await createMicrochip(payload.microchipNumber2, dogFromDb.id, 2, transaction)
-    }
-  }
-}
-
-const getMicrochipDetails = async (dogId, displayOrder, transaction) => {
-  return await sequelize.models.microchip.findOne({
-    where: { display_order: displayOrder },
-    include: [{
-      model: sequelize.models.dog_microchip,
-      as: 'dog_microchips',
-      where: { dog_id: dogId }
-    }],
-    transaction
-  })
 }
 
 const getDogByIndexNumber = async (indexNumber) => {

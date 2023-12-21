@@ -74,13 +74,13 @@ const buildPerson = (jsonObj) => ({
 
 const buildContacts = (jsonObj) => {
   const contacts = []
-  if (jsonObj.phone1) {
+  if (jsonObj.phone1 && jsonObj.phone1 !== 'No') {
     contacts.push({ type: 'Phone', contact: jsonObj.phone1 })
   }
-  if (jsonObj.phone2) {
+  if (jsonObj.phone2 && jsonObj.phone2 !== 'No') {
     contacts.push({ type: 'Phone', contact: jsonObj.phone2 })
   }
-  if (jsonObj.email) {
+  if (jsonObj.email && jsonObj.email !== 'No') {
     contacts.push({ type: 'Email', contact: jsonObj.email })
   }
   return contacts

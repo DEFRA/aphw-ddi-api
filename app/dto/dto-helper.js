@@ -1,11 +1,16 @@
-const getMicrochip = (data, displayOrder) => {
-  const microchip = data.dog_microchips?.filter(x => x.microchip.display_order === displayOrder)
-  if (!microchip || microchip.length === 0) {
+const getMicrochip = (data, position) => {
+  const microchips = data.dog_microchips?.sort((a, b) => a.id - b.id)
+  if (!microchips || microchips.length < position) {
     return null
   }
-  return microchip[0]?.microchip?.microchip_number
+  return microchips[position - 1].microchip?.microchip_number
+}
+
+const getMicrochips = (data) => {
+  return data.dog_microchips?.sort((a, b) => a.id - b.id)
 }
 
 module.exports = {
-  getMicrochip
+  getMicrochip,
+  getMicrochips
 }

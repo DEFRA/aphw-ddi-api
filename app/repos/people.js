@@ -211,6 +211,15 @@ const getPersonAndDogsByReference = async (reference, transaction) => {
         {
           model: sequelize.models.status,
           as: 'status'
+        },
+        {
+          model: sequelize.models.dog_microchip,
+          as: 'dog_microchips',
+          order: [['id', 'ASC']],
+          include: [{
+            model: sequelize.models.microchip,
+            as: 'microchip'
+          }]
         }]
       }],
       transaction

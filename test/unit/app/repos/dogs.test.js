@@ -24,10 +24,11 @@ describe('Dog repo', () => {
         create: jest.fn()
       },
       microchip: {
-        findOne: jest.fn(),
+        findAll: jest.fn(),
         create: jest.fn()
       },
       dog_microchip: {
+        findAll: jest.fn(),
         create: jest.fn()
       }
     },
@@ -245,7 +246,7 @@ describe('Dog repo', () => {
 
   test('updateMicrochips should update existing', async () => {
     const mockSave = jest.fn()
-    sequelize.models.microchip.findOne.mockResolvedValue({ microchip_number: '123', save: mockSave })
+    sequelize.models.microchip.findAll.mockResolvedValue([{ microchip_number: '123', save: mockSave }])
 
     const dogFromDb = {
       id: 1
@@ -254,12 +255,12 @@ describe('Dog repo', () => {
       microchipNumber: '456'
     }
     await updateMicrochips(dogFromDb, payload, {})
-    expect(mockSave).toHaveBeenCalledTimes(2)
+    expect(mockSave).toHaveBeenCalledTimes(1)
   })
 
   test('updateMicrochips should create new if not existing', async () => {
     const mockSave = jest.fn()
-    sequelize.models.microchip.findOne.mockResolvedValue()
+    sequelize.models.microchip.findAll.mockResolvedValue([])
     sequelize.models.microchip.create.mockResolvedValue({ id: 101 })
 
     const dogFromDb = {
