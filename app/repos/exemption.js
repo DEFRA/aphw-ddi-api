@@ -38,7 +38,7 @@ const updateExemption = async (data, transaction) => {
     registration.application_fee_paid = data.applicationFeePaid
     registration.neutering_confirmation = data.neuteringConfirmation
     registration.microchip_verification = data.microchipVerification
-    registration.exemption_scheme_join = data.exemptionSchemeJoin
+    registration.joined_exemption_scheme = data.joinedExemptionScheme
 
     const insurance = cdo.insurance.sort((a, b) => b.id - a.id)[0]
 
@@ -56,7 +56,7 @@ const updateExemption = async (data, transaction) => {
       }
     }
 
-    await registration.save({ transaction })
+    return registration.save({ transaction })
   } catch (err) {
     console.error(`Error updating CDO: ${err}`)
     throw err

@@ -50,7 +50,17 @@ const updateInsurance = async (insurance, data, transaction) => {
   }
 }
 
+const getCompanies = async () => {
+  const companies = await sequelize.models.insurance_company.findAll()
+
+  return companies.map((company) => ({
+    id: company.id,
+    name: company.company_name
+  }))
+}
+
 module.exports = {
   createInsurance,
-  updateInsurance
+  updateInsurance,
+  getCompanies
 }

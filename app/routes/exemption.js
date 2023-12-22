@@ -14,9 +14,9 @@ module.exports = [{
       }
     },
     handler: async (request, h) => {
-      await updateExemption(request.payload)
+      const res = await updateExemption(request.payload)
 
-      return h.response().code(200)
+      return h.response(res).code(200)
     }
   }
 }]

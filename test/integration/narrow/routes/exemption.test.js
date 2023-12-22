@@ -23,7 +23,7 @@ describe('Exemption endpoint', () => {
       applicationFeePaid: '2020-03-01',
       neuteringConfirmation: '2020-04-01',
       microchipVerification: '2020-04-01',
-      exemptionSchemeJoin: '2020-05-01',
+      joinedExemptionScheme: '2020-05-01',
       insurance: {
         company: 'Test Insurance',
         renewalDate: '2020-06-01'

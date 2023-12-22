@@ -6,12 +6,12 @@ const exemption = Joi.object({
   cdoExpiry: Joi.date().iso().required(),
   court: Joi.string().required(),
   policeForce: Joi.string().required(),
-  legislationOfficer: Joi.string().allow(null).allow('').optional(),
-  certificateIssued: Joi.date().iso().allow(null).allow('').optional(),
-  applicationFeePaid: Joi.date().iso().allow(null).allow('').optional(),
-  neuteringConfirmation: Joi.date().iso().allow(null).allow('').optional(),
-  microchipVerification: Joi.date().iso().allow(null).allow('').optional(),
-  exemptionSchemeJoin: Joi.date().iso().allow(null).allow('').optional(),
+  legislationOfficer: Joi.string().optional(),
+  certificateIssued: Joi.date().iso().optional(),
+  applicationFeePaid: Joi.date().iso().optional(),
+  neuteringConfirmation: Joi.date().iso().optional(),
+  microchipVerification: Joi.date().iso().optional(),
+  joinedExemptionScheme: Joi.date().iso().optional(),
   insurance: Joi.object({
     company: Joi.string().required(),
     renewalDate: Joi.date().iso().required()
