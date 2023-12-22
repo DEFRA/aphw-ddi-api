@@ -18,6 +18,12 @@ const buildAddressString = (address, includeAlternatePostcode) => {
   return addrParts.join(', ')
 }
 
+const buildAddressForSearchResults = (address) => {
+  address.address_line_2 = null
+  return buildAddressString(address)
+}
+
 module.exports = {
-  buildAddressString
+  buildAddressString,
+  buildAddressForSearchResults
 }
