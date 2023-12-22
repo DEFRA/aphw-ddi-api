@@ -1,6 +1,6 @@
 const sequelize = require('../config/db')
 const { Op } = require('sequelize')
-const { buildAddressString } = require('../lib/address-helper')
+const { buildAddressForSearchResults } = require('../lib/address-helper')
 
 const search = async (type, terms) => {
   if (terms === null || terms === undefined) {
@@ -61,7 +61,7 @@ const groupOwners = results => {
       personReference: value[0].personReference,
       firstName: value[0].firstName,
       lastName: value[0].lastName,
-      address: buildAddressString(value[0].address),
+      address: buildAddressForSearchResults(value[0].address),
       dogs: value.map(y => ({
         dogId: y.dogId,
         dogIndex: y.dogIndex,
