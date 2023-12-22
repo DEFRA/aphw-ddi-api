@@ -29,6 +29,7 @@ const cdoCreateDto = (data) => ({
 
 const cdoViewDto = (data) => {
   const person = data.registered_person[0].person
+
   return {
     person: {
       id: person.id,
@@ -62,13 +63,16 @@ const cdoViewDto = (data) => {
       court: data.registration.court.name,
       policeForce: data.registration.police_force.name,
       legislationOfficer: data.registration.legislation_officer,
-      applicationFeePaid: null,
-      insuranceCompany: null,
-      insuranceReneewalDate: null,
-      neuteringCofirmed: null,
-      microchipVerified: null
-    },
-    insurance: data.insurance
+      certificateIssued: data.registration.certificate_issued,
+      applicationFeePaid: data.registration.application_fee_paid,
+      insurance: data.insurance?.sort((a, b) => a.id - b.id).map(i => ({
+        company: i.company.company_name,
+        insuranceRenewal: i.renewal_date
+      })),
+      neuteringConfirmation: data.registration.neutering_confirmation,
+      microchipVerification: data.registration.microchip_verification,
+      joinedExemptionScheme: data.registration.joined_exemption_scheme
+    }
   }
 }
 

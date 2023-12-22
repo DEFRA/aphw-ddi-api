@@ -5,7 +5,7 @@ const getCourt = async court => {
   return await sequelize.models.court.findOne({
     attributes: ['id'],
     where: {
-      court: {
+      name: {
         [Op.iLike]: `%${court}%`
       }
     }
