@@ -60,6 +60,22 @@ module.exports = (sequelize, DataTypes) => {
     legislation_officer: {
       type: DataTypes.STRING(64),
       allowNull: true
+    },
+    application_fee_paid_date: {
+      type: DataTypes.DATE,
+      allowNull: true
+    },
+    neutering_confirmation_date: {
+      type: DataTypes.DATE,
+      allowNull: true
+    },
+    microchip_verification_date: {
+      type: DataTypes.DATE,
+      allowNull: true
+    },
+    joined_exemption_scheme_date: {
+      type: DataTypes.DATE,
+      allowNull: true
     }
   }, {
     sequelize,

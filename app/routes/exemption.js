@@ -1,5 +1,5 @@
 const { updateExemption } = require('../repos/exemption')
-const { exemption: updateExemptionSchema } = require('../schema/cdo/update')
+const { exemption: updateExemptionSchema } = require('../schema/exemption/update')
 
 module.exports = [{
   method: 'PUT',

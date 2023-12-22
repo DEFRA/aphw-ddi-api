@@ -38,7 +38,7 @@ const updateInsurance = async (insurance, data, transaction) => {
       throw new Error(`Company not found: ${data.company}`)
     }
 
-    await insurance.save({
+    await insurance.update({
       company_id: company.id,
       renewal_date: data.renewalDate
     }, { transaction })
