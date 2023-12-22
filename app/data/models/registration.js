@@ -57,8 +57,28 @@ module.exports = (sequelize, DataTypes) => {
       type: DataTypes.DATE,
       allowNull: true
     },
+    certificate_issued: {
+      type: DataTypes.DATE,
+      allowNull: true
+    },
     legislation_officer: {
       type: DataTypes.STRING(64),
+      allowNull: true
+    },
+    application_fee_paid: {
+      type: DataTypes.DATE,
+      allowNull: true
+    },
+    neutering_confirmation: {
+      type: DataTypes.DATE,
+      allowNull: true
+    },
+    microchip_verification: {
+      type: DataTypes.DATE,
+      allowNull: true
+    },
+    joined_exemption_scheme: {
+      type: DataTypes.DATE,
       allowNull: true
     }
   }, {

@@ -1,0 +1,24 @@
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog" xmlns:ext="http://www.liquibase.org/xml/ns/dbchangelog-ext" xmlns:pro="http://www.liquibase.org/xml/ns/pro" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog-ext http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-ext.xsd http://www.liquibase.org/xml/ns/pro http://www.liquibase.org/xml/ns/pro/liquibase-pro-3.9.xsd http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.9.xsd">
+  <changeSet author="Shaun Fitzsimons" id="1">
+    <tagDatabase tag="v1.38.0" />
+  </changeSet>
+  <changeSet author="Shaun Fitzsimons" id="2">
+    <addColumn tableName="registration">
+      <column name="application_fee_paid" type="date">
+        <constraints nullable="true" />
+      </column>
+      <column name="neutering_confirmation" type="date">
+        <constraints nullable="true" />
+      </column>
+      <column name="microchip_verification" type="date">
+        <constraints nullable="true" />
+      </column>
+      <column name="joined_exemption_scheme" type="date">
+        <constraints nullable="true" />
+      </column>
+      <column name="certificate_issued" type="date">
+        <constraints nullable="true" />
+      </column>
+    </addColumn>
+  </changeSet>
+</databaseChangeLog>

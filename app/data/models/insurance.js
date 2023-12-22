@@ -9,7 +9,7 @@ module.exports = (sequelize, DataTypes) => {
     },
     policy_number: {
       type: DataTypes.STRING(32),
-      allowNull: false,
+      allowNull: true,
       unique: 'insurance_policy_number_ukey'
     },
     company_id: {
@@ -20,7 +20,7 @@ module.exports = (sequelize, DataTypes) => {
         key: 'id'
       }
     },
-    expiry_date: {
+    renewal_date: {
       type: DataTypes.DATE,
       allowNull: false
     }
