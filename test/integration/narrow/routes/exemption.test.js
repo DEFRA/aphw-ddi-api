@@ -19,6 +19,7 @@ describe('Exemption endpoint', () => {
       court: 'Test Court',
       policeForce: 'Test Police Force',
       legislationOfficer: 'Test Officer',
+      certificateIssuedDate: '2020-03-01',
       applicationFeePaidDate: '2020-03-01',
       neuteringConfirmationDate: '2020-04-01',
       exemptionSchemeJoinDate: '2020-05-01',

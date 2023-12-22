@@ -16,6 +16,9 @@
       <column name="joined_exemption_scheme_date" type="date">
         <constraints nullable="true" />
       </column>
+      <column name="certificate_issued_date" type="date">
+        <constraints nullable="true" />
+      </column>
     </addColumn>
   </changeSet>
 </databaseChangeLog>

@@ -7,6 +7,7 @@ const exemption = Joi.object({
   court: Joi.string().required(),
   policeForce: Joi.string().required(),
   legislationOfficer: Joi.string().allow(null).allow('').optional(),
+  certificateIssuedDate: Joi.date().iso().allow(null).allow('').optional(),
   applicationFeePaidDate: Joi.date().iso().allow(null).allow('').optional(),
   neuteringConfirmationDate: Joi.date().iso().allow(null).allow('').optional(),
   exemptionSchemeJoinDate: Joi.date().iso().allow(null).allow('').optional(),

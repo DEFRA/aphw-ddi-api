@@ -3,7 +3,8 @@ describe('Insurance repo', () => {
     models: {
       insurance: {
         create: jest.fn(),
-        save: jest.fn()
+        save: jest.fn(),
+        update: jest.fn()
       }
     },
     transaction: jest.fn()
@@ -129,7 +130,7 @@ describe('Insurance repo', () => {
 
     await updateInsurance(sequelize.models.insurance, data, {})
 
-    expect(sequelize.models.insurance.save).toHaveBeenCalledWith({
+    expect(sequelize.models.insurance.update).toHaveBeenCalledWith({
       company_id: 1,
       renewal_date: '2023-01-01'
     }, { transaction: expect.any(Object) })
@@ -142,7 +143,7 @@ describe('Insurance repo', () => {
     }
 
     getInsuranceCompany.mockResolvedValue({ id: 1 })
-    sequelize.models.insurance.save.mockRejectedValue(new Error('test'))
+    sequelize.models.insurance.update.mockRejectedValue(new Error('test'))
 
     await expect(updateInsurance(sequelize.models.insurance, data, {})).rejects.toThrow('test')
   })
