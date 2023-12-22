@@ -34,10 +34,11 @@ const updateExemption = async (data, transaction) => {
     registration.court_id = court.id
     registration.police_force_id = policeForce.id
     registration.legislation_officer = data.legislationOfficer
-    registration.certificate_issued_date = data.certificateIssuedDate
-    registration.application_fee_paid_date = data.applicationFeePaidDate
-    registration.neutering_confirmation_date = data.neuteringConfirmationDate
-    registration.exemption_scheme_join_date = data.exemptionSchemeJoinDate
+    registration.certificate_issued = data.certificateIssued
+    registration.application_fee_paid = data.applicationFeePaid
+    registration.neutering_confirmation = data.neuteringConfirmation
+    registration.microchip_verification = data.microchipVerification
+    registration.exemption_scheme_join = data.exemptionSchemeJoin
 
     const insurance = cdo.insurance.sort((a, b) => b.id - a.id)[0]
 

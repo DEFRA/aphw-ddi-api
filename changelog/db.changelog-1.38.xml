@@ -4,19 +4,19 @@
   </changeSet>
   <changeSet author="Shaun Fitzsimons" id="2">
     <addColumn tableName="registration">
-      <column name="application_fee_paid_date" type="date">
+      <column name="application_fee_paid" type="date">
         <constraints nullable="true" />
       </column>
-      <column name="neutering_confirmation_date" type="date">
+      <column name="neutering_confirmation" type="date">
         <constraints nullable="true" />
       </column>
-      <column name="microchip_verification_date" type="date">
+      <column name="microchip_verification" type="date">
         <constraints nullable="true" />
       </column>
-      <column name="joined_exemption_scheme_date" type="date">
+      <column name="joined_exemption_scheme" type="date">
         <constraints nullable="true" />
       </column>
-      <column name="certificate_issued_date" type="date">
+      <column name="certificate_issued" type="date">
         <constraints nullable="true" />
       </column>
     </addColumn>

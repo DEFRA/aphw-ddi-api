@@ -34,10 +34,11 @@ describe('Exemption repo', () => {
       court: 'Test Court',
       policeForce: 'Test Police Force',
       legislationOfficer: 'Test Officer',
-      certificateIssuedDate: '2020-03-01',
-      applicationFeePaidDate: '2020-03-01',
-      neuteringConfirmationDate: '2020-04-01',
-      exemptionSchemeJoinDate: '2020-05-01'
+      certificateIssued: '2020-03-01',
+      applicationFeePaid: '2020-03-01',
+      neuteringConfirmation: '2020-04-01',
+      microchipVerification: '2020-04-01',
+      exemptionSchemeJoin: '2020-05-01'
     }
 
     const registration = {
@@ -46,9 +47,10 @@ describe('Exemption repo', () => {
       court_id: 1,
       police_force_id: 1,
       legislation_officer: 'Test Officer',
-      certificateIssuedDate: '2020-03-01',
-      application_fee_paid_date: '2020-03-01',
+      certificate_issued: '2020-03-01',
+      application_fee_paid: '2020-03-01',
       neutering_confirmation_date: '2020-04-01',
+      microchip_verification_date: '2020-04-01',
       exemption_scheme_join_date: '2020-05-01',
       save: jest.fn()
     }
@@ -70,10 +72,11 @@ describe('Exemption repo', () => {
       court: 'Test Court',
       policeForce: 'Test Police Force',
       legislationOfficer: 'Test Officer',
-      certificateIssuedDate: '2020-03-01',
-      applicationFeePaidDate: '2020-03-01',
-      neuteringConfirmationDate: '2020-04-01',
-      exemptionSchemeJoinDate: '2020-05-01'
+      certificateIssued: '2020-03-01',
+      applicationFeePaid: '2020-03-01',
+      neuteringConfirmation: '2020-04-01',
+      microchipVerification: '2020-04-01',
+      exemptionSchemeJoin: '2020-05-01'
     }
 
     const registration = {
@@ -82,10 +85,11 @@ describe('Exemption repo', () => {
       court_id: 1,
       police_force_id: 1,
       legislation_officer: 'Test Officer',
-      certificateIssuedDate: '2020-03-01',
-      application_fee_paid_date: '2020-03-01',
-      neutering_confirmation_date: '2020-04-01',
-      exemption_scheme_join_date: '2020-05-01',
+      certificate_issued: '2020-03-01',
+      application_fee_paid: '2020-03-01',
+      neutering_confirmation: '2020-04-01',
+      microchip_verification: '2020-04-01',
+      exemption_scheme_join: '2020-05-01',
       save: jest.fn()
     }
 
@@ -106,10 +110,11 @@ describe('Exemption repo', () => {
       court: 'Test Court',
       policeForce: 'Test Police Force',
       legislationOfficer: 'Test Officer',
-      certificateIssuedDate: '2020-03-01',
-      applicationFeePaidDate: '2020-03-01',
-      neuteringConfirmationDate: '2020-04-01',
-      exemptionSchemeJoinDate: '2020-05-01',
+      certificateIssued: '2020-03-01',
+      applicationFeePaid: '2020-03-01',
+      neuteringConfirmation: '2020-04-01',
+      microchip_verification: '2020-04-01',
+      exemptionSchemeJoin: '2020-05-01',
       insurance: {
         company: 'Test Insurance',
         renewalDate: '2021-06-01'
@@ -122,10 +127,11 @@ describe('Exemption repo', () => {
       court_id: 1,
       police_force_id: 1,
       legislation_officer: 'Test Officer',
-      certificate_issued_date: '2020-03-01',
-      application_fee_paid_date: '2020-03-01',
-      neutering_confirmation_date: '2020-04-01',
-      exemption_scheme_join_date: '2020-05-01',
+      certificate_issued: '2020-03-01',
+      application_fee_paid: '2020-03-01',
+      neutering_confirmation: '2020-04-01',
+      microchip_verification: '2020-04-01',
+      exemption_scheme_join: '2020-05-01',
       save: jest.fn()
     }
 
@@ -150,10 +156,11 @@ describe('Exemption repo', () => {
       court: 'Test Court',
       policeForce: 'Test Police Force',
       legislationOfficer: 'Test Officer',
-      certificateIssuedDate: '2020-03-01',
-      applicationFeePaidDate: '2020-03-01',
-      neuteringConfirmationDate: '2020-04-01',
-      exemptionSchemeJoinDate: '2020-05-01',
+      certificateIssued: '2020-03-01',
+      applicationFeePaid: '2020-03-01',
+      neuteringConfirmation: '2020-04-01',
+      microchipVerification: '2020-04-01',
+      exemptionSchemeJoin: '2020-05-01',
       insurance: {
         company: 'Test Insurance',
         renewalDate: '2021-06-01'
@@ -166,10 +173,11 @@ describe('Exemption repo', () => {
       court_id: 1,
       police_force_id: 1,
       legislation_officer: 'Test Officer',
-      certificate_issued_date: '2020-03-01',
-      application_fee_paid_date: '2020-03-01',
-      neutering_confirmation_date: '2020-04-01',
-      exemption_scheme_join_date: '2020-05-01',
+      certificate_issued: '2020-03-01',
+      application_fee_paid: '2020-03-01',
+      neutering_confirmation: '2020-04-01',
+      microchip_verification: '2020-04-01',
+      exemption_scheme_join: '2020-05-01',
       save: jest.fn()
     }
 

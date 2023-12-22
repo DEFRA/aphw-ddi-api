@@ -62,11 +62,12 @@ const cdoViewDto = (data) => {
       court: data.registration.court.name,
       policeForce: data.registration.police_force.name,
       legislationOfficer: data.registration.legislation_officer,
-      applicationFeePaid: null,
-      insuranceCompany: null,
-      insuranceReneewalDate: null,
-      neuteringCofirmed: null,
-      microchipVerified: null
+      certificateIssued: data.registration.certificate_issued,
+      applicationFeePaid: data.registration.application_fee_paid,
+      insuranceCompany: data.registration.insurance,
+      insuranceRenewalDate: data.registration.insurance,
+      neuteringConfirmation: data.registration.neutering_confirmation,
+      microchipVerification: data.registration.microchip_verification
     },
     insurance: data.insurance
   }
