@@ -87,6 +87,10 @@ const getCdo = async (indexNumber) => {
       {
         model: sequelize.models.court,
         as: 'court'
+      },
+      {
+        model: sequelize.models.exemption_order,
+        as: 'exemption_order'
       }]
     },
     {
@@ -110,9 +114,6 @@ const getCdo = async (indexNumber) => {
     }]
   })
 
-  // Workaround due to Sequelize bug when using 'raw: true'
-  // Multiple rows aren't returned from an array when using 'raw: true'
-  // so the temporary solution is to omit 'raw: true'
   return cdo
 }
 
