@@ -9,7 +9,7 @@ module.exports = (sequelize, DataTypes) => {
     },
     contact: {
       type: DataTypes.STRING(24),
-      allowNull: false,
+      allowNull: true,
       unique: 'contact_ukey'
     },
     contact_type_id: {
