@@ -5,7 +5,8 @@ describe('CDO repo', () => {
     transaction: jest.fn(),
     models: {
       dog: {
-        findOne: jest.fn()
+        findOne: jest.fn(),
+        findAll: jest.fn()
       }
     }
   }))
@@ -21,7 +22,7 @@ describe('CDO repo', () => {
   jest.mock('../../../../app/repos/search')
   const { addToSearchIndex } = require('../../../../app/repos/search')
 
-  const { createCdo, getCdo } = require('../../../../app/repos/cdo')
+  const { createCdo, getCdo, getAllCdos } = require('../../../../app/repos/cdo')
 
   beforeEach(async () => {
     jest.clearAllMocks()
@@ -75,5 +76,18 @@ describe('CDO repo', () => {
     expect(sequelize.models.dog.findOne).toHaveBeenCalledTimes(1)
     expect(res).not.toBe(null)
     expect(res.id).toBe(123)
+  })
+
+  test('getAllCdos should return CDOs', async () => {
+    sequelize.models.dog.findAll.mockResolvedValue([
+      { id: 123, breed: 'breed', name: 'Bruno' },
+      { id: 456, breed: 'breed2', name: 'Fido' }
+    ])
+
+    const res = await getAllCdos()
+    expect(sequelize.models.dog.findAll).toHaveBeenCalledTimes(1)
+    expect(res).not.toBe(null)
+    expect(res.length).toBe(2)
+    expect(res[1].id).toBe(456)
   })
 })
