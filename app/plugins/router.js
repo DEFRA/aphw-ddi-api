@@ -14,7 +14,8 @@ const routes = [].concat(
   require('../routes/dog-breeds'),
   require('../routes/cdo'),
   require('../routes/exemption'),
-  require('../routes/insurance')
+  require('../routes/insurance'),
+  require('../routes/export')
 )
 
 module.exports = {
