@@ -241,7 +241,7 @@ const updateContact = async (existingPerson, type, contact, transaction) => {
 
   const contactType = await getContactType(type)
 
-  if (contact && existingContact !== contact) {
+  if (existingContact !== contact) {
     const email = await sequelize.models.contact.create({
       contact_type_id: contactType.id,
       contact
