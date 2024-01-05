@@ -52,6 +52,9 @@ describe('Exemption repo', () => {
       neutering_confirmation_date: '2020-04-01',
       microchip_verification_date: '2020-04-01',
       exemption_scheme_join_date: '2020-05-01',
+      exemption_order: {
+        exemption_order: 2015
+      },
       save: jest.fn()
     }
 
@@ -90,6 +93,9 @@ describe('Exemption repo', () => {
       neutering_confirmation: '2020-04-01',
       microchip_verification: '2020-04-01',
       exemption_scheme_join: '2020-05-01',
+      exemption_order: {
+        exemption_order: 2015
+      },
       save: jest.fn()
     }
 
@@ -132,6 +138,9 @@ describe('Exemption repo', () => {
       neutering_confirmation: '2020-04-01',
       microchip_verification: '2020-04-01',
       exemption_scheme_join: '2020-05-01',
+      exemption_order: {
+        exemption_order: 2015
+      },
       save: jest.fn()
     }
 
@@ -178,6 +187,9 @@ describe('Exemption repo', () => {
       neutering_confirmation: '2020-04-01',
       microchip_verification: '2020-04-01',
       exemption_scheme_join: '2020-05-01',
+      exemption_order: {
+        exemption_order: 2015
+      },
       save: jest.fn()
     }
 

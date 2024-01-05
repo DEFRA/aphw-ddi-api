@@ -5,6 +5,9 @@ describe('Exemption endpoint', () => {
   jest.mock('../../../../app/repos/exemption')
   const { updateExemption } = require('../../../../app/repos/exemption')
 
+  jest.mock('../../../../app/repos/cdo')
+  const { getCdo } = require('../../../../app/repos/cdo')
+
   beforeEach(async () => {
     jest.clearAllMocks()
     server = await createServer()
@@ -29,6 +32,32 @@ describe('Exemption endpoint', () => {
         renewalDate: '2020-06-01'
       }
     }
+
+    getCdo.mockResolvedValue({
+      id: 123,
+      index_number: 'ED123',
+      dog_breed: {
+        breed: 'breed1'
+      },
+      status: {
+        status: 'NEW'
+      },
+      registration: {
+        court: {
+          name: 'court1'
+        },
+        police_force: {
+          name: 'force1'
+        },
+        exemption_order: {
+          exemption_order: 2015
+        }
+      },
+      registered_person: [{
+        person: {
+        }
+      }]
+    })
 
     const options = {
       method: 'PUT',

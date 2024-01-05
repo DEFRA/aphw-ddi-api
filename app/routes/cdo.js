@@ -9,6 +9,11 @@ module.exports = [{
     const indexNumber = request.params.indexNumber
     try {
       const cdo = await getCdo(indexNumber)
+
+      if (!cdo) {
+        return h.response().code(404)
+      }
+
       return h.response({ cdo: cdoViewDto(cdo) }).code(200)
     } catch (e) {
       console.log(`Error retrieving cdo record: ${e}`)

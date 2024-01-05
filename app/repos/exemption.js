@@ -1,6 +1,6 @@
 const sequelize = require('../config/db')
 const { getCdo } = require('./cdo')
-const { getCourt, getPoliceForce } = require('../lookups')
+const { getCourt, getPoliceForce, getExemptionOrder } = require('../lookups')
 const { createInsurance, updateInsurance } = require('./insurance')
 
 const updateExemption = async (data, transaction) => {
@@ -39,6 +39,19 @@ const updateExemption = async (data, transaction) => {
     registration.neutering_confirmation = data.neuteringConfirmation
     registration.microchip_verification = data.microchipVerification
     registration.joined_exemption_scheme = data.joinedExemptionScheme
+
+    if (registration.exemption_order.exemption_order === '2023') {
+      const order = await getExemptionOrder(data.exemptionOrder)
+
+      if (!order) {
+        throw new Error(`Exemption order not found: ${data.exemptionOrder}`)
+      }
+
+      registration.exemption_order_id = order.id
+      registration.microchip_deadline = data.microchipDeadline
+      registration.typed_by_dlo = data.typedByDlo
+      registration.withdrawn = data.withdrawn
+    }
 
     const insurance = cdo.insurance.sort((a, b) => b.id - a.id)[0]
 
