@@ -25,7 +25,7 @@ const search = async (type, terms) => {
     res.dogId = x.dog_id
     res.personId = x.person_id
     res.distance = type === 'dog' ? levenshtein(x.json.dogName, termsQuery) : levenshtein(`${x.json.firstName} ${x.json.lastName}`, termsQuery)
-    res.rank = x.dataValues.rank
+    res.rank = x.rank ?? x.dataValues.rank
     return res
   })
 

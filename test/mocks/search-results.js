@@ -8,7 +8,8 @@ const uniqueResults = [
       dogName: 'Bruno',
       address: '1 test address',
       microchipNumber: 123456789011111
-    }
+    },
+    rank: 0.5
   },
   {
     dog_id: 2,
@@ -19,7 +20,8 @@ const uniqueResults = [
       dogName: 'Butch',
       address: '2 test address',
       microchipNumber: 123456789022222
-    }
+    },
+    rank: 0.5
   },
   {
     dog_id: 3,
@@ -30,7 +32,8 @@ const uniqueResults = [
       dogName: 'Fido',
       address: '3 test address',
       microchipNumber: 123456789033333
-    }
+    },
+    rank: 0.5
   }
 ]
 
@@ -44,7 +47,8 @@ const resultsForGrouping = [
       dogName: 'Bruno',
       address: '1 test address',
       microchipNumber: 123456789011111
-    }
+    },
+    rank: 0.5
   },
   {
     dog_id: 2,
@@ -55,7 +59,8 @@ const resultsForGrouping = [
       dogName: 'Butch',
       address: '2 test address',
       microchipNumber: 123456789022222
-    }
+    },
+    rank: 0.5
   },
   {
     dog_id: 3,
@@ -66,7 +71,8 @@ const resultsForGrouping = [
       dogName: 'Fido',
       address: '1 test address',
       microchipNumber: 123456789033333
-    }
+    },
+    rank: 0.5
   }
 ]
 

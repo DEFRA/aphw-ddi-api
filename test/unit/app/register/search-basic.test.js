@@ -7,7 +7,8 @@ describe('SearchBasic repo', () => {
         findAll: jest.fn()
       }
     },
-    fn: jest.fn()
+    fn: jest.fn(),
+    literal: jest.fn()
   }))
 
   const sequelize = require('../../../../app/config/db')
@@ -41,7 +42,7 @@ describe('SearchBasic repo', () => {
   test('search for owners with many dogs should return many dogs under owner', async () => {
     sequelize.models.search_index.findAll.mockResolvedValue(mockResultsForGrouping)
 
-    const results = await search('owner', 'term1 term2')
+    const results = await search('owner', 'john term2')
     expect(results.length).toBe(2)
     expect(results[0].firstName).toBe('John')
     expect(results[0].dogs.length).toBe(2)
