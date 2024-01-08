@@ -7,16 +7,23 @@ const search = async (type, terms) => {
     return []
   }
 
-  const termsArray = terms.replaceAll('  ', ' ').split(' ')
+  const termsArray = terms.replaceAll('  ', ' ').replaceAll('*', ':*').split(' ')
   const termsQuery = termsArray.join(' & ')
+  const rankFunc = [sequelize.fn('ts_rank(search_index.search, to_tsquery', sequelize.literal(`'${termsQuery}')`)), 'rank']
   const results = await sequelize.models.search_index.findAll({
+    attributes: { include: [rankFunc] },
     where: {
       search: {
         [Op.match]: sequelize.fn('to_tsquery', termsQuery)
       }
-    }
+    },
+    order: [['rank', 'DESC']]
   })
 
+  // console.log('result1', JSON.parse(JSON.stringify(results)))
+  // TODO - if dog search, and dog name matches criteria, display at top of list
+  //      - if owner search, and owner name matches criteria, display at top of list
+  // ??? use levenshtein on mapped results?
   const mappedResults = results.map(x => {
     const res = x.json
     res.dogId = x.dog_id
