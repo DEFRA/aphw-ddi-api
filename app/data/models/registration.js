@@ -40,6 +40,14 @@ module.exports = (sequelize, DataTypes) => {
         key: 'id'
       }
     },
+    exemption_order_id: {
+      type: DataTypes.INTEGER,
+      allowNull: true,
+      references: {
+        model: 'exemption_order',
+        key: 'id'
+      }
+    },
     created_on: {
       type: DataTypes.DATE,
       allowNull: false,
@@ -80,6 +88,18 @@ module.exports = (sequelize, DataTypes) => {
     joined_exemption_scheme: {
       type: DataTypes.DATE,
       allowNull: true
+    },
+    withdrawn: {
+      type: DataTypes.DATE,
+      allowNull: true
+    },
+    typed_by_dlo: {
+      type: DataTypes.DATE,
+      allowNull: true
+    },
+    microchip_deadline: {
+      type: DataTypes.DATE,
+      allowNull: true
     }
   }, {
     sequelize,
@@ -117,6 +137,11 @@ module.exports = (sequelize, DataTypes) => {
     registration.belongsTo(models.court, {
       as: 'court',
       foreignKey: 'court_id'
+    })
+
+    registration.belongsTo(models.exemption_order, {
+      as: 'exemption_order',
+      foreignKey: 'exemption_order_id'
     })
 
     registration.hasMany(models.comment, {

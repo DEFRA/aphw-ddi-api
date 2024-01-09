@@ -1,4 +1,4 @@
-const { getMicrochip } = require('../../../../app/dto/dto-helper')
+const { getMicrochip, calculateNeuteringDeadline } = require('../../../../app/dto/dto-helper')
 
 describe('DtoHelper test', () => {
   test('getMicrochip should handle null', () => {
@@ -24,5 +24,23 @@ describe('DtoHelper test', () => {
       ]
     }, 2)
     expect(res).toBe('DEF456')
+  })
+
+  test('calculateNeuteringDeadline should return 2024-12-31 if less than 1 year old', () => {
+    const deadline = calculateNeuteringDeadline(new Date('2023-02-01'))
+
+    expect(deadline).toEqual(new Date('2024-12-31'))
+  })
+
+  test('calculateNeuteringDeadline should return 2024-06-30 if at least 1 year old', () => {
+    const deadline = calculateNeuteringDeadline(new Date('2023-01-31'))
+
+    expect(deadline).toEqual(new Date('2024-06-30'))
+  })
+
+  test('calculateNeuteringDeadline should return null if dateOfBirth is null', () => {
+    const deadline = calculateNeuteringDeadline(null)
+
+    expect(deadline).toBeNull()
   })
 })
