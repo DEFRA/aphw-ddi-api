@@ -1,5 +1,6 @@
 const sequelize = require('../config/db')
 const { Op } = require('sequelize')
+const levenshtein = require('js-levenshtein')
 const { buildAddressForSearchResults } = require('../lib/address-helper')
 
 const search = async (type, terms) => {
@@ -7,9 +8,11 @@ const search = async (type, terms) => {
     return []
   }
 
-  const termsArray = terms.replaceAll('  ', ' ').split(' ')
+  const termsArray = terms.replaceAll('  ', ' ').replaceAll('*', ':*').split(' ')
   const termsQuery = termsArray.join(' & ')
+  const rankFunc = [sequelize.fn('ts_rank(search_index.search, to_tsquery', sequelize.literal(`'${termsQuery}')`)), 'rank']
   const results = await sequelize.models.search_index.findAll({
+    attributes: { include: [rankFunc] },
     where: {
       search: {
         [Op.match]: sequelize.fn('to_tsquery', termsQuery)
@@ -21,15 +24,17 @@ const search = async (type, terms) => {
     const res = x.json
     res.dogId = x.dog_id
     res.personId = x.person_id
+    res.distance = type === 'dog' ? levenshtein(x.json.dogName, termsQuery) : levenshtein(`${x.json.firstName} ${x.json.lastName}`, termsQuery)
+    res.rank = x.rank ?? x.dataValues.rank
     return res
   })
 
   if (type === 'dog') {
-    return mappedResults
+    return mappedResults.sort(sortDogSearch)
   } else if (type === 'owner') {
     // Owner
     const groupedResults = groupOwners(mappedResults)
-    return groupedResults
+    return groupedResults.sort(sortOwnerSearch)
   }
 }
 
@@ -61,6 +66,8 @@ const groupOwners = results => {
       personReference: value[0].personReference,
       firstName: value[0].firstName,
       lastName: value[0].lastName,
+      rank: value[0].rank,
+      distance: value[0].distance,
       address: buildAddressForSearchResults(value[0].address),
       dogs: value.map(y => ({
         dogId: y.dogId,
@@ -73,6 +80,14 @@ const groupOwners = results => {
     })
   })
   return groupedResults
+}
+
+const sortDogSearch = (a, b) => {
+  return a.distance - b.distance || b.rank - a.rank || a.dogId - b.dogId
+}
+
+const sortOwnerSearch = (a, b) => {
+  return a.distance - b.distance || b.rank - a.rank || `${a.lastName} ${a.firstName}` - `${b.lastName} ${b.firstName}`
 }
 
 module.exports = {

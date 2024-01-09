@@ -131,7 +131,8 @@ const updateSearchIndexPerson = async (person, transaction) => {
         index_number: indexRow.json.dogIndex,
         name: indexRow.json.dogName,
         microchip_number: indexRow.json.microchipNumber,
-        microchip_number2: indexRow.json.microchipNumber2
+        microchip_number2: indexRow.json.microchipNumber2,
+        status: indexRow.json.dogStatus
       }
       indexRow.search = buildIndexColumn(partialPerson, partialDog)
       indexRow.json = buildJsonColumn(partialPerson, partialDog)
