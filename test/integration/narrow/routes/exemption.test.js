@@ -51,7 +51,7 @@ describe('Exemption endpoint', () => {
           name: 'force1'
         },
         exemption_order: {
-          exemption_order: 2015
+          exemption_order: '2015'
         }
       },
       registered_person: [{
@@ -111,7 +111,7 @@ describe('Exemption endpoint', () => {
           name: 'force1'
         },
         exemption_order: {
-          exemption_order: 2023
+          exemption_order: '2023'
         }
       },
       registered_person: [{
@@ -156,7 +156,7 @@ describe('Exemption endpoint', () => {
           name: 'force1'
         },
         exemption_order: {
-          exemption_order: 2015
+          exemption_order: '2015'
         }
       },
       registered_person: [{
@@ -210,7 +210,7 @@ describe('Exemption endpoint', () => {
           name: 'force1'
         },
         exemption_order: {
-          exemption_order: 2015
+          exemption_order: '2015'
         }
       },
       registered_person: [{

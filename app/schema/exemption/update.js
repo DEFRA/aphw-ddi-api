@@ -33,7 +33,7 @@ const validatePayload = async (payload) => {
 
   const order = cdo?.registration.exemption_order.exemption_order
 
-  if (order === 2023) {
+  if (order === '2023') {
     schema = schema.concat(orderSpecific)
   }
 
