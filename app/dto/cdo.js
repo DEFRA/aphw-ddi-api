@@ -1,4 +1,15 @@
-const { getMicrochip } = require('./dto-helper')
+const { getMicrochip, calculateNeuteringDeadline } = require('./dto-helper')
+
+const generateOrderSpecificData = (data) => {
+  if (data.registration.exemption_order.exemption_order === '2023') {
+    return {
+      microchipDeadline: data.registration.microchip_deadline,
+      neuteringDeadline: calculateNeuteringDeadline(data.birth_date),
+      typedByDlo: data.registration.typed_by_dlo,
+      withdrawn: data.registration.withdrawn
+    }
+  }
+}
 
 const cdoCreateDto = (data) => ({
   owner: {
@@ -58,9 +69,10 @@ const cdoViewDto = (data) => {
       microchipNumber2: getMicrochip(data, 2)
     },
     exemption: {
+      exemptionOrder: data.registration.exemption_order.exemption_order,
       cdoIssued: data.registration.cdo_issued,
       cdoExpiry: data.registration.cdo_expiry,
-      court: data.registration.court.name,
+      court: data.registration.court?.name,
       policeForce: data.registration.police_force.name,
       legislationOfficer: data.registration.legislation_officer,
       certificateIssued: data.registration.certificate_issued,
@@ -71,7 +83,8 @@ const cdoViewDto = (data) => {
       })),
       neuteringConfirmation: data.registration.neutering_confirmation,
       microchipVerification: data.registration.microchip_verification,
-      joinedExemptionScheme: data.registration.joined_exemption_scheme
+      joinedExemptionScheme: data.registration.joined_exemption_scheme,
+      ...generateOrderSpecificData(data)
     }
   }
 }

@@ -1,0 +1,49 @@
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog" xmlns:ext="http://www.liquibase.org/xml/ns/dbchangelog-ext" xmlns:pro="http://www.liquibase.org/xml/ns/pro" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog-ext http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-ext.xsd http://www.liquibase.org/xml/ns/pro http://www.liquibase.org/xml/ns/pro/liquibase-pro-3.9.xsd http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.9.xsd">
+  <changeSet author="Shaun Fitzsimons" id="1">
+    <tagDatabase tag="v1.39.0" />
+  </changeSet>
+  <changeSet author="Shaun Fitzsimons" id="2">
+    <createTable tableName="exemption_order">
+      <column name="id" type="INTEGER" autoIncrement="true">
+        <constraints primaryKey="true" nullable="false" primaryKeyName="exemption_order_pkey" />
+      </column>
+      <column name="exemption_order" type="varchar(32)">
+        <constraints nullable="false" unique="true" uniqueConstraintName="exemption_order_ukey" />
+      </column>
+      <column name="active" type="boolean">
+        <constraints nullable="false" />
+      </column>
+    </createTable>
+  </changeSet>
+  <changeSet author="Shaun Fitzsimons" id="3">
+    <insert tableName="exemption_order">
+      <column name="id" value="1" />
+      <column name="exemption_order" value="2015" />
+      <column name="active" valueBoolean="true" />
+    </insert>
+    <insert tableName="exemption_order">
+      <column name="id" value="2" />
+      <column name="exemption_order" value="2023" />
+      <column name="active" valueBoolean="true" />
+    </insert>
+  </changeSet>
+  <changeSet author="Shaun Fitzsimons" id="4">
+    <addColumn tableName="registration">
+      <column name="exemption_order_id" type="INTEGER" defaultValue="1">
+        <constraints nullable="false" />
+      </column>
+      <column name="withdrawn" type="date">
+        <constraints nullable="true" />
+      </column>
+      <column name="typed_by_dlo" type="date">
+        <constraints nullable="true" />
+      </column>
+      <column name="microchip_deadline" type="date">
+        <constraints nullable="true" />
+      </column>
+    </addColumn>
+  </changeSet>
+  <changeSet author="Shaun Fitzsimons" id="5">
+    <addForeignKeyConstraint baseColumnNames="exemption_order_id" baseTableName="registration" constraintName="fk_registration_exemption_order" referencedColumnNames="id" referencedTableName="exemption_order" />
+  </changeSet>
+</databaseChangeLog>

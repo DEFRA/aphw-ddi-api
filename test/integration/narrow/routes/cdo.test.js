@@ -29,6 +29,9 @@ describe('CDO endpoint', () => {
         },
         police_force: {
           name: 'force1'
+        },
+        exemption_order: {
+          exemption_order: 2015
         }
       },
       registered_person: [{
