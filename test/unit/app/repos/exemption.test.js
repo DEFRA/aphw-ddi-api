@@ -28,6 +28,7 @@ describe('Exemption repo', () => {
 
   test('updateExemption should not start a transaction if one is provided', async () => {
     const data = {
+      exemptionOrder: '2015',
       indexNumber: 'ED123',
       cdoIssued: '2020-01-01',
       cdoExpiry: '2020-02-01',
@@ -53,7 +54,7 @@ describe('Exemption repo', () => {
       microchip_verification_date: '2020-04-01',
       exemption_scheme_join_date: '2020-05-01',
       exemption_order: {
-        exemption_order: 2015
+        exemption_order: '2015'
       },
       save: jest.fn()
     }
@@ -69,6 +70,7 @@ describe('Exemption repo', () => {
 
   test('updateExemption should update the CDO registration', async () => {
     const data = {
+      exemptionOrder: '2015',
       indexNumber: 'ED123',
       cdoIssued: '2020-01-01',
       cdoExpiry: '2020-02-01',
@@ -94,7 +96,7 @@ describe('Exemption repo', () => {
       microchip_verification: '2020-04-01',
       exemption_scheme_join: '2020-05-01',
       exemption_order: {
-        exemption_order: 2015
+        exemption_order: '2015'
       },
       save: jest.fn()
     }
@@ -108,8 +110,49 @@ describe('Exemption repo', () => {
     expect(registration.save).toHaveBeenCalled()
   })
 
+  test('updateExemption with 2023 order should not call getCourt', async () => {
+    const data = {
+      exemptionOrder: '2023',
+      indexNumber: 'ED123',
+      cdoIssued: '2020-01-01',
+      cdoExpiry: '2020-02-01',
+      policeForce: 'Test Police Force',
+      legislationOfficer: 'Test Officer',
+      certificateIssued: '2020-03-01',
+      applicationFeePaid: '2020-03-01',
+      neuteringConfirmation: '2020-04-01',
+      microchipVerification: '2020-04-01',
+      exemptionSchemeJoin: '2020-05-01'
+    }
+
+    const registration = {
+      cdo_issued: '2020-01-01',
+      cdo_expiry: '2020-02-01',
+      court_id: 1,
+      police_force_id: 1,
+      legislation_officer: 'Test Officer',
+      certificate_issued: '2020-03-01',
+      application_fee_paid: '2020-03-01',
+      neutering_confirmation: '2020-04-01',
+      microchip_verification: '2020-04-01',
+      exemption_scheme_join: '2020-05-01',
+      exemption_order: {
+        exemption_order: '2023'
+      },
+      save: jest.fn()
+    }
+
+    getCdo.mockResolvedValue({ registration, insurance: [] })
+    getPoliceForce.mockResolvedValue({ id: 1, name: 'Test Police Force' })
+
+    await updateExemption(data, {})
+
+    expect(getCourt).not.toHaveBeenCalled()
+  })
+
   test('updateExemption should create insurance if none exists', async () => {
     const data = {
+      exemptionOrder: '2015',
       indexNumber: 'ED123',
       cdoIssued: '2020-01-01',
       cdoExpiry: '2020-02-01',
@@ -139,7 +182,7 @@ describe('Exemption repo', () => {
       microchip_verification: '2020-04-01',
       exemption_scheme_join: '2020-05-01',
       exemption_order: {
-        exemption_order: 2015
+        exemption_order: '2015'
       },
       save: jest.fn()
     }
@@ -159,6 +202,7 @@ describe('Exemption repo', () => {
 
   test('updateExemption should update insurance if it exists', async () => {
     const data = {
+      exemptionOrder: '2015',
       indexNumber: 'ED123',
       cdoIssued: '2020-01-01',
       cdoExpiry: '2020-02-01',
@@ -188,7 +232,7 @@ describe('Exemption repo', () => {
       microchip_verification: '2020-04-01',
       exemption_scheme_join: '2020-05-01',
       exemption_order: {
-        exemption_order: 2015
+        exemption_order: '2015'
       },
       save: jest.fn()
     }
@@ -220,17 +264,48 @@ describe('Exemption repo', () => {
   })
 
   test('updateExemption should throw an error if the court is not found', async () => {
-    getCdo.mockResolvedValue({ registration: {}, insurance: [] })
+    const data = {
+      exemptionOrder: '2015',
+      indexNumber: 'ED123',
+      cdoIssued: '2020-01-01',
+      cdoExpiry: '2020-02-01',
+      court: 'test',
+      policeForce: 'Test Police Force',
+      legislationOfficer: 'Test Officer',
+      certificateIssued: '2020-03-01',
+      applicationFeePaid: '2020-03-01',
+      neuteringConfirmation: '2020-04-01',
+      microchipVerification: '2020-04-01',
+      exemptionSchemeJoin: '2020-05-01'
+    }
+
+    const registration = {
+      cdo_issued: '2020-01-01',
+      cdo_expiry: '2020-02-01',
+      court_id: 1,
+      police_force_id: 1,
+      legislation_officer: 'Test Officer',
+      certificate_issued: '2020-03-01',
+      application_fee_paid: '2020-03-01',
+      neutering_confirmation: '2020-04-01',
+      microchip_verification: '2020-04-01',
+      exemption_scheme_join: '2020-05-01',
+      exemption_order: {
+        exemption_order: '2015'
+      },
+      save: jest.fn()
+    }
+
+    getCdo.mockResolvedValue({ id: '123', registration, insurance: [] })
     getCourt.mockResolvedValue(null)
 
-    await expect(updateExemption({ indexNumber: '123', court: 'test' }, {})).rejects.toThrow('Court not found: test')
+    await expect(updateExemption(data, {})).rejects.toThrow('Court not found: test')
   })
 
   test('updateExemption should throw an error if the police force is not found', async () => {
     getCdo.mockResolvedValue({ registration: {}, insurance: [] })
-    getCourt.mockResolvedValue({ id: 1, name: 'Test Court' })
     getPoliceForce.mockResolvedValue(null)
 
-    await expect(updateExemption({ indexNumber: '123', court: 'test', policeForce: 'test' }, {})).rejects.toThrow('Police force not found: test')
+    await expect(updateExemption({ indexNumber: '123', policeForce: 'test' }, {})).rejects.toThrow('Police force not found: test')
   })
 })

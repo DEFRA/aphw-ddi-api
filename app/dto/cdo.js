@@ -72,7 +72,7 @@ const cdoViewDto = (data) => {
       exemptionOrder: data.registration.exemption_order.exemption_order,
       cdoIssued: data.registration.cdo_issued,
       cdoExpiry: data.registration.cdo_expiry,
-      court: data.registration.court.name,
+      court: data.registration.court?.name,
       policeForce: data.registration.police_force.name,
       legislationOfficer: data.registration.legislation_officer,
       certificateIssued: data.registration.certificate_issued,

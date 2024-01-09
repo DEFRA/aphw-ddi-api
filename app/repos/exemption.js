@@ -1,6 +1,6 @@
 const sequelize = require('../config/db')
 const { getCdo } = require('./cdo')
-const { getCourt, getPoliceForce, getExemptionOrder } = require('../lookups')
+const { getCourt, getPoliceForce } = require('../lookups')
 const { createInsurance, updateInsurance } = require('./insurance')
 
 const updateExemption = async (data, transaction) => {
@@ -15,12 +15,6 @@ const updateExemption = async (data, transaction) => {
       throw new Error(`CDO not found: ${data.indexNumber}`)
     }
 
-    const court = await getCourt(data.court)
-
-    if (!court) {
-      throw new Error(`Court not found: ${data.court}`)
-    }
-
     const policeForce = await getPoliceForce(data.policeForce)
 
     if (!policeForce) {
@@ -31,7 +25,6 @@ const updateExemption = async (data, transaction) => {
 
     registration.cdo_issued = data.cdoIssued
     registration.cdo_expiry = data.cdoExpiry
-    registration.court_id = court.id
     registration.police_force_id = policeForce.id
     registration.legislation_officer = data.legislationOfficer
     registration.certificate_issued = data.certificateIssued
@@ -41,16 +34,19 @@ const updateExemption = async (data, transaction) => {
     registration.joined_exemption_scheme = data.joinedExemptionScheme
 
     if (registration.exemption_order.exemption_order === '2023') {
-      const order = await getExemptionOrder(data.exemptionOrder)
-
-      if (!order) {
-        throw new Error(`Exemption order not found: ${data.exemptionOrder}`)
-      }
-
-      registration.exemption_order_id = order.id
       registration.microchip_deadline = data.microchipDeadline
       registration.typed_by_dlo = data.typedByDlo
       registration.withdrawn = data.withdrawn
+    }
+
+    if (registration.exemption_order.exemption_order === '2015') {
+      const court = await getCourt(data.court)
+
+      if (!court) {
+        throw new Error(`Court not found: ${data.court}`)
+      }
+
+      registration.court_id = court.id
     }
 
     const insurance = cdo.insurance.sort((a, b) => b.id - a.id)[0]

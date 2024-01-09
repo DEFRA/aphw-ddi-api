@@ -3,9 +3,10 @@ const { getCdo } = require('../../repos/cdo')
 
 const exemption = Joi.object({
   indexNumber: Joi.string().required(),
+  exemptionOrder: Joi.number().required(),
   cdoIssued: Joi.date().iso().required(),
   cdoExpiry: Joi.date().iso().required(),
-  court: Joi.string().required(),
+  court: Joi.string().optional(),
   policeForce: Joi.string().required(),
   legislationOfficer: Joi.string().allow(null).allow('').optional(),
   certificateIssued: Joi.date().iso().allow(null).optional(),
@@ -20,7 +21,6 @@ const exemption = Joi.object({
 })
 
 const orderSpecific = Joi.object({
-  exemptionOrder: Joi.string().optional(),
   microchipDeadline: Joi.date().iso().optional(),
   typedByDlo: Joi.date().iso().optional(),
   withdrawn: Joi.date().iso().optional()
@@ -33,7 +33,7 @@ const validatePayload = async (payload) => {
 
   const order = cdo?.registration.exemption_order.exemption_order
 
-  if (order === '2023') {
+  if (order === 2023) {
     schema = schema.concat(orderSpecific)
   }
 
