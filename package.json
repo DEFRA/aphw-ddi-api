@@ -25,6 +25,7 @@
     "@hapi/hapi": "20.2.2",
     "@joi/date": "2.1.0",
     "applicationinsights": "2.3.5",
+    "date-fns": "^3.0.6",
     "dayjs": "^1.11.10",
     "joi": "^17.11.0",
     "pg": "^8.11.3",
