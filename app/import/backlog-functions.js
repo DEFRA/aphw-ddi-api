@@ -198,7 +198,7 @@ const createRegistration = async (dogId, statusId, jsonObj) => {
     status_id: statusId,
     cdo_issued: jsonObj.notificationDate,
     cdo_expiry: dayjs(jsonObj.notificationDate).add(2, 'month'),
-    court_id: 1
+    court_id: null
   }
   return (await dbCreate(sequelize.models.registration, registration)).id
 }
