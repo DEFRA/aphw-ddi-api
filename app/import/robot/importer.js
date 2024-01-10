@@ -1,5 +1,5 @@
 const readXlsxFile = require('read-excel-file/node')
-const map = require('./schema/map')
+const map = require('./map')
 const { baseSchema } = require('./schema')
 
 const processRows = async (register, sheet, map, schema) => {

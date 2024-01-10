@@ -15,6 +15,7 @@ services:
       AZURE_STORAGE_USE_CONNECTION_STRING: "true"
       AZURE_STORAGE_CREATE_CONTAINERS: "true"
       AZURE_STORAGE_CONNECTION_STRING: "UseDevelopmentStorage=true"
+      ROBOT_SHEET_NAME: ${ROBOT_SHEET_NAME:-Passed}
       POSTGRES_DB: aphw-ddi
       POSTGRES_HOST: ${POSTGRES_HOST:-aphw-ddi-api-postgres}
       POSTGRES_PORT: 5432
