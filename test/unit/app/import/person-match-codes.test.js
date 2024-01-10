@@ -1,5 +1,5 @@
 const { personMatchCodesStandard } = require('./persons')
-const generatePersonMatchCodes = require('../../../../app/import/person-match-codes')
+const generatePersonMatchCodes = require('../../../../app/import/access/person-match-codes')
 
 describe('PersonMatchCodes test', () => {
   test('generatePersonMatchCodes returns firstname and lastname only by default', () => {

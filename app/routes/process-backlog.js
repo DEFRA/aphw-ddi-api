@@ -1,4 +1,4 @@
-const processBacklog = require('../import/process-backlog')
+const processBacklog = require('../import/access/backlog/process-backlog')
 
 const buildConfig = (request) => ({
   maxRecords: request.query.maxRecords,

@@ -22,7 +22,7 @@ const map = {
       DogGender: 'gender',
       DogDOB: 'birthDate',
       MicrochipNumber: 'microchipNumber',
-      'Insurance Start Date': 'insuranceStartDate',
+      'Insurance Start Date': 'insuranceStartDate'
     }
   }
 }

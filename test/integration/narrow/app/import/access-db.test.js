@@ -1,4 +1,4 @@
-const { saveParsedToBacklog } = require('../../../../../app/import/access-db')
+const { saveParsedToBacklog } = require('../../../../../app/import/access/access-db')
 
 jest.mock('../../../../../app/lib/db-functions')
 const { dbCreate, dbDelete } = require('../../../../../app/lib/db-functions')

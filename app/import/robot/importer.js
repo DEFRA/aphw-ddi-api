@@ -42,7 +42,7 @@ const importRegister = async register => {
   const passed = await processRows(register, 'Passed', map, baseSchema)
 
   return {
-    add: [].concat(passed.add),
+    add: [].concat(passed.add)
   }
 }
 
