@@ -4,12 +4,14 @@ const schema = Joi.object({
   owner: Joi.object({
     firstName: Joi.string().trim().required(),
     lastName: Joi.string().trim().required(),
-    addressLine1: Joi.string().trim().required(),
-    addressLine2: Joi.string().trim().optional(),
-    townOrCity: Joi.string().trim().required(),
-    county: Joi.string().trim().optional(),
-    country: Joi.string().trim().required(),
-    postcode: Joi.string().trim().required(),
+    address: {
+      addressLine1: Joi.string().trim().required(),
+      addressLine2: Joi.string().trim().optional(),
+      town: Joi.string().trim().required(),
+      county: Joi.string().trim().optional(),
+      country: Joi.string().trim().required(),
+      postcode: Joi.string().trim().required(),
+    },
     birthDate: Joi.date().iso().required(),
     phoneNumber: Joi.alternatives().try(
       Joi.number(),

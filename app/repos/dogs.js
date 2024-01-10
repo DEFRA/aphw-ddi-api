@@ -33,6 +33,7 @@ const createDogs = async (dogs, owners, enforcement, transaction) => {
       const breed = await getBreed(dog.breed)
 
       const dogEntity = await sequelize.models.dog.create({
+        id: dog.indexNumber ?? undefined,
         name: dog.name,
         dog_breed_id: breed.id,
         exported: false,

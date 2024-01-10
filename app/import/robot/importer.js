@@ -1,5 +1,5 @@
 const readXlsxFile = require('read-excel-file/node')
-const map = require('./map')
+const map = require('./schema/map')
 const { baseSchema } = require('./schema')
 
 const processRows = async (register, sheet, map, schema) => {
@@ -33,9 +33,7 @@ const processRows = async (register, sheet, map, schema) => {
 
     const key = `${owner.lastName}^${owner.postcode}^${owner.birthDate.getDate()}`
 
-    owner.phoneNumber = `0${owner.phoneNumber}`
-
-    const value = registerMap.get(key) || { ...owner, dogs: [] }
+    const value = registerMap.get(key) || { owner, dogs: [] }
 
     value.dogs.push(dog)
 
@@ -54,7 +52,8 @@ const importRegister = async register => {
   const passed = await processRows(register, 'Wall-E', map, baseSchema)
 
   return {
-    add: [].concat(passed.add)
+    add: [].concat(passed.add),
+    errors: [].concat(passed.errors)
   }
 }
 

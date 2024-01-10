@@ -4,12 +4,16 @@ const map = {
       FirstName: 'firstName',
       LastName: 'lastName',
       DateOfBirth: 'birthDate',
-      AddressLine1: 'addressLine1',
-      AddressLine2: 'addressLine2',
-      TownOrCity: 'townOrCity',
-      County: 'county',
-      Country: 'country',
-      PostCode: 'postcode',
+      Address: {
+        address: {
+          AddressLine1: 'addressLine1',
+          AddressLine2: 'addressLine2',
+          TownOrCity: 'town',
+          County: 'county',
+          Country: 'country',
+          PostCode: 'postcode'
+        }
+      },
       PhoneNumber: 'phoneNumber',
       EmailAddress: 'email'
     }
