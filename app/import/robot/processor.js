@@ -1,14 +1,42 @@
 const { createCdo } = require('../../repos/cdo')
 const sequelize = require('../../config/db')
+const { updateExemption } = require('../../repos/exemption')
+const { addYears } = require('date-fns')
 
 const processRegister = async (register) => {
   await sequelize.transaction(async (t) => {
     for (const record of register.add) {
-      record.owner.phoneNumber = `0${owner.phoneNumber}`
+      const owner = record.owner
 
-      record.dog.breed = 'XL Bully'
+      owner.phoneNumber = `0${owner.phoneNumber}`
 
-      await createCdo(record, t)
+      const data = {
+        owner: {
+          ...owner,
+          primaryTelephone: owner.phoneNumber,
+        },
+        dogs: record.dogs.map(d => ({
+          ...d,
+          source: 'Robot',
+          breed: 'XL Bully',
+          enforcement: {
+            cdoIssued: null,
+            cdoExpiry: null,
+            policeForce: 1
+          },
+          insurance: {
+            company: 'Dogs Trust',
+            renewalDate: addYears(d.insuranceStartDate, 1)
+          }
+        })),
+        enforcementDetails: {
+          cdoIssued: null,
+          cdoExpiry: null,
+          policeForce: 1
+        }
+      }
+
+      await createCdo(data, t)
     }
   })
 }

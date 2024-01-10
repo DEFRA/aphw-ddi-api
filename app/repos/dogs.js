@@ -1,8 +1,9 @@
 const sequelize = require('../config/db')
 const { v4: uuidv4 } = require('uuid')
-const { getBreed } = require('../lookups')
+const { getBreed, getExemptionOrder } = require('../lookups')
 const { updateSearchIndexDog } = require('../repos/search')
 const { updateMicrochips, createMicrochip } = require('./microchip')
+const { createInsurance } = require('./insurance')
 
 const getBreeds = async () => {
   try {
@@ -52,6 +53,14 @@ const createDogs = async (dogs, owners, enforcement, transaction) => {
         transaction
       })
 
+      let exemptionOrder
+
+      if (dog.source === 'ROBOT') {
+        exemptionOrder = await getExemptionOrder('2023')
+      } else {
+        exemptionOrder = await getExemptionOrder('2015')
+      }
+
       const registrationEntity = await sequelize.models.registration.create({
         dog_id: dogEntity.id,
         cdo_issued: dog.cdoIssued,
@@ -59,8 +68,13 @@ const createDogs = async (dogs, owners, enforcement, transaction) => {
         police_force_id: enforcement.policeForce,
         court_id: enforcement.court,
         legislation_officer: enforcement.legislationOfficer,
-        status_id: 1
+        status_id: 1,
+        exemption_order: exemptionOrder.id
       }, { transaction })
+
+      if (dog.insurance) {
+        createInsurance(dogEntity.id, dog.insurance, transaction)
+      }
 
       const createdRegistration = await sequelize.models.registration.findByPk(registrationEntity.id, {
         include: [{
