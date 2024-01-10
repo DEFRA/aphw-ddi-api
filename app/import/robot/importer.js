@@ -1,9 +1,19 @@
 const readXlsxFile = require('read-excel-file/node')
-const map = require('./excel/map')
-const { baseSchema } = require('./excel/register-schema')
+const map = require('./schema/map')
+const { baseSchema } = require('./schema')
 
 const processRows = async (register, sheet, map, schema) => {
-  const { rows } = await readXlsxFile(register, { sheet, map, dateFormat: 'dd/mm/yyyy' })
+  let rows
+  
+  try {
+    const { rows: sheetRows } = await readXlsxFile(register, { sheet, map, dateFormat: 'dd/mm/yyyy' })
+
+    rows = sheetRows
+  } catch (err) {
+    console.error(`Error reading xlsx file: ${err}`)
+
+    throw err
+  }
 
   const errors = []
 
@@ -18,12 +28,14 @@ const processRows = async (register, sheet, map, schema) => {
       return errors.push({ rowNum, row, errors: result.errors.details })
     }
 
-    const person = row.person
+    const owner = row.owner
     const dog = row.dog
 
-    const key = `${person.lastName}^${person.postcode}^${person.dateOfBirth.getDate()}`
+    const key = `${owner.lastName}^${owner.postcode}^${owner.birthDate.getDate()}`
 
-    const value = registerMap.get(key) || { ...person, dogs: [] }
+    owner.phoneNumber = `0${owner.phoneNumber}`
+
+    const value = registerMap.get(key) || { ...owner, dogs: [] }
 
     value.dogs.push(dog)
 
@@ -39,7 +51,7 @@ const processRows = async (register, sheet, map, schema) => {
 }
 
 const importRegister = async register => {
-  const passed = await processRows(register, 'Passed', map, baseSchema)
+  const passed = await processRows(register, 'Wall-E', map, baseSchema)
 
   return {
     add: [].concat(passed.add)

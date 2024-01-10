@@ -1,18 +1,25 @@
-const { processRobotImport } = require('../import/robot-import')
+const Joi = require('joi')
+const { importRegister } = require('../import/robot/importer')
+const { downloadBlob } = require('../storage')
 
 module.exports = [{
   method: 'POST',
   path: '/robot-import',
-  handler: async (request, h) => {
-    if (request.headers['content-type'] !== 'application/json') {
-      return h.response().code(400)
+  options: {
+    validate: {
+      payload: Joi.object({
+        filename: Joi.string().required()
+      }),
+      failAction: (request, h, error) => {
+        console.error(error)
+        return h.response(error).code(400)
+      },
+    },
+    handler: async (request, h) => {
+      const blob = await downloadBlob('inbound', request.payload.filename)
+      const register = await importRegister(blob)
+  
+      return h.response(register).code(200)
     }
-
-    const payload = request.payload
-    const res = await processRobotImport(payload)
-    if (res?.stats?.errors?.length > 0) {
-      return h.response(res).code(400)
-    }
-    return h.response(res).code(200)
-  }
+  },
 }]
