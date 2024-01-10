@@ -1,3 +1,5 @@
+const { getMicrochip } = require('./dto-helper')
+
 const addContacts = (contacts) => {
   const emails = contacts.filter(entry => entry.contact.contact_type.contact_type === 'Email')
     .sort((a, b) => b.id - a.id)
@@ -47,8 +49,8 @@ const personAndDogsDto = (personAndDogs) => ({
     id: x.dog.id,
     indexNumber: x.dog.index_number,
     dogReference: x.dog.dog_reference,
-    microchipNumber: x.dog.dog_microchips?.length >= 1 ? x.dog.dog_microchips[0].microchip?.microchip_number : null,
-    microchipNumber2: x.dog.dog_microchips?.length >= 2 ? x.dog.dog_microchips[1].microchip?.microchip_number : null,
+    microchipNumber: getMicrochip(x.dog, 1),
+    microchipNumber2: getMicrochip(x.dog, 2),
     breed: x.dog.dog_breed.breed,
     name: x.dog.name,
     status: x.dog.status.status,
