@@ -1,8 +1,10 @@
-jest.mock('../../../../app/import/robot-import')
-const { processRobotImport } = require('../../../../app/import/robot-import')
-const { importOneDogOnePerson } = require('../app/import/robot-import-data')
-
 describe('Robot import endpoint', () => {
+  jest.mock('../../../../app/storage')
+  const { downloadBlob } = require('../../../../app/storage')
+
+  jest.mock('../../../../app/import/robot')
+  const { importRegister, processRegister } = require('../../../../app/import/robot')
+
   const createServer = require('../../../../app/server')
   let server
 
@@ -26,13 +28,13 @@ describe('Robot import endpoint', () => {
   })
 
   test('POST /robot-import returns 400 when errors during import', async () => {
-    processRobotImport.mockResolvedValue({
-      stats: {
-        errors: [
-          'Error 1'
-        ],
-        created: []
-      }
+    downloadBlob.mockResolvedValue([])
+
+    importRegister.mockResolvedValue({
+      add: [],
+      errors: [
+        'Error 1'
+      ]
     })
 
     const options = {
@@ -41,7 +43,9 @@ describe('Robot import endpoint', () => {
       headers: {
         'content-type': 'application/json'
       },
-      payload: importOneDogOnePerson
+      payload: {
+        filename: 'register.xlsx'
+      }
     }
 
     const response = await server.inject(options)
@@ -49,22 +53,22 @@ describe('Robot import endpoint', () => {
   })
 
   test('POST /robot-import returns 200', async () => {
-    processRobotImport.mockResolvedValue({
-      stats: {
-        errors: [],
-        created: [
-          'New dog index number 1234 created',
-          'Created person id 39',
-          'Linked person id 39 to dog id 40'
-        ]
-      }
+    downloadBlob.mockResolvedValue([])
+
+    importRegister.mockResolvedValue({
+      add: []
     })
+
+    processRegister.mockResolvedValue()
 
     const options = {
       method: 'POST',
       url: '/robot-import',
       headers: {
         'content-type': 'application/json'
+      },
+      payload: {
+        filename: 'register.xlsx'
       }
     }
 

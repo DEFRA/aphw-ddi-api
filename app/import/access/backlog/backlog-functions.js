@@ -1,12 +1,12 @@
-const sequelize = require('../config/db')
+const sequelize = require('../../../config/db')
 const { v4: uuidv4 } = require('uuid')
 const dayjs = require('dayjs')
-const importDogSchema = require('./imported-dog-schema')
-const importPersonSchema = require('./imported-person-schema')
-const { addPeople } = require('../person/add-person')
-const { addImportedDog } = require('../repos/dogs')
-const { getCounty, getCountry, getBreed, getPoliceForce } = require('../lookups')
-const { dbLogErrorToBacklog, dbLogWarningToBacklog, dbFindAll, dbFindOne, dbUpdate, dbCreate } = require('../lib/db-functions')
+const importDogSchema = require('../schema/imported-dog-schema')
+const importPersonSchema = require('../schema/imported-person-schema')
+const { addPeople } = require('../../../person/add-person')
+const { addImportedDog } = require('../../../repos/dogs')
+const { getCounty, getCountry, getBreed, getPoliceForce } = require('../../../lookups')
+const { dbLogErrorToBacklog, dbLogWarningToBacklog, dbFindAll, dbFindOne, dbUpdate, dbCreate } = require('../../../lib/db-functions')
 
 const getBacklogRows = async (maxRecords) => {
   // TODO - refine criteria using json attributes

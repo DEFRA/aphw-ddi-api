@@ -1,8 +1,8 @@
-const PersonCache = require('./person-cache')
+const PersonCache = require('../person-cache')
 const { buildDog, buildPerson, warmUpCache, isPersonValid, insertPerson, isDogValid, insertDog, getBacklogRows, lookupPersonIdByRef, isRegistrationValid, createRegistration, addComment } = require('./backlog-functions')
-const { dbLogErrorToBacklog } = require('../lib/db-functions')
+const { dbLogErrorToBacklog } = require('../../../lib/db-functions')
 const { cleanseRow } = require('./cleanse-backlog.js')
-const { addToSearchIndex } = require('../repos/search')
+const { addToSearchIndex } = require('../../../repos/search')
 
 let stats
 

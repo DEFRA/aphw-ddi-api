@@ -43,6 +43,18 @@ const createPeople = async (owners, transaction) => {
         address_id: address.id
       }, { transaction })
 
+      if (owner.email) {
+        await createContact(person, 'Email', owner.email, transaction)
+      }
+
+      if (owner.primaryTelephone) {
+        await createContact(person, 'Phone', owner.primaryTelephone, transaction)
+      }
+
+      if (owner.secondaryTelephone) {
+        await createContact(person, 'SecondaryPhone', owner.secondaryTelephone, transaction)
+      }
+
       createdPeople.push({ ...person.dataValues, address: createdAddress })
     }
 
@@ -232,6 +244,20 @@ const getPersonAndDogsByReference = async (reference, transaction) => {
   }
 }
 
+const createContact = async (person, type, contact, transaction) => {
+  const contactType = await getContactType(type)
+
+  const email = await sequelize.models.contact.create({
+    contact_type_id: contactType.id,
+    contact
+  }, { transaction })
+
+  await sequelize.models.person_contact.create({
+    person_id: person.id,
+    contact_id: email.id
+  }, { transaction })
+}
+
 const updateContact = async (existingPerson, type, contact, transaction) => {
   const existingContacts = existingPerson.person_contacts.filter(contact => contact.contact.contact_type.contact_type === type)
 
@@ -239,18 +265,8 @@ const updateContact = async (existingPerson, type, contact, transaction) => {
 
   const existingContact = existingContacts.length ? existingContacts[0].contact.contact : undefined
 
-  const contactType = await getContactType(type)
-
   if (existingContact !== contact) {
-    const email = await sequelize.models.contact.create({
-      contact_type_id: contactType.id,
-      contact
-    }, { transaction })
-
-    await sequelize.models.person_contact.create({
-      person_id: existingPerson.id,
-      contact_id: email.id
-    }, { transaction })
+    createContact(existingContacts, type, contact, transaction)
   }
 }
 

@@ -1,4 +1,4 @@
-const { getBreedIfValid, buildPerson, areDogLookupsValid, arePersonLookupsValid, getBacklogRows, isDogValid, isPersonValid, insertPerson, insertDog, isRegistrationValid, createRegistration, addComment } = require('../../../../app/import/backlog-functions')
+const { getBreedIfValid, buildPerson, areDogLookupsValid, arePersonLookupsValid, getBacklogRows, isDogValid, isPersonValid, insertPerson, insertDog, isRegistrationValid, createRegistration, addComment } = require('../../../../app/import/access/backlog/backlog-functions')
 const { personWithAddress } = require('./persons')
 
 jest.mock('../../../../app/lookups')
@@ -13,7 +13,7 @@ const { addPeople } = require('../../../../app/person/add-person')
 jest.mock('../../../../app/repos/dogs')
 const { addImportedDog } = require('../../../../app/repos/dogs')
 
-const PersonCache = require('../../../../app/import/person-cache')
+const PersonCache = require('../../../../app/import/access/person-cache')
 
 describe('BacklogFunctions test', () => {
   beforeEach(() => {
