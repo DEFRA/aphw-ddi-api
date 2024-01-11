@@ -55,11 +55,11 @@ module.exports = (sequelize, DataTypes) => {
     },
     cdo_issued: {
       type: DataTypes.DATE,
-      allowNull: false
+      allowNull: true
     },
     cdo_expiry: {
       type: DataTypes.DATE,
-      allowNull: false
+      allowNull: true
     },
     time_limit: {
       type: DataTypes.DATE,

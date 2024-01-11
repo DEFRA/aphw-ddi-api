@@ -1,5 +1,5 @@
-jest.mock('../../../../../app/import/backlog-functions')
-const { buildDog, buildPerson, warmUpCache, isPersonValid, insertPerson, isDogValid, insertDog, getBacklogRows, createRegistration, isRegistrationValid, lookupPersonIdByRef, addComment } = require('../../../../../app/import/backlog-functions')
+jest.mock('../../../../../app/import/access/backlog/backlog-functions')
+const { buildDog, buildPerson, warmUpCache, isPersonValid, insertPerson, isDogValid, insertDog, getBacklogRows, createRegistration, isRegistrationValid, lookupPersonIdByRef, addComment } = require('../../../../../app/import/access/backlog/backlog-functions')
 jest.mock('../../../../../app/lib/db-functions')
 const { dbLogErrorToBacklog } = require('../../../../../app/lib/db-functions')
 jest.mock('../../../../../app/lookups')
@@ -8,7 +8,7 @@ jest.mock('../../../../../app/repos/search')
 const { testBacklogPerson } = require('./persons')
 const { testBacklogDog } = require('./dogs')
 const backlogRows = require('./mock-backlog-rows')
-const { process } = require('../../../../../app/import/process-backlog')
+const { process } = require('../../../../../app/import/access/backlog/process-backlog')
 
 describe('ProcessBacklog test', () => {
   test('Should return zero stats when no rows', async () => {

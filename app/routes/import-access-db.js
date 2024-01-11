@@ -1,4 +1,4 @@
-const accessDb = require('../import/access-db')
+const accessDb = require('../import/access/access-db')
 
 module.exports = {
   method: 'GET',

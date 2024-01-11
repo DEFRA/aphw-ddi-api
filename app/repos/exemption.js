@@ -15,10 +15,14 @@ const updateExemption = async (data, transaction) => {
       throw new Error(`CDO not found: ${data.indexNumber}`)
     }
 
-    const policeForce = await getPoliceForce(data.policeForce)
+    let policeForce
 
-    if (!policeForce) {
-      throw new Error(`Police force not found: ${data.policeForce}`)
+    if (data.policeForce) {
+      policeForce = await getPoliceForce(data.policeForce)
+
+      if (!policeForce) {
+        throw new Error(`Police force not found: ${data.policeForce}`)
+      }
     }
 
     const registration = cdo.registration

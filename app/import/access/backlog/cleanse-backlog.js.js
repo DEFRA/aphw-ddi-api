@@ -1,7 +1,7 @@
 const dayjs = require('dayjs')
 const customParseFormat = require('dayjs/plugin/customParseFormat')
 dayjs.extend(customParseFormat)
-const { dbLogWarningToBacklog } = require('../lib/db-functions')
+const { dbLogWarningToBacklog } = require('../../../lib/db-functions')
 
 const dateFormats = ['D MMMM YYYY', 'DD MMMM YYYY', 'DD/MM/YYYY']
 

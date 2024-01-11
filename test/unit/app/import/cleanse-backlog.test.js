@@ -1,4 +1,4 @@
-const { cleanseRow, extractPersonDateOfBirth } = require('../../../../app/import/cleanse-backlog.js')
+const { cleanseRow, extractPersonDateOfBirth } = require('../../../../app/import/access/backlog/cleanse-backlog.js.js')
 const { dbLogWarningToBacklog } = require('../../../../app/lib/db-functions')
 jest.mock('../../../../app/lib/db-functions')
 

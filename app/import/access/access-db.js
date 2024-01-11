@@ -1,8 +1,8 @@
-const storage = require('../storage')
+const storage = require('../../storage')
 const readExcelFile = require('read-excel-file/node')
-const accessDbSchema = require('./access-db-schema')
-const sequelize = require('../config/db')
-const { dbCreate } = require('../lib/db-functions')
+const accessDbSchema = require('./schema/access-db-schema')
+const sequelize = require('../../config/db')
+const { dbCreate } = require('../../lib/db-functions')
 
 const parseBlob = async (blobFilename) => {
   const files = await storage.getInboundFileList()

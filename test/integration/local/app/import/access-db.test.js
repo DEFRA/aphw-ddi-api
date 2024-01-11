@@ -1,7 +1,7 @@
 jest.mock('read-excel-file/node')
 const mockReadXlsxFile = require('read-excel-file/node')
 const importData = require('./mock-xlsx-import')
-const { parseBlob } = require('../../../../../app/import/access-db')
+const { parseBlob } = require('../../../../../app/import/access/access-db')
 const { uploadInboundFile } = require('../../../../../app/storage')
 
 describe('AccessDB test', () => {
