@@ -34,6 +34,7 @@ container:
   azureStorageUseConnectionString: false
   azureStorageAccountName: dummy
   azureStorageCreateContainers: false
+  robotSheetName: Passed
 
 postgresService:
   postgresDb: dangerous_dogs_index
