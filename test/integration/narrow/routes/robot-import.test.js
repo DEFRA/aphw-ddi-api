@@ -1,11 +1,10 @@
-jest.mock('../../../../app/storage')
-
-jest.mock('../../../../app/import/robot')
-const { importRegister, processRegister } = require('../../../../app/import/robot')
-
-const { importOneDogOnePerson } = require('../app/import/robot-import-data')
-
 describe('Robot import endpoint', () => {
+  jest.mock('../../../../app/storage')
+  const { downloadBlob } = require('../../../../app/storage')
+
+  jest.mock('../../../../app/import/robot')
+  const { importRegister, processRegister } = require('../../../../app/import/robot')
+
   const createServer = require('../../../../app/server')
   let server
 
@@ -29,6 +28,8 @@ describe('Robot import endpoint', () => {
   })
 
   test('POST /robot-import returns 400 when errors during import', async () => {
+    downloadBlob.mockResolvedValue([])
+
     importRegister.mockResolvedValue({
       add: [],
       errors: [
@@ -42,7 +43,9 @@ describe('Robot import endpoint', () => {
       headers: {
         'content-type': 'application/json'
       },
-      payload: importOneDogOnePerson
+      payload: {
+        filename: 'register.xlsx'
+      }
     }
 
     const response = await server.inject(options)
@@ -50,9 +53,10 @@ describe('Robot import endpoint', () => {
   })
 
   test('POST /robot-import returns 200', async () => {
+    downloadBlob.mockResolvedValue([])
+
     importRegister.mockResolvedValue({
-      add: [],
-      errors: []
+      add: []
     })
 
     processRegister.mockResolvedValue()
