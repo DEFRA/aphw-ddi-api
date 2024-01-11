@@ -1,6 +1,7 @@
 const { createCdo } = require('../../repos/cdo')
 const sequelize = require('../../config/db')
 const { addYears } = require('date-fns')
+const { lookupPoliceForceByPostcode } = require('./police')
 
 const processRegister = async (register) => {
   await sequelize.transaction(async (t) => {
@@ -26,7 +27,7 @@ const processRegister = async (register) => {
         enforcementDetails: {
           cdoIssued: null,
           cdoExpiry: null,
-          policeForce: 1
+          policeForce: lookupPoliceForceByPostcode(owner.address.postcode)
         }
       }
 
