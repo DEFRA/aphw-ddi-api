@@ -20,9 +20,7 @@ describe('register import', () => {
   test('should group approved dogs under owner', async () => {
     const { add } = await importRegister([])
 
-    const owner = add.find(p => p.lastName === 'Poppins' &&
-      p.birthDate.getDate() === new Date(2000, 0, 1).getDate() &&
-      p.postcode === 'SW1A 2AA')
+    const owner = add.find(p => p.owner.lastName === 'Poppins')
 
     expect(owner.dogs).toHaveLength(3)
 

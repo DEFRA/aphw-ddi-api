@@ -1,5 +1,8 @@
-jest.mock('../../../../app/import/robot-import')
-const { processRobotImport } = require('../../../../app/import/robot-import')
+jest.mock('../../../../app/storage')
+
+jest.mock('../../../../app/import/robot')
+const { importRegister, processRegister } = require('../../../../app/import/robot')
+
 const { importOneDogOnePerson } = require('../app/import/robot-import-data')
 
 describe('Robot import endpoint', () => {
@@ -26,13 +29,11 @@ describe('Robot import endpoint', () => {
   })
 
   test('POST /robot-import returns 400 when errors during import', async () => {
-    processRobotImport.mockResolvedValue({
-      stats: {
-        errors: [
-          'Error 1'
-        ],
-        created: []
-      }
+    importRegister.mockResolvedValue({
+      add: [],
+      errors: [
+        'Error 1'
+      ]
     })
 
     const options = {
@@ -49,22 +50,21 @@ describe('Robot import endpoint', () => {
   })
 
   test('POST /robot-import returns 200', async () => {
-    processRobotImport.mockResolvedValue({
-      stats: {
-        errors: [],
-        created: [
-          'New dog index number 1234 created',
-          'Created person id 39',
-          'Linked person id 39 to dog id 40'
-        ]
-      }
+    importRegister.mockResolvedValue({
+      add: [],
+      errors: []
     })
+
+    processRegister.mockResolvedValue()
 
     const options = {
       method: 'POST',
       url: '/robot-import',
       headers: {
         'content-type': 'application/json'
+      },
+      payload: {
+        filename: 'register.xlsx'
       }
     }
 

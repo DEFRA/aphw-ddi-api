@@ -4,10 +4,12 @@ const register = {
       owner: {
         firstName: 'Bill',
         lastName: 'Test',
-        addressLine1: '319 test street',
-        townOrCity: 'Swansea',
-        country: 'Wales',
-        postcode: 'AA1 1AA',
+        address: {
+          addressLine1: '319 test street',
+          town: 'Swansea',
+          country: 'Wales',
+          postcode: 'AA1 1AA'
+        },
         birthDate: new Date(1970, 3, 28),
         phoneNumber: 3333333333,
         email: 'test@example.com'
@@ -27,10 +29,12 @@ const register = {
       owner: {
         firstName: 'Bill',
         lastName: 'Test',
-        addressLine1: '319 test street',
-        townOrCity: 'Swansea',
-        country: 'Wales',
-        postcode: 'AA1 1AA',
+        address: {
+          addressLine1: '319 test street',
+          town: 'Swansea',
+          country: 'Wales',
+          postcode: 'AA1 1AA'
+        },
         birthDate: new Date(1970, 3, 28),
         phoneNumber: 3333333333,
         email: 'test@example.com'
@@ -50,10 +54,12 @@ const register = {
       owner: {
         firstName: 'Bill',
         lastName: 'Test',
-        addressLine1: '319 test street',
-        townOrCity: 'Swansea',
-        country: 'Wales',
-        postcode: 'AA1 1AA',
+        address: {
+          addressLine1: '319 test street',
+          town: 'Swansea',
+          country: 'Wales',
+          postcode: 'AA1 1AA'
+        },
         birthDate: new Date(1970, 3, 28),
         phoneNumber: 3333333333,
         email: 'test@example.com'
@@ -73,11 +79,13 @@ const register = {
       owner: {
         firstName: 'Joe',
         lastName: 'Bloggs',
-        addressLine1: '1 test street',
-        townOrCity: 'Swansea',
-        country: 'Wales',
-        county: 'West Glamorgan',
-        postcode: 'AA1 1AA',
+        address: {
+          addressLine1: '1 test street',
+          town: 'Swansea',
+          country: 'Wales',
+          county: 'West Glamorgan',
+          postcode: 'AA1 1AA'
+        },
         birthDate: new Date(1960, 3, 28),
         phoneNumber: 3333333333,
         email: 'test@example.com'
@@ -97,10 +105,12 @@ const register = {
       owner: {
         firstName: 'Mary',
         lastName: 'Poppins',
-        addressLine1: '10 Downing Street',
-        townOrCity: 'London',
-        country: 'England',
-        postcode: 'SW1A 2AA',
+        address: {
+          addressLine1: '10 Downing Street',
+          town: 'London',
+          country: 'England',
+          postcode: 'SW1A 2AA'
+        },
         birthDate: new Date(2000, 0, 1),
         phoneNumber: 3333333333,
         email: 'test@example.com'
@@ -120,10 +130,12 @@ const register = {
       owner: {
         firstName: 'Mary',
         lastName: 'Poppins',
-        addressLine1: '10 Downing Street',
-        townOrCity: 'London',
-        country: 'England',
-        postcode: 'SW1A 2AA',
+        address: {
+          addressLine1: '10 Downing Street',
+          town: 'London',
+          country: 'England',
+          postcode: 'SW1A 2AA'
+        },
         birthDate: new Date(2000, 0, 1),
         phoneNumber: 3333333333,
         email: 'test@example.com'
@@ -143,10 +155,12 @@ const register = {
       owner: {
         firstName: 'Mary',
         lastName: 'Poppins',
-        addressLine1: '10 Downing Street',
-        townOrCity: 'London',
-        country: 'England',
-        postcode: 'SW1A 2AA',
+        address: {
+          addressLine1: '10 Downing Street',
+          town: 'London',
+          country: 'England',
+          postcode: 'SW1A 2AA'
+        },
         birthDate: new Date(2000, 0, 1),
         phoneNumber: 3333333333,
         email: 'test@example.com'

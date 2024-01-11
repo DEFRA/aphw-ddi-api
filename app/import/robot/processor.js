@@ -1,6 +1,5 @@
 const { createCdo } = require('../../repos/cdo')
 const sequelize = require('../../config/db')
-const { updateExemption } = require('../../repos/exemption')
 const { addYears } = require('date-fns')
 
 const processRegister = async (register) => {
@@ -13,7 +12,7 @@ const processRegister = async (register) => {
       const data = {
         owner: {
           ...owner,
-          primaryTelephone: owner.phoneNumber,
+          primaryTelephone: owner.phoneNumber
         },
         dogs: record.dogs.map(d => ({
           ...d,

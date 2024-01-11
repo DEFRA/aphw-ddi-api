@@ -2,7 +2,7 @@ const { breeds: mockBreeds } = require('../../../mocks/dog-breeds')
 const mockCdoPayload = require('../../../mocks/cdo/create')
 
 jest.mock('../../../../app/lookups')
-const { getBreed } = require('../../../../app/lookups')
+const { getBreed, getExemptionOrder } = require('../../../../app/lookups')
 
 describe('Dog repo', () => {
   jest.mock('../../../../app/config/db', () => ({
@@ -43,6 +43,7 @@ describe('Dog repo', () => {
     jest.clearAllMocks()
 
     getBreed.mockResolvedValue({ id: 1, breed: 'Breed 1' })
+    getExemptionOrder.mockResolvedValue({ id: 1, exemption_order: '2015' })
     sequelize.models.dog_breed.findAll.mockResolvedValue(mockBreeds)
   })
 

@@ -4,7 +4,7 @@ const { baseSchema } = require('./schema')
 
 const processRows = async (register, sheet, map, schema) => {
   let rows
-  
+
   try {
     const { rows: sheetRows } = await readXlsxFile(register, { sheet, map, dateFormat: 'dd/mm/yyyy' })
 
