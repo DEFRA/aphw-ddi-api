@@ -3,9 +3,12 @@ const config = require('../../config/index')
 
 const lookupPoliceForceByPostcode = async (postcode) => {
   const url = `${config.robotImportPoliceApiUrl}?postcode=${postcode}`
-  console.log('url', url)
-  const { payload } = await wreck.get(url, { json: true })
-  console.log('force', payload?.name)
+  try {
+    const { payload } = await wreck.get(url, { json: true })
+    return payload
+  } catch (e) {
+    console.log(e)
+  }
 }
 
 module.exports = {

@@ -22,7 +22,7 @@ module.exports = [{
       const blob = await downloadBlob('inbound', request.payload.filename)
       const register = await importRegister(blob)
 
-      if (register.errors) {
+      if (register.errors?.length > 0) {
         return h.response(register).code(400)
       }
 

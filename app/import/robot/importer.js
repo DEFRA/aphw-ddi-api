@@ -1,6 +1,9 @@
 const readXlsxFile = require('read-excel-file/node')
 const map = require('./schema/map')
 const { baseSchema } = require('./schema')
+const config = require('../../config/index')
+const { lookupPoliceForceByPostcode } = require('./police')
+const getPoliceForce = require('../../lookups/police-force')
 
 const processRows = async (register, sheet, map, schema) => {
   let rows
@@ -19,9 +22,8 @@ const processRows = async (register, sheet, map, schema) => {
 
   const registerMap = new Map()
 
-  rows.forEach((row, index) => {
-    const rowNum = index + 1
-
+  let rowNum = 1
+  for (const row of rows) {
     const result = schema.validate(row)
 
     if (!result.isValid) {
@@ -38,7 +40,16 @@ const processRows = async (register, sheet, map, schema) => {
     value.dogs.push(dog)
 
     registerMap.set(key, value)
-  })
+
+    const forceId = await lookupPoliceForce(owner.address.postcode)
+    if (!forceId) {
+      errors.push({ rowNum, row, errors: `Cannot find police force for postcode ${owner.address.postcode}` })
+    } else {
+      owner.policeForceId = forceId
+    }
+
+    rowNum++
+  }
 
   const result = {
     add: [...registerMap.values()],
@@ -49,12 +60,23 @@ const processRows = async (register, sheet, map, schema) => {
 }
 
 const importRegister = async register => {
-  const passed = await processRows(register, 'Wall-E', map, baseSchema)
+  const passed = await processRows(register, config.robotSheetName, map, baseSchema)
 
   return {
     add: [].concat(passed.add),
     errors: [].concat(passed.errors)
   }
+}
+
+const lookupPoliceForce = async (postcode) => {
+  const policeForce = await lookupPoliceForceByPostcode(postcode)
+  if (policeForce) {
+    const force = await getPoliceForce(policeForce.name)
+    if (force) {
+      return force.id
+    }
+  }
+  return null
 }
 
 module.exports = {
