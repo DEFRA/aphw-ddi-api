@@ -18,11 +18,6 @@ const processRegister = async (register) => {
           ...d,
           source: 'Robot',
           breed: 'XL Bully',
-          enforcement: {
-            cdoIssued: null,
-            cdoExpiry: null,
-            policeForce: 1
-          },
           insurance: {
             company: 'Dogs Trust',
             renewalDate: addYears(d.insuranceStartDate, 1)

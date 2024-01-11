@@ -29,7 +29,7 @@ const updateExemption = async (data, transaction) => {
 
     registration.cdo_issued = data.cdoIssued
     registration.cdo_expiry = data.cdoExpiry
-    registration.police_force_id = policeForce
+    registration.police_force_id = policeForce.id
     registration.legislation_officer = data.legislationOfficer
     registration.certificate_issued = data.certificateIssued
     registration.application_fee_paid = data.applicationFeePaid
