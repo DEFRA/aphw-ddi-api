@@ -182,13 +182,13 @@ const getPersonAndDogsByReference = async (reference, transaction) => {
       include: [{
         model: sequelize.models.person,
         where: { person_reference: reference },
+        order: [
+          [{ model: sequelize.models.person_address, as: 'addresses' }, 'id', 'DESC']
+        ],
         as: 'person',
         include: [{
           model: sequelize.models.person_address,
           as: 'addresses',
-          order: [
-            [{ model: sequelize.models.person_address, as: 'addresses' }, 'id', 'DESC']
-          ],
           include: [{
             model: sequelize.models.address,
             as: 'address',
@@ -266,7 +266,7 @@ const updateContact = async (existingPerson, type, contact, transaction) => {
   const existingContact = existingContacts.length ? existingContacts[0].contact.contact : undefined
 
   if (existingContact !== contact) {
-    createContact(existingPerson, type, contact, transaction)
+    await createContact(existingPerson, type, contact, transaction)
   }
 }
 
