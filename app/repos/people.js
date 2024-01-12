@@ -266,7 +266,7 @@ const updateContact = async (existingPerson, type, contact, transaction) => {
   const existingContact = existingContacts.length ? existingContacts[0].contact.contact : undefined
 
   if (existingContact !== contact) {
-    createContact(existingContacts, type, contact, transaction)
+    createContact(existingPerson, type, contact, transaction)
   }
 }
 
