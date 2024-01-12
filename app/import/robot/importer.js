@@ -22,8 +22,9 @@ const processRows = async (register, sheet, map, schema) => {
 
   const registerMap = new Map()
 
-  for (let rowNum = 1; rowNum < rows.length + 1; rowNum++) {
-    const row = rows[rowNum - 1]
+  for (let i = 0; i < rows.length; i++) {
+    const rowNum = i + 1
+    const row = rows[i]
     const result = schema.validate(row)
 
     if (!result.isValid) {
