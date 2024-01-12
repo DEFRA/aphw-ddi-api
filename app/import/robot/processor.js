@@ -26,7 +26,7 @@ const processRegister = async (register) => {
         enforcementDetails: {
           cdoIssued: null,
           cdoExpiry: null,
-          policeForce: 1
+          policeForce: owner.policeForceId
         }
       }
 
