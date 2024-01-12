@@ -5,7 +5,8 @@ const schema = Joi.object({
   serviceName: Joi.string().default('Request Editor'),
   port: Joi.number().default(3001),
   env: Joi.string().valid('development', 'test', 'production').default('development'),
-  robotSheetName: Joi.string().required()
+  robotSheetName: Joi.string().required(),
+  robotImportPoliceApiUrl: Joi.string().required()
 })
 
 // Build config
@@ -13,7 +14,8 @@ const config = {
   serviceName: process.env.SERVICE_NAME,
   port: process.env.PORT,
   env: process.env.NODE_ENV,
-  robotSheetName: process.env.ROBOT_SHEET_NAME
+  robotSheetName: process.env.ROBOT_SHEET_NAME,
+  robotImportPoliceApiUrl: process.env.ROBOT_IMPORT_POLICE_API_URL
 }
 
 // Validate config
