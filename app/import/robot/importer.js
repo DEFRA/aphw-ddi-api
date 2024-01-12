@@ -22,8 +22,8 @@ const processRows = async (register, sheet, map, schema) => {
 
   const registerMap = new Map()
 
-  let rowNum = 1
-  for (const row of rows) {
+  for (let rowNum = 1; rowNum < rows.length; rowNum++) {
+    const row = rows[rowNum - 1]
     const result = schema.validate(row)
 
     if (!result.isValid) {
@@ -47,8 +47,6 @@ const processRows = async (register, sheet, map, schema) => {
     } else {
       owner.policeForceId = forceId
     }
-
-    rowNum++
   }
 
   const result = {
@@ -70,12 +68,15 @@ const importRegister = async register => {
 
 const lookupPoliceForce = async (postcode) => {
   const policeForce = await lookupPoliceForceByPostcode(postcode)
+
   if (policeForce) {
     const force = await getPoliceForce(policeForce.name)
+
     if (force) {
       return force.id
     }
   }
+
   return null
 }
 
