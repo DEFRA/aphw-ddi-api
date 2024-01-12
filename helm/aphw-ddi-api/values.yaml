@@ -35,6 +35,7 @@ container:
   azureStorageAccountName: dummy
   azureStorageCreateContainers: false
   robotSheetName: Passed
+  robotImportPoliceApiUrl: dummy
 
 postgresService:
   postgresDb: dangerous_dogs_index
