@@ -8,6 +8,7 @@ const lookupPoliceForceByPostcode = async (postcode) => {
     return payload
   } catch (e) {
     console.log(e)
+    return null
   }
 }
 
