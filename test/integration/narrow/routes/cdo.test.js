@@ -46,7 +46,6 @@ describe('CDO endpoint', () => {
     }
 
     const response = await server.inject(options)
-    console.log('response', response)
     expect(response.statusCode).toBe(200)
   })
 
