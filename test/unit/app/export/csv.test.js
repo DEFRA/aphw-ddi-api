@@ -31,7 +31,6 @@ describe('CSV test', () => {
     const csvData = csv.substring(csv.indexOf('\n') + 1)
     expect(csvHeader).toBe(validHeader)
     const csvDataArray = csvData.split(',')
-    console.log('csvData', csvData)
     expect(csvDataArray[0]).toBe('"P-123-456"')
     expect(csvDataArray[1]).toBe('"John"')
     expect(csvDataArray[2]).toBe('"Smith"')

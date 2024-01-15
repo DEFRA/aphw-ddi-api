@@ -67,43 +67,43 @@ const createPeople = async (owners, transaction) => {
 
 const getPersonByReference = async (reference, transaction) => {
   try {
-    const person = await sequelize.models.person.findOne({
-      where: {
-        person_reference: reference
-      },
-      order: [
-        [{ model: sequelize.models.person_address, as: 'addresses' }, 'id', 'DESC']
-      ],
+    const person = await sequelize.models.registered_person.findAll({
+      order: [[sequelize.col('person.addresses.address.id'), 'DESC']],
       include: [{
-        model: sequelize.models.person_address,
-        as: 'addresses',
+        model: sequelize.models.person,
+        where: { person_reference: reference },
+        as: 'person',
         include: [{
-          model: sequelize.models.address,
-          as: 'address',
+          model: sequelize.models.person_address,
+          as: 'addresses',
           include: [{
-            attribute: ['country'],
-            model: sequelize.models.country,
-            as: 'country'
+            model: sequelize.models.address,
+            as: 'address',
+            include: [{
+              attribute: ['country'],
+              model: sequelize.models.country,
+              as: 'country'
+            }]
           }]
-        }]
-      },
-      {
-        model: sequelize.models.person_contact,
-        as: 'person_contacts',
-        separate: true,
-        include: [{
-          model: sequelize.models.contact,
-          as: 'contact',
+        },
+        {
+          model: sequelize.models.person_contact,
+          as: 'person_contacts',
+          separate: true,
           include: [{
-            model: sequelize.models.contact_type,
-            as: 'contact_type'
+            model: sequelize.models.contact,
+            as: 'contact',
+            include: [{
+              model: sequelize.models.contact_type,
+              as: 'contact_type'
+            }]
           }]
         }]
       }],
       transaction
     })
 
-    return person
+    return person?.length > 0 ? person[0] : null
   } catch (err) {
     console.error(`Error getting person by reference: ${err}`)
     throw err
@@ -179,12 +179,11 @@ const updatePerson = async (person, transaction) => {
 const getPersonAndDogsByReference = async (reference, transaction) => {
   try {
     const person = await sequelize.models.registered_person.findAll({
+      order: [[sequelize.col('person.addresses.address.id'), 'DESC'],
+        [sequelize.col('dog.dog_microchips.microchip.id'), 'ASC']],
       include: [{
         model: sequelize.models.person,
         where: { person_reference: reference },
-        order: [
-          [{ model: sequelize.models.person_address, as: 'addresses' }, 'id', 'DESC']
-        ],
         as: 'person',
         include: [{
           model: sequelize.models.person_address,
@@ -227,7 +226,6 @@ const getPersonAndDogsByReference = async (reference, transaction) => {
         {
           model: sequelize.models.dog_microchip,
           as: 'dog_microchips',
-          order: [['id', 'ASC']],
           include: [{
             model: sequelize.models.microchip,
             as: 'microchip'
@@ -237,7 +235,7 @@ const getPersonAndDogsByReference = async (reference, transaction) => {
       transaction
     })
 
-    return person
+    return person?.length > 0 ? person[0] : null
   } catch (err) {
     console.error(`Error getting person and dogs by reference: ${err}`)
     throw err
