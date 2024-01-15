@@ -10,6 +10,7 @@ describe('Search repo', () => {
         findAll: jest.fn()
       }
     },
+    col: jest.fn(),
     transaction: jest.fn(),
     fn: jest.fn()
   }))

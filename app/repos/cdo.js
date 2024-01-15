@@ -29,8 +29,10 @@ const createCdo = async (data, transaction) => {
 }
 
 const getCdo = async (indexNumber) => {
-  const cdo = await sequelize.models.dog.findOne({
+  const cdo = await sequelize.models.dog.findAll({
     where: { index_number: indexNumber },
+    order: [[sequelize.col('registered_person.person.addresses.address.id'), 'DESC'],
+      [sequelize.col('dog_microchips.microchip.id'), 'ASC']],
     include: [{
       model: sequelize.models.registered_person,
       as: 'registered_person',
@@ -104,9 +106,6 @@ const getCdo = async (indexNumber) => {
     {
       model: sequelize.models.dog_microchip,
       as: 'dog_microchips',
-      order: [
-        ['id', 'ASC']
-      ],
       include: [{
         model: sequelize.models.microchip,
         as: 'microchip'
@@ -114,12 +113,13 @@ const getCdo = async (indexNumber) => {
     }]
   })
 
-  return cdo
+  return cdo?.length > 0 ? cdo[0] : null
 }
 
 const getAllCdos = async () => {
   const cdos = await sequelize.models.dog.findAll({
-    order: [['id']],
+    order: [[sequelize.col('registered_person.person.addresses.address.id'), 'DESC'],
+      [sequelize.col('dog_microchips.microchip.id'), 'ASC']],
     include: [{
       model: sequelize.models.registered_person,
       as: 'registered_person',
@@ -189,9 +189,6 @@ const getAllCdos = async () => {
     {
       model: sequelize.models.dog_microchip,
       as: 'dog_microchips',
-      order: [
-        ['id', 'ASC']
-      ],
       include: [{
         model: sequelize.models.microchip,
         as: 'microchip'

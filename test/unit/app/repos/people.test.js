@@ -29,6 +29,7 @@ describe('People repo', () => {
         create: jest.fn()
       }
     },
+    col: jest.fn(),
     transaction: jest.fn()
   }))
 
@@ -138,7 +139,7 @@ describe('People repo', () => {
   })
 
   test('getPersonByReference should return person', async () => {
-    sequelize.models.person.findOne.mockResolvedValue({
+    sequelize.models.registered_person.findAll.mockResolvedValue([{
       dataValues: {
         id: 1,
         first_name: 'First',
@@ -154,9 +155,11 @@ describe('People repo', () => {
           }
         ]
       }
-    })
+    }])
 
     const person = await getPersonByReference('1234')
+
+    console.log('person', JSON.parse(JSON.stringify(person)))
 
     expect(person).toEqual({
       dataValues: {
@@ -178,13 +181,13 @@ describe('People repo', () => {
   })
 
   test('getPersonByReference should throw if error', async () => {
-    sequelize.models.person.findOne.mockRejectedValue(new Error('Test error'))
+    sequelize.models.registered_person.findAll.mockRejectedValue(new Error('Test error'))
 
     await expect(getPersonByReference('1234')).rejects.toThrow('Test error')
   })
 
   test('getPersonAndDogsByReference should return person and dogs', async () => {
-    sequelize.models.registered_person.findAll.mockResolvedValue({
+    sequelize.models.registered_person.findAll.mockResolvedValue([{
       dataValues: {
         person: [
           {
@@ -208,7 +211,7 @@ describe('People repo', () => {
           }
         ]
       }
-    })
+    }])
 
     const personAndDogs = await getPersonAndDogsByReference('P-1234')
 
@@ -285,7 +288,7 @@ describe('People repo', () => {
       }
     }
 
-    sequelize.models.person.findOne.mockResolvedValue({
+    sequelize.models.registered_person.findAll.mockResolvedValue([{
       id: 1,
       first_name: 'First',
       last_name: 'Last',
@@ -303,7 +306,7 @@ describe('People repo', () => {
         }
       ],
       person_contacts: []
-    })
+    }])
 
     await updatePerson(person, {})
 
@@ -327,7 +330,7 @@ describe('People repo', () => {
       }
     }
 
-    sequelize.models.person.findOne.mockResolvedValue({
+    sequelize.models.registered_person.findAll.mockResolvedValue([{
       id: 1,
       first_name: 'First',
       last_name: 'Last',
@@ -345,7 +348,7 @@ describe('People repo', () => {
         }
       ],
       person_contacts: []
-    })
+    }])
 
     sequelize.models.address.findByPk.mockResolvedValue({
       id: 1,
@@ -387,7 +390,7 @@ describe('People repo', () => {
       }
     }
 
-    sequelize.models.person.findOne.mockResolvedValue({
+    sequelize.models.registered_person.findAll.mockResolvedValue([{
       id: 1,
       first_name: 'First',
       last_name: 'Last',
@@ -405,7 +408,7 @@ describe('People repo', () => {
         }
       ],
       person_contacts: []
-    })
+    }])
 
     sequelize.models.address.findByPk.mockResolvedValue({
       id: 1,
@@ -439,7 +442,7 @@ describe('People repo', () => {
       email: 'test_3@example.com'
     }
 
-    sequelize.models.person.findOne.mockResolvedValue({
+    sequelize.models.registered_person.findAll.mockResolvedValue([{
       id: 1,
       first_name: 'First',
       last_name: 'Last',
@@ -465,7 +468,7 @@ describe('People repo', () => {
           }
         }
       ]
-    })
+    }])
 
     sequelize.models.contact.create.mockResolvedValue({
       id: 2,
