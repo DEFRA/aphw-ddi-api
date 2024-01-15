@@ -8,6 +8,7 @@ const addToSearchIndex = async (person, dogId, transaction) => {
   }
 
   const dog = await dbFindByPk(sequelize.models.dog, dogId, {
+    order: [[sequelize.col('dog_microchips.id'), 'ASC']],
     include: [{
       model: sequelize.models.status,
       as: 'status'
@@ -15,7 +16,6 @@ const addToSearchIndex = async (person, dogId, transaction) => {
     {
       model: sequelize.models.dog_microchip,
       as: 'dog_microchips',
-      order: [['id', 'ASC']],
       include: [{
         model: sequelize.models.microchip,
         as: 'microchip'

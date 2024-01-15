@@ -1,5 +1,6 @@
 const { when } = require('jest-when')
 const { owner: mockOwner } = require('../../../mocks/cdo/create')
+const { owner: mockEnhancedOwner } = require('../../../mocks/cdo/create-enhanced')
 
 describe('People repo', () => {
   jest.mock('../../../../app/config/db', () => ({
@@ -29,6 +30,7 @@ describe('People repo', () => {
         create: jest.fn()
       }
     },
+    col: jest.fn(),
     transaction: jest.fn()
   }))
 
@@ -60,7 +62,7 @@ describe('People repo', () => {
     expect(sequelize.transaction).toHaveBeenCalledTimes(1)
   })
 
-  test('createPeople should note start new transaction if passed', async () => {
+  test('createPeople should not start new transaction if passed', async () => {
     const people = [mockOwner]
 
     const mockAddress = {
@@ -83,13 +85,17 @@ describe('People repo', () => {
 
     sequelize.models.address.findByPk.mockResolvedValue({ ...mockAddress })
 
+    sequelize.models.contact.create.mockResolvedValue({
+      id: 555
+    })
+
     await createPeople(people, {})
 
     expect(sequelize.transaction).not.toHaveBeenCalled()
   })
 
   test('createPeople should return created people', async () => {
-    const people = [mockOwner]
+    const people = [mockEnhancedOwner]
 
     const mockAddress = {
       id: 1,
@@ -130,7 +136,7 @@ describe('People repo', () => {
   })
 
   test('createPeople should throw if error', async () => {
-    const people = [mockOwner]
+    const people = [mockEnhancedOwner]
 
     sequelize.models.person.create.mockRejectedValue(new Error('Test error'))
 
@@ -138,23 +144,25 @@ describe('People repo', () => {
   })
 
   test('getPersonByReference should return person', async () => {
-    sequelize.models.person.findOne.mockResolvedValue({
-      dataValues: {
-        id: 1,
-        first_name: 'First',
-        last_name: 'Last',
-        person_reference: '1234',
-        addresses: [
-          {
-            id: 1,
-            address_line_1: 'Address 1',
-            address_line_2: 'Address 2',
-            town: 'Town',
-            postcode: 'Postcode'
-          }
-        ]
+    sequelize.models.registered_person.findAll.mockResolvedValue([{
+      person: {
+        dataValues: {
+          id: 1,
+          first_name: 'First',
+          last_name: 'Last',
+          person_reference: '1234',
+          addresses: [
+            {
+              id: 1,
+              address_line_1: 'Address 1',
+              address_line_2: 'Address 2',
+              town: 'Town',
+              postcode: 'Postcode'
+            }
+          ]
+        }
       }
-    })
+    }])
 
     const person = await getPersonByReference('1234')
 
@@ -178,13 +186,13 @@ describe('People repo', () => {
   })
 
   test('getPersonByReference should throw if error', async () => {
-    sequelize.models.person.findOne.mockRejectedValue(new Error('Test error'))
+    sequelize.models.registered_person.findAll.mockRejectedValue(new Error('Test error'))
 
     await expect(getPersonByReference('1234')).rejects.toThrow('Test error')
   })
 
   test('getPersonAndDogsByReference should return person and dogs', async () => {
-    sequelize.models.registered_person.findAll.mockResolvedValue({
+    sequelize.models.registered_person.findAll.mockResolvedValue([{
       dataValues: {
         person: [
           {
@@ -201,18 +209,35 @@ describe('People repo', () => {
                 postcode: 'Postcode'
               }
             ],
-            dogs: [
-              { id: 1, name: 'dog1' },
+            dog: [
+              { id: 1, name: 'dog1' }
+            ]
+          },
+          {
+            id: 1,
+            first_name: 'First',
+            last_name: 'Last',
+            person_reference: '1234',
+            addresses: [
+              {
+                id: 1,
+                address_line_1: 'Address 1',
+                address_line_2: 'Address 2',
+                town: 'Town',
+                postcode: 'Postcode'
+              }
+            ],
+            dog: [
               { id: 2, name: 'dog2' }
             ]
           }
         ]
       }
-    })
+    }])
 
     const personAndDogs = await getPersonAndDogsByReference('P-1234')
 
-    expect(personAndDogs).toEqual({
+    expect(personAndDogs).toEqual([{
       dataValues: {
         person: [
           {
@@ -229,14 +254,31 @@ describe('People repo', () => {
                 postcode: 'Postcode'
               }
             ],
-            dogs: [
-              { id: 1, name: 'dog1' },
+            dog: [
+              { id: 1, name: 'dog1' }
+            ]
+          },
+          {
+            id: 1,
+            first_name: 'First',
+            last_name: 'Last',
+            person_reference: '1234',
+            addresses: [
+              {
+                id: 1,
+                address_line_1: 'Address 1',
+                address_line_2: 'Address 2',
+                town: 'Town',
+                postcode: 'Postcode'
+              }
+            ],
+            dog: [
               { id: 2, name: 'dog2' }
             ]
           }
         ]
       }
-    })
+    }])
   })
 
   test('getPersonAndDogsByReference should throw if error', async () => {
@@ -285,25 +327,27 @@ describe('People repo', () => {
       }
     }
 
-    sequelize.models.person.findOne.mockResolvedValue({
-      id: 1,
-      first_name: 'First',
-      last_name: 'Last',
-      person_reference: '1234',
-      addresses: [
-        {
-          address: {
-            id: 1,
-            address_line_1: 'Address 1',
-            address_line_2: 'Address 2',
-            town: 'Town',
-            postcode: 'Postcode',
-            country: { country: 'England' }
+    sequelize.models.registered_person.findAll.mockResolvedValue([{
+      person: {
+        id: 1,
+        first_name: 'First',
+        last_name: 'Last',
+        person_reference: '1234',
+        addresses: [
+          {
+            address: {
+              id: 1,
+              address_line_1: 'Address 1',
+              address_line_2: 'Address 2',
+              town: 'Town',
+              postcode: 'Postcode',
+              country: { country: 'England' }
+            }
           }
-        }
-      ],
-      person_contacts: []
-    })
+        ],
+        person_contacts: []
+      }
+    }])
 
     await updatePerson(person, {})
 
@@ -327,25 +371,27 @@ describe('People repo', () => {
       }
     }
 
-    sequelize.models.person.findOne.mockResolvedValue({
-      id: 1,
-      first_name: 'First',
-      last_name: 'Last',
-      person_reference: '1234',
-      addresses: [
-        {
-          address: {
-            id: 1,
-            address_line_1: 'Address 1',
-            address_line_2: 'Address 2',
-            town: 'Town',
-            postcode: 'Postcode',
-            country: { id: 1, country: 'England' }
+    sequelize.models.registered_person.findAll.mockResolvedValue([{
+      person: {
+        id: 1,
+        first_name: 'First',
+        last_name: 'Last',
+        person_reference: '1234',
+        addresses: [
+          {
+            address: {
+              id: 1,
+              address_line_1: 'Address 1',
+              address_line_2: 'Address 2',
+              town: 'Town',
+              postcode: 'Postcode',
+              country: { id: 1, country: 'England' }
+            }
           }
-        }
-      ],
-      person_contacts: []
-    })
+        ],
+        person_contacts: []
+      }
+    }])
 
     sequelize.models.address.findByPk.mockResolvedValue({
       id: 1,
@@ -387,25 +433,27 @@ describe('People repo', () => {
       }
     }
 
-    sequelize.models.person.findOne.mockResolvedValue({
-      id: 1,
-      first_name: 'First',
-      last_name: 'Last',
-      person_reference: '1234',
-      addresses: [
-        {
-          address: {
-            id: 1,
-            address_line_1: 'Address 1',
-            address_line_2: 'Address 2',
-            town: 'Town',
-            postcode: 'Postcode',
-            country: { id: 1, country: 'England' }
+    sequelize.models.registered_person.findAll.mockResolvedValue([{
+      person: {
+        id: 1,
+        first_name: 'First',
+        last_name: 'Last',
+        person_reference: '1234',
+        addresses: [
+          {
+            address: {
+              id: 1,
+              address_line_1: 'Address 1',
+              address_line_2: 'Address 2',
+              town: 'Town',
+              postcode: 'Postcode',
+              country: { id: 1, country: 'England' }
+            }
           }
-        }
-      ],
-      person_contacts: []
-    })
+        ],
+        person_contacts: []
+      }
+    }])
 
     sequelize.models.address.findByPk.mockResolvedValue({
       id: 1,
@@ -439,33 +487,35 @@ describe('People repo', () => {
       email: 'test_3@example.com'
     }
 
-    sequelize.models.person.findOne.mockResolvedValue({
-      id: 1,
-      first_name: 'First',
-      last_name: 'Last',
-      person_reference: '1234',
-      addresses: [
-        {
-          address: {
-            id: 1,
-            address_line_1: 'Address 1',
-            address_line_2: 'Address 2',
-            town: 'Town',
-            postcode: 'Postcode',
-            country: { id: 1, country: 'England' }
+    sequelize.models.registered_person.findAll.mockResolvedValue([{
+      person: {
+        id: 1,
+        first_name: 'First',
+        last_name: 'Last',
+        person_reference: '1234',
+        addresses: [
+          {
+            address: {
+              id: 1,
+              address_line_1: 'Address 1',
+              address_line_2: 'Address 2',
+              town: 'Town',
+              postcode: 'Postcode',
+              country: { id: 1, country: 'England' }
+            }
           }
-        }
-      ],
-      person_contacts: [
-        {
-          contact: {
-            id: 1,
-            contact: 'test@example.com',
-            contact_type: { id: 2, contact_type: 'Email' }
+        ],
+        person_contacts: [
+          {
+            contact: {
+              id: 1,
+              contact: 'test@example.com',
+              contact_type: { id: 2, contact_type: 'Email' }
+            }
           }
-        }
-      ]
-    })
+        ]
+      }
+    }])
 
     sequelize.models.contact.create.mockResolvedValue({
       id: 2,
@@ -481,5 +531,13 @@ describe('People repo', () => {
     await updatePerson(person, {})
 
     expect(sequelize.models.contact.create).toHaveBeenCalledTimes(1)
+  })
+
+  test('updatePerson throws error if person not found', async () => {
+    updateSearchIndexPerson.mockResolvedValue()
+
+    sequelize.models.registered_person.findAll.mockResolvedValue([])
+
+    await expect(updatePerson({ personReference: 'invalid' }, {})).rejects.toThrow('Person not found')
   })
 })
