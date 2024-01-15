@@ -19,9 +19,7 @@ const updateMicrochip = async (dogFromDb, newMicrochipNumber, position, transact
 
 const getMicrochipDetails = async (dogId, position, transaction) => {
   const microchips = await sequelize.models.microchip.findAll({
-    order: [
-      ['id', 'ASC']
-    ],
+    order: [[sequelize.col('dog_microchips.id'), 'ASC']],
     include: [{
       model: sequelize.models.dog_microchip,
       as: 'dog_microchips',

@@ -90,7 +90,7 @@ process.env.ROBOT_SHEET_NAME = 'Passed'
 process.env.ROBOT_IMPORT_POLICE_API_URL = 'http://localhost/force'
 ```
 
-## Licence
+## Licence 
 
 THIS INFORMATION IS LICENSED UNDER THE CONDITIONS OF THE OPEN GOVERNMENT LICENCE found at:
 

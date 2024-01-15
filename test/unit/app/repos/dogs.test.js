@@ -32,6 +32,7 @@ describe('Dog repo', () => {
         create: jest.fn()
       }
     },
+    col: jest.fn(),
     transaction: jest.fn()
   }))
 
