@@ -103,7 +103,7 @@ const getPersonByReference = async (reference, transaction) => {
       transaction
     })
 
-    return person?.length > 0 ? person[0] : null
+    return person?.length > 0 ? person[0]?.person : null
   } catch (err) {
     console.error(`Error getting person by reference: ${err}`)
     throw err
@@ -235,7 +235,7 @@ const getPersonAndDogsByReference = async (reference, transaction) => {
       transaction
     })
 
-    return person?.length > 0 ? person[0] : null
+    return person
   } catch (err) {
     console.error(`Error getting person and dogs by reference: ${err}`)
     throw err

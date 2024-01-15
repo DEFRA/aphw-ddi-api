@@ -24,6 +24,7 @@ module.exports = [{
         return h.response().code(204)
       }
 
+      console.log('person', JSON.parse(JSON.stringify(person)))
       const result = includeDogs ? personAndDogsDto(person) : personDto(person)
 
       return h.response(result).code(200)
