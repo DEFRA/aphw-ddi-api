@@ -61,7 +61,7 @@ const getCertificateValues = (data) => ({
 })
 
 const generateCertificate = (template, data) => {
-  return new Promise((resolve) => {   
+  return new Promise((resolve) => {
     const values = getCertificateValues(data)
 
     const doc = new PDFDocument({ autoFirstPage: false })
