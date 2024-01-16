@@ -46,6 +46,8 @@ const createDogs = async (dogs, owners, enforcement, transaction) => {
   try {
     const createdDogs = []
 
+    const preExemptStatus = (await getStatuses()).filter(x => x.status === 'Pre-exempt')[0].id
+
     for (const dog of dogs) {
       const breed = await getBreed(dog.breed)
 
@@ -54,7 +56,7 @@ const createDogs = async (dogs, owners, enforcement, transaction) => {
         name: dog.name,
         dog_breed_id: breed.id,
         exported: false,
-        status_id: 1,
+        status_id: preExemptStatus,
         dog_reference: uuidv4()
       }, { transaction })
 
