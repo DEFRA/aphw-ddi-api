@@ -1,16 +1,27 @@
+const Joi = require('joi')
+const { v4: uuidv4 } = require('uuid')
 const { generateCertificate } = require('../generator/certificate')
 const { getCertificateTemplate } = require('../storage/repos/certificate-template')
 const { getCdo } = require('../repos/cdo')
 const { cdoViewDto } = require('../dto/cdo')
 const { uploadCertificate } = require('../storage/repos/certificate')
-const { v4: uuidv4 } = require('uuid')
 
 module.exports = {
-  method: 'GET',
-  path: '/certificate/{indexNumber}',
+  method: 'POST',
+  path: '/certificate',
+  options: {
+    validate: {
+      payload: Joi.object({
+        indexNumber: Joi.string().required()
+      }),
+      failAction: async (request, h, error) => {
+        return h.response().code(400).takeover()
+      }
+    }
+  },
   handler: async (request, h) => {
     try {
-      const cdo = cdoViewDto(await getCdo(request.params.indexNumber))
+      const cdo = cdoViewDto(await getCdo(request.payload.indexNumber))
 
       const template = await getCertificateTemplate(cdo.exemption.exemptionOrder)
       const cert = await generateCertificate(template, cdo)
