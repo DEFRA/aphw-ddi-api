@@ -118,8 +118,10 @@ const getCdo = async (indexNumber) => {
 
 const getAllCdos = async () => {
   const cdos = await sequelize.models.dog.findAll({
-    order: [[sequelize.col('registered_person.person.addresses.address.id'), 'DESC'],
-      [sequelize.col('dog_microchips.microchip.id'), 'ASC']],
+    order: [
+      [sequelize.col('dog.id'), 'ASC'],
+      [sequelize.col('registered_person.person.addresses.address.id'), 'DESC']
+    ],
     include: [{
       model: sequelize.models.registered_person,
       as: 'registered_person',
