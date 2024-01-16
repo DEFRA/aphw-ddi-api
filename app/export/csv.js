@@ -19,7 +19,6 @@ const convertRow = (row) => {
   const exemption = row.registration
   const latestInsurance = extractLatestInsurance(row.insurance)
   return [
-    // Dog
     row.index_number,
     row.dog_breed.breed,
     row.name,
@@ -32,7 +31,6 @@ const convertRow = (row) => {
     getMicrochip(row, 2),
     row.exported_date,
     row.stolen_date,
-    // Owner
     owner.first_name,
     owner.last_name,
     owner.birth_date,
@@ -45,7 +43,6 @@ const convertRow = (row) => {
     extractEmail(owner.person_contacts),
     extractLatestPrimaryTelephoneNumber(owner.person_contacts),
     extractLatestSecondaryTelephoneNumber(owner.person_contacts),
-    // Exemption
     row.status.status,
     exemption.certificate_issued,
     exemption.cdo_issued,
@@ -63,7 +60,6 @@ const convertRow = (row) => {
 }
 
 const headerRow = [
-  // Dog
   'IndexNumber',
   'DogBreed',
   'DogName',
@@ -76,7 +72,6 @@ const headerRow = [
   'DogMicrochip2',
   'DogExportedDate',
   'DogStolenDate',
-  // Owner
   'OwnerFirstName',
   'OwnerLastName',
   'OwnerDateOfBirth',
@@ -89,7 +84,6 @@ const headerRow = [
   'Email',
   'Telephone1',
   'Telephone2',
-  // Exemption
   'ExemptionStatus',
   'CertificateIssued',
   'CdoIssued',
