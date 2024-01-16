@@ -22,6 +22,22 @@ const getBreeds = async () => {
   }
 }
 
+const getStatuses = async () => {
+  try {
+    const statuses = await sequelize.models.status.findAll({
+      attributes: ['id', 'status', 'status_type'],
+      order: [
+        ['id', 'ASC']
+      ]
+    })
+
+    return statuses
+  } catch (err) {
+    console.error(`Error retrieving statuses: ${err}`)
+    throw err
+  }
+}
+
 const createDogs = async (dogs, owners, enforcement, transaction) => {
   if (!transaction) {
     return sequelize.transaction(async (t) => createDogs(dogs, owners, enforcement, t))
@@ -146,7 +162,9 @@ const updateDog = async (payload, transaction) => {
 
   const breeds = await getBreeds()
 
-  updateDogFields(dogFromDB, payload, breeds)
+  const statuses = await getStatuses()
+
+  updateDogFields(dogFromDB, payload, breeds, statuses)
 
   await updateMicrochips(dogFromDB, payload, transaction)
 
@@ -157,7 +175,7 @@ const updateDog = async (payload, transaction) => {
   return dogFromDB
 }
 
-const updateDogFields = (dbDog, payload, breeds) => {
+const updateDogFields = (dbDog, payload, breeds, statuses) => {
   dbDog.dog_breed_id = breeds.filter(x => x.breed === payload.breed)[0].id
   dbDog.name = payload.name
   dbDog.birth_date = payload.dateOfBirth
@@ -167,6 +185,7 @@ const updateDogFields = (dbDog, payload, breeds) => {
   dbDog.sex = payload.sex
   dbDog.exported_date = payload.dateExported
   dbDog.stolen_date = payload.dateStolen
+  dbDog.status_id = payload.status ? statuses.filter(x => x.status === payload.status)[0].id : dbDog.status_id
 }
 
 const getDogByIndexNumber = async (indexNumber) => {
@@ -238,6 +257,7 @@ const getAllDogIds = async () => {
 
 module.exports = {
   getBreeds,
+  getStatuses,
   createDogs,
   addImportedDog,
   updateDog,

@@ -1,0 +1,35 @@
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog" xmlns:ext="http://www.liquibase.org/xml/ns/dbchangelog-ext" xmlns:pro="http://www.liquibase.org/xml/ns/pro" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog-ext http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-ext.xsd http://www.liquibase.org/xml/ns/pro http://www.liquibase.org/xml/ns/pro/liquibase-pro-3.9.xsd http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.9.xsd">
+  <changeSet author="J Barnsley" id="1">
+    <tagDatabase tag="v1.43" />
+  </changeSet>
+  <changeSet author="J Barnsley" id="2">
+    <insert tableName="status">
+      <column name="status" value="Interim exempt" />
+      <column name="status_type" value="STANDARD" />
+    </insert>
+    <insert tableName="status">
+      <column name="status" value="Pre-exempt" />
+      <column name="status_type" value="STANDARD" />
+    </insert>
+    <insert tableName="status">
+      <column name="status" value="Failed" />
+      <column name="status_type" value="STANDARD" />
+    </insert>
+    <insert tableName="status">
+      <column name="status" value="Exempt" />
+      <column name="status_type" value="STANDARD" />
+    </insert>
+    <insert tableName="status">
+      <column name="status" value="In breach" />
+      <column name="status_type" value="STANDARD" />
+    </insert>
+    <insert tableName="status">
+      <column name="status" value="Withdrawn" />
+      <column name="status_type" value="STANDARD" />
+    </insert>
+    <insert tableName="status">
+      <column name="status" value="Inactive" />
+      <column name="status_type" value="STANDARD" />
+    </insert>
+  </changeSet>
+</databaseChangeLog>

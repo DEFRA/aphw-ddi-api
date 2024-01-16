@@ -1,4 +1,5 @@
 const { breeds: mockBreeds } = require('../../../mocks/dog-breeds')
+const { statuses: mockStatuses } = require('../../../mocks/statuses')
 const mockCdoPayload = require('../../../mocks/cdo/create')
 
 jest.mock('../../../../app/lookups')
@@ -30,6 +31,9 @@ describe('Dog repo', () => {
       dog_microchip: {
         findAll: jest.fn(),
         create: jest.fn()
+      },
+      status: {
+        findAll: jest.fn()
       }
     },
     col: jest.fn(),
@@ -38,7 +42,7 @@ describe('Dog repo', () => {
 
   const sequelize = require('../../../../app/config/db')
 
-  const { getBreeds, createDogs, addImportedDog, getDogByIndexNumber, getAllDogIds, updateDogFields, updateMicrochips } = require('../../../../app/repos/dogs')
+  const { getBreeds, getStatuses, createDogs, addImportedDog, getDogByIndexNumber, getAllDogIds, updateDogFields, updateMicrochips } = require('../../../../app/repos/dogs')
 
   beforeEach(async () => {
     jest.clearAllMocks()
@@ -46,6 +50,7 @@ describe('Dog repo', () => {
     getBreed.mockResolvedValue({ id: 1, breed: 'Breed 1' })
     getExemptionOrder.mockResolvedValue({ id: 1, exemption_order: '2015' })
     sequelize.models.dog_breed.findAll.mockResolvedValue(mockBreeds)
+    sequelize.models.status.findAll.mockResolvedValue(mockStatuses)
   })
 
   test('getBreeds should return breeds', async () => {
@@ -61,6 +66,21 @@ describe('Dog repo', () => {
     sequelize.models.dog_breed.findAll.mockRejectedValue(new Error('Test error'))
 
     await expect(getBreeds()).rejects.toThrow('Test error')
+  })
+
+  test('getStatuses should return statuses', async () => {
+    const statuses = await getStatuses()
+
+    expect(statuses).toHaveLength(3)
+    expect(statuses).toContainEqual({ id: 1, status: 'Status 1' })
+    expect(statuses).toContainEqual({ id: 2, status: 'Status 2' })
+    expect(statuses).toContainEqual({ id: 3, status: 'Status 3' })
+  })
+
+  test('getStatuses should throw if error', async () => {
+    sequelize.models.status.findAll.mockRejectedValue(new Error('Test error'))
+
+    await expect(getStatuses()).rejects.toThrow('Test error')
   })
 
   test('createDogs should create start new transaction if none passed', async () => {
