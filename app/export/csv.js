@@ -19,20 +19,6 @@ const convertRow = (row) => {
   const exemption = row.registration
   const latestInsurance = extractLatestInsurance(row.insurance)
   return [
-    // Owner
-    owner.person_reference,
-    owner.first_name,
-    owner.last_name,
-    owner.birth_date,
-    latestAddress.address_line_1 ?? '',
-    latestAddress.address_line_2 ?? '',
-    latestAddress.town ?? '',
-    latestAddress.county ?? '',
-    latestAddress.postcode ?? '',
-    latestAddress.country ?? '',
-    extractEmail(owner.person_contacts),
-    extractLatestPrimaryTelephoneNumber(owner.person_contacts),
-    extractLatestSecondaryTelephoneNumber(owner.person_contacts),
     // Dog
     row.index_number,
     row.dog_breed.breed,
@@ -46,6 +32,19 @@ const convertRow = (row) => {
     getMicrochip(row, 2),
     row.exported_date,
     row.stolen_date,
+    // Owner
+    owner.first_name,
+    owner.last_name,
+    owner.birth_date,
+    latestAddress.address_line_1 ?? '',
+    latestAddress.address_line_2 ?? '',
+    latestAddress.town ?? '',
+    latestAddress.county ?? '',
+    latestAddress.postcode ?? '',
+    latestAddress.country ?? '',
+    extractEmail(owner.person_contacts),
+    extractLatestPrimaryTelephoneNumber(owner.person_contacts),
+    extractLatestSecondaryTelephoneNumber(owner.person_contacts),
     // Exemption
     row.status.status,
     exemption.certificate_issued,
@@ -64,20 +63,6 @@ const convertRow = (row) => {
 }
 
 const headerRow = [
-  // Owner
-  'OwnerReference',
-  'OwnerFirstName',
-  'OwnerLastName',
-  'OwnerDateOfBirth',
-  'AddressLine1',
-  'AddressLine2',
-  'Town',
-  'County',
-  'Postcode',
-  'Country',
-  'Email',
-  'Telephone1',
-  'Telephone2',
   // Dog
   'IndexNumber',
   'DogBreed',
@@ -91,6 +76,19 @@ const headerRow = [
   'DogMicrochip2',
   'DogExportedDate',
   'DogStolenDate',
+  // Owner
+  'OwnerFirstName',
+  'OwnerLastName',
+  'OwnerDateOfBirth',
+  'AddressLine1',
+  'AddressLine2',
+  'Town',
+  'County',
+  'Postcode',
+  'Country',
+  'Email',
+  'Telephone1',
+  'Telephone2',
   // Exemption
   'ExemptionStatus',
   'CertificateIssued',
