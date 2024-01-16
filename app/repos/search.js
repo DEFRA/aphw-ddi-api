@@ -92,7 +92,7 @@ const updateSearchIndexDog = async (dog, transaction) => {
       const partialDog = {
         index_number: dog.indexNumber,
         name: dog.name,
-        status: indexRow.json.dogStatus,
+        status: dog.status ?? indexRow.json.dogStatus,
         microchip_number: dog.microchipNumber,
         microchip_number2: dog.microchipNumber2
       }
