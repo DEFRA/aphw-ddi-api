@@ -2,10 +2,13 @@ const { getMicrochip } = require('../dto/dto-helper')
 
 const convertToCsv = (rows) => {
   const csvRows = []
+
   csvRows.push(headerRow)
+
   rows.forEach(x => {
     csvRows.push(convertRow(x))
   })
+
   return csvRows
     .map(v =>
       v.map(x => (isNaN(x) ? `"${x?.replace(/"/g, '""')}"` : x)).join(',')
@@ -18,6 +21,7 @@ const convertRow = (row) => {
   const latestAddress = extractLatestAddress(owner.addresses)
   const exemption = row.registration
   const latestInsurance = extractLatestInsurance(row.insurance)
+
   return [
     row.index_number,
     row.dog_breed.breed,
@@ -103,27 +107,33 @@ const extractEmail = (contacts) => {
   if (!contacts || contacts.length === 0) {
     return ''
   }
+
   const email = contacts.filter(x => x.contact.contact_type.contact_type === 'Email').sort(propertyComparatorDesc('contact', 'id')).map(y => y.contact.contact)
+
   return email.length > 0 ? email[0] : null
 }
 
 const extractLatestPrimaryTelephoneNumber = (contacts) => {
   if (contacts && contacts.length > 0) {
     const primaryPhones = contacts.filter(x => x.contact.contact_type.contact_type === 'Phone').sort(propertyComparatorDesc('contact', 'id')).map(y => y.contact.contact)
+
     if (primaryPhones.length > 0) {
       return primaryPhones[0]
     }
   }
+
   return null
 }
 
 const extractLatestSecondaryTelephoneNumber = (contacts) => {
   if (contacts && contacts.length > 0) {
     const secondaryPhones = contacts.filter(x => x.contact.contact_type.contact_type === 'SecondaryPhone').sort(propertyComparatorDesc('contact', 'id')).map(y => y.contact.contact)
+
     if (secondaryPhones.length > 0) {
       return secondaryPhones[0]
     }
   }
+
   return null
 }
 
@@ -131,7 +141,9 @@ const extractLatestAddress = (addresses) => {
   if (addresses == null || addresses.length === 0) {
     return {}
   }
+
   const latestAddress = addresses.sort(propertyComparatorDesc('address', 'id'))[0].address
+
   return {
     address_line_1: latestAddress.address_line_1,
     address_line_2: latestAddress.address_line_2,
@@ -146,6 +158,7 @@ const extractLatestInsurance = (insurances) => {
   if (insurances == null || insurances.length === 0) {
     return {}
   }
+
   return insurances.sort(propertyComparatorDesc('id'))[0]
 }
 
@@ -159,15 +172,19 @@ const truncDate = (inDate) => {
   if (!inDate) {
     return ''
   }
+
   let day = inDate.getDate()
   if (parseInt(day) < 10) {
     day = `0${day}`
   }
+
   let month = inDate.getMonth() + 1
   if (parseInt(month) < 10) {
     month = `0${month}`
   }
+
   const year = inDate.getFullYear()
+
   return `${year}-${month}-${day}`
 }
 
