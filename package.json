@@ -27,6 +27,7 @@
     "applicationinsights": "2.3.5",
     "date-fns": "^3.0.6",
     "dayjs": "^1.11.10",
+    "ffc-messaging": "2.7.0",
     "js-levenshtein": "^1.1.6",
     "joi": "^17.11.0",
     "pg": "^8.11.3",

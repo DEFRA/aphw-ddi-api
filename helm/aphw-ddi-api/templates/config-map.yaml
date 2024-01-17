@@ -12,4 +12,7 @@ data:
   AZURE_STORAGE_CREATE_CONTAINERS: {{ quote .Values.container.azureStorageCreateContainers }}
   ROBOT_SHEET_NAME: {{ quote .Values.container.robotSheetName }}
   ROBOT_IMPORT_POLICE_API_URL: {{ quote .Values.container.robotImportPoliceApiUrl }}
+  MESSAGE_QUEUE_HOST: {{ quote .Values.container.messageQueueHost }}
+  MESSAGE_QUEUE_USER: {{ quote .Values.container.messageQueueUser }}
+  EVENTS_TOPIC_ADDRESS: {{ quote .Values.container.eventsTopicAddress }}
 {{- end -}}

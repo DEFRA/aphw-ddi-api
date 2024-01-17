@@ -2,6 +2,7 @@ const sequelize = require('../config/db')
 const createRegistrationNumber = require('../lib/create-registration-number')
 const { getCountry, getContactType } = require('../lookups')
 const { updateSearchIndexPerson } = require('./search')
+const { sendUpdateToAudit } = require('../messaging/send-audit')
 
 const createPeople = async (owners, transaction) => {
   if (!transaction) {
@@ -110,9 +111,9 @@ const getPersonByReference = async (reference, transaction) => {
   }
 }
 
-const updatePerson = async (person, transaction) => {
+const updatePerson = async (person, user, transaction) => {
   if (!transaction) {
-    return sequelize.transaction(async (t) => updatePerson(person, t))
+    return sequelize.transaction(async (t) => updatePerson(person, user, t))
   }
 
   try {
@@ -168,6 +169,8 @@ const updatePerson = async (person, transaction) => {
 
     person.id = updatedPerson.id
     await updateSearchIndexPerson(person, transaction)
+
+    await sendUpdateToAudit(person, user)
 
     return updatedPerson
   } catch (err) {

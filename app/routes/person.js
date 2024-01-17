@@ -1,4 +1,5 @@
 const Joi = require('joi')
+const { getCallingUser } = require('../auth/get-user')
 const { getPersonByReference, getPersonAndDogsByReference, updatePerson } = require('../repos/people')
 const { personDto, personAndDogsDto } = require('../dto/person')
 const { schema: updateSchema } = require('../schema/person/update')
@@ -43,7 +44,7 @@ module.exports = [{
       const person = request.payload
 
       try {
-        const updated = await updatePerson(person)
+        const updated = await updatePerson(person, getCallingUser(request))
 
         return h.response(personDto(updated)).code(200)
       } catch (err) {

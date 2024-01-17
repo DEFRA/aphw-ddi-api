@@ -2,10 +2,11 @@ const sequelize = require('../config/db')
 const { getCdo } = require('./cdo')
 const { getCourt, getPoliceForce } = require('../lookups')
 const { createInsurance, updateInsurance } = require('./insurance')
+const { sendUpdateToAudit } = require('../messaging/send-audit')
 
-const updateExemption = async (data, transaction) => {
+const updateExemption = async (data, user, transaction) => {
   if (!transaction) {
-    return sequelize.transaction((t) => updateExemption(data, t))
+    return sequelize.transaction((t) => updateExemption(data, user, t))
   }
 
   try {
@@ -69,7 +70,11 @@ const updateExemption = async (data, transaction) => {
       }
     }
 
-    return registration.save({ transaction })
+    const res = registration.save({ transaction })
+
+    await sendUpdateToAudit(data, registration, user)
+
+    return res
   } catch (err) {
     console.error(`Error updating CDO: ${err}`)
     throw err

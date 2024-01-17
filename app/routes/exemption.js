@@ -1,3 +1,4 @@
+const { getCallingUser } = require('../auth/get-user')
 const { updateExemption } = require('../repos/exemption')
 const { validatePayload } = require('../schema/exemption/update')
 
@@ -13,7 +14,7 @@ module.exports = [{
         return h.response().code(400).takeover()
       }
 
-      const res = await updateExemption(request.payload)
+      const res = await updateExemption(request.payload, getCallingUser(request))
 
       return h.response(res).code(200)
     }
