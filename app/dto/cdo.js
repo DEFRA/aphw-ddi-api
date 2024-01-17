@@ -65,6 +65,7 @@ const cdoViewDto = (data) => {
       sex: data.sex,
       dateExported: data.exported_date,
       dateStolen: data.stolen_date,
+      dateUntraceable: data.untraceable_date,
       microchipNumber: getMicrochip(data, 1),
       microchipNumber2: getMicrochip(data, 2)
     },
@@ -84,6 +85,7 @@ const cdoViewDto = (data) => {
       neuteringConfirmation: data.registration.neutering_confirmation,
       microchipVerification: data.registration.microchip_verification,
       joinedExemptionScheme: data.registration.joined_exemption_scheme,
+      removedFromCdoProcess: data.registration.removed_from_cdo_process,
       ...generateOrderSpecificData(data)
     }
   }

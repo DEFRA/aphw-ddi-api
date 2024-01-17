@@ -1,7 +1,10 @@
+const { isFuture } = require('date-fns')
 const sequelize = require('../config/db')
+const constants = require('../constants/statuses')
 const { getCdo } = require('./cdo')
 const { getCourt, getPoliceForce } = require('../lookups')
 const { createInsurance, updateInsurance } = require('./insurance')
+const { updateStatus } = require('../repos/dogs')
 
 const updateExemption = async (data, transaction) => {
   if (!transaction) {
@@ -25,22 +28,25 @@ const updateExemption = async (data, transaction) => {
       }
     }
 
+    await autoChangeStatus(cdo, data, transaction)
+
     const registration = cdo.registration
 
     registration.cdo_issued = data.cdoIssued
     registration.cdo_expiry = data.cdoExpiry
     registration.police_force_id = policeForce.id
     registration.legislation_officer = data.legislationOfficer
-    registration.certificate_issued = data.certificateIssued
-    registration.application_fee_paid = data.applicationFeePaid
-    registration.neutering_confirmation = data.neuteringConfirmation
-    registration.microchip_verification = data.microchipVerification
-    registration.joined_exemption_scheme = data.joinedExemptionScheme
+    registration.certificate_issued = data.certificateIssued ?? null
+    registration.application_fee_paid = data.applicationFeePaid ?? null
+    registration.neutering_confirmation = data.neuteringConfirmation ?? null
+    registration.microchip_verification = data.microchipVerification ?? null
+    registration.joined_exemption_scheme = data.joinedExemptionScheme ?? null
+    registration.removed_from_cdo_process = data.removedFromCdoProcess ?? null
 
     if (registration.exemption_order.exemption_order === '2023') {
-      registration.microchip_deadline = data.microchipDeadline
-      registration.typed_by_dlo = data.typedByDlo
-      registration.withdrawn = data.withdrawn
+      registration.microchip_deadline = data.microchipDeadline ?? null
+      registration.typed_by_dlo = data.typedByDlo ?? null
+      registration.withdrawn = data.withdrawn ?? null
     }
 
     if (registration.exemption_order.exemption_order === '2015') {
@@ -73,6 +79,24 @@ const updateExemption = async (data, transaction) => {
   } catch (err) {
     console.error(`Error updating CDO: ${err}`)
     throw err
+  }
+}
+
+const autoChangeStatus = async (cdo, data, transaction) => {
+  const currentStatus = cdo?.status?.status
+
+  if (currentStatus === constants.statuses.PreExempt) {
+    if (!cdo.registration.removed_from_cdo_process && data.removedFromCdoProcess) {
+      await updateStatus(cdo.index_number, constants.statuses.Failed, transaction)
+    } else if (data.insurance?.renewalDate && isFuture(data.insurance?.renewalDate) && !cdo.registration.certificate_issued && data.certificateIssued) {
+      await updateStatus(cdo.index_number, constants.statuses.Exempt, transaction)
+    }
+  }
+
+  if (cdo.registration.exemption_order.exemption_order === '2023') {
+    if (!cdo.registration.withdrawn && data.withdrawn) {
+      await updateStatus(cdo.index_number, constants.statuses.Withdrawn, transaction)
+    }
   }
 }
 
