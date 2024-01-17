@@ -6,6 +6,7 @@ let blobServiceClient
 
 if (storageConfig.useConnectionStr) {
   console.log('Using connection string for BlobServiceClient')
+  console.log(storageConfig.connectionStr)
   blobServiceClient = BlobServiceClient.fromConnectionString(storageConfig.connectionStr)
 } else {
   console.log('Using DefaultAzureCredential for BlobServiceClient')
