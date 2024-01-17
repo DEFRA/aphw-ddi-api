@@ -30,7 +30,8 @@ const schema = Joi.object({
       Joi.string().trim(),
       Joi.number()
     ).required(),
-    indexNumber: Joi.number().required()
+    indexNumber: Joi.number().required(),
+    certificateIssued: Joi.date().iso().required()
   }).required()
 })
 
