@@ -93,7 +93,7 @@ const autoChangeStatus = async (cdo, data, transaction) => {
     }
   }
 
-  if (cdo.registration.exemption_order.exemption_order === '2023') {
+  if (cdo.registration.exemption_order?.exemption_order === '2023') {
     if (!cdo.registration.withdrawn && data.withdrawn) {
       await updateStatus(cdo.index_number, constants.statuses.Withdrawn, transaction)
     }
@@ -101,5 +101,6 @@ const autoChangeStatus = async (cdo, data, transaction) => {
 }
 
 module.exports = {
-  updateExemption
+  updateExemption,
+  autoChangeStatus
 }
