@@ -1,5 +1,6 @@
 const sequelize = require('../config/db')
 const { v4: uuidv4 } = require('uuid')
+const { deepClone } = require('../lib/deep-clone')
 const { getBreed, getExemptionOrder } = require('../lookups')
 const { updateSearchIndexDog } = require('../repos/search')
 const { updateMicrochips, createMicrochip } = require('./microchip')
@@ -151,7 +152,7 @@ const addImportedDog = async (dog, user, transaction) => {
     await addImportedRegisteredPerson(dog.owner, 1, newDog.id, transaction)
   }
 
-  await sendCreateToAudit(dog, user)
+  await sendCreateToAudit('dog', dog, user)
 
   return newDog.id
 }
@@ -162,6 +163,8 @@ const updateDog = async (payload, user, transaction) => {
   }
 
   const dogFromDB = await getDogByIndexNumber(payload.indexNumber)
+
+  const preChangedDog = deepClone(dogFromDB)
 
   const breeds = await getBreeds()
 
@@ -175,7 +178,7 @@ const updateDog = async (payload, user, transaction) => {
 
   await updateSearchIndexDog(payload, transaction)
 
-  await sendUpdateToAudit(payload, dogFromDB, user)
+  await sendUpdateToAudit('dog', preChangedDog, dogFromDB, user)
 
   return dogFromDB
 }

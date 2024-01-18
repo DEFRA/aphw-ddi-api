@@ -199,7 +199,7 @@ describe('Dog repo', () => {
       owner: { firstName: 'John', lastName: 'Smith' }
     }
 
-    await addImportedDog(dog)
+    await addImportedDog(dog, 'dummy-username')
     expect(sequelize.transaction).toHaveBeenCalledTimes(1)
   })
 
@@ -212,7 +212,7 @@ describe('Dog repo', () => {
       owner: { firstName: 'John', lastName: 'Smith' }
     }
 
-    await addImportedDog(dog, {})
+    await addImportedDog(dog, 'dummy-username', {})
     expect(sequelize.models.dog.create).toHaveBeenCalledTimes(1)
     expect(sequelize.models.registered_person.create).toHaveBeenCalledTimes(1)
     expect(sequelize.transaction).toHaveBeenCalledTimes(0)

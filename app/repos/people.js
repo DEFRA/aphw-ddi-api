@@ -1,4 +1,5 @@
 const sequelize = require('../config/db')
+const { deepClone } = require('../lib/deep-clone')
 const createRegistrationNumber = require('../lib/create-registration-number')
 const { getCountry, getContactType } = require('../lookups')
 const { updateSearchIndexPerson } = require('./search')
@@ -127,6 +128,8 @@ const updatePerson = async (person, user, transaction) => {
       throw error
     }
 
+    const preChangedPerson = deepClone(existing)
+
     await sequelize.models.person.update({
       first_name: person.firstName,
       last_name: person.lastName,
@@ -170,7 +173,7 @@ const updatePerson = async (person, user, transaction) => {
     person.id = updatedPerson.id
     await updateSearchIndexPerson(person, transaction)
 
-    await sendUpdateToAudit(person, user)
+    await sendUpdateToAudit('person', preChangedPerson, updatedPerson, user)
 
     return updatedPerson
   } catch (err) {

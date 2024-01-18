@@ -24,7 +24,7 @@ const createCdo = async (data, user, transaction) => {
       dogs
     }
 
-    await sendCreateToAudit(cdo, user)
+    await sendCreateToAudit('CDO', cdo, user)
 
     return cdo
   } catch (err) {

@@ -1,15 +1,21 @@
 const { v4: uuidv4 } = require('uuid')
 const { CREATE, UPDATE } = require('../constants/event/events')
 const { SOURCE } = require('../constants/event/source')
+const { jsonDiff } = require('../lib/json-diff')
 const { sendEvent } = require('./send-event')
 
-const sendCreateToAudit = async (entity, user) => {
-  const messagePayload = constructCreatePayload(entity, user)
+const sendCreateToAudit = async (auditObjectName, entity, user) => {
+  if (!user || user === '') {
+    throw new Error(`Username is required for auditing creation of ${auditObjectName}`)
+  }
+
+  const messagePayload = constructCreatePayload(auditObjectName, entity, user)
+
   const event = {
     type: CREATE,
     source: SOURCE,
     id: uuidv4(),
-    subject: 'Audit DDI - Create',
+    subject: `DDI Create ${auditObjectName}`,
     data: {
       message: messagePayload
     }
@@ -18,20 +24,26 @@ const sendCreateToAudit = async (entity, user) => {
   await sendEvent(event)
 }
 
-const constructCreatePayload = (entity, user) => {
+const constructCreatePayload = (auditObjectName, entity, user) => {
   return JSON.stringify({
     username: user,
+    operation: `created ${auditObjectName}`,
     created: entity
   })
 }
 
-const sendUpdateToAudit = async (entityPre, entityPost, user) => {
-  const messagePayload = constructUpdatePayload(entityPre, entityPost, user)
+const sendUpdateToAudit = async (auditObjectName, entityPre, entityPost, user) => {
+  if (!user || user === '') {
+    throw new Error(`Username is required for auditing update of ${auditObjectName}`)
+  }
+
+  const messagePayload = constructUpdatePayload(auditObjectName, entityPre, entityPost, user)
+
   const event = {
     type: UPDATE,
     source: SOURCE,
     id: uuidv4(),
-    subject: 'Audit DDI - Update',
+    subject: `DDI Update ${auditObjectName}`,
     data: {
       message: messagePayload
     }
@@ -40,11 +52,11 @@ const sendUpdateToAudit = async (entityPre, entityPost, user) => {
   await sendEvent(event)
 }
 
-const constructUpdatePayload = (entityPre, entityPost, user) => {
+const constructUpdatePayload = (auditObjectName, entityPre, entityPost, user) => {
   return JSON.stringify({
     username: user,
-    preUpdate: entityPre,
-    postUpdate: entityPost
+    operation: `updated ${auditObjectName}`,
+    changes: jsonDiff(entityPre, entityPost)
   })
 }
 

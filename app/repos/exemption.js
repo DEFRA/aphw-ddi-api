@@ -1,4 +1,5 @@
 const sequelize = require('../config/db')
+const { deepClone } = require('../lib/deep-clone')
 const { getCdo } = require('./cdo')
 const { getCourt, getPoliceForce } = require('../lookups')
 const { createInsurance, updateInsurance } = require('./insurance')
@@ -27,6 +28,8 @@ const updateExemption = async (data, user, transaction) => {
     }
 
     const registration = cdo.registration
+
+    const preChangedRegistration = deepClone(registration)
 
     registration.cdo_issued = data.cdoIssued
     registration.cdo_expiry = data.cdoExpiry
@@ -72,7 +75,7 @@ const updateExemption = async (data, user, transaction) => {
 
     const res = registration.save({ transaction })
 
-    await sendUpdateToAudit(data, registration, user)
+    await sendUpdateToAudit('exemption', preChangedRegistration, registration, user)
 
     return res
   } catch (err) {
