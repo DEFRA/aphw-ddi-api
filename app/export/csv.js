@@ -22,6 +22,9 @@ const convertRow = (row) => {
   const exemption = row.registration
   const latestInsurance = extractLatestInsurance(row.insurance)
 
+  if (row.index_number === 'ED3449') {
+    console.log('exemption', JSON.parse(JSON.stringify(exemption)))
+  }
   return [
     row.index_number,
     row.dog_breed.breed,
@@ -59,7 +62,12 @@ const convertRow = (row) => {
     truncDate(latestInsurance?.renewal_date),
     exemption.neutering_confirmation,
     exemption.microchip_verification,
-    exemption.joined_exemption_scheme
+    exemption.joined_exemption_scheme,
+    exemption.exemption_order?.exemption_order,
+    exemption.withdrawn,
+    exemption.typed_by_dlo,
+    exemption.microchip_deadline,
+    exemption.removed_from_cdo_process
   ]
 }
 
@@ -100,7 +108,12 @@ const headerRow = [
   'InsuranceRenewalDate',
   'NeuteringConfirmationDate',
   'MicrochipVerificationDate',
-  'JoinedInterimSchemeDate'
+  'JoinedInterimSchemeDate',
+  'ExemptionOrder',
+  'Withdrawn',
+  'ExamindByDlo',
+  'MicrochipDeadline',
+  'RemovedFromCdoProcess'
 ]
 
 const extractEmail = (contacts) => {
