@@ -15,10 +15,10 @@ describe('register import', () => {
   beforeEach(() => {
     mockReadXlsxFile.mockReturnValue(mockRegister)
     getPoliceForce.mockResolvedValue({ id: 1, name: 'police force 1' })
+    lookupPoliceForceByPostcode.mockResolvedValue({ name: 'police force 1' })
   })
 
   test('should return register rows from xlsx', async () => {
-    lookupPoliceForceByPostcode.mockResolvedValue(null)
     const { add } = await importRegister([])
 
     expect(mockReadXlsxFile).toHaveBeenCalledTimes(1)
@@ -26,7 +26,6 @@ describe('register import', () => {
   })
 
   test('should group approved dogs under owner', async () => {
-    lookupPoliceForceByPostcode.mockResolvedValue(null)
     const { add } = await importRegister([])
 
     const owner = add.find(p => p.owner.lastName === 'Poppins')
@@ -41,7 +40,6 @@ describe('register import', () => {
   })
 
   test('should find police force', async () => {
-    lookupPoliceForceByPostcode.mockResolvedValue({ id: 5, name: 'police force 5' })
     const { add } = await importRegister([])
 
     expect(add).toHaveLength(3)

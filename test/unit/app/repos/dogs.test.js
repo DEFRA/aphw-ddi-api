@@ -158,7 +158,8 @@ describe('Dog repo', () => {
       breed: 'Breed 1',
       name: 'Dog 1',
       cdoIssued: '2020-01-01',
-      cdoExpiry: '2020-02-01'
+      cdoExpiry: '2020-02-01',
+      status: 'Status 1'
     }]
 
     const result = await createDogs(dogs, owners, enforcement, {})

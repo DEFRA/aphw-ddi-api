@@ -28,7 +28,7 @@ const map = {
       Neutered: 'neutered',
       MicrochipNumber: 'microchipNumber',
       'Insurance Start Date': 'insuranceStartDate',
-      'Certificate Issued': 'certificateIssued'
+      'Certificate Issued Date': 'certificateIssued'
     }
   }
 }
