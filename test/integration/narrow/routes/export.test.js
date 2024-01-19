@@ -5,6 +5,9 @@ describe('Export endpoint', () => {
   jest.mock('../../../../app/repos/cdo')
   const { getAllCdos } = require('../../../../app/repos/cdo')
 
+  jest.mock('../../../../app/messaging/send-audit')
+  const { sendExportToAudit } = require('../../../../app/messaging/send-audit')
+
   beforeEach(async () => {
     jest.clearAllMocks()
     server = await createServer()
@@ -18,6 +21,7 @@ describe('Export endpoint', () => {
     }
 
     getAllCdos.mockResolvedValue([])
+    sendExportToAudit.mockResolvedValue()
 
     const response = await server.inject(options)
 
