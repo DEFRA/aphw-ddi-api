@@ -5,6 +5,7 @@ const { getCountry, getContactType } = require('../lookups')
 const { updateSearchIndexPerson } = require('./search')
 const { sendUpdateToAudit } = require('../messaging/send-audit')
 const { PERSON } = require('../constants/event/audit-event-object-types')
+const { personDto } = require('../dto/person')
 
 const createPeople = async (owners, transaction) => {
   if (!transaction) {
@@ -129,7 +130,7 @@ const updatePerson = async (person, user, transaction) => {
       throw error
     }
 
-    const preChangedPerson = deepClone(existing)
+    const preChangedPersonDto = deepClone(personDto(existing, true))
 
     await sequelize.models.person.update({
       first_name: person.firstName,
@@ -174,7 +175,7 @@ const updatePerson = async (person, user, transaction) => {
     person.id = updatedPerson.id
     await updateSearchIndexPerson(person, transaction)
 
-    await sendUpdateToAudit(PERSON, preChangedPerson, updatedPerson, user)
+    await sendUpdateToAudit(PERSON, preChangedPersonDto, personDto(updatedPerson, true), user)
 
     return updatedPerson
   } catch (err) {

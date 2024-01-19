@@ -1,8 +1,9 @@
 const { v4: uuidv4 } = require('uuid')
 const { CREATE, UPDATE } = require('../constants/event/events')
 const { SOURCE } = require('../constants/event/source')
-const { jsonDiff } = require('../lib/json-diff')
+const { getDiff } = require('json-difference')
 const { sendEvent } = require('./send-event')
+const { deepClone } = require('../lib/deep-clone')
 const { CDO, DOG, PERSON, EXEMPTION } = require('../constants/event/audit-event-object-types')
 
 const sendCreateToAudit = async (auditObjectName, entity, user) => {
@@ -68,7 +69,7 @@ const determineUpdatePk = (objName, entity) => {
   if (objName === DOG) {
     return entity.index_number
   } else if (objName === PERSON) {
-    return entity.person_reference
+    return entity.personReference
   } else if (objName === EXEMPTION) {
     return entity.index_number
   }
@@ -79,7 +80,7 @@ const constructUpdatePayload = (auditObjectName, entityPre, entityPost, user) =>
   return JSON.stringify({
     username: user,
     operation: `updated ${auditObjectName}`,
-    changes: jsonDiff(entityPre, entityPost)
+    changes: getDiff(deepClone(entityPre), deepClone(entityPost))
   })
 }
 
