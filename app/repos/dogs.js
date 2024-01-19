@@ -6,6 +6,7 @@ const { updateSearchIndexDog } = require('../repos/search')
 const { updateMicrochips, createMicrochip } = require('./microchip')
 const { createInsurance } = require('./insurance')
 const { sendCreateToAudit, sendUpdateToAudit } = require('../messaging/send-audit')
+const { DOG } = require('../constants/event/audit-event-object-types')
 
 const getBreeds = async () => {
   try {
@@ -152,7 +153,7 @@ const addImportedDog = async (dog, user, transaction) => {
     await addImportedRegisteredPerson(dog.owner, 1, newDog.id, transaction)
   }
 
-  await sendCreateToAudit('dog', dog, user)
+  await sendCreateToAudit(DOG, dog, user)
 
   return newDog.id
 }
@@ -178,7 +179,7 @@ const updateDog = async (payload, user, transaction) => {
 
   await updateSearchIndexDog(payload, transaction)
 
-  await sendUpdateToAudit('dog', preChangedDog, dogFromDB, user)
+  await sendUpdateToAudit(DOG, preChangedDog, dogFromDB, user)
 
   return dogFromDB
 }

@@ -9,6 +9,8 @@ const sendEvent = async (data) => {
     const eventSender = new MessageSender(eventsTopic)
     await eventSender.sendMessage(message)
     await eventSender.closeConnection()
+  } else {
+    throw new Error(`Invalid event: unable to send ${data}`)
   }
 }
 

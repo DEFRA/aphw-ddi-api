@@ -5,6 +5,7 @@ module.exports = Joi.object({
   source: Joi.string().required(),
   id: Joi.string().required(),
   subject: Joi.string().optional(),
+  partitionKey: Joi.string().optional(),
   data: Joi.object(
     {
       message: Joi.string().required()

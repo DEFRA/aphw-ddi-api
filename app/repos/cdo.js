@@ -3,6 +3,7 @@ const { createPeople } = require('./people')
 const { createDogs } = require('./dogs')
 const { addToSearchIndex } = require('./search')
 const { sendCreateToAudit } = require('../messaging/send-audit')
+const { CDO } = require('../constants/event/audit-event-object-types')
 
 const createCdo = async (data, user, transaction) => {
   if (!transaction) {
@@ -24,7 +25,7 @@ const createCdo = async (data, user, transaction) => {
       dogs
     }
 
-    await sendCreateToAudit('CDO', cdo, user)
+    await sendCreateToAudit(CDO, cdo, user)
 
     return cdo
   } catch (err) {

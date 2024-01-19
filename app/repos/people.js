@@ -4,6 +4,7 @@ const createRegistrationNumber = require('../lib/create-registration-number')
 const { getCountry, getContactType } = require('../lookups')
 const { updateSearchIndexPerson } = require('./search')
 const { sendUpdateToAudit } = require('../messaging/send-audit')
+const { PERSON } = require('../constants/event/audit-event-object-types')
 
 const createPeople = async (owners, transaction) => {
   if (!transaction) {
@@ -173,7 +174,7 @@ const updatePerson = async (person, user, transaction) => {
     person.id = updatedPerson.id
     await updateSearchIndexPerson(person, transaction)
 
-    await sendUpdateToAudit('person', preChangedPerson, updatedPerson, user)
+    await sendUpdateToAudit(PERSON, preChangedPerson, updatedPerson, user)
 
     return updatedPerson
   } catch (err) {

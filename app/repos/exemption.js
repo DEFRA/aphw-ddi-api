@@ -4,6 +4,7 @@ const { getCdo } = require('./cdo')
 const { getCourt, getPoliceForce } = require('../lookups')
 const { createInsurance, updateInsurance } = require('./insurance')
 const { sendUpdateToAudit } = require('../messaging/send-audit')
+const { EXEMPTION } = require('../constants/event/audit-event-object-types')
 
 const updateExemption = async (data, user, transaction) => {
   if (!transaction) {
@@ -30,6 +31,7 @@ const updateExemption = async (data, user, transaction) => {
     const registration = cdo.registration
 
     const preChangedRegistration = deepClone(registration)
+    preChangedRegistration.index_number = data.indexNumber
 
     registration.cdo_issued = data.cdoIssued
     registration.cdo_expiry = data.cdoExpiry
@@ -75,7 +77,7 @@ const updateExemption = async (data, user, transaction) => {
 
     const res = registration.save({ transaction })
 
-    await sendUpdateToAudit('exemption', preChangedRegistration, registration, user)
+    await sendUpdateToAudit(EXEMPTION, preChangedRegistration, registration, user)
 
     return res
   } catch (err) {
