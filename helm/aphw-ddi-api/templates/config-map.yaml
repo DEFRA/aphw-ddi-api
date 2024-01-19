@@ -14,5 +14,6 @@ data:
   ROBOT_IMPORT_POLICE_API_URL: {{ quote .Values.container.robotImportPoliceApiUrl }}
   MESSAGE_QUEUE_HOST: {{ quote .Values.container.messageQueueHost }}
   MESSAGE_QUEUE_USER: {{ quote .Values.container.messageQueueUser }}
+  MESSAGE_QUEUE_PASSWORD: {{ quote .Values.container.messageQueuePassword }}
   EVENTS_TOPIC_ADDRESS: {{ quote .Values.container.eventsTopicAddress }}
 {{- end -}}
