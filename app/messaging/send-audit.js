@@ -18,10 +18,10 @@ const sendExportToAudit = async (user) => {
     partitionKey: EXPORT,
     subject: 'DDI Export',
     data: {
-      message: {
+      message: JSON.stringify({
         username: user,
         operation: 'Export data'
-      }
+      })
     }
   }
 
