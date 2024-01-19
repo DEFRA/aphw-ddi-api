@@ -22,9 +22,6 @@ const convertRow = (row) => {
   const exemption = row.registration
   const latestInsurance = extractLatestInsurance(row.insurance)
 
-  if (row.index_number === 'ED3449') {
-    console.log('exemption', JSON.parse(JSON.stringify(exemption)))
-  }
   return [
     row.index_number,
     row.dog_breed.breed,
