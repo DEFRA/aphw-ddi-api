@@ -36,8 +36,7 @@ container:
   azureStorageCreateContainers: false
   robotSheetName: Passed
   robotImportPoliceApiUrl: dummy
-  messageQueueHost: dummy
-  messageQueueUser: dummy
+  messageQueueHost: namespace.servicebus.windows.net
   eventsTopicAddress: dummy
   messageQueuePassword: dummy
 
