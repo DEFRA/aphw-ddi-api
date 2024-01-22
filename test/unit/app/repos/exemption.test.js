@@ -8,13 +8,16 @@ describe('Exemption repo', () => {
   jest.mock('../../../../app/repos/cdo')
   const { getCdo } = require('../../../../app/repos/cdo')
 
+  jest.mock('../../../../app/repos/dogs')
+  const { updateStatus } = require('../../../../app/repos/dogs')
+
   jest.mock('../../../../app/repos/insurance')
   const { createInsurance, updateInsurance } = require('../../../../app/repos/insurance')
 
   jest.mock('../../../../app/lookups')
   const { getCourt, getPoliceForce } = require('../../../../app/lookups')
 
-  const { updateExemption } = require('../../../../app/repos/exemption')
+  const { updateExemption, autoChangeStatus } = require('../../../../app/repos/exemption')
 
   beforeEach(async () => {
     jest.clearAllMocks()
@@ -307,5 +310,90 @@ describe('Exemption repo', () => {
     getPoliceForce.mockResolvedValue(null)
 
     await expect(updateExemption({ indexNumber: '123', policeForce: 'test' }, {})).rejects.toThrow('Police force not found: test')
+  })
+
+  test('autoChangeStatus should handle no status change when doesnt satisfy any rules', async () => {
+    updateStatus.mockResolvedValue()
+
+    const cdo = {
+      registration: {
+      }
+    }
+
+    const payload = {
+    }
+
+    await autoChangeStatus(cdo, payload)
+
+    expect(updateStatus).toHaveBeenCalledTimes(0)
+  })
+
+  test('autoChangeStatus should handle Pre-exempt to Failed', async () => {
+    updateStatus.mockResolvedValue()
+
+    const cdo = {
+      index_number: 'ED123',
+      status: {
+        status: 'Pre-exempt'
+      },
+      registration: {
+      }
+    }
+
+    const payload = {
+      removedFromCdoProcess: new Date().toISOString()
+    }
+
+    await autoChangeStatus(cdo, payload, {})
+
+    expect(updateStatus).toHaveBeenCalledWith('ED123', 'Failed', {})
+  })
+
+  test('autoChangeStatus should handle Pre-exempt to Exempt', async () => {
+    updateStatus.mockResolvedValue()
+
+    const cdo = {
+      index_number: 'ED123',
+      status: {
+        status: 'Pre-exempt'
+      },
+      registration: {
+      }
+    }
+
+    const payload = {
+      certificateIssued: new Date().toISOString(),
+      insurance: {
+        renewalDate: new Date(2040, 1, 1)
+      }
+    }
+
+    await autoChangeStatus(cdo, payload, {})
+
+    expect(updateStatus).toHaveBeenCalledWith('ED123', 'Exempt', {})
+  })
+
+  test('autoChangeStatus should handle 2023 order to Withdrawn', async () => {
+    updateStatus.mockResolvedValue()
+
+    const cdo = {
+      index_number: 'ED123',
+      status: {
+        status: 'Exempt'
+      },
+      registration: {
+        exemption_order: {
+          exemption_order: '2023'
+        }
+      }
+    }
+
+    const payload = {
+      withdrawn: new Date().toISOString()
+    }
+
+    await autoChangeStatus(cdo, payload, {})
+
+    expect(updateStatus).toHaveBeenCalledWith('ED123', 'Withdrawn', {})
   })
 })

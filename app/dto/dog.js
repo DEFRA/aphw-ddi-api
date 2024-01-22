@@ -13,7 +13,8 @@ const dogDto = (data) => ({
   microchipNumber: getMicrochip(data, 1),
   microchipNumber2: getMicrochip(data, 2),
   dateExported: data.exported_date,
-  dateStolen: data.stolen_date
+  dateStolen: data.stolen_date,
+  dateUntraceable: data.untraceable_date
 })
 
 module.exports = {
