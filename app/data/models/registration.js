@@ -100,6 +100,10 @@ module.exports = (sequelize, DataTypes) => {
     microchip_deadline: {
       type: DataTypes.DATE,
       allowNull: true
+    },
+    removed_from_cdo_process: {
+      type: DataTypes.DATE,
+      allowNull: true
     }
   }, {
     sequelize,

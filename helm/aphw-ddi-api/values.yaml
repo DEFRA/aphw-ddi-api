@@ -36,6 +36,10 @@ container:
   azureStorageCreateContainers: false
   robotSheetName: Passed
   robotImportPoliceApiUrl: dummy
+  messageQueueHost: dummy
+  messageQueueUser: dummy
+  eventsTopicAddress: dummy
+  messageQueuePassword: dummy
 
 postgresService:
   postgresDb: dangerous_dogs_index

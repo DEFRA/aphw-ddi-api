@@ -1,7 +1,11 @@
 const sequelize = require('../config/db')
+const { deepClone } = require('../lib/deep-clone')
 const createRegistrationNumber = require('../lib/create-registration-number')
 const { getCountry, getContactType } = require('../lookups')
 const { updateSearchIndexPerson } = require('./search')
+const { sendUpdateToAudit } = require('../messaging/send-audit')
+const { PERSON } = require('../constants/event/audit-event-object-types')
+const { personDto } = require('../dto/person')
 
 const createPeople = async (owners, transaction) => {
   if (!transaction) {
@@ -19,12 +23,14 @@ const createPeople = async (owners, transaction) => {
         person_reference: createRegistrationNumber()
       }, { transaction })
 
+      const country = await getCountry(owner.address.country)
+
       const address = await sequelize.models.address.create({
         address_line_1: owner.address.addressLine1,
         address_line_2: owner.address.addressLine2,
         town: owner.address.town,
         postcode: owner.address.postcode,
-        country_id: 1
+        country_id: country?.id ?? 1
       }, { transaction })
 
       const createdAddress = await sequelize.models.address.findByPk(address.id, {
@@ -110,9 +116,9 @@ const getPersonByReference = async (reference, transaction) => {
   }
 }
 
-const updatePerson = async (person, transaction) => {
+const updatePerson = async (person, user, transaction) => {
   if (!transaction) {
-    return sequelize.transaction(async (t) => updatePerson(person, t))
+    return sequelize.transaction(async (t) => updatePerson(person, user, t))
   }
 
   try {
@@ -125,6 +131,8 @@ const updatePerson = async (person, transaction) => {
 
       throw error
     }
+
+    const preChangedPersonDto = deepClone(personDto(existing, true))
 
     await sequelize.models.person.update({
       first_name: person.firstName,
@@ -151,7 +159,7 @@ const updatePerson = async (person, transaction) => {
         address_line_2: person.address.addressLine2,
         town: person.address.town,
         postcode: person.address.postcode,
-        country_id: country.id
+        country_id: country?.id ?? 1
       }, { transaction })
 
       await sequelize.models.person_address.create({
@@ -168,6 +176,8 @@ const updatePerson = async (person, transaction) => {
 
     person.id = updatedPerson.id
     await updateSearchIndexPerson(person, transaction)
+
+    await sendUpdateToAudit(PERSON, preChangedPersonDto, personDto(updatedPerson, true), user)
 
     return updatedPerson
   } catch (err) {
