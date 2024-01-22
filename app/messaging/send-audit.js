@@ -1,26 +1,26 @@
 const { v4: uuidv4 } = require('uuid')
-const { CREATE, UPDATE, EXPORT } = require('../constants/event/events')
+const { CREATE, UPDATE } = require('../constants/event/events')
 const { SOURCE } = require('../constants/event/source')
 const { getDiff } = require('json-difference')
 const { sendEvent } = require('./send-event')
 const { deepClone } = require('../lib/deep-clone')
 const { CDO, DOG, PERSON, EXEMPTION } = require('../constants/event/audit-event-object-types')
 
-const sendExportToAudit = async (user) => {
+const sendEventToAudit = async (eventType, eventSubject, eventDescription, user) => {
   if (!user || user === '') {
-    throw new Error('Username is required for auditing event of EXPORT')
+    throw new Error(`Username is required for auditing event of ${eventType}`)
   }
 
   const event = {
-    type: EXPORT,
+    type: eventType,
     source: SOURCE,
     id: uuidv4(),
-    partitionKey: EXPORT,
-    subject: 'DDI Export',
+    partitionKey: eventType,
+    subject: eventSubject,
     data: {
       message: JSON.stringify({
         username: user,
-        operation: 'Export data'
+        operation: eventDescription
       })
     }
   }
@@ -109,5 +109,5 @@ const constructUpdatePayload = (auditObjectName, entityPre, entityPost, user) =>
 module.exports = {
   sendCreateToAudit,
   sendUpdateToAudit,
-  sendExportToAudit
+  sendEventToAudit
 }
