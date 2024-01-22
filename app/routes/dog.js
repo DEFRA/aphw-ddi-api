@@ -1,3 +1,4 @@
+const { getCallingUser } = require('../auth/get-user')
 const { addImportedDog, updateDog, getDogByIndexNumber } = require('../repos/dogs')
 const { dogDto } = require('../dto/dog')
 
@@ -23,7 +24,7 @@ module.exports = [{
       return h.response().code(400)
     }
 
-    await addImportedDog(request.payload.dog)
+    await addImportedDog(request.payload.dog, getCallingUser(request))
 
     return h.response('ok').code(200)
   }
@@ -37,7 +38,7 @@ module.exports = [{
     }
 
     try {
-      const updatedDog = await updateDog(request.payload)
+      const updatedDog = await updateDog(request.payload, getCallingUser(request))
 
       return h.response(updatedDog).code(200)
     } catch (e) {

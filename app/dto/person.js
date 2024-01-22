@@ -1,6 +1,6 @@
 const { getMicrochip } = require('./dto-helper')
 
-const addContacts = (contacts) => {
+const addContacts = (contacts, onlyLatest) => {
   const emails = contacts.filter(entry => entry.contact.contact_type.contact_type === 'Email')
     .sort((a, b) => b.id - a.id)
 
@@ -10,14 +10,24 @@ const addContacts = (contacts) => {
   const secondaryTelephones = contacts.filter(entry => entry.contact.contact_type.contact_type === 'SecondaryPhone')
     .sort((a, b) => b.id - a.id)
 
-  return {
+  const contactsList = {
     emails: emails.map((email) => email.contact.contact),
     primaryTelephones: primaryTelephones.map((phone) => phone.contact.contact),
     secondaryTelephones: secondaryTelephones.map((phone) => phone.contact.contact)
   }
+
+  if (!onlyLatest) {
+    return contactsList
+  }
+
+  return {
+    email: contactsList.emails.length ? contactsList.emails[0] : null,
+    primaryTelephone: contactsList.primaryTelephones.length ? contactsList.primaryTelephones[0] : null,
+    secondaryTelephone: contactsList.secondaryTelephones.length ? contactsList.secondaryTelephones[0] : null
+  }
 }
 
-const personDto = (person) => ({
+const personDto = (person, onlyLatestContacts) => ({
   firstName: person.first_name,
   lastName: person.last_name,
   birthDate: person.birth_date,
@@ -29,7 +39,7 @@ const personDto = (person) => ({
     postcode: person.addresses[0].address.postcode,
     country: person.addresses[0].address.country.country
   },
-  contacts: person.person_contacts ? addContacts(person.person_contacts) : []
+  contacts: person.person_contacts ? addContacts(person.person_contacts, onlyLatestContacts) : []
 })
 
 const personAndDogsDto = (personAndDogs) => ({

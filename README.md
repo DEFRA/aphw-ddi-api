@@ -74,7 +74,7 @@ npm run test <path>/<filename>
 e.g.
 ```
 npm run test owner.test.js
-```
+``` 
 
 However, you will need to copy these lines into your jest.setup.js temporarily, and do not check in any changes to jest.setup.js 
 

@@ -2,10 +2,12 @@ const sequelize = require('../config/db')
 const { createPeople } = require('./people')
 const { createDogs } = require('./dogs')
 const { addToSearchIndex } = require('./search')
+const { sendCreateToAudit } = require('../messaging/send-audit')
+const { CDO } = require('../constants/event/audit-event-object-types')
 
-const createCdo = async (data, transaction) => {
+const createCdo = async (data, user, transaction) => {
   if (!transaction) {
-    return sequelize.transaction((t) => createCdo(data, t))
+    return sequelize.transaction((t) => createCdo(data, user, t))
   }
 
   try {
@@ -18,10 +20,14 @@ const createCdo = async (data, transaction) => {
       }
     }
 
-    return {
+    const cdo = {
       owner: owners[0],
       dogs
     }
+
+    await sendCreateToAudit(CDO, cdo, user)
+
+    return cdo
   } catch (err) {
     console.error(`Error creating CDO: ${err}`)
     throw err
