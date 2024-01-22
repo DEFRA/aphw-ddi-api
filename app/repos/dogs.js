@@ -94,7 +94,7 @@ const createDogs = async (dogs, owners, enforcement, transaction) => {
       }, { transaction })
 
       if (dog.insurance) {
-        createInsurance(dogEntity.id, dog.insurance, transaction)
+        await createInsurance(dogEntity.id, dog.insurance, transaction)
       }
 
       const createdRegistration = await sequelize.models.registration.findByPk(registrationEntity.id, {
