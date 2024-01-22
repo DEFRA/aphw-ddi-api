@@ -1,5 +1,6 @@
 const { cdoCreateDto, cdoViewDto } = require('../dto/cdo')
 const { createCdo, getCdo } = require('../repos/cdo')
+const { getCallingUser } = require('../auth/get-user')
 const cdoCreateSchema = require('../schema/cdo/create')
 
 module.exports = [{
@@ -34,7 +35,7 @@ module.exports = [{
       }
     },
     handler: async (request, h) => {
-      const created = await createCdo(request.payload)
+      const created = await createCdo(request.payload, getCallingUser(request))
 
       const res = cdoCreateDto(created)
 

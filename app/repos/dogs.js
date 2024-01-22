@@ -1,10 +1,13 @@
 const sequelize = require('../config/db')
 const { v4: uuidv4 } = require('uuid')
+const { deepClone } = require('../lib/deep-clone')
 const constants = require('../constants/statuses')
 const { getBreed, getExemptionOrder } = require('../lookups')
 const { updateSearchIndexDog } = require('../repos/search')
 const { updateMicrochips, createMicrochip } = require('./microchip')
 const { createInsurance } = require('./insurance')
+const { sendCreateToAudit, sendUpdateToAudit } = require('../messaging/send-audit')
+const { DOG } = require('../constants/event/audit-event-object-types')
 
 const getBreeds = async () => {
   try {
@@ -143,9 +146,9 @@ const addImportedRegisteredPerson = async (personId, personTypeId, dogId, t) => 
   await sequelize.models.registered_person.create(registeredPerson, { transaction: t })
 }
 
-const addImportedDog = async (dog, transaction) => {
+const addImportedDog = async (dog, user, transaction) => {
   if (!transaction) {
-    return sequelize.transaction(async (t) => addImportedDog(dog, t))
+    return sequelize.transaction(async (t) => addImportedDog(dog, user, t))
   }
 
   const newDog = await sequelize.models.dog.create(dog, { transaction })
@@ -158,15 +161,19 @@ const addImportedDog = async (dog, transaction) => {
     await addImportedRegisteredPerson(dog.owner, 1, newDog.id, transaction)
   }
 
+  await sendCreateToAudit(DOG, dog, user)
+
   return newDog.id
 }
 
-const updateDog = async (payload, transaction) => {
+const updateDog = async (payload, user, transaction) => {
   if (!transaction) {
-    return sequelize.transaction(async (t) => updateDog(payload, t))
+    return sequelize.transaction(async (t) => updateDog(payload, user, t))
   }
 
   const dogFromDB = await getDogByIndexNumber(payload.indexNumber)
+
+  const preChangedDog = deepClone(dogFromDB)
 
   const breeds = await getBreeds()
 
@@ -179,6 +186,8 @@ const updateDog = async (payload, transaction) => {
   await dogFromDB.save({ transaction })
 
   await updateSearchIndexDog(payload, transaction)
+
+  await sendUpdateToAudit(DOG, preChangedDog, dogFromDB, user)
 
   return dogFromDB
 }

@@ -350,7 +350,7 @@ describe('People repo', () => {
       }
     }])
 
-    await updatePerson(person, {})
+    await updatePerson(person, 'dummy-username', {})
 
     expect(sequelize.transaction).toHaveBeenCalledTimes(0)
   })
@@ -412,7 +412,7 @@ describe('People repo', () => {
       country: { id: 1, country: 'England' }
     })
 
-    await updatePerson(person, {})
+    await updatePerson(person, 'dummy-username', {})
 
     expect(sequelize.models.address.create).toHaveBeenCalledTimes(1)
   })
@@ -465,7 +465,7 @@ describe('People repo', () => {
       country: { id: 1, country: 'England' }
     })
 
-    await updatePerson(person, {})
+    await updatePerson(person, 'dummy-username', {})
 
     expect(sequelize.models.address.create).not.toHaveBeenCalled()
   })
@@ -529,7 +529,7 @@ describe('People repo', () => {
       contact_id: 2
     })
 
-    await updatePerson(person, {})
+    await updatePerson(person, 'dummy-username', {})
 
     expect(sequelize.models.contact.create).toHaveBeenCalledTimes(1)
   })
@@ -539,6 +539,57 @@ describe('People repo', () => {
 
     sequelize.models.registered_person.findAll.mockResolvedValue([])
 
-    await expect(updatePerson({ personReference: 'invalid' }, {})).rejects.toThrow('Person not found')
+    await expect(updatePerson({ personReference: 'invalid' }, 'dummy-username', {})).rejects.toThrow('Person not found')
+  })
+
+  test('updatePerson throws error if no username passed to auditing', async () => {
+    updateSearchIndexPerson.mockResolvedValue()
+
+    const person = {
+      personReference: '1234',
+      firstName: 'First',
+      lastName: 'Last',
+      dateOfBirth: '1990-01-01',
+      address: {
+        addressLine1: 'Address 1',
+        addressLine2: 'Address 2',
+        town: 'Town',
+        postcode: 'Postcode',
+        country: 'England'
+      },
+      email: 'test_3@example.com'
+    }
+
+    sequelize.models.registered_person.findAll.mockResolvedValue([{
+      person: {
+        id: 1,
+        first_name: 'First',
+        last_name: 'Last',
+        person_reference: '1234',
+        addresses: [
+          {
+            address: {
+              id: 1,
+              address_line_1: 'Address 1',
+              address_line_2: 'Address 2',
+              town: 'Town',
+              postcode: 'Postcode',
+              country: { id: 1, country: 'England' }
+            }
+          }
+        ],
+        person_contacts: [
+          {
+            contact: {
+              id: 1,
+              contact: 'test@example.com',
+              contact_type: { id: 2, contact_type: 'Email' }
+            }
+          }
+        ]
+      }
+    }])
+
+    await expect(updatePerson(person, null, {})).rejects.toThrow('Username is required for auditing update of person')
   })
 })

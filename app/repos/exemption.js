@@ -1,14 +1,17 @@
 const { isFuture } = require('date-fns')
 const sequelize = require('../config/db')
-const constants = require('../constants/statuses')
+const { deepClone } = require('../lib/deep-clone')
 const { getCdo } = require('./cdo')
 const { getCourt, getPoliceForce } = require('../lookups')
 const { createInsurance, updateInsurance } = require('./insurance')
+const { sendUpdateToAudit } = require('../messaging/send-audit')
+const { EXEMPTION } = require('../constants/event/audit-event-object-types')
+const constants = require('../constants/statuses')
 const { updateStatus } = require('../repos/dogs')
 
-const updateExemption = async (data, transaction) => {
+const updateExemption = async (data, user, transaction) => {
   if (!transaction) {
-    return sequelize.transaction((t) => updateExemption(data, t))
+    return sequelize.transaction((t) => updateExemption(data, user, t))
   }
 
   try {
@@ -31,6 +34,9 @@ const updateExemption = async (data, transaction) => {
     await autoChangeStatus(cdo, data, transaction)
 
     const registration = cdo.registration
+
+    const preChangedRegistration = deepClone(registration)
+    preChangedRegistration.index_number = data.indexNumber
 
     registration.cdo_issued = data.cdoIssued
     registration.cdo_expiry = data.cdoExpiry
@@ -75,7 +81,11 @@ const updateExemption = async (data, transaction) => {
       }
     }
 
-    return registration.save({ transaction })
+    const res = registration.save({ transaction })
+
+    await sendUpdateToAudit(EXEMPTION, preChangedRegistration, registration, user)
+
+    return res
   } catch (err) {
     console.error(`Error updating CDO: ${err}`)
     throw err
