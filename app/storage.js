@@ -9,8 +9,9 @@ const ONE_MEGABYTE = 1024 * 1024
 const uploadOptions = { bufferSize: 4 * ONE_MEGABYTE, maxBuffers: 20 }
 
 if (config.useConnectionStr) {
-  console.log('Using connection string for BlobServiceClient')
+  console.log('Using connection string for BlobServiceClient storage.js')
   blobServiceClient = BlobServiceClient.fromConnectionString(config.connectionStr)
+  console.log('client connected ok')
 } else {
   console.log('Using DefaultAzureCredential for BlobServiceClient')
   const uri = `https://${config.storageAccount}.blob.core.windows.net`

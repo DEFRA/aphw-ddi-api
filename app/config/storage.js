@@ -7,7 +7,9 @@ const schema = Joi.object({
   container: Joi.string().required(),
   inboundFolder: Joi.string().required(),
   useConnectionStr: Joi.boolean().default(false),
-  createContainers: Joi.boolean().default(false)
+  createContainers: Joi.boolean().default(false),
+  certificateTemplateContainer: Joi.string().default('certificate-templates'),
+  certificateContainer: Joi.string().default('certificates')
 })
 
 // Build config
