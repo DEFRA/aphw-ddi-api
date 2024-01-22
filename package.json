@@ -1,6 +1,6 @@
 {
   "name": "aphw-ddi-api",
-  "version": "0.53.0",
+  "version": "0.54.0",
   "description": "API to manage CRUD / query functions for dangerous dogs register",
   "homepage": "https://github.com/DEFRA/aphw-ddi-api",
   "main": "app/index.js",
@@ -27,8 +27,9 @@
     "applicationinsights": "2.3.5",
     "date-fns": "^3.0.6",
     "dayjs": "^1.11.10",
-    "js-levenshtein": "^1.1.6",
     "joi": "^17.11.0",
+    "js-levenshtein": "^1.1.6",
+    "pdfkit": "^0.14.0",
     "pg": "^8.11.3",
     "pg-hstore": "^2.3.4",
     "read-excel-file": "^5.7.1",
