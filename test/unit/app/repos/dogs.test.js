@@ -34,6 +34,10 @@ describe('Dog repo', () => {
       },
       status: {
         findAll: jest.fn()
+      },
+      search_index: {
+        findAll: jest.fn(),
+        save: jest.fn()
       }
     },
     col: jest.fn(),
@@ -42,7 +46,7 @@ describe('Dog repo', () => {
 
   const sequelize = require('../../../../app/config/db')
 
-  const { getBreeds, getStatuses, createDogs, addImportedDog, getDogByIndexNumber, getAllDogIds, updateDogFields, updateMicrochips } = require('../../../../app/repos/dogs')
+  const { getBreeds, getStatuses, createDogs, addImportedDog, getDogByIndexNumber, getAllDogIds, updateDog, updateDogFields, updateMicrochips } = require('../../../../app/repos/dogs')
 
   beforeEach(async () => {
     jest.clearAllMocks()
@@ -347,5 +351,39 @@ describe('Dog repo', () => {
     await updateMicrochips(dogFromDb, payload, {})
     expect(mockSave).toHaveBeenCalledTimes(0)
     expect(sequelize.models.microchip.create).toHaveBeenCalledTimes(1)
+  })
+
+  test('updateDog should create new transaction if not passed', async () => {
+    const mockSave = jest.fn()
+    sequelize.models.dog.findOne.mockResolvedValue({ id: 123, breed: 'Breed 1', name: 'Bruno', save: mockSave })
+    sequelize.models.microchip.findAll.mockResolvedValue([])
+    sequelize.models.microchip.create.mockResolvedValue({ id: 101 })
+    sequelize.models.search_index.findAll.mockResolvedValue([])
+
+    const payload = {
+      microchipNumber: '456',
+      breed: 'Breed 1'
+    }
+
+    await updateDog(payload)
+
+    expect(sequelize.transaction).toHaveBeenCalledTimes(1)
+  })
+
+  test('updateDog should not create new transaction if one is passed', async () => {
+    const mockSave = jest.fn()
+    sequelize.models.dog.findOne.mockResolvedValue({ id: 123, breed: 'Breed 1', name: 'Bruno', status: 'Failed', save: mockSave })
+    sequelize.models.microchip.findAll.mockResolvedValue([])
+    sequelize.models.microchip.create.mockResolvedValue({ id: 101 })
+    sequelize.models.search_index.findAll.mockResolvedValue([])
+
+    const payload = {
+      microchipNumber: '456',
+      breed: 'Breed 1'
+    }
+
+    await updateDog(payload, {})
+
+    expect(sequelize.transaction).toHaveBeenCalledTimes(0)
   })
 })
