@@ -1,5 +1,6 @@
 const sequelize = require('../config/db')
 const { v4: uuidv4 } = require('uuid')
+const constants = require('../constants/statuses')
 const { getBreed, getExemptionOrder } = require('../lookups')
 const { updateSearchIndexDog } = require('../repos/search')
 const { updateMicrochips, createMicrochip } = require('./microchip')
@@ -46,19 +47,17 @@ const createDogs = async (dogs, owners, enforcement, transaction) => {
   try {
     const createdDogs = []
 
+    const preExemptStatus = (await getStatuses()).filter(x => x.status === 'Pre-exempt')[0].id
+
     for (const dog of dogs) {
       const breed = await getBreed(dog.breed)
-
-      const statuses = await getStatuses()
-
-      const status = dog.status ?? 'Interim exempt'
 
       const dogEntity = await sequelize.models.dog.create({
         id: dog.indexNumber ?? undefined,
         name: dog.name,
         dog_breed_id: breed.id,
         exported: false,
-        status_id: statuses.filter(x => x.status === status)[0].id,
+        status_id: preExemptStatus,
         dog_reference: uuidv4()
       }, { transaction })
 
@@ -184,7 +183,25 @@ const updateDog = async (payload, transaction) => {
   return dogFromDB
 }
 
+const updateStatus = async (indexNumber, newStatus, transaction) => {
+  if (!transaction) {
+    return sequelize.transaction(async (t) => updateStatus(indexNumber, newStatus, t))
+  }
+
+  const statuses = await getStatuses()
+
+  const dogFromDB = await getDogByIndexNumber(indexNumber)
+
+  dogFromDB.status_id = statuses.filter(x => x.status === newStatus)[0].id
+
+  await dogFromDB.save({ transaction })
+
+  dogFromDB.dogId = dogFromDB.id
+  await updateSearchIndexDog(dogFromDB, transaction)
+}
+
 const updateDogFields = (dbDog, payload, breeds, statuses) => {
+  autoChangeStatus(dbDog, payload, statuses)
   dbDog.dog_breed_id = breeds.filter(x => x.breed === payload.breed)[0].id
   dbDog.name = payload.name
   dbDog.birth_date = payload.dateOfBirth
@@ -194,7 +211,18 @@ const updateDogFields = (dbDog, payload, breeds, statuses) => {
   dbDog.sex = payload.sex
   dbDog.exported_date = payload.dateExported
   dbDog.stolen_date = payload.dateStolen
-  dbDog.status_id = payload.status ? statuses.filter(x => x.status === payload.status)[0].id : dbDog.status_id
+  dbDog.untraceable_date = payload.dateUntraceable
+}
+
+const autoChangeStatus = (dbDog, payload, statuses) => {
+  if ((!dbDog.death_date && payload.dateOfDeath) ||
+      (!dbDog.exported_date && payload.dateExported) ||
+      (!dbDog.stolen_date && payload.dateStolen) ||
+      (!dbDog.untraceable_date && payload.dateUntraceable)) {
+    dbDog.status_id = statuses.filter(x => x.status === constants.statuses.Inactive)[0].id
+  } else {
+    dbDog.status_id = payload.status ? statuses.filter(x => x.status === payload.status)[0].id : dbDog.status_id
+  }
 }
 
 const getDogByIndexNumber = async (indexNumber) => {
@@ -271,5 +299,6 @@ module.exports = {
   getAllDogIds,
   getDogByIndexNumber,
   updateDogFields,
-  updateMicrochips
+  updateMicrochips,
+  updateStatus
 }

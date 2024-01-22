@@ -49,7 +49,7 @@ describe('Dog repo', () => {
 
   const sequelize = require('../../../../app/config/db')
 
-  const { getBreeds, getStatuses, createDogs, addImportedDog, getDogByIndexNumber, getAllDogIds, updateDog, updateDogFields, updateMicrochips } = require('../../../../app/repos/dogs')
+  const { getBreeds, getStatuses, createDogs, addImportedDog, getDogByIndexNumber, getAllDogIds, updateDog, updateStatus, updateDogFields, updateMicrochips } = require('../../../../app/repos/dogs')
 
   beforeEach(async () => {
     jest.clearAllMocks()
@@ -79,10 +79,11 @@ describe('Dog repo', () => {
   test('getStatuses should return statuses', async () => {
     const statuses = await getStatuses()
 
-    expect(statuses).toHaveLength(3)
-    expect(statuses).toContainEqual({ id: 1, status: 'Status 1' })
-    expect(statuses).toContainEqual({ id: 2, status: 'Status 2' })
-    expect(statuses).toContainEqual({ id: 3, status: 'Status 3' })
+    expect(statuses).toHaveLength(7)
+    expect(statuses).toContainEqual({ id: 1, status: 'Interim exempt' })
+    expect(statuses).toContainEqual({ id: 2, status: 'Pre-exempt' })
+    expect(statuses).toContainEqual({ id: 3, status: 'Exempt' })
+    expect(statuses).toContainEqual({ id: 7, status: 'Inactive' })
   })
 
   test('getStatuses should throw if error', async () => {
@@ -306,7 +307,7 @@ describe('Dog repo', () => {
     expect(res[1]).toBe(456)
   })
 
-  test('updateDogFields should update fields', () => {
+  test('updateDogFields should update fields', async () => {
     const dbDog = {}
     const breeds = [
       { breed: 'breed1', id: 123 }
@@ -322,7 +323,7 @@ describe('Dog repo', () => {
       dateExported: new Date(2018, 3, 3),
       dateStolen: new Date(2019, 4, 4)
     }
-    updateDogFields(dbDog, payload, breeds)
+    updateDogFields(dbDog, payload, breeds, await getStatuses())
     expect(dbDog.dog_breed_id).toBe(123)
     expect(dbDog.name).toBe('dog name')
     expect(dbDog.birth_date).toEqual(new Date(2000, 1, 1))
@@ -394,6 +395,24 @@ describe('Dog repo', () => {
     }
 
     await updateDog(payload, {})
+
+    expect(sequelize.transaction).toHaveBeenCalledTimes(0)
+  })
+
+  test('updateStatus should create new transaction if not passed', async () => {
+    const mockSave = jest.fn()
+    sequelize.models.dog.findOne.mockResolvedValue({ id: 123, breed: 'Breed 1', name: 'Bruno', save: mockSave })
+
+    await updateStatus('ED123', 'Failed')
+
+    expect(sequelize.transaction).toHaveBeenCalledTimes(1)
+  })
+
+  test('updateStatus should not create new transaction if one is passed', async () => {
+    const mockSave = jest.fn()
+    sequelize.models.dog.findOne.mockResolvedValue({ id: 123, breed: 'Breed 1', name: 'Bruno', save: mockSave })
+
+    await updateStatus('ED123', 'Failed', {})
 
     expect(sequelize.transaction).toHaveBeenCalledTimes(0)
   })

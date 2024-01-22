@@ -62,6 +62,10 @@ module.exports = (sequelize, DataTypes) => {
     stolen_date: {
       type: DataTypes.DATEONLY,
       allowNull: true
+    },
+    untraceable_date: {
+      type: DataTypes.DATEONLY,
+      allowNull: true
     }
   }, {
     sequelize,

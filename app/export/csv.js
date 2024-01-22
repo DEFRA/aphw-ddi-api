@@ -35,6 +35,7 @@ const convertRow = (row) => {
     getMicrochip(row, 2),
     row.exported_date,
     row.stolen_date,
+    row.untraceable_date,
     owner.first_name,
     owner.last_name,
     owner.birth_date,
@@ -59,7 +60,8 @@ const convertRow = (row) => {
     truncDate(latestInsurance?.renewal_date),
     exemption.neutering_confirmation,
     exemption.microchip_verification,
-    exemption.joined_exemption_scheme
+    exemption.joined_exemption_scheme,
+    exemption.removed_from_cdo_process
   ]
 }
 
@@ -76,6 +78,7 @@ const headerRow = [
   'DogMicrochip2',
   'DogExportedDate',
   'DogStolenDate',
+  'DogUntraceableDate',
   'OwnerFirstName',
   'OwnerLastName',
   'OwnerDateOfBirth',
@@ -100,7 +103,8 @@ const headerRow = [
   'InsuranceRenewalDate',
   'NeuteringConfirmationDate',
   'MicrochipVerificationDate',
-  'JoinedInterimSchemeDate'
+  'JoinedInterimSchemeDate',
+  'RemovedFromCdoProcess'
 ]
 
 const extractEmail = (contacts) => {
