@@ -25,6 +25,11 @@ describe('register import', () => {
     expect(add).toHaveLength(3)
   })
 
+  test('should error when no xlsx file', async () => {
+    mockReadXlsxFile.mockImplementation(() => { throw new Error('dummy error') })
+    await expect(importRegister([])).rejects.toThrow('dummy error')
+  })
+
   test('should group approved dogs under owner', async () => {
     const { add } = await importRegister([])
 
@@ -44,5 +49,14 @@ describe('register import', () => {
 
     expect(add).toHaveLength(3)
     expect(add[0].owner.policeForceId).toBe(1)
+  })
+
+  test('should add error if cant find police force', async () => {
+    lookupPoliceForceByPostcode.mockResolvedValue(null)
+
+    const { add, errors } = await importRegister([])
+
+    expect(add).toHaveLength(0)
+    expect(errors[0].errors).toBe('Cannot find police force for postcode AA1 1AA')
   })
 })
