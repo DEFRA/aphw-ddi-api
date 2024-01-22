@@ -21,7 +21,8 @@ const schema = Joi.object({
     breed: Joi.string().required(),
     name: Joi.string().optional().allow('').allow(null),
     cdoIssued: Joi.date().iso().required(),
-    cdoExpiry: Joi.date().iso().required()
+    cdoExpiry: Joi.date().iso().required(),
+    status: Joi.string().optional().allow('').allow(null)
   })).min(1).required()
 })
 
