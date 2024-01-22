@@ -19,13 +19,15 @@ const payload = {
       breed: 'Pit Bull Terrier',
       name: 'Buster',
       cdoIssued: '2023-10-10',
-      cdoExpiry: '2023-12-10'
+      cdoExpiry: '2023-12-10',
+      status: 'Status 1'
     },
     {
       breed: 'XL Bully',
       name: 'Alice',
       cdoIssued: '2023-10-10',
-      cdoExpiry: '2023-12-10'
+      cdoExpiry: '2023-12-10',
+      status: 'Status 1'
     }
   ]
 }
