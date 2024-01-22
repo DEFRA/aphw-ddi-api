@@ -61,6 +61,10 @@ const convertRow = (row) => {
     exemption.neutering_confirmation,
     exemption.microchip_verification,
     exemption.joined_exemption_scheme,
+    exemption.exemption_order?.exemption_order,
+    exemption.withdrawn,
+    exemption.typed_by_dlo,
+    exemption.microchip_deadline,
     exemption.removed_from_cdo_process
   ]
 }
@@ -104,6 +108,10 @@ const headerRow = [
   'NeuteringConfirmationDate',
   'MicrochipVerificationDate',
   'JoinedInterimSchemeDate',
+  'ExemptionOrder',
+  'Withdrawn',
+  'ExamindByDlo',
+  'MicrochipDeadline',
   'RemovedFromCdoProcess'
 ]
 
