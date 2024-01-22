@@ -184,6 +184,10 @@ const getAllCdos = async () => {
       {
         model: sequelize.models.court,
         as: 'court'
+      },
+      {
+        model: sequelize.models.exemption_order,
+        as: 'exemption_order'
       }]
     },
     {
