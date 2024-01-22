@@ -22,7 +22,8 @@ const register = {
         insuranceStartDate: new Date(2023, 10, 11),
         neutered: 'Yes',
         microchipNumber: '2134567891',
-        indexNumber: 1234
+        indexNumber: 1234,
+        certificateIssued: new Date(2021, 10, 11)
       }
     },
     {
@@ -47,7 +48,8 @@ const register = {
         insuranceStartDate: new Date(2023, 10, 11),
         neutered: 'Yes',
         microchipNumber: '1234567891',
-        indexNumber: 1234
+        indexNumber: 1234,
+        certificateIssued: new Date(2021, 10, 11)
       }
     },
     {
@@ -72,7 +74,8 @@ const register = {
         insuranceStartDate: new Date(2023, 10, 11),
         neutered: 'Yes',
         microchipNumber: '1234567891',
-        indexNumber: 1234
+        indexNumber: 1234,
+        certificateIssued: new Date(2021, 10, 11)
       }
     },
     {
@@ -98,7 +101,8 @@ const register = {
         insuranceStartDate: new Date(2023, 10, 11),
         neutered: 'No',
         microchipNumber: '1234567891',
-        indexNumber: 1234
+        indexNumber: 1234,
+        certificateIssued: new Date(2021, 10, 11)
       }
     },
     {
@@ -123,7 +127,8 @@ const register = {
         insuranceStartDate: new Date(2023, 10, 11),
         neutered: 'No',
         microchipNumber: '2134567891',
-        indexNumber: 1234
+        indexNumber: 1234,
+        certificateIssued: new Date(2021, 10, 11)
       }
     },
     {
@@ -148,7 +153,8 @@ const register = {
         insuranceStartDate: new Date(2023, 10, 11),
         neutered: 'No',
         microchipNumber: '2134567891',
-        indexNumber: 1234
+        indexNumber: 1234,
+        certificateIssued: new Date(2021, 10, 11)
       }
     },
     {
@@ -173,7 +179,8 @@ const register = {
         insuranceStartDate: new Date(2023, 10, 11),
         neutered: 'No',
         microchipNumber: '2134567891',
-        indexNumber: 1234
+        indexNumber: 1234,
+        certificateIssued: new Date(2021, 10, 11)
       }
     }
   ],

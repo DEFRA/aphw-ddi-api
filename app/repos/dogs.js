@@ -49,12 +49,16 @@ const createDogs = async (dogs, owners, enforcement, transaction) => {
     for (const dog of dogs) {
       const breed = await getBreed(dog.breed)
 
+      const statuses = await getStatuses()
+
+      const status = dog.status ?? 'Interim exempt'
+
       const dogEntity = await sequelize.models.dog.create({
         id: dog.indexNumber ?? undefined,
         name: dog.name,
         dog_breed_id: breed.id,
         exported: false,
-        status_id: 1,
+        status_id: statuses.filter(x => x.status === status)[0].id,
         dog_reference: uuidv4()
       }, { transaction })
 
@@ -85,11 +89,12 @@ const createDogs = async (dogs, owners, enforcement, transaction) => {
         court_id: enforcement.court,
         legislation_officer: enforcement.legislationOfficer,
         status_id: 1,
-        exemption_order: exemptionOrder.id
+        certificate_issued: dog.certificateIssued,
+        exemption_order_id: exemptionOrder.id
       }, { transaction })
 
       if (dog.insurance) {
-        createInsurance(dogEntity.id, dog.insurance, transaction)
+        await createInsurance(dogEntity.id, dog.insurance, transaction)
       }
 
       const createdRegistration = await sequelize.models.registration.findByPk(registrationEntity.id, {
@@ -107,6 +112,10 @@ const createDogs = async (dogs, owners, enforcement, transaction) => {
         nest: true,
         transaction
       })
+
+      if (dog.microchipNumber) {
+        await createMicrochip(dog.microchipNumber, dogEntity.id, transaction)
+      }
 
       for (const owner of owners) {
         await sequelize.models.registered_person.create({
@@ -245,9 +254,7 @@ const getDogByIndexNumber = async (indexNumber) => {
       as: 'status'
     }]
   })
-  // Workaround due to Sequelize bug when using 'raw: true'
-  // Multiple rows aren't returned from an array when using 'raw: true'
-  // so the temporary solution is to omit 'raw: true'
+
   return dog
 }
 

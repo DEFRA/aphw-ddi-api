@@ -16,8 +16,9 @@ const processRegister = async (register) => {
         },
         dogs: record.dogs.map(d => ({
           ...d,
-          source: 'Robot',
+          source: 'ROBOT',
           breed: 'XL Bully',
+          status: 'Exempt',
           insurance: {
             company: 'Dogs Trust',
             renewalDate: addYears(d.insuranceStartDate, 1)
