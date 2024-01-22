@@ -28,11 +28,21 @@ const processRows = async (register, sheet, map, schema) => {
     const result = schema.validate(row)
 
     if (!result.isValid) {
-      return errors.push({ rowNum, row, errors: result.errors.details })
+      errors.push({ rowNum, row, errors: result.errors.details })
+      continue
     }
 
     const owner = row.owner
     const dog = row.dog
+
+    const forceId = await lookupPoliceForce(owner.address.postcode)
+
+    if (!forceId) {
+      errors.push({ rowNum, row, errors: `Cannot find police force for postcode ${owner.address.postcode}` })
+      continue
+    } else {
+      owner.policeForceId = forceId
+    }
 
     const key = `${owner.lastName}^${owner.postcode}^${owner.birthDate.getDate()}`
 
@@ -41,13 +51,6 @@ const processRows = async (register, sheet, map, schema) => {
     value.dogs.push(dog)
 
     registerMap.set(key, value)
-
-    const forceId = await lookupPoliceForce(owner.address.postcode)
-    if (!forceId) {
-      errors.push({ rowNum, row, errors: `Cannot find police force for postcode ${owner.address.postcode}` })
-    } else {
-      owner.policeForceId = forceId
-    }
   }
 
   const result = {
@@ -68,7 +71,7 @@ const importRegister = async register => {
 }
 
 const lookupPoliceForce = async (postcode) => {
-  const policeForce = await lookupPoliceForceByPostcode(postcode)
+  const policeForce = await lookupPoliceForceByPostcode(postcode.replace(' ', ''))
 
   if (policeForce) {
     const force = await getPoliceForce(policeForce.name)

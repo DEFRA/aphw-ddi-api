@@ -52,6 +52,7 @@ describe('People repo', () => {
     when(getContactType).calledWith('SecondaryPhone').mockResolvedValue({ id: 3 })
 
     when(getCountry).calledWith('England').mockResolvedValue({ id: 1 })
+    when(getCountry).calledWith('Wales').mockResolvedValue({ id: 2 })
   })
 
   test('createPeople should start new transaction if none passed', async () => {

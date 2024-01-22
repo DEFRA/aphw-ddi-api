@@ -23,12 +23,14 @@ const createPeople = async (owners, transaction) => {
         person_reference: createRegistrationNumber()
       }, { transaction })
 
+      const country = await getCountry(owner.address.country)
+
       const address = await sequelize.models.address.create({
         address_line_1: owner.address.addressLine1,
         address_line_2: owner.address.addressLine2,
         town: owner.address.town,
         postcode: owner.address.postcode,
-        country_id: 1
+        country_id: country?.id ?? 1
       }, { transaction })
 
       const createdAddress = await sequelize.models.address.findByPk(address.id, {
@@ -157,7 +159,7 @@ const updatePerson = async (person, user, transaction) => {
         address_line_2: person.address.addressLine2,
         town: person.address.town,
         postcode: person.address.postcode,
-        country_id: country.id
+        country_id: country?.id ?? 1
       }, { transaction })
 
       await sequelize.models.person_address.create({
