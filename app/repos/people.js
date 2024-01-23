@@ -19,7 +19,7 @@ const createPeople = async (owners, transaction) => {
       const person = await sequelize.models.person.create({
         first_name: owner.firstName,
         last_name: owner.lastName,
-        birth_date: owner.dateOfBirth,
+        birth_date: owner.dateOfBirth ?? owner.birthDate,
         person_reference: createRegistrationNumber()
       }, { transaction })
 

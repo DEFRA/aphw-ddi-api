@@ -1,13 +1,14 @@
 const { createCdo } = require('../../repos/cdo')
 const sequelize = require('../../config/db')
 const { addYears } = require('date-fns')
+const { calculateNeuteringDeadline } = require('../../dto/dto-helper')
 
 const processRegister = async (register) => {
   await sequelize.transaction(async (t) => {
     for (const record of register.add) {
       const owner = record.owner
 
-      owner.phoneNumber = `0${owner.phoneNumber}`
+      owner.phoneNumber = `${owner.phoneNumber}`.startsWith('0') ? `${owner.phoneNumber}` : `0${owner.phoneNumber}`
 
       const data = {
         owner: {
@@ -19,6 +20,11 @@ const processRegister = async (register) => {
           source: 'ROBOT',
           breed: 'XL Bully',
           status: 'Exempt',
+          sex: d.gender,
+          colour: d.colour,
+          microchipDeadline: new Date(2024, 2, 31),
+          neuteringDeadline: calculateNeuteringDeadline(d.birthDate),
+          applicationFeePaid: d.certificateIssued,
           insurance: {
             company: 'Dogs Trust',
             renewalDate: addYears(d.insuranceStartDate, 1)
@@ -31,7 +37,7 @@ const processRegister = async (register) => {
         }
       }
 
-      await createCdo(data, t)
+      await createCdo(data, 'robot-import-system-user', t)
     }
   })
 }

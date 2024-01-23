@@ -2,6 +2,9 @@ const { when } = require('jest-when')
 const { owner: mockOwner } = require('../../../mocks/cdo/create')
 const { owner: mockEnhancedOwner } = require('../../../mocks/cdo/create-enhanced')
 
+jest.mock('../../../../app/messaging/send-event')
+const { sendEvent } = require('../../../../app/messaging/send-event')
+
 describe('People repo', () => {
   jest.mock('../../../../app/config/db', () => ({
     models: {
@@ -53,6 +56,8 @@ describe('People repo', () => {
 
     when(getCountry).calledWith('England').mockResolvedValue({ id: 1 })
     when(getCountry).calledWith('Wales').mockResolvedValue({ id: 2 })
+
+    sendEvent.mockResolvedValue()
   })
 
   test('createPeople should start new transaction if none passed', async () => {
