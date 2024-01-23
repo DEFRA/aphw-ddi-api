@@ -1,19 +1,20 @@
 const HapiCron = require('hapi-cron')
+const config = require('../config/cron')
 
 module.exports = {
   plugin: HapiCron,
   options: {
     jobs: [{
       name: 'testcron',
-      time: '* */5 * * * *',
+      time: config.overnightJobCrontab ?? '5 4 * * *',
       timezone: 'Europe/London',
       request: {
         method: 'GET',
-        url: '/dog-breeds'
+        url: '/overnight'
       },
       onComplete: (res) => {
-        console.log('finished at ' + new Date())
-        console.log(res.breeds[0].dataValues.breed) // 'hello world'
+        console.log('overnight finished at ' + new Date())
+        console.log(`overnight result ${res}`)
       }
     }]
   }

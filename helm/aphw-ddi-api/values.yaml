@@ -38,6 +38,7 @@ container:
   robotSheetName: Passed
   robotImportPoliceApiUrl: dummy
   eventsTopicAddress: aphw-ddi-events
+  overnightJobCrontab: 5 4 * * *
 
 postgresService:
   postgresDb: dangerous_dogs_index

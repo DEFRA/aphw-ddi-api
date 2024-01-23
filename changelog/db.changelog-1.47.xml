@@ -1,0 +1,27 @@
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog" xmlns:ext="http://www.liquibase.org/xml/ns/dbchangelog-ext" xmlns:pro="http://www.liquibase.org/xml/ns/pro" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog-ext http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-ext.xsd http://www.liquibase.org/xml/ns/pro http://www.liquibase.org/xml/ns/pro/liquibase-pro-3.9.xsd http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.9.xsd">
+  <changeSet author="J Barnsley" id="1">
+    <tagDatabase tag="v1.47.0" />
+  </changeSet>
+  <changeSet author="J Barnsley" id="2">
+    <createTable tableName="regular_job">
+      <column name="id" type="INTEGER" autoIncrement="true">
+        <constraints primaryKey="true" nullable="false" primaryKeyName="regular_job_pkey" />
+      </column>
+      <column name="run_date" type="DATE">
+        <constraints nullable="false" />
+      </column>
+      <column name="start_date" type="DATE">
+        <constraints nullable="false" />
+      </column>
+      <column name="end_date" type="DATE">
+        <constraints nullable="true" />
+      </column>
+      <column name="result" type="VARCHAR(1000)">
+        <constraints nullable="true" />
+      </column>
+    </createTable>
+    <createIndex indexName="regular_job_run_date_idx" tableName="regular_job">
+      <column name="run_date" />
+    </createIndex>
+  </changeSet>
+</databaseChangeLog>
