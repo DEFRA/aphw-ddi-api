@@ -2,6 +2,7 @@ jest.mock('read-excel-file/node')
 const mockReadXlsxFile = require('read-excel-file/node')
 
 const mockRegister = require('../../../../mocks/register/register-xlsx')
+const mockInvalidRegister = require('../../../../mocks/register/invalid-register-xlsx')
 
 jest.mock('../../../../../app/import/robot/police')
 const { lookupPoliceForceByPostcode } = require('../../../../../app/import/robot/police')
@@ -51,12 +52,14 @@ describe('register import', () => {
     expect(add[0].owner.policeForceId).toBe(1)
   })
 
-  test('should add error if cant find police force', async () => {
+  test('should handle failed schema rows', async () => {
+    mockReadXlsxFile.mockReturnValue(mockInvalidRegister)
     lookupPoliceForceByPostcode.mockResolvedValue(null)
 
-    const { add, errors } = await importRegister([])
+    const { errors } = await importRegister([])
 
-    expect(add).toHaveLength(0)
-    expect(errors[0].errors).toBe('Cannot find police force for postcode AA1 1AA')
+    expect(errors).toHaveLength(1)
+    expect(errors[0].errors[0].message).toBe('"owner.address.addressLine1" is required')
+    expect(errors[0].errors[1].message).toBe('"owner.address.postcode" is required')
   })
 })

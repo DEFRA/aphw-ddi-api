@@ -38,8 +38,7 @@ const processRows = async (register, sheet, map, schema) => {
     const forceId = await lookupPoliceForce(owner.address.postcode)
 
     if (!forceId) {
-      errors.push({ rowNum, row, errors: `Cannot find police force for postcode ${owner.address.postcode}` })
-      continue
+      console.log(`RowNum ${rowNum} error: Cannot find police force for postcode ${owner.address.postcode}`)
     } else {
       owner.policeForceId = forceId
     }

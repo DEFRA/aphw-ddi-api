@@ -61,7 +61,10 @@ const createDogs = async (dogs, owners, enforcement, transaction) => {
         dog_breed_id: breed.id,
         exported: false,
         status_id: preExemptStatus,
-        dog_reference: uuidv4()
+        dog_reference: uuidv4(),
+        sex: dog.sex,
+        colour: dog.colour,
+        birth_date: dog.birthDate
       }, { transaction })
 
       const dogResult = await sequelize.models.dog.findByPk(dogEntity.id, {
@@ -92,7 +95,10 @@ const createDogs = async (dogs, owners, enforcement, transaction) => {
         legislation_officer: enforcement.legislationOfficer,
         status_id: 1,
         certificate_issued: dog.certificateIssued,
-        exemption_order_id: exemptionOrder.id
+        exemption_order_id: exemptionOrder.id,
+        application_fee_paid: dog.applicationFeePaid,
+        microchip_deadline: dog.microchipDeadline,
+        neutering_deadline: dog.neuteringDeadline
       }, { transaction })
 
       if (dog.insurance) {

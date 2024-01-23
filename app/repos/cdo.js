@@ -25,7 +25,9 @@ const createCdo = async (data, user, transaction) => {
       dogs
     }
 
-    await sendCreateToAudit(CDO, cdo, user)
+    if (user !== 'robot-import-system-user') {
+      await sendCreateToAudit(CDO, cdo, user)
+    }
 
     return cdo
   } catch (err) {
