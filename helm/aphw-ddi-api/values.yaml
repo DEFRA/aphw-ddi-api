@@ -30,15 +30,14 @@ container:
   limitMemory: 100Mi
   limitCpu: 100m
   port: 3000
+  messageQueueHost: namespace.servicebus.windows.net
   azureStorageConnectionString: dummy
   azureStorageUseConnectionString: false
   azureStorageAccountName: dummy
   azureStorageCreateContainers: false
   robotSheetName: Passed
   robotImportPoliceApiUrl: dummy
-  messageQueueHost: namespace.servicebus.windows.net
-  eventsTopicAddress: dummy
-  messageQueuePassword: dummy
+  eventsTopicAddress: aphw-ddi-events
 
 postgresService:
   postgresDb: dangerous_dogs_index
