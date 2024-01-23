@@ -7,4 +7,11 @@
       columnName="police_force_id"
       tableName="registration" />
   </changeSet>
+  <changeSet author="J Barnsley" id="3">
+    <addColumn tableName="registration">
+      <column name="neutering_deadline" type="date">
+        <constraints nullable="true" />
+      </column>
+    </addColumn>
+  </changeSet>
 </databaseChangeLog>

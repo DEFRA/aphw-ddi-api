@@ -98,7 +98,7 @@ const createDogs = async (dogs, owners, enforcement, transaction) => {
         exemption_order_id: exemptionOrder.id,
         application_fee_paid: dog.applicationFeePaid,
         microchip_deadline: dog.microchipDeadline,
-        neuteringDeadline: dog.neuteringDeadline
+        neutering_deadline: dog.neuteringDeadline
       }, { transaction })
 
       if (dog.insurance) {
