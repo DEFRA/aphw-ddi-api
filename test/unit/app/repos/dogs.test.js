@@ -8,6 +8,9 @@ const { createInsurance } = require('../../../../app/repos/insurance')
 jest.mock('../../../../app/lookups')
 const { getBreed, getExemptionOrder } = require('../../../../app/lookups')
 
+jest.mock('../../../../app/messaging/send-event')
+const { sendEvent } = require('../../../../app/messaging/send-event')
+
 describe('Dog repo', () => {
   jest.mock('../../../../app/config/db', () => ({
     models: {
@@ -59,6 +62,7 @@ describe('Dog repo', () => {
     sequelize.models.dog_breed.findAll.mockResolvedValue(mockBreeds)
     sequelize.models.status.findAll.mockResolvedValue(mockStatuses)
     createInsurance.mockResolvedValue()
+    sendEvent.mockResolvedValue()
   })
 
   test('getBreeds should return breeds', async () => {
