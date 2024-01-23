@@ -13,5 +13,9 @@ data:
   AZURE_STORAGE_CREATE_CONTAINERS: {{ quote .Values.container.azureStorageCreateContainers }}
   ROBOT_SHEET_NAME: {{ quote .Values.container.robotSheetName }}
   ROBOT_IMPORT_POLICE_API_URL: {{ quote .Values.container.robotImportPoliceApiUrl }}
+  {{- if and (.Values.environmentCode) (not .Values.pr) }}
+  EVENTS_TOPIC_ADDRESS: {{ .Values.container.eventsTopicAddress }}-{{ .Values.environmentCode }}
+  {{ else }}
   EVENTS_TOPIC_ADDRESS: {{ quote .Values.container.eventsTopicAddress }}
+  {{- end }}
 {{- end -}}
