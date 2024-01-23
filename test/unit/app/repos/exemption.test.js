@@ -17,10 +17,14 @@ describe('Exemption repo', () => {
   jest.mock('../../../../app/lookups')
   const { getCourt, getPoliceForce } = require('../../../../app/lookups')
 
+  jest.mock('../../../../app/messaging/send-event')
+  const { sendEvent } = require('../../../../app/messaging/send-event')
+
   const { updateExemption, autoChangeStatus } = require('../../../../app/repos/exemption')
 
   beforeEach(async () => {
     jest.clearAllMocks()
+    sendEvent.mockResolvedValue()
   })
 
   test('updateExemption should start a transaction if one is not provided', async () => {

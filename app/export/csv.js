@@ -65,6 +65,7 @@ const convertRow = (row) => {
     exemption.withdrawn,
     exemption.typed_by_dlo,
     exemption.microchip_deadline,
+    exemption.neutering_deadline,
     exemption.removed_from_cdo_process
   ]
 }
@@ -112,6 +113,7 @@ const headerRow = [
   'Withdrawn',
   'ExamindByDlo',
   'MicrochipDeadline',
+  'NeuteringDeadline',
   'RemovedFromCdoProcess'
 ]
 

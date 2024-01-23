@@ -101,6 +101,10 @@ module.exports = (sequelize, DataTypes) => {
       type: DataTypes.DATE,
       allowNull: true
     },
+    neutering_deadline: {
+      type: DataTypes.DATE,
+      allowNull: true
+    },
     removed_from_cdo_process: {
       type: DataTypes.DATE,
       allowNull: true

@@ -23,10 +23,14 @@ describe('CDO repo', () => {
   jest.mock('../../../../app/repos/search')
   const { addToSearchIndex } = require('../../../../app/repos/search')
 
+  jest.mock('../../../../app/messaging/send-event')
+  const { sendEvent } = require('../../../../app/messaging/send-event')
+
   const { createCdo, getCdo, getAllCdos } = require('../../../../app/repos/cdo')
 
   beforeEach(async () => {
     jest.clearAllMocks()
+    sendEvent.mockResolvedValue()
   })
 
   test('createCdo should create start new transaction if none passed', async () => {

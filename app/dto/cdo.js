@@ -74,7 +74,7 @@ const cdoViewDto = (data) => {
       cdoIssued: data.registration.cdo_issued,
       cdoExpiry: data.registration.cdo_expiry,
       court: data.registration.court?.name,
-      policeForce: data.registration.police_force.name,
+      policeForce: data.registration?.police_force?.name,
       legislationOfficer: data.registration.legislation_officer,
       certificateIssued: data.registration.certificate_issued,
       applicationFeePaid: data.registration.application_fee_paid,
