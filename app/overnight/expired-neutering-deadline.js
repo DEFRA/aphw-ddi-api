@@ -6,7 +6,7 @@ const { dbFindAll } = require('../lib/db-functions')
 
 const setExpiredNeuteringDeadlineToInBreach = async (today, t) => {
   try {
-    const setToBreach = await dbFindAll(sequelize.models.registration, {
+    const setStatusToBreach = await dbFindAll(sequelize.models.registration, {
       where: {
         neutering_deadline: {
           [Op.lt]: today
@@ -31,11 +31,11 @@ const setExpiredNeuteringDeadlineToInBreach = async (today, t) => {
       transaction: t
     })
 
-    for (const toUpdate of setToBreach) {
-      console.log(`Updating dog ${toUpdate.dog.index_number} to In breach`)
-      await updateStatusOnly(toUpdate.dog, statuses.InBreach, t)
+    for (const toUpdateStatus of setStatusToBreach) {
+      console.log(`Updating dog ${toUpdateStatus.dog.index_number} to In breach`)
+      await updateStatusOnly(toUpdateStatus.dog, statuses.InBreach, t)
     }
-    return `Success Neutering Expiry - updated ${setToBreach.length} rows | `
+    return `Success Neutering Expiry - updated ${setStatusToBreach.length} rows | `
   } catch (e) {
     console.log(`Error auto-updating statuses when Neutering Expiry: ${e} ${e.stack}`)
     throw new Error(`Error auto-updating statuses when Neutering Expiry: ${e}`)

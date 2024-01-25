@@ -14,67 +14,66 @@ const updateOvernightStatuses = async () => {
   return 'Job for today already running or run'
 }
 
-const tryStartJob = async () => {
+const tryStartJob = async (trans) => {
+  if (!trans) {
+    return sequelize.transaction(async (t) => tryStartJob(t))
+  }
+
   let jobId = null
 
   try {
     const today = new Date()
 
-    console.log('tryStart 1', sequelize.transaction)
-    await sequelize.transaction(async (t) => {
-      console.log('tryStart 2')
-      const currentJob = await sequelize.models.regular_job.findOne({
-        where: {
-          run_date: {
-            [Op.gte]: today
-          }
-        },
-        transaction: t
+    const currentJob = await sequelize.models.regular_job.findOne({
+      where: {
+        run_date: {
+          [Op.gte]: today
+        }
+      },
+      transaction: trans
+    })
+
+    if (!currentJob) {
+      const newJob = await sequelize.models.regular_job.create({
+        run_date: today,
+        start_time: new Date(),
+        result: 'Running'
+      },
+      {
+        transaction: trans
       })
 
-      console.log('currentJob', currentJob)
-      if (!currentJob) {
-        const newJob = await sequelize.models.regular_job.create({
-          run_date: today,
-          start_time: new Date(),
-          result: 'Running'
-        },
-        {
-          transaction: t
-        })
-        console.log(`Job started for today - jobId: ${newJob?.id}`)
-        jobId = newJob.id
-      }
-      console.log('Job for today already running or run')
-    })
+      console.log(`Job started for today - jobId: ${newJob?.id}`)
+      jobId = newJob.id
+    }
+    console.log('Job for today already running or run')
   } catch (e) {
     console.log(`Error starting overnight job: ${e}`)
-    throw e
+    throw new Error(`Error starting overnight job: ${e} ${e.stack}`)
   }
   return jobId
 }
 
-const endJob = async (jobId, resultText) => {
-  try {
-    console.log('endJob 1')
-    await sequelize.transaction(async (t) => {
-      console.log('endJob 2')
-      const currentJob = await sequelize.models.regular_job.findByPk(jobId, {
-        transaction: t
-      })
+const endJob = async (jobId, resultText, trans) => {
+  if (!trans) {
+    return sequelize.transaction(async (t) => endJob(jobId, resultText, t))
+  }
 
-      console.log('endJob 3')
-      if (currentJob) {
-        currentJob.end_time = new Date()
-        currentJob.result = resultText?.length >= 1000 ? resultText.substring(0, 999) : resultText
-        await currentJob.save({ transaction: t })
-      } else {
-        throw new Error(`Overnight jobId ${jobId} not found`)
-      }
+  try {
+    const currentJob = await sequelize.models.regular_job.findByPk(jobId, {
+      transaction: trans
     })
+
+    if (currentJob) {
+      currentJob.end_time = new Date()
+      currentJob.result = resultText?.length >= 1000 ? resultText.substring(0, 999) : resultText
+      await currentJob.save({ transaction: trans })
+    } else {
+      throw new Error(`Overnight jobId ${jobId} not found`)
+    }
   } catch (e) {
-    console.log(`Error finishing overnight job: ${e}`)
-    throw e
+    console.log(`Error finishing overnight job: ${jobId} ${e}`)
+    throw new Error(`Error finishing overnight job: ${jobId} ${e} ${e.stack}`)
   }
 }
 
