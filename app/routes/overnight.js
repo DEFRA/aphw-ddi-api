@@ -4,10 +4,10 @@ module.exports = {
   method: 'GET',
   path: '/overnight',
   handler: async (request, h) => {
-    const res = await updateOvernightStatuses()
+    const result = await updateOvernightStatuses()
 
     return h.response({
-      res
+      result
     }).code(200)
   }
 }

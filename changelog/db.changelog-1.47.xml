@@ -10,10 +10,10 @@
       <column name="run_date" type="DATE">
         <constraints nullable="false" />
       </column>
-      <column name="start_date" type="DATE">
+      <column name="start_time" type="TIMESTAMP WITH TIME ZONE">
         <constraints nullable="false" />
       </column>
-      <column name="end_date" type="DATE">
+      <column name="end_time" type="TIMESTAMP WITH TIME ZONE">
         <constraints nullable="true" />
       </column>
       <column name="result" type="VARCHAR(1000)">

@@ -14,7 +14,7 @@ module.exports = {
       },
       onComplete: (res) => {
         console.log('overnight finished at ' + new Date())
-        console.log(`overnight result ${res}`)
+        console.log(`overnight result ${res?.result}`)
       }
     }]
   }
