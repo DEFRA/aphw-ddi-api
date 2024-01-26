@@ -52,25 +52,17 @@ const createDogs = async (dogs, owners, enforcement, transaction) => {
 
     const statuses = await getStatuses()
 
-    const preExemptStatusId = statuses.filter(x => x.status === 'Pre-exempt')[0].id
-
     for (const dog of dogs) {
       const breed = await getBreed(dog.breed)
-
-      let targetStatusId = null
-      if (dog.status) {
-        const targetStatus = statuses.filter(x => x.status === dog.status)
-        if (targetStatus && targetStatus.length > 0) {
-          targetStatusId = targetStatus[0].id
-        }
-      }
 
       const dogEntity = await sequelize.models.dog.create({
         id: dog.indexNumber ?? undefined,
         name: dog.name,
         dog_breed_id: breed.id,
         exported: false,
-        status_id: targetStatusId ?? preExemptStatusId,
+        status_id: dog.source === 'ROBOT'
+          ? getStatusId(statuses, constants.statuses.Exempt)
+          : getStatusId(statuses, constants.statuses.PreExempt),
         dog_reference: uuidv4(),
         sex: dog.sex,
         colour: dog.colour,
@@ -151,6 +143,10 @@ const createDogs = async (dogs, owners, enforcement, transaction) => {
     console.error(`Error creating dog: ${err}`)
     throw err
   }
+}
+
+const getStatusId = (statuses, statusName) => {
+  return statuses.filter(x => x.status === statusName)[0].id
 }
 
 const addImportedRegisteredPerson = async (personId, personTypeId, dogId, t) => {
