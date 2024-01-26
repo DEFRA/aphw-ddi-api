@@ -50,7 +50,7 @@ const createDogs = async (dogs, owners, enforcement, transaction) => {
   try {
     const createdDogs = []
 
-    const preExemptStatus = (await getStatuses()).filter(x => x.status === 'Pre-exempt')[0].id
+    const statuses = await getStatuses()
 
     for (const dog of dogs) {
       const breed = await getBreed(dog.breed)
@@ -60,7 +60,9 @@ const createDogs = async (dogs, owners, enforcement, transaction) => {
         name: dog.name,
         dog_breed_id: breed.id,
         exported: false,
-        status_id: preExemptStatus,
+        status_id: dog.source === 'ROBOT'
+          ? getStatusId(statuses, constants.statuses.Exempt)
+          : getStatusId(statuses, constants.statuses.PreExempt),
         dog_reference: uuidv4(),
         sex: dog.sex,
         colour: dog.colour,
@@ -143,6 +145,10 @@ const createDogs = async (dogs, owners, enforcement, transaction) => {
   }
 }
 
+const getStatusId = (statuses, statusName) => {
+  return statuses.filter(x => x.status === statusName)[0].id
+}
+
 const addImportedRegisteredPerson = async (personId, personTypeId, dogId, t) => {
   const registeredPerson = {
     person_id: personId,
@@ -191,9 +197,11 @@ const updateDog = async (payload, user, transaction) => {
 
   await dogFromDB.save({ transaction })
 
-  await updateSearchIndexDog(payload, transaction)
+  const refreshedDog = await getDogByIndexNumber(payload.indexNumber, transaction)
 
-  await sendUpdateToAudit(DOG, preChangedDog, dogFromDB, user)
+  await updateSearchIndexDog(refreshedDog, statuses, transaction)
+
+  await sendUpdateToAudit(DOG, preChangedDog, refreshedDog, user)
 
   return dogFromDB
 }
@@ -205,14 +213,15 @@ const updateStatus = async (indexNumber, newStatus, transaction) => {
 
   const statuses = await getStatuses()
 
-  const dogFromDB = await getDogByIndexNumber(indexNumber)
+  const dogFromDB = await getDogByIndexNumber(indexNumber, transaction)
 
   dogFromDB.status_id = statuses.filter(x => x.status === newStatus)[0].id
 
   await dogFromDB.save({ transaction })
 
-  dogFromDB.dogId = dogFromDB.id
-  await updateSearchIndexDog(dogFromDB, transaction)
+  const refreshedDog = await getDogByIndexNumber(indexNumber, transaction)
+
+  await updateSearchIndexDog(refreshedDog, statuses, transaction)
 }
 
 const updateDogFields = (dbDog, payload, breeds, statuses) => {
@@ -240,7 +249,7 @@ const autoChangeStatus = (dbDog, payload, statuses) => {
   }
 }
 
-const getDogByIndexNumber = async (indexNumber) => {
+const getDogByIndexNumber = async (indexNumber, t) => {
   const dog = await sequelize.models.dog.findOne({
     where: { index_number: indexNumber },
     include: [{
@@ -295,7 +304,8 @@ const getDogByIndexNumber = async (indexNumber) => {
     {
       model: sequelize.models.status,
       as: 'status'
-    }]
+    }],
+    transaction: t
   })
 
   return dog

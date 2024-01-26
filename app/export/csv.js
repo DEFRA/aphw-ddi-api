@@ -111,7 +111,7 @@ const headerRow = [
   'JoinedInterimSchemeDate',
   'ExemptionOrder',
   'Withdrawn',
-  'ExamindByDlo',
+  'ExaminedByDlo',
   'MicrochipDeadline',
   'NeuteringDeadline',
   'RemovedFromCdoProcess'
