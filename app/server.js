@@ -17,6 +17,7 @@ async function createServer () {
   })
 
   await server.register(require('./plugins/router'))
+  await server.register(require('./plugins/cron'))
 
   return server
 }
