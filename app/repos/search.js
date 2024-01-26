@@ -1,6 +1,7 @@
 const sequelize = require('../config/db')
 const { dbFindByPk } = require('../lib/db-functions')
 const { buildAddressString } = require('../lib/address-helper')
+const { getMicrochip } = require('../dto/dto-helper')
 
 const addToSearchIndex = async (person, dogId, transaction) => {
   if (!transaction) {
@@ -90,8 +91,8 @@ const updateSearchIndexDog = async (dogFromDb, statuses, transaction) => {
       index_number: dogFromDb.index_number,
       name: dogFromDb.name,
       status: dogFromDb.status?.status ?? indexRow.json.dogStatus,
-      microchip_number: dogFromDb.microchip_number ?? '',
-      microchip_number2: dogFromDb.microchip_number2 ?? ''
+      microchip_number: getMicrochip(dogFromDb, 1),
+      microchip_number2: getMicrochip(dogFromDb, 2)
     }
     indexRow.search = buildIndexColumn(partialPerson, partialDog)
     indexRow.json = buildJsonColumn(partialPerson, partialDog)
