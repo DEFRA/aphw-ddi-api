@@ -73,33 +73,29 @@ const buildAddressObject = (person) => {
   }
 }
 
-const updateSearchIndexDog = async (dog, transaction) => {
+const updateSearchIndexDog = async (dogFromDb, statuses, transaction) => {
   const indexRows = await sequelize.models.search_index.findAll({
-    where: { dog_id: dog.dogId },
+    where: { dog_id: dogFromDb.id },
     transaction
   })
 
   for (const indexRow of indexRows) {
-    if (indexRow.json.name !== dog.name ||
-        indexRow.json.microchipNumber !== dog.microchipNumber ||
-        indexRow.json.microchipNumber2 !== dog.microchipNumber2) {
-      const partialPerson = {
-        person_reference: indexRow.json.personReference,
-        first_name: indexRow.json.firstName,
-        last_name: indexRow.json.lastName,
-        address: indexRow.json.address
-      }
-      const partialDog = {
-        index_number: dog.indexNumber,
-        name: dog.name,
-        status: dog.status ?? indexRow.json.dogStatus,
-        microchip_number: dog.microchipNumber,
-        microchip_number2: dog.microchipNumber2
-      }
-      indexRow.search = buildIndexColumn(partialPerson, partialDog)
-      indexRow.json = buildJsonColumn(partialPerson, partialDog)
-      await indexRow.save({ transaction })
+    const partialPerson = {
+      person_reference: indexRow.json.personReference,
+      first_name: indexRow.json.firstName,
+      last_name: indexRow.json.lastName,
+      address: indexRow.json.address
     }
+    const partialDog = {
+      index_number: dogFromDb.index_number,
+      name: dogFromDb.name,
+      status: dogFromDb.status?.status ?? indexRow.json.dogStatus,
+      microchip_number: dogFromDb.microchip_number ?? '',
+      microchip_number2: dogFromDb.microchip_number2 ?? ''
+    }
+    indexRow.search = buildIndexColumn(partialPerson, partialDog)
+    indexRow.json = buildJsonColumn(partialPerson, partialDog)
+    await indexRow.save({ transaction })
   }
 }
 
