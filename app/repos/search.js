@@ -95,7 +95,6 @@ const updateSearchIndexDog = async (dogFromDb, statuses, transaction) => {
     }
     indexRow.search = buildIndexColumn(partialPerson, partialDog)
     indexRow.json = buildJsonColumn(partialPerson, partialDog)
-    console.log('saving dog json ', indexRow.json)
     await indexRow.save({ transaction })
   }
 }
@@ -134,7 +133,6 @@ const updateSearchIndexPerson = async (person, transaction) => {
       indexRow.search = buildIndexColumn(partialPerson, partialDog)
       indexRow.json = buildJsonColumn(partialPerson, partialDog)
       await indexRow.save({ transaction })
-      console.log('saving person json ', indexRow.json)
     }
   }
 }
