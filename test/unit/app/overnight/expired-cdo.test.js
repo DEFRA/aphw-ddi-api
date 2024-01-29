@@ -20,7 +20,7 @@ describe('ExpiredCdo test', () => {
   test('setExpiredCdosToFailed should handle zero rows', async () => {
     dbFindAll.mockResolvedValue([])
     const res = await setExpiredCdosToFailed()
-    expect(res).toBe('Success CDO Expiry - updated 0 rows | ')
+    expect(res).toBe('Success CDO Expiry - updated 0 rows')
   })
 
   test('setExpiredCdosToFailed should handle error', async () => {
@@ -31,6 +31,6 @@ describe('ExpiredCdo test', () => {
   test('setExpiredCdosToFailed should handle some rows', async () => {
     dbFindAll.mockResolvedValue(mockOvernightRows)
     const res = await setExpiredCdosToFailed()
-    expect(res).toBe('Success CDO Expiry - updated 3 rows | ')
+    expect(res).toBe('Success CDO Expiry - updated 3 rows')
   })
 })

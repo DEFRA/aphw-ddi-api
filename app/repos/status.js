@@ -1,26 +1,25 @@
-const { getStatuses } = require('./dogs')
+const { getStatuses, getDogByIndexNumber } = require('./dogs')
 const { updateSearchIndexDog } = require('./search')
-const { dogDto } = require('../dto/dog')
 const { sendUpdateToAudit } = require('../messaging/send-audit')
 const { DOG } = require('../constants/event/audit-event-object-types')
 
 const updateStatusOnly = async (dog, newStatus, transaction) => {
   const statuses = await getStatuses()
 
+  const prevStatus = dog.status?.status
+
   dog.status_id = statuses.filter(x => x.status === newStatus)[0].id
 
   await dog.save({ transaction })
 
-  const dto = dogDto(dog)
-  dto.dogId = dog.id
-  dto.status = newStatus
+  const refreshedDog = await getDogByIndexNumber(dog.index_number, transaction)
 
-  await updateSearchIndexDog(dto, transaction)
+  await updateSearchIndexDog(refreshedDog, transaction)
 
   await sendUpdateToAudit(
     DOG,
-    { index_number: dog?.index_number, status: dog?.status?.status },
-    { index_number: dog?.index_number, status: newStatus },
+    { index_number: refreshedDog.index_number, status: prevStatus },
+    { index_number: refreshedDog.index_number, status: newStatus },
     'overnight-job-system-user'
   )
 }

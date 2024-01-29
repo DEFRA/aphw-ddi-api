@@ -20,7 +20,7 @@ describe('ExpiredMicrochipDeadline test', () => {
   test('setExpiredMicrochipDeadlineToInBreach should handle zero rows', async () => {
     dbFindAll.mockResolvedValue([])
     const res = await setExpiredMicrochipDeadlineToInBreach()
-    expect(res).toBe('Success Microchip Expiry - updated 0 rows | ')
+    expect(res).toBe('Success Microchip Expiry - updated 0 rows')
   })
 
   test('setExpiredMicrochipDeadlineToInBreach should handle error', async () => {
@@ -31,6 +31,6 @@ describe('ExpiredMicrochipDeadline test', () => {
   test('setExpiredMicrochipDeadlineToInBreach should handle some rows', async () => {
     dbFindAll.mockResolvedValue(mockOvernightRows)
     const res = await setExpiredMicrochipDeadlineToInBreach()
-    expect(res).toBe('Success Microchip Expiry - updated 3 rows | ')
+    expect(res).toBe('Success Microchip Expiry - updated 3 rows')
   })
 })
