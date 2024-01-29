@@ -28,7 +28,7 @@ const setExpiredCdosToFailed = async (today, t) => {
       console.log(`Updating dog ${toUpdate.dog.index_number} to Failed`)
       await updateStatusOnly(toUpdate.dog, statuses.Failed, t)
     }
-    return `Success CDO Expiry - updated ${setToFailed.length} rows | `
+    return `Success CDO Expiry - updated ${setToFailed.length} rows`
   } catch (e) {
     console.log(`Error auto-updating statuses when CDO Expiry: ${e} ${e.stack}`)
     throw new Error(`Error auto-updating statuses when CDO Expiry: ${e}`)

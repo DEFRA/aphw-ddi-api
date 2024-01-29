@@ -35,7 +35,7 @@ const setExpiredMicrochipDeadlineToInBreach = async (today, t) => {
       console.log(`Updating dog ${toUpdate.dog.index_number} to In breach`)
       await updateStatusOnly(toUpdate.dog, statuses.InBreach, t)
     }
-    return `Success Microchip Expiry - updated ${setToBreach.length} rows | `
+    return `Success Microchip Expiry - updated ${setToBreach.length} rows`
   } catch (e) {
     console.log(`Error auto-updating statuses when Microchip Expiry: ${e} ${e.stack}`)
     throw new Error(`Error auto-updating statuses when Microchip Expiry: ${e}`)
