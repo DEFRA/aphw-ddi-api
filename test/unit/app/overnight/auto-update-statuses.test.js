@@ -19,7 +19,7 @@ describe('AutoUpdateStatus test', () => {
     setExpiredNeuteringDeadlineToInBreach.mockResolvedValue('ok - neutering 3 rows')
     setExpiredMicrochipDeadlineToInBreach.mockResolvedValue('ok - microchip 4 rows')
     const res = await autoUpdateStatuses()
-    expect(res).toBe('ok - cdos 1 rows|ok - insurance 2 rows|ok - neutering 3 rows|ok - microchip 4 rows')
+    expect(res).toBe('ok - cdos 1 rows | ok - insurance 2 rows | ok - neutering 3 rows | ok - microchip 4 rows')
   })
 
   test('autoUpdateStatuses should handle errors', async () => {
@@ -28,6 +28,6 @@ describe('AutoUpdateStatus test', () => {
     setExpiredNeuteringDeadlineToInBreach.mockResolvedValue('ok - neutering 3 rows')
     setExpiredMicrochipDeadlineToInBreach.mockImplementation(() => { throw new Error('dummy error') })
     const res = await autoUpdateStatuses()
-    expect(res).toBe('Error auto-updating statuses: Error: dummy error ok - cdos 1 rows|ok - insurance 2 rows|ok - neutering 3 rows')
+    expect(res).toBe('Error auto-updating statuses: Error: dummy error ok - cdos 1 rows | ok - insurance 2 rows | ok - neutering 3 rows')
   })
 })

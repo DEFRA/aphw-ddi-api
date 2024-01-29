@@ -20,7 +20,7 @@ describe('ExpiredNeuteringDeadline test', () => {
   test('setExpiredNeuteringDeadlineToInBreach should handle zero rows', async () => {
     dbFindAll.mockResolvedValue([])
     const res = await setExpiredNeuteringDeadlineToInBreach()
-    expect(res).toBe('Success Neutering Expiry - updated 0 rows | ')
+    expect(res).toBe('Success Neutering Expiry - updated 0 rows')
   })
 
   test('setExpiredNeuteringDeadlineToInBreach should handle error', async () => {
@@ -31,6 +31,6 @@ describe('ExpiredNeuteringDeadline test', () => {
   test('setExpiredNeuteringDeadlineToInBreach should handle some rows', async () => {
     dbFindAll.mockResolvedValue(mockOvernightRows)
     const res = await setExpiredNeuteringDeadlineToInBreach()
-    expect(res).toBe('Success Neutering Expiry - updated 3 rows | ')
+    expect(res).toBe('Success Neutering Expiry - updated 3 rows')
   })
 })

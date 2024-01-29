@@ -12,9 +12,9 @@ const autoUpdateStatuses = async () => {
 
     await sequelize.transaction(async (t) => {
       result = result + await setExpiredCdosToFailed(today, t)
-      result = result + '|' + await setExpiredInsuranceToBreach(today, t)
-      result = result + '|' + await setExpiredNeuteringDeadlineToInBreach(today, t)
-      result = result + '|' + await setExpiredMicrochipDeadlineToInBreach(today, t)
+      result = result + ' | ' + await setExpiredInsuranceToBreach(today, t)
+      result = result + ' | ' + await setExpiredNeuteringDeadlineToInBreach(today, t)
+      result = result + ' | ' + await setExpiredMicrochipDeadlineToInBreach(today, t)
     })
   } catch (e) {
     console.log(`Error auto-updating statuses: ${e}`)
