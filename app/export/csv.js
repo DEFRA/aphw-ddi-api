@@ -61,12 +61,12 @@ const convertRow = (row) => {
     exemption.neutering_confirmation,
     exemption.microchip_verification,
     exemption.joined_exemption_scheme,
+    exemption.removed_from_cdo_process,
     exemption.exemption_order?.exemption_order,
     exemption.withdrawn,
     exemption.typed_by_dlo,
     exemption.microchip_deadline,
-    exemption.neutering_deadline,
-    exemption.removed_from_cdo_process
+    exemption.neutering_deadline
   ]
 }
 
@@ -109,12 +109,12 @@ const headerRow = [
   'NeuteringConfirmationDate',
   'MicrochipVerificationDate',
   'JoinedInterimSchemeDate',
+  'RemovedFromCdoProcess',
   'ExemptionOrder',
   'Withdrawn',
   'ExaminedByDlo',
   'MicrochipDeadline',
-  'NeuteringDeadline',
-  'RemovedFromCdoProcess'
+  'NeuteringDeadline'
 ]
 
 const extractEmail = (contacts) => {
