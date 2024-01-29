@@ -14,9 +14,6 @@ const updateStatusOnly = async (dog, newStatus, transaction) => {
 
   const refreshedDog = await getDogByIndexNumber(dog.index_number, transaction)
 
-  refreshedDog.dogId = refreshedDog.id
-  refreshedDog.status = { status: newStatus }
-
   await updateSearchIndexDog(refreshedDog, transaction)
 
   await sendUpdateToAudit(
