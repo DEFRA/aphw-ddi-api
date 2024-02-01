@@ -1,8 +1,13 @@
 const { createCdo } = require('../../repos/cdo')
 const { addYears } = require('date-fns')
 const { calculateNeuteringDeadline } = require('../../dto/dto-helper')
+const { lookupPoliceForceByPostcode } = require('./police')
+const getPoliceForce = require('../../lookups/police-force')
+const sequelize = require('../../config/db')
+const { dbFindOne } = require('../../lib/db-functions')
 
 const processRegisterRows = async (register, t) => {
+  let currentDataRow
   for (const record of register.add) {
     const owner = record.owner
 
@@ -35,10 +40,60 @@ const processRegisterRows = async (register, t) => {
       }
     }
 
-    await createCdo(data, 'robot-import-system-user', t)
+    currentDataRow = data
+
+    try {
+      await createCdo(data, 'robot-import-system-user', t)
+    } catch (err) {
+      console.log(err)
+      console.log('Row in error:', JSON.parse(JSON.stringify(currentDataRow)))
+    }
   }
 }
 
+const populatePoliceForce = async (register) => {
+  for (const record of register.add) {
+    const forceId = await lookupPoliceForce(record.owner.address.postcode)
+
+    if (!forceId) {
+      record.dogs.forEach(x => {
+        console.log(`IndexNumber ${x.indexNumber} error: Cannot find police force for postcode ${record.owner.address.postcode}`)
+      })
+      continue
+    }
+
+    for (const dog of record.dogs) {
+      const registration = await dbFindOne(sequelize.models.registration, {
+        where: { dog_id: dog.indexNumber }
+      })
+
+      if (!registration) {
+        throw new Error(`CDO not found - iondexNumber ${dog.indexNumber}`)
+      }
+
+      if (!registration.police_force_id) {
+        registration.police_force_id = forceId
+        registration.save()
+      }
+    }
+  }
+}
+
+const lookupPoliceForce = async (postcode) => {
+  const policeForce = await lookupPoliceForceByPostcode(postcode.replace(' ', ''), true)
+
+  if (policeForce) {
+    const force = await getPoliceForce(policeForce.name)
+
+    if (force) {
+      return force.id
+    }
+  }
+
+  return null
+}
+
 module.exports = {
-  processRegisterRows
+  processRegisterRows,
+  populatePoliceForce
 }

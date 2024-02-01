@@ -30,6 +30,7 @@ const createPeople = async (owners, transaction) => {
         address_line_2: owner.address.addressLine2,
         town: owner.address.town,
         postcode: owner.address.postcode,
+        county: owner.address.county,
         country_id: country?.id ?? 1
       }, { transaction })
 

@@ -28,7 +28,7 @@ const schema = Joi.object({
     neutered: Joi.any().required(),
     microchipNumber: Joi.alternatives().try(
       Joi.string().trim(),
-      Joi.number()
+      Joi.number().unsafe()
     ).optional().allow('').allow(null),
     indexNumber: Joi.number().required(),
     certificateIssued: Joi.date().iso().optional().allow('').allow(null)
