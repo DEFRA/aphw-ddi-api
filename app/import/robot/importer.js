@@ -29,6 +29,8 @@ const processRows = async (register, sheet, map, schema) => {
 
     autoCorrectDataValues(row)
 
+    replaceUnicodeCharacters(row)
+
     const result = schema.validate(row)
 
     if (!result.isValid) {
@@ -102,6 +104,80 @@ const autoCorrectDate = (inDate) => {
     }
   }
   return inDate
+}
+
+const replaceUnicodeCharacters = (row) => {
+  if (containsNonLatinCodepoints(row.owner.address?.addressLine1)) {
+    logReplacement(row.owner.address.addressLine1, row.dog.indexNumber, 'addressLine1')
+    row.owner.address.addressLine1 = replaceInvalidCharacters(row.owner.address.addressLine1)
+  }
+  if (containsNonLatinCodepoints(row.owner.address?.addressLine2)) {
+    logReplacement(row.owner.address.addressLine2, row.dog.indexNumber, 'addressLine2')
+    row.owner.address.addressLine2 = replaceInvalidCharacters(row.owner.address.addressLine2)
+  }
+  if (containsNonLatinCodepoints(row.owner.address?.town)) {
+    logReplacement(row.owner.address.town, row.dog.indexNumber, 'town')
+    row.owner.address.town = replaceInvalidCharacters(row.owner.address.town)
+  }
+  if (containsNonLatinCodepoints(row.owner.address?.county)) {
+    logReplacement(row.owner.address.county, row.dog.indexNumber, 'county')
+    row.owner.address.county = replaceInvalidCharacters(row.owner.address.county)
+  }
+  if (containsNonLatinCodepoints(row.owner.firstName)) {
+    logReplacement(row.owner.firstName, row.dog.indexNumber, 'firstName')
+    row.owner.firstName = replaceInvalidCharacters(row.owner.firstName)
+  }
+  if (containsNonLatinCodepoints(row.owner.lastName)) {
+    logReplacement(row.owner.lastName, row.dog.indexNumber, 'lastName')
+    row.owner.lastName = replaceInvalidCharacters(row.owner.lastName)
+  }
+  if (containsNonLatinCodepoints(row.dog.name)) {
+    logReplacement(row.dog.name, row.dog.indexNumber, 'dogName')
+    row.dog.name = replaceInvalidCharacters(row.dog.name)
+  }
+  if (containsNonLatinCodepoints(row.dog.microchipNumber)) {
+    logReplacement(row.dog.microchipNumber, row.dog.indexNumber, 'microchipNumber')
+    row.dog.microchipNumber = replaceInvalidCharacters(row.dog.microchipNumber)
+  }
+}
+
+const logReplacement = (elem, indexNumber, desc) => {
+  console.log(`IndexNumber ${indexNumber} replacing invalid characters in ${desc} with value ${elem}`)
+}
+
+const replaceInvalidCharacters = (elem) => {
+  return elem.replace(/\u2019/g, '\'')
+    .replace(/\u2013/g, '-')
+    .replace(/\u202c/g, '')
+    .replace(/[\u201c\u201d\u2018]/g, '"')
+    .replace(/[\u00e1\u00e3\u00e0]/g, 'a')
+    .replace(/\u00c5/g, 'A')
+    .replace(/[\u010d\u00e7]/g, 'c')
+    .replace(/[\u00e8\u00e9\u00eb]/g, 'e')
+    .replace(/\u00c9/g, 'E')
+    .replace(/[\u00ed\u00ef]/g, 'i')
+    .replace(/\u0142/g, 'l')
+    .replace(/[\u00f3\u00f4\u00f8]/g, 'o')
+    .replace(/[\u00d6\u00d8]/g, 'O')
+    .replace(/[\u00fa\u00fc]/g, 'u')
+    .replace(/\u017b/g, 'Z')
+    .replace(/[\u0080-\uFFFF]/g, '')
+}
+
+const containsNonLatinCodepoints = (str, log) => {
+  if (!str) {
+    return false
+  }
+  for (let i = 0, n = str.length; i < n; i++) {
+    if (str.charCodeAt(i) > 127) {
+      if (log) {
+        console.log('Char code:', str.charCodeAt(i))
+        console.log('str', str)
+      }
+      return true
+    }
+  }
+  return false
 }
 
 module.exports = {
