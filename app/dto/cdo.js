@@ -32,9 +32,11 @@ const cdoCreateDto = (data) => ({
   dogs: data.dogs.map(d => ({
     indexNumber: d.index_number,
     name: d.name,
+    status: d.status?.status,
     breed: d.dog_breed.breed,
     cdoIssued: d.registration.cdo_issued,
-    cdoExpiry: d.registration.cdo_expiry
+    cdoExpiry: d.registration.cdo_expiry,
+    interimExemption: d.registration.joined_exemption_scheme
   }))
 })
 
