@@ -9,6 +9,9 @@ const search = async (type, terms) => {
   }
 
   const termsArray = terms.replaceAll('  ', ' ').replaceAll('*', ':*').split(' ')
+
+  addFullDogIndexIfMissing(termsArray)
+
   const termsQuery = termsArray.join(' & ')
   const rankFunc = [sequelize.fn('ts_rank(search_index.search, to_tsquery', sequelize.literal(`'${termsQuery}')`)), 'rank']
   const results = await sequelize.models.search_index.findAll({
@@ -88,6 +91,17 @@ const sortDogSearch = (a, b) => {
 
 const sortOwnerSearch = (a, b) => {
   return a.distance - b.distance || b.rank - a.rank || `${a.lastName} ${a.firstName}` - `${b.lastName} ${b.firstName}`
+}
+
+const addFullDogIndexIfMissing = arr => {
+  for (let i = 0; i < arr.length; i++) {
+    const elem = arr[i]
+    if (elem.length === 6 && /^\d+$/.test(elem)) {
+      arr.splice(i, 1, `ed${elem}`)
+    }
+  }
+
+  return arr
 }
 
 module.exports = {

@@ -58,11 +58,11 @@ const updateExemption = async (data, user, transaction) => {
     if (registration.exemption_order.exemption_order === '2015') {
       const court = await getCourt(data.court)
 
-      if (!court) {
+      if (data.court && data.court !== '' && !court) {
         throw new Error(`Court not found: ${data.court}`)
       }
 
-      registration.court_id = court.id
+      registration.court_id = court?.id ?? null
     }
 
     const insurance = cdo.insurance.sort((a, b) => b.id - a.id)[0]
