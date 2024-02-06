@@ -17,7 +17,7 @@ describe('Courts repo', () => {
     jest.clearAllMocks()
   })
 
-  test('getCourts should return police forces', async () => {
+  test('getCourts should return courts', async () => {
     sequelize.models.court.findAll.mockResolvedValue(mockCourts)
 
     const courts = await getCourts()
