@@ -417,6 +417,30 @@ describe('Exemption repo', () => {
     expect(updateStatus).toHaveBeenCalledWith('ED123', 'Exempt', {})
   })
 
+  test('autoChangeStatus should handle Interim-exempt to Pre-Exempt', async () => {
+    updateStatus.mockResolvedValue()
+
+    const cdo = {
+      index_number: 'ED123',
+      status: {
+        status: 'Interim exempt'
+      },
+      registration: {
+      }
+    }
+
+    const payload = {
+      cdoIssued: new Date().toISOString(),
+      insurance: {
+        renewalDate: new Date(2040, 1, 1)
+      }
+    }
+
+    await autoChangeStatus(cdo, payload, {})
+
+    expect(updateStatus).toHaveBeenCalledWith('ED123', 'Pre-exempt', {})
+  })
+
   test('autoChangeStatus should handle 2023 order to Withdrawn', async () => {
     updateStatus.mockResolvedValue()
 
