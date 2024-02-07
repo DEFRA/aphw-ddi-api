@@ -55,14 +55,14 @@ const updateExemption = async (data, user, transaction) => {
       registration.withdrawn = data.withdrawn ?? null
     }
 
-    if (registration.exemption_order.exemption_order === '2015') {
+    if (registration.exemption_order.exemption_order === '2015' && cdo?.status?.status !== constants.statuses.InterimExempt) {
       const court = await getCourt(data.court)
 
-      if (data.court && data.court !== '' && !court) {
+      if (!court) {
         throw new Error(`Court not found: ${data.court}`)
       }
 
-      registration.court_id = court?.id ?? null
+      registration.court_id = court.id
     }
 
     const insurance = cdo.insurance.sort((a, b) => b.id - a.id)[0]
@@ -100,6 +100,10 @@ const autoChangeStatus = async (cdo, data, transaction) => {
       await updateStatus(cdo.index_number, constants.statuses.Failed, transaction)
     } else if (data.insurance?.renewalDate && isFuture(data.insurance?.renewalDate) && !cdo.registration.certificate_issued && data.certificateIssued) {
       await updateStatus(cdo.index_number, constants.statuses.Exempt, transaction)
+    }
+  } else if (currentStatus === constants.statuses.InterimExempt) {
+    if (!cdo.registration.cdoIssued && data.cdoIssued) {
+      await updateStatus(cdo.index_number, constants.statuses.PreExempt, transaction)
     }
   }
 
