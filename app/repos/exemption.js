@@ -102,7 +102,7 @@ const autoChangeStatus = async (cdo, data, transaction) => {
       await updateStatus(cdo.index_number, constants.statuses.Exempt, transaction)
     }
   } else if (currentStatus === constants.statuses.InterimExempt) {
-    if (!cdo.registration.cdoIssued && data.cdoIssued) {
+    if (!cdo.registration.cdo_issued && data.cdoIssued) {
       await updateStatus(cdo.index_number, constants.statuses.PreExempt, transaction)
     }
   }
