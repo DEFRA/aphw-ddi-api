@@ -59,8 +59,27 @@ const getCompanies = async () => {
   }))
 }
 
+const createOrUpdateInsurance = async (data, cdo, transaction) => {
+  const insurance = cdo.insurance.sort((a, b) => b.id - a.id)[0]
+
+  if (data.insurance) {
+    if (!insurance) {
+      await createInsurance(cdo.id, {
+        company: data.insurance.company,
+        renewalDate: data.insurance.renewalDate
+      }, transaction)
+    } else {
+      await updateInsurance(insurance, {
+        company: data.insurance.company,
+        renewalDate: data.insurance.renewalDate
+      }, transaction)
+    }
+  }
+}
+
 module.exports = {
   createInsurance,
   updateInsurance,
+  createOrUpdateInsurance,
   getCompanies
 }

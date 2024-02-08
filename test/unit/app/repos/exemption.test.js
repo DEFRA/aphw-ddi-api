@@ -12,7 +12,7 @@ describe('Exemption repo', () => {
   const { updateStatus } = require('../../../../app/repos/dogs')
 
   jest.mock('../../../../app/repos/insurance')
-  const { createInsurance, updateInsurance } = require('../../../../app/repos/insurance')
+  const { createOrUpdateInsurance } = require('../../../../app/repos/insurance')
 
   jest.mock('../../../../app/lookups')
   const { getCourt, getPoliceForce } = require('../../../../app/lookups')
@@ -25,6 +25,7 @@ describe('Exemption repo', () => {
   beforeEach(async () => {
     jest.clearAllMocks()
     sendEvent.mockResolvedValue()
+    createOrUpdateInsurance.mockResolvedValue()
   })
 
   test('updateExemption should start a transaction if one is not provided', async () => {
@@ -115,6 +116,7 @@ describe('Exemption repo', () => {
     await updateExemption(data, 'dummy-username', {})
 
     expect(registration.save).toHaveBeenCalled()
+    expect(createOrUpdateInsurance).toHaveBeenCalled()
   })
 
   test('updateExemption with 2023 order should not call getCourt', async () => {
@@ -155,113 +157,6 @@ describe('Exemption repo', () => {
     await updateExemption(data, 'dummy-username', {})
 
     expect(getCourt).not.toHaveBeenCalled()
-  })
-
-  test('updateExemption should create insurance if none exists', async () => {
-    const data = {
-      exemptionOrder: '2015',
-      indexNumber: 'ED123',
-      cdoIssued: '2020-01-01',
-      cdoExpiry: '2020-02-01',
-      court: 'Test Court',
-      policeForce: 'Test Police Force',
-      legislationOfficer: 'Test Officer',
-      certificateIssued: '2020-03-01',
-      applicationFeePaid: '2020-03-01',
-      neuteringConfirmation: '2020-04-01',
-      microchip_verification: '2020-04-01',
-      exemptionSchemeJoin: '2020-05-01',
-      insurance: {
-        company: 'Test Insurance',
-        renewalDate: '2021-06-01'
-      }
-    }
-
-    const registration = {
-      cdo_issued: '2020-01-01',
-      cdo_expiry: '2020-02-01',
-      court_id: 1,
-      police_force_id: 1,
-      legislation_officer: 'Test Officer',
-      certificate_issued: '2020-03-01',
-      application_fee_paid: '2020-03-01',
-      neutering_confirmation: '2020-04-01',
-      microchip_verification: '2020-04-01',
-      exemption_scheme_join: '2020-05-01',
-      exemption_order: {
-        exemption_order: '2015'
-      },
-      save: jest.fn()
-    }
-
-    getCdo.mockResolvedValue({ id: '123', registration, insurance: [] })
-    getCourt.mockResolvedValue({ id: 1, name: 'Test Court' })
-    getPoliceForce.mockResolvedValue({ id: 1, name: 'Test Police Force' })
-
-    await updateExemption(data, 'dummy-username', {})
-
-    expect(createInsurance).toHaveBeenCalledWith('123', {
-      company: 'Test Insurance',
-      renewalDate: '2021-06-01'
-    },
-    expect.any(Object))
-  })
-
-  test('updateExemption should update insurance if it exists', async () => {
-    const data = {
-      exemptionOrder: '2015',
-      indexNumber: 'ED123',
-      cdoIssued: '2020-01-01',
-      cdoExpiry: '2020-02-01',
-      court: 'Test Court',
-      policeForce: 'Test Police Force',
-      legislationOfficer: 'Test Officer',
-      certificateIssued: '2020-03-01',
-      applicationFeePaid: '2020-03-01',
-      neuteringConfirmation: '2020-04-01',
-      microchipVerification: '2020-04-01',
-      exemptionSchemeJoin: '2020-05-01',
-      insurance: {
-        company: 'Test Insurance',
-        renewalDate: '2021-06-01'
-      }
-    }
-
-    const registration = {
-      cdo_issued: '2020-01-01',
-      cdo_expiry: '2020-02-01',
-      court_id: 1,
-      police_force_id: 1,
-      legislation_officer: 'Test Officer',
-      certificate_issued: '2020-03-01',
-      application_fee_paid: '2020-03-01',
-      neutering_confirmation: '2020-04-01',
-      microchip_verification: '2020-04-01',
-      exemption_scheme_join: '2020-05-01',
-      exemption_order: {
-        exemption_order: '2015'
-      },
-      save: jest.fn()
-    }
-
-    const insurance = {
-      id: 1,
-      company: 'Test Insurance',
-      renewal_date: '2020-06-01',
-      save: jest.fn()
-    }
-
-    getCdo.mockResolvedValue({ registration, insurance: [insurance] })
-    getCourt.mockResolvedValue({ id: 1, name: 'Test Court' })
-    getPoliceForce.mockResolvedValue({ id: 1, name: 'Test Police Force' })
-
-    await updateExemption(data, 'dummy-username', {})
-
-    expect(updateInsurance).toHaveBeenCalledWith(insurance, {
-      company: 'Test Insurance',
-      renewalDate: '2021-06-01'
-    },
-    expect.any(Object))
   })
 
   test('updateExemption should throw an error if the CDO is not found', async () => {
