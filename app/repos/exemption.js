@@ -3,7 +3,7 @@ const sequelize = require('../config/db')
 const { deepClone } = require('../lib/deep-clone')
 const { getCdo } = require('./cdo')
 const { getCourt, getPoliceForce } = require('../lookups')
-const { createInsurance, updateInsurance } = require('./insurance')
+const { createOrUpdateInsurance } = require('./insurance')
 const { sendUpdateToAudit } = require('../messaging/send-audit')
 const { EXEMPTION } = require('../constants/event/audit-event-object-types')
 const constants = require('../constants/statuses')
@@ -15,71 +15,23 @@ const updateExemption = async (data, user, transaction) => {
   }
 
   try {
-    const cdo = await getCdo(data.indexNumber)
+    const cdo = await lookupCdo(data)
 
-    if (!cdo) {
-      throw new Error(`CDO not found: ${data.indexNumber}`)
-    }
-
-    let policeForce
-
-    if (data.policeForce) {
-      policeForce = await getPoliceForce(data.policeForce)
-
-      if (!policeForce) {
-        throw new Error(`Police force not found: ${data.policeForce}`)
-      }
-    }
+    const policeForce = await lookupPoliceForce(data)
 
     await autoChangeStatus(cdo, data, transaction)
 
     const registration = cdo.registration
 
-    const preChangedRegistration = deepClone(registration)
-    preChangedRegistration.index_number = data.indexNumber
+    const preChangedRegistration = constructPreChangedRegistration(registration, data)
 
-    registration.cdo_issued = data.cdoIssued
-    registration.cdo_expiry = data.cdoExpiry
-    registration.police_force_id = policeForce.id
-    registration.legislation_officer = data.legislationOfficer
-    registration.certificate_issued = data.certificateIssued ?? null
-    registration.application_fee_paid = data.applicationFeePaid ?? null
-    registration.neutering_confirmation = data.neuteringConfirmation ?? null
-    registration.microchip_verification = data.microchipVerification ?? null
-    registration.joined_exemption_scheme = data.joinedExemptionScheme ?? null
-    registration.removed_from_cdo_process = data.removedFromCdoProcess ?? null
+    updateRegistration(registration, data, policeForce)
 
-    if (registration.exemption_order.exemption_order === '2023') {
-      registration.microchip_deadline = data.microchipDeadline ?? null
-      registration.typed_by_dlo = data.typedByDlo ?? null
-      registration.withdrawn = data.withdrawn ?? null
-    }
+    handleOrder2023(registration, data)
 
-    if (registration.exemption_order.exemption_order === '2015') {
-      const court = await getCourt(data.court)
+    await handleOrder2015(registration, data, cdo)
 
-      if (!court) {
-        throw new Error(`Court not found: ${data.court}`)
-      }
-
-      registration.court_id = court.id
-    }
-
-    const insurance = cdo.insurance.sort((a, b) => b.id - a.id)[0]
-
-    if (data.insurance) {
-      if (!insurance) {
-        await createInsurance(cdo.id, {
-          company: data.insurance.company,
-          renewalDate: data.insurance.renewalDate
-        }, transaction)
-      } else {
-        await updateInsurance(insurance, {
-          company: data.insurance.company,
-          renewalDate: data.insurance.renewalDate
-        }, transaction)
-      }
-    }
+    await createOrUpdateInsurance(data, cdo, transaction)
 
     const res = registration.save({ transaction })
 
@@ -101,12 +53,77 @@ const autoChangeStatus = async (cdo, data, transaction) => {
     } else if (data.insurance?.renewalDate && isFuture(data.insurance?.renewalDate) && !cdo.registration.certificate_issued && data.certificateIssued) {
       await updateStatus(cdo.index_number, constants.statuses.Exempt, transaction)
     }
+  } else if (currentStatus === constants.statuses.InterimExempt) {
+    if (!cdo.registration.cdo_issued && data.cdoIssued) {
+      await updateStatus(cdo.index_number, constants.statuses.PreExempt, transaction)
+    }
   }
 
   if (cdo.registration.exemption_order?.exemption_order === '2023') {
     if (!cdo.registration.withdrawn && data.withdrawn) {
       await updateStatus(cdo.index_number, constants.statuses.Withdrawn, transaction)
     }
+  }
+}
+
+const lookupCdo = async (data) => {
+  const cdo = await getCdo(data.indexNumber)
+
+  if (!cdo) {
+    throw new Error(`CDO not found: ${data.indexNumber}`)
+  }
+
+  return cdo
+}
+
+const lookupPoliceForce = async (data) => {
+  if (data.policeForce) {
+    const policeForce = await getPoliceForce(data.policeForce)
+
+    if (!policeForce) {
+      throw new Error(`Police force not found: ${data.policeForce}`)
+    }
+
+    return policeForce
+  }
+}
+
+const constructPreChangedRegistration = (reg, data) => {
+  const preChangedRegistration = deepClone(reg)
+  preChangedRegistration.index_number = data.indexNumber
+  return preChangedRegistration
+}
+
+const updateRegistration = (registration, data, policeForce) => {
+  registration.cdo_issued = data.cdoIssued
+  registration.cdo_expiry = data.cdoExpiry
+  registration.police_force_id = policeForce.id
+  registration.legislation_officer = data.legislationOfficer
+  registration.certificate_issued = data.certificateIssued ?? null
+  registration.application_fee_paid = data.applicationFeePaid ?? null
+  registration.neutering_confirmation = data.neuteringConfirmation ?? null
+  registration.microchip_verification = data.microchipVerification ?? null
+  registration.joined_exemption_scheme = data.joinedExemptionScheme ?? null
+  registration.removed_from_cdo_process = data.removedFromCdoProcess ?? null
+}
+
+const handleOrder2023 = (registration, data) => {
+  if (registration.exemption_order.exemption_order === '2023') {
+    registration.microchip_deadline = data.microchipDeadline ?? null
+    registration.typed_by_dlo = data.typedByDlo ?? null
+    registration.withdrawn = data.withdrawn ?? null
+  }
+}
+
+const handleOrder2015 = async (registration, data, cdo) => {
+  if (registration.exemption_order.exemption_order === '2015' && cdo?.status?.status !== constants.statuses.InterimExempt) {
+    const court = await getCourt(data.court)
+
+    if (!court) {
+      throw new Error(`Court not found: ${data.court}`)
+    }
+
+    registration.court_id = court.id
   }
 }
 

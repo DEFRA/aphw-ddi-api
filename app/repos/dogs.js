@@ -60,9 +60,7 @@ const createDogs = async (dogs, owners, enforcement, transaction) => {
         name: dog.name,
         dog_breed_id: breed.id,
         exported: false,
-        status_id: dog.source === 'ROBOT'
-          ? getStatusId(statuses, constants.statuses.Exempt)
-          : getStatusId(statuses, constants.statuses.PreExempt),
+        status_id: determineStartingStatus(dog, statuses),
         dog_reference: uuidv4(),
         sex: dog.sex,
         colour: dog.colour,
@@ -74,6 +72,10 @@ const createDogs = async (dogs, owners, enforcement, transaction) => {
           attributes: ['breed'],
           model: sequelize.models.dog_breed,
           as: 'dog_breed'
+        },
+        {
+          model: sequelize.models.status,
+          as: 'status'
         }],
         raw: true,
         nest: true,
@@ -92,6 +94,7 @@ const createDogs = async (dogs, owners, enforcement, transaction) => {
         dog_id: dogEntity.id,
         cdo_issued: dog.cdoIssued,
         cdo_expiry: dog.cdoExpiry,
+        joined_exemption_scheme: dog.interimExemption,
         police_force_id: enforcement.policeForce,
         court_id: enforcement.court,
         legislation_officer: enforcement.legislationOfficer,
@@ -147,6 +150,16 @@ const createDogs = async (dogs, owners, enforcement, transaction) => {
 
 const getStatusId = (statuses, statusName) => {
   return statuses.filter(x => x.status === statusName)[0].id
+}
+
+const determineStartingStatus = (dog, statuses) => {
+  const interim = dog.interimExemption
+    ? getStatusId(statuses, constants.statuses.InterimExempt)
+    : getStatusId(statuses, constants.statuses.PreExempt)
+
+  return (dog.source === 'ROBOT')
+    ? getStatusId(statuses, constants.statuses.Exempt)
+    : interim
 }
 
 const addImportedRegisteredPerson = async (personId, personTypeId, dogId, t) => {

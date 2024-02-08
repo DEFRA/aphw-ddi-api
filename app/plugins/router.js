@@ -16,7 +16,6 @@ const routes = [].concat(
   require('../routes/exemption'),
   require('../routes/insurance'),
   require('../routes/export'),
-  require('../routes/overnight'),
   require('../routes/activities')
 )
 
