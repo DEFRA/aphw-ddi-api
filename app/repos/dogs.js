@@ -153,11 +153,13 @@ const getStatusId = (statuses, statusName) => {
 }
 
 const determineStartingStatus = (dog, statuses) => {
+  const interim = dog.interimExemption
+    ? getStatusId(statuses, constants.statuses.InterimExempt)
+    : getStatusId(statuses, constants.statuses.PreExempt)
+
   return (dog.source === 'ROBOT')
     ? getStatusId(statuses, constants.statuses.Exempt)
-    : dog.interimExemption
-      ? getStatusId(statuses, constants.statuses.InterimExempt)
-      : getStatusId(statuses, constants.statuses.PreExempt)
+    : interim
 }
 
 const addImportedRegisteredPerson = async (personId, personTypeId, dogId, t) => {
