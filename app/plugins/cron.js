@@ -1,21 +1,18 @@
-const HapiCron = require('hapi-cron')
+const cron = require('node-cron')
 const config = require('../config/cron')
+const { runOvernightJobs } = require('../repos/regular-jobs')
+
+const setupCron = () => {
+  cron.schedule(config.overnightJobCrontab ?? '5 4 * * *', async () => {
+    const result = await runOvernightJobs()
+    console.log('overnight finished at ' + new Date())
+    console.log(`overnight result ${result}`)
+  }, {
+    scheduled: true,
+    timezone: 'Europe/London'
+  })
+}
 
 module.exports = {
-  plugin: HapiCron,
-  options: {
-    jobs: [{
-      name: 'testcron',
-      time: config.overnightJobCrontab ?? '5 4 * * *',
-      timezone: 'Europe/London',
-      request: {
-        method: 'GET',
-        url: '/overnight'
-      },
-      onComplete: (res) => {
-        console.log('overnight finished at ' + new Date())
-        console.log(`overnight result ${res?.result}`)
-      }
-    }]
-  }
+  setupCron
 }

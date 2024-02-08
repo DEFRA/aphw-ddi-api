@@ -4,9 +4,9 @@ const { getCdo } = require('../../repos/cdo')
 const exemption = Joi.object({
   indexNumber: Joi.string().required(),
   exemptionOrder: Joi.number().required(),
-  cdoIssued: Joi.date().iso().optional(),
-  cdoExpiry: Joi.date().iso().optional(),
-  court: Joi.string().optional(),
+  cdoIssued: Joi.date().optional().allow(null).iso(),
+  cdoExpiry: Joi.date().optional().allow(null).iso(),
+  court: Joi.string().optional().allow('').allow(null),
   policeForce: Joi.string().required(),
   legislationOfficer: Joi.string().allow(null).allow('').optional(),
   certificateIssued: Joi.date().iso().allow(null).optional(),
