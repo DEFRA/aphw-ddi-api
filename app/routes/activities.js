@@ -1,6 +1,6 @@
 // const { activities } = require('../data')
 
-module.exports = {
+module.exports = [{
   method: 'GET',
   path: '/activities/{activityType}',
   handler: async (request, h) => {
@@ -8,14 +8,14 @@ module.exports = {
 
     const activities = activityType === 'sent'
       ? [
-          { text: 'Change of address form', value: 'change-of-address-form' },
-          { text: 'Death of a dog form', value: 'death-of-dog' },
-          { text: 'Witness statement', value: 'witness-statement' }
+          { text: 'Change of address form', value: '1' },
+          { text: 'Death of a dog form', value: '2' },
+          { text: 'Witness statement', value: '3' }
         ]
       : [
-          { text: 'Police correspondence', value: 'police-correspondence' },
-          { text: 'Witness statement', value: 'witness-statement' },
-          { text: 'Judicial review', value: 'judicial-review' }
+          { text: 'Police correspondence', value: '21' },
+          { text: 'Witness statement', value: '22' },
+          { text: 'Judicial review', value: '23' }
         ]
 
     // const activities = await activity.findAll({
@@ -26,4 +26,29 @@ module.exports = {
       activities
     }).code(200)
   }
-}
+},
+{
+  method: 'GET',
+  path: '/activity/{activityId}',
+  handler: async (request, h) => {
+    const id = request.params.activityId
+
+    const activities = [
+      { text: 'Change of address form', value: '1' },
+      { text: 'Death of a dog form', value: '2' },
+      { text: 'Witness statement', value: '3' },
+      { text: 'Police correspondence', value: '21' },
+      { text: 'Witness statement', value: '22' },
+      { text: 'Judicial review', value: '23' }
+    ]
+
+    const activity = activities.filter(x => x.value === id)
+    // const activities = await activity.findAll({
+    //  attributes: ['county']
+    // })
+
+    return h.response({
+      activity
+    }).code(200)
+  }
+}]
