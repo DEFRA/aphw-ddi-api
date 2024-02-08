@@ -31,7 +31,7 @@ module.exports = [{
   method: 'GET',
   path: '/activity/{activityId}',
   handler: async (request, h) => {
-    const id = request.params.activityId
+    const activityId = request.params.activityId
 
     const activities = [
       { text: 'Change of address form', value: '1' },
@@ -42,7 +42,7 @@ module.exports = [{
       { text: 'Judicial review', value: '23' }
     ]
 
-    const activity = activities.filter(x => x.value === id)
+    const activity = activities.filter(x => x.value === activityId)[0]
     // const activities = await activity.findAll({
     //  attributes: ['county']
     // })
