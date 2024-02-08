@@ -1,5 +1,6 @@
 const Hapi = require('@hapi/hapi')
 const config = require('./config')
+const { setupCron } = require('./plugins/cron')
 
 async function createServer () {
   const server = Hapi.server({
@@ -17,7 +18,7 @@ async function createServer () {
   })
 
   await server.register(require('./plugins/router'))
-  await server.register(require('./plugins/cron'))
+  setupCron()
 
   return server
 }
