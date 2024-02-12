@@ -1,4 +1,20 @@
+/**
+ * @typedef {Object<string, any>} DocumentType
+ * @property {number} id
+ * @property {string} type
+ * @property {number} documents
+ */
+
+/**
+ *
+ * @param sequelize
+ * @param DataTypes
+ * @returns {DocumentType}
+ */
 module.exports = (sequelize, DataTypes) => {
+  /**
+   * @type {DocumentType}
+   */
   const documentType = sequelize.define('document_type', {
     id: {
       autoIncrement: true,

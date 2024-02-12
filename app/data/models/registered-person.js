@@ -1,4 +1,23 @@
+/**
+ * @typedef {Object<string, any>} RegisteredPerson
+ * @property {number} id
+ * @property {number} person_id
+ * @property {number} dog_id
+ * @property {number} person_type_id
+ * @property {Dog} dog
+ * @property {Person} person
+ * @property {PersonType} person_type
+ */
+/**
+ *
+ * @param sequelize
+ * @param DataTypes
+ * @returns {RegisteredPerson}
+ */
 module.exports = (sequelize, DataTypes) => {
+  /**
+   * @type {RegisteredPerson}
+   */
   const registeredPerson = sequelize.define('registered_person', {
     id: {
       autoIncrement: true,

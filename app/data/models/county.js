@@ -1,4 +1,19 @@
+/**
+ * @typedef {Object<string, any>} County
+ * @property {number} id
+ * @property {string} county
+ */
+
+/**
+ *
+ * @param sequelize
+ * @param DataTypes
+ * @returns {County}
+ */
 module.exports = (sequelize, DataTypes) => {
+  /**
+   * @type {County}
+   */
   const county = sequelize.define('county', {
     id: {
       autoIncrement: true,

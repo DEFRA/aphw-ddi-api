@@ -1,4 +1,21 @@
+/**
+ * @typedef {Object<string, any>} DogMicrochip
+ * @property {number} id
+ * @property {number} dog_id
+ * @property {number} microchip_id
+ * @property {Microchip} microchip
+ * @property {Dog} dog
+ */
+/**
+ *
+ * @param sequelize
+ * @param DataTypes
+ * @returns {DogMicrochip}
+ */
 module.exports = (sequelize, DataTypes) => {
+  /**
+   * @type {DogMicrochip}
+   */
   const dogMicrochip = sequelize.define('dog_microchip', {
     id: {
       autoIncrement: true,

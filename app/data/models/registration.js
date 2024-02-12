@@ -1,4 +1,45 @@
+/**
+ * @typedef {Object<string, any>} Registration
+ * @property {number} id
+ * @property {number} dog_id
+ * @property {number} status_id
+ * @property {number} police_force_id
+ * @property {number} court_id
+ * @property {number} exemption_order_id
+ * @property {Date} created_on
+ * @property {Date} cdo_issued
+ * @property {Date} cdo_expiry
+ * @property {Date} time_limit
+ * @property {Date} certificate_issued
+ * @property {number} legislation_officer
+ * @property {Date} application_fee_paid
+ * @property {Date} neutering_confirmation
+ * @property {Date} microchip_verification
+ * @property {Date} joined_exemption_scheme
+ * @property {Date} withdrawn
+ * @property {Date} typed_by_dlo
+ * @property {Date} microchip_deadline
+ * @property {Date} neutering_deadline
+ * @property {Date} removed_from_cdo_process
+ * @property {Comment[]} comments
+ * @property {Document[]} documents
+ * @property {Notification[]} notifications
+ * @property {Dog} dog
+ * @property {PoliceForce} police_force
+ * @property {Court} court
+ * @property {ExemptionOrder} exemption_order
+ * @property {Status} status
+ */
+/**
+ *
+ * @param sequelize
+ * @param DataTypes
+ * @returns {Registration}
+ */
 module.exports = (sequelize, DataTypes) => {
+  /**
+   * @type {Registration}
+   */
   const registration = sequelize.define('registration', {
     id: {
       autoIncrement: true,

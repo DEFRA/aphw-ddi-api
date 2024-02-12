@@ -1,4 +1,20 @@
+/**
+ * @typedef {Object<string, any>} Country
+ * @property{number} id
+ * @property{string} country
+ * @property{Address[]} addresses
+ */
+
+/**
+ *
+ * @param sequelize
+ * @param DataTypes
+ * @returns {Country}
+ */
 module.exports = (sequelize, DataTypes) => {
+  /**
+   * @type {Country}
+   */
   const country = sequelize.define('country', {
     id: {
       autoIncrement: true,

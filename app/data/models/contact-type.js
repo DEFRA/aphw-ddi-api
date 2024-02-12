@@ -1,4 +1,21 @@
+/**
+ * @typedef {Object<string, any>} ContactType
+ * @property {number} id
+ * @property {string} contact_type
+ * @property {Contact[]} contacts
+ */
+
+/**
+ *
+ * @param sequelize
+ * @param DataTypes
+ * @returns {ContactType}
+ */
 module.exports = (sequelize, DataTypes) => {
+  /**
+   *
+   * @type {ContactType}
+   */
   const contactType = sequelize.define('contact_type', {
     id: {
       autoIncrement: true,

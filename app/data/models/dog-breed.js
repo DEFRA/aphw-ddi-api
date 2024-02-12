@@ -1,4 +1,17 @@
+/**
+ * @typedef {Object<string, any>} DogBreed
+ */
+
+/**
+ *
+ * @param sequelize
+ * @param DataTypes
+ * @returns {DogBreed}
+ */
 module.exports = (sequelize, DataTypes) => {
+  /**
+   * @type {DogBreed}
+   */
   const dogBreed = sequelize.define('dog_breed', {
     id: {
       autoIncrement: true,

@@ -1,4 +1,27 @@
+/**
+ * @typedef {Object<string, any>} Address
+ * @property {number} id
+ * @property {string} address_line_1
+ * @property {string} address_line_2
+ * @property {string} town
+ * @property {string} postcode
+ * @property {string} county
+ * @property {number} country_id
+ * @property {PersonAddress[]} person_addresses
+ * @property {Country} country
+ */
+
+/**
+ *
+ * @param sequelize
+ * @param DataTypes
+ * @returns {Address}
+ */
 module.exports = (sequelize, DataTypes) => {
+  /**
+   *
+   * @type {Address} address
+   */
   const address = sequelize.define('address', {
     id: {
       autoIncrement: true,

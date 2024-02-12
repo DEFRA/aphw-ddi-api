@@ -1,4 +1,21 @@
-module.exports = (sequelize, DataTypes) => {
+/**
+ * @typedef {Object<string, any>} PersonContact
+ * @property {number} id
+ * @property {number} person_id
+ * @property {number} contact_id
+ * @property {Contact} contact
+ * @property {Person} person
+ */
+/**
+ *
+ * @param sequelize
+ * @param DataTypes
+ * @returns {PersonContact}
+ */
+ module.exports = (sequelize, DataTypes) => {
+   /**
+    * @type {PersonContact}
+    */
   const personContact = sequelize.define('person_contact', {
     id: {
       autoIncrement: true,

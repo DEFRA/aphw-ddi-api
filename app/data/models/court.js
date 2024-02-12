@@ -1,4 +1,18 @@
+/**
+ * @typedef {Object<string, any>} Court
+ * @preserve {number} id
+ * @preserve {string} name
+ */
+/**
+ *
+ * @param sequelize
+ * @param DataTypes
+ * @returns {Court}
+ */
 module.exports = (sequelize, DataTypes) => {
+  /**
+   * @type {Court}
+   */
   const court = sequelize.define('court', {
     id: {
       autoIncrement: true,

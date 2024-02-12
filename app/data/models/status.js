@@ -1,4 +1,20 @@
+/**
+ * @typedef {Object<string, any>} Status
+ * @property {number} id
+ * @property {string} status
+ * @property {string} status_type
+ * @property {Dog[]} dogs
+ */
+/**
+ *
+ * @param sequelize
+ * @param DataTypes
+ * @returns {Status}
+ */
 module.exports = (sequelize, DataTypes) => {
+  /**
+   * @type {Status}
+   */
   const status = sequelize.define('status', {
     id: {
       autoIncrement: true,

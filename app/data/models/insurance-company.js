@@ -1,4 +1,20 @@
+/**
+ * @typedef {Object<string, any>} InsuranceCompany
+ * @property {number} id
+ * @property {string} company_name
+ * @property {Insurance[]} insurances
+ */
+
+/**
+ *
+ * @param sequelize
+ * @param DataTypes
+ * @returns {InsuranceCompany}
+ */
 module.exports = (sequelize, DataTypes) => {
+  /**
+   * @type {InsuranceCompany}
+   */
   const insuranceCompany = sequelize.define('insurance_company', {
     id: {
       autoIncrement: true,

@@ -1,4 +1,19 @@
+/**
+ * @typedef {Object<string, any>} PoliceForce
+ * @property {number} id
+ * @property {string} name
+ * @property {Registration[]} registrations
+ */
+/**
+ *
+ * @param sequelize
+ * @param DataTypes
+ * @returns {PoliceForce}
+ */
 module.exports = (sequelize, DataTypes) => {
+  /**
+   * @type {PoliceForce}
+   */
   const policeForce = sequelize.define('police_force', {
     id: {
       autoIncrement: true,

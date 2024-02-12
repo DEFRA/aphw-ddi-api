@@ -1,4 +1,21 @@
+/**
+ * @typedef {Object<string, any>} Notification
+ * @property {number} id
+ * @property {number} registration_id
+ * @property {number} notification_type_id
+ * @property {Date} date
+ * @property {NotificationType} notification_type
+ */
+/**
+ *
+ * @param sequelize
+ * @param DataTypes
+ * @returns {Notification}
+ */
 module.exports = (sequelize, DataTypes) => {
+  /**
+   * @type {Notification}
+   */
   const notification = sequelize.define('notification', {
     id: {
       autoIncrement: true,

@@ -1,4 +1,23 @@
+/**
+ * @typedef {Object<string, any>} Comment
+ * @property {number} id
+ * @property {number} registration_id
+ * @property {string} comment
+ * @property {Date} created_on
+ * @property {Registration} registration
+ */
+
+/**
+ *
+ * @param sequelize
+ * @param DataTypes
+ * @returns {Comment}
+ */
 module.exports = (sequelize, DataTypes) => {
+  /**
+   *
+   * @type {Comment}
+   */
   const comment = sequelize.define('comment', {
     id: {
       autoIncrement: true,

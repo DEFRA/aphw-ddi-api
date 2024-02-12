@@ -1,4 +1,37 @@
+/**
+ * @typedef {Object<string, any>} Dog
+ * @property {number} id
+ * @property {string} dog_reference
+ * @property {string} index_number
+ * @property {number} dog_breed_id
+ * @property {number} status_id
+ * @property {string} name
+ * @property {Date} birth_date
+ * @property {Date} death_date
+ * @property {string} tattoo
+ * @property {string} colour
+ * @property {string} sex
+ * @property {Date} exported_date
+ * @property {Date} stolen_date
+ * @property {Date} untraceable_date
+ * @property {RegisteredPerson} registered_person
+ * @property {Registration} registration
+ * @property {Insurance[]} insurance
+ * @property {DogMicrochip[]} dog_microchips
+ * @property {DogBreed} dog_breed
+ * @property {Status} status
+ */
+
+/**
+ *
+ * @param sequelize
+ * @param DataTypes
+ * @returns {Dog}
+ */
 module.exports = (sequelize, DataTypes) => {
+  /**
+   * @type {Dog}
+   */
   const dog = sequelize.define('dog', {
     id: {
       autoIncrement: true,

@@ -4,6 +4,7 @@ const sequelize = require('../config/db')
 const { DataTypes } = require('sequelize')
 const modelPath = path.join(__dirname, 'models')
 
+
 const initModels = () => {
   fs.readdirSync(modelPath)
     .filter(file => (file.indexOf('.') !== 0) && (file !== 'index.js') && (file.slice(-3) === '.js'))

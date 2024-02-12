@@ -1,4 +1,22 @@
+/**
+ * @typedef {Object<string, any>} Backlog
+ * @property {number} id
+ * @property {JSON} json
+ * @property {string} errors
+ * @property {string} status
+ * @property {string} warnings
+ */
+
+/**
+ * @param sequelize
+ * @param DataTypes
+ * @returns {Backlog}
+ */
 module.exports = (sequelize, DataTypes) => {
+  /**
+   *
+   * @type {Backlog}
+   */
   const backlog = sequelize.define('backlog', {
     id: {
       autoIncrement: true,

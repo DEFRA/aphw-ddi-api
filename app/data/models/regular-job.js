@@ -1,4 +1,21 @@
+/**
+ * @typedef {Object<string, any>} RegularJob
+ * @property {number} id
+ * @property {Date} run_date
+ * @property {Date} start_time
+ * @property {Date} end_time
+ * @property {string} result
+ */
+/**
+ *
+ * @param sequelize
+ * @param DataTypes
+ * @returns {RegularJob}
+ */
 module.exports = (sequelize, DataTypes) => {
+  /**
+   * @type {RegularJob}
+   */
   const regularJob = sequelize.define('regular_job', {
     id: {
       autoIncrement: true,

@@ -1,4 +1,20 @@
+/**
+ * @typedef {Object<string, any>} ExemptionOrder
+ * @property {number} id
+ * @property {string} exemption_order
+ * @property {boolean} active
+ * @property {Registration[]} registrations
+ */
+/**
+ *
+ * @param sequelize
+ * @param DataTypes
+ * @returns {ExemptionOrder}
+ */
 module.exports = (sequelize, DataTypes) => {
+  /**
+   * @type {ExemptionOrder}
+   */
   const exemptionOrder = sequelize.define('exemption_order', {
     id: {
       autoIncrement: true,
