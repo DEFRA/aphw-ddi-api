@@ -83,7 +83,7 @@ describe('CDO repo', () => {
     addToSearchIndex.mockResolvedValue()
     getDogByIndexNumber.mockResolvedValue({ id: 1, index_number: 'ED1' })
 
-    await expect(createCdo(mockCdoPayload, '', {})).rejects.toThrow('Username is required for auditing')
+    await expect(createCdo(mockCdoPayload, '', {})).rejects.toThrow('Username and displayname are required for auditing')
   })
 
   test('getCdo should return CDO', async () => {

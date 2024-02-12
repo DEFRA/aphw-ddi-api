@@ -4,11 +4,12 @@ const { SOURCE } = require('../constants/event/source')
 const { getDiff } = require('json-difference')
 const { sendEvent } = require('./send-event')
 const { deepClone } = require('../lib/deep-clone')
+const { isUserValid } = require('../auth/get-user')
 const { CDO, DOG, PERSON, EXEMPTION } = require('../constants/event/audit-event-object-types')
 
 const sendEventToAudit = async (eventType, eventSubject, eventDescription, user) => {
-  if (!user || user === '') {
-    throw new Error(`Username is required for auditing event of ${eventType}`)
+  if (!isUserValid(user)) {
+    throw new Error(`Username and displayname are required for auditing event of ${eventType}`)
   }
 
   const event = {
@@ -29,8 +30,8 @@ const sendEventToAudit = async (eventType, eventSubject, eventDescription, user)
 }
 
 const sendCreateToAudit = async (auditObjectName, entity, user) => {
-  if (!user || user === '') {
-    throw new Error(`Username is required for auditing creation of ${auditObjectName}`)
+  if (!isUserValid(user)) {
+    throw new Error(`Username and displayname are required for auditing creation of ${auditObjectName}`)
   }
 
   const messagePayload = constructCreatePayload(auditObjectName, entity, user)
@@ -51,7 +52,7 @@ const sendCreateToAudit = async (auditObjectName, entity, user) => {
 
 const constructCreatePayload = (auditObjectName, entity, user) => {
   return JSON.stringify({
-    username: user,
+    actioningUser: { user },
     operation: `created ${auditObjectName}`,
     created: entity
   })
@@ -59,7 +60,7 @@ const constructCreatePayload = (auditObjectName, entity, user) => {
 
 const sendUpdateToAudit = async (auditObjectName, entityPre, entityPost, user) => {
   if (!user || user === '') {
-    throw new Error(`Username is required for auditing update of ${auditObjectName}`)
+    throw new Error(`Username and displayname are required for auditing update of ${auditObjectName}`)
   }
 
   const messagePayload = constructUpdatePayload(auditObjectName, entityPre, entityPost, user)
