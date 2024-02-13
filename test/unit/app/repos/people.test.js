@@ -595,6 +595,6 @@ describe('People repo', () => {
       }
     }])
 
-    await expect(updatePerson(person, null, {})).rejects.toThrow('Username is required for auditing update of person')
+    await expect(updatePerson(person, null, {})).rejects.toThrow('Username and displayname are required for auditing update of person')
   })
 })

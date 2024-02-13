@@ -248,7 +248,7 @@ describe('Exemption repo', () => {
     getCourt.mockResolvedValue({ id: 1, name: 'Test Court' })
     getPoliceForce.mockResolvedValue({ id: 1, name: 'Test Police Force' })
 
-    await expect(updateExemption(data, '', {})).rejects.toThrow('Username is required for auditing')
+    await expect(updateExemption(data, '', {})).rejects.toThrow('Username and displayname are required for auditing')
   })
 
   test('autoChangeStatus should handle no status change when doesnt satisfy any rules', async () => {
