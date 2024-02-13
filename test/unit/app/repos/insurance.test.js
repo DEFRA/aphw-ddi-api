@@ -15,7 +15,7 @@ describe('Insurance repo', () => {
   jest.mock('../../../../app/lookups')
   const { getInsuranceCompany } = require('../../../../app/lookups')
 
-  const { createInsurance, updateInsurance } = require('../../../../app/repos/insurance')
+  const { createInsurance, updateInsurance, createOrUpdateInsurance } = require('../../../../app/repos/insurance')
 
   beforeEach(async () => {
     jest.clearAllMocks()
@@ -146,5 +146,65 @@ describe('Insurance repo', () => {
     sequelize.models.insurance.update.mockRejectedValue(new Error('test'))
 
     await expect(updateInsurance(sequelize.models.insurance, data, {})).rejects.toThrow('test')
+  })
+
+  test('createOrUpdateInsurance should create if not exists', async () => {
+    const mockCreate = sequelize.models.insurance.create
+    mockCreate.mockResolvedValue()
+    const mockUpdate = jest.fn()
+
+    const data = {
+      insurance: {
+        company: 'test',
+        renewalDate: '2020-01-01'
+      }
+    }
+
+    const cdo = {
+      id: 123,
+      insurance: []
+    }
+
+    getInsuranceCompany.mockResolvedValue({ id: 1 })
+
+    await createOrUpdateInsurance(data, cdo, {})
+
+    expect(mockCreate).toHaveBeenCalledWith({
+      company_id: 1,
+      renewal_date: '2020-01-01',
+      dog_id: 123
+    }, { transaction: expect.any(Object) })
+    expect(mockUpdate).toHaveBeenCalledTimes(0)
+  })
+
+  test('createOrUpdateInsurance should update if exists', async () => {
+    const mockCreate = sequelize.models.insurance.create
+    mockCreate.mockResolvedValue()
+    const mockUpdate = jest.fn()
+
+    const data = {
+      insurance: {
+        company: 'test',
+        renewalDate: '2020-01-01'
+      }
+    }
+
+    const cdo = {
+      id: 123,
+      insurance: [
+        { id: 1, name: 'ins 1', update: mockUpdate },
+        { id: 2, name: 'ins 2', update: mockUpdate }
+      ]
+    }
+
+    getInsuranceCompany.mockResolvedValue({ id: 1 })
+
+    await createOrUpdateInsurance(data, cdo, {})
+
+    expect(mockCreate).toHaveBeenCalledTimes(0)
+    expect(mockUpdate).toHaveBeenCalledWith({
+      company_id: 1,
+      renewal_date: '2020-01-01'
+    }, { transaction: expect.any(Object) })
   })
 })

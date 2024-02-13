@@ -20,14 +20,16 @@ const payload = {
       name: 'Buster',
       cdoIssued: '2023-10-10',
       cdoExpiry: '2023-12-10',
-      status: 'Status 1'
+      status: 'Status 1',
+      applicationType: 'cdo'
     },
     {
       breed: 'XL Bully',
       name: 'Alice',
       cdoIssued: '2023-10-10',
       cdoExpiry: '2023-12-10',
-      status: 'Status 1'
+      status: 'Status 1',
+      applicationType: 'cdo'
     }
   ]
 }

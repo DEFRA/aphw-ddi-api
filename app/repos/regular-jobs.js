@@ -2,7 +2,7 @@ const sequelize = require('../config/db')
 const { Op } = require('sequelize')
 const { autoUpdateStatuses } = require('../overnight/auto-update-statuses')
 
-const updateOvernightStatuses = async () => {
+const runOvernightJobs = async () => {
   const jobId = await tryStartJob()
 
   if (jobId) {
@@ -78,7 +78,7 @@ const endJob = async (jobId, resultText, trans) => {
 }
 
 module.exports = {
-  updateOvernightStatuses,
+  runOvernightJobs,
   tryStartJob,
   endJob
 }
