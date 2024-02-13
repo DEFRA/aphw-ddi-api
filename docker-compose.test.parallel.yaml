@@ -1,0 +1,24 @@
+# This override file should be used when running automated tests so
+# that test output is saved to the host
+
+services:
+  aphw-ddi-api:
+    build:
+      target: development
+    image: aphw-ddi-api-development
+    container_name: aphw-ddi-api-test
+    command: npm run test:parallel
+    volumes:
+      - ./app:/home/node/app
+      - ./test:/home/node/test
+      - ./test-output:/home/node/test-output
+      - ./jest.config.js:/home/node/jest.config.js
+      - ./package.json:/home/node/package.json
+    depends_on:
+        - aphw-ddi-api-azurite
+    environment:
+      AZURE_STORAGE_CONNECTION_STRING: "DefaultEndpointsProtocol=http;AccountName=devstoreaccount1;AccountKey=Eby8vdM02xNOcqFlqUwJPLlmEtlCDXJ1OUzFT50uSRZ6IFsuFq2UVErCz4I6tq/K1SZFPTOtr/KBHBeksoGMGw==;BlobEndpoint=http://aphw-ddi-api-azurite:10000/devstoreaccount1"
+      ROBOT_IMPORT_POLICE_API_URL: http://host.docker.internal:3000/force
+
+  aphw-ddi-api-azurite:
+    image: mcr.microsoft.com/azure-storage/azurite:3.23.0
