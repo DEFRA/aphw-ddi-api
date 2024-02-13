@@ -7,6 +7,9 @@ describe('Activity endpoint', () => {
   jest.mock('../../../../app/repos/activity')
   const { getActivityList, getActivityById } = require('../../../../app/repos/activity')
 
+  jest.mock('../../../../app/messaging/send-audit')
+  const { sendActivityToAudit } = require('../../../../app/messaging/send-audit')
+
   beforeEach(async () => {
     jest.clearAllMocks()
     server = await createServer()
@@ -63,13 +66,12 @@ describe('Activity endpoint', () => {
     expect(response.statusCode).toBe(500)
   })
 
-  /*
   test('POST /activity route returns 400 with invalid payload', async () => {
-    addImportedDog.mockResolvedValue()
+    sendActivityToAudit.mockResolvedValue()
 
     const options = {
       method: 'POST',
-      url: '/dog',
+      url: '/activity',
       payload: {}
     }
 
@@ -78,13 +80,20 @@ describe('Activity endpoint', () => {
     expect(response.statusCode).toBe(400)
   })
 
-  test('POST /dog route returns 200 with valid payload', async () => {
-    addImportedDog.mockResolvedValue()
+  test('POST /activity route returns 200 with valid payload', async () => {
+    sendActivityToAudit.mockResolvedValue()
+    getActivityById.mockResolvedValue({ id: 1, name: 'act 1', label: 'activity 1' })
 
     const options = {
       method: 'POST',
-      url: '/dog',
-      payload: { dog: { name: 'Bruno' } }
+      url: '/activity',
+      payload: {
+        activity: '3',
+        activityType: 'sent',
+        pk: 'ED300000',
+        source: 'dog',
+        activityDate: new Date()
+      }
     }
 
     const response = await server.inject(options)
@@ -92,12 +101,12 @@ describe('Activity endpoint', () => {
     expect(response.statusCode).toBe(200)
   })
 
-  test('PUT /dog route returns 400 with invalid payload', async () => {
-    updateDog.mockResolvedValue()
+  test('POST /activity route returns 400 with invalid payload', async () => {
+    sendActivityToAudit.mockResolvedValue()
 
     const options = {
-      method: 'PUT',
-      url: '/dog',
+      method: 'POST',
+      url: '/activity',
       payload: {}
     }
 
@@ -106,34 +115,6 @@ describe('Activity endpoint', () => {
     expect(response.statusCode).toBe(400)
   })
 
-  test('PUT /dog route returns 500 with db error', async () => {
-    updateDog.mockImplementation(() => { throw new Error('dog error') })
-
-    const options = {
-      method: 'PUT',
-      url: '/dog',
-      payload: { indexNumber: 'ABC123' }
-    }
-
-    const response = await server.inject(options)
-
-    expect(response.statusCode).toBe(500)
-  })
-
-  test('PUT /dog route returns 200 with valid payload', async () => {
-    updateDog.mockResolvedValue()
-
-    const options = {
-      method: 'PUT',
-      url: '/dog',
-      payload: { indexNumber: 'ABC123' }
-    }
-
-    const response = await server.inject(options)
-
-    expect(response.statusCode).toBe(200)
-  })
-  */
   afterEach(async () => {
     await server.stop()
   })

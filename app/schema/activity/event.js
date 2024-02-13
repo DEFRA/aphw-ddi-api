@@ -5,11 +5,7 @@ const schema = Joi.object({
   activityType: Joi.string().required(),
   pk: Joi.string().required(),
   source: Joi.string().required(),
-  activityDate: Joi.date().iso().required(),
-  'activityDate-day': Joi.any().allow('').allow(null).optional(),
-  'activityDate-month': Joi.any().allow('').allow(null).optional(),
-  'activityDate-year': Joi.any().allow('').allow(null).optional(),
-  srcHashParam: Joi.string().allow('').allow(null).optional()
+  activityDate: Joi.date().iso().required()
 }).required()
 
 module.exports = schema
