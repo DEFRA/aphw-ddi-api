@@ -1,5 +1,6 @@
 const { getActivityList, getActivityById } = require('..//repos/activity')
 const { getCallingUser } = require('../auth/get-user')
+const schema = require('../schema/activity/event')
 
 module.exports = [{
   method: 'GET',
@@ -31,15 +32,25 @@ module.exports = [{
 {
   method: 'POST',
   path: '/activity',
-  handler: async (request, h) => {
-    const payload = {
-      ...request.payload,
-      activityLabel: (await getActivityById(request.payload.activity)).label,
-      user: getCallingUser(request)
+  options: {
+    validate: {
+      payload: schema,
+      failAction: (request, h, err) => {
+        console.error(err)
+
+        return h.response({ errors: err.details.map(e => e.message) }).code(400).takeover()
+      }
+    },
+    handler: async (request, h) => {
+      const payload = {
+        ...request.payload,
+        activityLabel: (await getActivityById(request.payload.activity)).label,
+        user: getCallingUser(request)
+      }
+
+      console.log('payload ok', payload)
+
+      return h.response({ result: 'ok' }).code(200)
     }
-
-    console.log('payload', payload)
-
-    return h.response({ result: 'ok' }).code(200)
   }
 }]

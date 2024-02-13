@@ -20,7 +20,7 @@ const sendEventToAudit = async (eventType, eventSubject, eventDescription, user)
     subject: eventSubject,
     data: {
       message: JSON.stringify({
-        username: user,
+        actioningUser: { user },
         operation: eventDescription
       })
     }
