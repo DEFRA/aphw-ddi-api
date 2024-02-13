@@ -1,5 +1,10 @@
 const mockCdoPayload = require('../../../mocks/cdo/create')
 
+const devUser = {
+  username: 'dev-user@test.com',
+  displayname: 'Dev User'
+}
+
 describe('CDO repo', () => {
   jest.mock('../../../../app/config/db', () => ({
     transaction: jest.fn(),
@@ -34,7 +39,7 @@ describe('CDO repo', () => {
   })
 
   test('createCdo should create start new transaction if none passed', async () => {
-    await createCdo(mockCdoPayload, 'dummy-username')
+    await createCdo(mockCdoPayload, devUser)
 
     expect(sequelize.transaction).toHaveBeenCalledTimes(1)
   })
@@ -48,7 +53,7 @@ describe('CDO repo', () => {
     addToSearchIndex.mockResolvedValue()
     getDogByIndexNumber.mockResolvedValue({ id: 1, index_number: 'ED1' })
 
-    await createCdo(mockCdoPayload, 'dummy-username', {})
+    await createCdo(mockCdoPayload, devUser, {})
 
     expect(sequelize.transaction).not.toHaveBeenCalled()
   })
@@ -62,7 +67,7 @@ describe('CDO repo', () => {
     addToSearchIndex.mockResolvedValue()
     getDogByIndexNumber.mockResolvedValue({ id: 1, index_number: 'ED1' })
 
-    const cdo = await createCdo(mockCdoPayload, 'dummy-username', {})
+    const cdo = await createCdo(mockCdoPayload, devUser, {})
 
     expect(cdo.owner).toEqual(owners[0])
     expect(cdo.dogs).toEqual(dogs)
@@ -71,7 +76,7 @@ describe('CDO repo', () => {
   test('createCdo should throw if error', async () => {
     createPeople.mockRejectedValue(new Error('Test error'))
 
-    await expect(createCdo(mockCdoPayload, 'dummy-username', {})).rejects.toThrow('Test error')
+    await expect(createCdo(mockCdoPayload, devUser, {})).rejects.toThrow('Test error')
   })
 
   test('createCdo should throw error if no username for auditing', async () => {
@@ -83,7 +88,7 @@ describe('CDO repo', () => {
     addToSearchIndex.mockResolvedValue()
     getDogByIndexNumber.mockResolvedValue({ id: 1, index_number: 'ED1' })
 
-    await expect(createCdo(mockCdoPayload, '', {})).rejects.toThrow('Username is required for auditing')
+    await expect(createCdo(mockCdoPayload, '', {})).rejects.toThrow('Username and displayname are required for auditing')
   })
 
   test('getCdo should return CDO', async () => {

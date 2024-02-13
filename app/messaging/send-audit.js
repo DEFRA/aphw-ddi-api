@@ -1,14 +1,15 @@
 const { v4: uuidv4 } = require('uuid')
-const { CREATE, UPDATE } = require('../constants/event/events')
+const { CREATE, UPDATE, ACTIVITY } = require('../constants/event/events')
 const { SOURCE } = require('../constants/event/source')
 const { getDiff } = require('json-difference')
 const { sendEvent } = require('./send-event')
 const { deepClone } = require('../lib/deep-clone')
+const { isUserValid } = require('../auth/get-user')
 const { CDO, DOG, PERSON, EXEMPTION } = require('../constants/event/audit-event-object-types')
 
-const sendEventToAudit = async (eventType, eventSubject, eventDescription, user) => {
-  if (!user || user === '') {
-    throw new Error(`Username is required for auditing event of ${eventType}`)
+const sendEventToAudit = async (eventType, eventSubject, eventDescription, actioningUser) => {
+  if (!isUserValid(actioningUser)) {
+    throw new Error(`Username and displayname are required for auditing event of ${eventType}`)
   }
 
   const event = {
@@ -19,7 +20,7 @@ const sendEventToAudit = async (eventType, eventSubject, eventDescription, user)
     subject: eventSubject,
     data: {
       message: JSON.stringify({
-        username: user,
+        actioningUser,
         operation: eventDescription
       })
     }
@@ -29,8 +30,8 @@ const sendEventToAudit = async (eventType, eventSubject, eventDescription, user)
 }
 
 const sendCreateToAudit = async (auditObjectName, entity, user) => {
-  if (!user || user === '') {
-    throw new Error(`Username is required for auditing creation of ${auditObjectName}`)
+  if (!isUserValid(user)) {
+    throw new Error(`Username and displayname are required for auditing creation of ${auditObjectName}`)
   }
 
   const messagePayload = constructCreatePayload(auditObjectName, entity, user)
@@ -49,9 +50,31 @@ const sendCreateToAudit = async (auditObjectName, entity, user) => {
   await sendEvent(event)
 }
 
-const constructCreatePayload = (auditObjectName, entity, user) => {
+const sendActivityToAudit = async (activity, actioningUser) => {
+  if (!isUserValid(actioningUser)) {
+    throw new Error(`Username and displayname are required for auditing activity of ${activity.activityLabel} on ${activity.pk}`)
+  }
+
+  const event = {
+    type: ACTIVITY,
+    source: SOURCE,
+    id: uuidv4(),
+    partitionKey: activity.pk,
+    subject: `DDI Activity ${activity.activityLabel}`,
+    data: {
+      message: JSON.stringify({
+        actioningUser,
+        activity
+      })
+    }
+  }
+
+  await sendEvent(event)
+}
+
+const constructCreatePayload = (auditObjectName, entity, actioningUser) => {
   return JSON.stringify({
-    username: user,
+    actioningUser,
     operation: `created ${auditObjectName}`,
     created: entity
   })
@@ -59,7 +82,7 @@ const constructCreatePayload = (auditObjectName, entity, user) => {
 
 const sendUpdateToAudit = async (auditObjectName, entityPre, entityPost, user) => {
   if (!user || user === '') {
-    throw new Error(`Username is required for auditing update of ${auditObjectName}`)
+    throw new Error(`Username and displayname are required for auditing update of ${auditObjectName}`)
   }
 
   const messagePayload = constructUpdatePayload(auditObjectName, entityPre, entityPost, user)
@@ -98,9 +121,9 @@ const determineUpdatePk = (objName, entity) => {
   throw new Error(`Invalid object for update audit: ${objName}`)
 }
 
-const constructUpdatePayload = (auditObjectName, entityPre, entityPost, user) => {
+const constructUpdatePayload = (auditObjectName, entityPre, entityPost, actioningUser) => {
   return JSON.stringify({
-    username: user,
+    actioningUser,
     operation: `updated ${auditObjectName}`,
     changes: getDiff(deepClone(entityPre), deepClone(entityPost))
   })
@@ -109,5 +132,6 @@ const constructUpdatePayload = (auditObjectName, entityPre, entityPost, user) =>
 module.exports = {
   sendCreateToAudit,
   sendUpdateToAudit,
-  sendEventToAudit
+  sendEventToAudit,
+  sendActivityToAudit
 }

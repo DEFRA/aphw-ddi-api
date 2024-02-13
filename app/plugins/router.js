@@ -15,7 +15,8 @@ const routes = [].concat(
   require('../routes/cdo'),
   require('../routes/exemption'),
   require('../routes/insurance'),
-  require('../routes/export')
+  require('../routes/export'),
+  require('../routes/activities')
 )
 
 module.exports = {
