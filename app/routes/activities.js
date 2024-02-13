@@ -1,4 +1,4 @@
-const { getActivityList, getActivityById } = require('..//repos/activity')
+const { getActivityList, getActivityById } = require('../repos/activity')
 const { getCallingUser } = require('../auth/get-user')
 const { sendActivityToAudit } = require('../messaging/send-audit')
 const schema = require('../schema/activity/event')
@@ -48,7 +48,6 @@ module.exports = [{
         activityLabel: (await getActivityById(request.payload.activity)).label
       }
 
-      console.log('payload', payload)
       await sendActivityToAudit(payload, getCallingUser(request))
 
       return h.response({ result: 'ok' }).code(200)
