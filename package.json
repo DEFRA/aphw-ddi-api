@@ -7,6 +7,7 @@
   "scripts": {
     "pretest": "npm run test:lint",
     "test": "jest --runInBand --forceExit --silent=\"false\"",
+    "test:parallel": "jest --forceExit --silent=\"false\"",
     "test:watch": "jest --coverage=false --onlyChanged --watch --runInBand",
     "test:lint": "standard",
     "test:debug": "node --inspect-brk=0.0.0.0 ./node_modules/jest/bin/jest.js --coverage=false --onlyChanged --watch --runInBand --no-cache",
