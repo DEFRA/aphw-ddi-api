@@ -25,7 +25,7 @@ module.exports = (sequelize, DataTypes) => {
         ]
       },
       {
-        name: 'activity_type_ukey',
+        name: 'activity_source_ukey',
         unique: true,
         fields: [
           { name: 'name' }
