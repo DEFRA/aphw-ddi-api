@@ -386,7 +386,7 @@ describe('Dog repo', () => {
       breed: 'Breed 1'
     }
 
-    await updateDog(payload)
+    await updateDog(payload, devUser)
 
     expect(sequelize.transaction).toHaveBeenCalledTimes(1)
   })
@@ -403,7 +403,7 @@ describe('Dog repo', () => {
       breed: 'Breed 1'
     }
 
-    await updateDog(payload, 'dummy-username', {})
+    await updateDog(payload, devUser, {})
 
     expect(sequelize.transaction).toHaveBeenCalledTimes(0)
   })

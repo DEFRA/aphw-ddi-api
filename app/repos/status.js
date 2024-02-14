@@ -3,7 +3,7 @@ const { updateSearchIndexDog } = require('./search')
 const { sendUpdateToAudit } = require('../messaging/send-audit')
 const { DOG } = require('../constants/event/audit-event-object-types')
 
-const updateStatusOnly = async (dog, newStatus, transaction) => {
+const updateStatusOnly = async (dog, newStatus, user, transaction) => {
   const statuses = await getStatuses()
 
   const prevStatus = dog.status?.status
@@ -20,7 +20,7 @@ const updateStatusOnly = async (dog, newStatus, transaction) => {
     DOG,
     { index_number: refreshedDog.index_number, status: prevStatus },
     { index_number: refreshedDog.index_number, status: newStatus },
-    'overnight-job-system-user'
+    user
   )
 }
 
