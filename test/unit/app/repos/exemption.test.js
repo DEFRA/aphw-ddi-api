@@ -1,3 +1,8 @@
+const dummyUser = {
+  username: 'dummy-user',
+  displayname: 'Dummy User'
+}
+
 describe('Exemption repo', () => {
   jest.mock('../../../../app/config/db', () => ({
     transaction: jest.fn()
@@ -71,7 +76,7 @@ describe('Exemption repo', () => {
     getCourt.mockResolvedValue({ id: 1, name: 'Test Court' })
     getPoliceForce.mockResolvedValue({ id: 1, name: 'Test Police Force' })
 
-    await updateExemption(data, 'dummy-username', {})
+    await updateExemption(data, dummyUser, {})
 
     expect(sequelize.transaction).not.toHaveBeenCalled()
   })
@@ -113,7 +118,7 @@ describe('Exemption repo', () => {
     getCourt.mockResolvedValue({ id: 1, name: 'Test Court' })
     getPoliceForce.mockResolvedValue({ id: 1, name: 'Test Police Force' })
 
-    await updateExemption(data, 'dummy-username', {})
+    await updateExemption(data, dummyUser, {})
 
     expect(registration.save).toHaveBeenCalled()
     expect(createOrUpdateInsurance).toHaveBeenCalled()
@@ -154,7 +159,7 @@ describe('Exemption repo', () => {
     getCdo.mockResolvedValue({ registration, insurance: [] })
     getPoliceForce.mockResolvedValue({ id: 1, name: 'Test Police Force' })
 
-    await updateExemption(data, 'dummy-username', {})
+    await updateExemption(data, dummyUser, {})
 
     expect(getCourt).not.toHaveBeenCalled()
   })
@@ -162,7 +167,7 @@ describe('Exemption repo', () => {
   test('updateExemption should throw an error if the CDO is not found', async () => {
     getCdo.mockResolvedValue(null)
 
-    await expect(updateExemption({ indexNumber: '123' }, 'dummy-username', {})).rejects.toThrow('CDO not found: 123')
+    await expect(updateExemption({ indexNumber: '123' }, dummyUser, {})).rejects.toThrow('CDO not found: 123')
   })
 
   test('updateExemption should throw an error if the court is not found', async () => {
@@ -201,14 +206,14 @@ describe('Exemption repo', () => {
     getCdo.mockResolvedValue({ id: '123', registration, insurance: [] })
     getCourt.mockResolvedValue(null)
 
-    await expect(updateExemption(data, 'dummy-username', {})).rejects.toThrow('Court not found: test')
+    await expect(updateExemption(data, dummyUser, {})).rejects.toThrow('Court not found: test')
   })
 
   test('updateExemption should throw an error if the police force is not found', async () => {
     getCdo.mockResolvedValue({ registration: {}, insurance: [] })
     getPoliceForce.mockResolvedValue(null)
 
-    await expect(updateExemption({ indexNumber: '123', policeForce: 'test' }, 'dummy-username', {})).rejects.toThrow('Police force not found: test')
+    await expect(updateExemption({ indexNumber: '123', policeForce: 'test' }, dummyUser, {})).rejects.toThrow('Police force not found: test')
   })
 
   test('updateExemption should throw error if no username for auditing', async () => {

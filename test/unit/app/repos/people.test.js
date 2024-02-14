@@ -5,6 +5,11 @@ const { owner: mockEnhancedOwner } = require('../../../mocks/cdo/create-enhanced
 jest.mock('../../../../app/messaging/send-event')
 const { sendEvent } = require('../../../../app/messaging/send-event')
 
+const dummyUser = {
+  username: 'dummy-user',
+  displayname: 'Dummy User'
+}
+
 describe('People repo', () => {
   jest.mock('../../../../app/config/db', () => ({
     models: {
@@ -355,7 +360,7 @@ describe('People repo', () => {
       }
     }])
 
-    await updatePerson(person, 'dummy-username', {})
+    await updatePerson(person, dummyUser, {})
 
     expect(sequelize.transaction).toHaveBeenCalledTimes(0)
   })
@@ -417,7 +422,7 @@ describe('People repo', () => {
       country: { id: 1, country: 'England' }
     })
 
-    await updatePerson(person, 'dummy-username', {})
+    await updatePerson(person, dummyUser, {})
 
     expect(sequelize.models.address.create).toHaveBeenCalledTimes(1)
   })
@@ -470,7 +475,7 @@ describe('People repo', () => {
       country: { id: 1, country: 'England' }
     })
 
-    await updatePerson(person, 'dummy-username', {})
+    await updatePerson(person, dummyUser, {})
 
     expect(sequelize.models.address.create).not.toHaveBeenCalled()
   })
@@ -534,7 +539,7 @@ describe('People repo', () => {
       contact_id: 2
     })
 
-    await updatePerson(person, 'dummy-username', {})
+    await updatePerson(person, dummyUser, {})
 
     expect(sequelize.models.contact.create).toHaveBeenCalledTimes(1)
   })
