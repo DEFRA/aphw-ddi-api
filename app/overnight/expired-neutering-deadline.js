@@ -4,7 +4,7 @@ const { statuses } = require('../constants/statuses')
 const { updateStatusOnly } = require('../repos/status')
 const { dbFindAll } = require('../lib/db-functions')
 
-const setExpiredNeuteringDeadlineToInBreach = async (today, t) => {
+const setExpiredNeuteringDeadlineToInBreach = async (today, user, t) => {
   try {
     const setStatusToBreach = await dbFindAll(sequelize.models.registration, {
       where: {
@@ -33,7 +33,7 @@ const setExpiredNeuteringDeadlineToInBreach = async (today, t) => {
 
     for (const toUpdateStatus of setStatusToBreach) {
       console.log(`Updating dog ${toUpdateStatus.dog.index_number} to In breach`)
-      await updateStatusOnly(toUpdateStatus.dog, statuses.InBreach, t)
+      await updateStatusOnly(toUpdateStatus.dog, statuses.InBreach, user, t)
     }
     return `Success Neutering Expiry - updated ${setStatusToBreach.length} rows`
   } catch (e) {

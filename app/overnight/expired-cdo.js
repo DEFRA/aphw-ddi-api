@@ -4,7 +4,7 @@ const { statuses } = require('../constants/statuses')
 const { updateStatusOnly } = require('../repos/status')
 const { dbFindAll } = require('../lib/db-functions')
 
-const setExpiredCdosToFailed = async (today, t) => {
+const setExpiredCdosToFailed = async (today, user, t) => {
   try {
     const setToFailed = await dbFindAll(sequelize.models.registration, {
       where: {
@@ -26,7 +26,7 @@ const setExpiredCdosToFailed = async (today, t) => {
 
     for (const toUpdate of setToFailed) {
       console.log(`Updating dog ${toUpdate.dog.index_number} to Failed`)
-      await updateStatusOnly(toUpdate.dog, statuses.Failed, t)
+      await updateStatusOnly(toUpdate.dog, statuses.Failed, user, t)
     }
     return `Success CDO Expiry - updated ${setToFailed.length} rows`
   } catch (e) {

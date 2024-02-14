@@ -7,14 +7,19 @@ const { setExpiredMicrochipDeadlineToInBreach } = require('./expired-microchip-d
 const autoUpdateStatuses = async () => {
   let result = ''
 
+  const user = {
+    username: 'overnight-job-system-user',
+    displayname: 'Overnight Job System User'
+  }
+
   try {
     const today = new Date()
 
     await sequelize.transaction(async (t) => {
-      result = result + await setExpiredCdosToFailed(today, t)
-      result = result + ' | ' + await setExpiredInsuranceToBreach(today, t)
-      result = result + ' | ' + await setExpiredNeuteringDeadlineToInBreach(today, t)
-      result = result + ' | ' + await setExpiredMicrochipDeadlineToInBreach(today, t)
+      result = result + await setExpiredCdosToFailed(today, user, t)
+      result = result + ' | ' + await setExpiredInsuranceToBreach(today, user, t)
+      result = result + ' | ' + await setExpiredNeuteringDeadlineToInBreach(today, user, t)
+      result = result + ' | ' + await setExpiredMicrochipDeadlineToInBreach(today, user, t)
     })
   } catch (e) {
     console.log(`Error auto-updating statuses: ${e}`)

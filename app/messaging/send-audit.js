@@ -64,7 +64,8 @@ const sendActivityToAudit = async (activity, actioningUser) => {
     data: {
       message: JSON.stringify({
         actioningUser,
-        activity
+        activity,
+        operation: 'activity'
       })
     }
   }
@@ -81,7 +82,7 @@ const constructCreatePayload = (auditObjectName, entity, actioningUser) => {
 }
 
 const sendUpdateToAudit = async (auditObjectName, entityPre, entityPost, user) => {
-  if (!user || user === '') {
+  if (!isUserValid(user)) {
     throw new Error(`Username and displayname are required for auditing update of ${auditObjectName}`)
   }
 

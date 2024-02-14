@@ -4,7 +4,7 @@ const { statuses } = require('../constants/statuses')
 const { updateStatusOnly } = require('../repos/status')
 const { dbFindAll } = require('../lib/db-functions')
 
-const setExpiredInsuranceToBreach = async (today, t) => {
+const setExpiredInsuranceToBreach = async (today, user, t) => {
   try {
     const setToBreach = await dbFindAll(sequelize.models.registration, {
       where: {
@@ -33,7 +33,7 @@ const setExpiredInsuranceToBreach = async (today, t) => {
 
     for (const toUpdate of setToBreach) {
       console.log(`Updating dog ${toUpdate.dog.index_number} to In breach`)
-      await updateStatusOnly(toUpdate.dog, statuses.InBreach, t)
+      await updateStatusOnly(toUpdate.dog, statuses.InBreach, user, t)
     }
     return `Success Insurance Expiry - updated ${setToBreach.length} rows`
   } catch (e) {
