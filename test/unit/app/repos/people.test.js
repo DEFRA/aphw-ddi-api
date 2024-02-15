@@ -26,7 +26,8 @@ describe('People repo', () => {
         create: jest.fn()
       },
       registered_person: {
-        findAll: jest.fn()
+        findAll: jest.fn(),
+        findOne: jest.fn()
       },
       dog: {
         findAll: jest.fn()
@@ -50,7 +51,7 @@ describe('People repo', () => {
   jest.mock('../../../../app/repos/search')
   const { updateSearchIndexPerson } = require('../../../../app/repos/search')
 
-  const { createPeople, getPersonByReference, getPersonAndDogsByReference, updatePerson } = require('../../../../app/repos/people')
+  const { createPeople, getPersonByReference, getPersonAndDogsByReference, updatePerson, getOwnerOfDog } = require('../../../../app/repos/people')
 
   beforeEach(async () => {
     jest.clearAllMocks()
@@ -296,6 +297,32 @@ describe('People repo', () => {
     sequelize.models.registered_person.findAll.mockRejectedValue(new Error('Test error'))
 
     await expect(getPersonAndDogsByReference('P-1234')).rejects.toThrow('Test error')
+  })
+
+  test('getOwnerOfDog should return person', async () => {
+    sequelize.models.registered_person.findOne.mockResolvedValue([{
+      person: {
+        dataValues: {
+          id: 1,
+          first_name: 'First',
+          last_name: 'Last',
+          person_reference: '1234'
+        }
+      }
+    }])
+
+    const person = await getOwnerOfDog('1234')
+
+    expect(person).toEqual([{
+      person: {
+        dataValues: {
+          id: 1,
+          first_name: 'First',
+          last_name: 'Last',
+          person_reference: '1234'
+        }
+      }
+    }])
   })
 
   test('updatePerson should start new transaction if none passed', async () => {
