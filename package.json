@@ -1,12 +1,13 @@
 {
   "name": "aphw-ddi-api",
-  "version": "0.61.1",
+  "version": "0.62.2",
   "description": "API to manage CRUD / query functions for dangerous dogs register",
   "homepage": "https://github.com/DEFRA/aphw-ddi-api",
   "main": "app/index.js",
   "scripts": {
     "pretest": "npm run test:lint",
     "test": "jest --runInBand --forceExit --silent=\"false\"",
+    "test:parallel": "jest --forceExit --silent=\"false\"",
     "test:watch": "jest --coverage=false --onlyChanged --watch --runInBand",
     "test:lint": "standard",
     "test:debug": "node --inspect-brk=0.0.0.0 ./node_modules/jest/bin/jest.js --coverage=false --onlyChanged --watch --runInBand --no-cache",

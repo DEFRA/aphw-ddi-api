@@ -11,6 +11,11 @@ const { getBreed, getExemptionOrder } = require('../../../../app/lookups')
 jest.mock('../../../../app/messaging/send-event')
 const { sendEvent } = require('../../../../app/messaging/send-event')
 
+const devUser = {
+  username: 'dev-user@test.com',
+  displayname: 'Dev User'
+}
+
 describe('Dog repo', () => {
   jest.mock('../../../../app/config/db', () => ({
     models: {
@@ -272,7 +277,7 @@ describe('Dog repo', () => {
       owner: { firstName: 'John', lastName: 'Smith' }
     }
 
-    await addImportedDog(dog, 'dummy-username')
+    await addImportedDog(dog, devUser)
     expect(sequelize.transaction).toHaveBeenCalledTimes(1)
   })
 
@@ -285,7 +290,7 @@ describe('Dog repo', () => {
       owner: { firstName: 'John', lastName: 'Smith' }
     }
 
-    await addImportedDog(dog, 'dummy-username', {})
+    await addImportedDog(dog, devUser, {})
     expect(sequelize.models.dog.create).toHaveBeenCalledTimes(1)
     expect(sequelize.models.registered_person.create).toHaveBeenCalledTimes(1)
     expect(sequelize.transaction).toHaveBeenCalledTimes(0)
@@ -381,7 +386,7 @@ describe('Dog repo', () => {
       breed: 'Breed 1'
     }
 
-    await updateDog(payload)
+    await updateDog(payload, devUser)
 
     expect(sequelize.transaction).toHaveBeenCalledTimes(1)
   })
@@ -398,7 +403,7 @@ describe('Dog repo', () => {
       breed: 'Breed 1'
     }
 
-    await updateDog(payload, 'dummy-username', {})
+    await updateDog(payload, devUser, {})
 
     expect(sequelize.transaction).toHaveBeenCalledTimes(0)
   })

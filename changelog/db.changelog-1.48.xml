@@ -1,0 +1,113 @@
+<?xml version="1.1" encoding="utf-8" standalone="no"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog" xmlns:ext="http://www.liquibase.org/xml/ns/dbchangelog-ext" xmlns:pro="http://www.liquibase.org/xml/ns/pro" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog-ext http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-ext.xsd http://www.liquibase.org/xml/ns/pro http://www.liquibase.org/xml/ns/pro/liquibase-pro-3.9.xsd http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.9.xsd">
+  <changeSet author="J Barnsley" id="1">
+    <tagDatabase tag="v1.48.0" />
+  </changeSet>
+  <changeSet author="J Barnsley" id="2">
+    <createTable tableName="activity_type">
+      <column autoIncrement="true" name="id" type="INTEGER">
+        <constraints nullable="false" primaryKey="true" primaryKeyName="activity_type_pkey" />
+      </column>
+      <column name="name" type="VARCHAR(24)">
+        <constraints nullable="false" unique="true" uniqueConstraintName="activity_type_ukey" />
+      </column>
+    </createTable>
+  </changeSet>
+  <changeSet author="J Barnsley" id="3">
+    <createTable tableName="activity_source">
+      <column autoIncrement="true" name="id" type="INTEGER">
+        <constraints nullable="false" primaryKey="true" primaryKeyName="activity_source_pkey" />
+      </column>
+      <column name="name" type="VARCHAR(24)">
+        <constraints nullable="false" unique="true" uniqueConstraintName="activity_source_ukey" />
+      </column>
+    </createTable>
+  </changeSet>
+  <changeSet author="J Barnsley" id="4">
+    <createTable tableName="activity">
+      <column autoIncrement="true" name="id" type="INTEGER">
+        <constraints nullable="false" primaryKey="true" primaryKeyName="activity_pkey" />
+      </column>
+      <column name="label" type="VARCHAR(100)">
+        <constraints nullable="false" />
+      </column>
+      <column name="activity_type_id" type="INTEGER">
+        <constraints nullable="false" />
+      </column>
+      <column name="activity_source_id" type="INTEGER">
+        <constraints nullable="false" />
+      </column>
+      <column name="display_order" type="INTEGER">
+        <constraints nullable="false" />
+      </column>
+    </createTable>
+  </changeSet>
+  <changeSet author="J Barnsley" id="5">
+    <addForeignKeyConstraint baseColumnNames="activity_type_id" baseTableName="activity" constraintName="fk_activity_activity_type" referencedColumnNames="id" referencedTableName="activity_type" />
+    <addForeignKeyConstraint baseColumnNames="activity_source_id" baseTableName="activity" constraintName="fk_activity_activity_source" referencedColumnNames="id" referencedTableName="activity_source" />
+  </changeSet>
+  <changeSet author="J Barnsley" id="6">
+    <insert tableName="activity_type">
+      <column name="name" value="sent" />
+    </insert>
+    <insert tableName="activity_type">
+      <column name="name" value="received" />
+    </insert>
+    <insert tableName="activity_source">
+      <column name="name" value="dog" />
+    </insert>
+    <insert tableName="activity_source">
+      <column name="name" value="owner" />
+    </insert>
+  </changeSet>
+  <changeSet author="J Barnsley" id="7">
+    <insert tableName="activity">
+      <column name="label" value="Change of address form" />
+      <column name="activity_type_id" value="1" />
+      <column name="activity_source_id" value="1" />
+      <column name="display_order" value="1" />
+    </insert>
+    <insert tableName="activity">
+      <column name="label" value="Death of dog form" />
+      <column name="activity_type_id" value="1" />
+      <column name="activity_source_id" value="1" />
+      <column name="display_order" value="2" />
+    </insert>
+    <insert tableName="activity">
+      <column name="label" value="Witness statement" />
+      <column name="activity_type_id" value="1" />
+      <column name="activity_source_id" value="1" />
+      <column name="display_order" value="3" />
+    </insert>
+    <insert tableName="activity">
+      <column name="label" value="Police correspondence" />
+      <column name="activity_type_id" value="2" />
+      <column name="activity_source_id" value="1" />
+      <column name="display_order" value="1" />
+    </insert>
+    <insert tableName="activity">
+      <column name="label" value="Witness statement request" />
+      <column name="activity_type_id" value="2" />
+      <column name="activity_source_id" value="1" />
+      <column name="display_order" value="2" />
+    </insert>
+    <insert tableName="activity">
+      <column name="label" value="Judicial review notice" />
+      <column name="activity_type_id" value="2" />
+      <column name="activity_source_id" value="1" />
+      <column name="display_order" value="3" />
+    </insert>
+    <insert tableName="activity">
+      <column name="label" value="Change of address form" />
+      <column name="activity_type_id" value="1" />
+      <column name="activity_source_id" value="2" />
+      <column name="display_order" value="1" />
+    </insert>
+    <insert tableName="activity">
+      <column name="label" value="Change of address form" />
+      <column name="activity_type_id" value="2" />
+      <column name="activity_source_id" value="2" />
+      <column name="display_order" value="1" />
+    </insert>
+  </changeSet>
+</databaseChangeLog>
