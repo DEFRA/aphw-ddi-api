@@ -23,6 +23,7 @@ module.exports = [{
   path: '/dog-owner/{indexNumber}',
   handler: async (request, h) => {
     const indexNumber = request.params.indexNumber
+
     try {
       const owner = await getOwnerOfDog(indexNumber)
       return h.response({ owner: personDto(owner.person, true) }).code(200)
