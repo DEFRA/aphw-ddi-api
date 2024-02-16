@@ -1,0 +1,51 @@
+<?xml version="1.1" encoding="utf-8" standalone="no"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog" xmlns:ext="http://www.liquibase.org/xml/ns/dbchangelog-ext" xmlns:pro="http://www.liquibase.org/xml/ns/pro" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog-ext http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-ext.xsd http://www.liquibase.org/xml/ns/pro http://www.liquibase.org/xml/ns/pro/liquibase-pro-3.9.xsd http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.9.xsd">
+  <changeSet author="J Barnsley" id="1">
+    <tagDatabase tag="v1.49.0" />
+  </changeSet>
+  <changeSet author="J Barnsley" id="2">
+    <delete tableName="activity">
+      <where>id=8</where>
+    </delete>
+  </changeSet>
+  <changeSet author="J Barnsley" id="3">
+    <createTable tableName="activity_event">
+      <column autoIncrement="true" name="id" type="INTEGER">
+        <constraints nullable="false" primaryKey="true" primaryKeyName="activity_event_pkey" />
+      </column>
+      <column name="target_primary_key" type="VARCHAR(24)">
+        <constraints nullable="false" unique="true" uniqueConstraintName="activity_event_ukey" />
+      </column>
+    </createTable>
+  </changeSet>
+  <changeSet author="J Barnsley" id="4">
+    <addColumn tableName="activity">
+      <column name="activity_event_id" type="INTEGER" />
+    </addColumn>
+  </changeSet>
+  <changeSet author="J Barnsley" id="5">
+    <addForeignKeyConstraint baseColumnNames="activity_event_id" baseTableName="activity" constraintName="fk_activity_activity_event" referencedColumnNames="id" referencedTableName="activity_event" />
+  </changeSet>
+  <changeSet author="J Barnsley" id="6">
+    <insert tableName="activity_event">
+      <column name="target_primary_key" value="dog" />
+    </insert>
+    <insert tableName="activity_event">
+      <column name="target_primary_key" value="owner" />
+    </insert>
+  </changeSet>
+  <changeSet author="J Barnsley" id="7">
+    <update tableName="activity">
+      <column name="activity_event_id" value="1" />
+      <where>activity_source_id = 1</where>
+    </update>
+    <update tableName="activity">
+      <column name="activity_event_id" value="2" />
+      <where>activity_source_id = 2</where>
+    </update>
+    <update tableName="activity">
+      <column name="activity_event_id" value="2" />
+      <where>id = 1</where>
+    </update>
+  </changeSet>
+</databaseChangeLog>

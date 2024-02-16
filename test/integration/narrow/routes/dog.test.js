@@ -5,6 +5,9 @@ describe('Dog endpoint', () => {
   jest.mock('../../../../app/repos/dogs')
   const { getDogByIndexNumber, addImportedDog, updateDog } = require('../../../../app/repos/dogs')
 
+  jest.mock('../../../../app/repos/people')
+  const { getOwnerOfDog } = require('../../../../app/repos/people')
+
   beforeEach(async () => {
     jest.clearAllMocks()
     server = await createServer()
@@ -29,6 +32,31 @@ describe('Dog endpoint', () => {
     const options = {
       method: 'GET',
       url: '/dog/ED123'
+    }
+
+    const response = await server.inject(options)
+
+    expect(response.statusCode).toBe(500)
+  })
+
+  test('GET /dog-owner/ED123 route returns 200', async () => {
+    getOwnerOfDog.mockResolvedValue({ person: { id: 123, personReference: 'P-123' } })
+
+    const options = {
+      method: 'GET',
+      url: '/dog-owner/ED123'
+    }
+
+    const response = await server.inject(options)
+    expect(response.statusCode).toBe(200)
+  })
+
+  test('GET /dog-owner/ED123 route returns 500 if db error', async () => {
+    getOwnerOfDog.mockRejectedValue(new Error('Test error'))
+
+    const options = {
+      method: 'GET',
+      url: '/dog-owner/ED123'
     }
 
     const response = await server.inject(options)
