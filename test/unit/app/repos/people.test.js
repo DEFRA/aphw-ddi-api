@@ -300,7 +300,7 @@ describe('People repo', () => {
   })
 
   test('getOwnerOfDog should return person', async () => {
-    sequelize.models.registered_person.findOne.mockResolvedValue([{
+    sequelize.models.registered_person.findOne.mockResolvedValue({
       person: {
         dataValues: {
           id: 1,
@@ -309,11 +309,11 @@ describe('People repo', () => {
           person_reference: '1234'
         }
       }
-    }])
+    })
 
     const person = await getOwnerOfDog('1234')
 
-    expect(person).toEqual([{
+    expect(person).toEqual({
       person: {
         dataValues: {
           id: 1,
@@ -322,7 +322,13 @@ describe('People repo', () => {
           person_reference: '1234'
         }
       }
-    }])
+    })
+  })
+
+  test('getOwnerOfDog should throw when DB error', async () => {
+    sequelize.models.registered_person.findOne.mockRejectedValue(new Error('Test error'))
+
+    await expect(getOwnerOfDog('ED1234')).rejects.toThrow('Test error')
   })
 
   test('updatePerson should start new transaction if none passed', async () => {
