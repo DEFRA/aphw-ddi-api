@@ -116,6 +116,27 @@ const getPersonByReference = async (reference, transaction) => {
   }
 }
 
+const getOwnerOfDog = async (indexNumber) => {
+  try {
+    const person = await sequelize.models.registered_person.findOne({
+      include: [{
+        model: sequelize.models.person,
+        as: 'person'
+      },
+      {
+        model: sequelize.models.dog,
+        where: { index_number: indexNumber },
+        as: 'dog'
+      }]
+    })
+
+    return person
+  } catch (err) {
+    console.error(`Error getting owner of dog ${indexNumber}: ${err}`)
+    throw err
+  }
+}
+
 const updatePerson = async (person, user, transaction) => {
   if (!transaction) {
     return sequelize.transaction(async (t) => updatePerson(person, user, t))
@@ -282,5 +303,6 @@ module.exports = {
   createPeople,
   getPersonByReference,
   getPersonAndDogsByReference,
-  updatePerson
+  updatePerson,
+  getOwnerOfDog
 }

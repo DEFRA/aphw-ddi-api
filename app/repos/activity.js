@@ -13,6 +13,10 @@ const getActivityList = async (typeName, sourceName) => {
         model: sequelize.models.activity_source,
         where: { name: sourceName },
         as: 'activity_source'
+      },
+      {
+        model: sequelize.models.activity_event,
+        as: 'activity_event'
       }]
     })
 
@@ -34,6 +38,10 @@ const getActivityById = async (id) => {
       {
         model: sequelize.models.activity_source,
         as: 'activity_source'
+      },
+      {
+        model: sequelize.models.activity_event,
+        as: 'activity_event'
       }]
     })
 
