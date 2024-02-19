@@ -43,7 +43,7 @@ const processRegisterRows = async (register, t) => {
     currentDataRow = data
 
     try {
-      await createCdo(data, 'robot-import-system-user', t)
+      // await createCdo(data, 'robot-import-system-user', t)
     } catch (err) {
       console.log(err)
       console.log('Row in error:', JSON.parse(JSON.stringify(currentDataRow)))
