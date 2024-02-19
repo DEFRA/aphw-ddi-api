@@ -1,6 +1,8 @@
 const { getCallingUser } = require('../auth/get-user')
 const { addImportedDog, updateDog, getDogByIndexNumber } = require('../repos/dogs')
 const { dogDto } = require('../dto/dog')
+const { personDto } = require('../dto/person')
+const { getOwnerOfDog } = require('../repos/people')
 
 module.exports = [{
   method: 'GET',
@@ -10,6 +12,21 @@ module.exports = [{
     try {
       const dog = await getDogByIndexNumber(indexNumber)
       return h.response({ dog: dogDto(dog) }).code(200)
+    } catch (e) {
+      console.log(e)
+      throw e
+    }
+  }
+},
+{
+  method: 'GET',
+  path: '/dog-owner/{indexNumber}',
+  handler: async (request, h) => {
+    const indexNumber = request.params.indexNumber
+
+    try {
+      const owner = await getOwnerOfDog(indexNumber)
+      return h.response({ owner: personDto(owner.person, true) }).code(200)
     } catch (e) {
       console.log(e)
       throw e

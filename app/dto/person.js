@@ -33,11 +33,11 @@ const personDto = (person, onlyLatestContacts) => ({
   birthDate: person.birth_date,
   personReference: person.person_reference,
   address: {
-    addressLine1: person.addresses[0].address.address_line_1,
-    addressLine2: person.addresses[0].address.address_line_2,
-    town: person.addresses[0].address.town,
-    postcode: person.addresses[0].address.postcode,
-    country: person.addresses[0].address.country.country
+    addressLine1: person.addresses ? person.addresses[0].address.address_line_1 : '',
+    addressLine2: person.addresses ? person.addresses[0].address.address_line_2 : '',
+    town: person.addresses ? person.addresses[0].address.town : '',
+    postcode: person.addresses ? person.addresses[0].address.postcode : '',
+    country: person.addresses ? person.addresses[0].address.country.country : ''
   },
   contacts: person.person_contacts ? addContacts(person.person_contacts, onlyLatestContacts) : []
 })

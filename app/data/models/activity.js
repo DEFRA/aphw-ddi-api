@@ -47,6 +47,10 @@ module.exports = (sequelize, DataTypes) => {
       as: 'activity_source',
       foreignKey: 'activity_source_id'
     })
+    activity.belongsTo(models.activity_event, {
+      as: 'activity_event',
+      foreignKey: 'activity_event_id'
+    })
   }
 
   return activity
