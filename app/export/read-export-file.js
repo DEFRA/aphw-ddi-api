@@ -9,7 +9,6 @@ const readExportFile = async () => {
 
   const exists = await blobClient.exists()
 
-  console.log('******exists', exists)
   if (!exists) {
     console.log(`Read export file: File ${filename} does not exist`)
     throw new Error(`File ${filename} does not exist`)
