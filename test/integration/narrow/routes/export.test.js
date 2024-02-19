@@ -2,7 +2,7 @@ describe('Export endpoint', () => {
   const createServer = require('../../../../app/server')
   let server
 
-  jest.mock('../../../../app/export/read-file')
+  jest.mock('../../../../app/export/read-export-file')
   const { readExportFile } = require('../../../../app/export/read-export-file')
 
   jest.mock('../../../../app/messaging/send-audit')
