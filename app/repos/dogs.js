@@ -1,6 +1,5 @@
 const sequelize = require('../config/db')
 const { v4: uuidv4 } = require('uuid')
-const { deepClone } = require('../lib/deep-clone')
 const constants = require('../constants/statuses')
 const { getBreed, getExemptionOrder } = require('../lookups')
 const { updateSearchIndexDog } = require('../repos/search')
@@ -8,6 +7,7 @@ const { updateMicrochips, createMicrochip } = require('./microchip')
 const { createInsurance } = require('./insurance')
 const { sendCreateToAudit, sendUpdateToAudit } = require('../messaging/send-audit')
 const { DOG } = require('../constants/event/audit-event-object-types')
+const { preChangedDogAudit, postChangedDogAudit } = require('../dto/auditing/dog')
 
 const getBreeds = async () => {
   try {
@@ -198,7 +198,7 @@ const updateDog = async (payload, user, transaction) => {
 
   const dogFromDB = await getDogByIndexNumber(payload.indexNumber)
 
-  const preChangedDog = deepClone(dogFromDB)
+  const preChangedDog = preChangedDogAudit(dogFromDB)
 
   const breeds = await getBreeds()
 
@@ -214,7 +214,7 @@ const updateDog = async (payload, user, transaction) => {
 
   await updateSearchIndexDog(refreshedDog, statuses, transaction)
 
-  await sendUpdateToAudit(DOG, preChangedDog, refreshedDog, user)
+  await sendUpdateToAudit(DOG, preChangedDog, postChangedDogAudit(refreshedDog), user)
 
   return dogFromDB
 }
