@@ -76,22 +76,10 @@ const uploadInboundFile = async (stream, filename) => {
   return blockBlobClient
 }
 
-const uploadOvernightFile = async (stream, filename) => {
-  containersInitialised ?? await initialiseContainers()
-  const container = blobServiceClient.getContainerClient(config.certificateContainer)
-  await container.createIfNotExists()
-  const blockBlobClient = container.getBlockBlobClient(filename)
-  await blockBlobClient.uploadStream(stream,
-    uploadOptions.bufferSize, uploadOptions.maxBuffers)
-
-  return blockBlobClient
-}
-
 module.exports = {
   downloadBlob,
   getInboundFileList,
   getInboundFileDetails,
   blobServiceClient,
-  uploadInboundFile,
-  uploadOvernightFile
+  uploadInboundFile
 }
