@@ -5,13 +5,14 @@ const preChangedDogAudit = (dogFromDb) => {
   const dog = deepClone(dogFromDb)
 
   const pre = {
-    dog_name: dog.name ?? null,
+    index_number: dog.index_number,
+    dog_name: dog.name ?? '',
     breed_type: dog.dog_breed?.breed ?? null,
-    colour: dog.colour ?? null,
-    sex: dog.sex ?? null,
+    colour: dog.colour ?? '',
+    sex: dog.sex ?? '',
     dog_date_of_birth: stripTime(dog.birth_date) ?? null,
     dog_date_of_death: stripTime(dog.death_date) ?? null,
-    tattoo: dog.tattoo ?? null,
+    tattoo: dog.tattoo ?? '',
     microchip1: getMicrochip(dog, 1),
     microchip2: getMicrochip(dog, 2),
     date_exported: stripTime(dog.exported_date) ?? null,

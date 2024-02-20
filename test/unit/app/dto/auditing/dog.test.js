@@ -5,13 +5,13 @@ describe('DogAudit test', () => {
     const dog = { }
     const res = preChangedDogAudit(dog)
     expect(res).toEqual({
-      dog_name: null,
+      dog_name: '',
       breed_type: null,
-      colour: null,
-      sex: null,
+      colour: '',
+      sex: '',
       dog_date_of_birth: null,
       dog_date_of_death: null,
-      tattoo: null,
+      tattoo: '',
       microchip1: null,
       microchip2: null,
       date_exported: null,
@@ -66,13 +66,13 @@ describe('DogAudit test', () => {
     }
     const res = preChangedDogAudit(dog)
     expect(res).toEqual({
-      dog_name: null,
+      dog_name: '',
       breed_type: null,
-      colour: null,
-      sex: null,
+      colour: '',
+      sex: '',
       dog_date_of_birth: null,
       dog_date_of_death: null,
-      tattoo: null,
+      tattoo: '',
       microchip1: '11111',
       microchip2: '22222',
       date_exported: null,
