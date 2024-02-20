@@ -1,6 +1,6 @@
 const { getAllCdos } = require('../repos/cdo')
 const { convertToCsv } = require('../export/csv')
-const { uploadInboundFile } = require('../storage')
+const { uploadExportedFile } = require('../../app/storage/repos/export')
 
 const createExportFile = async () => {
   let result = ''
@@ -14,7 +14,7 @@ const createExportFile = async () => {
     str.push(exportedData)
     str.push(null)
 
-    await uploadInboundFile(str, 'daily_export.csv')
+    await uploadExportedFile(str, 'daily_export.csv')
 
     return `Success Export (${cdos.length} rows)`
   } catch (e) {
