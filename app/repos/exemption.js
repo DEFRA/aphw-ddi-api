@@ -1,6 +1,5 @@
 const { isFuture } = require('date-fns')
 const sequelize = require('../config/db')
-const { deepClone } = require('../lib/deep-clone')
 const { getCdo } = require('./cdo')
 const { getCourt, getPoliceForce } = require('../lookups')
 const { createOrUpdateInsurance } = require('./insurance')
@@ -8,6 +7,7 @@ const { sendUpdateToAudit } = require('../messaging/send-audit')
 const { EXEMPTION } = require('../constants/event/audit-event-object-types')
 const constants = require('../constants/statuses')
 const { updateStatus } = require('../repos/dogs')
+const { preChangedExemptionAudit, postChangedExemptionAudit } = require('../dto/auditing/exemption')
 
 const updateExemption = async (data, user, transaction) => {
   if (!transaction) {
@@ -23,7 +23,7 @@ const updateExemption = async (data, user, transaction) => {
 
     const registration = cdo.registration
 
-    const preChangedRegistration = constructPreChangedRegistration(registration, data)
+    const preChanged = preChangedExemptionAudit(cdo)
 
     updateRegistration(registration, data, policeForce)
 
@@ -35,7 +35,9 @@ const updateExemption = async (data, user, transaction) => {
 
     const res = registration.save({ transaction })
 
-    await sendUpdateToAudit(EXEMPTION, preChangedRegistration, registration, user)
+    const postChanged = postChangedExemptionAudit(data)
+
+    await sendUpdateToAudit(EXEMPTION, preChanged, postChanged, user)
 
     return res
   } catch (err) {
@@ -86,12 +88,6 @@ const lookupPoliceForce = async (data) => {
 
     return policeForce
   }
-}
-
-const constructPreChangedRegistration = (reg, data) => {
-  const preChangedRegistration = deepClone(reg)
-  preChangedRegistration.index_number = data.indexNumber
-  return preChangedRegistration
 }
 
 const updateRegistration = (registration, data, policeForce) => {
