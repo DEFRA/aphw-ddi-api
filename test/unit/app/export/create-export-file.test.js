@@ -5,8 +5,8 @@ const { createExportFile } = require('../../../../app/overnight/create-export-fi
 jest.mock('../../../../app/repos/cdo')
 const { getAllCdos } = require('../../../../app/repos/cdo')
 
-jest.mock('../../../../app/storage')
-const { uploadInboundFile } = require('../../../../app/storage')
+jest.mock('../../../../app/storage/repos/export')
+const { uploadExportedFile } = require('../../../../app/storage/repos/export')
 
 describe('CreateExportFile test', () => {
   beforeEach(async () => {
@@ -15,21 +15,21 @@ describe('CreateExportFile test', () => {
 
   test('should handle success', async () => {
     getAllCdos.mockResolvedValue([validRow])
-    uploadInboundFile.mockResolvedValue()
+    uploadExportedFile.mockResolvedValue()
 
     const res = await createExportFile()
 
     expect(res).toBe('Success Export (1 rows)')
-    expect(uploadInboundFile).toHaveBeenCalledWith(expect.anything(), 'daily_export.csv')
+    expect(uploadExportedFile).toHaveBeenCalledWith(expect.anything(), 'daily_export.csv')
   })
 
   test('should handle error', async () => {
     getAllCdos.mockImplementation(() => { throw new Error('cdo error') })
-    uploadInboundFile.mockResolvedValue()
+    uploadExportedFile.mockResolvedValue()
 
     const res = await createExportFile()
 
     expect(res).toBe('Error create export file: Error: cdo error')
-    expect(uploadInboundFile).not.toHaveBeenCalled()
+    expect(uploadExportedFile).not.toHaveBeenCalled()
   })
 })
