@@ -2,7 +2,7 @@ const { blobServiceClient } = require('../storage')
 const storageConfig = require('../config/storage')
 
 const readExportFile = async () => {
-  const container = blobServiceClient.getContainerClient(`${storageConfig.container}/${storageConfig.inboundFolder}`)
+  const container = blobServiceClient.getContainerClient(`${storageConfig.certificateContainer}`)
   const filename = 'daily_export.csv'
 
   const blobClient = container.getBlockBlobClient(filename)
