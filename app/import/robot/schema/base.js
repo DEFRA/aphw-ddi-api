@@ -12,7 +12,7 @@ const schema = Joi.object({
       country: Joi.any().required(),
       postcode: Joi.any().required()
     },
-    birthDate: Joi.date().iso().required(),
+    birthDate: Joi.any().required(),
     phoneNumber: Joi.alternatives().try(
       Joi.number(),
       Joi.string().trim()
@@ -21,17 +21,17 @@ const schema = Joi.object({
   }).required(),
   dog: Joi.object({
     name: Joi.any().required(),
-    birthDate: Joi.date().iso().required(),
+    birthDate: Joi.any().required(),
     colour: Joi.any().required(),
     gender: Joi.any().required(),
-    insuranceStartDate: Joi.date().iso().required(),
+    insuranceStartDate: Joi.any().required(),
     neutered: Joi.any().required(),
     microchipNumber: Joi.alternatives().try(
       Joi.string().trim(),
       Joi.number().unsafe()
     ).optional().allow('').allow(null),
     indexNumber: Joi.number().required(),
-    certificateIssued: Joi.date().iso().optional().allow('').allow(null)
+    certificateIssued: Joi.any().optional().allow('').allow(null)
   }).required()
 })
 

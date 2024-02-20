@@ -5,6 +5,7 @@ dayjs.extend(customParseFormat)
 const map = require('./schema/map')
 const { baseSchema } = require('./schema')
 const config = require('../../config/index')
+const { formatDate } = require('../../lib/date-helpers')
 
 const processRows = async (register, sheet, map, schema) => {
   let rows
@@ -87,7 +88,6 @@ const autoCorrectDataValues = (row) => {
   row.owner.birthDate = autoCorrectDate(row.owner.birthDate)
   row.dog.name = truncateIfTooLong(row.dog.name, 32, row, 'dogName')
   row.dog.colour = truncateIfTooLong(row.dog.colour, 50, row, 'colour')
-  console.log('micro', row.dog.microchipNumber)
   const microchipClean = (row.dog.microchipNumber ? row.dog.microchipNumber : '').toString().replace(/\u0020/g, '')
   row.dog.microchipNumber = truncateIfTooLong(microchipClean, 24, row, 'microchipNumber')
   row.owner.address.addressLine1 = truncateIfTooLong(row.owner.address.addressLine1, 50, row, 'addressLine1')
@@ -96,16 +96,20 @@ const autoCorrectDataValues = (row) => {
   row.owner.address.county = truncateIfTooLong(row.owner.address.county, 30, row, 'county')
   row.owner.firstName = truncateIfTooLong(row.owner.firstName, 30, row, 'firstName')
   row.owner.lastName = truncateIfTooLong(row.owner.lastName, 24, row, 'lastName')
+  row.dog.certificateIssued = autoCorrectDate(row.dog.certificateIssued)
 }
 
 const autoCorrectDate = (inDate) => {
+  if (typeof inDate === 'object') {
+    inDate = formatDate(inDate)
+  }
   if (inDate.length === 10 && inDate.substring(6, 8) === '00') {
     const newDate = `${inDate.substring(0, 6)}20${inDate.substring(8, 10)}`
     if (dayjs(newDate, 'DD/MM/YYYY', true).isValid()) {
       return dayjs(newDate, 'DD/MM/YYYY').toDate()
     }
   }
-  return inDate
+  return dayjs(inDate, 'DD/MM/YYYY').toDate()
 }
 
 const replaceUnicodeCharacters = (row) => {
