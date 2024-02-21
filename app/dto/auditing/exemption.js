@@ -24,7 +24,8 @@ const preChangedExemptionAudit = (cdo) => {
     exemption_order: reg.exemption_order?.exemption_order ?? null,
     court: reg.court?.name ?? null,
     cdo_issued: reg.cdo_issued ?? null,
-    cdo_expiry: reg.cdo_expiry ?? null
+    cdo_expiry: reg.cdo_expiry ?? null,
+    status: cdo.status?.status ?? null
   }
 
   return pre
@@ -49,7 +50,8 @@ const postChangedExemptionAudit = (data) => {
     exemption_order: data.exemptionOrder ? `${data.exemptionOrder}` : null,
     court: data.court ?? null,
     cdo_issued: stripTime(data.cdoIssued) ?? null,
-    cdo_expiry: stripTime(data.cdoExpiry) ?? null
+    cdo_expiry: stripTime(data.cdoExpiry) ?? null,
+    status: data.status ?? null
   }
 
   return post

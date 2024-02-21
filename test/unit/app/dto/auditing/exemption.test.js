@@ -23,7 +23,8 @@ describe('ExemptionAudit test', () => {
       police_force: null,
       removed_from_cdo_process: null,
       typed_by_dlo: null,
-      withdrawn: null
+      withdrawn: null,
+      status: null
     })
   })
 
@@ -52,6 +53,9 @@ describe('ExemptionAudit test', () => {
         court: {
           name: 'court1'
         }
+      },
+      status: {
+        status: 'Exempt'
       }
     }
     const res = preChangedExemptionAudit(cdo)
@@ -73,7 +77,8 @@ describe('ExemptionAudit test', () => {
       police_force: 'force name 1',
       removed_from_cdo_process: '2024-02-10T00:00:00.000Z',
       typed_by_dlo: '2024-02-11T00:00:00.000Z',
-      withdrawn: '2024-02-12T00:00:00.000Z'
+      withdrawn: '2024-02-12T00:00:00.000Z',
+      status: 'Exempt'
     })
   })
 
@@ -124,7 +129,8 @@ describe('ExemptionAudit test', () => {
       police_force: null,
       removed_from_cdo_process: null,
       typed_by_dlo: null,
-      withdrawn: null
+      withdrawn: null,
+      status: null
     })
   })
 
@@ -149,7 +155,8 @@ describe('ExemptionAudit test', () => {
       police_force: null,
       removed_from_cdo_process: null,
       typed_by_dlo: null,
-      withdrawn: null
+      withdrawn: null,
+      status: null
     })
   })
 
@@ -179,7 +186,8 @@ describe('ExemptionAudit test', () => {
       police_force: null,
       removed_from_cdo_process: null,
       typed_by_dlo: null,
-      withdrawn: null
+      withdrawn: null,
+      status: null
     })
   })
 
@@ -209,7 +217,8 @@ describe('ExemptionAudit test', () => {
       police_force: null,
       removed_from_cdo_process: null,
       typed_by_dlo: null,
-      withdrawn: null
+      withdrawn: null,
+      status: null
     })
   })
 })

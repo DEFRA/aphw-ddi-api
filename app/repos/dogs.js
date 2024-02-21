@@ -235,6 +235,8 @@ const updateStatus = async (indexNumber, newStatus, transaction) => {
   const refreshedDog = await getDogByIndexNumber(indexNumber, transaction)
 
   await updateSearchIndexDog(refreshedDog, statuses, transaction)
+
+  return newStatus
 }
 
 const updateDogFields = (dbDog, payload, breeds, statuses) => {
