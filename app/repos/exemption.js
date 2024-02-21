@@ -19,11 +19,11 @@ const updateExemption = async (data, user, transaction) => {
 
     const policeForce = await lookupPoliceForce(data)
 
-    await autoChangeStatus(cdo, data, transaction)
+    const preChanged = preChangedExemptionAudit(cdo)
+
+    const changedStatus = await autoChangeStatus(cdo, data, transaction)
 
     const registration = cdo.registration
-
-    const preChanged = preChangedExemptionAudit(cdo)
 
     updateRegistration(registration, data, policeForce)
 
@@ -35,6 +35,7 @@ const updateExemption = async (data, user, transaction) => {
 
     const res = registration.save({ transaction })
 
+    data.status = changedStatus
     const postChanged = postChangedExemptionAudit(data)
 
     await sendUpdateToAudit(EXEMPTION, preChanged, postChanged, user)
@@ -51,21 +52,23 @@ const autoChangeStatus = async (cdo, data, transaction) => {
 
   if (currentStatus === constants.statuses.PreExempt) {
     if (!cdo.registration.removed_from_cdo_process && data.removedFromCdoProcess) {
-      await updateStatus(cdo.index_number, constants.statuses.Failed, transaction)
+      return await updateStatus(cdo.index_number, constants.statuses.Failed, transaction)
     } else if (data.insurance?.renewalDate && isFuture(data.insurance?.renewalDate) && !cdo.registration.certificate_issued && data.certificateIssued) {
-      await updateStatus(cdo.index_number, constants.statuses.Exempt, transaction)
+      return await updateStatus(cdo.index_number, constants.statuses.Exempt, transaction)
     }
   } else if (currentStatus === constants.statuses.InterimExempt) {
     if (!cdo.registration.cdo_issued && data.cdoIssued) {
-      await updateStatus(cdo.index_number, constants.statuses.PreExempt, transaction)
+      return await updateStatus(cdo.index_number, constants.statuses.PreExempt, transaction)
     }
   }
 
   if (cdo.registration.exemption_order?.exemption_order === '2023') {
     if (!cdo.registration.withdrawn && data.withdrawn) {
-      await updateStatus(cdo.index_number, constants.statuses.Withdrawn, transaction)
+      return await updateStatus(cdo.index_number, constants.statuses.Withdrawn, transaction)
     }
   }
+
+  return currentStatus
 }
 
 const lookupCdo = async (data) => {
