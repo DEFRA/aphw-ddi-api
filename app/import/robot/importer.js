@@ -88,7 +88,7 @@ const autoCorrectDataValues = (row) => {
   row.owner.birthDate = autoCorrectDate(row.owner.birthDate)
   row.dog.name = truncateIfTooLong(row.dog.name, 32, row, 'dogName')
   row.dog.colour = truncateIfTooLong(row.dog.colour, 50, row, 'colour')
-  const microchipClean = (row.dog.microchipNumber ? row.dog.microchipNumber : '').toString().replace(/\u0020/g, '')
+  const microchipClean = (row.dog.microchipNumber ? row.dog.microchipNumber : '').toString().replace(/\u0020/g, '').replace(/-/g, '').replace(/\u2013/g, '')
   row.dog.microchipNumber = truncateIfTooLong(microchipClean, 24, row, 'microchipNumber')
   row.owner.address.addressLine1 = truncateIfTooLong(row.owner.address.addressLine1, 50, row, 'addressLine1')
   row.owner.address.addressLine2 = truncateIfTooLong(row.owner.address.addressLine2, 50, row, 'addressLine2')
