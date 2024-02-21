@@ -73,6 +73,27 @@ describe('CDO repo', () => {
     expect(cdo.dogs).toEqual(dogs)
   })
 
+  test('createCdo should handle multiple dogs sending multiple audit events', async () => {
+    const owners = [{ id: 1, ...mockCdoPayload.owner }]
+    const dogs = [{ id: 1, ...mockCdoPayload.dogs[0] }, { id: 2, ...mockCdoPayload.dogs[1] }]
+
+    createPeople.mockResolvedValue(owners)
+    createDogs.mockResolvedValue(dogs)
+    addToSearchIndex.mockResolvedValue()
+
+    const cdo = await createCdo(mockCdoPayload, devUser, {})
+
+    expect(cdo.owner).toEqual(owners[0])
+    expect(cdo.dogs).toEqual(dogs)
+    expect(sendEvent).toHaveBeenCalledTimes(2)
+    const callPayload1 = JSON.parse(sendEvent.mock.calls[0][0].data.message)
+    expect(callPayload1.created.owner.lastName).toBe('Bloggs')
+    expect(callPayload1.created.dog.name).toBe('Buster')
+    const callPayload2 = JSON.parse(sendEvent.mock.calls[1][0].data.message)
+    expect(callPayload2.created.owner.lastName).toBe('Bloggs')
+    expect(callPayload2.created.dog.name).toBe('Alice')
+  })
+
   test('createCdo should throw if error', async () => {
     createPeople.mockRejectedValue(new Error('Test error'))
 
@@ -88,7 +109,7 @@ describe('CDO repo', () => {
     addToSearchIndex.mockResolvedValue()
     getDogByIndexNumber.mockResolvedValue({ id: 1, index_number: 'ED1' })
 
-    await expect(createCdo(mockCdoPayload, '', {})).rejects.toThrow('Username and displayname are required for auditing')
+    await expect(createCdo(mockCdoPayload, {}, {})).rejects.toThrow('Username and displayname are required for auditing')
   })
 
   test('getCdo should return CDO', async () => {

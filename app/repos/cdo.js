@@ -17,6 +17,11 @@ const createCdo = async (data, user, transaction) => {
     for (const owner of owners) {
       for (const dog of dogs) {
         await addToSearchIndex(owner, dog.id, transaction)
+        const entity = {
+          owner,
+          dog
+        }
+        await sendCreateToAudit(CDO, entity, user)
       }
     }
 
@@ -24,8 +29,6 @@ const createCdo = async (data, user, transaction) => {
       owner: owners[0],
       dogs
     }
-
-    await sendCreateToAudit(CDO, cdo, user)
 
     return cdo
   } catch (err) {

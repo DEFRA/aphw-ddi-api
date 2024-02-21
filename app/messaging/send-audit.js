@@ -104,7 +104,7 @@ const sendUpdateToAudit = async (auditObjectName, entityPre, entityPost, user) =
 
 const determineCreatePk = (objName, entity) => {
   if (objName === CDO) {
-    return entity.dogs?.length > 0 ? entity.dogs[0].index_number : null
+    return entity.dog.index_number
   } else if (objName === DOG) {
     return entity.index_number
   }
