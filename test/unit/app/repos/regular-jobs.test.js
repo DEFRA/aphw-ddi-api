@@ -1,3 +1,5 @@
+const { jobs: mockJobs } = require('../../../mocks/jobs')
+
 describe('RegularJobs repo', () => {
   jest.mock('../../../../app/config/db', () => ({
     models: {
@@ -5,9 +7,11 @@ describe('RegularJobs repo', () => {
         create: jest.fn(),
         save: jest.fn(),
         findOne: jest.fn(),
-        findByPk: jest.fn()
+        findByPk: jest.fn(),
+        findAll: jest.fn()
       }
     },
+    col: jest.fn(),
     transaction: jest.fn().mockImplementation((transactionCallback) => {
       transactionCallback()
     })
@@ -18,7 +22,7 @@ describe('RegularJobs repo', () => {
   jest.mock('../../../../app/overnight/auto-update-statuses')
   const { autoUpdateStatuses } = require('../../../../app/overnight/auto-update-statuses')
 
-  const { tryStartJob, endJob } = require('../../../../app/repos/regular-jobs')
+  const { tryStartJob, endJob, getRegularJobs } = require('../../../../app/repos/regular-jobs')
 
   beforeEach(async () => {
     jest.clearAllMocks()
@@ -103,5 +107,13 @@ describe('RegularJobs repo', () => {
     sequelize.models.regular_job.findByPk.mockImplementation(() => { throw new Error('dummy error') })
 
     await expect(endJob(3, 'result text', {})).rejects.toThrow('Error finishing overnight job: 3 Error: dummy error')
+  })
+
+  test('getJobs should return jobs', async () => {
+    sequelize.models.regular_job.findAll.mockResolvedValue(mockJobs)
+
+    await getRegularJobs()
+
+    expect(sequelize.models.regular_job.findAll).toHaveBeenCalledTimes(1)
   })
 })
