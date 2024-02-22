@@ -32,10 +32,10 @@ describe('Export endpoint', () => {
     expect(readExportFile).toHaveBeenCalled()
   })
 
-  test('GET /export-trigger-overnight route returns 200 and calls runOvernightJobs', async () => {
+  test('GET /trigger-overnight route returns 200 and calls runOvernightJobs', async () => {
     const options = {
       method: 'GET',
-      url: '/export-trigger-overnight'
+      url: '/trigger-overnight'
     }
 
     runOvernightJobs.mockResolvedValue()

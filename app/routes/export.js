@@ -19,9 +19,9 @@ module.exports = [{
 },
 {
   method: 'GET',
-  path: '/export-trigger-overnight',
+  path: '/trigger-overnight',
   handler: async (request, h) => {
-    await runOvernightJobs()
+    runOvernightJobs()
 
     return h.response().code(200)
   }
