@@ -16,7 +16,8 @@ const routes = [].concat(
   require('../routes/exemption'),
   require('../routes/insurance'),
   require('../routes/export'),
-  require('../routes/activities')
+  require('../routes/activities'),
+  require('../routes/create-fake-data')
 )
 
 module.exports = {

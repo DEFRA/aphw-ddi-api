@@ -1,14 +1,15 @@
 const sequelize = require('../config/db')
 const { Op } = require('sequelize')
-const { autoUpdateStatuses } = require('../overnight/auto-update-statuses')
+// const { autoUpdateStatuses } = require('../overnight/auto-update-statuses')
 const { createExportFile } = require('../overnight/create-export-file')
 
 const runOvernightJobs = async () => {
   const jobId = await tryStartJob()
 
   if (jobId) {
-    let result = await autoUpdateStatuses()
-    result = result + ' | ' + await createExportFile()
+    // let result = await autoUpdateStatuses()
+    // result = result + ' | ' + await createExportFile()
+    const result = await createExportFile()
     await endJob(jobId, result)
     return result
   }
