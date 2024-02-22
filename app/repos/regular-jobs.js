@@ -3,6 +3,19 @@ const { Op } = require('sequelize')
 const { autoUpdateStatuses } = require('../overnight/auto-update-statuses')
 const { createExportFile } = require('../overnight/create-export-file')
 
+const getRegularJobs = async () => {
+  try {
+    const jobs = await sequelize.models.regular_job.findAll({
+      order: [[sequelize.col('regular_job.id'), 'DESC']]
+    })
+
+    return jobs
+  } catch (e) {
+    console.log(`Error retrieving regular-jobs: ${e}`)
+    throw e
+  }
+}
+
 const runOvernightJobs = async () => {
   const jobId = await tryStartJob()
 
@@ -83,5 +96,6 @@ const endJob = async (jobId, resultText, trans) => {
 module.exports = {
   runOvernightJobs,
   tryStartJob,
-  endJob
+  endJob,
+  getRegularJobs
 }
