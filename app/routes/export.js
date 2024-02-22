@@ -16,13 +16,4 @@ module.exports = [{
       csv
     }).code(200)
   }
-},
-{
-  method: 'GET',
-  path: '/trigger-overnight',
-  handler: async (request, h) => {
-    runOvernightJobs()
-
-    return h.response().code(200)
-  }
 }]

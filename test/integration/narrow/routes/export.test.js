@@ -8,9 +8,6 @@ describe('Export endpoint', () => {
   jest.mock('../../../../app/messaging/send-audit')
   const { sendEventToAudit } = require('../../../../app/messaging/send-audit')
 
-  jest.mock('../../../../app/repos/regular-jobs')
-  const { runOvernightJobs } = require('../../../../app/repos/regular-jobs')
-
   beforeEach(async () => {
     jest.clearAllMocks()
     server = await createServer()
@@ -30,20 +27,6 @@ describe('Export endpoint', () => {
 
     expect(response.statusCode).toBe(200)
     expect(readExportFile).toHaveBeenCalled()
-  })
-
-  test('GET /trigger-overnight route returns 200 and calls runOvernightJobs', async () => {
-    const options = {
-      method: 'GET',
-      url: '/trigger-overnight'
-    }
-
-    runOvernightJobs.mockResolvedValue()
-
-    const response = await server.inject(options)
-
-    expect(response.statusCode).toBe(200)
-    expect(runOvernightJobs).toHaveBeenCalled()
   })
 
   afterEach(async () => {
