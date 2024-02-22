@@ -47,8 +47,9 @@ const tryStartJob = async (trans) => {
 
       console.log(`Job started for today - jobId: ${newJob?.id}`)
       jobId = newJob.id
+    } else {
+      console.log('Job for today already running or run')
     }
-    console.log('Job for today already running or run')
   } catch (e) {
     console.log(`Error starting overnight job: ${e}`)
     throw new Error(`Error starting overnight job: ${e} ${e.stack}`)

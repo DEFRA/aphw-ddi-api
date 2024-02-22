@@ -29,7 +29,7 @@ const updateExemption = async (data, user, transaction) => {
 
     handleOrder2023(registration, data)
 
-    await handleOrder2015(registration, data, cdo)
+    await handleCourt(registration, data, cdo)
 
     await createOrUpdateInsurance(data, cdo, transaction)
 
@@ -114,8 +114,8 @@ const handleOrder2023 = (registration, data) => {
   }
 }
 
-const handleOrder2015 = async (registration, data, cdo) => {
-  if (registration.exemption_order.exemption_order === '2015' && cdo?.status?.status !== constants.statuses.InterimExempt) {
+const handleCourt = async (registration, data, cdo) => {
+  if (data.court && data.court !== '') {
     const court = await getCourt(data.court)
 
     if (!court) {
