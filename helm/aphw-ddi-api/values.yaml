@@ -51,17 +51,17 @@ livenessProbe:
   path: /healthz
   port: 3000
   initialDelaySeconds: 20
-  periodSeconds: 10
+  periodSeconds: 30
   failureThreshold: 3
-  timeoutSeconds: 5
+  timeoutSeconds: 60
 
 readinessProbe:
   path: /healthy
   port: 3000
   initialDelaySeconds: 30
-  periodSeconds: 10
+  periodSeconds: 30
   failureThreshold: 3
-  timeoutSeconds: 5
+  timeoutSeconds: 60
 
 ingress:
   class: nginx
