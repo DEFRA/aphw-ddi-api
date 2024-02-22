@@ -53,7 +53,7 @@ livenessProbe:
   initialDelaySeconds: 20
   periodSeconds: 30
   failureThreshold: 3
-  timeoutSeconds: 60
+  timeoutSeconds: 120
 
 readinessProbe:
   path: /healthy
@@ -61,7 +61,7 @@ readinessProbe:
   initialDelaySeconds: 30
   periodSeconds: 30
   failureThreshold: 3
-  timeoutSeconds: 60
+  timeoutSeconds: 120
 
 ingress:
   class: nginx
