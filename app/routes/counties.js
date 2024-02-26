@@ -3,6 +3,7 @@ const { county } = require('../data')
 module.exports = {
   method: 'GET',
   path: '/counties',
+  options: { tags: ['api'] },
   handler: async (request, h) => {
     const counties = await county.findAll({
       attributes: ['county']

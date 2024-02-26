@@ -10,6 +10,7 @@ module.exports = {
   method: 'POST',
   path: '/certificate',
   options: {
+    tags: ['api'],
     validate: {
       payload: Joi.object({
         indexNumber: Joi.string().required()

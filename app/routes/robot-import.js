@@ -6,6 +6,7 @@ module.exports = [{
   method: 'POST',
   path: '/robot-import',
   options: {
+    tags: ['api'],
     validate: {
       headers: Joi.object({
         'content-type': Joi.string().valid('application/json').required()

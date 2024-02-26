@@ -7,6 +7,7 @@ const { runOvernightJobs } = require('../repos/regular-jobs')
 module.exports = [{
   method: 'GET',
   path: '/export',
+  options: { tags: ['api'] },
   handler: async (request, h) => {
     const csv = await readExportFile()
 

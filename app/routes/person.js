@@ -8,6 +8,7 @@ module.exports = [{
   method: 'GET',
   path: '/person/{reference}',
   options: {
+    tags: ['api'],
     validate: {
       params: Joi.object({
         reference: Joi.string().required()
@@ -34,6 +35,7 @@ module.exports = [{
   method: 'PUT',
   path: '/person',
   options: {
+    tags: ['api'],
     validate: {
       payload: updateSchema,
       failAction: (request, h, error) => {

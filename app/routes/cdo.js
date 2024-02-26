@@ -6,6 +6,7 @@ const cdoCreateSchema = require('../schema/cdo/create')
 module.exports = [{
   method: 'GET',
   path: '/cdo/{indexNumber}',
+  options: { tags: ['api'] },
   handler: async (request, h) => {
     const indexNumber = request.params.indexNumber
     try {

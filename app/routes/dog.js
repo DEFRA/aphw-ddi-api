@@ -7,6 +7,7 @@ const { getOwnerOfDog } = require('../repos/people')
 module.exports = [{
   method: 'GET',
   path: '/dog/{indexNumber}',
+  options: { tags: ['api'] },
   handler: async (request, h) => {
     const indexNumber = request.params.indexNumber
     try {
@@ -21,6 +22,7 @@ module.exports = [{
 {
   method: 'GET',
   path: '/dog-owner/{indexNumber}',
+  options: { tags: ['api'] },
   handler: async (request, h) => {
     const indexNumber = request.params.indexNumber
 
@@ -36,6 +38,7 @@ module.exports = [{
 {
   method: 'POST',
   path: '/dog',
+  options: { tags: ['api'] },
   handler: async (request, h) => {
     if (!request.payload?.dog) {
       return h.response().code(400)
@@ -49,6 +52,7 @@ module.exports = [{
 {
   method: 'PUT',
   path: '/dog',
+  options: { tags: ['api'] },
   handler: async (request, h) => {
     if (!request.payload?.indexNumber) {
       return h.response().code(400)

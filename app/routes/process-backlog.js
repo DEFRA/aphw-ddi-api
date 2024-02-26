@@ -11,6 +11,7 @@ const buildConfig = (request) => ({
 module.exports = {
   method: 'GET',
   path: '/process-backlog',
+  options: { tags: ['api'] },
   handler: async (request, h) => {
     const config = buildConfig(request)
     let res = null

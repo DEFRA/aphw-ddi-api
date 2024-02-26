@@ -17,7 +17,9 @@ async function createServer () {
     }
   })
 
+  await server.register(require('./plugins/open-api'))
   await server.register(require('./plugins/router'))
+
   setupCron()
 
   return server
