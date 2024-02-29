@@ -19,6 +19,16 @@ services:
     environment:
       AZURE_STORAGE_CONNECTION_STRING: "DefaultEndpointsProtocol=http;AccountName=devstoreaccount1;AccountKey=Eby8vdM02xNOcqFlqUwJPLlmEtlCDXJ1OUzFT50uSRZ6IFsuFq2UVErCz4I6tq/K1SZFPTOtr/KBHBeksoGMGw==;BlobEndpoint=http://aphw-ddi-api-azurite:10000/devstoreaccount1"
       ROBOT_IMPORT_POLICE_API_URL: http://host.docker.internal:3000/force
+      PACT_BROKER_URL: ${PACT_BROKER_URL:-notset}
+      PACT_BROKER_USERNAME: ${PACT_BROKER_USERNAME:-notset}
+      PACT_BROKER_PASSWORD: ${PACT_BROKER_PASSWORD:-notset}
 
   aphw-ddi-api-azurite:
     image: mcr.microsoft.com/azure-storage/azurite:3.23.0
+
+  aphw-ddi-api-postgres:
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+volumes:
+  postgres_data:
