@@ -6,7 +6,8 @@ const payload = {
     address: {
       addressLine1: '14 Fake Street',
       town: 'Fake Town',
-      postcode: 'FA1 2KE'
+      postcode: 'FA1 2KE',
+      country: 'England'
     }
   },
   enforcementDetails: {

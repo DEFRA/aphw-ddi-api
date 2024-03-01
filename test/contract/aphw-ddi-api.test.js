@@ -9,7 +9,7 @@ describe('Pact Verification', () => {
   let server
 
   async function createTestData () {
-    await dbHelper.truncate()
+
   }
 
   beforeAll(async () => {
@@ -32,13 +32,15 @@ describe('Pact Verification', () => {
       pactBrokerPassword: process.env.PACT_BROKER_PASSWORD,
       stateHandlers: {
         'countries exist': async () => {
+          await dbHelper.truncate()
           await dbHelper.createCountryRecords([
             { id: 1, country: 'England' },
             { id: 2, country: 'Scotland' },
             { id: 3, country: 'Wales' }
           ])
           return 'Countries added to db'
-        }
+        },
+        'cdo includes optional data and country': () => true
       }
     }
 
