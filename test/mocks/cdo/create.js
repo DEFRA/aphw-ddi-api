@@ -3,6 +3,7 @@ const payload = {
     firstName: 'Joe',
     lastName: 'Bloggs',
     dateOfBirth: '1998-05-10',
+    personReference: 'P-6076-A37C',
     address: {
       addressLine1: '14 Fake Street',
       town: 'Fake Town',
