@@ -15,6 +15,7 @@ module.exports = [{
       if (dog === null) {
         return h.response().code(404)
       }
+
       return h.response({ dog: dogDto(dog) }).code(200)
     } catch (e) {
       console.log(e)
