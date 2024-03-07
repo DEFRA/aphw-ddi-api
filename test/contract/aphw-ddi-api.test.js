@@ -10,6 +10,8 @@ describe('Pact Verification', () => {
 
   beforeAll(async () => {
     createServer = require('../../app/server')
+    await dbHelper.truncate()
+    await dbHelper.addPerson()
   })
 
   beforeEach(async () => {
@@ -35,7 +37,10 @@ describe('Pact Verification', () => {
           // ])
           return 'Countries added to db'
         },
-        'cdo includes optional data and country': () => true
+        'cdo includes optional data and country': () => true,
+        'owner already exists in the db': async () => {
+          return true
+        }
       }
     }
 

@@ -3,7 +3,6 @@ const payload = {
     firstName: 'Joe',
     lastName: 'Bloggs',
     dateOfBirth: '1998-05-10',
-    personReference: 'P-6076-A37C',
     address: {
       addressLine1: '14 Fake Street',
       town: 'Fake Town',
@@ -36,4 +35,14 @@ const payload = {
   ]
 }
 
-module.exports = payload
+const payloadWithPersonReference = {
+  ...payload,
+  owner: {
+    ...payload.owner,
+    personReference: 'P-6076-A37C'
+  }
+}
+
+const owner = payload.owner
+
+module.exports = { payload, payloadWithPersonReference, owner }
