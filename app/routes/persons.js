@@ -1,6 +1,8 @@
 // const { getPersonByReference, getPersonAndDogsByReference } = require('../repos/people')
 // const { personDto, personAndDogsDto } = require('../dto/person')
 const { personsFilter } = require('../schema/persons/get')
+const { getPersons } = require('../repos/persons')
+const { personDto } = require('../dto/person')
 
 module.exports = [
   {
@@ -14,18 +16,12 @@ module.exports = [
         }
       },
       handler: async (request, h) => {
-        // const filter = request.query
-        // const includeDogs = request.query.includeDogs === 'true'
-        // const person = includeDogs ? await getPersonAndDogsByReference(ref) : await getPersonByReference(ref)
-        //
-        // if (person === null) {
-        //   return h.response().code(204)
-        // }
-        //
-        // const result = includeDogs ? personAndDogsDto(person) : personDto(person)
+        const filter = request.query
+        const personDaos = await getPersons(filter)
+        const persons = personDaos.map(personDto)
 
         const result = {
-          persons: []
+          persons
         }
         return h.response(result).code(200)
       }
