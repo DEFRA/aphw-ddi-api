@@ -2,6 +2,7 @@ const { cdoCreateDto, cdoViewDto } = require('../dto/cdo')
 const { createCdo, getCdo } = require('../repos/cdo')
 const { getCallingUser } = require('../auth/get-user')
 const cdoCreateSchema = require('../schema/cdo/create')
+const { NotFoundError } = require('../errors/notFound')
 
 module.exports = [{
   method: 'GET',
@@ -35,11 +36,17 @@ module.exports = [{
       }
     },
     handler: async (request, h) => {
-      const created = await createCdo(request.payload, getCallingUser(request))
+      try {
+        const created = await createCdo(request.payload, getCallingUser(request))
+        const res = cdoCreateDto(created)
 
-      const res = cdoCreateDto(created)
-
-      return h.response(res).code(200)
+        return h.response(res).code(200)
+      } catch (e) {
+        if (e instanceof NotFoundError) {
+          return h.response().code(422).takeover()
+        }
+        throw e
+      }
     }
   }
 }]

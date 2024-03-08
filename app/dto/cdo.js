@@ -22,7 +22,8 @@ const cdoCreateDto = (data) => ({
       town: data.owner.address.town,
       postcode: data.owner.address.postcode,
       country: data.owner.address.country.country
-    }
+    },
+    personReference: data.owner.person_reference
   },
   enforcementDetails: {
     policeForce: data.dogs[0].registration.police_force.name,

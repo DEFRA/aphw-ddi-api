@@ -1,6 +1,6 @@
 const { breeds: mockBreeds } = require('../../../mocks/dog-breeds')
 const { statuses: mockStatuses } = require('../../../mocks/statuses')
-const mockCdoPayload = require('../../../mocks/cdo/create')
+const { payload: mockCdoPayload } = require('../../../mocks/cdo/create')
 
 jest.mock('../../../../app/repos/insurance')
 const { createInsurance } = require('../../../../app/repos/insurance')

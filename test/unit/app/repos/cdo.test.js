@@ -1,4 +1,6 @@
-const mockCdoPayload = require('../../../mocks/cdo/create')
+const { payload: mockCdoPayload, payloadWithPersonReference: mockCdoPayloadWithRef } = require('../../../mocks/cdo/create')
+const { NotFoundError } = require('../../../../app/errors/notFound')
+const { personDao: mockPersonPayload, createdPersonDao: mockCreatedPersonPayload } = require('../../../mocks/person')
 
 const devUser = {
   username: 'dev-user@test.com',
@@ -20,7 +22,7 @@ describe('CDO repo', () => {
   const sequelize = require('../../../../app/config/db')
 
   jest.mock('../../../../app/repos/people')
-  const { createPeople } = require('../../../../app/repos/people')
+  const { createPeople, getPersonByReference } = require('../../../../app/repos/people')
 
   jest.mock('../../../../app/repos/dogs')
   const { createDogs, getDogByIndexNumber } = require('../../../../app/repos/dogs')
@@ -71,6 +73,42 @@ describe('CDO repo', () => {
 
     expect(cdo.owner).toEqual(owners[0])
     expect(cdo.dogs).toEqual(dogs)
+  })
+
+  test('createCdo should use existing owner record if valid owner personReference is supplied', async () => {
+    const owner = { id: 1, ...mockPersonPayload }
+    const expectedOwner = { id: 1, ...mockCreatedPersonPayload }
+    const dogs = [{ id: 1, ...mockCdoPayloadWithRef.dogs[0] }]
+
+    getPersonByReference.mockResolvedValue(owner)
+    createDogs.mockResolvedValue(dogs)
+    addToSearchIndex.mockResolvedValue()
+    getDogByIndexNumber.mockResolvedValue({ id: 1, index_number: 'ED1' })
+
+    const cdo = await createCdo(mockCdoPayloadWithRef, devUser, {})
+
+    expect(cdo.owner).toEqual(expectedOwner)
+    expect(cdo.dogs).toEqual(dogs)
+    expect(createPeople).not.toHaveBeenCalled()
+    expect(getPersonByReference).toHaveBeenCalledWith('P-6076-A37C', expect.anything())
+  })
+
+  test('createCdo throw a NotFoundError if invalid owner personReference is supplied', async () => {
+    const owners = [{ id: 1, ...mockCdoPayloadWithRef.owner }]
+    const dogs = [{ id: 1, ...mockCdoPayloadWithRef.dogs[0] }]
+
+    getPersonByReference.mockResolvedValue(null)
+    createPeople.mockResolvedValue(owners)
+    createDogs.mockResolvedValue(dogs)
+    addToSearchIndex.mockResolvedValue()
+    getDogByIndexNumber.mockResolvedValue({ id: 1, index_number: 'ED1' })
+
+    await expect(createCdo(mockCdoPayloadWithRef, devUser, {})).rejects.toThrow(NotFoundError)
+
+    expect(createPeople).not.toHaveBeenCalled()
+    expect(createDogs).not.toHaveBeenCalled()
+    expect(addToSearchIndex).not.toHaveBeenCalled()
+    expect(sendEvent).not.toHaveBeenCalled()
   })
 
   test('createCdo should handle multiple dogs sending multiple audit events', async () => {

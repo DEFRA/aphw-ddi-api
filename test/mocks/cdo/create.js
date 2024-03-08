@@ -35,4 +35,14 @@ const payload = {
   ]
 }
 
-module.exports = payload
+const payloadWithPersonReference = {
+  ...payload,
+  owner: {
+    ...payload.owner,
+    personReference: 'P-6076-A37C'
+  }
+}
+
+const owner = payload.owner
+
+module.exports = { payload, payloadWithPersonReference, owner }
