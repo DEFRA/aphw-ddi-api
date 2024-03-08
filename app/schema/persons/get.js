@@ -19,6 +19,11 @@ const personsResponse = Joi.object({
       postcode: Joi.string().required(),
       county: Joi.string().allow('').allow(null).optional(),
       country: Joi.string().required()
+    }),
+    contacts: Joi.object({
+      emails: Joi.array().items(Joi.string()),
+      primaryTelephones: Joi.array().items(Joi.string()),
+      secondaryTelephones: Joi.array().items(Joi.string())
     })
   }))
 })

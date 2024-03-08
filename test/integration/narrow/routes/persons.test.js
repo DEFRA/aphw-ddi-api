@@ -16,7 +16,7 @@ describe('CDO endpoint', () => {
       url: '/persons'
     }
 
-    // const expectedPerson = {
+    // const expectedPersons = [{
     //   firstName: 'John',
     //   lastName: 'Doe',
     //   birthDate: '1990-01-01',
@@ -32,10 +32,10 @@ describe('CDO endpoint', () => {
     //     emails: [
     //       'test@example.com'
     //     ],
-    //     primaryTelephones: [],
-    //     secondaryTelephones: []
+    //     primaryTelephones: ['01234567890'],
+    //     secondaryTelephones: ['07890123456']
     //   }
-    // }
+    // }]
 
     // getPersonByReference.mockResolvedValue({
     //   first_name: 'John',

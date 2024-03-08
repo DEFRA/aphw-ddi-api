@@ -97,7 +97,12 @@ describe('getPersons schema', () => {
               postcode: 'S1 1AA',
               country: 'England'
             },
-            personReference: 'P-DB0D-A045'
+            personReference: 'P-DB0D-A045',
+            contacts: {
+              emails: ['sammy.leannon@example.com'],
+              primaryTelephones: ['01234567890'],
+              secondaryTelephones: ['07890123456']
+            }
           }
         ]
       }
@@ -115,7 +120,63 @@ describe('getPersons schema', () => {
               postcode: 'S1 1AA',
               country: 'England'
             },
-            personReference: 'P-DB0D-A045'
+            personReference: 'P-DB0D-A045',
+            contacts: {
+              emails: ['sammy.leannon@example.com'],
+              primaryTelephones: ['01234567890'],
+              secondaryTelephones: ['07890123456']
+            }
+          }
+        ]
+      }
+
+      const validation = personsResponse.validate(response, { abortEarly: false })
+      expect(validation.error).toBeUndefined()
+      expect(validation.value).toEqual(expectedResponse)
+    })
+    test('should allow empty contact details', () => {
+      const response = {
+        persons: [
+          {
+            firstName: 'Sammy',
+            lastName: 'Leannon',
+            birthDate: '1998-05-10',
+            address: {
+              addressLine1: '0141 Kihn Village EDITED',
+              addressLine2: null,
+              town: 'City of London',
+              postcode: 'S1 1AA',
+              country: 'England'
+            },
+            personReference: 'P-DB0D-A045',
+            contacts: {
+              emails: [],
+              primaryTelephones: [],
+              secondaryTelephones: []
+            }
+          }
+        ]
+      }
+
+      const expectedResponse = {
+        persons: [
+          {
+            firstName: 'Sammy',
+            lastName: 'Leannon',
+            birthDate: '1998-05-10',
+            address: {
+              addressLine1: '0141 Kihn Village EDITED',
+              addressLine2: null,
+              town: 'City of London',
+              postcode: 'S1 1AA',
+              country: 'England'
+            },
+            personReference: 'P-DB0D-A045',
+            contacts: {
+              emails: [],
+              primaryTelephones: [],
+              secondaryTelephones: []
+            }
           }
         ]
       }
