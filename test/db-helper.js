@@ -2,7 +2,7 @@ require('../app/data')
 const sequelize = require('../app/config/db')
 const { getCountry } = require('../app/lookups')
 
-const truncate = async () => {
+const truncateDatabase = async () => {
   await sequelize.models.search_index.truncate()
   await sequelize.models.comment.truncate()
   await sequelize.models.dog_microchip.truncate()
@@ -64,7 +64,7 @@ const close = async () => {
 
 module.exports = {
   close,
-  truncate,
+  truncateDatabase,
   createCountryRecords,
   addPerson
 }

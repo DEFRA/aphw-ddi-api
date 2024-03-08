@@ -3,8 +3,8 @@
  * @returns {CreatedPersonDao}
  */
 const mapPersonDaoToCreatedPersonDao = (personDao) => {
-  const [personDaoAddressParent] = personDao.addresses
-  const personDaoAddress = personDaoAddressParent.address
+  const [latestAddress] = personDao.addresses
+  const personDaoAddress = latestAddress.address
 
   return {
     id: personDao.id,

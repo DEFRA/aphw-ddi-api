@@ -10,7 +10,7 @@ describe('Pact Verification', () => {
 
   beforeAll(async () => {
     createServer = require('../../app/server')
-    await dbHelper.truncate()
+    await dbHelper.truncateDatabase()
     await dbHelper.addPerson()
   })
 
