@@ -1,9 +1,11 @@
 const sequelize = require('../config/db')
-const { createPeople } = require('./people')
+const { createPeople, getPersonByReference } = require('./people')
 const { createDogs } = require('./dogs')
 const { addToSearchIndex } = require('./search')
 const { sendCreateToAudit } = require('../messaging/send-audit')
 const { CDO } = require('../constants/event/audit-event-object-types')
+const { NotFoundError } = require('../errors/notFound')
+const { mapPersonDaoToCreatedPersonDao } = require('./mappers/person')
 
 const createCdo = async (data, user, transaction) => {
   if (!transaction) {
@@ -11,7 +13,17 @@ const createCdo = async (data, user, transaction) => {
   }
 
   try {
-    const owners = await createPeople([data.owner], transaction)
+    let owners
+    if (data.owner.personReference) {
+      const person = await getPersonByReference(data.owner.personReference, transaction)
+      if (person === null) {
+        throw new NotFoundError('Owner not found')
+      }
+
+      owners = [mapPersonDaoToCreatedPersonDao(person)]
+    } else {
+      owners = await createPeople([data.owner], transaction)
+    }
     const dogs = await createDogs(data.dogs, owners, data.enforcementDetails, transaction)
 
     for (const owner of owners) {

@@ -1,4 +1,5 @@
-const mockCreatePayload = require('../../../mocks/cdo/create')
+const { payload: mockCreatePayload, payloadWithPersonReference: mockCreateWithRefPayload } = require('../../../mocks/cdo/create')
+const { NotFoundError } = require('../../../../app/errors/notFound')
 
 describe('CDO endpoint', () => {
   const createServer = require('../../../../app/server')
@@ -81,7 +82,8 @@ describe('CDO endpoint', () => {
           country: {
             country: 'England'
           }
-        }
+        },
+        person_reference: '1234'
       },
       dogs: [
         {
@@ -118,7 +120,8 @@ describe('CDO endpoint', () => {
           town: 'Test',
           postcode: 'TE1 1ST',
           country: 'England'
-        }
+        },
+        personReference: '1234'
       },
       enforcementDetails: {
         policeForce: 'Test Police Force',
@@ -135,6 +138,98 @@ describe('CDO endpoint', () => {
         }
       ]
     })
+  })
+
+  test('POST /cdo route returns 200 with valid payload and personReference', async () => {
+    const options = {
+      method: 'POST',
+      url: '/cdo',
+      payload: mockCreateWithRefPayload
+    }
+
+    createCdo.mockResolvedValue({
+      owner: {
+        first_name: 'John',
+        last_name: 'Doe',
+        birth_date: '1990-01-01',
+        address: {
+          address_line_1: '1 Test Street',
+          address_line_2: 'Test',
+          town: 'Test',
+          postcode: 'TE1 1ST',
+          country: {
+            country: 'England'
+          }
+        },
+        person_reference: 'P-6076-A37C'
+      },
+      dogs: [
+        {
+          index_number: 'ED10000',
+          name: 'Test Dog',
+          dog_breed: {
+            breed: 'Test Breed'
+          },
+          registration: {
+            police_force: {
+              name: 'Test Police Force'
+            },
+            court: {
+              name: 'Test Court'
+            },
+            cdo_issued: '2020-01-01',
+            cdo_expiry: '2020-02-01',
+            legislation_officer: 'Test Officer'
+          }
+        }
+      ]
+    })
+
+    const response = await server.inject(options)
+    expect(response.statusCode).toBe(200)
+    expect(response.result).toEqual({
+      owner: {
+        firstName: 'John',
+        lastName: 'Doe',
+        birthDate: '1990-01-01',
+        address: {
+          addressLine1: '1 Test Street',
+          addressLine2: 'Test',
+          town: 'Test',
+          postcode: 'TE1 1ST',
+          country: 'England'
+        },
+        personReference: 'P-6076-A37C'
+      },
+      enforcementDetails: {
+        policeForce: 'Test Police Force',
+        court: 'Test Court',
+        legislationOfficer: 'Test Officer'
+      },
+      dogs: [
+        {
+          indexNumber: 'ED10000',
+          name: 'Test Dog',
+          breed: 'Test Breed',
+          cdoIssued: '2020-01-01',
+          cdoExpiry: '2020-02-01'
+        }
+      ]
+    })
+  })
+
+  test('POST /cdo route returns 422 with invalid personReference', async () => {
+    const options = {
+      method: 'POST',
+      url: '/cdo',
+      payload: mockCreateWithRefPayload
+    }
+
+    createCdo.mockRejectedValue(new NotFoundError('Owner not found'))
+
+    const response = await server.inject(options)
+
+    expect(response.statusCode).toBe(422)
   })
 
   test('POST /cdo route returns 400 with invalid payload', async () => {

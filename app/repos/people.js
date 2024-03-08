@@ -7,6 +7,37 @@ const { sendUpdateToAudit } = require('../messaging/send-audit')
 const { PERSON } = require('../constants/event/audit-event-object-types')
 const { personDto } = require('../dto/person')
 
+/**
+ * @typedef CountryDao
+ * @property {number} [id]
+ * @property {string} country
+ */
+/**
+ * @typedef AddressDao
+ * @property {number} id
+ * @property {string} address_line_1
+ * @property {string|null} address_line_2
+ * @property {string} town
+ * @property {string} postcode
+ * @property {string|null} county
+ * @property {number} country_id
+ * @property {CountryDao} country
+ */
+/**
+ * @typedef CreatedPersonDao
+ * @property {number} id
+ * @property {string} first_name
+ * @property {string} last_name
+ * @property {string} birth_date
+ * @property {string} person_reference
+ * @property {AddressDao} address
+ */
+
+/**
+ * @param owners
+ * @param transaction
+ * @returns {Promise<CreatedPersonDao[]>}
+ */
 const createPeople = async (owners, transaction) => {
   if (!transaction) {
     return sequelize.transaction(async (t) => createPeople(owners, t))
@@ -70,46 +101,74 @@ const createPeople = async (owners, transaction) => {
     throw err
   }
 }
+/**
+ * @typedef PersonAddressDao
+ * @property {number} id
+ * @property {number} person_id
+ * @property {number} address_id
+ * @property {AddressDao} address
+ */
+/**
+ * @typedef PersonDao
+ * @property {number} id
+ * @property {string} first_name
+ * @property {string} last_name
+ * @property {string} person_reference
+ * @property {string} birth_date
+ * @property {PersonAddressDao[]} addresses
+ * @property {unknown[]} person_contacts
+ */
 
+/**
+ * @param {string} reference
+ * @param [transaction]
+ * @returns {Promise<PersonDao|null>}
+ */
 const getPersonByReference = async (reference, transaction) => {
   try {
-    const person = await sequelize.models.registered_person.findAll({
-      order: [[sequelize.col('person.addresses.address.id'), 'DESC']],
-      include: [{
-        model: sequelize.models.person,
-        where: { person_reference: reference },
-        as: 'person',
-        include: [{
+    const person = await sequelize.models.person.findAll({
+      order: [[sequelize.col('addresses.address.id'), 'DESC']],
+      where: { person_reference: reference },
+      include: [
+        {
           model: sequelize.models.person_address,
           as: 'addresses',
-          include: [{
-            model: sequelize.models.address,
-            as: 'address',
-            include: [{
-              attribute: ['country'],
-              model: sequelize.models.country,
-              as: 'country'
-            }]
-          }]
+          include: [
+            {
+              model: sequelize.models.address,
+              as: 'address',
+              include: [
+                {
+                  attribute: ['country'],
+                  model: sequelize.models.country,
+                  as: 'country'
+                }
+              ]
+            }
+          ]
         },
         {
           model: sequelize.models.person_contact,
           as: 'person_contacts',
           separate: true,
-          include: [{
-            model: sequelize.models.contact,
-            as: 'contact',
-            include: [{
-              model: sequelize.models.contact_type,
-              as: 'contact_type'
-            }]
-          }]
-        }]
-      }],
+          include: [
+            {
+              model: sequelize.models.contact,
+              as: 'contact',
+              include: [
+                {
+                  model: sequelize.models.contact_type,
+                  as: 'contact_type'
+                }
+              ]
+            }
+          ]
+        }
+      ],
       transaction
     })
 
-    return person?.length > 0 ? person[0]?.person : null
+    return person?.length > 0 ? person[0] : null
   } catch (err) {
     console.error(`Error getting person by reference: ${err}`)
     throw err
