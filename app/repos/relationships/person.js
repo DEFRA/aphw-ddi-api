@@ -1,5 +1,4 @@
-const sequelize = require('../../config/db')
-const personTableRelationships = [
+const personTableRelationships = (sequelize) => [
   {
     model: sequelize.models.person_address,
     as: 'addresses',

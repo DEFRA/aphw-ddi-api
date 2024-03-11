@@ -34,7 +34,7 @@ const getPersons = async (queryParams, transaction) => {
   try {
     return await sequelize.models.person.findAll({
       where,
-      include: personTableRelationships,
+      include: personTableRelationships(sequelize),
       order: [[sequelize.col('addresses.address.id'), 'DESC']],
       limit: MAX_RESULTS,
       subQuery: false,

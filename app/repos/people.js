@@ -154,7 +154,7 @@ const getPersonByReference = async (reference, transaction) => {
     const person = await sequelize.models.person.findAll({
       order: [[sequelize.col('addresses.address.id'), 'DESC']],
       where: { person_reference: reference },
-      include: personTableRelationships,
+      include: personTableRelationships(sequelize),
       transaction
     })
 
