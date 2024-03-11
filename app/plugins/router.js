@@ -8,6 +8,7 @@ const routes = [].concat(
   require('../routes/process-backlog'),
   require('../routes/robot-import'),
   require('../routes/person'),
+  require('../routes/persons'),
   require('../routes/search-index'),
   require('../routes/police-forces'),
   require('../routes/courts'),
