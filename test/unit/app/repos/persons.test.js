@@ -2,6 +2,7 @@ const { when } = require('jest-when')
 
 jest.mock('../../../../app/messaging/send-event')
 const { sendEvent } = require('../../../../app/messaging/send-event')
+
 describe('People repo', () => {
   jest.mock('../../../../app/config/db', () => ({
     models: {
@@ -57,7 +58,15 @@ describe('People repo', () => {
     sendEvent.mockResolvedValue()
   })
 
-  test('getPersons should return created people', async () => {
+  test('getPersons should use a transaction if one is passed', async () => {
+    const transaction = jest.fn()
+    await getPersons({}, transaction)
+    expect(sequelize.models.person.findAll).toBeCalledWith(expect.objectContaining({
+      transaction
+    }))
+  })
+
+  test('getPersons should return created people limited to 20 given no query params are passed', async () => {
     sequelize.models.person.findAll.mockResolvedValue([{
       dataValues: {
         id: 1,
@@ -105,6 +114,50 @@ describe('People repo', () => {
         }
       }
     ])
+
+    expect(sequelize.models.person.findAll).toBeCalledWith(expect.objectContaining({
+      limit: 20,
+      where: {}
+    }))
+  })
+
+  test('getPersons should return up to 20 created people given query parameters are passed', async () => {
+    sequelize.models.person.findAll.mockResolvedValue([{
+      dataValues: {
+        id: 1,
+        first_name: 'First',
+        last_name: 'Last',
+        person_reference: '1234',
+        addresses: [
+          {
+            id: 1,
+            address_line_1: 'Address 1',
+            address_line_2: 'Address 2',
+            town: 'Town',
+            postcode: 'Postcode',
+            country: {
+              id: 1,
+              country: 'England'
+            }
+          }
+        ]
+      }
+    }])
+
+    await getPersons({
+      firstName: 'John',
+      lastName: 'Smith',
+      dateOfBirth: '2000-01-01'
+    })
+
+    expect(sequelize.models.person.findAll).toBeCalledWith(expect.objectContaining({
+      limit: 20,
+      where: {
+        first_name: 'John',
+        last_name: 'Smith',
+        birth_date: '2000-01-01'
+      }
+    }))
   })
 
   test('getPersons should throw if error', async () => {
