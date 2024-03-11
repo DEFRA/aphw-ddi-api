@@ -1,12 +1,12 @@
 const Joi = require('joi')
 
-const personsFilter = Joi.object({
+const personsQueryParamsSchema = Joi.object({
   firstName: Joi.string().optional().allow('').allow(null),
   lastName: Joi.string().optional().allow('').allow(null),
   dateOfBirth: Joi.date().iso().allow(null).optional()
 })
 
-const personsResponse = Joi.object({
+const personsResponseSchema = Joi.object({
   persons: Joi.array().items(Joi.object({
     firstName: Joi.string().required(),
     lastName: Joi.string().required(),
@@ -29,6 +29,6 @@ const personsResponse = Joi.object({
 })
 
 module.exports = {
-  personsFilter,
-  personsResponse
+  personsQueryParamsSchema,
+  personsResponseSchema
 }

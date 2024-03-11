@@ -66,16 +66,14 @@ const createPeople = async (owners, transaction) => {
       } catch (e) {
         if (e instanceof UniqueConstraintError) {
           await unmanagedTransaction.rollback()
-          const duplicatePersonReference = e.fields.person_reference
-          let personReference = duplicatePersonReference
+          let personReference = createProperties.person_reference
 
-          while (personReference === duplicatePersonReference) {
+          while (personReference === createProperties.person_reference) {
             personReference = createRegistrationNumber()
           }
 
           person = await sequelize.models.person.create({ ...createProperties, person_reference: personReference }, { transaction })
         } else {
-          transaction.rollback()
           throw e
         }
       }

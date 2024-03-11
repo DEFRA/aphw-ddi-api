@@ -73,7 +73,7 @@ describe('CDO endpoint', () => {
         },
         {
           contact: {
-            id: 2,
+            id: 3,
             contact_type: { contact_type: 'SecondaryPhone' },
             contact: '07890123456'
           }
@@ -93,55 +93,6 @@ describe('CDO endpoint', () => {
       url: '/persons?firstName=Frodo&lastName=Baggins&dateOfBirth=2968-09-22'
     }
 
-    // const expectedPerson = {
-    //   firstName: 'Frodo',
-    //   lastName: 'Baggins',
-    //   birthDate: '2968-09-22',
-    //   personReference: 'ABC123',
-    //   address: {
-    //     addressLine1: 'Bag End',
-    //     addressLine2: 'Hobbiton',
-    //     town: 'The Shire',
-    //     postcode: 'SH1 2AA',
-    //     country: 'Eriador'
-    //   },
-    //   contacts: {
-    //     emails: [
-    //       'frodo@example.com'
-    //     ],
-    //     primaryTelephones: [],
-    //     secondaryTelephones: []
-    //   }
-    // }
-
-    // getPersonByReference.mockResolvedValue({
-    //   first_name: 'John',
-    //   last_name: 'Doe',
-    //   birth_date: '1990-01-01',
-    //   person_reference: 'ABC123',
-    //   addresses: [
-    //     {
-    //       address: {
-    //         address_line_1: '1 Test Street',
-    //         address_line_2: 'Test',
-    //         town: 'Test',
-    //         postcode: 'TE1 1ST',
-    //         country: {
-    //           country: 'England'
-    //         }
-    //       }
-    //     }
-    //   ],
-    //   person_contacts: [
-    //     {
-    //       contact: {
-    //         id: 1,
-    //         contact_type: { contact_type: 'Email' },
-    //         contact: 'test@example.com'
-    //       }
-    //     }
-    //   ]
-    // })
     getPersons.mockResolvedValue([])
 
     const response = await server.inject(options)

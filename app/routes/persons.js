@@ -1,6 +1,4 @@
-// const { getPersonByReference, getPersonAndDogsByReference } = require('../repos/people')
-// const { personDto, personAndDogsDto } = require('../dto/person')
-const { personsFilter } = require('../schema/persons/get')
+const { personsQueryParamsSchema } = require('../schema/persons/get')
 const { getPersons } = require('../repos/persons')
 const { personDto } = require('../dto/person')
 
@@ -10,7 +8,7 @@ module.exports = [
     path: '/persons',
     options: {
       validate: {
-        query: personsFilter,
+        query: personsQueryParamsSchema,
         failAction: (request, h, error) => {
           return h.response().code(400).takeover()
         }

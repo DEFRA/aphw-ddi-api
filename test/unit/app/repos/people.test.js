@@ -248,14 +248,10 @@ describe('People repo', () => {
 
     test('createPeople should throw if error', async () => {
       const people = [mockEnhancedOwner]
-      const transaction = {
-        rollback: jest.fn()
-      }
 
       sequelize.models.person.create.mockRejectedValue(new Error('Test error'))
 
-      await expect(createPeople(people, transaction, {})).rejects.toThrow('Test error')
-      expect(transaction.rollback).toBeCalled()
+      await expect(createPeople(people, {})).rejects.toThrow('Test error')
     })
   })
 

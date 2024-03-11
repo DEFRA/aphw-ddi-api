@@ -1,10 +1,10 @@
-const { personsFilter, personsResponse } = require('../../../../../app/schema/persons/get')
+const { personsQueryParamsSchema, personsResponseSchema } = require('../../../../../app/schema/persons/get')
 
 describe('getPersons schema', () => {
   describe('queryParams', () => {
     test('should validate given no filters are passed', () => {
       const queryParams = {}
-      const validation = personsFilter.validate(queryParams, { abortEarly: false })
+      const validation = personsQueryParamsSchema.validate(queryParams, { abortEarly: false })
 
       expect(validation).toEqual({ value: {} })
       expect(validation.error).not.toBeDefined()
@@ -21,7 +21,7 @@ describe('getPersons schema', () => {
         lastName: 'lastName',
         dateOfBirth: new Date('2000-01-01')
       }
-      const validation = personsFilter.validate(queryParams, { abortEarly: false })
+      const validation = personsQueryParamsSchema.validate(queryParams, { abortEarly: false })
 
       expect(validation).toEqual({ value: expectedQueryParams })
       expect(validation.error).not.toBeDefined()
@@ -33,7 +33,7 @@ describe('getPersons schema', () => {
         lastName: null,
         dateOfBirth: null
       }
-      const validation = personsFilter.validate(queryParams, { abortEarly: false })
+      const validation = personsQueryParamsSchema.validate(queryParams, { abortEarly: false })
 
       expect(validation).toEqual({ value: queryParams })
       expect(validation.error).toBeUndefined()
@@ -44,7 +44,7 @@ describe('getPersons schema', () => {
         firstName: '',
         lastName: ''
       }
-      const validation = personsFilter.validate(queryParams, { abortEarly: false })
+      const validation = personsQueryParamsSchema.validate(queryParams, { abortEarly: false })
 
       expect(validation).toEqual({ value: queryParams })
       expect(validation.error).toBeUndefined()
@@ -56,7 +56,7 @@ describe('getPersons schema', () => {
         lastName: 'lastName'
       }
 
-      const validation = personsFilter.validate(queryParams, { abortEarly: false })
+      const validation = personsQueryParamsSchema.validate(queryParams, { abortEarly: false })
       expect(validation).toEqual({ value: queryParams })
       expect(validation.error).toBeUndefined()
     })
@@ -68,7 +68,7 @@ describe('getPersons schema', () => {
         unknown: 'something'
       }
 
-      const validation = personsFilter.validate(queryParams, { abortEarly: false })
+      const validation = personsQueryParamsSchema.validate(queryParams, { abortEarly: false })
       expect(validation.error.message).toEqual('"unknown" is not allowed')
     })
 
@@ -77,7 +77,7 @@ describe('getPersons schema', () => {
         dateOfBirth: '20000-13-1'
       }
 
-      const validation = personsFilter.validate(queryParams, { abortEarly: false })
+      const validation = personsQueryParamsSchema.validate(queryParams, { abortEarly: false })
       expect(validation.error.message).toEqual('"dateOfBirth" must be in ISO 8601 date format')
     })
   })
@@ -130,7 +130,7 @@ describe('getPersons schema', () => {
         ]
       }
 
-      const validation = personsResponse.validate(response, { abortEarly: false })
+      const validation = personsResponseSchema.validate(response, { abortEarly: false })
       expect(validation.error).toBeUndefined()
       expect(validation.value).toEqual(expectedResponse)
     })
@@ -181,7 +181,7 @@ describe('getPersons schema', () => {
         ]
       }
 
-      const validation = personsResponse.validate(response, { abortEarly: false })
+      const validation = personsResponseSchema.validate(response, { abortEarly: false })
       expect(validation.error).toBeUndefined()
       expect(validation.value).toEqual(expectedResponse)
     })
