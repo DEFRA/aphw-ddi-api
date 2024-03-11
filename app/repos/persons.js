@@ -70,8 +70,9 @@ const getPersons = async (queryParams, transaction) => {
           ]
         }
       ],
-      // order: [[sequelize.col('person_address.address.id'), 'DESC']],
+      order: [[sequelize.col('addresses.address.id'), 'DESC']],
       limit: MAX_RESULTS,
+      subQuery: false,
       transaction
     })
   } catch (err) {
