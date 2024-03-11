@@ -1,11 +1,11 @@
+const sequelize = require('../config/db')
+const { personTableRelationships } = require('./relationships/person')
 /**
  * @typedef GetPersonsFilter
  * @property {string} [firstName]
  * @property {string} [lastName]
  * @property {Date} [dateOfBirth]
  */
-const sequelize = require('../config/db')
-
 const MAX_RESULTS = 20
 
 const dtoToModelMapping = {
@@ -34,42 +34,7 @@ const getPersons = async (queryParams, transaction) => {
   try {
     return await sequelize.models.person.findAll({
       where,
-      include: [
-        {
-          model: sequelize.models.person_address,
-          as: 'addresses',
-          include: [
-            {
-              model: sequelize.models.address,
-              as: 'address',
-              include: [
-                {
-                  attribute: ['country'],
-                  model: sequelize.models.country,
-                  as: 'country'
-                }
-              ]
-            }
-          ]
-        },
-        {
-          model: sequelize.models.person_contact,
-          as: 'person_contacts',
-          separate: true,
-          include: [
-            {
-              model: sequelize.models.contact,
-              as: 'contact',
-              include: [
-                {
-                  model: sequelize.models.contact_type,
-                  as: 'contact_type'
-                }
-              ]
-            }
-          ]
-        }
-      ],
+      include: personTableRelationships,
       order: [[sequelize.col('addresses.address.id'), 'DESC']],
       limit: MAX_RESULTS,
       subQuery: false,
