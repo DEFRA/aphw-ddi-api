@@ -6,6 +6,8 @@ const { updateSearchIndexPerson } = require('./search')
 const { sendUpdateToAudit } = require('../messaging/send-audit')
 const { PERSON } = require('../constants/event/audit-event-object-types')
 const { personDto } = require('../dto/person')
+const { UniqueConstraintError } = require('sequelize')
+const { personTableRelationships } = require('./relationships/person')
 
 /**
  * @typedef CountryDao
@@ -35,24 +37,47 @@ const { personDto } = require('../dto/person')
 
 /**
  * @param owners
- * @param transaction
+ * @param [transaction]
+ * @param  [transaction2]
  * @returns {Promise<CreatedPersonDao[]>}
+ *
  */
 const createPeople = async (owners, transaction) => {
   if (!transaction) {
     return sequelize.transaction(async (t) => createPeople(owners, t))
   }
+  const unmanagedTransaction = await sequelize.transaction()
 
   const createdPeople = []
 
   try {
     for (const owner of owners) {
-      const person = await sequelize.models.person.create({
+      const createProperties = {
         first_name: owner.firstName,
         last_name: owner.lastName,
         birth_date: owner.dateOfBirth ?? owner.birthDate,
         person_reference: createRegistrationNumber()
-      }, { transaction })
+      }
+
+      let person
+
+      try {
+        person = await sequelize.models.person.create(createProperties, { transaction: unmanagedTransaction })
+        await unmanagedTransaction.commit()
+      } catch (e) {
+        if (e instanceof UniqueConstraintError) {
+          await unmanagedTransaction.rollback()
+          let personReference = createProperties.person_reference
+
+          while (personReference === createProperties.person_reference) {
+            personReference = createRegistrationNumber()
+          }
+
+          person = await sequelize.models.person.create({ ...createProperties, person_reference: personReference }, { transaction })
+        } else {
+          throw e
+        }
+      }
 
       const country = await getCountry(owner.address.country)
 
@@ -129,42 +154,7 @@ const getPersonByReference = async (reference, transaction) => {
     const person = await sequelize.models.person.findAll({
       order: [[sequelize.col('addresses.address.id'), 'DESC']],
       where: { person_reference: reference },
-      include: [
-        {
-          model: sequelize.models.person_address,
-          as: 'addresses',
-          include: [
-            {
-              model: sequelize.models.address,
-              as: 'address',
-              include: [
-                {
-                  attribute: ['country'],
-                  model: sequelize.models.country,
-                  as: 'country'
-                }
-              ]
-            }
-          ]
-        },
-        {
-          model: sequelize.models.person_contact,
-          as: 'person_contacts',
-          separate: true,
-          include: [
-            {
-              model: sequelize.models.contact,
-              as: 'contact',
-              include: [
-                {
-                  model: sequelize.models.contact_type,
-                  as: 'contact_type'
-                }
-              ]
-            }
-          ]
-        }
-      ],
+      include: personTableRelationships(sequelize),
       transaction
     })
 
