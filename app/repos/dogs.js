@@ -128,6 +128,7 @@ const createDogs = async (dogs, owners, enforcement, transaction) => {
 
       if (dog.microchipNumber) {
         await createMicrochip(dog.microchipNumber, dogEntity.id, transaction)
+        dogResult.microchipNumber = dog.microchipNumber
       }
 
       for (const owner of owners) {

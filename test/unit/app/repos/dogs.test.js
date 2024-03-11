@@ -254,6 +254,62 @@ describe('Dog repo', () => {
     })
   })
 
+  test('createDogs should handle no microchip and source and insurance', async () => {
+    const mockDog = {
+      id: 1,
+      breed: 'Breed 1',
+      name: 'Dog 1',
+      source: 'ROBOT'
+    }
+
+    const mockRegistration = {
+      id: 1,
+      cdoIssued: '2020-01-01',
+      cdoExpiry: '2020-02-01'
+    }
+
+    sequelize.models.dog.create.mockResolvedValue({ ...mockDog })
+    sequelize.models.dog.findByPk.mockResolvedValue({ ...mockDog })
+
+    sequelize.models.registration.create.mockResolvedValue({ ...mockRegistration })
+    sequelize.models.registration.findByPk.mockResolvedValue({ ...mockRegistration })
+
+    sequelize.models.microchip.create.mockResolvedValue({ id: 456 })
+
+    const enforcement = {
+      policeForce: '1',
+      court: '1'
+    }
+
+    const owners = [{ id: 1, ...mockCdoPayload.owner }]
+    const dogs = [{
+      breed: 'Breed 1',
+      name: 'Dog 1',
+      cdoIssued: '2020-01-01',
+      cdoExpiry: '2020-02-01',
+      status: 'Status 1',
+      source: 'ROBOT',
+      insurance: {
+        company_name: 'Dog Insurers'
+      }
+    }]
+
+    const result = await createDogs(dogs, owners, enforcement, {})
+
+    expect(result).toHaveLength(1)
+    expect(result).toContainEqual({
+      id: 1,
+      breed: 'Breed 1',
+      name: 'Dog 1',
+      registration: {
+        id: 1,
+        cdoIssued: '2020-01-01',
+        cdoExpiry: '2020-02-01'
+      },
+      source: 'ROBOT'
+    })
+  })
+
   test('createDogs should throw if error', async () => {
     sequelize.models.dog.create.mockRejectedValue(new Error('Test error'))
 
