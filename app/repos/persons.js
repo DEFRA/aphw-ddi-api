@@ -30,7 +30,6 @@ const getPersons = async (queryParams, transaction) => {
     }
     return whereObject
   }, {})
-  console.log('~~~~~~ Chris Debug ~~~~~~ ', 'Where', where)
 
   try {
     return await sequelize.models.person.findAll({
