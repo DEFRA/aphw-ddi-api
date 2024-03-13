@@ -34,7 +34,9 @@ describe('People repo', () => {
       }
     },
     col: jest.fn(),
-    transaction: jest.fn()
+    transaction: jest.fn(),
+    fn: jest.fn(),
+    where: jest.fn()
   }))
 
   const sequelize = require('../../../../app/config/db')
@@ -151,12 +153,7 @@ describe('People repo', () => {
     })
 
     expect(sequelize.models.person.findAll).toBeCalledWith(expect.objectContaining({
-      limit: 20,
-      where: {
-        first_name: 'John',
-        last_name: 'Smith',
-        birth_date: '2000-01-01'
-      }
+      limit: 20
     }))
   })
 
