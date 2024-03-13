@@ -1,4 +1,5 @@
 const sequelize = require('../config/db')
+const { Op } = require('sequelize')
 const { personTableRelationships } = require('./relationships/person')
 /**
  * @typedef GetPersonsFilter
@@ -26,8 +27,12 @@ const getPersons = async (queryParams, transaction) => {
 
     if (query) {
       const dbColumnKey = dtoToModelMapping[key]
-      whereObject[dbColumnKey] = query
+      whereObject[dbColumnKey] = dbColumnKey !== 'birth_date'
+        ? sequelize.where(
+          sequelize.fn('lower', sequelize.col(dbColumnKey)), `${query.toLowerCase()}`)
+        : { [Op.eq]: `${query}` }
     }
+
     return whereObject
   }, {})
 
