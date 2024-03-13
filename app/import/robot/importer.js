@@ -100,6 +100,9 @@ const autoCorrectDataValues = (row) => {
 }
 
 const autoCorrectDate = (inDate) => {
+  if (!inDate) {
+    return null
+  }
   if (typeof inDate === 'object') {
     inDate = formatDate(inDate)
   }
