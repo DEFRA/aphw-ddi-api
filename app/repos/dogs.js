@@ -63,33 +63,16 @@ const createDogs = async (dogs, owners, enforcement, transaction) => {
 
       const dogEntity = await getOrCreateDog(dog, statuses, breed, transaction)
 
-      const dogResult = await rereadDog(dogEntity.id, transaction)
+      const dogResult = await refreshDogData(dogEntity.id, transaction)
       dogResult.existingDog = existingDog
 
       const exemptionOrder = await getExemptionOrder(dog.source === 'ROBOT' ? '2023' : '2015')
 
       const registrationEntity = await createRegistration(dogEntity, dog, enforcement, exemptionOrder, transaction)
 
-      const createdRegistration = await rereadRegistration(registrationEntity.id, transaction)
+      const createdRegistration = await refreshRegistrationData(registrationEntity.id, transaction)
 
-      if (!existingDog) {
-        if (dog.insurance) {
-          await createInsurance(dogEntity.id, dog.insurance, transaction)
-        }
-
-        if (dog.microchipNumber) {
-          await createMicrochip(dog.microchipNumber, dogEntity.id, transaction)
-          dogResult.microchipNumber = dog.microchipNumber
-        }
-
-        for (const owner of owners) {
-          await sequelize.models.registered_person.create({
-            person_id: owner.id,
-            dog_id: dogEntity.id,
-            person_type_id: 1
-          }, { transaction })
-        }
-      }
+      await handleInsuranceAndMicrochipAndRegPerson(dogEntity, dog, dogResult, owners, transaction)
 
       createdDogs.push({ ...dogResult, registration: createdRegistration })
     }
@@ -98,6 +81,27 @@ const createDogs = async (dogs, owners, enforcement, transaction) => {
   } catch (err) {
     console.error(`Error creating dog: ${err}`)
     throw err
+  }
+}
+
+const handleInsuranceAndMicrochipAndRegPerson = async (dogEntity, dog, dogResult, owners, transaction) => {
+  if (!dogResult.existingDog) {
+    if (dog.insurance) {
+      await createInsurance(dogEntity.id, dog.insurance, transaction)
+    }
+
+    if (dog.microchipNumber) {
+      await createMicrochip(dog.microchipNumber, dogEntity.id, transaction)
+      dogResult.microchipNumber = dog.microchipNumber
+    }
+
+    for (const owner of owners) {
+      await sequelize.models.registered_person.create({
+        person_id: owner.id,
+        dog_id: dogEntity.id,
+        person_type_id: 1
+      }, { transaction })
+    }
   }
 }
 
@@ -122,7 +126,7 @@ const getOrCreateDog = async (dog, statuses, breed, transaction) => {
   }
 }
 
-const rereadDog = async (dogId, transaction) => {
+const refreshDogData = async (dogId, transaction) => {
   return await sequelize.models.dog.findByPk(dogId, {
     include: [{
       attributes: ['breed'],
@@ -139,7 +143,7 @@ const rereadDog = async (dogId, transaction) => {
   })
 }
 
-const rereadRegistration = async (regId, transaction) => {
+const refreshRegistrationData = async (regId, transaction) => {
   return await sequelize.models.registration.findByPk(regId, {
     include: [{
       attributes: ['name'],
