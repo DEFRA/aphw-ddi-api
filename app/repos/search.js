@@ -1,14 +1,18 @@
 const sequelize = require('../config/db')
-const { dbFindByPk } = require('../lib/db-functions')
+const { dbFindByPk, dbDelete } = require('../lib/db-functions')
 const { buildAddressString } = require('../lib/address-helper')
 const { getMicrochip } = require('../dto/dto-helper')
 
-const addToSearchIndex = async (person, dogId, transaction) => {
+const addToSearchIndex = async (person, dog, transaction) => {
   if (!transaction) {
-    return sequelize.transaction((t) => addToSearchIndex(person, dogId, t))
+    return sequelize.transaction((t) => addToSearchIndex(person, dog, t))
   }
 
-  const dog = await dbFindByPk(sequelize.models.dog, dogId, {
+  if (dog.existingDog) {
+    await dbDelete(sequelize.models.search_index, { where: { dog_id: dog.id } })
+  }
+
+  const rereadDog = await dbFindByPk(sequelize.models.dog, dog.id, {
     order: [[sequelize.col('dog_microchips.id'), 'ASC']],
     include: [{
       model: sequelize.models.status,
@@ -26,13 +30,13 @@ const addToSearchIndex = async (person, dogId, transaction) => {
     transaction
   })
 
-  applyMicrochips(dog)
+  applyMicrochips(rereadDog)
 
   await sequelize.models.search_index.create({
-    search: buildIndexColumn(person, dog),
+    search: buildIndexColumn(person, rereadDog),
     person_id: person.id,
     dog_id: dog.id,
-    json: buildJsonColumn(person, dog)
+    json: buildJsonColumn(person, rereadDog)
   }, { transaction })
 }
 

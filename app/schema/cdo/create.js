@@ -27,7 +27,8 @@ const schema = Joi.object({
     cdoIssued: Joi.when('applicationType', { is: 'cdo', then: Joi.date().iso().required(), otherwise: Joi.optional() }),
     cdoExpiry: Joi.when('applicationType', { is: 'cdo', then: Joi.date().iso().required(), otherwise: Joi.optional() }),
     interimExemption: Joi.when('applicationType', { is: 'interim-exemption', then: Joi.date().iso().required(), otherwise: Joi.optional() }),
-    status: Joi.string().optional().allow('').allow(null)
+    status: Joi.string().optional().allow('').allow(null),
+    indexNumber: Joi.string().optional().allow('').allow(null)
   })).min(1).required()
 })
 

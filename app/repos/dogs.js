@@ -42,6 +42,10 @@ const getStatuses = async () => {
   }
 }
 
+const isExistingDog = (dog) => {
+  return (dog.indexNumber ?? '') !== ''
+}
+
 const createDogs = async (dogs, owners, enforcement, transaction) => {
   if (!transaction) {
     return sequelize.transaction(async (t) => createDogs(dogs, owners, enforcement, t))
@@ -53,34 +57,14 @@ const createDogs = async (dogs, owners, enforcement, transaction) => {
     const statuses = await getStatuses()
 
     for (const dog of dogs) {
+      const existingDog = isExistingDog(dog)
+
       const breed = await getBreed(dog.breed)
 
-      const dogEntity = await sequelize.models.dog.create({
-        id: dog.indexNumber ?? undefined,
-        name: dog.name,
-        dog_breed_id: breed.id,
-        exported: false,
-        status_id: determineStartingStatus(dog, statuses),
-        dog_reference: uuidv4(),
-        sex: dog.sex,
-        colour: dog.colour,
-        birth_date: dog.birthDate
-      }, { transaction })
+      const dogEntity = await getOrCreateDog(dog, statuses, breed, transaction)
 
-      const dogResult = await sequelize.models.dog.findByPk(dogEntity.id, {
-        include: [{
-          attributes: ['breed'],
-          model: sequelize.models.dog_breed,
-          as: 'dog_breed'
-        },
-        {
-          model: sequelize.models.status,
-          as: 'status'
-        }],
-        raw: true,
-        nest: true,
-        transaction
-      })
+      const dogResult = await rereadDog(dogEntity.id, transaction)
+      dogResult.existingDog = existingDog
 
       let exemptionOrder
 
@@ -90,53 +74,27 @@ const createDogs = async (dogs, owners, enforcement, transaction) => {
         exemptionOrder = await getExemptionOrder('2015')
       }
 
-      const registrationEntity = await sequelize.models.registration.create({
-        dog_id: dogEntity.id,
-        cdo_issued: dog.cdoIssued,
-        cdo_expiry: dog.cdoExpiry,
-        joined_exemption_scheme: dog.interimExemption,
-        police_force_id: enforcement.policeForce,
-        court_id: enforcement.court,
-        legislation_officer: enforcement.legislationOfficer,
-        status_id: 1,
-        certificate_issued: dog.certificateIssued,
-        exemption_order_id: exemptionOrder.id,
-        application_fee_paid: dog.applicationFeePaid,
-        microchip_deadline: dog.microchipDeadline,
-        neutering_deadline: dog.neuteringDeadline
-      }, { transaction })
+      const registrationEntity = await createRegistration(dogEntity, dog, enforcement, exemptionOrder, transaction)
 
-      if (dog.insurance) {
+      if (dog.insurance && !existingDog) {
         await createInsurance(dogEntity.id, dog.insurance, transaction)
       }
 
-      const createdRegistration = await sequelize.models.registration.findByPk(registrationEntity.id, {
-        include: [{
-          attributes: ['name'],
-          model: sequelize.models.police_force,
-          as: 'police_force'
-        },
-        {
-          attributes: ['name'],
-          model: sequelize.models.court,
-          as: 'court'
-        }],
-        raw: true,
-        nest: true,
-        transaction
-      })
+      const createdRegistration = await rereadRegistration(registrationEntity.id, transaction)
 
-      if (dog.microchipNumber) {
+      if (dog.microchipNumber && !existingDog) {
         await createMicrochip(dog.microchipNumber, dogEntity.id, transaction)
         dogResult.microchipNumber = dog.microchipNumber
       }
 
-      for (const owner of owners) {
-        await sequelize.models.registered_person.create({
-          person_id: owner.id,
-          dog_id: dogEntity.id,
-          person_type_id: 1
-        }, { transaction })
+      if (!existingDog) {
+        for (const owner of owners) {
+          await sequelize.models.registered_person.create({
+            person_id: owner.id,
+            dog_id: dogEntity.id,
+            person_type_id: 1
+          }, { transaction })
+        }
       }
 
       createdDogs.push({ ...dogResult, registration: createdRegistration })
@@ -147,6 +105,87 @@ const createDogs = async (dogs, owners, enforcement, transaction) => {
     console.error(`Error creating dog: ${err}`)
     throw err
   }
+}
+
+const getOrCreateDog = async (dog, statuses, breed, transaction) => {
+  if (isExistingDog(dog)) {
+    const dogEntity = await getDogByIndexNumber(dog.indexNumber, transaction)
+    dogEntity.status_id = determineStartingStatus(dog, statuses)
+    await dogEntity.save({ transaction })
+    return dogEntity
+  } else {
+    return await sequelize.models.dog.create({
+      id: dog.indexNumber ?? undefined,
+      name: dog.name,
+      dog_breed_id: breed.id,
+      exported: false,
+      status_id: determineStartingStatus(dog, statuses),
+      dog_reference: uuidv4(),
+      sex: dog.sex,
+      colour: dog.colour,
+      birth_date: dog.birthDate
+    }, { transaction })
+  }
+}
+
+const rereadDog = async (dogId, transaction) => {
+  return await sequelize.models.dog.findByPk(dogId, {
+    include: [{
+      attributes: ['breed'],
+      model: sequelize.models.dog_breed,
+      as: 'dog_breed'
+    },
+    {
+      model: sequelize.models.status,
+      as: 'status'
+    }],
+    raw: true,
+    nest: true,
+    transaction
+  })
+}
+
+const rereadRegistration = async (regId, transaction) => {
+  return await sequelize.models.registration.findByPk(regId, {
+    include: [{
+      attributes: ['name'],
+      model: sequelize.models.police_force,
+      as: 'police_force'
+    },
+    {
+      attributes: ['name'],
+      model: sequelize.models.court,
+      as: 'court'
+    }],
+    raw: true,
+    nest: true,
+    transaction
+  })
+}
+
+const createRegistration = async (dogEntity, dog, enforcement, exemptionOrder, transaction) => {
+  if (isExistingDog(dog)) {
+    await sequelize.models.registration.destroy({
+      where: { dog_id: dogEntity.id },
+      transaction
+    })
+  }
+
+  return await sequelize.models.registration.create({
+    dog_id: dogEntity.id,
+    cdo_issued: dog.cdoIssued,
+    cdo_expiry: dog.cdoExpiry,
+    joined_exemption_scheme: dog.interimExemption,
+    police_force_id: enforcement.policeForce,
+    court_id: enforcement.court,
+    legislation_officer: enforcement.legislationOfficer,
+    status_id: 1,
+    certificate_issued: dog.certificateIssued,
+    exemption_order_id: exemptionOrder.id,
+    application_fee_paid: dog.applicationFeePaid,
+    microchip_deadline: dog.microchipDeadline,
+    neutering_deadline: dog.neuteringDeadline
+  }, { transaction })
 }
 
 const getStatusId = (statuses, statusName) => {
