@@ -1,5 +1,5 @@
 const sequelize = require('../config/db')
-const { dbFindByPk, dbDelete } = require('../lib/db-functions')
+const { dbFindByPk } = require('../lib/db-functions')
 const { buildAddressString } = require('../lib/address-helper')
 const { getMicrochip } = require('../dto/dto-helper')
 
@@ -9,7 +9,7 @@ const addToSearchIndex = async (person, dog, transaction) => {
   }
 
   if (dog.existingDog) {
-    await dbDelete(sequelize.models.search_index, { where: { dog_id: dog.id } })
+    await sequelize.models.search_index.destroy({ where: { dog_id: dog.id } }, { transaction })
   }
 
   const rereadDog = await dbFindByPk(sequelize.models.dog, dog.id, {
