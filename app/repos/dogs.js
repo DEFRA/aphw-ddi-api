@@ -66,28 +66,22 @@ const createDogs = async (dogs, owners, enforcement, transaction) => {
       const dogResult = await rereadDog(dogEntity.id, transaction)
       dogResult.existingDog = existingDog
 
-      let exemptionOrder
-
-      if (dog.source === 'ROBOT') {
-        exemptionOrder = await getExemptionOrder('2023')
-      } else {
-        exemptionOrder = await getExemptionOrder('2015')
-      }
+      const exemptionOrder = await getExemptionOrder(dog.source === 'ROBOT' ? '2023' : '2015')
 
       const registrationEntity = await createRegistration(dogEntity, dog, enforcement, exemptionOrder, transaction)
 
-      if (dog.insurance && !existingDog) {
-        await createInsurance(dogEntity.id, dog.insurance, transaction)
-      }
-
       const createdRegistration = await rereadRegistration(registrationEntity.id, transaction)
 
-      if (dog.microchipNumber && !existingDog) {
-        await createMicrochip(dog.microchipNumber, dogEntity.id, transaction)
-        dogResult.microchipNumber = dog.microchipNumber
-      }
-
       if (!existingDog) {
+        if (dog.insurance) {
+          await createInsurance(dogEntity.id, dog.insurance, transaction)
+        }
+
+        if (dog.microchipNumber) {
+          await createMicrochip(dog.microchipNumber, dogEntity.id, transaction)
+          dogResult.microchipNumber = dog.microchipNumber
+        }
+
         for (const owner of owners) {
           await sequelize.models.registered_person.create({
             person_id: owner.id,

@@ -11,12 +11,10 @@ const { getBreed, getExemptionOrder } = require('../../../../app/lookups')
 jest.mock('../../../../app/messaging/send-event')
 const { sendEvent } = require('../../../../app/messaging/send-event')
 
-/*
 const devUser = {
   username: 'dev-user@test.com',
   displayname: 'Dev User'
 }
-*/
 
 describe('Dog repo', () => {
   jest.mock('../../../../app/config/db', () => ({
@@ -60,8 +58,7 @@ describe('Dog repo', () => {
 
   const sequelize = require('../../../../app/config/db')
 
-  const { createDogs } = require('../../../../app/repos/dogs')
-  // const { getBreeds, getStatuses, createDogs, addImportedDog, getDogByIndexNumber, getAllDogIds, updateDog, updateStatus, updateDogFields, updateMicrochips } = require('../../../../app/repos/dogs')
+  const { getBreeds, getStatuses, createDogs, addImportedDog, getDogByIndexNumber, getAllDogIds, updateDog, updateStatus, updateDogFields, updateMicrochips } = require('../../../../app/repos/dogs')
 
   beforeEach(async () => {
     jest.clearAllMocks()
@@ -73,7 +70,7 @@ describe('Dog repo', () => {
     createInsurance.mockResolvedValue()
     sendEvent.mockResolvedValue()
   })
-  /*
+
   test('getBreeds should return breeds', async () => {
     const breeds = await getBreeds()
 
@@ -330,7 +327,7 @@ describe('Dog repo', () => {
 
     await expect(createDogs(dogs, owners, enforcement, {})).rejects.toThrow('Test error')
   })
-  */
+
   test('createDogs should return existing dog / registration', async () => {
     const dogSave = jest.fn()
 
@@ -395,7 +392,7 @@ describe('Dog repo', () => {
       status_id: 2
     })
   })
-  /*
+
   test('addImportedDog should create new transaction if none passed', async () => {
     sequelize.models.dog.create.mockResolvedValue({ id: 123, breed: 'breed', name: 'Bruno' })
 
@@ -553,5 +550,4 @@ describe('Dog repo', () => {
 
     expect(sequelize.transaction).toHaveBeenCalledTimes(0)
   })
-  */
 })
