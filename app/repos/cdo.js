@@ -24,11 +24,12 @@ const createCdo = async (data, user, transaction) => {
     } else {
       owners = await createPeople([data.owner], transaction)
     }
+
     const dogs = await createDogs(data.dogs, owners, data.enforcementDetails, transaction)
 
     for (const owner of owners) {
       for (const dog of dogs) {
-        await addToSearchIndex(owner, dog.id, transaction)
+        await addToSearchIndex(owner, dog, transaction)
         const entity = {
           owner,
           dog
