@@ -13,8 +13,7 @@ module.exports = (sequelize, DataTypes) => {
       references: {
         model: 'dog',
         key: 'id'
-      },
-      unique: 'registration_dog_ukey'
+      }
     },
     status_id: {
       type: DataTypes.INTEGER,
@@ -47,11 +46,6 @@ module.exports = (sequelize, DataTypes) => {
         model: 'exemption_order',
         key: 'id'
       }
-    },
-    created_on: {
-      type: DataTypes.DATE,
-      allowNull: false,
-      defaultValue: sequelize.fn('now')
     },
     cdo_issued: {
       type: DataTypes.DATE,
@@ -108,17 +102,26 @@ module.exports = (sequelize, DataTypes) => {
     removed_from_cdo_process: {
       type: DataTypes.DATE,
       allowNull: true
+    },
+    deleted_at: {
+      type: DataTypes.DATE,
+      allowNull: true
     }
   }, {
     sequelize,
     tableName: 'registration',
-    timestamps: false,
+    timestamps: true,
+    paranoid: true,
+    deletedAt: 'deleted_at',
+    createdAt: 'created_at',
+    updatedAt: 'updated_at',
     indexes: [
       {
         name: 'registration_dog_ukey',
         unique: true,
         fields: [
-          { name: 'dog_id' }
+          { name: 'dog_id' },
+          { name: 'deletedAt' }
         ]
       },
       {

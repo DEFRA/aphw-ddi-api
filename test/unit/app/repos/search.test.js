@@ -7,6 +7,7 @@ describe('Search repo', () => {
       search_index: {
         create: jest.fn(),
         save: jest.fn(),
+        destroy: jest.fn(),
         findAll: jest.fn()
       }
     },
@@ -26,7 +27,35 @@ describe('Search repo', () => {
     jest.clearAllMocks()
   })
 
-  test('addToSearchIndex should call create', async () => {
+  test('addToSearchIndex should call create and not destroy for new dog', async () => {
+    sequelize.models.search_index.create.mockResolvedValue()
+    getDogByIndexNumber.mockResolvedValue({ id: 1, index_number: 'ED1' })
+
+    const person = {
+      id: 123,
+      firstName: 'John',
+      lastName: 'Smith',
+      dogIndex: 123,
+      address: {
+        address_line_1: '123 some address'
+      }
+    }
+
+    const dog = {
+      id: 456,
+      dogName: 'Bruno',
+      microchipNumber: 123456789012345
+    }
+
+    dbFindByPk.mockResolvedValue(dog)
+
+    await addToSearchIndex(person, dog, {})
+
+    expect(sequelize.models.search_index.create).toHaveBeenCalledTimes(1)
+    expect(sequelize.models.search_index.destroy).not.toHaveBeenCalled()
+  })
+
+  test('addToSearchIndex should call destroy for existing dog', async () => {
     sequelize.models.search_index.create.mockResolvedValue()
     getDogByIndexNumber.mockResolvedValue({ id: 1, index_number: 'ED1' })
 
@@ -43,14 +72,44 @@ describe('Search repo', () => {
       id: 456,
       dogIndex: 123,
       dogName: 'Bruno',
+      existingDog: true,
       microchipNumber: 123456789012345
     }
 
     dbFindByPk.mockResolvedValue(dog)
 
-    await addToSearchIndex(person, dog.id, {})
+    await addToSearchIndex(person, dog, {})
 
     expect(sequelize.models.search_index.create).toHaveBeenCalledTimes(1)
+    expect(sequelize.models.search_index.destroy).toHaveBeenCalledTimes(1)
+  })
+
+  test('addToSearchIndex should create new transaction if none passed', async () => {
+    sequelize.models.search_index.create.mockResolvedValue()
+    getDogByIndexNumber.mockResolvedValue({ id: 1, index_number: 'ED1' })
+
+    const person = {
+      id: 123,
+      firstName: 'John',
+      lastName: 'Smith',
+      address: {
+        address_line_1: '123 some address'
+      }
+    }
+
+    const dog = {
+      id: 456,
+      dogIndex: 123,
+      dogName: 'Bruno',
+      existingDog: true,
+      microchipNumber: 123456789012345
+    }
+
+    dbFindByPk.mockResolvedValue(dog)
+
+    await addToSearchIndex(person, dog)
+
+    expect(sequelize.transaction).toHaveBeenCalledTimes(1)
   })
 
   test('buildAddressString should return parts', async () => {
