@@ -12,7 +12,7 @@ const addToSearchIndex = async (person, dog, transaction) => {
     await sequelize.models.search_index.destroy({ where: { dog_id: dog.id } }, { transaction })
   }
 
-  const rereadDog = await dbFindByPk(sequelize.models.dog, dog.id, {
+  const refreshedDogEntity = await dbFindByPk(sequelize.models.dog, dog.id, {
     order: [[sequelize.col('dog_microchips.id'), 'ASC']],
     include: [{
       model: sequelize.models.status,
@@ -30,13 +30,13 @@ const addToSearchIndex = async (person, dog, transaction) => {
     transaction
   })
 
-  applyMicrochips(rereadDog)
+  applyMicrochips(refreshedDogEntity)
 
   await sequelize.models.search_index.create({
-    search: buildIndexColumn(person, rereadDog),
+    search: buildIndexColumn(person, refreshedDogEntity),
     person_id: person.id,
     dog_id: dog.id,
-    json: buildJsonColumn(person, rereadDog)
+    json: buildJsonColumn(person, refreshedDogEntity)
   }, { transaction })
 }
 
