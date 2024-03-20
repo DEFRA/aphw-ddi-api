@@ -25,7 +25,13 @@ class PersonCache {
   addPerson (person) {
     for (const matchCode of person.matchCodes) {
       this.cache.set(matchCode, person.person_reference)
+      this.cache.set(person.person_reference, person)
     }
+  }
+
+  getPerson (person) {
+    const ref = this.getPersonRefIfAlreadyExists(person)
+    return ref ? this.cache.get(ref) : null
   }
 
   addMatchCodes (person) {

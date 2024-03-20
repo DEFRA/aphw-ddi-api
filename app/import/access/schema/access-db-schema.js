@@ -1,4 +1,9 @@
 const accessDbSchema = {
+  ID: {
+    prop: 'personId',
+    type: String,
+    required: true
+  },
   'M-First Name': {
     prop: 'firstName',
     type: String,

@@ -15,7 +15,8 @@ module.exports = {
     const config = buildConfig(request)
     let res = null
     try {
-      res = await processBacklog.process(config)
+      // res = await processBacklog.process(config)
+      res = await processBacklog.listDuplicates(config)
     } catch (e) {
       console.log(e)
     }

@@ -69,7 +69,8 @@ const buildPerson = (jsonObj) => ({
     country: jsonObj.country
   },
   contacts: buildContacts(jsonObj),
-  birth_date: jsonObj.person_date_of_birth
+  birth_date: jsonObj.person_date_of_birth,
+  person_reference: jsonObj.personId
 })
 
 const buildContacts = (jsonObj) => {

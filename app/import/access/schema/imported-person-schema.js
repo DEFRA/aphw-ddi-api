@@ -15,7 +15,8 @@ const personSchema = Joi.object({
     type: Joi.string().required(),
     contact: Joi.string().required()
   })),
-  birth_date: Joi.date().optional()
+  birth_date: Joi.date().optional(),
+  person_reference: Joi.date().optional()
 })
 
 // Validate schema
