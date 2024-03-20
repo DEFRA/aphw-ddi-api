@@ -7,20 +7,12 @@ const generatePersonMatchCodes = (person, config) => {
   const matchCodes = []
   const firstName = person.first_name.toLowerCase()
   const lastName = person.last_name.toLowerCase()
-  const addr1 = person.address?.address_line_1.toLowerCase()
-  const postcode = person.address?.postcode.toLowerCase()
+  const addr1 = config.includeAddressLine1 ? person.address?.address_line_1.toLowerCase() : ''
+  const postcode = config.includePostcode ? person.address?.postcode.toLowerCase() : ''
 
-  let matchKey = `${firstName}^${lastName}`
-  if (config.includeAddressLine1) {
-    matchKey += `^${addr1}`
-  }
-  if (config.includePostcode) {
-    matchKey += `^${postcode}`
-  }
-
-  matchCodes.push(matchKey)
+  matchCodes.push(`${firstName}^${lastName}^${addr1}^${postcode}`)
   if (config.includeSwappedNames) {
-    matchCodes.push(`${lastName}^${firstName}`)
+    matchCodes.push(`${lastName}^${firstName}^${addr1}^${postcode}`)
   }
 
   // Algorithm 1 (daitch-mokotoff) can yield multiple codes per result

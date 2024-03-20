@@ -82,9 +82,9 @@ const listDuplicates = async (config) => {
     return { stats }
   }
 
-  const personCache = new PersonCache(config)
+  const personDefiniteDuplicateCache = new PersonCache({}) // { includeAddressLine1: true, includePostcode: true })
 
-  const duplicates = []
+  const definiteDuplicates = []
 
   for (const backlogRow of backlogRows) {
     try {
@@ -94,16 +94,20 @@ const listDuplicates = async (config) => {
         continue
       }
 
+      // if (jsonObj.person_date_of_birth) {
+      //  stats.rowsProcessed++
+      // }
+
       stats.rowsProcessed++
 
       const person = buildPerson(jsonObj)
       if (await isPersonValid(person, backlogRow)) {
-        personCache.addMatchCodes(person)
-        const existingPersonRef = personCache.getPersonRefIfAlreadyExists(person)
+        personDefiniteDuplicateCache.addMatchCodes(person)
+        const existingPersonRef = personDefiniteDuplicateCache.getPersonRefIfAlreadyExists(person)
         if (!existingPersonRef) {
-          personCache.addPerson(person)
+          personDefiniteDuplicateCache.addPerson(person)
         } else {
-          duplicates.push(person)
+          definiteDuplicates.push(person)
         }
       }
     } catch (e) {
@@ -113,18 +117,20 @@ const listDuplicates = async (config) => {
     }
   }
 
-  for (const duplicate of duplicates.sort((a, b) => parseInt(a.person_reference) - parseInt(b.person_reference))) {
-    const person = personCache.getPerson(duplicate)
-    console.log('Duplicate from cache1 person_reference:', person.person_reference)
-    console.log(`Duplicate found:      ${duplicate.person_reference} ${duplicate.first_name} ${duplicate.last_name} ${duplicate.address?.address_line_1} ${duplicate.address?.postcode}`)
-    console.log(`Duplicate from cache: ${person.person_reference} ${person.first_name} ${person.last_name} ${person.address?.address_line_1} ${person.address?.postcode}`)
-  }
-
-  console.log('duplicate count', duplicates.length)
-
-  console.log('config', config)
+  finalReport(definiteDuplicates, personDefiniteDuplicateCache, 'Definite')
 
   return { stats }
+}
+
+const finalReport = (duplicates, cache, preText) => {
+  for (const duplicate of duplicates.sort((a, b) => parseInt(a.person_reference) - parseInt(b.person_reference))) {
+    const person = cache.getPerson(duplicate)
+    // console.log(`${preText} duplicate             ${person.person_reference}`)
+    console.log(`${preText} duplicate found:      ${duplicate.person_reference} ${duplicate.first_name} ${duplicate.last_name} ${duplicate.address?.address_line_1} ${duplicate.address?.postcode} ${duplicate.birth_date}`)
+    console.log(`${preText} duplicate from cache: ${person.person_reference} ${person.first_name} ${person.last_name} ${person.address?.address_line_1} ${person.address?.postcode} ${person.birth_date}`)
+  }
+
+  console.log(`${preText} duplicate count`, duplicates.length)
 }
 
 const isExcludedRecord = jsonObj => {
@@ -135,7 +141,7 @@ const isExcludedRecord = jsonObj => {
   }
 
   const dob = jsonObj.dogDateOfBirth || jsonObj.notificationDate
-  if (differenceInYears(today, new Date(dob), { locale: 'enGB' }) > 15) {
+  if (differenceInYears(today, new Date(dob), { locale: 'enGB' }) >= 15) {
     return true
   }
 
