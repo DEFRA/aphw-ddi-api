@@ -1,46 +1,7 @@
-const cdoRelationships = sequelize => [
-  {
-    model: sequelize.models.registered_person,
-    as: 'registered_person',
-    include: [{
-      model: sequelize.models.person,
-      as: 'person',
-      include: [{
-        model: sequelize.models.person_address,
-        as: 'addresses',
-        include: [{
-          model: sequelize.models.address,
-          as: 'address',
-          include: [{
-            attribute: ['country'],
-            model: sequelize.models.country,
-            as: 'country'
-          }]
-        }]
-      },
-      {
-        model: sequelize.models.person_contact,
-        as: 'person_contacts',
-        separate: true, // workaround to prevent 'contact_type_id' being truncated to 'contact_type_i'
-        include: [{
-          model: sequelize.models.contact,
-          as: 'contact',
-          include: [{
-            model: sequelize.models.contact_type,
-            as: 'contact_type'
-          }]
-        }]
-      },
-      {
-        model: sequelize.models.organisation,
-        as: 'organisation'
-      }]
-    },
-    {
-      model: sequelize.models.person_type,
-      as: 'person_type'
-    }]
-  },
+const { personRelationship } = require('./person')
+
+const cdoRelationship = sequelize => [
+  ...personRelationship,
   {
     model: sequelize.models.dog_breed,
     as: 'dog_breed'
@@ -84,5 +45,5 @@ const cdoRelationships = sequelize => [
 ]
 
 module.exports = {
-  cdoRelationships
+  cdoRelationship
 }

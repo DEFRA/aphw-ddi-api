@@ -6,7 +6,7 @@ const { sendCreateToAudit } = require('../messaging/send-audit')
 const { CDO } = require('../constants/event/audit-event-object-types')
 const { NotFoundError } = require('../errors/notFound')
 const { mapPersonDaoToCreatedPersonDao } = require('./mappers/person')
-const { cdoRelationships } = require('./relationships/cdo')
+const { cdoRelationship } = require('./relationships/cdo')
 
 const createCdo = async (data, user, transaction) => {
   if (!transaction) {
@@ -56,7 +56,7 @@ const getCdo = async (indexNumber) => {
     where: { index_number: indexNumber },
     order: [[sequelize.col('registered_person.person.addresses.address.id'), 'DESC'],
       [sequelize.col('dog_microchips.microchip.id'), 'ASC']],
-    include: cdoRelationships
+    include: cdoRelationship
   })
 
   return cdo?.length > 0 ? cdo[0] : null
@@ -68,7 +68,7 @@ const getAllCdos = async () => {
       [sequelize.col('dog.id'), 'ASC'],
       [sequelize.col('registered_person.person.addresses.address.id'), 'DESC']
     ],
-    include: cdoRelationships
+    include: cdoRelationship
   })
 
   // Workaround due to Sequelize bug when using 'raw: true'

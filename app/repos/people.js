@@ -7,7 +7,7 @@ const { sendUpdateToAudit } = require('../messaging/send-audit')
 const { PERSON } = require('../constants/event/audit-event-object-types')
 const { personDto } = require('../dto/person')
 const { UniqueConstraintError } = require('sequelize')
-const { personTableRelationships } = require('./relationships/person')
+const { personRelationship } = require('./relationships/person')
 
 /**
  * @typedef CountryDao
@@ -154,7 +154,7 @@ const getPersonByReference = async (reference, transaction) => {
     const person = await sequelize.models.person.findAll({
       order: [[sequelize.col('addresses.address.id'), 'DESC']],
       where: { person_reference: reference },
-      include: personTableRelationships(sequelize),
+      include: personRelationship(sequelize),
       transaction
     })
 
@@ -266,7 +266,7 @@ const getPersonAndDogsByReference = async (reference, transaction) => {
         model: sequelize.models.person,
         where: { person_reference: reference },
         as: 'person',
-        include: personTableRelationships
+        include: personRelationship(sequelize)
       },
       {
         model: sequelize.models.dog,
