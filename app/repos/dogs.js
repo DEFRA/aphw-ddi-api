@@ -92,7 +92,6 @@ const handleInsuranceAndMicrochipAndRegPerson = async (dogEntity, dog, dogResult
 
     if (dog.microchipNumber) {
       await createMicrochip(dog.microchipNumber, dogEntity.id, transaction)
-      dogResult.microchipNumber = dog.microchipNumber
     }
 
     for (const owner of owners) {
@@ -103,6 +102,7 @@ const handleInsuranceAndMicrochipAndRegPerson = async (dogEntity, dog, dogResult
       }, { transaction })
     }
   }
+  dogResult.microchipNumber = dog.microchipNumber
 }
 
 const getOrCreateDog = async (dog, statuses, breed, transaction) => {

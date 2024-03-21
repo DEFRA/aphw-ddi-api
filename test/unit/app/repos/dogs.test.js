@@ -364,7 +364,8 @@ describe('Dog repo', () => {
       cdoIssued: '2020-01-01',
       cdoExpiry: '2020-02-01',
       status: 'Status 1',
-      source: 'UI'
+      source: 'UI',
+      microchipNumber: '12345'
     }]
 
     const result = await createDogs(dogs, owners, enforcement, {})
@@ -384,6 +385,7 @@ describe('Dog repo', () => {
       name: 'Dog 1',
       existingDog: true,
       indexNumber: 'ED1',
+      microchipNumber: '12345',
       registration: {
         id: 1,
         cdoIssued: '2020-01-01',
