@@ -162,7 +162,8 @@ describe('Search repo', () => {
       id: 1,
       dogIndex: 123,
       dogName: 'Bruno2',
-      microchipNumber: 123456789012345
+      microchipNumber: 123456789012345,
+      microchipNumber2: 234567890123456
     }
 
     await updateSearchIndexDog(dog, {})
@@ -180,7 +181,10 @@ describe('Search repo', () => {
       id: 1,
       dogIndex: 123,
       firstName: 'Mark',
-      address: {}
+      address: {
+        address_line_1: 'address line 1',
+        postcode: 'postcode'
+      }
     }
 
     await updateSearchIndexPerson(person, {})
