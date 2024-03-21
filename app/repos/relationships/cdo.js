@@ -1,7 +1,15 @@
 const { personRelationship } = require('./person')
 
 const cdoRelationship = sequelize => [
-  ...personRelationship,
+  {
+    model: sequelize.models.registered_person,
+    as: 'registered_person',
+    include: [{
+      model: sequelize.models.person,
+      as: 'person',
+      include: personRelationship(sequelize)
+    }]
+  },
   {
     model: sequelize.models.dog_breed,
     as: 'dog_breed'

@@ -56,7 +56,7 @@ const getCdo = async (indexNumber) => {
     where: { index_number: indexNumber },
     order: [[sequelize.col('registered_person.person.addresses.address.id'), 'DESC'],
       [sequelize.col('dog_microchips.microchip.id'), 'ASC']],
-    include: cdoRelationship
+    include: cdoRelationship(sequelize)
   })
 
   return cdo?.length > 0 ? cdo[0] : null
@@ -68,7 +68,7 @@ const getAllCdos = async () => {
       [sequelize.col('dog.id'), 'ASC'],
       [sequelize.col('registered_person.person.addresses.address.id'), 'DESC']
     ],
-    include: cdoRelationship
+    include: cdoRelationship(sequelize)
   })
 
   // Workaround due to Sequelize bug when using 'raw: true'
