@@ -18,7 +18,7 @@ describe('Search repo', () => {
 
   const sequelize = require('../../../../app/config/db')
 
-  const { addToSearchIndex, buildAddressString, updateSearchIndexDog, updateSearchIndexPerson } = require('../../../../app/repos/search')
+  const { addToSearchIndex, buildAddressString, updateSearchIndexDog, updateSearchIndexPerson, applyMicrochips } = require('../../../../app/repos/search')
 
   const { dbFindByPk } = require('../../../../app/lib/db-functions')
   jest.mock('../../../../app/lib/db-functions')
@@ -102,10 +102,21 @@ describe('Search repo', () => {
       dogIndex: 123,
       dogName: 'Bruno',
       existingDog: true,
-      microchipNumber: 123456789012345
+      microchipNumber: 123456789012345,
+      microchipNumber2: 112345678901234
     }
 
-    dbFindByPk.mockResolvedValue(dog)
+    const dogFromDb = {
+      id: 456,
+      index_number: 123,
+      name: 'Bruno',
+      dog_microchips: [
+        { microchip: { microchip_number: 123456789012345 } },
+        { microchip: { microchip_number: 112345678901234 } }
+      ]
+    }
+
+    dbFindByPk.mockResolvedValue(dogFromDb)
 
     await addToSearchIndex(person, dog)
 
@@ -190,5 +201,47 @@ describe('Search repo', () => {
     await updateSearchIndexPerson(person, {})
 
     expect(mockSave).toHaveBeenCalledTimes(1)
+  })
+
+  test('UpdateSearchIndexPerson should call search_index save for each row when changes', async () => {
+    const mockSave = jest.fn()
+    sequelize.models.search_index.findAll.mockResolvedValue([
+      { dog_id: 1, person_id: 1, search: '12345', json: '{ dogName: \'Bruno\', firstName: \'John\', lastName: \'Smith\' }', save: mockSave }
+    ])
+
+    const person = {
+      id: 1,
+      dogIndex: 123,
+      firstName: 'John',
+      lastName: 'Walker',
+      address: {
+        address_line_1: 'address line 1',
+        postcode: 'postcode'
+      }
+    }
+
+    await updateSearchIndexPerson(person, {})
+
+    expect(mockSave).toHaveBeenCalledTimes(1)
+  })
+
+  test('applyMicrochips should set microchip numbers at root', async () => {
+    const dog = {
+      dog_microchips: [
+        { microchip: { microchip_number: 1234567890 } },
+        { microchip: { microchip_number: 2345678901 } }
+      ]
+    }
+
+    applyMicrochips(dog)
+
+    expect(dog).toEqual({
+      dog_microchips: [
+        { microchip: { microchip_number: 1234567890 } },
+        { microchip: { microchip_number: 2345678901 } }
+      ],
+      microchip_number: 1234567890,
+      microchip_number2: 2345678901
+    })
   })
 })

@@ -10,7 +10,7 @@ const { cdoRelationship } = require('./relationships/cdo')
 
 const createCdo = async (data, user, transaction) => {
   if (!transaction) {
-    return sequelize.transaction((t) => createCdo(data, user, t))
+    return sequelize.transaction(async (t) => createCdo(data, user, t))
   }
 
   try {

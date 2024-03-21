@@ -5,7 +5,7 @@ const { getMicrochip } = require('../dto/dto-helper')
 
 const addToSearchIndex = async (person, dog, transaction) => {
   if (!transaction) {
-    return sequelize.transaction((t) => addToSearchIndex(person, dog, t))
+    return sequelize.transaction(async (t) => addToSearchIndex(person, dog, t))
   }
 
   if (dog.existingDog) {
@@ -149,5 +149,6 @@ module.exports = {
   addToSearchIndex,
   buildAddressString,
   updateSearchIndexDog,
-  updateSearchIndexPerson
+  updateSearchIndexPerson,
+  applyMicrochips
 }
