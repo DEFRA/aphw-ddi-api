@@ -9,6 +9,10 @@ const createExportFile = async () => {
     const cdos = await getAllCdos()
     const exportedData = convertToCsv(cdos)
 
+    console.log('cdos', cdos)
+
+    console.log('exportedData', exportedData)
+
     const Readable = require('stream').Readable
     const str = new Readable()
     str.push(exportedData)

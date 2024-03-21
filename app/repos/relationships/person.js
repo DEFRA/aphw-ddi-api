@@ -32,6 +32,10 @@ const personTableRelationships = (sequelize) => [
         ]
       }
     ]
+  },
+  {
+    model: sequelize.models.organisation,
+    as: 'organisation'
   }
 ]
 

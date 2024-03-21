@@ -245,6 +245,7 @@ const updatePerson = async (person, user, transaction) => {
     const updatedPerson = await getPersonByReference(person.personReference, transaction)
 
     person.id = updatedPerson.id
+    person.organisationName = updatedPerson.organisation?.organisation_name
     await updateSearchIndexPerson(person, transaction)
 
     await sendUpdateToAudit(PERSON, preChangedPersonDto, personDto(updatedPerson, true), user)
@@ -290,6 +291,10 @@ const getPersonAndDogsByReference = async (reference, transaction) => {
               as: 'contact_type'
             }]
           }]
+        },
+        {
+          model: sequelize.models.organisation,
+          as: 'organisation'
         }]
       },
       {

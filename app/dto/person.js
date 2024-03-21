@@ -82,7 +82,8 @@ const personDto = (person, onlyLatestContacts) => ({
     postcode: person.addresses ? person.addresses[0].address.postcode : '',
     country: person.addresses ? person.addresses[0].address.country.country : ''
   },
-  contacts: person.person_contacts ? addContacts(person.person_contacts, onlyLatestContacts) : []
+  contacts: person.person_contacts ? addContacts(person.person_contacts, onlyLatestContacts) : [],
+  organisationName: person.organisation?.organisation_name
 })
 
 const personAndDogsDto = (personAndDogs) => ({
@@ -98,6 +99,7 @@ const personAndDogsDto = (personAndDogs) => ({
     country: personAndDogs[0].person.addresses[0].address.country.country
   },
   contacts: personAndDogs[0].person.person_contacts,
+  organisationName: personAndDogs[0].person.organisation?.organisation_name,
   dogs: personAndDogs.map(x => ({
     id: x.dog.id,
     indexNumber: x.dog.index_number,

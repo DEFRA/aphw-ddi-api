@@ -175,6 +175,10 @@ const getAllCdos = async () => {
               as: 'contact_type'
             }]
           }]
+        },
+        {
+          model: sequelize.models.organisation,
+          as: 'organisation'
         }]
       },
       {
