@@ -3,7 +3,7 @@ const { getInsuranceCompany } = require('../lookups')
 
 const createInsurance = async (id, data, transaction) => {
   if (!transaction) {
-    return sequelize.transaction(async (t) => createInsurance(data, t))
+    return await sequelize.transaction(async (t) => createInsurance(data, t))
   }
 
   try {
@@ -28,7 +28,7 @@ const createInsurance = async (id, data, transaction) => {
 
 const updateInsurance = async (insurance, data, transaction) => {
   if (!transaction) {
-    return sequelize.transaction(async (t) => updateInsurance(insurance, data, t))
+    return await sequelize.transaction(async (t) => updateInsurance(insurance, data, t))
   }
 
   try {

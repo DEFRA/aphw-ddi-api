@@ -44,7 +44,7 @@ const { personRelationship } = require('./relationships/person')
  */
 const createPeople = async (owners, transaction) => {
   if (!transaction) {
-    return sequelize.transaction(async (t) => createPeople(owners, t))
+    return await sequelize.transaction(async (t) => createPeople(owners, t))
   }
   const unmanagedTransaction = await sequelize.transaction()
 
@@ -188,7 +188,7 @@ const getOwnerOfDog = async (indexNumber) => {
 
 const updatePerson = async (person, user, transaction) => {
   if (!transaction) {
-    return sequelize.transaction(async (t) => updatePerson(person, user, t))
+    return await sequelize.transaction(async (t) => updatePerson(person, user, t))
   }
 
   try {
