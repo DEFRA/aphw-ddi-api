@@ -53,7 +53,8 @@ const cdoViewDto = (data) => {
       lastName: person.last_name,
       dateOfBirth: person.birth_date,
       addresses: person.addresses,
-      person_contacts: person.person_contacts
+      person_contacts: person.person_contacts,
+      organisationName: person.organisation?.organisation_name ?? null
     },
     dog: {
       id: data.id,

@@ -1,4 +1,4 @@
-const personTableRelationships = (sequelize) => [
+const personRelationship = (sequelize) => [
   {
     model: sequelize.models.person_address,
     as: 'addresses',
@@ -19,7 +19,7 @@ const personTableRelationships = (sequelize) => [
   {
     model: sequelize.models.person_contact,
     as: 'person_contacts',
-    separate: true,
+    separate: true, // workaround to prevent 'contact_type_id' being truncated to 'contact_type_i'
     include: [
       {
         model: sequelize.models.contact,
@@ -32,9 +32,13 @@ const personTableRelationships = (sequelize) => [
         ]
       }
     ]
+  },
+  {
+    model: sequelize.models.organisation,
+    as: 'organisation'
   }
 ]
 
 module.exports = {
-  personTableRelationships
+  personRelationship
 }
