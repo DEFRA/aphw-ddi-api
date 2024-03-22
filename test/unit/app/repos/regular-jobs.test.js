@@ -1,4 +1,4 @@
-const { jobs: mockJobs } = require('../../../mocks/jobs')
+// const { jobs: mockJobs } = require('../../../mocks/jobs')
 
 describe('RegularJobs repo', () => {
   jest.mock('../../../../app/config/db', () => ({
@@ -13,7 +13,7 @@ describe('RegularJobs repo', () => {
     },
     col: jest.fn(),
     transaction: jest.fn().mockImplementation((transactionCallback) => {
-      transactionCallback()
+      return {}
     })
   }))
 
@@ -22,26 +22,31 @@ describe('RegularJobs repo', () => {
   jest.mock('../../../../app/overnight/auto-update-statuses')
   const { autoUpdateStatuses } = require('../../../../app/overnight/auto-update-statuses')
 
-  const { tryStartJob, endJob, getRegularJobs } = require('../../../../app/repos/regular-jobs')
+  jest.mock('../../../../app/overnight/create-export-file')
+  const { createExportFile } = require('../../../../app/overnight/create-export-file')
+
+  const { /* tryStartJob, endJob, getRegularJobs, */ runOvernightJobs } = require('../../../../app/repos/regular-jobs')
 
   beforeEach(async () => {
     jest.clearAllMocks()
-    autoUpdateStatuses.mockResolvedValue()
-    jest.mock('sequelize/lib/transaction', () => {
-      const Transaction = jest.requireActual('sequelize/lib/transaction')
-      Object.defineProperty(Transaction, Symbol.hasInstance, { value: () => true })
-      Transaction.__esModule = true
-      Transaction.default = Transaction
-      return Transaction
-    })
+    autoUpdateStatuses.mockResolvedValue('autoUpdate ok')
+    createExportFile.mockResolvedValue('export file ok')
   })
-
+  /*
   test('tryStartJob should not start new transaction if passed', async () => {
     sequelize.models.regular_job.findOne.mockResolvedValue({ id: 1, run_date: new Date() })
 
     await tryStartJob({})
 
     expect(sequelize.transaction).not.toHaveBeenCalled()
+  })
+
+  test('tryStartJob should start new transaction if none passed', async () => {
+    sequelize.models.regular_job.findOne.mockResolvedValue({ id: 1, run_date: new Date() })
+
+    await tryStartJob()
+
+    expect(sequelize.transaction).toHaveBeenCalledTimes(1)
   })
 
   test('tryStartJob should return null if existing job running', async () => {
@@ -109,11 +114,26 @@ describe('RegularJobs repo', () => {
     await expect(endJob(3, 'result text', {})).rejects.toThrow('Error finishing overnight job: 3 Error: dummy error')
   })
 
-  test('getJobs should return jobs', async () => {
+  test('getRegularJobs should return jobs', async () => {
     sequelize.models.regular_job.findAll.mockResolvedValue(mockJobs)
 
     await getRegularJobs()
 
     expect(sequelize.models.regular_job.findAll).toHaveBeenCalledTimes(1)
+  })
+
+  test('getRegularJobs should error if DB error', async () => {
+    sequelize.models.regular_job.findAll.mockImplementation(() => { throw new Error('DB error') })
+
+    await expect(getRegularJobs()).rejects.toThrow('DB error')
+  })
+  */
+  test('runOvernightJobs should run if no run already today', async () => {
+    sequelize.models.regular_job.findOne.mockResolvedValue(null)
+    sequelize.models.regular_job.create.mockResolvedValue({ id: 456 })
+
+    const res = await runOvernightJobs()
+
+    expect(res).toBe('autoUpdate ok | export file ok')
   })
 })

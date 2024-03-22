@@ -11,7 +11,7 @@ const { preChangedExemptionAudit, postChangedExemptionAudit } = require('../dto/
 
 const updateExemption = async (data, user, transaction) => {
   if (!transaction) {
-    return sequelize.transaction((t) => updateExemption(data, user, t))
+    return await sequelize.transaction(async (t) => updateExemption(data, user, t))
   }
 
   try {
