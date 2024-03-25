@@ -118,7 +118,8 @@ const updateSearchIndexPerson = async (person, transaction) => {
         indexRow.json.address.address_line_1 !== person.address.addressLine1 ||
         indexRow.json.address.address_line_2 !== person.address.addressLine2 ||
         indexRow.json.address.town !== person.address.town ||
-        indexRow.json.address.postcode !== person.address.postcode) {
+        indexRow.json.address.postcode !== person.address.postcode ||
+        indexRow.json.organisationName !== person.organisationName) {
       const partialPerson = {
         person_reference: person.personReference,
         first_name: person.firstName,
