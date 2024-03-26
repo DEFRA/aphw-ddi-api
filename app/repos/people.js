@@ -263,8 +263,8 @@ const updatePerson = async (person, user, transaction) => {
  *   dateOfBirth: Date
  * }} personFields
  * @param user
- * @param transaction
- * @returns {Promise<{}>}
+ * @param [transaction]
+ * @returns {Promise<PersonDao>}
  */
 const updatePersonFields = async (id, personFields, user, transaction) => {
   if (!transaction) {

@@ -22,7 +22,7 @@ describe('CDO repo', () => {
   const sequelize = require('../../../../app/config/db')
 
   jest.mock('../../../../app/repos/people')
-  const { createPeople, getPersonByReference } = require('../../../../app/repos/people')
+  const { createPeople, getPersonByReference, updatePerson, updatePersonFields } = require('../../../../app/repos/people')
 
   jest.mock('../../../../app/repos/dogs')
   const { createDogs, getDogByIndexNumber } = require('../../../../app/repos/dogs')
@@ -73,6 +73,8 @@ describe('CDO repo', () => {
 
     expect(cdo.owner).toEqual(owners[0])
     expect(cdo.dogs).toEqual(dogs)
+    expect(updatePerson).not.toHaveBeenCalled()
+    expect(updatePersonFields).not.toHaveBeenCalled()
   })
 
   test('createCdo should use existing owner record if valid owner personReference is supplied', async () => {
@@ -90,6 +92,40 @@ describe('CDO repo', () => {
     expect(cdo.owner).toEqual(expectedOwner)
     expect(cdo.dogs).toEqual(dogs)
     expect(createPeople).not.toHaveBeenCalled()
+    expect(getPersonByReference).toHaveBeenCalledWith('P-6076-A37C', expect.anything())
+    expect(updatePersonFields).not.toHaveBeenCalled()
+  })
+
+  test('createCdo should use existing owner record but updated DOB given valid owner personReference and original has blank DOB', async () => {
+    const owner = { id: 1, ...mockPersonPayload, birth_date: null }
+    const reloadMock = jest.fn(() => {
+      owner.birth_date = '1951-09-25'
+    })
+    owner.reload = reloadMock
+    const expectedOwner = { id: 1, ...mockCreatedPersonPayload }
+    const dogs = [{ id: 1, ...mockCdoPayloadWithRef.dogs[0] }]
+
+    getPersonByReference.mockResolvedValue(owner)
+    updatePersonFields.mockResolvedValue()
+    createDogs.mockResolvedValue(dogs)
+    addToSearchIndex.mockResolvedValue()
+    getDogByIndexNumber.mockResolvedValue({ id: 1, index_number: 'ED1' })
+
+    const cdo = await createCdo({
+      ...mockCdoPayloadWithRef,
+      owner: {
+        ...mockCdoPayloadWithRef.owner,
+        dateOfBirth: '1951-09-25'
+      }
+    }, devUser, {})
+
+    expect(cdo.owner).toEqual(expectedOwner)
+    expect(cdo.dogs).toEqual(dogs)
+    expect(createPeople).not.toHaveBeenCalled()
+    expect(updatePersonFields).toBeCalledWith(1, {
+      dateOfBirth: '1951-09-25'
+    }, expect.anything())
+    expect(reloadMock).toBeCalledWith({ transaction: expect.anything() })
     expect(getPersonByReference).toHaveBeenCalledWith('P-6076-A37C', expect.anything())
   })
 

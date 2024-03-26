@@ -1,5 +1,5 @@
 const sequelize = require('../config/db')
-const { createPeople, getPersonByReference } = require('./people')
+const { createPeople, getPersonByReference, updatePersonFields } = require('./people')
 const { createDogs } = require('./dogs')
 const { addToSearchIndex } = require('./search')
 const { sendCreateToAudit } = require('../messaging/send-audit')
@@ -18,6 +18,11 @@ const createCdo = async (data, user, transaction) => {
       const person = await getPersonByReference(data.owner.personReference, transaction)
       if (person === null) {
         throw new NotFoundError('Owner not found')
+      }
+
+      if (data.owner.dateOfBirth !== null && person.birth_date == null) {
+        await updatePersonFields(person.id, { dateOfBirth: data.owner.dateOfBirth }, user)
+        await person.reload({ transaction })
       }
 
       owners = [mapPersonDaoToCreatedPersonDao(person)]
