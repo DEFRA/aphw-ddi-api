@@ -22,7 +22,7 @@ const createCdo = async (data, user, transaction) => {
       }
 
       if (data.owner.dateOfBirth !== null && person.birth_date == null) {
-        await updatePersonFields(person.id, { dateOfBirth: data.owner.dateOfBirth }, user)
+        await updatePersonFields(person.id, { dateOfBirth: data.owner.dateOfBirth }, user, transaction)
         await person.reload({ transaction })
       }
 
