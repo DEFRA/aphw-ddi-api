@@ -271,7 +271,7 @@ const updatePersonFields = async (id, personFields, user, transaction) => {
     return sequelize.transaction(async (t) => updatePersonFields(id, personFields, user, t))
   }
 
-  const person = await sequelize.models.person.findByPk(id)
+  const person = await sequelize.models.person.findByPk(id, { transaction })
 
   /**
    * @type {Partial<PersonDao>}
@@ -284,9 +284,13 @@ const updatePersonFields = async (id, personFields, user, transaction) => {
   }, {})
 
   if (Object.values(personDao).length) {
-    await person.update(personDao)
-    await person.save()
-    await person.reload()
+    await person.update(personDao, { transaction })
+    await person.save({
+      transaction
+    })
+    await person.reload({
+      transaction
+    })
   }
 
   return person

@@ -843,7 +843,7 @@ describe('People repo', () => {
       expect(personModelMock.update).toHaveBeenCalledTimes(1)
       expect(personModelMock.update).toBeCalledWith({
         birth_date: new Date('1990-01-01')
-      })
+      }, expect.anything())
       expect(personModelMock.save).toHaveBeenCalledTimes(1)
       expect(reloadMock).toHaveBeenCalledTimes(1)
       expect(person.dataValues.birth_date).toEqual(new Date('1990-01-01'))
