@@ -43,6 +43,15 @@ const payloadWithPersonReference = {
   }
 }
 
+const payloadWithPersonReferenceNoDob = {
+  ...payload,
+  owner: {
+    ...payload.owner,
+    personReference: 'P-6076-A37C',
+    dateOfBirth: null
+  }
+}
+
 const owner = payload.owner
 
-module.exports = { payload, payloadWithPersonReference, owner }
+module.exports = { payload, payloadWithPersonReference, owner, payloadWithPersonReferenceNoDob }
