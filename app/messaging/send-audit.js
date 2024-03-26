@@ -88,18 +88,20 @@ const sendUpdateToAudit = async (auditObjectName, entityPre, entityPost, user) =
 
   const messagePayload = constructUpdatePayload(auditObjectName, entityPre, entityPost, user)
 
-  const event = {
-    type: UPDATE,
-    source: SOURCE,
-    id: uuidv4(),
-    partitionKey: determineUpdatePk(auditObjectName, entityPre),
-    subject: `DDI Update ${auditObjectName}`,
-    data: {
-      message: messagePayload
+  if (!isDataUnchanged(messagePayload)) {
+    const event = {
+      type: UPDATE,
+      source: SOURCE,
+      id: uuidv4(),
+      partitionKey: determineUpdatePk(auditObjectName, entityPre),
+      subject: `DDI Update ${auditObjectName}`,
+      data: {
+        message: messagePayload
+      }
     }
-  }
 
-  await sendEvent(event)
+    await sendEvent(event)
+  }
 }
 
 const determineCreatePk = (objName, entity) => {
@@ -130,9 +132,16 @@ const constructUpdatePayload = (auditObjectName, entityPre, entityPost, actionin
   })
 }
 
+const isDataUnchanged = payload => {
+  return payload?.indexOf('"added":[]') > -1 &&
+  payload?.indexOf('"removed":[]') > -1 &&
+  payload?.indexOf('"edited":[]') > -1
+}
+
 module.exports = {
   sendCreateToAudit,
   sendUpdateToAudit,
   sendEventToAudit,
-  sendActivityToAudit
+  sendActivityToAudit,
+  isDataUnchanged
 }
