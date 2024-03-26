@@ -6,7 +6,6 @@ const { updateSearchIndexPerson } = require('./search')
 const { sendUpdateToAudit } = require('../messaging/send-audit')
 const { PERSON } = require('../constants/event/audit-event-object-types')
 const { personDto } = require('../dto/person')
-const { UniqueConstraintError } = require('sequelize')
 const { personRelationship } = require('./relationships/person')
 
 /**
@@ -36,6 +35,17 @@ const { personRelationship } = require('./relationships/person')
  */
 
 /**
+ *
+ * @param {string} personReference
+ * @param transaction
+ * @returns {Promise<boolean>}
+ */
+const pkExists = async (personReference, transaction) => {
+  const count = await sequelize.models.person.count({ where: { person_reference: personReference } }, { transaction })
+
+  return count > 0
+}
+/**
  * @param owners
  * @param {Person[]} owners
  * @param  [transaction]
@@ -46,7 +56,6 @@ const createPeople = async (owners, transaction) => {
   if (!transaction) {
     return await sequelize.transaction(async (t) => createPeople(owners, t))
   }
-  const unmanagedTransaction = await sequelize.transaction()
 
   const createdPeople = []
 
@@ -56,28 +65,18 @@ const createPeople = async (owners, transaction) => {
         first_name: owner.firstName,
         last_name: owner.lastName,
         birth_date: owner.dateOfBirth ?? owner.birthDate,
-        person_reference: createRegistrationNumber()
+        person_reference: ''
       }
 
-      let person
+      let pkAlreadyExists = true
 
-      try {
-        person = await sequelize.models.person.create(createProperties, { transaction: unmanagedTransaction })
-        await unmanagedTransaction.commit()
-      } catch (e) {
-        if (e instanceof UniqueConstraintError) {
-          await unmanagedTransaction.rollback()
-          let personReference = createProperties.person_reference
-
-          while (personReference === createProperties.person_reference) {
-            personReference = createRegistrationNumber()
-          }
-
-          person = await sequelize.models.person.create({ ...createProperties, person_reference: personReference }, { transaction })
-        } else {
-          throw e
-        }
+      while (pkAlreadyExists) {
+        const personReference = createRegistrationNumber()
+        createProperties.person_reference = personReference
+        pkAlreadyExists = await pkExists(personReference, transaction)
       }
+
+      const person = await sequelize.models.person.create(createProperties, { transaction })
 
       const country = await getCountry(owner.address.country)
 
