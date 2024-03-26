@@ -31,7 +31,7 @@ const runOvernightJobs = async () => {
 
 const tryStartJob = async (trans) => {
   if (!trans) {
-    return sequelize.transaction(async (t) => tryStartJob(t))
+    return await sequelize.transaction(async (t) => tryStartJob(t))
   }
 
   let jobId = null
@@ -72,7 +72,7 @@ const tryStartJob = async (trans) => {
 
 const endJob = async (jobId, resultText, trans) => {
   if (!trans) {
-    return sequelize.transaction(async (t) => endJob(jobId, resultText, t))
+    return await sequelize.transaction(async (t) => endJob(jobId, resultText, t))
   }
 
   try {

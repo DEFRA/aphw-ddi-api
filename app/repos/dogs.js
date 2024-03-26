@@ -48,7 +48,7 @@ const isExistingDog = (dog) => {
 
 const createDogs = async (dogs, owners, enforcement, transaction) => {
   if (!transaction) {
-    return sequelize.transaction(async (t) => createDogs(dogs, owners, enforcement, t))
+    return await sequelize.transaction(async (t) => createDogs(dogs, owners, enforcement, t))
   }
 
   try {
@@ -92,7 +92,6 @@ const handleInsuranceAndMicrochipAndRegPerson = async (dogEntity, dog, dogResult
 
     if (dog.microchipNumber) {
       await createMicrochip(dog.microchipNumber, dogEntity.id, transaction)
-      dogResult.microchipNumber = dog.microchipNumber
     }
 
     for (const owner of owners) {
@@ -103,6 +102,7 @@ const handleInsuranceAndMicrochipAndRegPerson = async (dogEntity, dog, dogResult
       }, { transaction })
     }
   }
+  dogResult.microchipNumber = dog.microchipNumber
 }
 
 const getOrCreateDog = async (dog, statuses, breed, transaction) => {
@@ -211,7 +211,7 @@ const addImportedRegisteredPerson = async (personId, personTypeId, dogId, t) => 
 
 const addImportedDog = async (dog, user, transaction) => {
   if (!transaction) {
-    return sequelize.transaction(async (t) => addImportedDog(dog, user, t))
+    return await sequelize.transaction(async (t) => addImportedDog(dog, user, t))
   }
 
   const newDog = await sequelize.models.dog.create(dog, { transaction })
@@ -231,7 +231,7 @@ const addImportedDog = async (dog, user, transaction) => {
 
 const updateDog = async (payload, user, transaction) => {
   if (!transaction) {
-    return sequelize.transaction(async (t) => updateDog(payload, user, t))
+    return await sequelize.transaction(async (t) => updateDog(payload, user, t))
   }
 
   const dogFromDB = await getDogByIndexNumber(payload.indexNumber)
@@ -259,7 +259,7 @@ const updateDog = async (payload, user, transaction) => {
 
 const updateStatus = async (indexNumber, newStatus, transaction) => {
   if (!transaction) {
-    return sequelize.transaction(async (t) => updateStatus(indexNumber, newStatus, t))
+    return await sequelize.transaction(async (t) => updateStatus(indexNumber, newStatus, t))
   }
 
   const statuses = await getStatuses()

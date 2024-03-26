@@ -7,7 +7,7 @@ const { sendUpdateToAudit } = require('../messaging/send-audit')
 const { PERSON } = require('../constants/event/audit-event-object-types')
 const { personDto } = require('../dto/person')
 const { UniqueConstraintError } = require('sequelize')
-const { personTableRelationships } = require('./relationships/person')
+const { personRelationship } = require('./relationships/person')
 
 /**
  * @typedef CountryDao
@@ -44,7 +44,7 @@ const { personTableRelationships } = require('./relationships/person')
  */
 const createPeople = async (owners, transaction) => {
   if (!transaction) {
-    return sequelize.transaction(async (t) => createPeople(owners, t))
+    return await sequelize.transaction(async (t) => createPeople(owners, t))
   }
   const unmanagedTransaction = await sequelize.transaction()
 
@@ -154,7 +154,7 @@ const getPersonByReference = async (reference, transaction) => {
     const person = await sequelize.models.person.findAll({
       order: [[sequelize.col('addresses.address.id'), 'DESC']],
       where: { person_reference: reference },
-      include: personTableRelationships(sequelize),
+      include: personRelationship(sequelize),
       transaction
     })
 
@@ -188,7 +188,7 @@ const getOwnerOfDog = async (indexNumber) => {
 
 const updatePerson = async (person, user, transaction) => {
   if (!transaction) {
-    return sequelize.transaction(async (t) => updatePerson(person, user, t))
+    return await sequelize.transaction(async (t) => updatePerson(person, user, t))
   }
 
   try {
@@ -245,6 +245,7 @@ const updatePerson = async (person, user, transaction) => {
     const updatedPerson = await getPersonByReference(person.personReference, transaction)
 
     person.id = updatedPerson.id
+    person.organisationName = updatedPerson.organisation?.organisation_name
     await updateSearchIndexPerson(person, transaction)
 
     await sendUpdateToAudit(PERSON, preChangedPersonDto, personDto(updatedPerson, true), user)
@@ -305,32 +306,7 @@ const getPersonAndDogsByReference = async (reference, transaction) => {
         model: sequelize.models.person,
         where: { person_reference: reference },
         as: 'person',
-        include: [{
-          model: sequelize.models.person_address,
-          as: 'addresses',
-          include: [{
-            model: sequelize.models.address,
-            as: 'address',
-            include: [{
-              attribute: ['country'],
-              model: sequelize.models.country,
-              as: 'country'
-            }]
-          }]
-        },
-        {
-          model: sequelize.models.person_contact,
-          as: 'person_contacts',
-          separate: true,
-          include: [{
-            model: sequelize.models.contact,
-            as: 'contact',
-            include: [{
-              model: sequelize.models.contact_type,
-              as: 'contact_type'
-            }]
-          }]
-        }]
+        include: personRelationship(sequelize)
       },
       {
         model: sequelize.models.dog,
