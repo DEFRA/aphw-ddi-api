@@ -37,8 +37,8 @@ const { personTableRelationships } = require('./relationships/person')
 
 /**
  * @param owners
- * @param [transaction]
- * @param  [transaction2]
+ * @param {Person[]} owners
+ * @param  [transaction]
  * @returns {Promise<CreatedPersonDao[]>}
  *
  */
@@ -256,6 +256,40 @@ const updatePerson = async (person, user, transaction) => {
   }
 }
 
+/**
+ *
+ * @param id
+ * @param {{
+ *   dateOfBirth: Date
+ * }} personFields
+ * @param user
+ * @param transaction
+ * @returns {Promise<{}>}
+ */
+const updatePersonFields = async (id, personFields, user, transaction) => {
+  if (!transaction) {
+    return sequelize.transaction(async (t) => updatePersonFields(id, personFields, user, t))
+  }
+
+  const person = await sequelize.models.person.findByPk(id)
+
+  /**
+   * @type {Partial<PersonDao>}
+   */
+  const personDao = Object.keys(personFields).reduce((personDao, personKey) => {
+    if (personKey === 'dateOfBirth') {
+      personDao.birth_date = personFields[personKey]
+    }
+    return personDao
+  }, {})
+
+  await person.update(personDao)
+  await person.save()
+  await person.reload()
+
+  return person
+}
+
 const getPersonAndDogsByReference = async (reference, transaction) => {
   try {
     const person = await sequelize.models.registered_person.findAll({
@@ -353,5 +387,6 @@ module.exports = {
   getPersonByReference,
   getPersonAndDogsByReference,
   updatePerson,
+  updatePersonFields,
   getOwnerOfDog
 }

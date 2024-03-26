@@ -18,6 +18,7 @@ describe('People repo', () => {
         create: jest.fn(),
         findOne: jest.fn(),
         findAll: jest.fn(),
+        findByPk: jest.fn(),
         update: jest.fn()
       },
       address: {
@@ -56,7 +57,7 @@ describe('People repo', () => {
   jest.mock('../../../../app/repos/search')
   const { updateSearchIndexPerson } = require('../../../../app/repos/search')
 
-  const { createPeople, getPersonByReference, getPersonAndDogsByReference, updatePerson, getOwnerOfDog } = require('../../../../app/repos/people')
+  const { createPeople, getPersonByReference, getPersonAndDogsByReference, updatePerson, getOwnerOfDog, updatePersonFields } = require('../../../../app/repos/people')
 
   beforeEach(async () => {
     jest.clearAllMocks()
@@ -739,6 +740,113 @@ describe('People repo', () => {
       ])
 
       await expect(updatePerson(person, null, {})).rejects.toThrow('Username and displayname are required for auditing update of person')
+    })
+  })
+
+  describe('updatePersonFields', () => {
+    test('updatePersonFields should start new transaction if none passed', async () => {
+      updateSearchIndexPerson.mockResolvedValue()
+
+      await updatePersonFields(1, {
+        dateOfBirth: new Date('1990-01-01')
+      })
+
+      expect(sequelize.transaction).toHaveBeenCalledTimes(1)
+    })
+
+    test('updatePersonFields should not start new transaction if passed', async () => {
+      updateSearchIndexPerson.mockResolvedValue()
+
+      const updateMock = jest.fn()
+      const saveMock = jest.fn()
+      const reloadMock = jest.fn()
+
+      const personMock = {
+        id: 1,
+        first_name: 'First',
+        last_name: 'Last',
+        person_reference: '1234',
+        addresses: [
+          {
+            address: {
+              id: 1,
+              address_line_1: 'Address 1',
+              address_line_2: 'Address 2',
+              town: 'Town',
+              postcode: 'Postcode',
+              country: { id: 1, country: 'England' }
+            }
+          }
+        ],
+        person_contacts: []
+      }
+
+      const personModelMock = {
+        update: updateMock,
+        save: saveMock,
+        reload: reloadMock,
+        dateValues: personMock
+      }
+
+      sequelize.models.person.findByPk.mockResolvedValue(personModelMock)
+
+      await updatePersonFields(1, {
+        dateOfBirth: new Date('1990-01-01')
+      }, dummyUser, {})
+
+      expect(sequelize.transaction).toHaveBeenCalledTimes(0)
+    })
+
+    test('updatePersonFields change in date of birth should create new entry', async () => {
+      updateSearchIndexPerson.mockResolvedValue()
+
+      const updateMock = jest.fn()
+      const saveMock = jest.fn()
+
+      const personMock = {
+        id: 1,
+        first_name: 'First',
+        last_name: 'Last',
+        person_reference: '1234',
+        addresses: [
+          {
+            address: {
+              id: 1,
+              address_line_1: 'Address 1',
+              address_line_2: 'Address 2',
+              town: 'Town',
+              postcode: 'Postcode',
+              country: { id: 1, country: 'England' }
+            }
+          }
+        ],
+        person_contacts: []
+      }
+
+      const reloadMock = jest.fn(() => {
+        personMock.birth_date = new Date('1990-01-01')
+      })
+
+      const personModelMock = {
+        update: updateMock,
+        save: saveMock,
+        reload: reloadMock,
+        dataValues: personMock
+      }
+
+      sequelize.models.person.findByPk.mockResolvedValue(personModelMock)
+
+      const person = await updatePersonFields(1, {
+        dateOfBirth: new Date('1990-01-01')
+      }, dummyUser, {})
+
+      expect(personModelMock.update).toHaveBeenCalledTimes(1)
+      expect(personModelMock.update).toBeCalledWith({
+        birth_date: new Date('1990-01-01')
+      })
+      expect(personModelMock.save).toHaveBeenCalledTimes(1)
+      expect(reloadMock).toHaveBeenCalledTimes(1)
+      expect(person.dataValues.birth_date).toEqual(new Date('1990-01-01'))
     })
   })
 })
