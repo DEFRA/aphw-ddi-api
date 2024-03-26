@@ -848,5 +848,54 @@ describe('People repo', () => {
       expect(reloadMock).toHaveBeenCalledTimes(1)
       expect(person.dataValues.birth_date).toEqual(new Date('1990-01-01'))
     })
+
+    test('updatePersonFields should not call update given a non-updatable field', async () => {
+      updateSearchIndexPerson.mockResolvedValue()
+
+      const updateMock = jest.fn()
+      const saveMock = jest.fn()
+
+      const personMock = {
+        id: 1,
+        first_name: 'First',
+        last_name: 'Last',
+        person_reference: '1234',
+        addresses: [
+          {
+            address: {
+              id: 1,
+              address_line_1: 'Address 1',
+              address_line_2: 'Address 2',
+              town: 'Town',
+              postcode: 'Postcode',
+              country: { id: 1, country: 'England' }
+            }
+          }
+        ],
+        person_contacts: []
+      }
+
+      const reloadMock = jest.fn(() => {
+        personMock.birth_date = new Date('1990-01-01')
+      })
+
+      const personModelMock = {
+        update: updateMock,
+        save: saveMock,
+        reload: reloadMock,
+        dataValues: personMock
+      }
+
+      sequelize.models.person.findByPk.mockResolvedValue(personModelMock)
+
+      const person = await updatePersonFields(1, {
+        personReference: '1345'
+      }, dummyUser, {})
+
+      expect(personModelMock.update).not.toHaveBeenCalled()
+      expect(personModelMock.save).toHaveBeenCalledTimes(0)
+      expect(reloadMock).toHaveBeenCalledTimes(0)
+      expect(person.dataValues.person_reference).toEqual('1234')
+    })
   })
 })

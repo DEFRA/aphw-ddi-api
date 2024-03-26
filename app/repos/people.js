@@ -283,9 +283,11 @@ const updatePersonFields = async (id, personFields, user, transaction) => {
     return personDao
   }, {})
 
-  await person.update(personDao)
-  await person.save()
-  await person.reload()
+  if (Object.values(personDao).length) {
+    await person.update(personDao)
+    await person.save()
+    await person.reload()
+  }
 
   return person
 }
