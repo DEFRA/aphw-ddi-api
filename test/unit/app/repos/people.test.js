@@ -4,7 +4,6 @@ const { owner: mockEnhancedOwner } = require('../../../mocks/cdo/create-enhanced
 
 jest.mock('../../../../app/messaging/send-event')
 const { sendEvent } = require('../../../../app/messaging/send-event')
-const { UniqueConstraintError } = require('sequelize/lib/errors')
 
 const dummyUser = {
   username: 'dummy-user',
@@ -19,7 +18,8 @@ describe('People repo', () => {
         findOne: jest.fn(),
         findAll: jest.fn(),
         findByPk: jest.fn(),
-        update: jest.fn()
+        update: jest.fn(),
+        count: jest.fn()
       },
       address: {
         create: jest.fn(),
@@ -92,6 +92,8 @@ describe('People repo', () => {
         postcode: 'Postcode'
       }
 
+      sequelize.models.person.count.mockResolvedValue(0)
+
       sequelize.models.person.create.mockResolvedValue({
         dataValues: {
           id: 1,
@@ -110,7 +112,7 @@ describe('People repo', () => {
 
       await createPeople(people, {})
 
-      expect(sequelize.transaction).toHaveBeenCalledTimes(1)
+      expect(sequelize.transaction).toHaveBeenCalledTimes(0)
     })
 
     test('createPeople should return created people', async () => {
@@ -123,7 +125,7 @@ describe('People repo', () => {
         town: 'Town',
         postcode: 'Postcode'
       }
-
+      sequelize.models.person.count.mockResolvedValue(0)
       sequelize.models.person.create.mockResolvedValue({
         dataValues: {
           id: 1,
@@ -165,7 +167,7 @@ describe('People repo', () => {
         town: 'Town',
         postcode: 'Postcode'
       }
-
+      sequelize.models.person.count.mockResolvedValue(0)
       sequelize.models.person.create.mockResolvedValue({
         dataValues: {
           id: 1,
@@ -210,11 +212,12 @@ describe('People repo', () => {
         postcode: 'Postcode'
       }
 
+      sequelize.models.person.count
+        .mockResolvedValueOnce(1)
+        .mockResolvedValueOnce(1)
+        .mockResolvedValueOnce(0)
+
       sequelize.models.person.create
-        .mockRejectedValueOnce(new UniqueConstraintError({
-          message: 'Validation error',
-          fields: { person_reference: 'P-1C1B-EA37' }
-        }))
         .mockResolvedValueOnce({
           dataValues: {
             id: 1,
@@ -230,6 +233,7 @@ describe('People repo', () => {
 
       const createdPeople = await createPeople(people, transaction, {})
 
+      expect(sequelize.models.person.count).toBeCalledTimes(3)
       expect(createdPeople).toEqual([
         {
           id: 1,
