@@ -27,10 +27,18 @@ const getPersons = async (queryParams, transaction) => {
 
     if (query) {
       const dbColumnKey = dtoToModelMapping[key]
-      whereObject[dbColumnKey] = dbColumnKey !== 'birth_date'
-        ? sequelize.where(
+
+      if (dbColumnKey !== 'birth_date') {
+        whereObject[dbColumnKey] = sequelize.where(
           sequelize.fn('lower', sequelize.col(dbColumnKey)), `${query.toLowerCase()}`)
-        : { [Op.eq]: `${query}` }
+      } else {
+        whereObject[dbColumnKey] = {
+          [Op.or]: {
+            [Op.eq]: `${query}`,
+            [Op.is]: null
+          }
+        }
+      }
     }
 
     return whereObject
