@@ -11,6 +11,9 @@ const sendEventToAudit = async (eventType, eventSubject, eventDescription, actio
   if (!isUserValid(actioningUser)) {
     throw new Error(`Username and displayname are required for auditing event of ${eventType}`)
   }
+  if (actioningUser.username === 'import-access-db') {
+    return
+  }
 
   const event = {
     type: eventType,

@@ -6,6 +6,8 @@ const { addToSearchIndex } = require('../../../repos/search')
 
 let stats
 
+const importUser = { username: 'import-access-db', displayname: 'Import Access DB' }
+
 const process = async (config) => {
   config.maxRecords = config.maxRecords || 99999
   stats = {
@@ -47,7 +49,7 @@ const process = async (config) => {
               await addComment(jsonObj.comments, regId)
             }
             dog.id = dogId
-            await addToSearchIndex(rereadPerson, dog.id)
+            await addToSearchIndex(rereadPerson, dog)
             stats.dogRowsIntoDb++
           }
         }

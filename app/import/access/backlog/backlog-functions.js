@@ -8,6 +8,8 @@ const { addImportedDog } = require('../../../repos/dogs')
 const { getCounty, getCountry, getBreed, getPoliceForce } = require('../../../lookups')
 const { dbLogErrorToBacklog, dbLogWarningToBacklog, dbFindAll, dbFindOne, dbUpdate, dbCreate } = require('../../../lib/db-functions')
 
+const importUser = { username: 'import-access-db', displayname: 'Import Access DB' }
+
 const getBacklogRows = async (maxRecords) => {
   // TODO - refine criteria using json attributes
   // e.g. exclude dead dogs where yearOfDead is less than 2003
@@ -57,6 +59,109 @@ const getBreedIfValid = async (jsonObj) => {
   throw new Error(`Invalid breed: ${jsonObj.breed}`)
 }
 
+const countyMap = {
+  Bedfordshire: 'Bedfordshire',
+  Berkshire: 'Berkshire',
+  Bristol: 'Bristol',
+  Buckinghamshire: 'Buckinghamshire',
+  Cambridgeshire: 'Cambridgeshire',
+  Cheshire: 'Cheshire',
+  'City of London': 'City of London',
+  Cornwall: 'Cornwall',
+  'County Durham': 'County Durham',
+  Cumbria: 'Cumbria',
+  Derbyshire: 'Derbyshire',
+  Devon: 'Devon',
+  Dorset: 'Dorset',
+  'East Sussex': 'East Sussex',
+  'East Yorkshire': 'East Yorkshire',
+  Essex: 'Essex',
+  Gloucestershire: 'Gloucestershire',
+  'Greater London': 'Greater London',
+  'Greater Manchester': 'Greater Manchester',
+  Hampshire: 'Hampshire',
+  Herefordshire: 'Herefordshire',
+  Hertfordshire: 'Hertfordshire',
+  'Isle of Wight': 'Isle of Wight',
+  Kent: 'Kent',
+  Lancashire: 'Lancashire',
+  Leicestershire: 'Leicestershire',
+  Lincolnshire: 'Lincolnshire',
+  Merseyside: 'Merseyside',
+  Norfolk: 'Norfolk',
+  'North Yorkshire': 'North Yorkshire',
+  Northamptonshire: 'Northamptonshire',
+  Northumberland: 'Northumberland',
+  Nottinghamshire: 'Nottinghamshire',
+  Oxfordshire: 'Oxfordshire',
+  Rutland: 'Rutland',
+  Shropshire: 'Shropshire',
+  Somerset: 'Somerset',
+  'South Yorkshire': 'South Yorkshire',
+  Staffordshire: 'Staffordshire',
+  Suffolk: 'Suffolk',
+  Surrey: 'Surrey',
+  'Tyne and Wear': 'Tyne and Wear',
+  Warwickshire: 'Warwickshire',
+  'West Berkshire': 'West Berkshire',
+  'West Midlands': 'West Midlands',
+  'West Sussex': 'West Sussex',
+  'West Yorkshire': 'West Yorkshire',
+  Wiltshire: 'Wiltshire',
+  Worcestershire: 'Worcestershire',
+  Flintshire: 'Flintshire',
+  Glamorgan: 'Glamorgan',
+  Merionethshire: 'Merionethshire',
+  Monmouthshire: 'Monmouthshire',
+  Montgomeryshire: 'Montgomeryshire',
+  Pembrokeshire: 'Pembrokeshire',
+  Radnorshire: 'Radnorshire',
+  Anglesey: 'Anglesey',
+  Breconshire: 'Breconshire',
+  Caernarvonshire: 'Caernarvonshire',
+  Cardiganshire: 'Cardiganshire',
+  Carmarthenshire: 'Carmarthenshire',
+  Denbighshire: 'Denbighshire',
+  'Aberdeen City': 'Aberdeen City',
+  Aberdeenshire: 'Aberdeenshire',
+  Angus: 'Angus',
+  'Argyll and Bute': 'Argyll and Bute',
+  'City of Edinburgh': 'City of Edinburgh',
+  Clackmannanshire: 'Clackmannanshire',
+  'Dumfries and Galloway': 'Dumfries and Galloway',
+  'Dundee City': 'Dundee City',
+  'East Ayrshire': 'East Ayrshire',
+  'East Dunbartonshire': 'East Dunbartonshire',
+  'East Lothian': 'East Lothian',
+  'East Renfrewshire': 'East Renfrewshire',
+  'Eilean Siar': 'Eilean Siar',
+  Falkirk: 'Falkirk',
+  Fife: 'Fife',
+  'Glasgow City': 'Glasgow City',
+  Highland: 'Highland',
+  Inverclyde: 'Inverclyde',
+  Midlothian: 'Midlothian',
+  Moray: 'Moray',
+  'North Ayrshire': 'North Ayrshire',
+  'North Lanarkshire': 'North Lanarkshire',
+  'Orkney Islands': 'Orkney Islands',
+  'Perth and Kinross': 'Perth and Kinross',
+  Renfrewshire: 'Renfrewshire',
+  'Scottish Borders': 'Scottish Borders',
+  'Shetland Islands': 'Shetland Islands',
+  'South Ayrshire': 'South Ayrshire',
+  'South Lanarkshire': 'South Lanarkshire',
+  Stirling: 'Stirling',
+  'West Dunbartonshire': 'West Dunbartonshire',
+  'West Lothian': 'West Lothian',
+  Antrim: 'Antrim',
+  Armagh: 'Armagh',
+  Down: 'Down',
+  Fermanagh: 'Fermanagh',
+  'Derry and Londonderry': 'Derry and Londonderry',
+  Tyrone: 'Tyrone'
+}
+
 const buildPerson = (jsonObj) => ({
   first_name: jsonObj.firstName,
   last_name: jsonObj.lastName,
@@ -64,7 +169,7 @@ const buildPerson = (jsonObj) => ({
     address_line_1: jsonObj.addressLine1,
     address_line_2: jsonObj.addressLine2,
     town: jsonObj.town,
-    county: jsonObj.county,
+    county: countyMap[jsonObj.county] || null,
     postcode: `${jsonObj.postcodePart1} ${jsonObj.postcodePart2}`,
     country: jsonObj.country
   },
@@ -101,7 +206,7 @@ const isDogValid = async (dog, row) => {
 
 const insertDog = async (dog, row) => {
   // TODO - check if dog already exists - need to confirm criteria to use for this
-  const dogId = await addImportedDog(dog)
+  const dogId = await addImportedDog(dog, importUser)
   await dbUpdate(row, { status: row.status + '_AND_DOG', errors: '' })
   return dogId
 }
@@ -198,7 +303,7 @@ const createRegistration = async (dogId, statusId, jsonObj) => {
     status_id: statusId,
     cdo_issued: jsonObj.notificationDate,
     cdo_expiry: dayjs(jsonObj.notificationDate).add(2, 'month'),
-    court_id: 1
+    court_id: null
   }
   return (await dbCreate(sequelize.models.registration, registration)).id
 }
@@ -209,9 +314,33 @@ const addComment = async (comment, registrationId) => {
 
 const warmUpCache = async (cache) => {
   const personRows = await dbFindAll(sequelize.models.person, {
-    attributes: ['first_name', 'last_name', 'person_reference']
+    attributes: ['first_name', 'last_name', 'person_reference', 'addresses.address.address_line_1', 'addresses.address.postcode'],
+    include: [{
+      model: sequelize.models.person_address,
+      as: 'addresses',
+      include: {
+        model: sequelize.models.address,
+        as: 'address'
+      }
+    }]
   })
-  cache.prepopulate(personRows)
+
+  const mappedPersonRows = personRows.map(person => {
+    const { first_name: firstName, last_name: lastName, addresses } = person
+
+    const [personAddress] = addresses
+
+    const address = {
+      ...(personAddress?.address || {})
+    }
+
+    return {
+      first_name: firstName,
+      last_name: lastName,
+      address
+    }
+  })
+  cache.prepopulate(mappedPersonRows)
 }
 
 module.exports = {
@@ -229,5 +358,6 @@ module.exports = {
   insertPerson,
   createRegistration,
   isRegistrationValid,
-  addComment
+  addComment,
+  importUser
 }
