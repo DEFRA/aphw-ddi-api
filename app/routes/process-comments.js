@@ -12,8 +12,9 @@ module.exports = {
   method: 'GET',
   path: '/process-comments',
   handler: async (request, h) => {
-    const results = await processComments()
+    const maxRecords = request.query.maxRecords ? parseInt(request.query.maxRecords) : undefined
+    const results = await processComments(maxRecords)
 
-    return h.response({}).code(200)
+    return h.response(results).code(200)
   }
 }
