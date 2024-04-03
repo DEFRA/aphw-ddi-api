@@ -6,7 +6,14 @@ const importPersonSchema = require('../schema/imported-person-schema')
 const { addPeople } = require('../../../person/add-person')
 const { addImportedDog } = require('../../../repos/dogs')
 const { getCounty, getCountry, getBreed, getPoliceForce } = require('../../../lookups')
-const { dbLogErrorToBacklog, dbLogWarningToBacklog, dbFindAll, dbFindOne, dbUpdate, dbCreate } = require('../../../lib/db-functions')
+const {
+  dbLogErrorToBacklog,
+  dbLogWarningToBacklog,
+  dbFindAll,
+  dbFindOne,
+  dbUpdate,
+  dbCreate
+} = require('../../../lib/db-functions')
 
 const importUser = { username: 'import-access-db', displayname: 'Import Access DB' }
 
@@ -26,7 +33,7 @@ const buildDog = (jsonObj) => ({
   id: jsonObj.dogIndexNumber,
   name: jsonObj.dogName,
   breed: jsonObj.breed,
-  status_id: 1,
+  status_id: getStatus(jsonObj),
   birth_date: jsonObj.dogDateOfBirth,
   tattoo: jsonObj.tattoo,
   microchip_number: jsonObj.microchipNumber,
@@ -204,6 +211,22 @@ const isDogValid = async (dog, row) => {
   return true
 }
 
+const InternalStatusDictionary = {
+  PreExempt: 5,
+  Exempt: 7,
+  InBreach: 8
+}
+
+const importStatusDictionary = {
+  'Work in Progress': InternalStatusDictionary.PreExempt,
+  'Certificate Issued': InternalStatusDictionary.Exempt,
+  'Insurance Expired': InternalStatusDictionary.InBreach
+}
+
+const getStatus = (jsonObj) => {
+  return importStatusDictionary[jsonObj.status] || 1
+}
+
 const insertDog = async (dog, row) => {
   // TODO - check if dog already exists - need to confirm criteria to use for this
   const dogId = await addImportedDog(dog, importUser)
@@ -360,5 +383,6 @@ module.exports = {
   createRegistration,
   isRegistrationValid,
   addComment,
-  importUser
+  importUser,
+  getStatus
 }

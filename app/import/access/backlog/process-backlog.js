@@ -1,5 +1,8 @@
 const PersonCache = require('../person-cache')
-const { buildDog, buildPerson, warmUpCache, isPersonValid, insertPerson, isDogValid, insertDog, getBacklogRows, lookupPersonIdByRef, isRegistrationValid, createRegistration, addComment } = require('./backlog-functions')
+const {
+  buildDog, buildPerson, warmUpCache, isPersonValid, insertPerson, isDogValid, insertDog, getBacklogRows, lookupPersonIdByRef, isRegistrationValid, createRegistration, addComment,
+  getStatus
+} = require('./backlog-functions')
 const { dbLogErrorToBacklog } = require('../../../lib/db-functions')
 const { cleanseRow } = require('./cleanse-backlog.js')
 const { addToSearchIndex } = require('../../../repos/search')
@@ -42,10 +45,13 @@ const process = async (config) => {
             const rereadPerson = await lookupPersonIdByRef(createdPersonRef)
             dog.owner = rereadPerson.id
             const dogId = await insertDog(dog, backlogRow)
-            const regId = await createRegistration(dogId, 1, jsonObj)
+            const statusId = getStatus(jsonObj)
+            const regId = await createRegistration(dogId, statusId, jsonObj)
+
             if (jsonObj.comments) {
               await addComment(jsonObj.comments, regId)
             }
+
             dog.id = dogId
             await addToSearchIndex(rereadPerson, dog)
             stats.dogRowsIntoDb++

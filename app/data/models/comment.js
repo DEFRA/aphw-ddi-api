@@ -19,7 +19,7 @@ module.exports = (sequelize, DataTypes) => {
       type: DataTypes.TEXT,
       allowNull: false
     },
-    created_on: {
+    created_at: {
       type: DataTypes.DATE,
       allowNull: false,
       defaultValue: sequelize.fn('now')
@@ -32,8 +32,8 @@ module.exports = (sequelize, DataTypes) => {
     sequelize,
     tableName: 'comment',
     paranoid: true,
-    deletedAt: 'deleted_at',
     createdAt: 'created_at',
+    deletedAt: 'deleted_at',
     updatedAt: 'updated_at',
     indexes: [
       {
