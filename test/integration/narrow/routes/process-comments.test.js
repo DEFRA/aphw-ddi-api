@@ -1,4 +1,5 @@
 const { comments: mockComments } = require('../../../mocks/comments')
+// const { sendEvent } = require
 
 describe('Process Comments endpoint', () => {
   const createServer = require('../../../../app/server')
@@ -6,6 +7,11 @@ describe('Process Comments endpoint', () => {
 
   jest.mock('../../../../app/repos/comments')
   const { getComments, removeComment } = require('../../../../app/repos/comments')
+
+  jest.mock('../../../../app/import/access/backlog/send-comment-event')
+  const { sendCommentEvent } = require('../../../../app/import/access/backlog/send-comment-event')
+
+  getComments.mockResolvedValue(mockComments)
 
   beforeEach(async () => {
     jest.clearAllMocks()
@@ -19,8 +25,6 @@ describe('Process Comments endpoint', () => {
       url: '/process-comments'
     }
 
-    getComments.mockResolvedValue(mockComments)
-
     const response = await server.inject(options)
     const payload = JSON.parse(response.payload)
 
@@ -28,6 +32,9 @@ describe('Process Comments endpoint', () => {
     expect(getComments).toBeCalledWith(undefined)
     expect(payload.rowsProcessed).toBe(3)
     expect(payload.rowsInError).toBe(0)
+    expect(payload.rowsPublishedToEvents).toBe(3)
+    expect(sendCommentEvent).toBeCalledTimes(3)
+    expect(removeComment).toBeCalledTimes(3)
   })
 
   test('GET /process-comments limits to maxRecords', async () => {
@@ -36,20 +43,17 @@ describe('Process Comments endpoint', () => {
       url: '/process-comments?maxRecords=10'
     }
 
-    getComments.mockResolvedValue(mockComments)
-
     const response = await server.inject(options)
     expect(response.statusCode).toBe(200)
     expect(getComments).toBeCalledWith(10)
   })
 
-  test('GET /process-comments returns 200 given errors exist', async () => {
+  test('GET /process-comments returns 200 given error exists in removeComment', async () => {
     const options = {
       method: 'GET',
       url: '/process-comments'
     }
 
-    getComments.mockResolvedValue(mockComments)
     removeComment.mockRejectedValueOnce(new Error('test error'))
 
     const response = await server.inject(options)
@@ -58,6 +62,25 @@ describe('Process Comments endpoint', () => {
     expect(response.statusCode).toBe(200)
     expect(getComments).toBeCalledWith(undefined)
     expect(payload.rowsProcessed).toBe(3)
+    expect(payload.rowsPublishedToEvents).toBe(2)
+    expect(payload.rowsInError).toBe(1)
+  })
+
+  test('GET /process-comments returns 200 given error exists in sendCommentEvent', async () => {
+    const options = {
+      method: 'GET',
+      url: '/process-comments'
+    }
+    sendCommentEvent.mockRejectedValueOnce(new Error('send comment error'))
+
+    const response = await server.inject(options)
+    const payload = JSON.parse(response.payload)
+
+    expect(response.statusCode).toBe(200)
+    expect(getComments).toBeCalledWith(undefined)
+    expect(removeComment).toBeCalledTimes(2)
+    expect(payload.rowsProcessed).toBe(3)
+    expect(payload.rowsPublishedToEvents).toBe(2)
     expect(payload.rowsInError).toBe(1)
   })
   afterEach(async () => {

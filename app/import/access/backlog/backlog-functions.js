@@ -337,7 +337,8 @@ const warmUpCache = async (cache) => {
     return {
       first_name: firstName,
       last_name: lastName,
-      address
+      address_line_1: address?.address_line_1,
+      postcode: address?.postcode
     }
   })
   cache.prepopulate(mappedPersonRows)

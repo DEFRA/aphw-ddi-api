@@ -25,22 +25,8 @@ describe('Comments repo', () => {
       const comments = await getComments()
 
       expect(comments).toHaveLength(3)
-      expect(comments).toEqual([{
-        id: 1,
-        registration_id: 1,
-        comment: 'Lorem ipsum dolar sit amet'
-      },
-      {
-        id: 2,
-        registration_id: 2,
-        name: 'Vel Nulla mauris vel fringilla. tortor amet, Maecenas luctus. sapien'
-      },
-      {
-        id: 3,
-        registration_id: 3,
-        name: 'Morbi venenatis Morbi dolor, sit dolor, Lorem libero Lorem '
-      }])
-      expect(sequelize.models.comment.findAll).toBeCalledWith({ attributes: ['id', 'registration_id', 'comment'] })
+      expect(comments).toEqual(mockComments)
+      expect(sequelize.models.comment.findAll).toBeCalledWith({ attributes: ['id', 'registration_id', 'comment'], include: expect.anything() })
     })
 
     test('getComments should limit', async () => {
@@ -49,12 +35,17 @@ describe('Comments repo', () => {
       const comments = await getComments(1)
 
       expect(comments).toHaveLength(1)
-      expect(comments).toEqual([{
-        id: 1,
-        registration_id: 1,
-        comment: 'Lorem ipsum dolar sit amet'
-      }])
-      expect(sequelize.models.comment.findAll).toBeCalledWith({ limit: 1, attributes: ['id', 'registration_id', 'comment'] })
+      expect(comments).toEqual([expect.objectContaining({
+        id: 2124,
+        registration_id: 2631,
+        comment: 'Ratione voluptatibus officiis totam cupiditate hic. Consequatur tempore rem qui aperiam ratione. Iure cupiditate blanditiis eos ea odio eius.',
+        registration: expect.objectContaining({
+          dog: expect.objectContaining({
+            index_number: 'ED27995'
+          })
+        })
+      })])
+      expect(sequelize.models.comment.findAll).toBeCalledWith({ limit: 1, attributes: expect.anything(), include: expect.anything() })
     })
 
     test('getComments should throw if error', async () => {

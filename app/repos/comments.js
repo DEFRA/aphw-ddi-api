@@ -7,9 +7,22 @@ const sequelize = require('../config/db')
 const getComments = async (count) => {
   try {
     /**
-     * @type {{ limit?: number }}
+     * @type {{ limit?: number; include: any[] }}
      */
-    const options = {}
+    const options = {
+      include: [
+        {
+          model: sequelize.models.registration,
+          as: 'registration',
+          include: [
+            {
+              model: sequelize.models.dog,
+              as: 'dog'
+            }
+          ]
+        }
+      ]
+    }
 
     if (count) {
       options.limit = count
