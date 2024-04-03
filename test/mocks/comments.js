@@ -6,6 +6,7 @@ const comments = [{
     id: 2631,
     dog_id: 27995,
     status_id: 1,
+    cdo_issued: '2016-07-20',
     deleted_at: null,
     created_at: '2024-04-02T07:33:16.338Z',
     updated_at: '2024-04-02T07:33:16.338Z',
@@ -27,6 +28,7 @@ const comments = [{
     dog_id: 26030,
     status_id: 1,
     deleted_at: null,
+    cdo_issued: '2013-04-17',
     created_at: '2024-04-02T07:33:21.746Z',
     updated_at: '2024-04-02T07:33:21.746Z',
     dog: {
@@ -47,6 +49,7 @@ const comments = [{
     dog_id: 29580,
     status_id: 1,
     deleted_at: null,
+    cdo_issued: '2019-04-17',
     created_at: '2024-04-02T07:34:03.453Z',
     updated_at: '2024-04-02T07:34:03.453Z',
     dog: {

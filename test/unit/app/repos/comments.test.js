@@ -40,6 +40,7 @@ describe('Comments repo', () => {
         registration_id: 2631,
         comment: 'Ratione voluptatibus officiis totam cupiditate hic. Consequatur tempore rem qui aperiam ratione. Iure cupiditate blanditiis eos ea odio eius.',
         registration: expect.objectContaining({
+          cdo_issued: '2016-07-20',
           dog: expect.objectContaining({
             index_number: 'ED27995'
           })

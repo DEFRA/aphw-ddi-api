@@ -35,7 +35,6 @@ module.exports = (sequelize, DataTypes) => {
     deletedAt: 'deleted_at',
     createdAt: 'created_at',
     updatedAt: 'updated_at',
-    timestamps: false,
     indexes: [
       {
         name: 'comment_pkey',
