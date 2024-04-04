@@ -175,7 +175,7 @@ const buildPerson = (jsonObj) => ({
   address: {
     address_line_1: jsonObj.addressLine1,
     address_line_2: jsonObj.addressLine2,
-    town: jsonObj.town,
+    town: jsonObj.town ?? 'Not provided',
     county: countyMap[jsonObj.county] || null,
     postcode: `${jsonObj.postcodePart1} ${jsonObj.postcodePart2}`,
     country: jsonObj.country
@@ -326,13 +326,18 @@ const createRegistration = async (dogId, statusId, jsonObj) => {
     status_id: statusId,
     cdo_issued: jsonObj.notificationDate,
     cdo_expiry: dayjs(jsonObj.notificationDate).add(2, 'month'),
-    court_id: null
+    court_id: null,
+    joined_exemption_scheme: jsonObj.dateJoinedInterimExemptionScheme
   }
   return (await dbCreate(sequelize.models.registration, registration)).id
 }
 
 const addComment = async (comment, registrationId) => {
   return (await dbCreate(sequelize.models.comment, { registration_id: registrationId, comment })).id
+}
+
+const addInsurance = async (jsonObj, dogId, companyId) => {
+  await dbCreate(sequelize.models.insurance, { dog_id: dogId, company_id: companyId, renewal_date: jsonObj.insuranceRenewalDate ?? null })
 }
 
 const warmUpCache = async (cache) => {
@@ -384,5 +389,6 @@ module.exports = {
   isRegistrationValid,
   addComment,
   importUser,
-  getStatus
+  getStatus,
+  addInsurance
 }

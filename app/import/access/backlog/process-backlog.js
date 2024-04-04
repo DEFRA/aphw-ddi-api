@@ -1,7 +1,7 @@
 const PersonCache = require('../person-cache')
 const {
   buildDog, buildPerson, warmUpCache, isPersonValid, insertPerson, isDogValid, insertDog, getBacklogRows, lookupPersonIdByRef, isRegistrationValid, createRegistration, addComment,
-  getStatus
+  getStatus, addInsurance
 } = require('./backlog-functions')
 const { dbLogErrorToBacklog } = require('../../../lib/db-functions')
 const { cleanseRow } = require('./cleanse-backlog.js')
@@ -27,6 +27,8 @@ const process = async (config) => {
   const personCache = new PersonCache(config)
   await warmUpCache(personCache)
 
+  const dogsTrustId = 1
+
   // Create records in DB from backlog data
   for (const backlogRow of backlogRows) {
     stats.rowsProcessed++
@@ -50,6 +52,10 @@ const process = async (config) => {
 
             if (jsonObj.comments) {
               await addComment(jsonObj.comments, regId)
+            }
+
+            if (jsonObj.insuranceRenewalDate) {
+              await addInsurance(jsonObj, dogId, dogsTrustId)
             }
 
             dog.id = dogId
