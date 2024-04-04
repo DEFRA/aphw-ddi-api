@@ -6,6 +6,7 @@ const importPersonSchema = require('../schema/imported-person-schema')
 const { addPeople } = require('../../../person/add-person')
 const { addImportedDog } = require('../../../repos/dogs')
 const { getCounty, getCountry, getBreed, getPoliceForce } = require('../../../lookups')
+const { importUser } = require('../../../constants/import')
 const {
   dbLogErrorToBacklog,
   dbLogWarningToBacklog,
@@ -15,7 +16,6 @@ const {
   dbCreate
 } = require('../../../lib/db-functions')
 
-const importUser = { username: 'import-access-db', displayname: 'Import Access DB' }
 
 const getBacklogRows = async (maxRecords) => {
   // TODO - refine criteria using json attributes

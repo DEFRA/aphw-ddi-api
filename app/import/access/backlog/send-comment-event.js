@@ -2,8 +2,7 @@ const { sendEvent } = require('../../../messaging/send-event')
 const { SOURCE } = require('../../../constants/event/source')
 const { IMPORT } = require('../../../constants/event/events')
 const { v4: uuidv4 } = require('uuid')
-
-const importUser = { username: 'import-access-db', displayname: 'Import Access DB' }
+const { importUser } = require('../../../constants/import')
 
 const createCommentAuditMessage = (commentModel, dogIndexNumber, actioningUser) => {
   const { registration, ...comment } = commentModel.dataValues

@@ -6,12 +6,14 @@ const { sendEvent } = require('./send-event')
 const { deepClone } = require('../lib/deep-clone')
 const { isUserValid } = require('../auth/get-user')
 const { CDO, DOG, PERSON, EXEMPTION } = require('../constants/event/audit-event-object-types')
+const { importUser } = require('../constants/import')
 
 const sendEventToAudit = async (eventType, eventSubject, eventDescription, actioningUser) => {
   if (!isUserValid(actioningUser)) {
     throw new Error(`Username and displayname are required for auditing event of ${eventType}`)
   }
-  if (actioningUser.username === 'import-access-db') {
+
+  if (isImporting(actioningUser)) {
     return
   }
 
@@ -37,6 +39,10 @@ const sendCreateToAudit = async (auditObjectName, entity, user) => {
     throw new Error(`Username and displayname are required for auditing creation of ${auditObjectName}`)
   }
 
+  if (isImporting(user)) {
+    return
+  }
+
   const messagePayload = constructCreatePayload(auditObjectName, entity, user)
 
   const event = {
@@ -56,6 +62,10 @@ const sendCreateToAudit = async (auditObjectName, entity, user) => {
 const sendActivityToAudit = async (activity, actioningUser) => {
   if (!isUserValid(actioningUser)) {
     throw new Error(`Username and displayname are required for auditing activity of ${activity.activityLabel} on ${activity.pk}`)
+  }
+
+  if (isImporting(actioningUser)) {
+    return
   }
 
   const event = {
@@ -87,6 +97,10 @@ const constructCreatePayload = (auditObjectName, entity, actioningUser) => {
 const sendUpdateToAudit = async (auditObjectName, entityPre, entityPost, user) => {
   if (!isUserValid(user)) {
     throw new Error(`Username and displayname are required for auditing update of ${auditObjectName}`)
+  }
+
+  if (isImporting(user)) {
+    return
   }
 
   const messagePayload = constructUpdatePayload(auditObjectName, entityPre, entityPost, user)
@@ -139,6 +153,10 @@ const isDataUnchanged = payload => {
   return payload?.indexOf('"added":[]') > -1 &&
   payload?.indexOf('"removed":[]') > -1 &&
   payload?.indexOf('"edited":[]') > -1
+}
+
+const isImporting = user => {
+  return user?.username === importUser.username
 }
 
 module.exports = {
