@@ -7,7 +7,7 @@ const personSchema = Joi.object({
     address_line_1: Joi.string().required(),
     address_line_2: Joi.string(),
     town: Joi.string(),
-    county: Joi.string(),
+    county: Joi.string().optional().allow(null).allow(''),
     postcode: Joi.string().required(),
     country: Joi.string().required()
   }),
