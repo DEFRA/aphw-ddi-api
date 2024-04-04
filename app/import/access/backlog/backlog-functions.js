@@ -16,7 +16,6 @@ const {
   dbCreate
 } = require('../../../lib/db-functions')
 
-
 const getBacklogRows = async (maxRecords) => {
   // TODO - refine criteria using json attributes
   // e.g. exclude dead dogs where yearOfDead is less than 2003

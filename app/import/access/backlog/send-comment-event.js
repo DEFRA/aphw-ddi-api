@@ -37,5 +37,6 @@ const sendCommentEvent = async (commentModel) => {
 }
 
 module.exports = {
+  createCommentAuditMessage,
   sendCommentEvent
 }
