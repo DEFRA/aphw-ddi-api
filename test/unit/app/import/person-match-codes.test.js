@@ -7,7 +7,7 @@ describe('PersonMatchCodes test', () => {
     const matchCodes = generatePersonMatchCodes(personMatchCodesStandard, config)
     expect(matchCodes).not.toBe(null)
     expect(matchCodes.length).toBe(1)
-    expect(matchCodes[0]).toBe('john^smith')
+    expect(matchCodes[0]).toBe('john^smith^1 anywhere st^ab1 2cd')
   })
 
   test('generatePersonMatchCodes returns firstname and lastname swapped', () => {
@@ -15,7 +15,7 @@ describe('PersonMatchCodes test', () => {
     const matchCodes = generatePersonMatchCodes(personMatchCodesStandard, config)
     expect(matchCodes).not.toBe(null)
     expect(matchCodes.length).toBe(2)
-    expect(matchCodes[0]).toBe('john^smith')
+    expect(matchCodes[0]).toBe('john^smith^1 anywhere st^ab1 2cd')
     expect(matchCodes[1]).toBe('smith^john')
   })
 
@@ -24,7 +24,7 @@ describe('PersonMatchCodes test', () => {
     const matchCodes = generatePersonMatchCodes(personMatchCodesStandard, config)
     expect(matchCodes).not.toBe(null)
     expect(matchCodes.length).toBe(3)
-    expect(matchCodes[0]).toBe('john^smith')
+    expect(matchCodes[0]).toBe('john^smith^1 anywhere st^ab1 2cd')
     expect(matchCodes[1]).toBe('160000^463000')
     expect(matchCodes[2]).toBe('460000^463000')
   })
@@ -34,7 +34,7 @@ describe('PersonMatchCodes test', () => {
     const matchCodes = generatePersonMatchCodes(personMatchCodesStandard, config)
     expect(matchCodes).not.toBe(null)
     expect(matchCodes.length).toBe(6)
-    expect(matchCodes[0]).toBe('john^smith')
+    expect(matchCodes[0]).toBe('john^smith^1 anywhere st^ab1 2cd')
     expect(matchCodes[1]).toBe('smith^john')
     expect(matchCodes[2]).toBe('160000^463000')
     expect(matchCodes[3]).toBe('460000^463000')
@@ -47,7 +47,7 @@ describe('PersonMatchCodes test', () => {
     const matchCodes = generatePersonMatchCodes(personMatchCodesStandard, config)
     expect(matchCodes).not.toBe(null)
     expect(matchCodes.length).toBe(2)
-    expect(matchCodes[0]).toBe('john^smith')
+    expect(matchCodes[0]).toBe('john^smith^1 anywhere st^ab1 2cd')
     expect(matchCodes[1]).toBe('JAN^SNATH')
   })
 
@@ -56,7 +56,7 @@ describe('PersonMatchCodes test', () => {
     const matchCodes = generatePersonMatchCodes(personMatchCodesStandard, config)
     expect(matchCodes).not.toBe(null)
     expect(matchCodes.length).toBe(4)
-    expect(matchCodes[0]).toBe('john^smith')
+    expect(matchCodes[0]).toBe('john^smith^1 anywhere st^ab1 2cd')
     expect(matchCodes[1]).toBe('smith^john')
     expect(matchCodes[2]).toBe('JAN^SNATH')
     expect(matchCodes[3]).toBe('SNATH^JAN')

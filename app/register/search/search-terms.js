@@ -4,7 +4,7 @@ const cleanupSearchTerms = (terms) => {
 
 const addFullDogIndexIfMissing = arr => {
   return arr.map(elem => {
-    return (elem.length === 6 && /^\d+$/.test(elem)) ? `ed${elem}` : elem
+    return ((elem.length === 5 || elem.length === 6) && /^\d+$/.test(elem)) ? `ed${elem}` : elem
   })
 }
 

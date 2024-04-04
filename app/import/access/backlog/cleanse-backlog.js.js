@@ -13,7 +13,8 @@ const policeForceTransforms = [
   { in: 'Cumbria Police', out: 'Cumbria Constabulary' },
   { in: 'Devon and Cornwall Constabulary', out: 'Devon and Cornwall Police' },
   { in: 'Leicestershire Constabulary', out: 'Leicestershire Police' },
-  { in: 'Dumfries & Galloway Police', out: 'Dumfries and Galloway Constabulary' }
+  { in: 'Dumfries & Galloway Police', out: 'Dumfries and Galloway Constabulary' },
+  { in: 'Dumfries & Galloway Constabulary', out: 'Dumfries and Galloway Constabulary' }
 ]
 
 const cleanseRow = async (rowObj) => {
@@ -21,6 +22,9 @@ const cleanseRow = async (rowObj) => {
   rowJson.breed = transformProperty(rowJson.breed, breedTransforms)
   rowJson.policeForce = transformProperty(rowJson.policeForce, policeForceTransforms)
   rowJson.person_date_of_birth = await extractPersonDateOfBirth(rowJson, rowObj)
+  rowJson.dogName = rowJson.dogName ?? 'Unknown'
+  rowJson.colour = rowJson.colour ?? 'Unknown'
+  rowJson.notificationDate = rowJson.notificationDate ?? `${rowJson.notificationYear}-01-01T00:00:00.000Z`
   return rowJson
 }
 

@@ -177,11 +177,11 @@ const accessDbSchema = {
     type: String
   },
   'D-Interim Exemption Scheme': {
-    prop: 'interimExcemptionScheme',
+    prop: 'interimExemptionScheme',
     type: Boolean
   },
   'D-Date Joined Interim Exemption Scheme': {
-    prop: 'dateJoinedInterimExcemptionScheme',
+    prop: 'dateJoinedInterimExemptionScheme',
     type: Date
   }
 }
