@@ -68,7 +68,7 @@ const populatePoliceForce = async (register) => {
       })
 
       if (!registration) {
-        throw new Error(`CDO not found - iondexNumber ${dog.indexNumber}`)
+        throw new Error(`CDO not found - indexNumber ${dog.indexNumber}`)
       }
 
       if (!registration.police_force_id) {
