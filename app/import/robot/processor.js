@@ -6,6 +6,11 @@ const getPoliceForce = require('../../lookups/police-force')
 const sequelize = require('../../config/db')
 const { dbFindOne } = require('../../lib/db-functions')
 
+const robotImportUser = {
+  username: 'robot-import-system-user',
+  displayname: 'robot-import-system-user'
+}
+
 const processRegisterRows = async (register, t) => {
   let currentDataRow
   for (const record of register.add) {
@@ -43,7 +48,7 @@ const processRegisterRows = async (register, t) => {
     currentDataRow = data
 
     try {
-      await createCdo(data, 'robot-import-system-user', t)
+      await createCdo(data, robotImportUser, t)
     } catch (err) {
       console.log(err)
       console.log('Row in error:', JSON.parse(JSON.stringify(currentDataRow)))
