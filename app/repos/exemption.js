@@ -1,6 +1,5 @@
 const { isFuture } = require('date-fns')
 const sequelize = require('../config/db')
-const { deepClone } = require('../lib/deep-clone')
 const { getCdo } = require('./cdo')
 const { getCourt, getPoliceForce } = require('../lookups')
 const { createOrUpdateInsurance } = require('./insurance')
@@ -8,10 +7,11 @@ const { sendUpdateToAudit } = require('../messaging/send-audit')
 const { EXEMPTION } = require('../constants/event/audit-event-object-types')
 const constants = require('../constants/statuses')
 const { updateStatus } = require('../repos/dogs')
+const { preChangedExemptionAudit, postChangedExemptionAudit } = require('../dto/auditing/exemption')
 
 const updateExemption = async (data, user, transaction) => {
   if (!transaction) {
-    return sequelize.transaction((t) => updateExemption(data, user, t))
+    return await sequelize.transaction(async (t) => updateExemption(data, user, t))
   }
 
   try {
@@ -19,23 +19,26 @@ const updateExemption = async (data, user, transaction) => {
 
     const policeForce = await lookupPoliceForce(data)
 
-    await autoChangeStatus(cdo, data, transaction)
+    const preChanged = preChangedExemptionAudit(cdo)
+
+    const changedStatus = await autoChangeStatus(cdo, data, transaction)
 
     const registration = cdo.registration
-
-    const preChangedRegistration = constructPreChangedRegistration(registration, data)
 
     updateRegistration(registration, data, policeForce)
 
     handleOrder2023(registration, data)
 
-    await handleOrder2015(registration, data, cdo)
+    await handleCourt(registration, data, cdo)
 
     await createOrUpdateInsurance(data, cdo, transaction)
 
     const res = registration.save({ transaction })
 
-    await sendUpdateToAudit(EXEMPTION, preChangedRegistration, registration, user)
+    data.status = changedStatus
+    const postChanged = postChangedExemptionAudit(data)
+
+    await sendUpdateToAudit(EXEMPTION, preChanged, postChanged, user)
 
     return res
   } catch (err) {
@@ -49,21 +52,23 @@ const autoChangeStatus = async (cdo, data, transaction) => {
 
   if (currentStatus === constants.statuses.PreExempt) {
     if (!cdo.registration.removed_from_cdo_process && data.removedFromCdoProcess) {
-      await updateStatus(cdo.index_number, constants.statuses.Failed, transaction)
+      return await updateStatus(cdo.index_number, constants.statuses.Failed, transaction)
     } else if (data.insurance?.renewalDate && isFuture(data.insurance?.renewalDate) && !cdo.registration.certificate_issued && data.certificateIssued) {
-      await updateStatus(cdo.index_number, constants.statuses.Exempt, transaction)
+      return await updateStatus(cdo.index_number, constants.statuses.Exempt, transaction)
     }
   } else if (currentStatus === constants.statuses.InterimExempt) {
     if (!cdo.registration.cdo_issued && data.cdoIssued) {
-      await updateStatus(cdo.index_number, constants.statuses.PreExempt, transaction)
+      return await updateStatus(cdo.index_number, constants.statuses.PreExempt, transaction)
     }
   }
 
   if (cdo.registration.exemption_order?.exemption_order === '2023') {
     if (!cdo.registration.withdrawn && data.withdrawn) {
-      await updateStatus(cdo.index_number, constants.statuses.Withdrawn, transaction)
+      return await updateStatus(cdo.index_number, constants.statuses.Withdrawn, transaction)
     }
   }
+
+  return currentStatus
 }
 
 const lookupCdo = async (data) => {
@@ -88,12 +93,6 @@ const lookupPoliceForce = async (data) => {
   }
 }
 
-const constructPreChangedRegistration = (reg, data) => {
-  const preChangedRegistration = deepClone(reg)
-  preChangedRegistration.index_number = data.indexNumber
-  return preChangedRegistration
-}
-
 const updateRegistration = (registration, data, policeForce) => {
   registration.cdo_issued = data.cdoIssued
   registration.cdo_expiry = data.cdoExpiry
@@ -115,8 +114,8 @@ const handleOrder2023 = (registration, data) => {
   }
 }
 
-const handleOrder2015 = async (registration, data, cdo) => {
-  if (registration.exemption_order.exemption_order === '2015' && cdo?.status?.status !== constants.statuses.InterimExempt) {
+const handleCourt = async (registration, data, cdo) => {
+  if (data.court && data.court !== '') {
     const court = await getCourt(data.court)
 
     if (!court) {

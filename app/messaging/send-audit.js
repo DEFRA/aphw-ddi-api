@@ -6,10 +6,15 @@ const { sendEvent } = require('./send-event')
 const { deepClone } = require('../lib/deep-clone')
 const { isUserValid } = require('../auth/get-user')
 const { CDO, DOG, PERSON, EXEMPTION } = require('../constants/event/audit-event-object-types')
+const { importUser } = require('../constants/import')
 
 const sendEventToAudit = async (eventType, eventSubject, eventDescription, actioningUser) => {
   if (!isUserValid(actioningUser)) {
     throw new Error(`Username and displayname are required for auditing event of ${eventType}`)
+  }
+
+  if (isImporting(actioningUser)) {
+    return
   }
 
   const event = {
@@ -34,6 +39,10 @@ const sendCreateToAudit = async (auditObjectName, entity, user) => {
     throw new Error(`Username and displayname are required for auditing creation of ${auditObjectName}`)
   }
 
+  if (isImporting(user)) {
+    return
+  }
+
   const messagePayload = constructCreatePayload(auditObjectName, entity, user)
 
   const event = {
@@ -53,6 +62,10 @@ const sendCreateToAudit = async (auditObjectName, entity, user) => {
 const sendActivityToAudit = async (activity, actioningUser) => {
   if (!isUserValid(actioningUser)) {
     throw new Error(`Username and displayname are required for auditing activity of ${activity.activityLabel} on ${activity.pk}`)
+  }
+
+  if (isImporting(actioningUser)) {
+    return
   }
 
   const event = {
@@ -86,25 +99,31 @@ const sendUpdateToAudit = async (auditObjectName, entityPre, entityPost, user) =
     throw new Error(`Username and displayname are required for auditing update of ${auditObjectName}`)
   }
 
-  const messagePayload = constructUpdatePayload(auditObjectName, entityPre, entityPost, user)
-
-  const event = {
-    type: UPDATE,
-    source: SOURCE,
-    id: uuidv4(),
-    partitionKey: determineUpdatePk(auditObjectName, entityPre),
-    subject: `DDI Update ${auditObjectName}`,
-    data: {
-      message: messagePayload
-    }
+  if (isImporting(user)) {
+    return
   }
 
-  await sendEvent(event)
+  const messagePayload = constructUpdatePayload(auditObjectName, entityPre, entityPost, user)
+
+  if (!isDataUnchanged(messagePayload)) {
+    const event = {
+      type: UPDATE,
+      source: SOURCE,
+      id: uuidv4(),
+      partitionKey: determineUpdatePk(auditObjectName, entityPre),
+      subject: `DDI Update ${auditObjectName}`,
+      data: {
+        message: messagePayload
+      }
+    }
+
+    await sendEvent(event)
+  }
 }
 
 const determineCreatePk = (objName, entity) => {
   if (objName === CDO) {
-    return entity.dogs?.length > 0 ? entity.dogs[0].index_number : null
+    return entity.dog.index_number
   } else if (objName === DOG) {
     return entity.index_number
   }
@@ -130,9 +149,20 @@ const constructUpdatePayload = (auditObjectName, entityPre, entityPost, actionin
   })
 }
 
+const isDataUnchanged = payload => {
+  return payload?.indexOf('"added":[]') > -1 &&
+  payload?.indexOf('"removed":[]') > -1 &&
+  payload?.indexOf('"edited":[]') > -1
+}
+
+const isImporting = user => {
+  return user?.username === importUser.username
+}
+
 module.exports = {
   sendCreateToAudit,
   sendUpdateToAudit,
   sendEventToAudit,
-  sendActivityToAudit
+  sendActivityToAudit,
+  isDataUnchanged
 }

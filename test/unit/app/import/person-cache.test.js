@@ -49,6 +49,6 @@ describe('PersonCache test', () => {
     cache.addMatchCodes(person)
     expect(person.matchCodes).not.toBe(null)
     expect(person.matchCodes.length).toBe(1)
-    expect(person.matchCodes[0]).toBe('david^embleton')
+    expect(person.matchCodes[0]).toBe('david^embleton^1 testington st^ts1 1ts')
   })
 })

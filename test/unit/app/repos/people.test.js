@@ -16,7 +16,10 @@ describe('People repo', () => {
       person: {
         create: jest.fn(),
         findOne: jest.fn(),
-        update: jest.fn()
+        findAll: jest.fn(),
+        findByPk: jest.fn(),
+        update: jest.fn(),
+        count: jest.fn()
       },
       address: {
         create: jest.fn(),
@@ -40,7 +43,10 @@ describe('People repo', () => {
       }
     },
     col: jest.fn(),
-    transaction: jest.fn()
+    transaction: jest.fn(() => ({
+      commit: jest.fn(),
+      rollback: jest.fn()
+    }))
   }))
 
   const sequelize = require('../../../../app/config/db')
@@ -51,7 +57,7 @@ describe('People repo', () => {
   jest.mock('../../../../app/repos/search')
   const { updateSearchIndexPerson } = require('../../../../app/repos/search')
 
-  const { createPeople, getPersonByReference, getPersonAndDogsByReference, updatePerson, getOwnerOfDog } = require('../../../../app/repos/people')
+  const { createPeople, getPersonByReference, getPersonAndDogsByReference, updatePerson, getOwnerOfDog, updatePersonFields } = require('../../../../app/repos/people')
 
   beforeEach(async () => {
     jest.clearAllMocks()
@@ -66,98 +72,197 @@ describe('People repo', () => {
     sendEvent.mockResolvedValue()
   })
 
-  test('createPeople should start new transaction if none passed', async () => {
-    const people = [mockOwner]
+  describe('createPeople', () => {
+    test('createPeople should start two new transactions if none passed', async () => {
+      const people = [mockOwner]
 
-    await createPeople(people)
+      await createPeople(people)
 
-    expect(sequelize.transaction).toHaveBeenCalledTimes(1)
-  })
+      expect(sequelize.transaction).toHaveBeenCalledTimes(1)
+    })
 
-  test('createPeople should not start new transaction if passed', async () => {
-    const people = [mockOwner]
+    test('createPeople should not start new transaction if passed', async () => {
+      const people = [mockOwner]
 
-    const mockAddress = {
-      id: 1,
-      address_line_1: 'Address 1',
-      address_line_2: 'Address 2',
-      town: 'Town',
-      postcode: 'Postcode'
-    }
-
-    sequelize.models.person.create.mockResolvedValue({
-      dataValues: {
+      const mockAddress = {
         id: 1,
-        first_name: 'First',
-        last_name: 'Last'
+        address_line_1: 'Address 1',
+        address_line_2: 'Address 2',
+        town: 'Town',
+        postcode: 'Postcode'
       }
-    })
 
-    sequelize.models.address.create.mockResolvedValue({ ...mockAddress })
+      sequelize.models.person.count.mockResolvedValue(0)
 
-    sequelize.models.address.findByPk.mockResolvedValue({ ...mockAddress })
-
-    sequelize.models.contact.create.mockResolvedValue({
-      id: 555
-    })
-
-    await createPeople(people, {})
-
-    expect(sequelize.transaction).not.toHaveBeenCalled()
-  })
-
-  test('createPeople should return created people', async () => {
-    const people = [mockEnhancedOwner]
-
-    const mockAddress = {
-      id: 1,
-      address_line_1: 'Address 1',
-      address_line_2: 'Address 2',
-      town: 'Town',
-      postcode: 'Postcode'
-    }
-
-    sequelize.models.person.create.mockResolvedValue({
-      dataValues: {
-        id: 1,
-        first_name: 'First',
-        last_name: 'Last'
-      }
-    })
-
-    sequelize.models.address.create.mockResolvedValue({ ...mockAddress })
-
-    sequelize.models.address.findByPk.mockResolvedValue({ ...mockAddress })
-
-    const createdPeople = await createPeople(people, {})
-
-    expect(createdPeople).toEqual([
-      {
-        id: 1,
-        first_name: 'First',
-        last_name: 'Last',
-        address: {
+      sequelize.models.person.create.mockResolvedValue({
+        dataValues: {
           id: 1,
-          address_line_1: 'Address 1',
-          address_line_2: 'Address 2',
-          town: 'Town',
-          postcode: 'Postcode'
+          first_name: 'First',
+          last_name: 'Last'
         }
+      })
+
+      sequelize.models.address.create.mockResolvedValue({ ...mockAddress })
+
+      sequelize.models.address.findByPk.mockResolvedValue({ ...mockAddress })
+
+      sequelize.models.contact.create.mockResolvedValue({
+        id: 555
+      })
+
+      await createPeople(people, {})
+
+      expect(sequelize.transaction).toHaveBeenCalledTimes(0)
+    })
+
+    test('createPeople should return created people', async () => {
+      const people = [mockEnhancedOwner]
+
+      const mockAddress = {
+        id: 1,
+        address_line_1: 'Address 1',
+        address_line_2: 'Address 2',
+        town: 'Town',
+        postcode: 'Postcode'
       }
-    ])
+      sequelize.models.person.count.mockResolvedValue(0)
+      sequelize.models.person.create.mockResolvedValue({
+        dataValues: {
+          id: 1,
+          first_name: 'First',
+          last_name: 'Last'
+        }
+      })
+
+      sequelize.models.address.create.mockResolvedValue({ ...mockAddress })
+
+      sequelize.models.address.findByPk.mockResolvedValue({ ...mockAddress })
+
+      const createdPeople = await createPeople(people, {})
+
+      expect(createdPeople).toEqual([
+        {
+          id: 1,
+          first_name: 'First',
+          last_name: 'Last',
+          address: {
+            id: 1,
+            address_line_1: 'Address 1',
+            address_line_2: 'Address 2',
+            town: 'Town',
+            postcode: 'Postcode'
+          }
+        }
+      ])
+    })
+
+    test('createPeople should return created people with birthDate', async () => {
+      const { dateOfBirth, ...ownerWithBirthDate } = mockEnhancedOwner
+      const people = [{ ...ownerWithBirthDate, birthDate: dateOfBirth }]
+
+      const mockAddress = {
+        id: 1,
+        address_line_1: 'Address 1',
+        address_line_2: 'Address 2',
+        town: 'Town',
+        postcode: 'Postcode'
+      }
+      sequelize.models.person.count.mockResolvedValue(0)
+      sequelize.models.person.create.mockResolvedValue({
+        dataValues: {
+          id: 1,
+          first_name: 'First',
+          last_name: 'Last'
+        }
+      })
+
+      sequelize.models.address.create.mockResolvedValue({ ...mockAddress })
+
+      sequelize.models.address.findByPk.mockResolvedValue({ ...mockAddress })
+
+      const createdPeople = await createPeople(people, {})
+
+      expect(createdPeople).toEqual([
+        {
+          id: 1,
+          first_name: 'First',
+          last_name: 'Last',
+          address: {
+            id: 1,
+            address_line_1: 'Address 1',
+            address_line_2: 'Address 2',
+            town: 'Town',
+            postcode: 'Postcode'
+          }
+        }
+      ])
+    })
+
+    test('createPeople should create new person with different PK given PK collision', async () => {
+      const transaction = {
+        rollback: jest.fn()
+      }
+      const people = [mockEnhancedOwner]
+
+      const mockAddress = {
+        id: 1,
+        address_line_1: 'Address 1',
+        address_line_2: 'Address 2',
+        town: 'Town',
+        postcode: 'Postcode'
+      }
+
+      sequelize.models.person.count
+        .mockResolvedValueOnce(1)
+        .mockResolvedValueOnce(1)
+        .mockResolvedValueOnce(0)
+
+      sequelize.models.person.create
+        .mockResolvedValueOnce({
+          dataValues: {
+            id: 1,
+            first_name: 'First',
+            last_name: 'Last',
+            person_reference: 'P-1C1B-EA38'
+          }
+        })
+
+      sequelize.models.address.create.mockResolvedValue({ ...mockAddress })
+
+      sequelize.models.address.findByPk.mockResolvedValue({ ...mockAddress })
+
+      const createdPeople = await createPeople(people, transaction, {})
+
+      expect(sequelize.models.person.count).toBeCalledTimes(3)
+      expect(createdPeople).toEqual([
+        {
+          id: 1,
+          first_name: 'First',
+          last_name: 'Last',
+          person_reference: 'P-1C1B-EA38',
+          address: {
+            id: 1,
+            address_line_1: 'Address 1',
+            address_line_2: 'Address 2',
+            town: 'Town',
+            postcode: 'Postcode'
+          }
+        }
+      ])
+    })
+
+    test('createPeople should throw if error', async () => {
+      const people = [mockEnhancedOwner]
+
+      sequelize.models.person.create.mockRejectedValue(new Error('Test error'))
+
+      await expect(createPeople(people, {})).rejects.toThrow('Test error')
+    })
   })
 
-  test('createPeople should throw if error', async () => {
-    const people = [mockEnhancedOwner]
-
-    sequelize.models.person.create.mockRejectedValue(new Error('Test error'))
-
-    await expect(createPeople(people, {})).rejects.toThrow('Test error')
-  })
-
-  test('getPersonByReference should return person', async () => {
-    sequelize.models.registered_person.findAll.mockResolvedValue([{
-      person: {
+  describe('getPersonByReference', () => {
+    test('getPersonByReference should return person', async () => {
+      sequelize.models.person.findAll.mockResolvedValue([{
         dataValues: {
           id: 1,
           first_name: 'First',
@@ -169,210 +274,222 @@ describe('People repo', () => {
               address_line_1: 'Address 1',
               address_line_2: 'Address 2',
               town: 'Town',
-              postcode: 'Postcode'
+              postcode: 'Postcode',
+              country: {
+                id: 1,
+                country: 'England'
+              }
             }
           ]
         }
-      }
-    }])
+      }])
 
-    const person = await getPersonByReference('1234')
+      const person = await getPersonByReference('1234')
 
-    expect(person).toEqual({
-      dataValues: {
-        id: 1,
-        first_name: 'First',
-        last_name: 'Last',
-        person_reference: '1234',
-        addresses: [
-          {
-            id: 1,
-            address_line_1: 'Address 1',
-            address_line_2: 'Address 2',
-            town: 'Town',
-            postcode: 'Postcode'
-          }
-        ]
-      }
-    })
-  })
-
-  test('getPersonByReference should throw if error', async () => {
-    sequelize.models.registered_person.findAll.mockRejectedValue(new Error('Test error'))
-
-    await expect(getPersonByReference('1234')).rejects.toThrow('Test error')
-  })
-
-  test('getPersonAndDogsByReference should return person and dogs', async () => {
-    sequelize.models.registered_person.findAll.mockResolvedValue([{
-      dataValues: {
-        person: [
-          {
-            id: 1,
-            first_name: 'First',
-            last_name: 'Last',
-            person_reference: '1234',
-            addresses: [
-              {
-                id: 1,
-                address_line_1: 'Address 1',
-                address_line_2: 'Address 2',
-                town: 'Town',
-                postcode: 'Postcode'
-              }
-            ],
-            dog: [
-              { id: 1, name: 'dog1' }
-            ]
-          },
-          {
-            id: 1,
-            first_name: 'First',
-            last_name: 'Last',
-            person_reference: '1234',
-            addresses: [
-              {
-                id: 1,
-                address_line_1: 'Address 1',
-                address_line_2: 'Address 2',
-                town: 'Town',
-                postcode: 'Postcode'
-              }
-            ],
-            dog: [
-              { id: 2, name: 'dog2' }
-            ]
-          }
-        ]
-      }
-    }])
-
-    const personAndDogs = await getPersonAndDogsByReference('P-1234')
-
-    expect(personAndDogs).toEqual([{
-      dataValues: {
-        person: [
-          {
-            id: 1,
-            first_name: 'First',
-            last_name: 'Last',
-            person_reference: '1234',
-            addresses: [
-              {
-                id: 1,
-                address_line_1: 'Address 1',
-                address_line_2: 'Address 2',
-                town: 'Town',
-                postcode: 'Postcode'
-              }
-            ],
-            dog: [
-              { id: 1, name: 'dog1' }
-            ]
-          },
-          {
-            id: 1,
-            first_name: 'First',
-            last_name: 'Last',
-            person_reference: '1234',
-            addresses: [
-              {
-                id: 1,
-                address_line_1: 'Address 1',
-                address_line_2: 'Address 2',
-                town: 'Town',
-                postcode: 'Postcode'
-              }
-            ],
-            dog: [
-              { id: 2, name: 'dog2' }
-            ]
-          }
-        ]
-      }
-    }])
-  })
-
-  test('getPersonAndDogsByReference should throw if error', async () => {
-    sequelize.models.registered_person.findAll.mockRejectedValue(new Error('Test error'))
-
-    await expect(getPersonAndDogsByReference('P-1234')).rejects.toThrow('Test error')
-  })
-
-  test('getOwnerOfDog should return person', async () => {
-    sequelize.models.registered_person.findOne.mockResolvedValue({
-      person: {
+      expect(person).toEqual({
         dataValues: {
           id: 1,
           first_name: 'First',
           last_name: 'Last',
-          person_reference: '1234'
+          person_reference: '1234',
+          addresses: [
+            {
+              id: 1,
+              address_line_1: 'Address 1',
+              address_line_2: 'Address 2',
+              town: 'Town',
+              postcode: 'Postcode',
+              country: {
+                id: 1,
+                country: 'England'
+              }
+            }
+          ]
         }
-      }
+      })
     })
 
-    const person = await getOwnerOfDog('1234')
+    test('getPersonByReference should throw if error', async () => {
+      sequelize.models.person.findAll.mockRejectedValue(new Error('Test error'))
 
-    expect(person).toEqual({
-      person: {
+      await expect(getPersonByReference('1234')).rejects.toThrow('Test error')
+    })
+  })
+
+  describe('getPersonAndDogsByReference', () => {
+    test('getPersonAndDogsByReference should return person and dogs', async () => {
+      sequelize.models.registered_person.findAll.mockResolvedValue([{
         dataValues: {
-          id: 1,
-          first_name: 'First',
-          last_name: 'Last',
-          person_reference: '1234'
+          person: [
+            {
+              id: 1,
+              first_name: 'First',
+              last_name: 'Last',
+              person_reference: '1234',
+              addresses: [
+                {
+                  id: 1,
+                  address_line_1: 'Address 1',
+                  address_line_2: 'Address 2',
+                  town: 'Town',
+                  postcode: 'Postcode'
+                }
+              ],
+              dog: [
+                { id: 1, name: 'dog1' }
+              ]
+            },
+            {
+              id: 1,
+              first_name: 'First',
+              last_name: 'Last',
+              person_reference: '1234',
+              addresses: [
+                {
+                  id: 1,
+                  address_line_1: 'Address 1',
+                  address_line_2: 'Address 2',
+                  town: 'Town',
+                  postcode: 'Postcode'
+                }
+              ],
+              dog: [
+                { id: 2, name: 'dog2' }
+              ]
+            }
+          ]
         }
-      }
+      }])
+
+      const personAndDogs = await getPersonAndDogsByReference('P-1234')
+
+      expect(personAndDogs).toEqual([{
+        dataValues: {
+          person: [
+            {
+              id: 1,
+              first_name: 'First',
+              last_name: 'Last',
+              person_reference: '1234',
+              addresses: [
+                {
+                  id: 1,
+                  address_line_1: 'Address 1',
+                  address_line_2: 'Address 2',
+                  town: 'Town',
+                  postcode: 'Postcode'
+                }
+              ],
+              dog: [
+                { id: 1, name: 'dog1' }
+              ]
+            },
+            {
+              id: 1,
+              first_name: 'First',
+              last_name: 'Last',
+              person_reference: '1234',
+              addresses: [
+                {
+                  id: 1,
+                  address_line_1: 'Address 1',
+                  address_line_2: 'Address 2',
+                  town: 'Town',
+                  postcode: 'Postcode'
+                }
+              ],
+              dog: [
+                { id: 2, name: 'dog2' }
+              ]
+            }
+          ]
+        }
+      }])
+    })
+
+    test('getPersonAndDogsByReference should throw if error', async () => {
+      sequelize.models.registered_person.findAll.mockRejectedValue(new Error('Test error'))
+
+      await expect(getPersonAndDogsByReference('P-1234')).rejects.toThrow('Test error')
     })
   })
 
-  test('getOwnerOfDog should throw when DB error', async () => {
-    sequelize.models.registered_person.findOne.mockRejectedValue(new Error('Test error'))
+  describe('getOwnerOfDog', () => {
+    test('getOwnerOfDog should return person', async () => {
+      sequelize.models.registered_person.findOne.mockResolvedValue({
+        person: {
+          dataValues: {
+            id: 1,
+            first_name: 'First',
+            last_name: 'Last',
+            person_reference: '1234'
+          }
+        }
+      })
 
-    await expect(getOwnerOfDog('ED1234')).rejects.toThrow('Test error')
+      const person = await getOwnerOfDog('1234')
+
+      expect(person).toEqual({
+        person: {
+          dataValues: {
+            id: 1,
+            first_name: 'First',
+            last_name: 'Last',
+            person_reference: '1234'
+          }
+        }
+      })
+    })
+
+    test('getOwnerOfDog should throw when DB error', async () => {
+      sequelize.models.registered_person.findOne.mockRejectedValue(new Error('Test error'))
+
+      await expect(getOwnerOfDog('ED1234')).rejects.toThrow('Test error')
+    })
   })
 
-  test('updatePerson should start new transaction if none passed', async () => {
-    updateSearchIndexPerson.mockResolvedValue()
+  describe('updatePerson', () => {
+    test('updatePerson should start new transaction if none passed', async () => {
+      updateSearchIndexPerson.mockResolvedValue()
 
-    const person = {
-      personReference: '1234',
-      firstName: 'First',
-      lastName: 'Last',
-      dateOfBirth: '1990-01-01',
-      address: {
-        addressLine1: 'Address 1',
-        addressLine2: 'Address 2',
-        town: 'Town',
-        postcode: 'Postcode',
-        country: 'England'
-      },
-      email: 'test@example.com'
-    }
-
-    await updatePerson(person)
-
-    expect(sequelize.transaction).toHaveBeenCalledTimes(1)
-  })
-
-  test('updatePerson should not start new transaction if passed', async () => {
-    updateSearchIndexPerson.mockResolvedValue()
-
-    const person = {
-      personReference: '1234',
-      firstName: 'First',
-      lastName: 'Last',
-      dateOfBirth: '1990-01-01',
-      address: {
-        addressLine1: 'Address 1',
-        addressLine2: 'Address 2',
-        town: 'Town',
-        postcode: 'Postcode',
-        country: 'England'
+      const person = {
+        personReference: '1234',
+        firstName: 'First',
+        lastName: 'Last',
+        dateOfBirth: '1990-01-01',
+        address: {
+          addressLine1: 'Address 1',
+          addressLine2: 'Address 2',
+          town: 'Town',
+          postcode: 'Postcode',
+          country: 'England'
+        },
+        email: 'test@example.com'
       }
-    }
 
-    sequelize.models.registered_person.findAll.mockResolvedValue([{
-      person: {
+      await updatePerson(person)
+
+      expect(sequelize.transaction).toHaveBeenCalledTimes(1)
+    })
+
+    test('updatePerson should not start new transaction if passed', async () => {
+      updateSearchIndexPerson.mockResolvedValue()
+
+      const person = {
+        personReference: '1234',
+        firstName: 'First',
+        lastName: 'Last',
+        dateOfBirth: '1990-01-01',
+        address: {
+          addressLine1: 'Address 1',
+          addressLine2: 'Address 2',
+          town: 'Town',
+          postcode: 'Postcode',
+          country: 'England'
+        }
+      }
+
+      sequelize.models.person.findAll.mockResolvedValue([{
         id: 1,
         first_name: 'First',
         last_name: 'Last',
@@ -390,33 +507,31 @@ describe('People repo', () => {
           }
         ],
         person_contacts: []
+      }])
+
+      await updatePerson(person, dummyUser, {})
+
+      expect(sequelize.transaction).toHaveBeenCalledTimes(0)
+    })
+
+    test('updatePerson change in address should create new entry', async () => {
+      updateSearchIndexPerson.mockResolvedValue()
+
+      const person = {
+        personReference: '1234',
+        firstName: 'First',
+        lastName: 'Last',
+        dateOfBirth: '1990-01-01',
+        address: {
+          addressLine1: 'Address 1',
+          addressLine2: 'Address 2',
+          town: 'New Town',
+          postcode: 'Postcode',
+          country: 'England'
+        }
       }
-    }])
 
-    await updatePerson(person, dummyUser, {})
-
-    expect(sequelize.transaction).toHaveBeenCalledTimes(0)
-  })
-
-  test('updatePerson change in address should create new entry', async () => {
-    updateSearchIndexPerson.mockResolvedValue()
-
-    const person = {
-      personReference: '1234',
-      firstName: 'First',
-      lastName: 'Last',
-      dateOfBirth: '1990-01-01',
-      address: {
-        addressLine1: 'Address 1',
-        addressLine2: 'Address 2',
-        town: 'New Town',
-        postcode: 'Postcode',
-        country: 'England'
-      }
-    }
-
-    sequelize.models.registered_person.findAll.mockResolvedValue([{
-      person: {
+      sequelize.models.person.findAll.mockResolvedValue([{
         id: 1,
         first_name: 'First',
         last_name: 'Last',
@@ -434,51 +549,49 @@ describe('People repo', () => {
           }
         ],
         person_contacts: []
-      }
-    }])
+      }])
 
-    sequelize.models.address.findByPk.mockResolvedValue({
-      id: 1,
-      address_line_1: 'Address 1',
-      address_line_2: 'Address 2',
-      town: 'Town',
-      postcode: 'Postcode',
-      country: { id: 1, country: 'England' }
-    })
-
-    sequelize.models.address.create.mockResolvedValue({
-      id: 2,
-      address_line_1: 'Address 1',
-      address_line_2: 'Address 2',
-      town: 'Town',
-      postcode: 'Postcode',
-      country: { id: 1, country: 'England' }
-    })
-
-    await updatePerson(person, dummyUser, {})
-
-    expect(sequelize.models.address.create).toHaveBeenCalledTimes(1)
-  })
-
-  test('updatePerson no change in address should not create new entry', async () => {
-    updateSearchIndexPerson.mockResolvedValue()
-
-    const person = {
-      personReference: '1234',
-      firstName: 'First',
-      lastName: 'Last',
-      dateOfBirth: '1990-01-01',
-      address: {
-        addressLine1: 'Address 1',
-        addressLine2: 'Address 2',
+      sequelize.models.address.findByPk.mockResolvedValue({
+        id: 1,
+        address_line_1: 'Address 1',
+        address_line_2: 'Address 2',
         town: 'Town',
         postcode: 'Postcode',
-        country: 'England'
-      }
-    }
+        country: { id: 1, country: 'England' }
+      })
 
-    sequelize.models.registered_person.findAll.mockResolvedValue([{
-      person: {
+      sequelize.models.address.create.mockResolvedValue({
+        id: 2,
+        address_line_1: 'Address 1',
+        address_line_2: 'Address 2',
+        town: 'Town',
+        postcode: 'Postcode',
+        country: { id: 1, country: 'England' }
+      })
+
+      await updatePerson(person, dummyUser, {})
+
+      expect(sequelize.models.address.create).toHaveBeenCalledTimes(1)
+    })
+
+    test('updatePerson no change in address should not create new entry', async () => {
+      updateSearchIndexPerson.mockResolvedValue()
+
+      const person = {
+        personReference: '1234',
+        firstName: 'First',
+        lastName: 'Last',
+        dateOfBirth: '1990-01-01',
+        address: {
+          addressLine1: 'Address 1',
+          addressLine2: 'Address 2',
+          town: 'Town',
+          postcode: 'Postcode',
+          country: 'England'
+        }
+      }
+
+      sequelize.models.person.findAll.mockResolvedValue([{
         id: 1,
         first_name: 'First',
         last_name: 'Last',
@@ -496,43 +609,41 @@ describe('People repo', () => {
           }
         ],
         person_contacts: []
-      }
-    }])
+      }])
 
-    sequelize.models.address.findByPk.mockResolvedValue({
-      id: 1,
-      address_line_1: 'Address 1',
-      address_line_2: 'Address 2',
-      town: 'Town',
-      postcode: 'Postcode',
-      country: { id: 1, country: 'England' }
-    })
-
-    await updatePerson(person, dummyUser, {})
-
-    expect(sequelize.models.address.create).not.toHaveBeenCalled()
-  })
-
-  test('updatePerson change in email should create new entry', async () => {
-    updateSearchIndexPerson.mockResolvedValue()
-
-    const person = {
-      personReference: '1234',
-      firstName: 'First',
-      lastName: 'Last',
-      dateOfBirth: '1990-01-01',
-      address: {
-        addressLine1: 'Address 1',
-        addressLine2: 'Address 2',
+      sequelize.models.address.findByPk.mockResolvedValue({
+        id: 1,
+        address_line_1: 'Address 1',
+        address_line_2: 'Address 2',
         town: 'Town',
         postcode: 'Postcode',
-        country: 'England'
-      },
-      email: 'test_3@example.com'
-    }
+        country: { id: 1, country: 'England' }
+      })
 
-    sequelize.models.registered_person.findAll.mockResolvedValue([{
-      person: {
+      await updatePerson(person, dummyUser, {})
+
+      expect(sequelize.models.address.create).not.toHaveBeenCalled()
+    })
+
+    test('updatePerson change in email should create new entry', async () => {
+      updateSearchIndexPerson.mockResolvedValue()
+
+      const person = {
+        personReference: '1234',
+        firstName: 'First',
+        lastName: 'Last',
+        dateOfBirth: '1990-01-01',
+        address: {
+          addressLine1: 'Address 1',
+          addressLine2: 'Address 2',
+          town: 'Town',
+          postcode: 'Postcode',
+          country: 'England'
+        },
+        email: 'test_3@example.com'
+      }
+
+      sequelize.models.person.findAll.mockResolvedValue([{
         id: 1,
         first_name: 'First',
         last_name: 'Last',
@@ -558,53 +669,103 @@ describe('People repo', () => {
             }
           }
         ]
+      }])
+
+      sequelize.models.contact.create.mockResolvedValue({
+        id: 2,
+        contact: 'test_3@example.com'
+      })
+
+      sequelize.models.person_contact.create.mockResolvedValue({
+        id: 2,
+        person_id: 1,
+        contact_id: 2
+      })
+
+      await updatePerson(person, dummyUser, {})
+
+      expect(sequelize.models.contact.create).toHaveBeenCalledTimes(1)
+    })
+
+    test('updatePerson throws error if person not found', async () => {
+      updateSearchIndexPerson.mockResolvedValue()
+
+      sequelize.models.person.findAll.mockResolvedValue([])
+
+      await expect(updatePerson({ personReference: 'invalid' }, 'dummy-username', {})).rejects.toThrow('Person not found')
+    })
+
+    test('updatePerson throws error if no username passed to auditing', async () => {
+      updateSearchIndexPerson.mockResolvedValue()
+
+      const person = {
+        personReference: '1234',
+        firstName: 'First',
+        lastName: 'Last',
+        dateOfBirth: '1990-01-01',
+        address: {
+          addressLine1: 'Address 1',
+          addressLine2: 'Address 2',
+          town: 'Town',
+          postcode: 'Postcode',
+          country: 'England'
+        },
+        email: 'test_3@example.com'
       }
-    }])
 
-    sequelize.models.contact.create.mockResolvedValue({
-      id: 2,
-      contact: 'test_3@example.com'
+      sequelize.models.person.findAll.mockResolvedValue([
+        {
+          id: 1,
+          first_name: 'First',
+          last_name: 'Last',
+          person_reference: '1234',
+          addresses: [
+            {
+              address: {
+                id: 1,
+                address_line_1: 'Address 1',
+                address_line_2: 'Address 2',
+                town: 'Town',
+                postcode: 'Postcode',
+                country: { id: 1, country: 'England' }
+              }
+            }
+          ],
+          person_contacts: [
+            {
+              contact: {
+                id: 1,
+                contact: 'test@example.com',
+                contact_type: { id: 2, contact_type: 'Email' }
+              }
+            }
+          ]
+        }
+      ])
+
+      await expect(updatePerson(person, null, {})).rejects.toThrow('Username and displayname are required for auditing update of person')
     })
-
-    sequelize.models.person_contact.create.mockResolvedValue({
-      id: 2,
-      person_id: 1,
-      contact_id: 2
-    })
-
-    await updatePerson(person, dummyUser, {})
-
-    expect(sequelize.models.contact.create).toHaveBeenCalledTimes(1)
   })
 
-  test('updatePerson throws error if person not found', async () => {
-    updateSearchIndexPerson.mockResolvedValue()
+  describe('updatePersonFields', () => {
+    test('updatePersonFields should start new transaction if none passed', async () => {
+      updateSearchIndexPerson.mockResolvedValue()
 
-    sequelize.models.registered_person.findAll.mockResolvedValue([])
+      await updatePersonFields(1, {
+        dateOfBirth: new Date('1990-01-01')
+      })
 
-    await expect(updatePerson({ personReference: 'invalid' }, 'dummy-username', {})).rejects.toThrow('Person not found')
-  })
+      expect(sequelize.transaction).toHaveBeenCalledTimes(1)
+    })
 
-  test('updatePerson throws error if no username passed to auditing', async () => {
-    updateSearchIndexPerson.mockResolvedValue()
+    test('updatePersonFields should not start new transaction if passed', async () => {
+      updateSearchIndexPerson.mockResolvedValue()
 
-    const person = {
-      personReference: '1234',
-      firstName: 'First',
-      lastName: 'Last',
-      dateOfBirth: '1990-01-01',
-      address: {
-        addressLine1: 'Address 1',
-        addressLine2: 'Address 2',
-        town: 'Town',
-        postcode: 'Postcode',
-        country: 'England'
-      },
-      email: 'test_3@example.com'
-    }
+      const updateMock = jest.fn()
+      const saveMock = jest.fn()
+      const reloadMock = jest.fn()
 
-    sequelize.models.registered_person.findAll.mockResolvedValue([{
-      person: {
+      const personMock = {
         id: 1,
         first_name: 'First',
         last_name: 'Last',
@@ -621,18 +782,124 @@ describe('People repo', () => {
             }
           }
         ],
-        person_contacts: [
+        person_contacts: []
+      }
+
+      const personModelMock = {
+        update: updateMock,
+        save: saveMock,
+        reload: reloadMock,
+        dateValues: personMock
+      }
+
+      sequelize.models.person.findByPk.mockResolvedValue(personModelMock)
+
+      await updatePersonFields(1, {
+        dateOfBirth: new Date('1990-01-01')
+      }, dummyUser, {})
+
+      expect(sequelize.transaction).toHaveBeenCalledTimes(0)
+    })
+
+    test('updatePersonFields change in date of birth should create new entry', async () => {
+      updateSearchIndexPerson.mockResolvedValue()
+
+      const updateMock = jest.fn()
+      const saveMock = jest.fn()
+
+      const personMock = {
+        id: 1,
+        first_name: 'First',
+        last_name: 'Last',
+        person_reference: '1234',
+        addresses: [
           {
-            contact: {
+            address: {
               id: 1,
-              contact: 'test@example.com',
-              contact_type: { id: 2, contact_type: 'Email' }
+              address_line_1: 'Address 1',
+              address_line_2: 'Address 2',
+              town: 'Town',
+              postcode: 'Postcode',
+              country: { id: 1, country: 'England' }
             }
           }
-        ]
+        ],
+        person_contacts: []
       }
-    }])
 
-    await expect(updatePerson(person, null, {})).rejects.toThrow('Username and displayname are required for auditing update of person')
+      const reloadMock = jest.fn(() => {
+        personMock.birth_date = new Date('1990-01-01')
+      })
+
+      const personModelMock = {
+        update: updateMock,
+        save: saveMock,
+        reload: reloadMock,
+        dataValues: personMock
+      }
+
+      sequelize.models.person.findByPk.mockResolvedValue(personModelMock)
+
+      const person = await updatePersonFields(1, {
+        dateOfBirth: new Date('1990-01-01')
+      }, dummyUser, {})
+
+      expect(personModelMock.update).toHaveBeenCalledTimes(1)
+      expect(personModelMock.update).toBeCalledWith({
+        birth_date: new Date('1990-01-01')
+      }, expect.anything())
+      expect(personModelMock.save).toHaveBeenCalledTimes(1)
+      expect(reloadMock).toHaveBeenCalledTimes(1)
+      expect(person.dataValues.birth_date).toEqual(new Date('1990-01-01'))
+    })
+
+    test('updatePersonFields should not call update given a non-updatable field', async () => {
+      updateSearchIndexPerson.mockResolvedValue()
+
+      const updateMock = jest.fn()
+      const saveMock = jest.fn()
+
+      const personMock = {
+        id: 1,
+        first_name: 'First',
+        last_name: 'Last',
+        person_reference: '1234',
+        addresses: [
+          {
+            address: {
+              id: 1,
+              address_line_1: 'Address 1',
+              address_line_2: 'Address 2',
+              town: 'Town',
+              postcode: 'Postcode',
+              country: { id: 1, country: 'England' }
+            }
+          }
+        ],
+        person_contacts: []
+      }
+
+      const reloadMock = jest.fn(() => {
+        personMock.birth_date = new Date('1990-01-01')
+      })
+
+      const personModelMock = {
+        update: updateMock,
+        save: saveMock,
+        reload: reloadMock,
+        dataValues: personMock
+      }
+
+      sequelize.models.person.findByPk.mockResolvedValue(personModelMock)
+
+      const person = await updatePersonFields(1, {
+        personReference: '1345'
+      }, dummyUser, {})
+
+      expect(personModelMock.update).not.toHaveBeenCalled()
+      expect(personModelMock.save).toHaveBeenCalledTimes(0)
+      expect(reloadMock).toHaveBeenCalledTimes(0)
+      expect(person.dataValues.person_reference).toEqual('1234')
+    })
   })
 })

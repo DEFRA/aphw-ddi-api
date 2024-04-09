@@ -7,6 +7,7 @@ describe('Search repo', () => {
       search_index: {
         create: jest.fn(),
         save: jest.fn(),
+        destroy: jest.fn(),
         findAll: jest.fn()
       }
     },
@@ -17,7 +18,7 @@ describe('Search repo', () => {
 
   const sequelize = require('../../../../app/config/db')
 
-  const { addToSearchIndex, buildAddressString, updateSearchIndexDog, updateSearchIndexPerson } = require('../../../../app/repos/search')
+  const { addToSearchIndex, buildAddressString, updateSearchIndexDog, updateSearchIndexPerson, applyMicrochips } = require('../../../../app/repos/search')
 
   const { dbFindByPk } = require('../../../../app/lib/db-functions')
   jest.mock('../../../../app/lib/db-functions')
@@ -26,7 +27,35 @@ describe('Search repo', () => {
     jest.clearAllMocks()
   })
 
-  test('addToSearchIndex should call create', async () => {
+  test('addToSearchIndex should call create and not destroy for new dog', async () => {
+    sequelize.models.search_index.create.mockResolvedValue()
+    getDogByIndexNumber.mockResolvedValue({ id: 1, index_number: 'ED1' })
+
+    const person = {
+      id: 123,
+      firstName: 'John',
+      lastName: 'Smith',
+      dogIndex: 123,
+      address: {
+        address_line_1: '123 some address'
+      }
+    }
+
+    const dog = {
+      id: 456,
+      dogName: 'Bruno',
+      microchipNumber: 123456789012345
+    }
+
+    dbFindByPk.mockResolvedValue(dog)
+
+    await addToSearchIndex(person, dog, {})
+
+    expect(sequelize.models.search_index.create).toHaveBeenCalledTimes(1)
+    expect(sequelize.models.search_index.destroy).not.toHaveBeenCalled()
+  })
+
+  test('addToSearchIndex should call destroy for existing dog', async () => {
     sequelize.models.search_index.create.mockResolvedValue()
     getDogByIndexNumber.mockResolvedValue({ id: 1, index_number: 'ED1' })
 
@@ -43,14 +72,55 @@ describe('Search repo', () => {
       id: 456,
       dogIndex: 123,
       dogName: 'Bruno',
+      existingDog: true,
       microchipNumber: 123456789012345
     }
 
     dbFindByPk.mockResolvedValue(dog)
 
-    await addToSearchIndex(person, dog.id, {})
+    await addToSearchIndex(person, dog, {})
 
     expect(sequelize.models.search_index.create).toHaveBeenCalledTimes(1)
+    expect(sequelize.models.search_index.destroy).toHaveBeenCalledTimes(1)
+  })
+
+  test('addToSearchIndex should create new transaction if none passed', async () => {
+    sequelize.models.search_index.create.mockResolvedValue()
+    getDogByIndexNumber.mockResolvedValue({ id: 1, index_number: 'ED1' })
+
+    const person = {
+      id: 123,
+      firstName: 'John',
+      lastName: 'Smith',
+      address: {
+        address_line_1: '123 some address'
+      }
+    }
+
+    const dog = {
+      id: 456,
+      dogIndex: 123,
+      dogName: 'Bruno',
+      existingDog: true,
+      microchipNumber: 123456789012345,
+      microchipNumber2: 112345678901234
+    }
+
+    const dogFromDb = {
+      id: 456,
+      index_number: 123,
+      name: 'Bruno',
+      dog_microchips: [
+        { microchip: { microchip_number: 123456789012345 } },
+        { microchip: { microchip_number: 112345678901234 } }
+      ]
+    }
+
+    dbFindByPk.mockResolvedValue(dogFromDb)
+
+    await addToSearchIndex(person, dog)
+
+    expect(sequelize.transaction).toHaveBeenCalledTimes(1)
   })
 
   test('buildAddressString should return parts', async () => {
@@ -103,7 +173,8 @@ describe('Search repo', () => {
       id: 1,
       dogIndex: 123,
       dogName: 'Bruno2',
-      microchipNumber: 123456789012345
+      microchipNumber: 123456789012345,
+      microchipNumber2: 234567890123456
     }
 
     await updateSearchIndexDog(dog, {})
@@ -121,11 +192,56 @@ describe('Search repo', () => {
       id: 1,
       dogIndex: 123,
       firstName: 'Mark',
-      address: {}
+      address: {
+        address_line_1: 'address line 1',
+        postcode: 'postcode'
+      }
     }
 
     await updateSearchIndexPerson(person, {})
 
     expect(mockSave).toHaveBeenCalledTimes(1)
+  })
+
+  test('UpdateSearchIndexPerson should call search_index save for each row when changes', async () => {
+    const mockSave = jest.fn()
+    sequelize.models.search_index.findAll.mockResolvedValue([
+      { dog_id: 1, person_id: 1, search: '12345', json: '{ dogName: \'Bruno\', firstName: \'John\', lastName: \'Smith\' }', save: mockSave }
+    ])
+
+    const person = {
+      id: 1,
+      dogIndex: 123,
+      firstName: 'John',
+      lastName: 'Walker',
+      address: {
+        address_line_1: 'address line 1',
+        postcode: 'postcode'
+      }
+    }
+
+    await updateSearchIndexPerson(person, {})
+
+    expect(mockSave).toHaveBeenCalledTimes(1)
+  })
+
+  test('applyMicrochips should set microchip numbers at root', async () => {
+    const dog = {
+      dog_microchips: [
+        { microchip: { microchip_number: 1234567890 } },
+        { microchip: { microchip_number: 2345678901 } }
+      ]
+    }
+
+    applyMicrochips(dog)
+
+    expect(dog).toEqual({
+      dog_microchips: [
+        { microchip: { microchip_number: 1234567890 } },
+        { microchip: { microchip_number: 2345678901 } }
+      ],
+      microchip_number: 1234567890,
+      microchip_number2: 2345678901
+    })
   })
 })

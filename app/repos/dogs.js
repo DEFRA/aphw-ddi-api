@@ -1,6 +1,5 @@
 const sequelize = require('../config/db')
 const { v4: uuidv4 } = require('uuid')
-const { deepClone } = require('../lib/deep-clone')
 const constants = require('../constants/statuses')
 const { getBreed, getExemptionOrder } = require('../lookups')
 const { updateSearchIndexDog } = require('../repos/search')
@@ -8,6 +7,7 @@ const { updateMicrochips, createMicrochip } = require('./microchip')
 const { createInsurance } = require('./insurance')
 const { sendCreateToAudit, sendUpdateToAudit } = require('../messaging/send-audit')
 const { DOG } = require('../constants/event/audit-event-object-types')
+const { preChangedDogAudit, postChangedDogAudit } = require('../dto/auditing/dog')
 
 const getBreeds = async () => {
   try {
@@ -42,9 +42,13 @@ const getStatuses = async () => {
   }
 }
 
+const isExistingDog = (dog) => {
+  return (dog.indexNumber ?? '') !== ''
+}
+
 const createDogs = async (dogs, owners, enforcement, transaction) => {
   if (!transaction) {
-    return sequelize.transaction(async (t) => createDogs(dogs, owners, enforcement, t))
+    return await sequelize.transaction(async (t) => createDogs(dogs, owners, enforcement, t))
   }
 
   try {
@@ -53,90 +57,22 @@ const createDogs = async (dogs, owners, enforcement, transaction) => {
     const statuses = await getStatuses()
 
     for (const dog of dogs) {
+      const existingDog = isExistingDog(dog)
+
       const breed = await getBreed(dog.breed)
 
-      const dogEntity = await sequelize.models.dog.create({
-        id: dog.indexNumber ?? undefined,
-        name: dog.name,
-        dog_breed_id: breed.id,
-        exported: false,
-        status_id: determineStartingStatus(dog, statuses),
-        dog_reference: uuidv4(),
-        sex: dog.sex,
-        colour: dog.colour,
-        birth_date: dog.birthDate
-      }, { transaction })
+      const dogEntity = await getOrCreateDog(dog, statuses, breed, transaction)
 
-      const dogResult = await sequelize.models.dog.findByPk(dogEntity.id, {
-        include: [{
-          attributes: ['breed'],
-          model: sequelize.models.dog_breed,
-          as: 'dog_breed'
-        },
-        {
-          model: sequelize.models.status,
-          as: 'status'
-        }],
-        raw: true,
-        nest: true,
-        transaction
-      })
+      const dogResult = await refreshDogData(dogEntity.id, transaction)
+      dogResult.existingDog = existingDog
 
-      let exemptionOrder
+      const exemptionOrder = await getExemptionOrder(dog.source === 'ROBOT' ? '2023' : '2015')
 
-      if (dog.source === 'ROBOT') {
-        exemptionOrder = await getExemptionOrder('2023')
-      } else {
-        exemptionOrder = await getExemptionOrder('2015')
-      }
+      const registrationEntity = await createRegistration(dogEntity, dog, enforcement, exemptionOrder, transaction)
 
-      const registrationEntity = await sequelize.models.registration.create({
-        dog_id: dogEntity.id,
-        cdo_issued: dog.cdoIssued,
-        cdo_expiry: dog.cdoExpiry,
-        joined_exemption_scheme: dog.interimExemption,
-        police_force_id: enforcement.policeForce,
-        court_id: enforcement.court,
-        legislation_officer: enforcement.legislationOfficer,
-        status_id: 1,
-        certificate_issued: dog.certificateIssued,
-        exemption_order_id: exemptionOrder.id,
-        application_fee_paid: dog.applicationFeePaid,
-        microchip_deadline: dog.microchipDeadline,
-        neutering_deadline: dog.neuteringDeadline
-      }, { transaction })
+      const createdRegistration = await refreshRegistrationData(registrationEntity.id, transaction)
 
-      if (dog.insurance) {
-        await createInsurance(dogEntity.id, dog.insurance, transaction)
-      }
-
-      const createdRegistration = await sequelize.models.registration.findByPk(registrationEntity.id, {
-        include: [{
-          attributes: ['name'],
-          model: sequelize.models.police_force,
-          as: 'police_force'
-        },
-        {
-          attributes: ['name'],
-          model: sequelize.models.court,
-          as: 'court'
-        }],
-        raw: true,
-        nest: true,
-        transaction
-      })
-
-      if (dog.microchipNumber) {
-        await createMicrochip(dog.microchipNumber, dogEntity.id, transaction)
-      }
-
-      for (const owner of owners) {
-        await sequelize.models.registered_person.create({
-          person_id: owner.id,
-          dog_id: dogEntity.id,
-          person_type_id: 1
-        }, { transaction })
-      }
+      await handleInsuranceAndMicrochipAndRegPerson(dogEntity, dog, dogResult, owners, transaction)
 
       createdDogs.push({ ...dogResult, registration: createdRegistration })
     }
@@ -146,6 +82,108 @@ const createDogs = async (dogs, owners, enforcement, transaction) => {
     console.error(`Error creating dog: ${err}`)
     throw err
   }
+}
+
+const handleInsuranceAndMicrochipAndRegPerson = async (dogEntity, dog, dogResult, owners, transaction) => {
+  if (!dogResult.existingDog) {
+    if (dog.insurance) {
+      await createInsurance(dogEntity.id, dog.insurance, transaction)
+    }
+
+    if (dog.microchipNumber) {
+      await createMicrochip(dog.microchipNumber, dogEntity.id, transaction)
+    }
+
+    for (const owner of owners) {
+      await sequelize.models.registered_person.create({
+        person_id: owner.id,
+        dog_id: dogEntity.id,
+        person_type_id: 1
+      }, { transaction })
+    }
+  }
+  dogResult.microchipNumber = dog.microchipNumber
+}
+
+const getOrCreateDog = async (dog, statuses, breed, transaction) => {
+  if (isExistingDog(dog)) {
+    const dogEntity = await getDogByIndexNumber(dog.indexNumber, transaction)
+    dogEntity.status_id = determineStartingStatus(dog, statuses)
+    await dogEntity.save({ transaction })
+    return dogEntity
+  } else {
+    return await sequelize.models.dog.create({
+      id: dog.indexNumber ?? undefined,
+      name: dog.name,
+      dog_breed_id: breed.id,
+      exported: false,
+      status_id: determineStartingStatus(dog, statuses),
+      dog_reference: uuidv4(),
+      sex: dog.sex,
+      colour: dog.colour,
+      birth_date: dog.birthDate
+    }, { transaction })
+  }
+}
+
+const refreshDogData = async (dogId, transaction) => {
+  return await sequelize.models.dog.findByPk(dogId, {
+    include: [{
+      attributes: ['breed'],
+      model: sequelize.models.dog_breed,
+      as: 'dog_breed'
+    },
+    {
+      model: sequelize.models.status,
+      as: 'status'
+    }],
+    raw: true,
+    nest: true,
+    transaction
+  })
+}
+
+const refreshRegistrationData = async (regId, transaction) => {
+  return await sequelize.models.registration.findByPk(regId, {
+    include: [{
+      attributes: ['name'],
+      model: sequelize.models.police_force,
+      as: 'police_force'
+    },
+    {
+      attributes: ['name'],
+      model: sequelize.models.court,
+      as: 'court'
+    }],
+    raw: true,
+    nest: true,
+    transaction
+  })
+}
+
+const createRegistration = async (dogEntity, dog, enforcement, exemptionOrder, transaction) => {
+  if (isExistingDog(dog)) {
+    await sequelize.models.registration.destroy({
+      where: { dog_id: dogEntity.id },
+      transaction
+    })
+  }
+
+  return await sequelize.models.registration.create({
+    dog_id: dogEntity.id,
+    cdo_issued: dog.cdoIssued,
+    cdo_expiry: dog.cdoExpiry,
+    joined_exemption_scheme: dog.interimExemption,
+    police_force_id: enforcement.policeForce,
+    court_id: enforcement.court,
+    legislation_officer: enforcement.legislationOfficer,
+    status_id: 1,
+    certificate_issued: dog.certificateIssued,
+    exemption_order_id: exemptionOrder.id,
+    application_fee_paid: dog.applicationFeePaid,
+    microchip_deadline: dog.microchipDeadline,
+    neutering_deadline: dog.neuteringDeadline
+  }, { transaction })
 }
 
 const getStatusId = (statuses, statusName) => {
@@ -173,7 +211,7 @@ const addImportedRegisteredPerson = async (personId, personTypeId, dogId, t) => 
 
 const addImportedDog = async (dog, user, transaction) => {
   if (!transaction) {
-    return sequelize.transaction(async (t) => addImportedDog(dog, user, t))
+    return await sequelize.transaction(async (t) => addImportedDog(dog, user, t))
   }
 
   const newDog = await sequelize.models.dog.create(dog, { transaction })
@@ -193,12 +231,12 @@ const addImportedDog = async (dog, user, transaction) => {
 
 const updateDog = async (payload, user, transaction) => {
   if (!transaction) {
-    return sequelize.transaction(async (t) => updateDog(payload, user, t))
+    return await sequelize.transaction(async (t) => updateDog(payload, user, t))
   }
 
   const dogFromDB = await getDogByIndexNumber(payload.indexNumber)
 
-  const preChangedDog = deepClone(dogFromDB)
+  const preChangedDog = preChangedDogAudit(dogFromDB)
 
   const breeds = await getBreeds()
 
@@ -214,14 +252,14 @@ const updateDog = async (payload, user, transaction) => {
 
   await updateSearchIndexDog(refreshedDog, statuses, transaction)
 
-  await sendUpdateToAudit(DOG, preChangedDog, refreshedDog, user)
+  await sendUpdateToAudit(DOG, preChangedDog, postChangedDogAudit(refreshedDog), user)
 
   return dogFromDB
 }
 
 const updateStatus = async (indexNumber, newStatus, transaction) => {
   if (!transaction) {
-    return sequelize.transaction(async (t) => updateStatus(indexNumber, newStatus, t))
+    return await sequelize.transaction(async (t) => updateStatus(indexNumber, newStatus, t))
   }
 
   const statuses = await getStatuses()
@@ -235,6 +273,8 @@ const updateStatus = async (indexNumber, newStatus, transaction) => {
   const refreshedDog = await getDogByIndexNumber(indexNumber, transaction)
 
   await updateSearchIndexDog(refreshedDog, statuses, transaction)
+
+  return newStatus
 }
 
 const updateDogFields = (dbDog, payload, breeds, statuses) => {
