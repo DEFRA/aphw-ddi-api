@@ -1,5 +1,26 @@
 const { getMicrochip } = require('./dto-helper')
 
+/**
+ * @typedef LatestContact
+ * @property {string} email
+ * @property {string} primaryTelephone
+ * @property {string} secondaryTelephone
+ */
+/**
+ * @typedef ContactList
+ * @property {string[]} emails
+ * @property {string[]} primaryTelephones
+ * @property {string[]} secondaryTelephones
+ */
+/**
+ * @typedef Contacts
+ * @type {LatestContact|ContactList}
+ */
+/**
+ * @param contacts
+ * @param {boolean} onlyLatest
+ * @returns {Contacts}
+ */
 const addContacts = (contacts, onlyLatest) => {
   const emails = contacts.filter(entry => entry.contact.contact_type.contact_type === 'Email')
     .sort((a, b) => b.id - a.id)
@@ -26,7 +47,29 @@ const addContacts = (contacts, onlyLatest) => {
     secondaryTelephone: contactsList.secondaryTelephones.length ? contactsList.secondaryTelephones[0] : null
   }
 }
-
+/**
+ * @typedef Address
+ * @property {string} addressLine1
+ * @property {string} addressLine2
+ * @property {string} town
+ * @property {string} postcode
+ * @property {string} country
+ */
+/**
+ * @typedef PersonDto
+ * @property {string} firstName
+ * @property {string} lastName
+ * @property {string} birthDate
+ * @property {string} personReference
+ * @property {Address} address
+ * @property {Contacts | []} contacts
+ *
+ */
+/**
+ * @param person
+ * @param onlyLatestContacts
+ * @returns {PersonDto}
+ */
 const personDto = (person, onlyLatestContacts) => ({
   firstName: person.first_name,
   lastName: person.last_name,
@@ -39,7 +82,8 @@ const personDto = (person, onlyLatestContacts) => ({
     postcode: person.addresses ? person.addresses[0].address.postcode : '',
     country: person.addresses ? person.addresses[0].address.country.country : ''
   },
-  contacts: person.person_contacts ? addContacts(person.person_contacts, onlyLatestContacts) : []
+  contacts: person.person_contacts ? addContacts(person.person_contacts, onlyLatestContacts) : [],
+  organisationName: person.organisation?.organisation_name
 })
 
 const personAndDogsDto = (personAndDogs) => ({
@@ -55,6 +99,7 @@ const personAndDogsDto = (personAndDogs) => ({
     country: personAndDogs[0].person.addresses[0].address.country.country
   },
   contacts: personAndDogs[0].person.person_contacts,
+  organisationName: personAndDogs[0].person.organisation?.organisation_name,
   dogs: personAndDogs.map(x => ({
     id: x.dog.id,
     indexNumber: x.dog.index_number,

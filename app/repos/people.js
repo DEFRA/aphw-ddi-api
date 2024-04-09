@@ -6,22 +6,77 @@ const { updateSearchIndexPerson } = require('./search')
 const { sendUpdateToAudit } = require('../messaging/send-audit')
 const { PERSON } = require('../constants/event/audit-event-object-types')
 const { personDto } = require('../dto/person')
+const { personRelationship } = require('./relationships/person')
 
+/**
+ * @typedef CountryDao
+ * @property {number} [id]
+ * @property {string} country
+ */
+/**
+ * @typedef AddressDao
+ * @property {number} id
+ * @property {string} address_line_1
+ * @property {string|null} address_line_2
+ * @property {string} town
+ * @property {string} postcode
+ * @property {string|null} county
+ * @property {number} country_id
+ * @property {CountryDao} country
+ */
+/**
+ * @typedef CreatedPersonDao
+ * @property {number} id
+ * @property {string} first_name
+ * @property {string} last_name
+ * @property {string} birth_date
+ * @property {string} person_reference
+ * @property {AddressDao} address
+ */
+
+/**
+ *
+ * @param {string} personReference
+ * @param transaction
+ * @returns {Promise<boolean>}
+ */
+const pkExists = async (personReference, transaction) => {
+  const count = await sequelize.models.person.count({ where: { person_reference: personReference } }, { transaction })
+
+  return count > 0
+}
+/**
+ * @param owners
+ * @param {Person[]} owners
+ * @param  [transaction]
+ * @returns {Promise<CreatedPersonDao[]>}
+ *
+ */
 const createPeople = async (owners, transaction) => {
   if (!transaction) {
-    return sequelize.transaction(async (t) => createPeople(owners, t))
+    return await sequelize.transaction(async (t) => createPeople(owners, t))
   }
 
   const createdPeople = []
 
   try {
     for (const owner of owners) {
-      const person = await sequelize.models.person.create({
+      const createProperties = {
         first_name: owner.firstName,
         last_name: owner.lastName,
         birth_date: owner.dateOfBirth ?? owner.birthDate,
-        person_reference: createRegistrationNumber()
-      }, { transaction })
+        person_reference: ''
+      }
+
+      let pkAlreadyExists = true
+
+      while (pkAlreadyExists) {
+        const personReference = createRegistrationNumber()
+        createProperties.person_reference = personReference
+        pkAlreadyExists = await pkExists(personReference, transaction)
+      }
+
+      const person = await sequelize.models.person.create(createProperties, { transaction })
 
       const country = await getCountry(owner.address.country)
 
@@ -71,46 +126,39 @@ const createPeople = async (owners, transaction) => {
     throw err
   }
 }
+/**
+ * @typedef PersonAddressDao
+ * @property {number} id
+ * @property {number} person_id
+ * @property {number} address_id
+ * @property {AddressDao} address
+ */
+/**
+ * @typedef PersonDao
+ * @property {number} id
+ * @property {string} first_name
+ * @property {string} last_name
+ * @property {string} person_reference
+ * @property {string} birth_date
+ * @property {PersonAddressDao[]} addresses
+ * @property {unknown[]} person_contacts
+ */
 
+/**
+ * @param {string} reference
+ * @param [transaction]
+ * @returns {Promise<PersonDao|null>}
+ */
 const getPersonByReference = async (reference, transaction) => {
   try {
-    const person = await sequelize.models.registered_person.findAll({
-      order: [[sequelize.col('person.addresses.address.id'), 'DESC']],
-      include: [{
-        model: sequelize.models.person,
-        where: { person_reference: reference },
-        as: 'person',
-        include: [{
-          model: sequelize.models.person_address,
-          as: 'addresses',
-          include: [{
-            model: sequelize.models.address,
-            as: 'address',
-            include: [{
-              attribute: ['country'],
-              model: sequelize.models.country,
-              as: 'country'
-            }]
-          }]
-        },
-        {
-          model: sequelize.models.person_contact,
-          as: 'person_contacts',
-          separate: true,
-          include: [{
-            model: sequelize.models.contact,
-            as: 'contact',
-            include: [{
-              model: sequelize.models.contact_type,
-              as: 'contact_type'
-            }]
-          }]
-        }]
-      }],
+    const person = await sequelize.models.person.findAll({
+      order: [[sequelize.col('addresses.address.id'), 'DESC']],
+      where: { person_reference: reference },
+      include: personRelationship(sequelize),
       transaction
     })
 
-    return person?.length > 0 ? person[0]?.person : null
+    return person?.length > 0 ? person[0] : null
   } catch (err) {
     console.error(`Error getting person by reference: ${err}`)
     throw err
@@ -140,7 +188,7 @@ const getOwnerOfDog = async (indexNumber) => {
 
 const updatePerson = async (person, user, transaction) => {
   if (!transaction) {
-    return sequelize.transaction(async (t) => updatePerson(person, user, t))
+    return await sequelize.transaction(async (t) => updatePerson(person, user, t))
   }
 
   try {
@@ -197,6 +245,7 @@ const updatePerson = async (person, user, transaction) => {
     const updatedPerson = await getPersonByReference(person.personReference, transaction)
 
     person.id = updatedPerson.id
+    person.organisationName = updatedPerson.organisation?.organisation_name
     await updateSearchIndexPerson(person, transaction)
 
     await sendUpdateToAudit(PERSON, preChangedPersonDto, personDto(updatedPerson, true), user)
@@ -208,6 +257,46 @@ const updatePerson = async (person, user, transaction) => {
   }
 }
 
+/**
+ *
+ * @param id
+ * @param {{
+ *   dateOfBirth: Date
+ * }} personFields
+ * @param user
+ * @param [transaction]
+ * @returns {Promise<PersonDao>}
+ */
+const updatePersonFields = async (id, personFields, user, transaction) => {
+  if (!transaction) {
+    return sequelize.transaction(async (t) => updatePersonFields(id, personFields, user, t))
+  }
+
+  const person = await sequelize.models.person.findByPk(id, { transaction })
+
+  /**
+   * @type {Partial<PersonDao>}
+   */
+  const personDao = Object.keys(personFields).reduce((personDao, personKey) => {
+    if (personKey === 'dateOfBirth') {
+      personDao.birth_date = personFields[personKey]
+    }
+    return personDao
+  }, {})
+
+  if (Object.values(personDao).length) {
+    await person.update(personDao, { transaction })
+    await person.save({
+      transaction
+    })
+    await person.reload({
+      transaction
+    })
+  }
+
+  return person
+}
+
 const getPersonAndDogsByReference = async (reference, transaction) => {
   try {
     const person = await sequelize.models.registered_person.findAll({
@@ -217,32 +306,7 @@ const getPersonAndDogsByReference = async (reference, transaction) => {
         model: sequelize.models.person,
         where: { person_reference: reference },
         as: 'person',
-        include: [{
-          model: sequelize.models.person_address,
-          as: 'addresses',
-          include: [{
-            model: sequelize.models.address,
-            as: 'address',
-            include: [{
-              attribute: ['country'],
-              model: sequelize.models.country,
-              as: 'country'
-            }]
-          }]
-        },
-        {
-          model: sequelize.models.person_contact,
-          as: 'person_contacts',
-          separate: true,
-          include: [{
-            model: sequelize.models.contact,
-            as: 'contact',
-            include: [{
-              model: sequelize.models.contact_type,
-              as: 'contact_type'
-            }]
-          }]
-        }]
+        include: personRelationship(sequelize)
       },
       {
         model: sequelize.models.dog,
@@ -305,5 +369,6 @@ module.exports = {
   getPersonByReference,
   getPersonAndDogsByReference,
   updatePerson,
+  updatePersonFields,
   getOwnerOfDog
 }

@@ -11,6 +11,11 @@ module.exports = [{
     const indexNumber = request.params.indexNumber
     try {
       const dog = await getDogByIndexNumber(indexNumber)
+
+      if (dog === null) {
+        return h.response().code(404)
+      }
+
       return h.response({ dog: dogDto(dog) }).code(200)
     } catch (e) {
       console.log(e)
@@ -26,6 +31,11 @@ module.exports = [{
 
     try {
       const owner = await getOwnerOfDog(indexNumber)
+
+      if (owner === null) {
+        return h.response().code(404)
+      }
+
       return h.response({ owner: personDto(owner.person, true) }).code(200)
     } catch (e) {
       console.log(e)

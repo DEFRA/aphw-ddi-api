@@ -22,6 +22,10 @@ module.exports = (sequelize, DataTypes) => {
     birth_date: {
       type: DataTypes.DATEONLY,
       allowNull: true
+    },
+    organisation_id: {
+      type: DataTypes.INTEGER,
+      allowNull: true
     }
   }, {
     sequelize,
@@ -52,6 +56,11 @@ module.exports = (sequelize, DataTypes) => {
     person.hasMany(models.registered_person, {
       as: 'registered_people',
       foreignKey: 'person_id'
+    })
+
+    person.belongsTo(models.organisation, {
+      as: 'organisation',
+      foreignKey: 'organisation_id'
     })
   }
 

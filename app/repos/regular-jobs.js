@@ -1,12 +1,27 @@
 const sequelize = require('../config/db')
 const { Op } = require('sequelize')
 const { autoUpdateStatuses } = require('../overnight/auto-update-statuses')
+const { createExportFile } = require('../overnight/create-export-file')
+
+const getRegularJobs = async () => {
+  try {
+    const jobs = await sequelize.models.regular_job.findAll({
+      order: [[sequelize.col('regular_job.id'), 'DESC']]
+    })
+
+    return jobs
+  } catch (e) {
+    console.log(`Error retrieving regular-jobs: ${e}`)
+    throw e
+  }
+}
 
 const runOvernightJobs = async () => {
   const jobId = await tryStartJob()
 
   if (jobId) {
-    const result = await autoUpdateStatuses()
+    let result = await autoUpdateStatuses()
+    result = result + ' | ' + await createExportFile()
     await endJob(jobId, result)
     return result
   }
@@ -16,7 +31,7 @@ const runOvernightJobs = async () => {
 
 const tryStartJob = async (trans) => {
   if (!trans) {
-    return sequelize.transaction(async (t) => tryStartJob(t))
+    return await sequelize.transaction(async (t) => tryStartJob(t))
   }
 
   let jobId = null
@@ -45,8 +60,9 @@ const tryStartJob = async (trans) => {
 
       console.log(`Job started for today - jobId: ${newJob?.id}`)
       jobId = newJob.id
+    } else {
+      console.log('Job for today already running or run')
     }
-    console.log('Job for today already running or run')
   } catch (e) {
     console.log(`Error starting overnight job: ${e}`)
     throw new Error(`Error starting overnight job: ${e} ${e.stack}`)
@@ -56,7 +72,7 @@ const tryStartJob = async (trans) => {
 
 const endJob = async (jobId, resultText, trans) => {
   if (!trans) {
-    return sequelize.transaction(async (t) => endJob(jobId, resultText, t))
+    return await sequelize.transaction(async (t) => endJob(jobId, resultText, t))
   }
 
   try {
@@ -80,5 +96,6 @@ const endJob = async (jobId, resultText, trans) => {
 module.exports = {
   runOvernightJobs,
   tryStartJob,
-  endJob
+  endJob,
+  getRegularJobs
 }

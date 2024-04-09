@@ -3,12 +3,16 @@ const { dbFindByPk } = require('../lib/db-functions')
 const { buildAddressString } = require('../lib/address-helper')
 const { getMicrochip } = require('../dto/dto-helper')
 
-const addToSearchIndex = async (person, dogId, transaction) => {
+const addToSearchIndex = async (person, dog, transaction) => {
   if (!transaction) {
-    return sequelize.transaction((t) => addToSearchIndex(person, dogId, t))
+    return await sequelize.transaction(async (t) => addToSearchIndex(person, dog, t))
   }
 
-  const dog = await dbFindByPk(sequelize.models.dog, dogId, {
+  if (dog.existingDog) {
+    await sequelize.models.search_index.destroy({ where: { dog_id: dog.id } }, { transaction })
+  }
+
+  const refreshedDogEntity = await dbFindByPk(sequelize.models.dog, dog.id, {
     order: [[sequelize.col('dog_microchips.id'), 'ASC']],
     include: [{
       model: sequelize.models.status,
@@ -26,25 +30,26 @@ const addToSearchIndex = async (person, dogId, transaction) => {
     transaction
   })
 
-  applyMicrochips(dog)
+  applyMicrochips(refreshedDogEntity)
 
   await sequelize.models.search_index.create({
-    search: buildIndexColumn(person, dog),
+    search: buildIndexColumn(person, refreshedDogEntity),
     person_id: person.id,
     dog_id: dog.id,
-    json: buildJsonColumn(person, dog)
+    json: buildJsonColumn(person, refreshedDogEntity)
   }, { transaction })
 }
 
 const buildIndexColumn = (person, dog) => {
   const address = person?.addresses?.address ? person.addresses.address : person.address
-  return sequelize.fn('to_tsvector', `${person.person_reference} ${person.first_name} ${person.last_name} ${buildAddressString(address, true)} ${dog.index_number} ${dog.name ? dog.name : ''} ${dog.microchip_number ? dog.microchip_number : ''} ${dog.microchip_number2 ? dog.microchip_number2 : ''}`)
+  return sequelize.fn('to_tsvector', `${person.person_reference} ${person.first_name} ${person.last_name} ${person.organisation_name ? person.organisation_name : ''} ${buildAddressString(address, true)} ${dog.index_number} ${dog.name ? dog.name : ''} ${dog.microchip_number ? dog.microchip_number : ''} ${dog.microchip_number2 ? dog.microchip_number2 : ''}`)
 }
 
 const buildJsonColumn = (person, dog) => {
   return {
     firstName: person.first_name,
     lastName: person.last_name,
+    organisationName: person.organisation_name,
     address: buildAddressObject(person),
     dogIndex: dog.index_number,
     dogName: dog.name,
@@ -85,7 +90,8 @@ const updateSearchIndexDog = async (dogFromDb, statuses, transaction) => {
       person_reference: indexRow.json.personReference,
       first_name: indexRow.json.firstName,
       last_name: indexRow.json.lastName,
-      address: indexRow.json.address
+      address: indexRow.json.address,
+      organisation_name: indexRow.json.organisationName
     }
     const partialDog = {
       index_number: dogFromDb.index_number,
@@ -112,11 +118,13 @@ const updateSearchIndexPerson = async (person, transaction) => {
         indexRow.json.address.address_line_1 !== person.address.addressLine1 ||
         indexRow.json.address.address_line_2 !== person.address.addressLine2 ||
         indexRow.json.address.town !== person.address.town ||
-        indexRow.json.address.postcode !== person.address.postcode) {
+        indexRow.json.address.postcode !== person.address.postcode ||
+        indexRow.json.organisationName !== person.organisationName) {
       const partialPerson = {
         person_reference: person.personReference,
         first_name: person.firstName,
         last_name: person.lastName,
+        organisation_name: person.organisationName,
         address: {
           address_line_1: person.address.address_line_1 ?? person.address.addressLine1,
           address_line_2: person.address.address_line_2 ?? person.address.addressLine2,
@@ -142,5 +150,6 @@ module.exports = {
   addToSearchIndex,
   buildAddressString,
   updateSearchIndexDog,
-  updateSearchIndexPerson
+  updateSearchIndexPerson,
+  applyMicrochips
 }

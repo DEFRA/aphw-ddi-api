@@ -22,7 +22,8 @@ const cdoCreateDto = (data) => ({
       town: data.owner.address.town,
       postcode: data.owner.address.postcode,
       country: data.owner.address.country.country
-    }
+    },
+    personReference: data.owner.person_reference
   },
   enforcementDetails: {
     policeForce: data.dogs[0].registration.police_force.name,
@@ -32,6 +33,7 @@ const cdoCreateDto = (data) => ({
   dogs: data.dogs.map(d => ({
     indexNumber: d.index_number,
     name: d.name,
+    microchipNumber: d.microchipNumber,
     status: d.status?.status,
     breed: d.dog_breed.breed,
     cdoIssued: d.registration.cdo_issued,
@@ -51,7 +53,8 @@ const cdoViewDto = (data) => {
       lastName: person.last_name,
       dateOfBirth: person.birth_date,
       addresses: person.addresses,
-      person_contacts: person.person_contacts
+      person_contacts: person.person_contacts,
+      organisationName: person.organisation?.organisation_name ?? null
     },
     dog: {
       id: data.id,

@@ -8,7 +8,10 @@ const generatePersonMatchCodes = (person, config) => {
   const firstName = person.first_name.toLowerCase()
   const lastName = person.last_name.toLowerCase()
 
-  matchCodes.push(`${firstName}^${lastName}`)
+  const addressLine1 = person.address_line_1?.toLowerCase()
+  const postcode = person.postcode?.toLowerCase()
+
+  matchCodes.push(`${firstName}^${lastName}^${addressLine1}^${postcode}`)
   if (config.includeSwappedNames) {
     matchCodes.push(`${lastName}^${firstName}`)
   }

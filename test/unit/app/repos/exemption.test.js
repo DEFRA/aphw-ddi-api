@@ -124,7 +124,7 @@ describe('Exemption repo', () => {
     expect(createOrUpdateInsurance).toHaveBeenCalled()
   })
 
-  test('updateExemption with 2023 order should not call getCourt', async () => {
+  test('updateExemption should not call getCourt if no court supplied', async () => {
     const data = {
       exemptionOrder: '2023',
       indexNumber: 'ED123',
@@ -162,6 +162,47 @@ describe('Exemption repo', () => {
     await updateExemption(data, dummyUser, {})
 
     expect(getCourt).not.toHaveBeenCalled()
+  })
+
+  test('updateExemption should call getCourt if court supplied', async () => {
+    const data = {
+      exemptionOrder: '2023',
+      indexNumber: 'ED123',
+      cdoIssued: '2020-01-01',
+      cdoExpiry: '2020-02-01',
+      policeForce: 'Test Police Force',
+      legislationOfficer: 'Test Officer',
+      certificateIssued: '2020-03-01',
+      applicationFeePaid: '2020-03-01',
+      neuteringConfirmation: '2020-04-01',
+      microchipVerification: '2020-04-01',
+      exemptionSchemeJoin: '2020-05-01',
+      court: 'Manchester Crown Court'
+    }
+
+    const registration = {
+      cdo_issued: '2020-01-01',
+      cdo_expiry: '2020-02-01',
+      court_id: 1,
+      police_force_id: 1,
+      legislation_officer: 'Test Officer',
+      certificate_issued: '2020-03-01',
+      application_fee_paid: '2020-03-01',
+      neutering_confirmation: '2020-04-01',
+      microchip_verification: '2020-04-01',
+      exemption_scheme_join: '2020-05-01',
+      exemption_order: {
+        exemption_order: '2023'
+      },
+      save: jest.fn()
+    }
+
+    getCdo.mockResolvedValue({ registration, insurance: [] })
+    getPoliceForce.mockResolvedValue({ id: 1, name: 'Test Police Force' })
+
+    await updateExemption(data, dummyUser, {})
+
+    expect(getCourt).toHaveBeenCalled()
   })
 
   test('updateExemption should throw an error if the CDO is not found', async () => {

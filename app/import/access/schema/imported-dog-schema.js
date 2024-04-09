@@ -10,7 +10,7 @@ const dogSchema = Joi.object({
   tattoo: Joi.string().optional(),
   microchip_number: Joi.string().optional(),
   colour: Joi.string().required(),
-  sex: Joi.string().required(),
+  sex: Joi.string().optional().allow(null),
   exported: Joi.boolean().required(),
   owner: Joi.number(),
   keeper: Joi.number()

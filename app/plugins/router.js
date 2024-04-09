@@ -6,8 +6,10 @@ const routes = [].concat(
   require('../routes/healthz'),
   require('../routes/import-access-db'),
   require('../routes/process-backlog'),
+  require('../routes/process-comments'),
   require('../routes/robot-import'),
   require('../routes/person'),
+  require('../routes/persons'),
   require('../routes/search-index'),
   require('../routes/police-forces'),
   require('../routes/courts'),
@@ -16,7 +18,8 @@ const routes = [].concat(
   require('../routes/exemption'),
   require('../routes/insurance'),
   require('../routes/export'),
-  require('../routes/activities')
+  require('../routes/activities'),
+  require('../routes/regular-jobs')
 )
 
 module.exports = {

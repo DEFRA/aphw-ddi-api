@@ -26,6 +26,18 @@ describe('Dog endpoint', () => {
     expect(response.statusCode).toBe(200)
   })
 
+  test('GET /dog/ED123 route returns 404 if dog does not exist', async () => {
+    getDogByIndexNumber.mockResolvedValue(null)
+
+    const options = {
+      method: 'GET',
+      url: '/dog/ED000'
+    }
+
+    const response = await server.inject(options)
+    expect(response.statusCode).toBe(404)
+  })
+
   test('GET /dog/ED123 route returns 500 if db error', async () => {
     getDogByIndexNumber.mockRejectedValue(new Error('Test error'))
 
@@ -49,6 +61,30 @@ describe('Dog endpoint', () => {
 
     const response = await server.inject(options)
     expect(response.statusCode).toBe(200)
+  })
+
+  test('GET /dog-owner/ED123 route returns 404 if dog owner does not exist', async () => {
+    getOwnerOfDog.mockResolvedValue(null)
+
+    const options = {
+      method: 'GET',
+      url: '/dog-owner/ED000'
+    }
+
+    const response = await server.inject(options)
+    expect(response.statusCode).toBe(404)
+  })
+
+  test('GET /dog-owner/ED123 route returns 404 if dog does not exist', async () => {
+    getDogByIndexNumber.mockResolvedValue(null)
+
+    const options = {
+      method: 'GET',
+      url: '/dog-owner/ED000'
+    }
+
+    const response = await server.inject(options)
+    expect(response.statusCode).toBe(404)
   })
 
   test('GET /dog-owner/ED123 route returns 500 if db error', async () => {
