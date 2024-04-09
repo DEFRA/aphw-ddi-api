@@ -190,5 +190,8 @@ const containsNonLatinCodepoints = (str, log) => {
 }
 
 module.exports = {
-  importRegister
+  importRegister,
+  truncateIfTooLong,
+  autoCorrectDate,
+  replaceUnicodeCharacters
 }
