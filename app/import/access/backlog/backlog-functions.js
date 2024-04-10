@@ -6,7 +6,7 @@ const importPersonSchema = require('../schema/imported-person-schema')
 const { addPeople } = require('../../../person/add-person')
 const { addImportedDog } = require('../../../repos/dogs')
 const { getCounty, getCountry, getBreed, getPoliceForce } = require('../../../lookups')
-const { importUser } = require('../../../constants/import')
+const { accessImportUser } = require('../../../constants/import')
 const {
   dbLogErrorToBacklog,
   dbLogWarningToBacklog,
@@ -228,7 +228,7 @@ const getStatus = (jsonObj) => {
 
 const insertDog = async (dog, row) => {
   // TODO - check if dog already exists - need to confirm criteria to use for this
-  const dogId = await addImportedDog(dog, importUser)
+  const dogId = await addImportedDog(dog, accessImportUser)
   await dbUpdate(row, { status: row.status + '_AND_DOG', errors: '' })
   return dogId
 }
@@ -326,7 +326,8 @@ const createRegistration = async (dogId, statusId, jsonObj) => {
     cdo_issued: jsonObj.notificationDate,
     cdo_expiry: dayjs(jsonObj.notificationDate).add(2, 'month'),
     court_id: null,
-    joined_exemption_scheme: jsonObj.dateJoinedInterimExemptionScheme
+    joined_exemption_scheme: jsonObj.dateJoinedInterimExemptionScheme,
+    certificate_issued: new Date(2024, 3, 17)
   }
   return (await dbCreate(sequelize.models.registration, registration)).id
 }
@@ -387,7 +388,6 @@ module.exports = {
   createRegistration,
   isRegistrationValid,
   addComment,
-  importUser,
   getStatus,
   addInsurance
 }
