@@ -5,11 +5,7 @@ const { lookupPoliceForceByPostcode } = require('./police')
 const getPoliceForce = require('../../lookups/police-force')
 const sequelize = require('../../config/db')
 const { dbFindOne } = require('../../lib/db-functions')
-
-const robotImportUser = {
-  username: 'robot-import-system-user',
-  displayname: 'robot-import-system-user'
-}
+const { robotImportUser } = require('../../constants/import')
 
 const processRegisterRows = async (register, t) => {
   let currentDataRow
