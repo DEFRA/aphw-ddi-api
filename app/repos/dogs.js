@@ -43,7 +43,8 @@ const getStatuses = async () => {
 }
 
 const isExistingDog = (dog) => {
-  return (dog.indexNumber ?? '') !== ''
+  const dogIndexNumber = `${dog.indexNumber}`
+  return dogIndexNumber !== '' && dogIndexNumber.indexOf('ED') > -1
 }
 
 const createDogs = async (dogs, owners, enforcement, transaction) => {

@@ -2,7 +2,7 @@ const { isDataUnchanged, sendEventToAudit, sendCreateToAudit, sendActivityToAudi
 
 jest.mock('../../../../app/messaging/send-event')
 const { sendEvent } = require('../../../../app/messaging/send-event')
-const { importUser } = require('../../../../app/constants/import')
+const { robotImportUser, accessImportUser } = require('../../../../app/constants/import')
 
 describe('SendAudit test', () => {
   afterEach(() => {
@@ -79,8 +79,13 @@ describe('SendAudit test', () => {
       await expect(sendEventToAudit('CREATE', 'DDI Create Something', 'created something', {})).rejects.toThrow('Username and displayname are required for auditing event of CREATE')
     })
 
-    test('should not send an event given action is an import', async () => {
-      await sendEventToAudit('CREATE', 'DDI Create Something', 'created something', importUser)
+    test('should not send an event given action is an access db import', async () => {
+      await sendEventToAudit('CREATE', 'DDI Create Something', 'created something', accessImportUser)
+      expect(sendEvent).not.toHaveBeenCalled()
+    })
+
+    test('should not send an event given action is a robot import', async () => {
+      await sendEventToAudit('CREATE', 'DDI Create Something', 'created something', robotImportUser)
       expect(sendEvent).not.toHaveBeenCalled()
     })
   })
@@ -89,8 +94,12 @@ describe('SendAudit test', () => {
     test('should fail given no user', async () => {
       await expect(sendCreateToAudit('SOMETHING', {}, {})).rejects.toThrow('Username and displayname are required for auditing creation of SOMETHING')
     })
-    test('should not send an event given action is an import', async () => {
-      await sendCreateToAudit('SOMETHING', {}, importUser)
+    test('should not send an event given action is an access db import', async () => {
+      await sendCreateToAudit('SOMETHING', {}, accessImportUser)
+      expect(sendEvent).not.toHaveBeenCalled()
+    })
+    test('should not send an event given action is a robot import', async () => {
+      await sendCreateToAudit('SOMETHING', {}, robotImportUser)
       expect(sendEvent).not.toHaveBeenCalled()
     })
   })
@@ -102,8 +111,12 @@ describe('SendAudit test', () => {
         pk: 'l100'
       }, {})).rejects.toThrow('Username and displayname are required for auditing activity of LABEL on l100')
     })
-    test('should not send an event given action is an import', async () => {
-      await sendActivityToAudit({}, importUser)
+    test('should not send an event given action is an access db import', async () => {
+      await sendActivityToAudit({}, accessImportUser)
+      expect(sendEvent).not.toHaveBeenCalled()
+    })
+    test('should not send an event given action is a robot import', async () => {
+      await sendActivityToAudit({}, robotImportUser)
       expect(sendEvent).not.toHaveBeenCalled()
     })
   })
@@ -112,8 +125,12 @@ describe('SendAudit test', () => {
     test('should fail given no user', async () => {
       await expect(sendUpdateToAudit('OBJECT', {}, {}, {})).rejects.toThrow('Username and displayname are required for auditing update of OBJECT')
     })
-    test('should not send an event given action is an import', async () => {
-      await sendUpdateToAudit('OBJECT', {}, {}, importUser)
+    test('should not send an event given action is an access db import', async () => {
+      await sendUpdateToAudit('OBJECT', {}, {}, accessImportUser)
+      expect(sendEvent).not.toHaveBeenCalled()
+    })
+    test('should not send an event given action is a robot import', async () => {
+      await sendUpdateToAudit('OBJECT', {}, {}, robotImportUser)
       expect(sendEvent).not.toHaveBeenCalled()
     })
   })

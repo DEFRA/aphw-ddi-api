@@ -45,11 +45,11 @@ describe('register import', () => {
     expect(owner.dogs[1].colour).toEqual('grey')
   })
 
-  test('should find police force', async () => {
+  test('should leave police force blank if not provided', async () => {
     const { add } = await importRegister([])
 
     expect(add).toHaveLength(3)
-    expect(add[0].owner.policeForceId).toBe(1)
+    expect(add[0].owner.policeForceId).toBe(undefined)
   })
 
   test('should handle failed schema rows', async () => {

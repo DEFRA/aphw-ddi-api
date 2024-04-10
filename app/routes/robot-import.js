@@ -22,13 +22,17 @@ module.exports = [{
       const blob = await downloadBlob('inbound', request.payload.filename)
       const register = await importRegister(blob)
 
+      console.log('Import validation completed. Error count = ', register.errors?.length ?? 0)
+
       if (register.errors?.length > 0) {
-        return h.response(register).code(400)
+        return h.response(register.errors).code(400)
       }
 
+      console.log('Import insert starting')
       await processRegister(register)
+      console.log('Import finished')
 
-      return h.response(register).code(200)
+      return h.response(register.errors).code(200)
     }
   }
 }]
