@@ -189,7 +189,7 @@ const buildContacts = (jsonObj) => {
     contacts.push({ type: 'Phone', contact: jsonObj.phone1 })
   }
   if (jsonObj.phone2 && jsonObj.phone2 !== 'No') {
-    contacts.push({ type: 'Phone', contact: jsonObj.phone2 })
+    contacts.push({ type: 'SecondaryPhone', contact: jsonObj.phone2 })
   }
   if (jsonObj.email && jsonObj.email !== 'No') {
     contacts.push({ type: 'Email', contact: jsonObj.email })
@@ -327,7 +327,7 @@ const createRegistration = async (dogId, statusId, jsonObj) => {
     cdo_expiry: dayjs(jsonObj.notificationDate).add(2, 'month'),
     court_id: null,
     joined_exemption_scheme: jsonObj.dateJoinedInterimExemptionScheme,
-    certificate_issued: new Date(2024, 3, 17)
+    certificate_issued: statusId === InternalStatusDictionary.PreExempt ? null : new Date(2024, 3, 17)
   }
   return (await dbCreate(sequelize.models.registration, registration)).id
 }

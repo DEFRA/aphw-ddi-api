@@ -54,7 +54,7 @@ describe('BacklogFunctions test', () => {
     expect(res).not.toBe(null)
     expect(res.contacts.length).toBe(1)
     expect(res.contacts[0].contact).toBe('234567')
-    expect(res.contacts[0].type).toBe('Phone')
+    expect(res.contacts[0].type).toBe('SecondaryPhone')
   })
 
   test('areDogLookupsValid should return false if errors', async () => {
