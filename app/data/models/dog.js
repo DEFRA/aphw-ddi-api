@@ -66,10 +66,23 @@ module.exports = (sequelize, DataTypes) => {
     untraceable_date: {
       type: DataTypes.DATEONLY,
       allowNull: true
+    },
+    created_at: {
+      type: DataTypes.DATE,
+      allowNull: false,
+      defaultValue: sequelize.fn('now')
+    },
+    deleted_at: {
+      type: DataTypes.DATE,
+      allowNull: true
     }
   }, {
     sequelize,
     tableName: 'dog',
+    paranoid: true,
+    createdAt: 'created_at',
+    deletedAt: 'deleted_at',
+    updatedAt: 'updated_at',
     timestamps: false,
     indexes: [
       {
