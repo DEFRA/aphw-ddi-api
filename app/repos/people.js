@@ -331,6 +331,14 @@ const getPersonAndDogsByReference = async (reference, transaction) => {
       transaction
     })
 
+    if (!person?.length) {
+      // Owner has no dogs
+      return [{
+        dog: null,
+        person: await getPersonByReference(reference, transaction)
+      }]
+    }
+
     return person
   } catch (err) {
     console.error(`Error getting person and dogs by reference: ${err}`)
@@ -364,11 +372,26 @@ const updateContact = async (existingPerson, type, contact, transaction) => {
   }
 }
 
+const deletePerson = async (reference, transaction) => {
+  if (!transaction) {
+    return sequelize.transaction(async (t) => deletePerson(reference, t))
+  }
+
+  const person = await sequelize.models.person.findOne({
+    where: { person_reference: reference }
+  }, { transaction })
+  await person.destroy({ transaction })
+  await sequelize.models.search_index.destroy({
+    where: { person_id: person.id }
+  }, { transaction })
+}
+
 module.exports = {
   createPeople,
   getPersonByReference,
   getPersonAndDogsByReference,
   updatePerson,
   updatePersonFields,
-  getOwnerOfDog
+  getOwnerOfDog,
+  deletePerson
 }
