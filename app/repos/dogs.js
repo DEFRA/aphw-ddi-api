@@ -369,6 +369,8 @@ const getAllDogIds = async () => {
   return sequelize.models.dog.findAll({ attributes: ['id'] })
 }
 
+const deleteDogByIndexNumber = async (indexNumber, user, t) => {}
+
 module.exports = {
   getBreeds,
   getStatuses,
@@ -379,5 +381,6 @@ module.exports = {
   getDogByIndexNumber,
   updateDogFields,
   updateMicrochips,
-  updateStatus
+  updateStatus,
+  deleteDogByIndexNumber
 }
