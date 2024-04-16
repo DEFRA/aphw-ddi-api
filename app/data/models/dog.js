@@ -83,7 +83,6 @@ module.exports = (sequelize, DataTypes) => {
     createdAt: 'created_at',
     deletedAt: 'deleted_at',
     updatedAt: 'updated_at',
-    timestamps: false,
     indexes: [
       {
         name: 'dog_pkey',
@@ -98,11 +97,13 @@ module.exports = (sequelize, DataTypes) => {
   dog.associate = models => {
     dog.hasMany(models.registered_person, {
       as: 'registered_person',
+      onDelete: 'CASCADE',
       foreignKey: 'dog_id'
     })
 
     dog.hasOne(models.registration, {
       as: 'registration',
+      onDelete: 'CASCADE',
       foreignKey: 'dog_id'
     })
 
@@ -123,7 +124,8 @@ module.exports = (sequelize, DataTypes) => {
 
     dog.hasMany(models.dog_microchip, {
       as: 'dog_microchips',
-      foreignKey: 'dog_id'
+      foreignKey: 'dog_id',
+      onDelete: 'CASCADE'
     })
   }
 
