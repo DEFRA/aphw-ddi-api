@@ -1,6 +1,6 @@
 const Joi = require('joi')
 const { getCallingUser } = require('../auth/get-user')
-const { getPersonByReference, getPersonAndDogsByReference, updatePerson } = require('../repos/people')
+const { getPersonByReference, getPersonAndDogsByReference, updatePerson, deletePerson } = require('../repos/people')
 const { personDto, personAndDogsDto } = require('../dto/person')
 const { schema: updateSchema } = require('../schema/person/update')
 
@@ -56,6 +56,25 @@ module.exports = [{
 
         throw err
       }
+    }
+  }
+},
+{
+  method: 'DELETE',
+  path: '/person/{reference}',
+  options: {
+    validate: {
+      params: Joi.object({
+        reference: Joi.string().required()
+      }),
+      failAction: (request, h, error) => {
+        return h.response().code(400).takeover()
+      }
+    },
+    handler: async (request, h) => {
+      const result = await deletePerson(request.params.reference)
+
+      return h.response(result).code(200)
     }
   }
 }]
