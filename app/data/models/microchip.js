@@ -10,11 +10,24 @@ module.exports = (sequelize, DataTypes) => {
     microchip_number: {
       type: DataTypes.STRING(24),
       allowNull: false
+    },
+    created_at: {
+      type: DataTypes.DATE,
+      allowNull: false,
+      defaultValue: sequelize.fn('now')
+    },
+    deleted_at: {
+      type: DataTypes.DATE,
+      allowNull: true
     }
   }, {
     sequelize,
     tableName: 'microchip',
-    timestamps: false,
+    paranoid: true,
+    createdAt: 'created_at',
+    deletedAt: 'deleted_at',
+    updatedAt: 'updated_at',
+    timestamps: true,
     indexes: [
       {
         name: 'microchip_pkey',

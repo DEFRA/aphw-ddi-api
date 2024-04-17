@@ -45,7 +45,8 @@ module.exports = (sequelize, DataTypes) => {
   dogMicrochip.associate = models => {
     dogMicrochip.belongsTo(models.microchip, {
       as: 'microchip',
-      foreignKey: 'microchip_id'
+      foreignKey: 'microchip_id',
+      onDelete: 'CASCADE'
     })
 
     dogMicrochip.belongsTo(models.dog, {
