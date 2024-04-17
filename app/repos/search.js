@@ -2,7 +2,6 @@ const sequelize = require('../config/db')
 const { dbFindByPk } = require('../lib/db-functions')
 const { buildAddressString } = require('../lib/address-helper')
 const { getMicrochip } = require('../dto/dto-helper')
-const { personRelationship } = require('./relationships/person')
 
 const addToSearchIndex = async (person, dog, transaction) => {
   if (!transaction) {
