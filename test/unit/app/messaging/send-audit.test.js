@@ -1,4 +1,4 @@
-const { isDataUnchanged, sendEventToAudit, sendCreateToAudit, sendActivityToAudit, sendUpdateToAudit } = require('../../../../app/messaging/send-audit')
+const { isDataUnchanged, sendEventToAudit, sendCreateToAudit, sendActivityToAudit, sendUpdateToAudit, sendDeleteToAudit } = require('../../../../app/messaging/send-audit')
 
 jest.mock('../../../../app/messaging/send-event')
 const { sendEvent } = require('../../../../app/messaging/send-event')
@@ -133,5 +133,28 @@ describe('SendAudit test', () => {
       await sendUpdateToAudit('OBJECT', {}, {}, robotImportUser)
       expect(sendEvent).not.toHaveBeenCalled()
     })
+  })
+
+  describe('sendDeleteToAudit', () => {
+    // const hal9000 = { username: 'hal-9000', displayname: 'Hal 9000' }
+    test('should fail given no user', async () => {
+      await expect(sendDeleteToAudit('OBJECT', {}, {})).rejects.toThrow('Username and displayname are required for auditing deletion of OBJECT')
+    })
+    /*
+    test('should send correct message payload', async () => {
+      await sendDeleteToAudit('PERSON', { personReference: 'P-123' }, hal9000)
+      expect(sendEvent).toHaveBeenCalledWith({
+        type: 'delete',
+        source: 'uk.gov.defra.ddi.delete',
+        partitionKey: 'P-123',
+        subject: 'DDI Delete person',
+        data: {
+          message: { actioningUser: { username: 'hal-9000', displayname: 'Hal 9000' } },
+          operation: 'deleted person',
+          deleted: {}
+        }
+      })
+    })
+    */
   })
 })
