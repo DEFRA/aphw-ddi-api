@@ -9,9 +9,37 @@
       <column name="created_at" type="TIMESTAMP WITH TIME ZONE" />
       <column name="updated_at" type="TIMESTAMP WITH TIME ZONE" />
     </addColumn>
-  </changeSet>
-  <changeSet author="C Cole" id="3">
     <addColumn tableName="registered_person">
+      <column name="deleted_at" type="TIMESTAMP WITH TIME ZONE" />
+      <column name="created_at" type="TIMESTAMP WITH TIME ZONE" />
+      <column name="updated_at" type="TIMESTAMP WITH TIME ZONE" />
+    </addColumn>
+    <addColumn tableName="dog_microchip">
+      <column name="deleted_at" type="TIMESTAMP WITH TIME ZONE" />
+      <column name="created_at" type="TIMESTAMP WITH TIME ZONE" />
+      <column name="updated_at" type="TIMESTAMP WITH TIME ZONE" />
+    </addColumn>
+    <addColumn tableName="microchip">
+      <column name="deleted_at" type="TIMESTAMP WITH TIME ZONE" />
+      <column name="created_at" type="TIMESTAMP WITH TIME ZONE" />
+      <column name="updated_at" type="TIMESTAMP WITH TIME ZONE" />
+    </addColumn>
+    <addColumn tableName="person_address">
+      <column name="deleted_at" type="TIMESTAMP WITH TIME ZONE" />
+      <column name="created_at" type="TIMESTAMP WITH TIME ZONE" />
+      <column name="updated_at" type="TIMESTAMP WITH TIME ZONE" />
+    </addColumn>
+    <addColumn tableName="person_contact">
+      <column name="deleted_at" type="TIMESTAMP WITH TIME ZONE" />
+      <column name="created_at" type="TIMESTAMP WITH TIME ZONE" />
+      <column name="updated_at" type="TIMESTAMP WITH TIME ZONE" />
+    </addColumn>
+    <addColumn tableName="contact">
+      <column name="deleted_at" type="TIMESTAMP WITH TIME ZONE" />
+      <column name="created_at" type="TIMESTAMP WITH TIME ZONE" />
+      <column name="updated_at" type="TIMESTAMP WITH TIME ZONE" />
+    </addColumn>
+    <addColumn tableName="address">
       <column name="deleted_at" type="TIMESTAMP WITH TIME ZONE" />
       <column name="created_at" type="TIMESTAMP WITH TIME ZONE" />
       <column name="updated_at" type="TIMESTAMP WITH TIME ZONE" />

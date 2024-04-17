@@ -167,7 +167,6 @@ module.exports = {
   addToSearchIndex,
   buildAddressString,
   removeDogFromSearchIndex,
-  createIndexForPerson,
   updateSearchIndexDog,
   updateSearchIndexPerson,
   applyMicrochips
