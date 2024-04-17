@@ -2,7 +2,7 @@ const { sendEvent } = require('../../../messaging/send-event')
 const { SOURCE } = require('../../../constants/event/source')
 const { IMPORT } = require('../../../constants/event/events')
 const { v4: uuidv4 } = require('uuid')
-const { robotImportUser } = require('../../../constants/import')
+const { accessImportUser } = require('../../../constants/import')
 
 const createCommentAuditMessage = (commentModel, dogIndexNumber, actioningUser) => {
   const { registration, ...comment } = commentModel.dataValues
@@ -29,7 +29,7 @@ const sendCommentEvent = async (commentModel) => {
     subject: 'DDI Import Comment',
     partitionKey: dogIndexNumber,
     data: {
-      message: JSON.stringify(createCommentAuditMessage(commentModel, dogIndexNumber, robotImportUser))
+      message: JSON.stringify(createCommentAuditMessage(commentModel, dogIndexNumber, accessImportUser))
     }
   }
 
