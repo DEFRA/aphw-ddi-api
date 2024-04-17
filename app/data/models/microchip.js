@@ -27,7 +27,6 @@ module.exports = (sequelize, DataTypes) => {
     createdAt: 'created_at',
     deletedAt: 'deleted_at',
     updatedAt: 'updated_at',
-    timestamps: true,
     indexes: [
       {
         name: 'microchip_pkey',

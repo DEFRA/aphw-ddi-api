@@ -380,25 +380,21 @@ const deleteDogByIndexNumber = async (indexNumber, user, transaction) => {
     include: [
       {
         model: sequelize.models.registered_person,
-        as: 'registered_person',
-        onDelete: 'CASCADE'
+        as: 'registered_person'
       },
       {
         model: sequelize.models.dog_microchip,
         as: 'dog_microchips',
-        onDelete: 'CASCADE',
         include: [
           {
             model: sequelize.models.microchip,
-            as: 'microchip',
-            onDelete: 'CASCADE'
+            as: 'microchip'
           }
         ]
       },
       {
         model: sequelize.models.registration,
-        as: 'registration',
-        onDelete: 'CASCADE'
+        as: 'registration'
       }
     ],
     transaction

@@ -110,7 +110,6 @@ module.exports = (sequelize, DataTypes) => {
   }, {
     sequelize,
     tableName: 'registration',
-    timestamps: true,
     paranoid: true,
     deletedAt: 'deleted_at',
     createdAt: 'created_at',
