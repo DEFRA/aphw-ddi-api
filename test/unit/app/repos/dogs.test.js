@@ -14,6 +14,9 @@ const { sendEvent } = require('../../../../app/messaging/send-event')
 jest.mock('../../../../app/repos/search')
 const { removeDogFromSearchIndex } = require('../../../../app/repos/search')
 
+jest.mock('../../../../app/messaging/send-audit')
+const { sendDeleteToAudit } = require('../../../../app/messaging/send-audit')
+
 const devUser = {
   username: 'dev-user@test.com',
   displayname: 'Dev User'
@@ -622,9 +625,7 @@ describe('Dog repo', () => {
       expect(mockMicrochipDestroy).toHaveBeenCalledTimes(2)
       expect(mockDogMicrochipDestroy).toHaveBeenCalledTimes(2)
       expect(mockDogDestroy).toHaveBeenCalled()
+      expect(sendDeleteToAudit).toHaveBeenCalledWith('dog', mockDogAggregrate, devUser)
     })
-    // test('should publish a message given dog is deleted', () => {
-    //
-    // })
   })
 })

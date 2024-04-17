@@ -5,7 +5,7 @@ const { getBreed, getExemptionOrder } = require('../lookups')
 const { updateSearchIndexDog } = require('../repos/search')
 const { updateMicrochips, createMicrochip } = require('./microchip')
 const { createInsurance } = require('./insurance')
-const { sendCreateToAudit, sendUpdateToAudit } = require('../messaging/send-audit')
+const { sendCreateToAudit, sendUpdateToAudit, sendDeleteToAudit } = require('../messaging/send-audit')
 const { DOG } = require('../constants/event/audit-event-object-types')
 const { preChangedDogAudit, postChangedDogAudit } = require('../dto/auditing/dog')
 const { removeDogFromSearchIndex } = require('./search')
@@ -418,6 +418,8 @@ const deleteDogByIndexNumber = async (indexNumber, user, transaction) => {
   await dogAggregate.registration.destroy()
 
   await dogAggregate.destroy()
+
+  await sendDeleteToAudit(DOG, dogAggregate, user)
 }
 
 module.exports = {

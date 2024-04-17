@@ -1,5 +1,5 @@
 const { v4: uuidv4 } = require('uuid')
-const { CREATE, UPDATE, ACTIVITY } = require('../constants/event/events')
+const { CREATE, UPDATE, DELETE, ACTIVITY } = require('../constants/event/events')
 const { SOURCE } = require('../constants/event/source')
 const { getDiff } = require('json-difference')
 const { sendEvent } = require('./send-event')
@@ -121,6 +121,35 @@ const sendUpdateToAudit = async (auditObjectName, entityPre, entityPost, user) =
   }
 }
 
+const sendDeleteToAudit = async (auditObjectName, entity, user) => {
+  if (!isUserValid(user)) {
+    throw new Error(`Username and displayname are required for auditing deletion of ${auditObjectName}`)
+  }
+
+  const messagePayload = constructDeletePayload(auditObjectName, entity, user)
+
+  const event = {
+    type: DELETE,
+    source: SOURCE,
+    id: uuidv4(),
+    partitionKey: determineUpdatePk(auditObjectName, entity),
+    subject: `DDI Delete ${auditObjectName}`,
+    data: {
+      message: messagePayload
+    }
+  }
+
+  await sendEvent(event)
+}
+
+const constructDeletePayload = (auditObjectName, entity, actioningUser) => {
+  return JSON.stringify({
+    actioningUser,
+    operation: `deleted ${auditObjectName}`,
+    deleted: entity
+  })
+}
+
 const determineCreatePk = (objName, entity) => {
   if (objName === CDO) {
     return entity.dog.index_number
@@ -164,5 +193,6 @@ module.exports = {
   sendUpdateToAudit,
   sendEventToAudit,
   sendActivityToAudit,
+  sendDeleteToAudit,
   isDataUnchanged
 }
