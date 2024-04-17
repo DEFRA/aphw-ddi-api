@@ -299,17 +299,4 @@ describe('Search repo', () => {
       expect(sequelize.transaction).not.toHaveBeenCalled()
     })
   })
-
-  describe('createIndexForPerson', () => {
-    test('createIndexForPerson should create new transaction if none passed', async () => {
-      const personFromDb = {
-        id: 1,
-        first_name: 'Jacques Toulouse',
-        person_reference: 'P-1234-568'
-      }
-      await createIndexForPerson(personFromDb)
-
-      expect(sequelize.transaction).toHaveBeenCalledTimes(1)
-    })
-  })
 })

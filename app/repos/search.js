@@ -94,20 +94,6 @@ const removeDogFromSearchIndex = async (dogFromDb, transaction) => {
   for (const indexRow of indexRows) {
     await indexRow.destroy()
   }
-
-  const person = await sequelize.models.person.findOne({
-    where: { id: dogFromDb.registered_person[0].person_id },
-    include: personRelationship(sequelize),
-    transaction
-  })
-
-  await createIndexForPerson(person, transaction)
-}
-
-const createIndexForPerson = async (person, transaction) => {
-  if (!transaction) {
-    return await sequelize.transaction(async (t) => createIndexForPerson(person, t))
-  }
 }
 
 const updateSearchIndexDog = async (dogFromDb, statuses, transaction) => {
