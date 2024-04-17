@@ -6,7 +6,7 @@ const { schema: updateSchema } = require('../schema/person/update')
 
 module.exports = [{
   method: 'GET',
-  path: '/person/{reference}',
+  path: '/person/{reference?}',
   options: {
     validate: {
       params: Joi.object({
@@ -61,7 +61,7 @@ module.exports = [{
 },
 {
   method: 'DELETE',
-  path: '/person/{reference}',
+  path: '/person/{reference?}',
   options: {
     validate: {
       params: Joi.object({
@@ -72,7 +72,7 @@ module.exports = [{
       }
     },
     handler: async (request, h) => {
-      const result = await deletePerson(request.params.reference)
+      const result = await deletePerson(request.params.reference, getCallingUser(request))
 
       return h.response(result).code(200)
     }
