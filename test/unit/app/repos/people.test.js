@@ -19,14 +19,16 @@ describe('People repo', () => {
         findAll: jest.fn(),
         findByPk: jest.fn(),
         update: jest.fn(),
-        count: jest.fn()
+        count: jest.fn(),
+        destroy: jest.fn()
       },
       address: {
         create: jest.fn(),
         findByPk: jest.fn()
       },
       person_address: {
-        create: jest.fn()
+        create: jest.fn(),
+        findAll: jest.fn()
       },
       registered_person: {
         findAll: jest.fn(),
@@ -36,10 +38,15 @@ describe('People repo', () => {
         findAll: jest.fn()
       },
       person_contact: {
-        create: jest.fn()
+        create: jest.fn(),
+        findAll: jest.fn()
       },
       contact: {
-        create: jest.fn()
+        create: jest.fn(),
+        findByPk: jest.fn()
+      },
+      search_index: {
+        destroy: jest.fn()
       }
     },
     col: jest.fn(),
@@ -57,7 +64,7 @@ describe('People repo', () => {
   jest.mock('../../../../app/repos/search')
   const { updateSearchIndexPerson } = require('../../../../app/repos/search')
 
-  const { createPeople, getPersonByReference, getPersonAndDogsByReference, updatePerson, getOwnerOfDog, updatePersonFields } = require('../../../../app/repos/people')
+  const { createPeople, getPersonByReference, getPersonAndDogsByReference, updatePerson, getOwnerOfDog, updatePersonFields, deletePerson } = require('../../../../app/repos/people')
 
   beforeEach(async () => {
     jest.clearAllMocks()
@@ -900,6 +907,79 @@ describe('People repo', () => {
       expect(personModelMock.save).toHaveBeenCalledTimes(0)
       expect(reloadMock).toHaveBeenCalledTimes(0)
       expect(person.dataValues.person_reference).toEqual('1234')
+    })
+  })
+
+  describe('deletePerson', () => {
+    test('deletePerson should start new transaction if no transaction passed', async () => {
+      await deletePerson('P-12345', dummyUser)
+
+      expect(sequelize.transaction).toHaveBeenCalled()
+    })
+
+    test('deletePerson should not start new transaction if transaction passed', async () => {
+      const destroyFnPerson = jest.fn()
+      const destroyFnPersonAddress = jest.fn()
+      const destroyFnAddress = jest.fn()
+      const destroyFnPersonContact = jest.fn()
+      const destroyFnContact = jest.fn()
+
+      const mockPersonAddresses = [
+        { destroy: destroyFnPersonAddress, address_id: 1 },
+        { destroy: destroyFnPersonAddress, address_id: 2 },
+        { destroy: destroyFnPersonAddress, address_id: 3 }
+      ]
+
+      const mockPersonContacts = [
+        { destroy: destroyFnPersonContact, contact_id: 1 },
+        { destroy: destroyFnPersonContact, contact_id: 2 },
+        { destroy: destroyFnPersonContact, contact_id: 3 },
+        { destroy: destroyFnPersonContact, contact_id: 4 }
+      ]
+
+      sequelize.models.person.findOne.mockResolvedValue({ destroy: destroyFnPerson })
+      sequelize.models.person_address.findAll.mockResolvedValue(mockPersonAddresses)
+      sequelize.models.address.findByPk.mockResolvedValue({ destroy: destroyFnAddress })
+      sequelize.models.person_contact.findAll.mockResolvedValue(mockPersonContacts)
+      sequelize.models.contact.findByPk.mockResolvedValue({ destroy: destroyFnContact })
+      await deletePerson('P-12345', dummyUser, {})
+
+      expect(sequelize.transaction).not.toHaveBeenCalled()
+    })
+
+    test('deletePerson should make appropriate delete calls', async () => {
+      const destroyFnPerson = jest.fn()
+      const destroyFnPersonAddress = jest.fn()
+      const destroyFnAddress = jest.fn()
+      const destroyFnPersonContact = jest.fn()
+      const destroyFnContact = jest.fn()
+
+      const mockPersonAddresses = [
+        { destroy: destroyFnPersonAddress, address_id: 1 },
+        { destroy: destroyFnPersonAddress, address_id: 2 },
+        { destroy: destroyFnPersonAddress, address_id: 3 }
+      ]
+
+      const mockPersonContacts = [
+        { destroy: destroyFnPersonContact, contact_id: 1 },
+        { destroy: destroyFnPersonContact, contact_id: 2 },
+        { destroy: destroyFnPersonContact, contact_id: 3 },
+        { destroy: destroyFnPersonContact, contact_id: 4 }
+      ]
+
+      sequelize.models.person.findOne.mockResolvedValue({ destroy: destroyFnPerson })
+      sequelize.models.person_address.findAll.mockResolvedValue(mockPersonAddresses)
+      sequelize.models.address.findByPk.mockResolvedValue({ destroy: destroyFnAddress })
+      sequelize.models.person_contact.findAll.mockResolvedValue(mockPersonContacts)
+      sequelize.models.contact.findByPk.mockResolvedValue({ destroy: destroyFnContact })
+      await deletePerson('P-12345', dummyUser, {})
+
+      expect(destroyFnPerson).toHaveBeenCalledTimes(1)
+      expect(destroyFnPersonAddress).toHaveBeenCalledTimes(3)
+      expect(destroyFnAddress).toHaveBeenCalledTimes(3)
+      expect(destroyFnPersonContact).toHaveBeenCalledTimes(4)
+      expect(destroyFnContact).toHaveBeenCalledTimes(4)
+      expect(sequelize.models.search_index.destroy).toHaveBeenCalledTimes(1)
     })
   })
 })
