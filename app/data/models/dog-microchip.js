@@ -28,6 +28,7 @@ module.exports = (sequelize, DataTypes) => {
     sequelize,
     tableName: 'dog_microchip',
     paranoid: true,
+    timestamps: true,
     createdAt: 'created_at',
     deletedAt: 'deleted_at',
     updatedAt: 'updated_at',

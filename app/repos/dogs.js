@@ -8,6 +8,7 @@ const { createInsurance } = require('./insurance')
 const { sendCreateToAudit, sendUpdateToAudit } = require('../messaging/send-audit')
 const { DOG } = require('../constants/event/audit-event-object-types')
 const { preChangedDogAudit, postChangedDogAudit } = require('../dto/auditing/dog')
+const { removeDogFromSearchIndex } = require('./search')
 
 const getBreeds = async () => {
   try {
@@ -369,7 +370,55 @@ const getAllDogIds = async () => {
   return sequelize.models.dog.findAll({ attributes: ['id'] })
 }
 
-const deleteDogByIndexNumber = async (indexNumber, user, t) => {}
+const deleteDogByIndexNumber = async (indexNumber, user, transaction) => {
+  if (!transaction) {
+    return await sequelize.transaction(async (t) => deleteDogByIndexNumber(indexNumber, user, t))
+  }
+
+  const dogAggregate = await sequelize.models.dog.findOne({
+    where: { index_number: indexNumber },
+    include: [
+      {
+        model: sequelize.models.registered_person,
+        as: 'registered_person',
+        onDelete: 'CASCADE'
+      },
+      {
+        model: sequelize.models.dog_microchip,
+        as: 'dog_microchips',
+        onDelete: 'CASCADE',
+        include: [
+          {
+            model: sequelize.models.microchip,
+            as: 'microchip',
+            onDelete: 'CASCADE'
+          }
+        ]
+      },
+      {
+        model: sequelize.models.registration,
+        as: 'registration',
+        onDelete: 'CASCADE'
+      }
+    ],
+    transaction
+  })
+
+  await removeDogFromSearchIndex(dogAggregate, transaction)
+
+  for (const dogMicrochip of dogAggregate.dog_microchips) {
+    await dogMicrochip.microchip.destroy()
+    await dogMicrochip.destroy()
+  }
+
+  for (const registeredPerson of dogAggregate.registered_person) {
+    await registeredPerson.destroy()
+  }
+
+  await dogAggregate.registration.destroy()
+
+  await dogAggregate.destroy()
+}
 
 module.exports = {
   getBreeds,
