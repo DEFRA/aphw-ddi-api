@@ -100,20 +100,22 @@ const personAndDogsDto = (personAndDogs) => ({
   },
   contacts: personAndDogs[0].person.person_contacts,
   organisationName: personAndDogs[0].person.organisation?.organisation_name,
-  dogs: personAndDogs.map(x => ({
-    id: x.dog.id,
-    indexNumber: x.dog.index_number,
-    dogReference: x.dog.dog_reference,
-    microchipNumber: getMicrochip(x.dog, 1),
-    microchipNumber2: getMicrochip(x.dog, 2),
-    breed: x.dog.dog_breed.breed,
-    name: x.dog.name,
-    status: x.dog.status.status,
-    birthDate: x.dog.birth_date,
-    tattoo: x.dog.tattoo,
-    colour: x.dog.colour,
-    sex: x.dog.sex
-  }))
+  dogs: personAndDogs[0].dog
+    ? personAndDogs.map(x => ({
+      id: x.dog.id,
+      indexNumber: x.dog.index_number,
+      dogReference: x.dog.dog_reference,
+      microchipNumber: getMicrochip(x.dog, 1),
+      microchipNumber2: getMicrochip(x.dog, 2),
+      breed: x.dog.dog_breed.breed,
+      name: x.dog.name,
+      status: x.dog.status.status,
+      birthDate: x.dog.birth_date,
+      tattoo: x.dog.tattoo,
+      colour: x.dog.colour,
+      sex: x.dog.sex
+    }))
+    : []
 })
 
 module.exports = {

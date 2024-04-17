@@ -3,7 +3,7 @@ const { deepClone } = require('../lib/deep-clone')
 const createRegistrationNumber = require('../lib/create-registration-number')
 const { getCountry, getContactType } = require('../lookups')
 const { updateSearchIndexPerson } = require('./search')
-const { sendUpdateToAudit } = require('../messaging/send-audit')
+const { sendUpdateToAudit, sendDeleteToAudit } = require('../messaging/send-audit')
 const { PERSON } = require('../constants/event/audit-event-object-types')
 const { personDto } = require('../dto/person')
 const { personRelationship } = require('./relationships/person')
@@ -331,6 +331,14 @@ const getPersonAndDogsByReference = async (reference, transaction) => {
       transaction
     })
 
+    if (!person?.length) {
+      // Owner has no dogs
+      return [{
+        dog: null,
+        person: await getPersonByReference(reference, transaction)
+      }]
+    }
+
     return person
   } catch (err) {
     console.error(`Error getting person and dogs by reference: ${err}`)
@@ -364,11 +372,39 @@ const updateContact = async (existingPerson, type, contact, transaction) => {
   }
 }
 
+const deletePerson = async (reference, user, transaction) => {
+  if (!transaction) {
+    return sequelize.transaction(async (t) => deletePerson(reference, user, t))
+  }
+
+  const person = await sequelize.models.person.findOne({ where: { person_reference: reference } })
+  await person.destroy()
+
+  const personAddresses = await sequelize.models.person_address.findAll({ where: { person_id: person.id } })
+  for (const personAddress of personAddresses) {
+    const address = await sequelize.models.address.findByPk(personAddress.address_id)
+    await address.destroy()
+    await personAddress.destroy()
+  }
+
+  const personContacts = await sequelize.models.person_contact.findAll({ where: { person_id: person.id } })
+  for (const personContact of personContacts) {
+    const contact = await sequelize.models.contact.findByPk(personContact.contact_id)
+    await contact.destroy()
+    await personContact.destroy()
+  }
+
+  await sequelize.models.search_index.destroy({ where: { person_id: person.id } })
+
+  await sendDeleteToAudit(PERSON, person, user)
+}
+
 module.exports = {
   createPeople,
   getPersonByReference,
   getPersonAndDogsByReference,
   updatePerson,
   updatePersonFields,
-  getOwnerOfDog
+  getOwnerOfDog,
+  deletePerson
 }
