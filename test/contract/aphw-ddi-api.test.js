@@ -31,8 +31,8 @@ describe('Pact Verification', () => {
       stateHandlers: {
         'countries exist': async () => true,
         'cdo includes optional data and country': () => true,
-        'owner already exists in the db': async () => true,
-        'aphw-ddi-api has a matching dog Bruno ED300006': async () => true
+        'owner already exists in the db': async () => true
+        // 'aphw-ddi-api has a matching dog Bruno ED300006': async () => true
       }
     }
 
