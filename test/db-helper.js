@@ -1,6 +1,7 @@
 require('../app/data')
 const sequelize = require('../app/config/db')
 const { getCountry } = require('../app/lookups')
+const { createCdo } = require('../app/repos/cdo')
 
 const truncateDatabase = async () => {
   await sequelize.models.search_index.truncate()
@@ -58,6 +59,42 @@ const addPerson = async (personRequest) => {
   })
 }
 
+const addCdoWithDog = async (dog = {}) => {
+  await createCdo({
+    owner: {
+      firstName: 'Joe',
+      lastName: 'Bloggs',
+      dateOfBirth: '1998-05-10',
+      address: {
+        addressLine1: 'Anywhere St',
+        addressLine2: 'Anywhere Estate',
+        town: 'City of London',
+        postcode: 'S1 1AA'
+      }
+    },
+    enforcementDetails: {
+      court: '1',
+      policeForce: '1',
+      legislationOfficer: 'Sidney Lewis'
+    },
+    dogs: [
+      {
+        breed: 'XL Bully',
+        name: 'Bruno',
+        applicationType: 'cdo',
+        cdoIssued: '2023-10-10',
+        cdoExpiry: '2023-12-10',
+        interimExemption: '2023-12-10',
+        status: 'Status 1'
+      }
+    ]
+  }, { username: 'internal-user', displayname: 'User, Internal' })
+}
+
+const createCdoWithDog = async (dog = {}) => {
+  await addCdoWithDog()
+}
+
 const close = async () => {
   await sequelize.close()
 }
@@ -66,5 +103,6 @@ module.exports = {
   close,
   truncateDatabase,
   createCountryRecords,
-  addPerson
+  addPerson,
+  createCdoWithDog
 }

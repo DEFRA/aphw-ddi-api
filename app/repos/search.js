@@ -79,6 +79,22 @@ const buildAddressObject = (person) => {
   }
 }
 
+const removeDogFromSearchIndex = async (dogFromDb, transaction) => {
+  if (!transaction) {
+    return await sequelize.transaction(async (t) => removeDogFromSearchIndex(dogFromDb, t))
+  }
+
+  const indexRows = await sequelize.models.search_index.findAll({
+    where: { dog_id: dogFromDb.id },
+    transaction
+  })
+
+  // update
+  for (const indexRow of indexRows) {
+    await indexRow.destroy()
+  }
+}
+
 const updateSearchIndexDog = async (dogFromDb, statuses, transaction) => {
   const indexRows = await sequelize.models.search_index.findAll({
     where: { dog_id: dogFromDb.id },
@@ -149,6 +165,7 @@ const updateSearchIndexPerson = async (person, transaction) => {
 module.exports = {
   addToSearchIndex,
   buildAddressString,
+  removeDogFromSearchIndex,
   updateSearchIndexDog,
   updateSearchIndexPerson,
   applyMicrochips

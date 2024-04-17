@@ -3,10 +3,13 @@ describe('Dog endpoint', () => {
   let server
 
   jest.mock('../../../../app/repos/dogs')
-  const { getDogByIndexNumber, addImportedDog, updateDog } = require('../../../../app/repos/dogs')
+  const { getDogByIndexNumber, addImportedDog, updateDog, deleteDogByIndexNumber } = require('../../../../app/repos/dogs')
 
   jest.mock('../../../../app/repos/people')
   const { getOwnerOfDog } = require('../../../../app/repos/people')
+
+  jest.mock('../../../../app/auth/get-user')
+  const { getCallingUser } = require('../../../../app/auth/get-user')
 
   beforeEach(async () => {
     jest.clearAllMocks()
@@ -168,6 +171,52 @@ describe('Dog endpoint', () => {
     const response = await server.inject(options)
 
     expect(response.statusCode).toBe(200)
+  })
+
+  test('DELETE /dog/ED123 route returns 204 with valid index', async () => {
+    getDogByIndexNumber.mockResolvedValue({ id: 123, indexNumber: 'ED123' })
+    getCallingUser.mockReturnValue({
+      username: 'internal-user',
+      displayname: 'User, Internal'
+    })
+
+    const options = {
+      method: 'DELETE',
+      url: '/dog/ED123'
+    }
+
+    const response = await server.inject(options)
+
+    expect(response.statusCode).toBe(204)
+    expect(deleteDogByIndexNumber).toBeCalledWith('ED123', { displayname: 'User, Internal', username: 'internal-user' })
+  })
+
+  test('DELETE /dog/ED123 route returns 404 with invalid dog index', async () => {
+    getDogByIndexNumber.mockResolvedValue(null)
+
+    const options = {
+      method: 'DELETE',
+      url: '/dog/ED123'
+    }
+
+    const response = await server.inject(options)
+
+    expect(response.statusCode).toBe(404)
+    expect(deleteDogByIndexNumber).not.toHaveBeenCalled()
+  })
+
+  test('DELETE /dog/ED123 route returns 500 given server error', async () => {
+    getDogByIndexNumber.mockRejectedValue(new Error('500 error'))
+
+    const options = {
+      method: 'DELETE',
+      url: '/dog/ED123'
+    }
+
+    const response = await server.inject(options)
+
+    expect(response.statusCode).toBe(500)
+    expect(deleteDogByIndexNumber).not.toHaveBeenCalled()
   })
 
   afterEach(async () => {
