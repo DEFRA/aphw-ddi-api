@@ -205,7 +205,7 @@ describe('Dog endpoint', () => {
     expect(deleteDogByIndexNumber).not.toHaveBeenCalled()
   })
 
-  test('DELETE /dog/ED123 route returns 404 with invalid dog index', async () => {
+  test('DELETE /dog/ED123 route returns 500 given server error', async () => {
     getDogByIndexNumber.mockRejectedValue(new Error('500 error'))
 
     const options = {
