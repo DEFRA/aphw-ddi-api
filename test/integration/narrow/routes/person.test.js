@@ -3,7 +3,7 @@ describe('CDO endpoint', () => {
   let server
 
   jest.mock('../../../../app/repos/people')
-  const { getPersonByReference, getPersonAndDogsByReference, updatePerson } = require('../../../../app/repos/people')
+  const { getPersonByReference, getPersonAndDogsByReference, updatePerson, deletePerson } = require('../../../../app/repos/people')
 
   beforeEach(async () => {
     jest.clearAllMocks()
@@ -82,6 +82,19 @@ describe('CDO endpoint', () => {
     const response = await server.inject(options)
 
     expect(response.statusCode).toBe(204)
+  })
+
+  test('GET /person route returns 400 with missing param', async () => {
+    const options = {
+      method: 'GET',
+      url: '/person/'
+    }
+
+    getPersonByReference.mockResolvedValue(null)
+
+    const response = await server.inject(options)
+
+    expect(response.statusCode).toBe(400)
   })
 
   test('GET /person route with param includeDogs returns 200 with valid payload', async () => {
@@ -268,6 +281,58 @@ describe('CDO endpoint', () => {
     updatePerson.mockRejectedValue({
       type: 'NOT_FOUND'
     })
+
+    const response = await server.inject(options)
+
+    expect(response.statusCode).toBe(400)
+  })
+
+  test('PUT /person route throws if error other than NOT_FOUND', async () => {
+    const options = {
+      method: 'PUT',
+      url: '/person',
+      payload: {
+        personReference: 'ABC123',
+        firstName: 'John',
+        lastName: 'Doe',
+        dateOfBirth: '1990-01-01',
+        address: {
+          addressLine1: '1 Test Street',
+          addressLine2: 'Test',
+          town: 'Test',
+          postcode: 'TE1 1ST',
+          country: 'England'
+        }
+      }
+    }
+
+    updatePerson.mockImplementation(() => { throw new Error('DB error') })
+
+    const response = await server.inject(options)
+
+    expect(response.statusCode).toBe(500)
+  })
+
+  test('DELETE /person route returns 200 with valid payload', async () => {
+    const options = {
+      method: 'DELETE',
+      url: '/person/P-12345'
+    }
+
+    deletePerson.mockResolvedValue()
+
+    const response = await server.inject(options)
+
+    expect(response.statusCode).toBe(200)
+  })
+
+  test('DELETE /person route returns 400 with missing param', async () => {
+    const options = {
+      method: 'DELETE',
+      url: '/person/'
+    }
+
+    deletePerson.mockResolvedValue()
 
     const response = await server.inject(options)
 
