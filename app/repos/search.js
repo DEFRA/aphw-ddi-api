@@ -42,7 +42,15 @@ const addToSearchIndex = async (person, dog, transaction) => {
 
 const buildIndexColumn = (person, dog) => {
   const address = person?.addresses?.address ? person.addresses.address : person.address
-  return sequelize.fn('to_tsvector', `${person.person_reference} ${person.first_name} ${person.last_name} ${person.organisation_name ? person.organisation_name : ''} ${buildAddressString(address, true)} ${dog.index_number ? dog.index_number : ''} ${dog.name ? dog.name : ''} ${dog.microchip_number ? dog.microchip_number : ''} ${dog.microchip_number2 ? dog.microchip_number2 : ''}`.trim())
+  return sequelize.fn(
+    'to_tsvector',
+    `${person.person_reference} ${person.first_name} ${person.last_name} \
+${person.organisation_name ? person.organisation_name : ''} \
+${buildAddressString(address, true)} \
+${dog.index_number ? dog.index_number : ''} \
+${dog.name ? dog.name : ''} \
+${dog.microchip_number ? dog.microchip_number : ''} \
+${dog.microchip_number2 ? dog.microchip_number2 : ''}`.trim())
 }
 
 const buildJsonColumn = (person, dog) => {
