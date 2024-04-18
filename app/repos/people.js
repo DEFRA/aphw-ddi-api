@@ -374,7 +374,7 @@ const updateContact = async (existingPerson, type, contact, transaction) => {
 
 const deletePerson = async (reference, user, transaction) => {
   if (!transaction) {
-    return sequelize.transaction(async (t) => deletePerson(reference, user, t))
+    return await sequelize.transaction(async (t) => deletePerson(reference, user, t))
   }
 
   const person = await sequelize.models.person.findOne({ where: { person_reference: reference } })

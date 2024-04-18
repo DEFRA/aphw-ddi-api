@@ -72,9 +72,9 @@ module.exports = [{
       }
     },
     handler: async (request, h) => {
-      const result = await deletePerson(request.params.reference, getCallingUser(request))
+      await deletePerson(request.params.reference, getCallingUser(request))
 
-      return h.response(result).code(200)
+      return h.response().code(200)
     }
   }
 }]

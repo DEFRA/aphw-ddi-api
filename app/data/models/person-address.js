@@ -14,11 +14,23 @@ module.exports = (sequelize, DataTypes) => {
     address_id: {
       type: DataTypes.INTEGER,
       allowNull: false
+    },
+    created_at: {
+      type: DataTypes.DATE,
+      allowNull: false,
+      defaultValue: sequelize.fn('now')
+    },
+    deleted_at: {
+      type: DataTypes.DATE,
+      allowNull: true
     }
   }, {
     sequelize,
     tableName: 'person_address',
-    timestamps: false,
+    paranoid: true,
+    createdAt: 'created_at',
+    deletedAt: 'deleted_at',
+    updatedAt: 'updated_at',
     indexes: [
       {
         name: 'person_address_pkey',
