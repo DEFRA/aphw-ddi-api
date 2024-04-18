@@ -25,7 +25,7 @@ describe('RegularJobs repo', () => {
   jest.mock('../../../../app/overnight/create-export-file')
   const { createExportFile } = require('../../../../app/overnight/create-export-file')
 
-  const { tryStartJob, endJob, getRegularJobs /* , runOvernightJobs */ } = require('../../../../app/repos/regular-jobs')
+  const { tryStartJob, endJob, getRegularJobs, runOvernightJobs } = require('../../../../app/repos/regular-jobs')
 
   beforeEach(async () => {
     jest.clearAllMocks()
@@ -127,14 +127,13 @@ describe('RegularJobs repo', () => {
 
     await expect(getRegularJobs()).rejects.toThrow('DB error')
   })
-  /*
-  test('runOvernightJobs should run if no run already today', async () => {
-    sequelize.models.regular_job.findOne.mockResolvedValue(null)
-    sequelize.models.regular_job.create.mockResolvedValue({ id: 456 })
+
+  test('runOvernightJobs should not run if already run today', async () => {
+    sequelize.models.regular_job.findOne.mockResolvedValue({ id: 456 })
+    sequelize.models.regular_job.create.mockResolvedValue()
 
     const res = await runOvernightJobs()
 
-    expect(res).toBe('autoUpdate ok | export file ok')
+    expect(res).toBe('Job for today already running or run')
   })
-  */
 })
