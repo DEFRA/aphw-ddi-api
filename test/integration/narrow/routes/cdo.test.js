@@ -1,5 +1,5 @@
 const { payload: mockCreatePayload, payloadWithPersonReference: mockCreateWithRefPayload } = require('../../../mocks/cdo/create')
-const { NotFoundError } = require('../../../../app/errors/notFound')
+const { NotFoundError } = require('../../../../app/errors/not-found')
 
 describe('CDO endpoint', () => {
   const createServer = require('../../../../app/server')

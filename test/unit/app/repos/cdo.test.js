@@ -1,5 +1,5 @@
 const { payload: mockCdoPayload, payloadWithPersonReference: mockCdoPayloadWithRef } = require('../../../mocks/cdo/create')
-const { NotFoundError } = require('../../../../app/errors/notFound')
+const { NotFoundError } = require('../../../../app/errors/not-found')
 const { personDao: mockPersonPayload, createdPersonDao: mockCreatedPersonPayload } = require('../../../mocks/person')
 const { devUser } = require('../../../mocks/auth')
 
