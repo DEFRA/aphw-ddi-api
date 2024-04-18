@@ -64,7 +64,7 @@ describe('People repo', () => {
   jest.mock('../../../../app/repos/search')
   const { updateSearchIndexPerson } = require('../../../../app/repos/search')
 
-  const { createPeople, getPersonWithRelationshipsByReference, getPersonAndDogsByReference, updatePerson, getOwnerOfDog, updatePersonFields, deletePerson } = require('../../../../app/repos/people')
+  const { createPeople, getPersonByReference, getPersonAndDogsByReference, updatePerson, getOwnerOfDog, updatePersonFields, deletePerson } = require('../../../../app/repos/people')
 
   beforeEach(async () => {
     jest.clearAllMocks()
@@ -267,8 +267,8 @@ describe('People repo', () => {
     })
   })
 
-  describe('getPersonWithRelationshipsByReference', () => {
-    test('getPersonWithRelationshipsByReference should return person', async () => {
+  describe('getPersonByReference', () => {
+    test('getPersonByReference should return person', async () => {
       sequelize.models.person.findAll.mockResolvedValue([{
         dataValues: {
           id: 1,
@@ -291,7 +291,7 @@ describe('People repo', () => {
         }
       }])
 
-      const person = await getPersonWithRelationshipsByReference('1234')
+      const person = await getPersonByReference('1234')
 
       expect(person).toEqual({
         dataValues: {
@@ -316,10 +316,10 @@ describe('People repo', () => {
       })
     })
 
-    test('getPersonWithRelationshipsByReference should throw if error', async () => {
+    test('getPersonByReference should throw if error', async () => {
       sequelize.models.person.findAll.mockRejectedValue(new Error('Test error'))
 
-      await expect(getPersonWithRelationshipsByReference('1234')).rejects.toThrow('Test error')
+      await expect(getPersonByReference('1234')).rejects.toThrow('Test error')
     })
   })
 

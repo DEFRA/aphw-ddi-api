@@ -1,6 +1,6 @@
 const Joi = require('joi')
 const { getCallingUser } = require('../auth/get-user')
-const { getPersonWithRelationshipsByReference, getPersonAndDogsByReference, updatePerson, deletePerson } = require('../repos/people')
+const { getPersonByReference, getPersonAndDogsByReference, updatePerson, deletePerson } = require('../repos/people')
 const { personDto, personAndDogsDto } = require('../dto/person')
 const { schema: updateSchema } = require('../schema/person/update')
 
@@ -19,7 +19,7 @@ module.exports = [{
     handler: async (request, h) => {
       const ref = request.params.reference
       const includeDogs = request.query.includeDogs === 'true'
-      const person = includeDogs ? await getPersonAndDogsByReference(ref) : await getPersonWithRelationshipsByReference(ref)
+      const person = includeDogs ? await getPersonAndDogsByReference(ref) : await getPersonByReference(ref)
 
       if (person === null) {
         return h.response().code(204)

@@ -149,7 +149,7 @@ const createPeople = async (owners, transaction) => {
  * @param [transaction]
  * @returns {Promise<PersonDao|null>}
  */
-const getPersonWithRelationshipsByReference = async (reference, transaction) => {
+const getPersonByReference = async (reference, transaction) => {
   try {
     const person = await sequelize.models.person.findAll({
       order: [[sequelize.col('addresses.address.id'), 'DESC']],
@@ -192,7 +192,7 @@ const updatePerson = async (person, user, transaction) => {
   }
 
   try {
-    const existing = await getPersonWithRelationshipsByReference(person.personReference, transaction)
+    const existing = await getPersonByReference(person.personReference, transaction)
 
     if (!existing) {
       const error = new Error('Person not found')
@@ -242,7 +242,7 @@ const updatePerson = async (person, user, transaction) => {
     await updateContact(existing, 'Phone', person.primaryTelephone, transaction)
     await updateContact(existing, 'SecondaryPhone', person.secondaryTelephone, transaction)
 
-    const updatedPerson = await getPersonWithRelationshipsByReference(person.personReference, transaction)
+    const updatedPerson = await getPersonByReference(person.personReference, transaction)
 
     person.id = updatedPerson.id
     person.organisationName = updatedPerson.organisation?.organisation_name
@@ -335,7 +335,7 @@ const getPersonAndDogsByReference = async (reference, transaction) => {
       // Owner has no dogs
       return [{
         dog: null,
-        person: await getPersonWithRelationshipsByReference(reference, transaction)
+        person: await getPersonByReference(reference, transaction)
       }]
     }
 
@@ -377,7 +377,7 @@ const deletePerson = async (reference, user, transaction) => {
     return await sequelize.transaction(async (t) => deletePerson(reference, user, t))
   }
 
-  const personWithRelationships = await getPersonWithRelationshipsByReference(reference, transaction)
+  const personWithRelationships = await getPersonByReference(reference, transaction)
 
   const person = await sequelize.models.person.findOne({ where: { person_reference: reference } })
   await person.destroy()
@@ -399,7 +399,7 @@ const deletePerson = async (reference, user, transaction) => {
 
 module.exports = {
   createPeople,
-  getPersonWithRelationshipsByReference,
+  getPersonByReference,
   getPersonAndDogsByReference,
   updatePerson,
   updatePersonFields,

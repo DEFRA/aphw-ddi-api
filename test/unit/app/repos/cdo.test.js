@@ -22,7 +22,7 @@ describe('CDO repo', () => {
   const sequelize = require('../../../../app/config/db')
 
   jest.mock('../../../../app/repos/people')
-  const { createPeople, getPersonWithRelationshipsByReference, updatePerson, updatePersonFields } = require('../../../../app/repos/people')
+  const { createPeople, getPersonByReference, updatePerson, updatePersonFields } = require('../../../../app/repos/people')
 
   jest.mock('../../../../app/repos/dogs')
   const { createDogs, getDogByIndexNumber } = require('../../../../app/repos/dogs')
@@ -82,7 +82,7 @@ describe('CDO repo', () => {
     const expectedOwner = { id: 1, ...mockCreatedPersonPayload }
     const dogs = [{ id: 1, ...mockCdoPayloadWithRef.dogs[0] }]
 
-    getPersonWithRelationshipsByReference.mockResolvedValue(owner)
+    getPersonByReference.mockResolvedValue(owner)
     createDogs.mockResolvedValue(dogs)
     addToSearchIndex.mockResolvedValue()
     getDogByIndexNumber.mockResolvedValue({ id: 1, index_number: 'ED1' })
@@ -92,7 +92,7 @@ describe('CDO repo', () => {
     expect(cdo.owner).toEqual(expectedOwner)
     expect(cdo.dogs).toEqual(dogs)
     expect(createPeople).not.toHaveBeenCalled()
-    expect(getPersonWithRelationshipsByReference).toHaveBeenCalledWith('P-6076-A37C', expect.anything())
+    expect(getPersonByReference).toHaveBeenCalledWith('P-6076-A37C', expect.anything())
     expect(updatePersonFields).not.toHaveBeenCalled()
   })
 
@@ -105,7 +105,7 @@ describe('CDO repo', () => {
     const expectedOwner = { id: 1, ...mockCreatedPersonPayload }
     const dogs = [{ id: 1, ...mockCdoPayloadWithRef.dogs[0] }]
 
-    getPersonWithRelationshipsByReference.mockResolvedValue(owner)
+    getPersonByReference.mockResolvedValue(owner)
     updatePersonFields.mockResolvedValue()
     createDogs.mockResolvedValue(dogs)
     addToSearchIndex.mockResolvedValue()
@@ -126,14 +126,14 @@ describe('CDO repo', () => {
       dateOfBirth: '1951-09-25'
     }, expect.anything(), expect.anything())
     expect(reloadMock).toBeCalledWith({ transaction: expect.anything() })
-    expect(getPersonWithRelationshipsByReference).toHaveBeenCalledWith('P-6076-A37C', expect.anything())
+    expect(getPersonByReference).toHaveBeenCalledWith('P-6076-A37C', expect.anything())
   })
 
   test('createCdo throw a NotFoundError if invalid owner personReference is supplied', async () => {
     const owners = [{ id: 1, ...mockCdoPayloadWithRef.owner }]
     const dogs = [{ id: 1, ...mockCdoPayloadWithRef.dogs[0] }]
 
-    getPersonWithRelationshipsByReference.mockResolvedValue(null)
+    getPersonByReference.mockResolvedValue(null)
     createPeople.mockResolvedValue(owners)
     createDogs.mockResolvedValue(dogs)
     addToSearchIndex.mockResolvedValue()
