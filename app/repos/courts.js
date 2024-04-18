@@ -13,6 +13,12 @@ const getCourts = async () => {
   }
 }
 
+const createCourt = async () => {}
+
+const deleteCourt = async () => {}
+
 module.exports = {
-  getCourts
+  getCourts,
+  createCourt,
+  deleteCourt
 }
