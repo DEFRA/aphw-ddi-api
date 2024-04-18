@@ -1,10 +1,10 @@
 const Boom = require('@hapi/boom')
-function NotFoundError (message = 'Not Found') {
-  const boomError = Boom.notFound(message)
-  boomError.name = 'NotFoundError'
+function DuplicateRecordError (message = 'Duplicate record found') {
+  const boomError = Boom.conflict(message)
+  boomError.name = 'DuplicateRecordError'
   boomError.stack = (new Error()).stack
 
   return boomError
 }
 
-module.exports = { NotFoundError }
+module.exports = { DuplicateRecordError }
