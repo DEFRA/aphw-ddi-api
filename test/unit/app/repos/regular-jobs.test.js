@@ -1,4 +1,4 @@
-// const { jobs: mockJobs } = require('../../../mocks/jobs')
+const { jobs: mockJobs } = require('../../../mocks/jobs')
 
 describe('RegularJobs repo', () => {
   jest.mock('../../../../app/config/db', () => ({
@@ -25,7 +25,7 @@ describe('RegularJobs repo', () => {
   jest.mock('../../../../app/overnight/create-export-file')
   const { createExportFile } = require('../../../../app/overnight/create-export-file')
 
-  const { /* tryStartJob, endJob, getRegularJobs, */ runOvernightJobs } = require('../../../../app/repos/regular-jobs')
+  const { tryStartJob, endJob, getRegularJobs /* , runOvernightJobs */ } = require('../../../../app/repos/regular-jobs')
 
   beforeEach(async () => {
     jest.clearAllMocks()
