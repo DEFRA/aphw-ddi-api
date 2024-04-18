@@ -1,6 +1,7 @@
 const { courts: mockCourts } = require('../../../mocks/courts')
 const { payload: mockCdoPayload } = require('../../../mocks/cdo/create')
 const { devUser } = require('../../../mocks/auth')
+const { DuplicateResourceError } = require('../../../../app/errors/duplicate-record')
 
 describe('Courts repo', () => {
   jest.mock('../../../../app/config/db', () => ({
@@ -65,6 +66,17 @@ describe('Courts repo', () => {
       await createCourt(mockCourtPayload, devUser, {})
 
       expect(sequelize.transaction).toHaveBeenCalledTimes(0)
+    })
+
+    test('should throw a DuplicatRecordError given court already exists', async () => {
+      sequelize.models.court.findOne.mockResolvedValue({
+        id: 5,
+        name: 'The Shire County Court'
+      })
+      const mockCourtPayload = {
+        name: 'The Shire County Court'
+      }
+      await expect(createCourt(mockCourtPayload, devUser, {})).rejects.toThrow(new DuplicateResourceError('Court with name The Shire County Court already exists'))
     })
 
     test('should correctly reject if transaction fails', async () => {

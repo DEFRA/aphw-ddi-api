@@ -1,4 +1,6 @@
 const sequelize = require('../config/db')
+const { NotFoundError } = require('../errors/not-found')
+const { DuplicateResourceError } = require('../errors/duplicate-record')
 
 const getCourts = async () => {
   try {
@@ -27,12 +29,16 @@ const createCourt = async (court, user, transaction) => {
   if (!transaction) {
     return sequelize.transaction(async (t) => createCourt(court, user, t))
   }
-  await sequelize.models.court.findOne({
+  const foundCourt = await sequelize.models.court.findOne({
     where: {
       name: court.name
     },
     transaction
   })
+
+  if (foundCourt !== null) {
+    throw new DuplicateResourceError(`Court with name ${court.name} already exists`)
+  }
 }
 
 const deleteCourt = async () => {}

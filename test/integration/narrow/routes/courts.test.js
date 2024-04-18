@@ -1,5 +1,5 @@
 describe('Courts endpoint', () => {
-  const { DuplicateRecordError } = require('../../../../app/errors/duplicate-record')
+  const { DuplicateResourceError } = require('../../../../app/errors/duplicate-record')
   const { courts: mockCourts } = require('../../../mocks/courts')
 
   const createServer = require('../../../../app/server')
@@ -94,8 +94,8 @@ describe('Courts endpoint', () => {
       })
     })
 
-    test('should return 409 given DuplicateRecordError error', async () => {
-      createCourt.mockRejectedValue(new DuplicateRecordError())
+    test('should return 409 given DuplicateResourceError error', async () => {
+      createCourt.mockRejectedValue(new DuplicateResourceError())
 
       const options = {
         method: 'POST',
