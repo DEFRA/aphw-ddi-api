@@ -1,11 +1,12 @@
 describe('Courts endpoint', () => {
+  const { DuplicateRecordError } = require('../../../../app/errors/duplicate-record')
   const { courts: mockCourts } = require('../../../mocks/courts')
 
   const createServer = require('../../../../app/server')
   let server
 
   jest.mock('../../../../app/repos/courts')
-  const { getCourts } = require('../../../../app/repos/courts')
+  const { getCourts, createCourt } = require('../../../../app/repos/courts')
 
   jest.mock('../../../../app/auth/get-user')
   const { getCallingUser } = require('../../../../app/auth/get-user')
@@ -61,26 +62,67 @@ describe('Courts endpoint', () => {
   })
 
   describe('POST /courts', () => {
-    test('should return 201', async () => {
-      getCourts.mockResolvedValue(mockCourts)
-      getCallingUser.mockReturnValue({
-        username: 'internal-user',
-        displayname: 'User, Internal'
-      })
+    getCallingUser.mockReturnValue({
+      username: 'internal-user',
+      displayname: 'User, Internal'
+    })
 
+    afterEach(() => {
+      jest.resetAllMocks()
+    })
+
+    test('should return 201', async () => {
+      createCourt.mockResolvedValue({
+        id: 2,
+        name: 'Gondor Crown Court'
+      })
       const options = {
-        method: 'GET',
+        method: 'POST',
         url: '/courts',
         payload: {
-          name: 'Hobbiton County Court'
+          name: 'Gondor Crown Court'
         }
       }
 
       const response = await server.inject(options)
+      const court = JSON.parse(response.payload)
       expect(response.statusCode).toBe(201)
-      expect(response.payload).toEqual({
 
+      expect(court).toEqual({
+        id: 2,
+        name: 'Gondor Crown Court'
       })
+    })
+
+    test('should return 409 given DuplicateRecordError error', async () => {
+      createCourt.mockRejectedValue(new DuplicateRecordError())
+
+      const options = {
+        method: 'POST',
+        url: '/courts',
+        payload: {
+          name: 'Gondor Crown Court'
+        }
+      }
+
+      const response = await server.inject(options)
+      expect(response.statusCode).toBe(409)
+    })
+
+    test('should return 500 given db error', async () => {
+      createCourt.mockRejectedValue(new Error('Test error'))
+
+      const options = {
+        method: 'POST',
+        url: '/courts',
+        payload: {
+          name: 'Gondor Crown Court'
+        }
+      }
+
+      const response = await server.inject(options)
+
+      expect(response.statusCode).toBe(500)
     })
   })
 
