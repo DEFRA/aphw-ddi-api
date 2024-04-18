@@ -3,7 +3,7 @@ describe('CDO endpoint', () => {
   let server
 
   jest.mock('../../../../app/repos/people')
-  const { getPersonByReference, getPersonAndDogsByReference, updatePerson, deletePerson } = require('../../../../app/repos/people')
+  const { getPersonWithRelationshipsByReference, getPersonAndDogsByReference, updatePerson, deletePerson } = require('../../../../app/repos/people')
 
   beforeEach(async () => {
     jest.clearAllMocks()
@@ -17,7 +17,7 @@ describe('CDO endpoint', () => {
       url: '/person/ABC123'
     }
 
-    getPersonByReference.mockResolvedValue({
+    getPersonWithRelationshipsByReference.mockResolvedValue({
       first_name: 'John',
       last_name: 'Doe',
       birth_date: '1990-01-01',
@@ -77,7 +77,7 @@ describe('CDO endpoint', () => {
       url: '/person/ABC123'
     }
 
-    getPersonByReference.mockResolvedValue(null)
+    getPersonWithRelationshipsByReference.mockResolvedValue(null)
 
     const response = await server.inject(options)
 
@@ -90,7 +90,7 @@ describe('CDO endpoint', () => {
       url: '/person/'
     }
 
-    getPersonByReference.mockResolvedValue(null)
+    getPersonWithRelationshipsByReference.mockResolvedValue(null)
 
     const response = await server.inject(options)
 

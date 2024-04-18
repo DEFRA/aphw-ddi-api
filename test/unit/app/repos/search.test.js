@@ -260,7 +260,7 @@ describe('Search repo', () => {
   })
 
   describe('removeDogFromSearchIndex', () => {
-    test('removeDogFromSearchIndex should create new transaction if none passed', async () => {
+    test('should create new transaction if none passed', async () => {
       const dogFromDb = {
         id: 456,
         index_number: 123,
@@ -275,7 +275,7 @@ describe('Search repo', () => {
       expect(sequelize.transaction).toHaveBeenCalledTimes(1)
     })
 
-    test('removeDogFromSearchIndex should delete the search index if not last dog of owner', async () => {
+    test('should delete the search index if not last dog of owner', async () => {
       const mockDestroy = jest.fn()
       sequelize.models.search_index.findAll.mockResolvedValue([
         { dog_id: 456, person_id: 1, search: '12345', json: { dogName: 'Bruno' }, destroy: mockDestroy }
@@ -301,7 +301,7 @@ describe('Search repo', () => {
       expect(sequelize.transaction).not.toHaveBeenCalled()
     })
 
-    test('removeDogFromSearchIndex should delete the search index and create person index when last dog of owner', async () => {
+    test('should delete the search index and create person index when last dog of owner', async () => {
       const mockDestroy = jest.fn()
       sequelize.models.search_index.findAll.mockResolvedValue([
         {
@@ -357,6 +357,75 @@ describe('Search repo', () => {
         }
       },
       expect.anything())
+    })
+
+    test('should delete the search index and create person index when last dog of owner - for each of multiple people', async () => {
+      const mockDestroy = jest.fn()
+      sequelize.models.search_index.findAll.mockResolvedValue([
+        {
+          dog_id: 456,
+          person_id: 1,
+          search: '12345',
+          json: {
+            dogName: 'Bruno',
+            firstName: 'John',
+            lastName: 'Smith',
+            personReference: 'P-123',
+            address: { address_line_1: 'addr1', address_line_2: 'addr2', town: 'town', postcode: 'postcode' },
+            organisationName: 'org name'
+          },
+          destroy: mockDestroy
+        },
+        {
+          dog_id: 456,
+          person_id: 2,
+          search: '12345',
+          json: {
+            dogName: 'Bruno',
+            firstName: 'Peter',
+            lastName: 'Johnson',
+            personReference: 'P-234',
+            address: { address_line_1: 'addr1', address_line_2: 'addr2', town: 'town', postcode: 'postcode' },
+            organisationName: 'org name2'
+          },
+          destroy: mockDestroy
+        },
+        {
+          dog_id: 456,
+          person_id: 2,
+          search: '12345',
+          json: {
+            dogName: 'Bruno',
+            firstName: 'Peter',
+            lastName: 'Johnson',
+            personReference: 'P-234',
+            address: { address_line_1: 'addr1', address_line_2: 'addr2', town: 'town', postcode: 'postcode' },
+            organisationName: 'org name2'
+          },
+          destroy: mockDestroy
+        }
+      ])
+      sequelize.models.search_index.findOne.mockResolvedValue()
+      sequelize.fn.mockImplementation((a, b) => b)
+      const dogFromDb = {
+        id: 456,
+        index_number: 123,
+        name: 'Bruno',
+        dog_microchips: [
+          { microchip: { microchip_number: 123456789012345 } },
+          { microchip: { microchip_number: 112345678901234 } }
+        ],
+        registered_person: [
+          { id: 2, person_id: 1 }
+        ]
+      }
+
+      await removeDogFromSearchIndex(dogFromDb, {})
+      expect(sequelize.models.search_index.findAll).toHaveBeenCalledWith({ where: { dog_id: 456 }, transaction: {} })
+      expect(mockDestroy).toHaveBeenCalledTimes(3)
+
+      expect(sequelize.transaction).not.toHaveBeenCalled()
+      expect(sequelize.models.search_index.create).toHaveBeenCalledTimes(2)
     })
   })
 })
