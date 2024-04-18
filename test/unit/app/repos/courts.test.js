@@ -1,5 +1,4 @@
 const { courts: mockCourts } = require('../../../mocks/courts')
-const { payload: mockCdoPayload } = require('../../../mocks/cdo/create')
 const { devUser } = require('../../../mocks/auth')
 const { DuplicateResourceError } = require('../../../../app/errors/duplicate-record')
 
@@ -9,7 +8,8 @@ describe('Courts repo', () => {
     models: {
       court: {
         findAll: jest.fn(),
-        findOne: jest.fn()
+        findOne: jest.fn(),
+        create: jest.fn()
       }
     }
   }))
@@ -42,30 +42,29 @@ describe('Courts repo', () => {
   })
 
   describe('createCourt', () => {
-    const createCourtTransaction = jest.fn()
-
-    afterEach(() => {
-      jest.resetAllMocks()
-    })
-
-    test('should exist', () => {
-      expect(createCourt).toBeInstanceOf(Function)
-    })
-
+    const mockCourtPayload = {
+      name: 'The Shire County Court'
+    }
     test('should create start new transaction if none passed', async () => {
-      await createCourt(mockCdoPayload, devUser)
+      await createCourt(mockCourtPayload, devUser)
 
       expect(sequelize.transaction).toHaveBeenCalledTimes(1)
     })
 
     test('should create a court', async () => {
       sequelize.models.court.findOne.mockResolvedValue(null)
-      const mockCourtPayload = {
+
+      sequelize.models.court.create.mockResolvedValue({
+        id: 2,
         name: 'The Shire County Court'
-      }
-      await createCourt(mockCourtPayload, devUser, {})
+      })
+      const createdCourt = await createCourt(mockCourtPayload, devUser, {})
 
       expect(sequelize.transaction).toHaveBeenCalledTimes(0)
+      expect(createdCourt).toEqual({
+        id: 2,
+        name: 'The Shire County Court'
+      })
     })
 
     test('should throw a DuplicatRecordError given court already exists', async () => {
@@ -80,7 +79,9 @@ describe('Courts repo', () => {
     })
 
     test('should correctly reject if transaction fails', async () => {
-      sequelize.transaction.mockImplementation((autoCallback) => {
+      const createCourtTransaction = jest.fn()
+
+      sequelize.transaction.mockImplementation(async (autoCallback) => {
         return autoCallback(createCourtTransaction)
       })
       sequelize.models.court.findOne.mockImplementation(async (options) => {
@@ -92,6 +93,7 @@ describe('Courts repo', () => {
       await expect(createCourt(mockCourtPayload, devUser)).rejects.toThrow()
 
       expect(sequelize.transaction).toHaveBeenCalledTimes(1)
+      expect(sequelize.models.court.create).not.toHaveBeenCalled()
       expect(createCourtTransaction).toBeCalledWith(false)
     })
   })
