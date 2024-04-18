@@ -13,7 +13,27 @@ const getCourts = async () => {
   }
 }
 
-const createCourt = async () => {}
+/**
+ * @typedef CourtCreatePayload
+ * @property {string} name
+ */
+/**
+ * @param {CourtCreatePayload} court
+ * @param user
+ * @param [transaction]
+ * @returns {Promise<*|undefined>}
+ */
+const createCourt = async (court, user, transaction) => {
+  if (!transaction) {
+    return sequelize.transaction(async (t) => createCourt(court, user, t))
+  }
+  await sequelize.models.court.findOne({
+    where: {
+      name: court.name
+    },
+    transaction
+  })
+}
 
 const deleteCourt = async () => {}
 

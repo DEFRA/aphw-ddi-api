@@ -1,11 +1,7 @@
 const { payload: mockCdoPayload, payloadWithPersonReference: mockCdoPayloadWithRef } = require('../../../mocks/cdo/create')
 const { NotFoundError } = require('../../../../app/errors/notFound')
 const { personDao: mockPersonPayload, createdPersonDao: mockCreatedPersonPayload } = require('../../../mocks/person')
-
-const devUser = {
-  username: 'dev-user@test.com',
-  displayname: 'Dev User'
-}
+const { devUser } = require('../../../mocks/auth')
 
 describe('CDO repo', () => {
   jest.mock('../../../../app/config/db', () => ({

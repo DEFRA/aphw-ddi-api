@@ -1,12 +1,14 @@
 const { courts: mockCourts } = require('../../../mocks/courts')
-const sequelize = require('../../../../app/config/db')
-const { getCourts } = require('../../../../app/repos/courts')
+const { payload: mockCdoPayload } = require('../../../mocks/cdo/create')
+const { devUser } = require('../../../mocks/auth')
 
 describe('Courts repo', () => {
   jest.mock('../../../../app/config/db', () => ({
+    transaction: jest.fn(),
     models: {
       court: {
-        findAll: jest.fn()
+        findAll: jest.fn(),
+        findOne: jest.fn()
       }
     }
   }))
@@ -39,8 +41,46 @@ describe('Courts repo', () => {
   })
 
   describe('createCourt', () => {
+    const createCourtTransaction = jest.fn()
+
+    afterEach(() => {
+      jest.resetAllMocks()
+    })
+
     test('should exist', () => {
       expect(createCourt).toBeInstanceOf(Function)
+    })
+
+    test('should create start new transaction if none passed', async () => {
+      await createCourt(mockCdoPayload, devUser)
+
+      expect(sequelize.transaction).toHaveBeenCalledTimes(1)
+    })
+
+    test('should create a court', async () => {
+      sequelize.models.court.findOne.mockResolvedValue(null)
+      const mockCourtPayload = {
+        name: 'The Shire County Court'
+      }
+      await createCourt(mockCourtPayload, devUser, {})
+
+      expect(sequelize.transaction).toHaveBeenCalledTimes(0)
+    })
+
+    test('should correctly reject if transaction fails', async () => {
+      sequelize.transaction.mockImplementation((autoCallback) => {
+        return autoCallback(createCourtTransaction)
+      })
+      sequelize.models.court.findOne.mockImplementation(async (options) => {
+        options.transaction(false)
+        throw new Error('error')
+      })
+      const mockCourtPayload = {}
+
+      await expect(createCourt(mockCourtPayload, devUser)).rejects.toThrow()
+
+      expect(sequelize.transaction).toHaveBeenCalledTimes(1)
+      expect(createCourtTransaction).toBeCalledWith(false)
     })
   })
 
