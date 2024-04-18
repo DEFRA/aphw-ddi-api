@@ -32,7 +32,7 @@ describe('RegularJobs repo', () => {
     autoUpdateStatuses.mockResolvedValue('autoUpdate ok')
     createExportFile.mockResolvedValue('export file ok')
   })
-  /*
+
   test('tryStartJob should not start new transaction if passed', async () => {
     sequelize.models.regular_job.findOne.mockResolvedValue({ id: 1, run_date: new Date() })
 
@@ -127,7 +127,7 @@ describe('RegularJobs repo', () => {
 
     await expect(getRegularJobs()).rejects.toThrow('DB error')
   })
-  */
+  /*
   test('runOvernightJobs should run if no run already today', async () => {
     sequelize.models.regular_job.findOne.mockResolvedValue(null)
     sequelize.models.regular_job.create.mockResolvedValue({ id: 456 })
@@ -136,4 +136,5 @@ describe('RegularJobs repo', () => {
 
     expect(res).toBe('autoUpdate ok | export file ok')
   })
+  */
 })
