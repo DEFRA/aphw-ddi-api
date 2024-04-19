@@ -1,8 +1,12 @@
-const { isDataUnchanged, sendEventToAudit, sendCreateToAudit, sendActivityToAudit, sendUpdateToAudit } = require('../../../../app/messaging/send-audit')
+const {
+  isDataUnchanged, sendEventToAudit, sendCreateToAudit, sendActivityToAudit, sendUpdateToAudit,
+  determineCreatePk
+} = require('../../../../app/messaging/send-audit')
 
 jest.mock('../../../../app/messaging/send-event')
 const { sendEvent } = require('../../../../app/messaging/send-event')
 const { robotImportUser, accessImportUser } = require('../../../../app/constants/import')
+const { COURT } = require('../../../../app/constants/event/audit-event-object-types')
 
 describe('SendAudit test', () => {
   afterEach(() => {
@@ -132,6 +136,15 @@ describe('SendAudit test', () => {
     test('should not send an event given action is a robot import', async () => {
       await sendUpdateToAudit('OBJECT', {}, {}, robotImportUser)
       expect(sendEvent).not.toHaveBeenCalled()
+    })
+  })
+
+  describe('determineCreatePk', () => {
+    test('should get court id if obj is a court', () => {
+      const court = { id: 3, name: 'Metropolis City Court' }
+      const pk = determineCreatePk(COURT, court)
+
+      expect(pk).toBe('3')
     })
   })
 })

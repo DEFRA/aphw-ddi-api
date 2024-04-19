@@ -1,5 +1,7 @@
 const sequelize = require('../config/db')
 const { DuplicateResourceError } = require('../errors/duplicate-record')
+const { sendCreateToAudit } = require('../messaging/send-audit')
+const { COURT } = require('../constants/event/audit-event-object-types')
 
 const getCourts = async () => {
   try {
@@ -31,9 +33,8 @@ const createCourt = async (courtData, user, transaction) => {
   const foundCourt = await sequelize.models.court.findOne({
     where: {
       name: courtData.name
-    },
-    transaction
-  })
+    }
+  }, { transaction })
 
   if (foundCourt !== null) {
     throw new DuplicateResourceError(`Court with name ${courtData.name} already exists`)
@@ -41,7 +42,9 @@ const createCourt = async (courtData, user, transaction) => {
 
   const court = await sequelize.models.court.create({
     name: courtData.name
-  })
+  }, { transaction })
+
+  await sendCreateToAudit(COURT, { id: court.id, name: court.name }, user)
 
   return court
 }

@@ -1,10 +1,12 @@
-const Boom = require('@hapi/boom')
-function NotFoundError (message = 'Not Found') {
-  const boomError = Boom.notFound(message)
-  boomError.name = 'NotFoundError'
-  boomError.stack = (new Error()).stack
+const { Boom } = require('@hapi/boom')
 
-  return boomError
+class NotFoundError extends Boom {
+  constructor (message) {
+    super(message, { statusCode: 404 })
+    this.message = message
+    this.name = 'NotFoundError'
+    Object.setPrototypeOf(this, NotFoundError.prototype)
+  }
 }
 
 module.exports = { NotFoundError }

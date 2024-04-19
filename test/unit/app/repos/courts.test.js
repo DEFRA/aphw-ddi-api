@@ -1,6 +1,7 @@
 const { courts: mockCourts } = require('../../../mocks/courts')
 const { devUser } = require('../../../mocks/auth')
 const { DuplicateResourceError } = require('../../../../app/errors/duplicate-record')
+const { COURT } = require('../../../../app/constants/event/audit-event-object-types')
 
 describe('Courts repo', () => {
   jest.mock('../../../../app/config/db', () => ({
@@ -13,6 +14,9 @@ describe('Courts repo', () => {
       }
     }
   }))
+
+  jest.mock('../../../../app/messaging/send-audit')
+  const { sendCreateToAudit } = require('../../../../app/messaging/send-audit')
 
   const sequelize = require('../../../../app/config/db')
 
@@ -65,6 +69,10 @@ describe('Courts repo', () => {
         id: 2,
         name: 'The Shire County Court'
       })
+      expect(sendCreateToAudit).toBeCalledWith(COURT, {
+        id: 2,
+        name: 'The Shire County Court'
+      }, devUser)
     })
 
     test('should throw a DuplicatRecordError given court already exists', async () => {
@@ -84,7 +92,7 @@ describe('Courts repo', () => {
       sequelize.transaction.mockImplementation(async (autoCallback) => {
         return autoCallback(createCourtTransaction)
       })
-      sequelize.models.court.findOne.mockImplementation(async (options) => {
+      sequelize.models.court.findOne.mockImplementation(async (query, options) => {
         options.transaction(false)
         throw new Error('error')
       })
