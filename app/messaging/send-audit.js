@@ -164,7 +164,7 @@ const determineUpdatePk = (objName, entity) => {
   if (objName === DOG) {
     return entity.index_number
   } else if (objName === PERSON) {
-    return entity.personReference
+    return entity.personReference || entity.person_reference
   } else if (objName === EXEMPTION) {
     return entity.index_number
   } else if (objName === COURT) {
