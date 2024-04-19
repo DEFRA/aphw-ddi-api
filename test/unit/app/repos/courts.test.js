@@ -12,7 +12,8 @@ describe('Courts repo', () => {
         findAll: jest.fn(),
         findOne: jest.fn(),
         create: jest.fn(),
-        destroy: jest.fn()
+        destroy: jest.fn(),
+        restore: jest.fn()
       }
     }
   }))
@@ -26,6 +27,7 @@ describe('Courts repo', () => {
 
   beforeEach(async () => {
     jest.clearAllMocks()
+    jest.resetAllMocks()
   })
 
   describe('getCourts', () => {
@@ -77,6 +79,29 @@ describe('Courts repo', () => {
       }, devUser)
     })
 
+    test('should create a court given it has been soft deleted', async () => {
+      sequelize.models.court.restore.mockResolvedValue()
+      sequelize.models.court.findOne.mockResolvedValueOnce(null)
+      sequelize.models.court.findOne.mockResolvedValueOnce({
+        id: 2,
+        name: 'The Shire County Court'
+      })
+
+      const createdCourt = await createCourt(mockCourtPayload, devUser, {})
+
+      expect(sequelize.transaction).toHaveBeenCalledTimes(0)
+      expect(createdCourt).toEqual({
+        id: 2,
+        name: 'The Shire County Court'
+      })
+      expect(sequelize.models.court.restore).toHaveBeenCalled()
+      expect(sequelize.models.court.create).not.toHaveBeenCalled()
+      expect(sendCreateToAudit).toHaveBeenCalledWith(COURT, {
+        id: 2,
+        name: 'The Shire County Court'
+      }, devUser)
+    })
+
     test('should throw a DuplicateRecordError given court already exists', async () => {
       sequelize.models.court.findOne.mockResolvedValue({
         id: 5,
@@ -89,21 +114,21 @@ describe('Courts repo', () => {
     })
 
     test('should correctly reject if transaction fails', async () => {
+      sequelize.models.court.findOne.mockResolvedValue(null)
       const createCourtTransaction = jest.fn()
-
       sequelize.transaction.mockImplementation(async (autoCallback) => {
         return autoCallback(createCourtTransaction)
       })
-      sequelize.models.court.findOne.mockImplementation(async (query, options) => {
+      sequelize.models.court.create.mockImplementation(async (_court, options) => {
         options.transaction(false)
-        throw new Error('error')
       })
+      sendCreateToAudit.mockRejectedValue()
+
       const mockCourtPayload = {}
 
       await expect(createCourt(mockCourtPayload, devUser)).rejects.toThrow()
 
       expect(sequelize.transaction).toHaveBeenCalledTimes(1)
-      expect(sequelize.models.court.create).not.toHaveBeenCalled()
       expect(createCourtTransaction).toHaveBeenCalledWith(false)
     })
   })

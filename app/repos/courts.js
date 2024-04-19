@@ -35,15 +35,34 @@ const createCourt = async (courtData, user, transaction) => {
     where: {
       name: courtData.name
     }
-  }, { transaction })
+  })
 
   if (foundCourt !== null) {
     throw new DuplicateResourceError(`Court with name ${courtData.name} already exists`)
   }
 
-  const court = await sequelize.models.court.create({
-    name: courtData.name
-  }, { transaction })
+  let court
+
+  const foundParanoid = await sequelize.models.court.findOne({
+    where: {
+      name: courtData.name
+    },
+    paranoid: false
+  })
+
+  if (foundParanoid) {
+    await sequelize.models.court.restore({
+      where: {
+        id: foundParanoid.id
+      },
+      transaction
+    })
+    court = foundParanoid
+  } else {
+    court = await sequelize.models.court.create({
+      name: courtData.name
+    }, { transaction })
+  }
 
   await sendCreateToAudit(COURT, { id: court.id, name: court.name }, user)
 
