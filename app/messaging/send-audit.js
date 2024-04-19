@@ -5,7 +5,7 @@ const { getDiff } = require('json-difference')
 const { sendEvent } = require('./send-event')
 const { deepClone } = require('../lib/deep-clone')
 const { isUserValid } = require('../auth/get-user')
-const { CDO, DOG, PERSON, EXEMPTION } = require('../constants/event/audit-event-object-types')
+const { CDO, DOG, PERSON, EXEMPTION, COURT } = require('../constants/event/audit-event-object-types')
 const { accessImportUser, robotImportUser } = require('../constants/import')
 
 const sendEventToAudit = async (eventType, eventSubject, eventDescription, actioningUser) => {
@@ -44,7 +44,6 @@ const sendCreateToAudit = async (auditObjectName, entity, user) => {
   }
 
   const messagePayload = constructCreatePayload(auditObjectName, entity, user)
-
   const event = {
     type: CREATE,
     source: SOURCE,
@@ -155,6 +154,8 @@ const determineCreatePk = (objName, entity) => {
     return entity.dog.index_number
   } else if (objName === DOG) {
     return entity.index_number
+  } else if (objName === COURT) {
+    return entity.id.toString()
   }
   throw new Error(`Invalid object for create audit: ${objName}`)
 }
@@ -166,6 +167,8 @@ const determineUpdatePk = (objName, entity) => {
     return entity.personReference
   } else if (objName === EXEMPTION) {
     return entity.index_number
+  } else if (objName === COURT) {
+    return entity.id.toString()
   }
   throw new Error(`Invalid object for update audit: ${objName}`)
 }
@@ -194,5 +197,7 @@ module.exports = {
   sendEventToAudit,
   sendActivityToAudit,
   sendDeleteToAudit,
-  isDataUnchanged
+  isDataUnchanged,
+  determineCreatePk,
+  determineUpdatePk
 }

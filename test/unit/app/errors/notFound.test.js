@@ -1,4 +1,4 @@
-const { NotFoundError } = require('../../../../app/errors/notFound')
+const { NotFoundError } = require('../../../../app/errors/not-found')
 
 describe('NotFoundError', () => {
   test('should throw an error', () => {

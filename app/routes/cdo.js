@@ -2,7 +2,7 @@ const { cdoCreateDto, cdoViewDto } = require('../dto/cdo')
 const { createCdo, getCdo } = require('../repos/cdo')
 const { getCallingUser } = require('../auth/get-user')
 const cdoCreateSchema = require('../schema/cdo/create')
-const { NotFoundError } = require('../errors/notFound')
+const { NotFoundError } = require('../errors/not-found')
 
 module.exports = [{
   method: 'GET',

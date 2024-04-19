@@ -1,8 +1,12 @@
-const { isDataUnchanged, sendEventToAudit, sendCreateToAudit, sendActivityToAudit, sendUpdateToAudit, sendDeleteToAudit } = require('../../../../app/messaging/send-audit')
+const {
+  isDataUnchanged, sendEventToAudit, sendCreateToAudit, sendActivityToAudit, sendUpdateToAudit,
+  determineCreatePk, determineUpdatePk, sendDeleteToAudit
+} = require('../../../../app/messaging/send-audit')
 
 jest.mock('../../../../app/messaging/send-event')
 const { sendEvent } = require('../../../../app/messaging/send-event')
 const { robotImportUser, accessImportUser } = require('../../../../app/constants/import')
+const { COURT } = require('../../../../app/constants/event/audit-event-object-types')
 
 describe('SendAudit test', () => {
   afterEach(() => {
@@ -154,6 +158,24 @@ describe('SendAudit test', () => {
           message: '{"actioningUser":{"username":"hal-9000","displayname":"Hal 9000"},"operation":"deleted person","deleted":{"personReference":"P-123"}}'
         }
       })
+    })
+  })
+
+  describe('determineCreatePk', () => {
+    test('should get court id if obj is a court', () => {
+      const court = { id: 3, name: 'Metropolis City Court' }
+      const pk = determineCreatePk(COURT, court)
+
+      expect(pk).toBe('3')
+    })
+  })
+
+  describe('determineUpdatePk', () => {
+    test('should get court id if obj is a court', () => {
+      const court = { id: 3, name: 'Metropolis City Court' }
+      const pk = determineUpdatePk(COURT, court)
+
+      expect(pk).toBe('3')
     })
   })
 })
