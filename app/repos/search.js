@@ -42,7 +42,15 @@ const addToSearchIndex = async (person, dog, transaction) => {
 
 const buildIndexColumn = (person, dog) => {
   const address = person?.addresses?.address ? person.addresses.address : person.address
-  return sequelize.fn('to_tsvector', `${person.person_reference} ${person.first_name} ${person.last_name} ${person.organisation_name ? person.organisation_name : ''} ${buildAddressString(address, true)} ${dog.index_number} ${dog.name ? dog.name : ''} ${dog.microchip_number ? dog.microchip_number : ''} ${dog.microchip_number2 ? dog.microchip_number2 : ''}`)
+  return sequelize.fn(
+    'to_tsvector',
+    `${person.person_reference} ${person.first_name} ${person.last_name} \
+${person.organisation_name ? person.organisation_name : ''} \
+${buildAddressString(address, true)} \
+${dog.index_number ? dog.index_number : ''} \
+${dog.name ? dog.name : ''} \
+${dog.microchip_number ? dog.microchip_number : ''} \
+${dog.microchip_number2 ? dog.microchip_number2 : ''}`.trim())
 }
 
 const buildJsonColumn = (person, dog) => {
@@ -84,14 +92,51 @@ const removeDogFromSearchIndex = async (dogFromDb, transaction) => {
     return await sequelize.transaction(async (t) => removeDogFromSearchIndex(dogFromDb, t))
   }
 
-  const indexRows = await sequelize.models.search_index.findAll({
+  const dogIndexRows = await sequelize.models.search_index.findAll({
     where: { dog_id: dogFromDb.id },
     transaction
   })
 
-  // update
-  for (const indexRow of indexRows) {
+  const uniquePersons = new Map()
+
+  for (const indexRow of dogIndexRows) {
+    if (!uniquePersons.get(indexRow.person_id)) {
+      uniquePersons.set(indexRow.person_id, indexRow.json)
+    }
+
     await indexRow.destroy()
+  }
+
+  await addPeopleOnlyIfNoDogsLeft(uniquePersons, transaction)
+}
+
+const addPeopleOnlyIfNoDogsLeft = async (persons, transaction) => {
+  const personKeys = persons.keys()
+
+  for (const personId of personKeys) {
+    const searchIndexExists = await sequelize.models.search_index.findOne({
+      where: { person_id: personId },
+      transaction
+    })
+
+    if (!searchIndexExists) {
+      const person = persons.get(personId)
+
+      const partialPerson = {
+        first_name: person.firstName,
+        last_name: person.lastName,
+        organisation_name: person.organisationName,
+        address: person.address,
+        person_reference: person.personReference
+      }
+
+      await sequelize.models.search_index.create({
+        search: buildIndexColumn(partialPerson, {}),
+        person_id: personId,
+        dog_id: null,
+        json: buildJsonColumn(partialPerson, {})
+      }, { transaction })
+    }
   }
 }
 
