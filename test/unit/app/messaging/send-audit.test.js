@@ -1,6 +1,6 @@
 const {
   isDataUnchanged, sendEventToAudit, sendCreateToAudit, sendActivityToAudit, sendUpdateToAudit,
-  determineCreatePk, determineUpdatePk
+  determineCreatePk, determineUpdatePk, sendDeleteToAudit
 } = require('../../../../app/messaging/send-audit')
 
 jest.mock('../../../../app/messaging/send-event')
@@ -136,6 +136,28 @@ describe('SendAudit test', () => {
     test('should not send an event given action is a robot import', async () => {
       await sendUpdateToAudit('OBJECT', {}, {}, robotImportUser)
       expect(sendEvent).not.toHaveBeenCalled()
+    })
+  })
+
+  describe('sendDeleteToAudit', () => {
+    const hal9000 = { username: 'hal-9000', displayname: 'Hal 9000' }
+
+    test('should fail given no user', async () => {
+      await expect(sendDeleteToAudit('OBJECT', {}, {})).rejects.toThrow('Username and displayname are required for auditing deletion of OBJECT')
+    })
+
+    test('should send correct message payload', async () => {
+      await sendDeleteToAudit('person', { personReference: 'P-123' }, hal9000)
+      expect(sendEvent).toHaveBeenCalledWith({
+        type: 'uk.gov.defra.ddi.event.delete',
+        source: 'aphw-ddi-portal',
+        partitionKey: 'P-123',
+        id: expect.any(String),
+        subject: 'DDI Delete person',
+        data: {
+          message: '{"actioningUser":{"username":"hal-9000","displayname":"Hal 9000"},"operation":"deleted person","deleted":{"personReference":"P-123"}}'
+        }
+      })
     })
   })
 

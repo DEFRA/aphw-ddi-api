@@ -374,29 +374,27 @@ const updateContact = async (existingPerson, type, contact, transaction) => {
 
 const deletePerson = async (reference, user, transaction) => {
   if (!transaction) {
-    return sequelize.transaction(async (t) => deletePerson(reference, user, t))
+    return await sequelize.transaction(async (t) => deletePerson(reference, user, t))
   }
+
+  const personWithRelationships = await getPersonByReference(reference, transaction)
 
   const person = await sequelize.models.person.findOne({ where: { person_reference: reference } })
   await person.destroy()
 
-  const personAddresses = await sequelize.models.person_address.findAll({ where: { person_id: person.id } })
-  for (const personAddress of personAddresses) {
-    const address = await sequelize.models.address.findByPk(personAddress.address_id)
-    await address.destroy()
+  for (const personAddress of personWithRelationships.addresses) {
+    await personAddress.address.destroy()
     await personAddress.destroy()
   }
 
-  const personContacts = await sequelize.models.person_contact.findAll({ where: { person_id: person.id } })
-  for (const personContact of personContacts) {
-    const contact = await sequelize.models.contact.findByPk(personContact.contact_id)
-    await contact.destroy()
+  for (const personContact of personWithRelationships.person_contacts) {
+    await personContact.contact.destroy()
     await personContact.destroy()
   }
 
   await sequelize.models.search_index.destroy({ where: { person_id: person.id } })
 
-  await sendDeleteToAudit(PERSON, person, user)
+  await sendDeleteToAudit(PERSON, personWithRelationships, user)
 }
 
 module.exports = {
