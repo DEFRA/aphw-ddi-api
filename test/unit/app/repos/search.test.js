@@ -22,7 +22,7 @@ describe('Search repo', () => {
 
   const sequelize = require('../../../../app/config/db')
 
-  const { addToSearchIndex, buildAddressString, updateSearchIndexDog, updateSearchIndexPerson, applyMicrochips, removeDogFromSearchIndex } = require('../../../../app/repos/search')
+  const { addToSearchIndex, buildAddressString, updateSearchIndexDog, updateSearchIndexPerson, applyMicrochips, removeDogFromSearchIndex, cleanupPossibleOwnerWithNoDogs } = require('../../../../app/repos/search')
 
   const { dbFindByPk } = require('../../../../app/lib/db-functions')
   jest.mock('../../../../app/lib/db-functions')
@@ -426,6 +426,30 @@ describe('Search repo', () => {
 
       expect(sequelize.transaction).not.toHaveBeenCalled()
       expect(sequelize.models.search_index.create).toHaveBeenCalledTimes(2)
+    })
+  })
+
+  describe('cleanupPossibleOwnerWithNoDogs', () => {
+    test('should remove records of same person prior to adding dog', async () => {
+      const mockDestroy = jest.fn()
+      sequelize.models.search_index.findAll.mockResolvedValue([
+        { person_id: 123, json: 'some json', destroy: mockDestroy },
+        { person_id: 123, json: 'more json', destroy: mockDestroy },
+        { person_id: 123, json: 'extra json', destroy: mockDestroy }
+      ])
+      await cleanupPossibleOwnerWithNoDogs(123, {})
+
+      expect(sequelize.models.search_index.findAll).toHaveBeenCalledTimes(1)
+      expect(mockDestroy).toHaveBeenCalledTimes(3)
+    })
+
+    test('should not remove records of same person if none exist with no dog', async () => {
+      const mockDestroy = jest.fn()
+      sequelize.models.search_index.findAll.mockResolvedValue([])
+      await cleanupPossibleOwnerWithNoDogs(123, {})
+
+      expect(sequelize.models.search_index.findAll).toHaveBeenCalledTimes(1)
+      expect(mockDestroy).toHaveBeenCalledTimes(0)
     })
   })
 })
