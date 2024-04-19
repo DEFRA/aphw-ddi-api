@@ -6,7 +6,7 @@ describe('Courts endpoint', () => {
   let server
 
   jest.mock('../../../../app/repos/courts')
-  const { getCourts, createCourt } = require('../../../../app/repos/courts')
+  const { getCourts, createCourt, deleteCourt } = require('../../../../app/repos/courts')
 
   jest.mock('../../../../app/auth/get-user')
   const { getCallingUser } = require('../../../../app/auth/get-user')
@@ -92,6 +92,65 @@ describe('Courts endpoint', () => {
         id: 2,
         name: 'Gondor Crown Court'
       })
+    })
+
+    test('should return 409 given DuplicateResourceError error', async () => {
+      createCourt.mockRejectedValue(new DuplicateResourceError())
+
+      const options = {
+        method: 'POST',
+        url: '/courts',
+        payload: {
+          name: 'Gondor Crown Court'
+        }
+      }
+
+      const response = await server.inject(options)
+      expect(response.statusCode).toBe(409)
+    })
+
+    test('should return 500 given db error', async () => {
+      createCourt.mockRejectedValue(new Error('Test error'))
+
+      const options = {
+        method: 'POST',
+        url: '/courts',
+        payload: {
+          name: 'Gondor Crown Court'
+        }
+      }
+
+      const response = await server.inject(options)
+
+      expect(response.statusCode).toBe(500)
+    })
+  })
+
+  describe('DELETE /courts', () => {
+    getCallingUser.mockReturnValue({
+      username: 'internal-user',
+      displayname: 'User, Internal'
+    })
+
+    afterEach(() => {
+      jest.resetAllMocks()
+    })
+
+    test('should return 204', async () => {
+      deleteCourt.mockResolvedValue({
+        id: 1,
+        name: 'Gondor Crown Court'
+      })
+      const options = {
+        method: 'DELETE',
+        url: '/courts/1'
+      }
+
+      const response = await server.inject(options)
+
+      expect(response.statusCode).toBe(204)
+
+      expect(response.payload).toBe('')
     })
 
     test('should return 409 given DuplicateResourceError error', async () => {

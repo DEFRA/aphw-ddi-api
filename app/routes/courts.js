@@ -1,4 +1,4 @@
-const { getCourts, createCourt } = require('../repos/courts')
+const { getCourts, createCourt, deleteCourt } = require('../repos/courts')
 const { getCallingUser } = require('../auth/get-user')
 
 module.exports = [
@@ -23,6 +23,16 @@ module.exports = [
         id: court.id,
         name: court.name
       }).code(201)
+    }
+  },
+  {
+    method: 'DELETE',
+    path: '/courts/{courtId}',
+    handler: async (request, h) => {
+      const courtId = request.params.courtId
+      await deleteCourt(courtId, getCallingUser(request))
+
+      return h.response().code(204)
     }
   }
 ]
