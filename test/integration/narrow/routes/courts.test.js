@@ -1,5 +1,5 @@
 const { NotFoundError } = require('../../../../app/errors/not-found')
-const { deleteCourt } = require('../../../../app/repos/courts')
+
 describe('Courts endpoint', () => {
   const { DuplicateResourceError } = require('../../../../app/errors/duplicate-record')
   const { courts: mockCourts } = require('../../../mocks/courts')
@@ -94,6 +94,17 @@ describe('Courts endpoint', () => {
         id: 2,
         name: 'Gondor Crown Court'
       })
+    })
+
+    test('should return a 400 given schema is invalid', async () => {
+      const options = {
+        method: 'POST',
+        url: '/courts',
+        payload: {}
+      }
+
+      const response = await server.inject(options)
+      expect(response.statusCode).toBe(400)
     })
 
     test('should return 409 given DuplicateResourceError error', async () => {

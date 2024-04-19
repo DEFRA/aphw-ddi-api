@@ -1,5 +1,6 @@
 const { getCourts, createCourt, deleteCourt } = require('../repos/courts')
 const { getCallingUser } = require('../auth/get-user')
+const { createCourtSchema } = require('../schema/court/create')
 
 module.exports = [
   {
@@ -16,13 +17,23 @@ module.exports = [
   {
     method: 'POST',
     path: '/courts',
-    handler: async (request, h) => {
-      const court = await createCourt(request.payload, getCallingUser(request))
+    options: {
+      validate: {
+        payload: createCourtSchema,
+        failAction: (request, h, err) => {
+          console.error(err)
 
-      return h.response({
-        id: court.id,
-        name: court.name
-      }).code(201)
+          return h.response({ errors: err.details.map(e => e.message) }).code(400).takeover()
+        }
+      },
+      handler: async (request, h) => {
+        const court = await createCourt(request.payload, getCallingUser(request))
+
+        return h.response({
+          id: court.id,
+          name: court.name
+        }).code(201)
+      }
     }
   },
   {
