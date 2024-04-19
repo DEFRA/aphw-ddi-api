@@ -924,24 +924,25 @@ describe('People repo', () => {
       const destroyFnPersonContact = jest.fn()
       const destroyFnContact = jest.fn()
 
-      const mockPersonAddresses = [
-        { destroy: destroyFnPersonAddress, address_id: 1 },
-        { destroy: destroyFnPersonAddress, address_id: 2 },
-        { destroy: destroyFnPersonAddress, address_id: 3 }
-      ]
+      const combinedPerson = {
+        person_reference: 'P-123',
+        first_name: 'John',
+        last_name: 'Smith',
+        addresses: [
+          { destroy: destroyFnPersonAddress, address_id: 1, address: { destroy: destroyFnAddress } },
+          { destroy: destroyFnPersonAddress, address_id: 2, address: { destroy: destroyFnAddress } },
+          { destroy: destroyFnPersonAddress, address_id: 3, address: { destroy: destroyFnAddress } }
+        ],
+        person_contacts: [
+          { destroy: destroyFnPersonContact, contact_id: 1, contact: { destroy: destroyFnContact } },
+          { destroy: destroyFnPersonContact, contact_id: 2, contact: { destroy: destroyFnContact } },
+          { destroy: destroyFnPersonContact, contact_id: 3, contact: { destroy: destroyFnContact } },
+          { destroy: destroyFnPersonContact, contact_id: 4, contact: { destroy: destroyFnContact } }
+        ]
+      }
 
-      const mockPersonContacts = [
-        { destroy: destroyFnPersonContact, contact_id: 1 },
-        { destroy: destroyFnPersonContact, contact_id: 2 },
-        { destroy: destroyFnPersonContact, contact_id: 3 },
-        { destroy: destroyFnPersonContact, contact_id: 4 }
-      ]
-
+      sequelize.models.person.findAll.mockResolvedValue([combinedPerson])
       sequelize.models.person.findOne.mockResolvedValue({ destroy: destroyFnPerson })
-      sequelize.models.person_address.findAll.mockResolvedValue(mockPersonAddresses)
-      sequelize.models.address.findByPk.mockResolvedValue({ destroy: destroyFnAddress })
-      sequelize.models.person_contact.findAll.mockResolvedValue(mockPersonContacts)
-      sequelize.models.contact.findByPk.mockResolvedValue({ destroy: destroyFnContact })
       await deletePerson('P-12345', dummyUser, {})
 
       expect(sequelize.transaction).not.toHaveBeenCalled()
@@ -954,24 +955,25 @@ describe('People repo', () => {
       const destroyFnPersonContact = jest.fn()
       const destroyFnContact = jest.fn()
 
-      const mockPersonAddresses = [
-        { destroy: destroyFnPersonAddress, address_id: 1 },
-        { destroy: destroyFnPersonAddress, address_id: 2 },
-        { destroy: destroyFnPersonAddress, address_id: 3 }
-      ]
+      const combinedPerson = {
+        person_reference: 'P-123',
+        first_name: 'John',
+        last_name: 'Smith',
+        addresses: [
+          { destroy: destroyFnPersonAddress, address_id: 1, address: { destroy: destroyFnAddress } },
+          { destroy: destroyFnPersonAddress, address_id: 2, address: { destroy: destroyFnAddress } },
+          { destroy: destroyFnPersonAddress, address_id: 3, address: { destroy: destroyFnAddress } }
+        ],
+        person_contacts: [
+          { destroy: destroyFnPersonContact, contact_id: 1, contact: { destroy: destroyFnContact } },
+          { destroy: destroyFnPersonContact, contact_id: 2, contact: { destroy: destroyFnContact } },
+          { destroy: destroyFnPersonContact, contact_id: 3, contact: { destroy: destroyFnContact } },
+          { destroy: destroyFnPersonContact, contact_id: 4, contact: { destroy: destroyFnContact } }
+        ]
+      }
 
-      const mockPersonContacts = [
-        { destroy: destroyFnPersonContact, contact_id: 1 },
-        { destroy: destroyFnPersonContact, contact_id: 2 },
-        { destroy: destroyFnPersonContact, contact_id: 3 },
-        { destroy: destroyFnPersonContact, contact_id: 4 }
-      ]
-
+      sequelize.models.person.findAll.mockResolvedValue([combinedPerson])
       sequelize.models.person.findOne.mockResolvedValue({ destroy: destroyFnPerson })
-      sequelize.models.person_address.findAll.mockResolvedValue(mockPersonAddresses)
-      sequelize.models.address.findByPk.mockResolvedValue({ destroy: destroyFnAddress })
-      sequelize.models.person_contact.findAll.mockResolvedValue(mockPersonContacts)
-      sequelize.models.contact.findByPk.mockResolvedValue({ destroy: destroyFnContact })
       await deletePerson('P-12345', dummyUser, {})
 
       expect(destroyFnPerson).toHaveBeenCalledTimes(1)
