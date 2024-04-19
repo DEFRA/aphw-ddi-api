@@ -4,7 +4,7 @@ const { createDogs } = require('./dogs')
 const { addToSearchIndex } = require('./search')
 const { sendCreateToAudit } = require('../messaging/send-audit')
 const { CDO } = require('../constants/event/audit-event-object-types')
-const { NotFoundError } = require('../errors/notFound')
+const { NotFoundError } = require('../errors/not-found')
 const { mapPersonDaoToCreatedPersonDao } = require('./mappers/person')
 const { cdoRelationship } = require('./relationships/cdo')
 

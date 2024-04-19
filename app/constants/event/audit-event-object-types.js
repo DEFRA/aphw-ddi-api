@@ -3,5 +3,6 @@ module.exports = {
   DOG: 'dog',
   EXEMPTION: 'exemption',
   PERSON: 'person',
-  COMMENT: 'comment'
+  COMMENT: 'comment',
+  COURT: 'court'
 }
