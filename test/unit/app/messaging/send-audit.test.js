@@ -1,6 +1,6 @@
 const {
   isDataUnchanged, sendEventToAudit, sendCreateToAudit, sendActivityToAudit, sendUpdateToAudit,
-  determineCreatePk
+  determineCreatePk, determineUpdatePk
 } = require('../../../../app/messaging/send-audit')
 
 jest.mock('../../../../app/messaging/send-event')
@@ -143,6 +143,15 @@ describe('SendAudit test', () => {
     test('should get court id if obj is a court', () => {
       const court = { id: 3, name: 'Metropolis City Court' }
       const pk = determineCreatePk(COURT, court)
+
+      expect(pk).toBe('3')
+    })
+  })
+
+  describe('determineUpdatePk', () => {
+    test('should get court id if obj is a court', () => {
+      const court = { id: 3, name: 'Metropolis City Court' }
+      const pk = determineUpdatePk(COURT, court)
 
       expect(pk).toBe('3')
     })

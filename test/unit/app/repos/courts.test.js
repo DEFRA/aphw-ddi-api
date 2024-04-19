@@ -2,6 +2,7 @@ const { courts: mockCourts } = require('../../../mocks/courts')
 const { devUser } = require('../../../mocks/auth')
 const { DuplicateResourceError } = require('../../../../app/errors/duplicate-record')
 const { COURT } = require('../../../../app/constants/event/audit-event-object-types')
+const { NotFoundError } = require('../../../../app/errors/not-found')
 
 describe('Courts repo', () => {
   jest.mock('../../../../app/config/db', () => ({
@@ -10,13 +11,14 @@ describe('Courts repo', () => {
       court: {
         findAll: jest.fn(),
         findOne: jest.fn(),
-        create: jest.fn()
+        create: jest.fn(),
+        destroy: jest.fn()
       }
     }
   }))
 
   jest.mock('../../../../app/messaging/send-audit')
-  const { sendCreateToAudit } = require('../../../../app/messaging/send-audit')
+  const { sendCreateToAudit, sendDeleteToAudit } = require('../../../../app/messaging/send-audit')
 
   const sequelize = require('../../../../app/config/db')
 
@@ -69,13 +71,13 @@ describe('Courts repo', () => {
         id: 2,
         name: 'The Shire County Court'
       })
-      expect(sendCreateToAudit).toBeCalledWith(COURT, {
+      expect(sendCreateToAudit).toHaveBeenCalledWith(COURT, {
         id: 2,
         name: 'The Shire County Court'
       }, devUser)
     })
 
-    test('should throw a DuplicatRecordError given court already exists', async () => {
+    test('should throw a DuplicateRecordError given court already exists', async () => {
       sequelize.models.court.findOne.mockResolvedValue({
         id: 5,
         name: 'The Shire County Court'
@@ -102,13 +104,35 @@ describe('Courts repo', () => {
 
       expect(sequelize.transaction).toHaveBeenCalledTimes(1)
       expect(sequelize.models.court.create).not.toHaveBeenCalled()
-      expect(createCourtTransaction).toBeCalledWith(false)
+      expect(createCourtTransaction).toHaveBeenCalledWith(false)
     })
   })
 
   describe('deleteCourt', () => {
-    test('should exist', () => {
-      expect(deleteCourt).toBeInstanceOf(Function)
+    test('should create start new transaction if none passed', async () => {
+      await deleteCourt(2, devUser)
+
+      expect(sequelize.transaction).toHaveBeenCalledTimes(1)
+    })
+
+    test('should delete the court', async () => {
+      sequelize.models.court.findOne.mockResolvedValue({
+        id: 5,
+        name: 'The Shire County Court'
+      })
+      sequelize.models.court.destroy.mockResolvedValue(5)
+      await deleteCourt(2, devUser, {})
+      expect(sequelize.models.court.destroy).toHaveBeenCalled()
+      expect(sendDeleteToAudit).toHaveBeenCalledWith(COURT, {
+        id: 5,
+        name: 'The Shire County Court'
+      }, devUser)
+    })
+
+    test('should throw a NotFound given court id does not exist', async () => {
+      sequelize.models.court.findOne.mockResolvedValue(null)
+
+      await expect(deleteCourt(2, devUser, {})).rejects.toThrow(new NotFoundError('Court with id 2 does not exist'))
     })
   })
 })
