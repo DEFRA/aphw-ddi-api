@@ -3,6 +3,7 @@ const { DuplicateResourceError } = require('../errors/duplicate-record')
 const { sendCreateToAudit, sendDeleteToAudit } = require('../messaging/send-audit')
 const { COURT } = require('../constants/event/audit-event-object-types')
 const { NotFoundError } = require('../errors/not-found')
+const { Op } = require('sequelize')
 
 const getCourts = async () => {
   try {
@@ -31,11 +32,14 @@ const createCourt = async (courtData, user, transaction) => {
   if (!transaction) {
     return await sequelize.transaction(async (t) => createCourt(courtData, user, t))
   }
-  const foundCourt = await sequelize.models.court.findOne({
+  const findQuery = {
     where: {
-      name: courtData.name
+      name: {
+        [Op.iLike]: `%${courtData.name}%`
+      }
     }
-  })
+  }
+  const foundCourt = await sequelize.models.court.findOne(findQuery)
 
   if (foundCourt !== null) {
     throw new DuplicateResourceError(`Court with name ${courtData.name} already exists`)
@@ -44,9 +48,7 @@ const createCourt = async (courtData, user, transaction) => {
   let court
 
   const foundParanoid = await sequelize.models.court.findOne({
-    where: {
-      name: courtData.name
-    },
+    ...findQuery,
     paranoid: false
   })
 
