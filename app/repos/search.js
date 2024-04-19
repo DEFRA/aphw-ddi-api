@@ -38,6 +38,8 @@ const addToSearchIndex = async (person, dog, transaction) => {
     dog_id: dog.id,
     json: buildJsonColumn(person, refreshedDogEntity)
   }, { transaction })
+
+  await cleanupPossibleOwnerWithNoDogs(person.id, transaction)
 }
 
 const buildIndexColumn = (person, dog) => {
@@ -207,11 +209,28 @@ const updateSearchIndexPerson = async (person, transaction) => {
   }
 }
 
+const cleanupPossibleOwnerWithNoDogs = async (personId, transaction) => {
+  const personsNoDogs = await sequelize.models.search_index.findAll({
+    where: {
+      person_id: personId,
+      dog_id: null
+    },
+    transaction
+  })
+
+  if (personsNoDogs) {
+    for (const personNoDogs of personsNoDogs) {
+      await personNoDogs.destroy({ transaction })
+    }
+  }
+}
+
 module.exports = {
   addToSearchIndex,
   buildAddressString,
   removeDogFromSearchIndex,
   updateSearchIndexDog,
   updateSearchIndexPerson,
-  applyMicrochips
+  applyMicrochips,
+  cleanupPossibleOwnerWithNoDogs
 }
