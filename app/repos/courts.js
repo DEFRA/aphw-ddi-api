@@ -49,7 +49,9 @@ const createCourt = async (courtData, user, transaction) => {
   return court
 }
 
-const deleteCourt = async () => {}
+const deleteCourt = async () => {
+
+}
 
 module.exports = {
   getCourts,

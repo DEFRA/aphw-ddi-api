@@ -1,3 +1,5 @@
+const { NotFoundError } = require('../../../../app/errors/not-found')
+const { deleteCourt } = require('../../../../app/repos/courts')
 describe('Courts endpoint', () => {
   const { DuplicateResourceError } = require('../../../../app/errors/duplicate-record')
   const { courts: mockCourts } = require('../../../mocks/courts')
@@ -153,30 +155,24 @@ describe('Courts endpoint', () => {
       expect(response.payload).toBe('')
     })
 
-    test('should return 409 given DuplicateResourceError error', async () => {
-      createCourt.mockRejectedValue(new DuplicateResourceError())
+    test('should return 409 given NotFoundError error', async () => {
+      deleteCourt.mockRejectedValue(new NotFoundError())
 
       const options = {
-        method: 'POST',
-        url: '/courts',
-        payload: {
-          name: 'Gondor Crown Court'
-        }
+        method: 'DELETE',
+        url: '/courts/1'
       }
 
       const response = await server.inject(options)
-      expect(response.statusCode).toBe(409)
+      expect(response.statusCode).toBe(404)
     })
 
     test('should return 500 given db error', async () => {
-      createCourt.mockRejectedValue(new Error('Test error'))
+      deleteCourt.mockRejectedValue(new Error('Test error'))
 
       const options = {
-        method: 'POST',
-        url: '/courts',
-        payload: {
-          name: 'Gondor Crown Court'
-        }
+        method: 'DELETE',
+        url: '/courts/1'
       }
 
       const response = await server.inject(options)
