@@ -127,6 +127,16 @@ const { cdoRelationship } = require('./relationships/cdo')
  * @property {string} created_at
  * @property {null|string} deleted_at
  */
+
+/**
+ * @typedef {CdoDao} SummaryCdo
+ */
+/**
+ * @param data
+ * @param user
+ * @param transaction
+ * @return {Promise<*|{owner: CreatedPersonDao, dogs: (Promise<*>|[])}|undefined|{owner: CreatedPersonDao, dogs: (*|[])}>}
+ */
 const createCdo = async (data, user, transaction) => {
   if (!transaction) {
     return await sequelize.transaction(async (t) => createCdo(data, user, t))
@@ -208,7 +218,15 @@ const getAllCdos = async () => {
   return cdos
 }
 
-const getSummaryCdos = async () => {}
+/**
+ * @typedef {'InterimExempt'|'PreExempt'|'Exempt'|'Failed'|'InBreach'|'Withdrawn'|'Inactive'} CdoStatus
+ */
+/**
+ *
+ * @param {{ status?: CdoStatus[]; withinDays?: number }} filter
+ * @return {Promise<SummaryCdo[]>}
+ */
+const getSummaryCdos = async (filter) => {}
 
 module.exports = {
   createCdo,
