@@ -16,6 +16,28 @@ const overnightRows = [
   }
 ]
 
+const overnightRowsInBreach = [
+  {
+    dog: {
+      index_number: 'ED123',
+      breed: {
+        breed: 'XL Bully'
+      },
+      status: 'In breach'
+    }
+  },
+  {
+    dog: {
+      index_number: 'ED125',
+      breed: {
+        breed: 'XL Bully'
+      },
+      status: 'In breach'
+    }
+  }
+]
+
 module.exports = {
-  overnightRows
+  overnightRows,
+  overnightRowsInBreach
 }
