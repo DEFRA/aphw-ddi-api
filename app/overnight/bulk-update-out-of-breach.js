@@ -21,7 +21,8 @@ const bulkUpdateOutOfBreach = async (today, user, t) => {
     const setToExempt = await dbFindAll(sequelize.models.registration, {
       where: {
         '$dog.status.status$': statuses.InBreach,
-        '$dog.dog_breed.breed$': 'XL Bully'
+        '$dog.dog_breed.breed$': 'XL Bully',
+        exemption_order_id: 2
       },
       include: [{
         model: sequelize.models.dog,
@@ -34,10 +35,6 @@ const bulkUpdateOutOfBreach = async (today, user, t) => {
           model: sequelize.models.dog_breed,
           as: 'dog_breed'
         }]
-      },
-      {
-        model: sequelize.models.exemption_order,
-        as: 'exemption_order'
       }],
       transaction: t
     })
