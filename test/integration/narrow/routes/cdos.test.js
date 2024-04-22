@@ -45,10 +45,11 @@ describe('CDO endpoint', () => {
 
     const options = {
       method: 'GET',
-      url: '/cdos'
+      url: '/cdos?status=PreExempt'
     }
 
-    const expectedFilter = {}
+    const expectedFilter = { status: ['PreExempt'] }
+
     const expectedPayload = {
       cdos: expectedCdos
     }
@@ -60,17 +61,14 @@ describe('CDO endpoint', () => {
     expect(JSON.parse(payload)).toEqual(expectedPayload)
   })
 
-  test('GET /cdos route returns 200 given status filter applied', async () => {
+  test('GET /cdos route returns 501 given no filter applied', async () => {
     const options = {
       method: 'GET',
-      url: '/cdos?status=PreExempt'
+      url: '/cdos'
     }
 
-    const expectedFilter = { status: ['PreExempt'] }
-
     const response = await server.inject(options)
-    expect(response.statusCode).toBe(200)
-    expect(getSummaryCdos).toHaveBeenCalledWith(expectedFilter)
+    expect(response.statusCode).toBe(501)
   })
 
   test('GET /cdos route returns 200 given withinDays filter applied', async () => {
@@ -91,7 +89,7 @@ describe('CDO endpoint', () => {
 
     const options = {
       method: 'GET',
-      url: '/cdos'
+      url: '/cdos?status=PreExempt'
     }
 
     const response = await server.inject(options)

@@ -23,6 +23,10 @@ module.exports = [
           filter.withinDays = withinDays
         }
 
+        if (!Object.keys(filter).length) {
+          return h.response().code(501)
+        }
+
         const summaryCdos = await getSummaryCdos(filter)
 
         return h.response({ cdos: summaryCdos }).code(200)
