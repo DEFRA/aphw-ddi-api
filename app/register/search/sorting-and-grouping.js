@@ -44,7 +44,13 @@ const sortDogSearch = (a, b) => {
 }
 
 const sortOwnerSearch = (a, b) => {
-  return a.distance - b.distance || b.rank - a.rank || `${a.lastName} ${a.firstName}` - `${b.lastName} ${b.firstName}`
+  return a.distance - b.distance || b.rank - a.rank || alphaSort(`${a.lastName} ${a.firstName}`, `${b.lastName} ${b.firstName}`)
+}
+
+const alphaSort = (a, b) => {
+  if (a > b) { return -1 }
+  if (a < b) { return 1 }
+  return 0
 }
 
 const sortAndGroupResults = (mappedResults, type) => {
