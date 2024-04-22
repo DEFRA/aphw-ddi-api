@@ -10,50 +10,51 @@ const { formatDate } = require('../../lib/date-helpers')
 const processRows = async (register, sheet, map, schema) => {
   let rows
 
+  const errors = []
+
   try {
     const { rows: sheetRows } = await readXlsxFile(register, { sheet, map, dateFormat: 'dd/mm/yyyy' })
 
     rows = sheetRows
   } catch (err) {
     console.error(`Error reading xlsx file: ${err}`)
-
-    throw err
+    errors.push(`Error reading xlsx file: ${err}`)
   }
-
-  const errors = []
 
   const registerMap = new Map()
 
-  for (let i = 0; i < rows.length; i++) {
-    const rowNum = i + 1
-    const row = rows[i]
+  if (!errors.length) {
+    for (let i = 0; i < rows.length; i++) {
+      const rowNum = i + 1
+      const row = rows[i]
 
-    autoCorrectDataValues(row)
+      autoCorrectDataValues(row)
 
-    replaceUnicodeCharacters(row)
+      replaceUnicodeCharacters(row)
 
-    const result = schema.validate(row)
+      const result = schema.validate(row)
 
-    if (!result.isValid) {
-      if (result.errors.details.length === 1 && result.errors.details[0].message === '"owner.email" must be a valid email') {
-        console.log(`IndexNumber ${row.dog.indexNumber} Invalid email ${row.owner.email} - setting to blank`)
-        row.owner.email = ''
-      } else {
-        errors.push({ rowNum, row, errors: result.errors.details })
-        continue
+      if (!result.isValid) {
+        if (result.errors.details.length === 1 && result.errors.details[0].message === '"owner.email" must be a valid email') {
+          console.log(`IndexNumber ${row.dog.indexNumber} Invalid email ${row.owner.email} - setting to blank`)
+          row.owner.email = ''
+        } else {
+          errors.push({ rowNum, row, errors: result.errors.details })
+          continue
+        }
       }
+
+      const owner = row.owner
+      const dog = row.dog
+
+      const key = `${owner.lastName}^${owner.address.postcode}^${owner.birthDate.getDate()}^${owner.birthDate.getMonth()}`
+
+      const value = registerMap.get(key) || { owner, dogs: [] }
+
+      value.dogs.push(dog)
+
+      registerMap.set(key, value)
     }
-
-    const owner = row.owner
-    const dog = row.dog
-
-    const key = `${owner.lastName}^${owner.address.postcode}^${owner.birthDate.getDate()}^${owner.birthDate.getMonth()}`
-
-    const value = registerMap.get(key) || { owner, dogs: [] }
-
-    value.dogs.push(dog)
-
-    registerMap.set(key, value)
   }
 
   const result = {

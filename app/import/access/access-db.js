@@ -7,7 +7,7 @@ const { dbCreate } = require('../../lib/db-functions')
 const parseBlob = async (blobFilename) => {
   const files = await storage.getInboundFileList()
   const xlsFilename = files.filter((x) => x === blobFilename)[0]
-  const fileBuffer = await storage.downloadBlob('inbound', xlsFilename)
+  const fileBuffer = await storage.downloadBlob(xlsFilename)
   return await readExcelFile(fileBuffer, { schema: accessDbSchema })
 }
 

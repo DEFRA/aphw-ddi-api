@@ -11,7 +11,8 @@ module.exports = [{
         'content-type': Joi.string().valid('application/json').required()
       }).unknown(),
       payload: Joi.object({
-        filename: Joi.string().required()
+        filename: Joi.string().required(),
+        saveToDb: Joi.boolean().required()
       }),
       failAction: (request, h, error) => {
         console.error(error)
@@ -19,13 +20,13 @@ module.exports = [{
       }
     },
     handler: async (request, h) => {
-      const blob = await downloadBlob('inbound', request.payload.filename)
+      const blob = await downloadBlob(request.payload.filename)
       const register = await importRegister(blob)
 
       console.log('Import validation completed. Error count = ', register.errors?.length ?? 0)
 
-      if (register.errors?.length > 0) {
-        return h.response(register.errors).code(400)
+      if (register.errors?.length > 0 || !request.payload.saveToDb) {
+        return h.response(register.errors).code(200)
       }
 
       console.log('Import insert starting')
