@@ -1,4 +1,5 @@
 const { getSummaryCdos } = require('../repos/cdo')
+const { mapSummaryCdoDaoToDto } = require('../repos/mappers/cdo')
 
 module.exports = [
   {
@@ -29,7 +30,7 @@ module.exports = [
 
         const summaryCdos = await getSummaryCdos(filter)
 
-        return h.response({ cdos: summaryCdos }).code(200)
+        return h.response({ cdos: summaryCdos.map(mapSummaryCdoDaoToDto) }).code(200)
       } catch (e) {
         console.log(`Error retrieving cdos: ${e}`)
         throw e

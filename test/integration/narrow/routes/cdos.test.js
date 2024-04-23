@@ -4,7 +4,6 @@ describe('CDO endpoint', () => {
 
   jest.mock('../../../../app/repos/cdo')
   const { getSummaryCdos } = require('../../../../app/repos/cdo')
-  getSummaryCdos.mockResolvedValue([])
 
   beforeEach(async () => {
     server = await createServer()
@@ -16,35 +15,56 @@ describe('CDO endpoint', () => {
   })
 
   test('GET /cdos route returns 200', async () => {
-    const expectedCdos = [{
-      id: 300013,
-      index_number: 'ED300013',
-      status_id: 5,
-      registered_person: [
-        {
-          id: 13,
-          person: {
-            id: 10,
-            first_name: 'Scott',
-            last_name: 'Pilgrim'
-          }
-        }
-      ],
-      status: {
-        id: 5,
-        status: 'Pre-exempt',
-        status_type: 'STANDARD'
-      },
-      registration: {
-        id: 13,
-        cdo_expiry: '2024-03-01',
-        police_force: {
-          id: 5,
-          name: 'Cheshire Constabulary'
+    const expectedCdos = [
+      {
+        person: {
+          id: 10,
+          firstName: 'Scott',
+          lastName: 'Pilgrim',
+          personReference: 'P-1234-5678'
+        },
+        dog: {
+          id: 300013,
+          dogReference: 'ED300013',
+          status: 'Pre-exempt'
+        },
+        exemption: {
+          policeForce: 'Cheshire Constabulary',
+          cdoExpiry: '2024-03-01'
         }
       }
-    }]
-    getSummaryCdos.mockResolvedValue(expectedCdos)
+    ]
+    getSummaryCdos.mockResolvedValue([
+      {
+        id: 300013,
+        index_number: 'ED300013',
+        status_id: 5,
+        registered_person: [
+          {
+            id: 13,
+            person: {
+              id: 10,
+              first_name: 'Scott',
+              last_name: 'Pilgrim',
+              person_reference: 'P-1234-5678'
+            }
+          }
+        ],
+        status: {
+          id: 5,
+          status: 'Pre-exempt',
+          status_type: 'STANDARD'
+        },
+        registration: {
+          id: 13,
+          cdo_expiry: '2024-03-01',
+          police_force: {
+            id: 5,
+            name: 'Cheshire Constabulary'
+          }
+        }
+      }
+    ])
 
     const options = {
       method: 'GET',
@@ -65,12 +85,27 @@ describe('CDO endpoint', () => {
   })
 
   test('GET /cdos route returns 200 when called with multiple status', async () => {
+    getSummaryCdos.mockResolvedValue([])
     const options = {
       method: 'GET',
       url: '/cdos?status=PreExempt&status=InterimExempt'
     }
 
     const expectedFilter = { status: ['PreExempt', 'InterimExempt'] }
+
+    const response = await server.inject(options)
+    expect(response.statusCode).toBe(200)
+    expect(getSummaryCdos).toHaveBeenCalledWith(expectedFilter)
+  })
+
+  test('GET /cdos route returns 200 given withinDays filter applied', async () => {
+    getSummaryCdos.mockResolvedValue([])
+    const options = {
+      method: 'GET',
+      url: '/cdos?withinDays=30'
+    }
+
+    const expectedFilter = { withinDays: 30 }
 
     const response = await server.inject(options)
     expect(response.statusCode).toBe(200)
@@ -85,19 +120,6 @@ describe('CDO endpoint', () => {
 
     const response = await server.inject(options)
     expect(response.statusCode).toBe(501)
-  })
-
-  test('GET /cdos route returns 200 given withinDays filter applied', async () => {
-    const options = {
-      method: 'GET',
-      url: '/cdos?withinDays=30'
-    }
-
-    const expectedFilter = { withinDays: 30 }
-
-    const response = await server.inject(options)
-    expect(response.statusCode).toBe(200)
-    expect(getSummaryCdos).toHaveBeenCalledWith(expectedFilter)
   })
 
   test('GET /cdos route returns 500 when error', async () => {

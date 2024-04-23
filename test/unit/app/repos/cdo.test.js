@@ -222,7 +222,8 @@ describe('CDO repo', () => {
           person: {
             id: 10,
             first_name: 'Scott',
-            last_name: 'Pilgrim'
+            last_name: 'Pilgrim',
+            person_reference: 'P-1234-5678'
           }
         }
       ],
@@ -250,7 +251,8 @@ describe('CDO repo', () => {
           person: {
             id: 11,
             first_name: 'Scott',
-            last_name: 'Pilgrim'
+            last_name: 'Pilgrim',
+            person_reference: 'P-2345-6789'
           }
         }
       ],
