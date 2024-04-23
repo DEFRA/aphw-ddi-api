@@ -143,6 +143,13 @@ const createPeople = async (owners, transaction) => {
  * @property {PersonAddressDao[]} addresses
  * @property {unknown[]} person_contacts
  */
+/**
+ * @typedef SummmaryPersonDao
+ * @property {number} id
+ * @property {string} first_name
+ * @property {string} last_name
+ * @property {string} person_reference
+ */
 
 /**
  * @param {string} reference
