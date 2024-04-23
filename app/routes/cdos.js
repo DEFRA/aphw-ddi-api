@@ -26,7 +26,7 @@ module.exports = [
       handler: async (request, h) => {
         try {
           const status = request.query.status
-          const withinDays = parseInt(request.query.withinDays)
+          const withinDays = request.query.withinDays
 
           /**
            * @type {{ status?: CdoStatus[]; withinDays?: number }}
