@@ -1,5 +1,6 @@
 const Joi = require('joi')
 const { downloadBlob } = require('../storage')
+const { stages } = require('../constants/import')
 const { importRegister, processRegister } = require('../import/robot')
 
 module.exports = [{
@@ -12,7 +13,7 @@ module.exports = [{
       }).unknown(),
       payload: Joi.object({
         filename: Joi.string().required(),
-        saveToDb: Joi.boolean().required()
+        stage: Joi.string().required()
       }),
       failAction: (request, h, error) => {
         console.error(error)
@@ -21,19 +22,22 @@ module.exports = [{
     },
     handler: async (request, h) => {
       const blob = await downloadBlob(request.payload.filename)
+      const stage = request.payload.stage
       const register = await importRegister(blob)
 
       console.log('Import validation completed. Error count = ', register.errors?.length ?? 0)
 
-      if (register.errors?.length > 0 || !request.payload.saveToDb) {
-        return h.response(register.errors).code(200)
+      if (register.errors?.length > 0 || stage === stages.spreadsheetValidation) {
+        return h.response({ errors: register.errors, rows: register.add, log: register.log }).code(200)
       }
 
       console.log('Import insert starting')
-      await processRegister(register)
+
+      await processRegister(register, stage === stages.importValidation)
+
       console.log('Import finished')
 
-      return h.response(register.errors).code(200)
+      return h.response({ errors: register.errors, log: register.log, rows: register.add }).code(200)
     }
   }
 }]

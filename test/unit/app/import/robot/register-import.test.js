@@ -26,9 +26,10 @@ describe('register import', () => {
     expect(add).toHaveLength(3)
   })
 
-  test('should error when no xlsx file', async () => {
+  test('should return error when no xlsx file', async () => {
     mockReadXlsxFile.mockImplementation(() => { throw new Error('dummy error') })
-    await expect(importRegister([])).rejects.toThrow('dummy error')
+    const res = await importRegister([])
+    expect(res.errors).toEqual(['Error reading xlsx file: Error: dummy error'])
   })
 
   test('should group approved dogs under owner', async () => {

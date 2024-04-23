@@ -18,6 +18,6 @@ describe('Processor wrapper tests', () => {
     processRegisterRows.mockResolvedValue()
     populatePoliceForce.mockResolvedValue()
 
-    await processRegister({})
+    await processRegister({ errors: [] }, [])
   })
 })

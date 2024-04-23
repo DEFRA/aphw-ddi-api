@@ -6,11 +6,13 @@ const map = require('./schema/map')
 const { baseSchema } = require('./schema')
 const config = require('../../config/index')
 const { formatDate } = require('../../lib/date-helpers')
+const { log } = require('../../lib/import-helper')
 
 const processRows = async (register, sheet, map, schema) => {
   let rows
 
   const errors = []
+  const logBuffer = []
 
   try {
     const { rows: sheetRows } = await readXlsxFile(register, { sheet, map, dateFormat: 'dd/mm/yyyy' })
@@ -28,9 +30,9 @@ const processRows = async (register, sheet, map, schema) => {
       const rowNum = i + 1
       const row = rows[i]
 
-      autoCorrectDataValues(row)
+      autoCorrectDataValues(row, logBuffer)
 
-      replaceUnicodeCharacters(row)
+      replaceUnicodeCharacters(row, logBuffer)
 
       const result = schema.validate(row)
 
@@ -59,7 +61,8 @@ const processRows = async (register, sheet, map, schema) => {
 
   const result = {
     add: [...registerMap.values()],
-    errors
+    errors,
+    log: logBuffer
   }
 
   return result
@@ -70,33 +73,34 @@ const importRegister = async register => {
 
   return {
     add: [].concat(passed.add),
-    errors: [].concat(passed.errors)
+    errors: [].concat(passed.errors),
+    log: [].concat(passed.log)
   }
 }
 
-const truncateIfTooLong = (elem, maxLength, row, colName) => {
+const truncateIfTooLong = (elem, maxLength, row, colName, logBuffer) => {
   if (elem && elem.length > maxLength) {
     elem = elem.substring(0, maxLength)
-    console.log(`IndexNumber ${row.dog.indexNumber} truncating ${colName} - too long`)
+    log(logBuffer, `IndexNumber ${row.dog.indexNumber} truncating ${colName} - too long`)
   }
   return elem
 }
 
-const autoCorrectDataValues = (row) => {
+const autoCorrectDataValues = (row, logBuffer) => {
   row.dog.insuranceStartDate = autoCorrectDate(row.dog.insuranceStartDate)
   row.dog.birthDate = autoCorrectDate(row.dog.birthDate)
   row.owner.address.town = row.owner.address?.town ?? ' '
   row.owner.birthDate = autoCorrectDate(row.owner.birthDate)
-  row.dog.name = truncateIfTooLong(row.dog.name, 32, row, 'dogName')
-  row.dog.colour = truncateIfTooLong(row.dog.colour, 50, row, 'colour')
+  row.dog.name = truncateIfTooLong(row.dog.name, 32, row, 'dogName', logBuffer)
+  row.dog.colour = truncateIfTooLong(row.dog.colour, 50, row, 'colour', logBuffer)
   const microchipClean = (row.dog.microchipNumber ? row.dog.microchipNumber : '').toString().replace(/\u0020/g, '').replace(/-/g, '').replace(/\u2013/g, '')
-  row.dog.microchipNumber = truncateIfTooLong(microchipClean, 24, row, 'microchipNumber')
-  row.owner.address.addressLine1 = truncateIfTooLong(row.owner.address.addressLine1, 50, row, 'addressLine1')
-  row.owner.address.addressLine2 = truncateIfTooLong(row.owner.address.addressLine2, 50, row, 'addressLine2')
-  row.owner.address.town = truncateIfTooLong(row.owner.address.town, 50, row, 'town')
-  row.owner.address.county = truncateIfTooLong(row.owner.address.county, 30, row, 'county')
-  row.owner.firstName = truncateIfTooLong(row.owner.firstName, 30, row, 'firstName')
-  row.owner.lastName = truncateIfTooLong(row.owner.lastName, 24, row, 'lastName')
+  row.dog.microchipNumber = truncateIfTooLong(microchipClean, 24, row, 'microchipNumber', logBuffer)
+  row.owner.address.addressLine1 = truncateIfTooLong(row.owner.address.addressLine1, 50, row, 'addressLine1', logBuffer)
+  row.owner.address.addressLine2 = truncateIfTooLong(row.owner.address.addressLine2, 50, row, 'addressLine2', logBuffer)
+  row.owner.address.town = truncateIfTooLong(row.owner.address.town, 50, row, 'town', logBuffer)
+  row.owner.address.county = truncateIfTooLong(row.owner.address.county, 30, row, 'county', logBuffer)
+  row.owner.firstName = truncateIfTooLong(row.owner.firstName, 30, row, 'firstName', logBuffer)
+  row.owner.lastName = truncateIfTooLong(row.owner.lastName, 24, row, 'lastName', logBuffer)
   row.dog.certificateIssued = autoCorrectDate(row.dog.certificateIssued)
 }
 

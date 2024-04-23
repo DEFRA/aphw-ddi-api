@@ -68,7 +68,8 @@ describe('Robot import endpoint', () => {
         'content-type': 'application/json'
       },
       payload: {
-        filename: 'register.xlsx'
+        filename: 'register.xlsx',
+        stage: 'saveToDB'
       }
     }
 
