@@ -17,6 +17,13 @@ describe('postcode lookup import', () => {
     expect(result.lat).toBe(23456)
   })
 
+  test('should handle null payload', async () => {
+    wreck.get.mockResolvedValue({ payload: null })
+    const result = await getPostcodeLongLat('TS1 1TS')
+
+    expect(result).toBe(null)
+  })
+
   test('should handle error', async () => {
     wreck.get.mockImplementation(() => { throw new Error('Postcode not found') })
     const result = await getPostcodeLongLat('TS1 1TS')
