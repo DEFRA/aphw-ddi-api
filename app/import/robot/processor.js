@@ -65,21 +65,23 @@ const populatePoliceForce = async (register, rollback, transaction) => {
       continue
     }
 
-    if (!rollback) {
-      for (const dog of record.dogs) {
-        const registration = await dbFindOne(sequelize.models.registration, {
-          where: { dog_id: dog.indexNumber },
-          transaction
-        })
+    if (rollback) {
+      return
+    }
 
-        if (!registration) {
-          throw new Error(`CDO not found - indexNumber ${dog.indexNumber}`)
-        }
+    for (const dog of record.dogs) {
+      const registration = await dbFindOne(sequelize.models.registration, {
+        where: { dog_id: dog.indexNumber },
+        transaction
+      })
 
-        if (!registration.police_force_id) {
-          registration.police_force_id = forceId
-          registration.save()
-        }
+      if (!registration) {
+        throw new Error(`CDO not found - indexNumber ${dog.indexNumber}`)
+      }
+
+      if (!registration.police_force_id) {
+        registration.police_force_id = forceId
+        registration.save()
       }
     }
   }
