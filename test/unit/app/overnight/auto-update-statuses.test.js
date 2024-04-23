@@ -15,7 +15,7 @@ describe('AutoUpdateStatus test', () => {
     setExpiredInsuranceToBreach.mockResolvedValue('ok - insurance 2 rows')
     bulkUpdateOutOfBreach.mockResolvedValue('ok - bulk update 3 rows')
     const res = await autoUpdateStatuses()
-    expect(res).toBe('ok - cdos 1 rows | ok - insurance 2 rows | ok - bulk update 3 rows')
+    expect(res).toBe('ok - bulk update 3 rows | ok - cdos 1 rows | ok - insurance 2 rows')
   })
 
   test('autoUpdateStatuses should handle errors', async () => {
@@ -23,6 +23,6 @@ describe('AutoUpdateStatus test', () => {
     setExpiredInsuranceToBreach.mockImplementation(() => { throw new Error('dummy error') })
     bulkUpdateOutOfBreach.mockResolvedValue('ok - bulk update 3 rows')
     const res = await autoUpdateStatuses()
-    expect(res).toBe('Error auto-updating statuses: Error: dummy error ok - cdos 1 rows')
+    expect(res).toBe('Error auto-updating statuses: Error: dummy error ok - bulk update 3 rows | ok - cdos 1 rows')
   })
 })
