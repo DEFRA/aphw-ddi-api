@@ -7,6 +7,8 @@ const { CDO } = require('../constants/event/audit-event-object-types')
 const { NotFoundError } = require('../errors/not-found')
 const { mapPersonDaoToCreatedPersonDao } = require('./mappers/person')
 const { cdoRelationship } = require('./relationships/cdo')
+const { statuses } = require('../constants/statuses')
+const { Op } = require('sequelize')
 
 /**
  * @typedef DogBreedDao
@@ -55,6 +57,12 @@ const { cdoRelationship } = require('./relationships/cdo')
  * @property {null|string} deleted_at
  * @property {string} updated_at
  */
+
+/**
+ * @typedef SummaryRegisteredPersonDao
+ * @property {number}  id
+ * @property {SummmaryPersonDao} person
+ */
 /**
  * @typedef PoliceForceDao
  * @property {number} id
@@ -96,9 +104,18 @@ const { cdoRelationship } = require('./relationships/cdo')
  * @property {ExemptionOrderDao} exemption_order
  */
 /**
+ * @typedef SummaryRegistrationDao
+ * @property {number} id
+ * @property {string} cdo_expiry
+ * @property {PoliceForceDao} police_force
+ */
+/**
+ * @typedef {'Interim exempt'|'Pre-exempt'|'Exempt'|'Failed'|'In breach'|'Withdrawn'|'Inactive'} StatusLabel
+ */
+/**
  * @typedef StatusDao
  * @property {number} id
- * @property {string} status
+ * @property {StatusLabel} status
  * @property {'IMPORT'|'DOG'|'STANDARD'} status_type
  */
 /**
@@ -130,6 +147,12 @@ const { cdoRelationship } = require('./relationships/cdo')
 
 /**
  * @typedef {CdoDao} SummaryCdo
+ * @property {number} id
+ * @property {string} index_number
+ * @property {number} status_id
+ * @property {SummaryRegisteredPersonDao[]} registered_person
+ * @property {SummaryRegistrationDao} registration
+ * @property {StatusDao} status
  */
 /**
  * @param data
@@ -223,10 +246,62 @@ const getAllCdos = async () => {
  */
 /**
  *
- * @param {{ status?: CdoStatus[]; withinDays?: number }} filter
+ * @param {{ status?: CdoStatus[]; withinDays?: number }} [filter]
  * @return {Promise<SummaryCdo[]>}
  */
-const getSummaryCdos = async (filter) => {}
+const getSummaryCdos = async (filter) => {
+  const where = {}
+
+  if (filter.status) {
+    const statusArray = filter.status.map(status => statuses[status])
+    where['$status.status$'] = statusArray
+  }
+
+  if (filter.withinDays) {
+    const day = 24 * 60 * 60 * 1000
+    const withinMilliseconds = filter.withinDays * day
+    const now = Date.now()
+    const dayInThirtyDays = new Date(now + withinMilliseconds)
+
+    where['$registration.cdo_expiry$'] = {
+      [Op.lte]: dayInThirtyDays
+    }
+  }
+
+  const cdos = await sequelize.models.dog.findAll({
+    attributes: ['id', 'index_number', 'status_id'],
+    where,
+    include: [
+      {
+        model: sequelize.models.registered_person,
+        as: 'registered_person',
+        attributes: { exclude: ['created_at', 'updated_at', 'deleted_at', 'person_id', 'dog_id', 'person_type_id'] },
+        include: [{
+          model: sequelize.models.person,
+          as: 'person',
+          attributes: ['id', 'first_name', 'last_name', 'person_reference']
+        }]
+      },
+      {
+        model: sequelize.models.status,
+        as: 'status'
+      },
+      {
+        model: sequelize.models.registration,
+        as: 'registration',
+        attributes: ['id', 'cdo_expiry'],
+        include: [
+          {
+            model: sequelize.models.police_force,
+            as: 'police_force'
+          }
+        ]
+      }
+    ]
+  })
+
+  return cdos
+}
 
 module.exports = {
   createCdo,

@@ -24,7 +24,7 @@ module.exports = [
         }
 
         if (!Object.keys(filter).length) {
-          return h.response().code(501)
+          return h.response('Not implemented, please call with a filter').code(501)
         }
 
         const summaryCdos = await getSummaryCdos(filter)

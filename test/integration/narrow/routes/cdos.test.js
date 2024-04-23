@@ -17,29 +17,32 @@ describe('CDO endpoint', () => {
 
   test('GET /cdos route returns 200', async () => {
     const expectedCdos = [{
-      id: 123,
-      indexNumber: 'ED123',
-      dog_breed: {
-        breed: 'breed1'
-      },
+      id: 300013,
+      index_number: 'ED300013',
+      status_id: 5,
+      registered_person: [
+        {
+          id: 13,
+          person: {
+            id: 10,
+            first_name: 'Scott',
+            last_name: 'Pilgrim'
+          }
+        }
+      ],
       status: {
-        status: 'NEW'
+        id: 5,
+        status: 'Pre-exempt',
+        status_type: 'STANDARD'
       },
       registration: {
-        court: {
-          name: 'court1'
-        },
+        id: 13,
+        cdo_expiry: '2024-03-01',
         police_force: {
-          name: 'force1'
-        },
-        exemption_order: {
-          exemption_order: 2015
+          id: 5,
+          name: 'Cheshire Constabulary'
         }
-      },
-      registered_person: [{
-        person: {
-        }
-      }]
+      }
     }]
     getSummaryCdos.mockResolvedValue(expectedCdos)
 
@@ -59,6 +62,19 @@ describe('CDO endpoint', () => {
     expect(response.statusCode).toBe(200)
     expect(getSummaryCdos).toHaveBeenCalledWith(expectedFilter)
     expect(JSON.parse(payload)).toEqual(expectedPayload)
+  })
+
+  test('GET /cdos route returns 200 when called with multiple status', async () => {
+    const options = {
+      method: 'GET',
+      url: '/cdos?status=PreExempt&status=InterimExempt'
+    }
+
+    const expectedFilter = { status: ['PreExempt', 'InterimExempt'] }
+
+    const response = await server.inject(options)
+    expect(response.statusCode).toBe(200)
+    expect(getSummaryCdos).toHaveBeenCalledWith(expectedFilter)
   })
 
   test('GET /cdos route returns 501 given no filter applied', async () => {

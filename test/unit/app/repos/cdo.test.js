@@ -16,6 +16,7 @@ describe('CDO repo', () => {
   }))
 
   const sequelize = require('../../../../app/config/db')
+  const { Op } = require('sequelize')
 
   jest.mock('../../../../app/repos/people')
   const { createPeople, getPersonByReference, updatePerson, updatePersonFields } = require('../../../../app/repos/people')
@@ -29,7 +30,7 @@ describe('CDO repo', () => {
   jest.mock('../../../../app/messaging/send-event')
   const { sendEvent } = require('../../../../app/messaging/send-event')
 
-  const { createCdo, getCdo, getAllCdos, getCdos } = require('../../../../app/repos/cdo')
+  const { createCdo, getCdo, getAllCdos, getSummaryCdos } = require('../../../../app/repos/cdo')
 
   beforeEach(async () => {
     jest.clearAllMocks()
@@ -210,9 +211,115 @@ describe('CDO repo', () => {
     })
   })
 
-  describe('getCdos', () => {
-    test('should be a function', () => {
-      expect(getCdos).toBeInstanceOf(Function)
+  describe('getSummaryCdos', () => {
+    const preExempt1 = {
+      id: 300013,
+      index_number: 'ED300013',
+      status_id: 5,
+      registered_person: [
+        {
+          id: 13,
+          person: {
+            id: 10,
+            first_name: 'Scott',
+            last_name: 'Pilgrim'
+          }
+        }
+      ],
+      status: {
+        id: 5,
+        status: 'Pre-exempt',
+        status_type: 'STANDARD'
+      },
+      registration: {
+        id: 13,
+        cdo_expiry: '2024-03-01',
+        police_force: {
+          id: 5,
+          name: 'Cheshire Constabulary'
+        }
+      }
+    }
+    const preExempt2 = {
+      id: 300014,
+      index_number: 'ED300014',
+      status_id: 5,
+      registered_person: [
+        {
+          id: 14,
+          person: {
+            id: 11,
+            first_name: 'Scott',
+            last_name: 'Pilgrim'
+          }
+        }
+      ],
+      status: {
+        id: 5,
+        status: 'Pre-exempt',
+        status_type: 'STANDARD'
+      },
+      registration: {
+        id: 14,
+        cdo_expiry: '2024-03-01',
+        police_force: {
+          id: 5,
+          name: 'Cheshire Constabulary'
+        }
+      }
+    }
+
+    test('should be a get all cdos by exemption status', async () => {
+      const dbResponse = [
+        preExempt1,
+        preExempt2
+      ]
+      sequelize.models.dog.findAll.mockResolvedValue(dbResponse)
+
+      const res = await getSummaryCdos({ status: ['PreExempt'] })
+      expect(res).toEqual(dbResponse)
+      expect(sequelize.models.dog.findAll).toHaveBeenCalledWith({
+        attributes: ['id', 'index_number', 'status_id'],
+        include: expect.any(Array),
+        where: {
+          '$status.status$': ['Pre-exempt']
+        }
+      })
+    })
+
+    test('should be a get all cdos by multiple exemption statuses', async () => {
+      sequelize.models.dog.findAll.mockResolvedValue([])
+
+      const res = await getSummaryCdos({ status: ['PreExempt', 'InterimExempt'] })
+      expect(res).toEqual([])
+      expect(sequelize.models.dog.findAll).toHaveBeenCalledWith({
+        attributes: ['id', 'index_number', 'status_id'],
+        include: expect.any(Array),
+        where: {
+          '$status.status$': ['Pre-exempt', 'Interim exempt']
+        }
+      })
+    })
+
+    test('should be a get all cdos within 30 days', async () => {
+      const thirtyDays = 30 * 24 * 60 * 60 * 1000
+
+      const now = Date.now()
+      const dayInThirtyDays = new Date(now + thirtyDays)
+
+      sequelize.models.dog.findAll.mockResolvedValue([])
+
+      const res = await getSummaryCdos({ withinDays: 30 })
+      expect(res).toEqual([])
+      expect(sequelize.models.dog.findAll).toHaveBeenCalledWith({
+        attributes: ['id', 'index_number', 'status_id'],
+        include: expect.any(Array),
+        where: {
+          '$registration.cdo_expiry$': {
+            [Op.lte]: dayInThirtyDays
+          }
+        }
+      })
     })
   })
 })
