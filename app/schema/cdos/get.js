@@ -12,16 +12,18 @@ const getCdosResponseSchema = Joi.object({
       firstName: Joi.string().allow(null).allow('').required(),
       lastName: Joi.string().allow(null).allow('').required(),
       personReference: Joi.string().required()
-    }).required(),
+    }).unknown().required(),
     dog: Joi.object({
+      id: Joi.number().required(),
+      dogReference: Joi.string().required(),
       status: Joi.string().required()
-    }).required(),
+    }).unknown().required(),
     exemption: Joi.object({
       policeForce: Joi.string().required(),
       cdoExpiry: Joi.string().allow(null).required()
-    }).required()
+    }).unknown().required()
   })).required()
-})
+}).unknown()
 
 module.exports = {
   getCdosQuerySchema,

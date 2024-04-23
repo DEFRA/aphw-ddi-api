@@ -64,6 +64,8 @@ describe('cdos - GET schema', () => {
               personReference: 'P-2655-0A37'
             },
             dog: {
+              id: 1,
+              dogReference: 'ED300001',
               status: 'Pre-exempt'
             },
             exemption: {
@@ -85,11 +87,71 @@ describe('cdos - GET schema', () => {
               personReference: 'P-2655-0A37'
             },
             dog: {
+              id: 1,
+              dogReference: 'ED300001',
               status: 'Pre-exempt'
             },
             exemption: {
               policeForce: 'Cheshire Constabulary',
               cdoExpiry: '2024-03-01'
+            }
+          }
+        ]
+      }
+
+      expect(validation).toEqual({ value: expectedResponseValues })
+      expect(validation.error).not.toBeDefined()
+    })
+
+    test('should validate with results returned with unknown attributes', () => {
+      const response = {
+        unknown: true,
+        cdos: [
+          {
+            person: {
+              id: 10,
+              firstName: 'Scott',
+              lastName: 'Pilgrim',
+              personReference: 'P-2655-0A37',
+              birthDate: '2000-01-01'
+            },
+            dog: {
+              id: 1,
+              dogReference: 'ED300001',
+              status: 'Pre-exempt',
+              name: 'Rex'
+            },
+            exemption: {
+              policeForce: 'Cheshire Constabulary',
+              cdoExpiry: '2024-03-01',
+              deathDate: '2024-04-19'
+            }
+          }
+        ]
+      }
+
+      const validation = getCdosResponseSchema.validate(response, { abortEarly: false })
+      const expectedResponseValues = {
+        unknown: true,
+        cdos: [
+          {
+            person: {
+              id: 10,
+              firstName: 'Scott',
+              lastName: 'Pilgrim',
+              personReference: 'P-2655-0A37',
+              birthDate: '2000-01-01'
+            },
+            dog: {
+              id: 1,
+              dogReference: 'ED300001',
+              status: 'Pre-exempt',
+              name: 'Rex'
+            },
+            exemption: {
+              policeForce: 'Cheshire Constabulary',
+              cdoExpiry: '2024-03-01',
+              deathDate: '2024-04-19'
             }
           }
         ]

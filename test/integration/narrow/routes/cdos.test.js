@@ -112,14 +112,14 @@ describe('CDO endpoint', () => {
     expect(getSummaryCdos).toHaveBeenCalledWith(expectedFilter)
   })
 
-  test('GET /cdos route returns 501 given no filter applied', async () => {
+  test('GET /cdos route returns 400 given no filter applied', async () => {
     const options = {
       method: 'GET',
       url: '/cdos'
     }
 
     const response = await server.inject(options)
-    expect(response.statusCode).toBe(501)
+    expect(response.statusCode).toBe(400)
   })
 
   test('GET /cdos route returns 500 when error', async () => {

@@ -28,8 +28,7 @@
  * @return {SummaryCdoDto}
  */
 const mapSummaryCdoDaoToDto = (summaryCdo) => {
-  const { registered_person: registeredPersons, registration, ...dog } = summaryCdo
-
+  const { registered_person: registeredPersons, registration } = summaryCdo
   const [registeredPerson] = registeredPersons
   const person = registeredPerson.person
 
@@ -41,9 +40,9 @@ const mapSummaryCdoDaoToDto = (summaryCdo) => {
       personReference: person.person_reference
     },
     dog: {
-      id: dog.id,
-      status: dog.status.status,
-      dogReference: dog.index_number
+      id: summaryCdo.id,
+      status: summaryCdo.status.status,
+      dogReference: summaryCdo.index_number
     },
     exemption: {
       policeForce: registration.police_force.name,
