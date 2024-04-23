@@ -70,7 +70,7 @@ describe('Importer tests', () => {
 
     const clonedBadRow = JSON.parse(JSON.stringify(badRow))
 
-    replaceUnicodeCharacters(clonedBadRow)
+    replaceUnicodeCharacters(clonedBadRow, [])
     expect(clonedBadRow).toEqual(cleansedRow)
   })
 })

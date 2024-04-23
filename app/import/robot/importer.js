@@ -120,43 +120,43 @@ const autoCorrectDate = (inDate) => {
   return dayjs(inDate, 'DD/MM/YYYY').toDate()
 }
 
-const replaceUnicodeCharacters = (row) => {
+const replaceUnicodeCharacters = (row, logBuffer) => {
   if (containsNonLatinCodepoints(row.owner.address?.addressLine1)) {
-    logReplacement(row.owner.address.addressLine1, row.dog.indexNumber, 'addressLine1')
+    logReplacement(row.owner.address.addressLine1, row.dog.indexNumber, 'addressLine1', logBuffer)
     row.owner.address.addressLine1 = replaceInvalidCharacters(row.owner.address.addressLine1)
   }
   if (containsNonLatinCodepoints(row.owner.address?.addressLine2)) {
-    logReplacement(row.owner.address.addressLine2, row.dog.indexNumber, 'addressLine2')
+    logReplacement(row.owner.address.addressLine2, row.dog.indexNumber, 'addressLine2', logBuffer)
     row.owner.address.addressLine2 = replaceInvalidCharacters(row.owner.address.addressLine2)
   }
   if (containsNonLatinCodepoints(row.owner.address?.town)) {
-    logReplacement(row.owner.address.town, row.dog.indexNumber, 'town')
+    logReplacement(row.owner.address.town, row.dog.indexNumber, 'town', logBuffer)
     row.owner.address.town = replaceInvalidCharacters(row.owner.address.town)
   }
   if (containsNonLatinCodepoints(row.owner.address?.county)) {
-    logReplacement(row.owner.address.county, row.dog.indexNumber, 'county')
+    logReplacement(row.owner.address.county, row.dog.indexNumber, 'county', logBuffer)
     row.owner.address.county = replaceInvalidCharacters(row.owner.address.county)
   }
   if (containsNonLatinCodepoints(row.owner.firstName)) {
-    logReplacement(row.owner.firstName, row.dog.indexNumber, 'firstName')
+    logReplacement(row.owner.firstName, row.dog.indexNumber, 'firstName', logBuffer)
     row.owner.firstName = replaceInvalidCharacters(row.owner.firstName)
   }
   if (containsNonLatinCodepoints(row.owner.lastName)) {
-    logReplacement(row.owner.lastName, row.dog.indexNumber, 'lastName')
+    logReplacement(row.owner.lastName, row.dog.indexNumber, 'lastName', logBuffer)
     row.owner.lastName = replaceInvalidCharacters(row.owner.lastName)
   }
   if (containsNonLatinCodepoints(row.dog.name)) {
-    logReplacement(row.dog.name, row.dog.indexNumber, 'dogName')
+    logReplacement(row.dog.name, row.dog.indexNumber, 'dogName', logBuffer)
     row.dog.name = replaceInvalidCharacters(row.dog.name)
   }
   if (containsNonLatinCodepoints(row.dog.microchipNumber)) {
-    logReplacement(row.dog.microchipNumber, row.dog.indexNumber, 'microchipNumber')
+    logReplacement(row.dog.microchipNumber, row.dog.indexNumber, 'microchipNumber', logBuffer)
     row.dog.microchipNumber = replaceInvalidCharacters(row.dog.microchipNumber)
   }
 }
 
-const logReplacement = (elem, indexNumber, desc) => {
-  console.log(`IndexNumber ${indexNumber} replacing invalid characters in ${desc} with value ${elem}`)
+const logReplacement = (elem, indexNumber, desc, logBuffer) => {
+  log(logBuffer, `IndexNumber ${indexNumber} replacing invalid characters in ${desc} with value ${elem}`)
 }
 
 const replaceInvalidCharacters = (elem) => {
