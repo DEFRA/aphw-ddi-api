@@ -122,6 +122,47 @@ describe('CDO endpoint', () => {
     expect(response.statusCode).toBe(400)
   })
 
+  test('GET /cdos route returns 400 given incorrect data returned', async () => {
+    getSummaryCdos.mockResolvedValue([
+      {
+        id: 300013,
+        index_number: 'ED300013',
+        status_id: 5,
+        registered_person: [
+          {
+            id: 13,
+            person: {
+              id: 10,
+              first_name: 'Scott',
+              last_name: 'Pilgrim'
+            }
+          }
+        ],
+        status: {
+          id: 5,
+          status: 'Pre-exempt',
+          status_type: 'STANDARD'
+        },
+        registration: {
+          id: 13,
+          cdo_expiry: '2024-03-01',
+          police_force: {
+            id: 5,
+            name: 'Cheshire Constabulary'
+          }
+        }
+      }
+    ])
+
+    const options = {
+      method: 'GET',
+      url: '/cdos?status=PreExempt'
+    }
+
+    const response = await server.inject(options)
+    expect(response.statusCode).toBe(400)
+  })
+
   test('GET /cdos route returns 500 when error', async () => {
     getSummaryCdos.mockImplementation(() => { throw new Error('cdo error') })
 

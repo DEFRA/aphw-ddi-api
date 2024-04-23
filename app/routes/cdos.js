@@ -25,9 +25,8 @@ module.exports = [
       },
       handler: async (request, h) => {
         try {
-          const statusQuery = request.query.status || []
+          const status = request.query.status
           const withinDays = parseInt(request.query.withinDays)
-          const status = Array.isArray(statusQuery) ? statusQuery : [statusQuery]
 
           /**
            * @type {{ status?: CdoStatus[]; withinDays?: number }}
