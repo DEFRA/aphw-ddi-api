@@ -283,6 +283,7 @@ describe('CDO repo', () => {
       expect(sequelize.models.dog.findAll).toHaveBeenCalledWith({
         attributes: ['id', 'index_number', 'status_id'],
         include: expect.any(Array),
+        order: expect.any(Array),
         where: {
           '$status.status$': ['Pre-exempt']
         }
@@ -297,6 +298,7 @@ describe('CDO repo', () => {
       expect(sequelize.models.dog.findAll).toHaveBeenCalledWith({
         attributes: ['id', 'index_number', 'status_id'],
         include: expect.any(Array),
+        order: expect.any(Array),
         where: {
           '$status.status$': ['Pre-exempt', 'Interim exempt']
         }
@@ -316,6 +318,7 @@ describe('CDO repo', () => {
       expect(sequelize.models.dog.findAll).toHaveBeenCalledWith({
         attributes: ['id', 'index_number', 'status_id'],
         include: expect.any(Array),
+        order: expect.any(Array),
         where: {
           '$registration.cdo_expiry$': {
             [Op.lte]: dayInThirtyDays
