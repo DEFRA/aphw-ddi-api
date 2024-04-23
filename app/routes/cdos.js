@@ -33,7 +33,7 @@ module.exports = [
            */
           const filter = {}
 
-          if (status.length) {
+          if (status && status.length) {
             filter.status = status
           }
 

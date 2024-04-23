@@ -2,7 +2,7 @@ const Joi = require('joi')
 
 const getCdosQuerySchema = Joi.object({
   withinDays: Joi.number(),
-  status: Joi.array().items(Joi.string()).single().default([])
+  status: Joi.array().items(Joi.string()).single()
 }).or('withinDays', 'status')
 
 const getCdosResponseSchema = Joi.object({

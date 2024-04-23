@@ -33,6 +33,20 @@ describe('cdos - GET schema', () => {
       expect(validation.error).not.toBeDefined()
     })
 
+    test('should validate if only withinDays is passed', () => {
+      const queryParams = {
+        withinDays: '30'
+      }
+
+      const validation = getCdosQuerySchema.validate(queryParams, { abortEarly: false })
+      const expectedQueryParams = {
+        withinDays: 30
+      }
+
+      expect(validation).toEqual({ value: expectedQueryParams })
+      expect(validation.error).not.toBeDefined()
+    })
+
     test('should not validate if unknown filters are passed', () => {
       const queryParams = {
         unknown: 'something',

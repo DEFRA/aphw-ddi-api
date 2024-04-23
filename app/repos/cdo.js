@@ -297,7 +297,8 @@ const getSummaryCdos = async (filter) => {
           }
         ]
       }
-    ]
+    ],
+    order: [[sequelize.col('registration.cdo_expiry'), 'ASC']]
   })
 
   return cdos
