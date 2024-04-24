@@ -8,14 +8,14 @@ describe('Processor wrapper tests', () => {
 
   const sequelize = require('../../../../../app/config/db')
 
-  const { processRegister } = require('../../../../../app/import/robot/processor-wrapper')
+  const { processRegister, processRegisterInTransaction } = require('../../../../../app/import/robot/processor-wrapper')
 
   beforeEach(async () => {
     jest.clearAllMocks()
     jest.resetAllMocks()
   })
 
-  test('should start a new transaction', async () => {
+  test('processRegister should call processRegisterInTransaction', async () => {
     const register = { errors: [] }
     processRegisterRows.mockResolvedValue()
     populatePoliceForce.mockResolvedValue()
@@ -25,12 +25,22 @@ describe('Processor wrapper tests', () => {
     expect(sequelize.transaction).toHaveBeenCalledTimes(1)
   })
 
+  test('should start a new transaction', async () => {
+    const register = { errors: [] }
+    processRegisterRows.mockResolvedValue()
+    populatePoliceForce.mockResolvedValue()
+
+    await processRegisterInTransaction(register, false)
+
+    expect(sequelize.transaction).toHaveBeenCalledTimes(1)
+  })
+
   test('should process register', async () => {
     const register = { errors: [] }
     processRegisterRows.mockResolvedValue()
     populatePoliceForce.mockResolvedValue()
 
-    await processRegister(register, false, {})
+    await processRegisterInTransaction(register, false, {})
 
     expect(register.errors).toEqual([])
     expect(sequelize.transaction).not.toHaveBeenCalled()
@@ -41,9 +51,7 @@ describe('Processor wrapper tests', () => {
     processRegisterRows.mockResolvedValue()
     populatePoliceForce.mockResolvedValue()
 
-    await processRegister(register, true, {})
-
-    expect(register.errors).toEqual([])
+    await expect(processRegisterInTransaction(register, true, {})).rejects.toThrow('Rolling back')
   })
 
   test('should handle error that isnt rollback', async () => {
@@ -51,8 +59,6 @@ describe('Processor wrapper tests', () => {
     processRegisterRows.mockResolvedValue()
     populatePoliceForce.mockImplementation(() => { throw new Error('dummy error') })
 
-    await processRegister(register, true, {})
-
-    expect(register.errors).toEqual(['dummy error'])
+    await expect(processRegisterInTransaction(register, true, {})).rejects.toThrow('dummy error')
   })
 })
