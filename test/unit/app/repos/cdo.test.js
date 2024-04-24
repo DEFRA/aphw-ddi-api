@@ -235,6 +235,7 @@ describe('CDO repo', () => {
       registration: {
         id: 13,
         cdo_expiry: '2024-03-01',
+        joined_exemption_scheme: '2023-11-12',
         police_force: {
           id: 5,
           name: 'Cheshire Constabulary'
@@ -264,6 +265,7 @@ describe('CDO repo', () => {
       registration: {
         id: 14,
         cdo_expiry: '2024-03-01',
+        joined_exemption_scheme: '2023-11-12',
         police_force: {
           id: 5,
           name: 'Cheshire Constabulary'
@@ -277,17 +279,38 @@ describe('CDO repo', () => {
         preExempt2
       ]
       sequelize.models.dog.findAll.mockResolvedValue(dbResponse)
+      sequelize.col.mockReturnValue('registration.cdo_expiry')
 
       const res = await getSummaryCdos({ status: ['PreExempt'] })
       expect(res).toEqual(dbResponse)
       expect(sequelize.models.dog.findAll).toHaveBeenCalledWith({
         attributes: ['id', 'index_number', 'status_id'],
         include: expect.any(Array),
-        order: expect.any(Array),
+        order: [[expect.anything(), 'ASC']],
         where: {
           '$status.status$': ['Pre-exempt']
         }
       })
+      expect(sequelize.col).toHaveBeenCalledWith('registration.cdo_expiry')
+    })
+
+    test('should sort', async () => {
+      const dbResponse = []
+      sequelize.models.dog.findAll.mockResolvedValue(dbResponse)
+      sequelize.col.mockReturnValue('registration.joined_exemption_scheme')
+
+      const res = await getSummaryCdos({ status: ['PreExempt'] }, { key: 'joinedExemptionScheme', order: 'DESC' })
+      expect(res).toEqual(dbResponse)
+      expect(sequelize.models.dog.findAll).toHaveBeenCalledWith({
+        attributes: ['id', 'index_number', 'status_id'],
+        include: expect.any(Array),
+        order: [[expect.anything(), 'DESC'], [expect.anything(), 'DESC']],
+        where: {
+          '$status.status$': ['Pre-exempt']
+        }
+      })
+      expect(sequelize.col).toHaveBeenCalledWith('registration.joined_exemption_scheme')
+      expect(sequelize.col).toHaveBeenCalledWith('registration.cdo_expiry')
     })
 
     test('should be a get all cdos by multiple exemption statuses', async () => {

@@ -2,7 +2,9 @@ const Joi = require('joi')
 
 const getCdosQuerySchema = Joi.object({
   withinDays: Joi.number(),
-  status: Joi.array().items(Joi.string()).single()
+  status: Joi.array().items(Joi.string()).single(),
+  sortKey: Joi.string().valid('cdoExpiry', 'joinedExemptionScheme'),
+  sortOrder: Joi.string().valid('ASC', 'DESC')
 }).or('withinDays', 'status')
 
 const getCdosResponseSchema = Joi.object({
@@ -20,7 +22,8 @@ const getCdosResponseSchema = Joi.object({
     }).unknown().required(),
     exemption: Joi.object({
       policeForce: Joi.string().required(),
-      cdoExpiry: Joi.string().allow(null).required()
+      cdoExpiry: Joi.string().allow(null).required(),
+      joinedExemptionScheme: Joi.string().allow(null).required()
     }).unknown().required()
   })).required()
 }).unknown()
