@@ -49,5 +49,7 @@ const matchPoliceForceByName = async (name) => {
 }
 
 module.exports = {
-  lookupPoliceForceByPostcode
+  lookupPoliceForceByPostcode,
+  getPoliceForce,
+  matchPoliceForceByName
 }
