@@ -84,7 +84,8 @@ describe('cdos - GET schema', () => {
             },
             exemption: {
               policeForce: 'Cheshire Constabulary',
-              cdoExpiry: '2024-03-01'
+              cdoExpiry: '2024-03-01',
+              joinedExemptionScheme: '2023-11-12'
             }
           }
         ]
@@ -107,7 +108,8 @@ describe('cdos - GET schema', () => {
             },
             exemption: {
               policeForce: 'Cheshire Constabulary',
-              cdoExpiry: '2024-03-01'
+              cdoExpiry: '2024-03-01',
+              joinedExemptionScheme: '2023-11-12'
             }
           }
         ]
@@ -138,7 +140,8 @@ describe('cdos - GET schema', () => {
             exemption: {
               policeForce: 'Cheshire Constabulary',
               cdoExpiry: '2024-03-01',
-              deathDate: '2024-04-19'
+              deathDate: '2024-04-19',
+              joinedExemptionScheme: '2023-11-12'
             }
           }
         ]
@@ -165,7 +168,8 @@ describe('cdos - GET schema', () => {
             exemption: {
               policeForce: 'Cheshire Constabulary',
               cdoExpiry: '2024-03-01',
-              deathDate: '2024-04-19'
+              deathDate: '2024-04-19',
+              joinedExemptionScheme: '2023-11-12'
             }
           }
         ]

@@ -107,6 +107,7 @@ const { Op } = require('sequelize')
  * @typedef SummaryRegistrationDao
  * @property {number} id
  * @property {string} cdo_expiry
+ * @property {string} joined_exemption_scheme
  * @property {PoliceForceDao} police_force
  */
 /**
@@ -289,7 +290,7 @@ const getSummaryCdos = async (filter) => {
       {
         model: sequelize.models.registration,
         as: 'registration',
-        attributes: ['id', 'cdo_expiry'],
+        attributes: ['id', 'cdo_expiry', 'joined_exemption_scheme'],
         include: [
           {
             model: sequelize.models.police_force,
@@ -298,7 +299,10 @@ const getSummaryCdos = async (filter) => {
         ]
       }
     ],
-    order: [[sequelize.col('registration.cdo_expiry'), 'ASC']]
+    order: [
+      [sequelize.col('registration.cdo_expiry'), 'ASC'],
+      [sequelize.col('registration.joined_exemption_scheme'), 'ASC']
+    ]
   })
 
   return cdos

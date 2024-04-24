@@ -235,6 +235,7 @@ describe('CDO repo', () => {
       registration: {
         id: 13,
         cdo_expiry: '2024-03-01',
+        joined_exemption_scheme: '2023-11-12',
         police_force: {
           id: 5,
           name: 'Cheshire Constabulary'
@@ -264,6 +265,7 @@ describe('CDO repo', () => {
       registration: {
         id: 14,
         cdo_expiry: '2024-03-01',
+        joined_exemption_scheme: '2023-11-12',
         police_force: {
           id: 5,
           name: 'Cheshire Constabulary'
