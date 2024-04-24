@@ -3,11 +3,8 @@ const { processRegisterRows, populatePoliceForce } = require('./processor')
 
 const processRegister = async (register, rollback) => {
   try {
-    console.log('here1')
     await processRegisterInTransaction(register, rollback)
-    console.log('here2')
   } catch (err) {
-    console.log('here3', err.message)
     if (err.message !== 'Rolling back') {
       console.log('import error', err)
       register.errors.push(err.message)
