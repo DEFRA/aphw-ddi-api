@@ -47,6 +47,24 @@ describe('cdos - GET schema', () => {
       expect(validation.error).not.toBeDefined()
     })
 
+    test('should validate if sorting info is passed', () => {
+      const queryParams = {
+        status: 'InterimExempt',
+        sortKey: 'joinedExemptionScheme',
+        sortOrder: 'DESC'
+      }
+
+      const validation = getCdosQuerySchema.validate(queryParams, { abortEarly: false })
+      const expectedQueryParams = {
+        status: ['InterimExempt'],
+        sortKey: 'joinedExemptionScheme',
+        sortOrder: 'DESC'
+      }
+
+      expect(validation).toEqual({ value: expectedQueryParams })
+      expect(validation.error).not.toBeDefined()
+    })
+
     test('should not validate if unknown filters are passed', () => {
       const queryParams = {
         unknown: 'something',
@@ -63,6 +81,28 @@ describe('cdos - GET schema', () => {
 
       const validation = getCdosQuerySchema.validate(queryParams, { abortEarly: false })
       expect(validation.error.message).toEqual('"value" must contain at least one of [withinDays, status]')
+    })
+
+    test('should validate if incorrect sort order is passed', () => {
+      const queryParams = {
+        status: 'InterimExempt',
+        sortKey: 'joinedExemptionScheme',
+        sortOrder: 'ASCENDING'
+      }
+
+      const validation = getCdosQuerySchema.validate(queryParams, { abortEarly: false })
+      expect(validation.error.message).toEqual('"sortOrder" must be one of [ASC, DESC]')
+    })
+
+    test('should validate if incorrect sort key is passed', () => {
+      const queryParams = {
+        status: 'InterimExempt',
+        sortKey: 'joinedExemptionSchemes',
+        sortOrder: 'ASC'
+      }
+
+      const validation = getCdosQuerySchema.validate(queryParams, { abortEarly: false })
+      expect(validation.error.message).toEqual('"sortKey" must be one of [cdoExpiry, joinedExemptionScheme]')
     })
   })
 
@@ -84,7 +124,8 @@ describe('cdos - GET schema', () => {
             },
             exemption: {
               policeForce: 'Cheshire Constabulary',
-              cdoExpiry: '2024-03-01'
+              cdoExpiry: '2024-03-01',
+              joinedExemptionScheme: '2023-11-12'
             }
           }
         ]
@@ -107,7 +148,8 @@ describe('cdos - GET schema', () => {
             },
             exemption: {
               policeForce: 'Cheshire Constabulary',
-              cdoExpiry: '2024-03-01'
+              cdoExpiry: '2024-03-01',
+              joinedExemptionScheme: '2023-11-12'
             }
           }
         ]
@@ -138,7 +180,8 @@ describe('cdos - GET schema', () => {
             exemption: {
               policeForce: 'Cheshire Constabulary',
               cdoExpiry: '2024-03-01',
-              deathDate: '2024-04-19'
+              deathDate: '2024-04-19',
+              joinedExemptionScheme: '2023-11-12'
             }
           }
         ]
@@ -165,7 +208,8 @@ describe('cdos - GET schema', () => {
             exemption: {
               policeForce: 'Cheshire Constabulary',
               cdoExpiry: '2024-03-01',
-              deathDate: '2024-04-19'
+              deathDate: '2024-04-19',
+              joinedExemptionScheme: '2023-11-12'
             }
           }
         ]
