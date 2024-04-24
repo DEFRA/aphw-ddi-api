@@ -28,6 +28,7 @@ describe('cdo mappers', () => {
         registration: {
           id: 13,
           cdo_expiry: '2024-03-01',
+          joined_exemption_scheme: '2023-11-01',
           police_force: {
             id: 5,
             name: 'Cheshire Constabulary'
@@ -45,10 +46,12 @@ describe('cdo mappers', () => {
           id: 300013,
           dogReference: 'ED300013',
           status: 'Pre-exempt'
+
         },
         exemption: {
           policeForce: 'Cheshire Constabulary',
-          cdoExpiry: '2024-03-01'
+          cdoExpiry: '2024-03-01',
+          joinedExemptionScheme: '2023-11-01'
         }
       }
 

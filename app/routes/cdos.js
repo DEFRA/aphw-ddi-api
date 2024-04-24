@@ -27,6 +27,8 @@ module.exports = [
         try {
           const status = request.query.status
           const withinDays = request.query.withinDays
+          const key = request.query.sortKey
+          const order = request.query.sortOrder
 
           /**
            * @type {{ status?: CdoStatus[]; withinDays?: number }}
@@ -41,7 +43,13 @@ module.exports = [
             filter.withinDays = withinDays
           }
 
-          const summaryCdos = await getSummaryCdos(filter)
+          let sort
+
+          if (key || order) {
+            sort = { key, order }
+          }
+
+          const summaryCdos = await getSummaryCdos(filter, sort)
 
           const summaryCdosDto = summaryCdos.map(mapSummaryCdoDaoToDto)
 

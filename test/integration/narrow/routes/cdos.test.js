@@ -30,7 +30,8 @@ describe('CDO endpoint', () => {
         },
         exemption: {
           policeForce: 'Cheshire Constabulary',
-          cdoExpiry: '2024-03-01'
+          cdoExpiry: '2024-03-01',
+          joinedExemptionScheme: null
         }
       }
     ]
@@ -58,6 +59,7 @@ describe('CDO endpoint', () => {
         registration: {
           id: 13,
           cdo_expiry: '2024-03-01',
+          joined_exemption_scheme: null,
           police_force: {
             id: 5,
             name: 'Cheshire Constabulary'
@@ -80,7 +82,7 @@ describe('CDO endpoint', () => {
     const response = await server.inject(options)
     const { payload } = response
     expect(response.statusCode).toBe(200)
-    expect(getSummaryCdos).toHaveBeenCalledWith(expectedFilter)
+    expect(getSummaryCdos).toHaveBeenCalledWith(expectedFilter, undefined)
     expect(JSON.parse(payload)).toEqual(expectedPayload)
   })
 
@@ -95,7 +97,7 @@ describe('CDO endpoint', () => {
 
     const response = await server.inject(options)
     expect(response.statusCode).toBe(200)
-    expect(getSummaryCdos).toHaveBeenCalledWith(expectedFilter)
+    expect(getSummaryCdos).toHaveBeenCalledWith(expectedFilter, undefined)
   })
 
   test('GET /cdos route returns 200 given withinDays filter applied', async () => {
@@ -109,7 +111,22 @@ describe('CDO endpoint', () => {
 
     const response = await server.inject(options)
     expect(response.statusCode).toBe(200)
-    expect(getSummaryCdos).toHaveBeenCalledWith(expectedFilter)
+    expect(getSummaryCdos).toHaveBeenCalledWith(expectedFilter, undefined)
+  })
+
+  test('GET /cdos route returns 200 given sorting requested', async () => {
+    getSummaryCdos.mockResolvedValue([])
+    const options = {
+      method: 'GET',
+      url: '/cdos?status=InterimExempt&sortKey=joinedExemptionScheme&sortOrder=DESC'
+    }
+
+    const expectedFilter = { status: ['InterimExempt'] }
+    const expectedOrdering = { key: 'joinedExemptionScheme', order: 'DESC' }
+
+    const response = await server.inject(options)
+    expect(response.statusCode).toBe(200)
+    expect(getSummaryCdos).toHaveBeenCalledWith(expectedFilter, expectedOrdering)
   })
 
   test('GET /cdos route returns 400 given no filter applied', async () => {
@@ -146,6 +163,7 @@ describe('CDO endpoint', () => {
         registration: {
           id: 13,
           cdo_expiry: '2024-03-01',
+          joined_exemption_scheme: null,
           police_force: {
             id: 5,
             name: 'Cheshire Constabulary'
