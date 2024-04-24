@@ -66,7 +66,7 @@ const populatePoliceForce = async (register, rollback, transaction) => {
     }
 
     if (rollback) {
-      return
+      continue
     }
 
     for (const dog of record.dogs) {
