@@ -245,13 +245,22 @@ const getAllCdos = async () => {
 /**
  * @typedef {'InterimExempt'|'PreExempt'|'Exempt'|'Failed'|'InBreach'|'Withdrawn'|'Inactive'} CdoStatus
  */
+
+const sortKeys = {
+  cdoExpiry: undefined,
+  joinedExemptionScheme: 'registration.joined_exemption_scheme'
+}
+
 /**
  *
- * @param {{ status?: CdoStatus[]; withinDays?: number }} [filter]
+ * @param {{ status?: CdoStatus[]; withinDays?: number; }} [filter]
+ * @param {{ key: string; order?: 'ASC'|'DESC' }} [sort]
  * @return {Promise<SummaryCdo[]>}
  */
-const getSummaryCdos = async (filter) => {
+const getSummaryCdos = async (filter, sort) => {
   const where = {}
+  const sortOrder = sort?.order ?? 'ASC'
+  const sortKey = sortKeys[sort?.key]
 
   if (filter.status) {
     const statusArray = filter.status.map(status => statuses[status])
@@ -268,6 +277,14 @@ const getSummaryCdos = async (filter) => {
       [Op.lte]: withinDaysDate
     }
   }
+
+  const order = []
+
+  if (sortKey !== undefined) {
+    order.push([sequelize.col(sortKey), sortOrder])
+  }
+
+  order.push([sequelize.col('registration.cdo_expiry'), sortOrder])
 
   const cdos = await sequelize.models.dog.findAll({
     attributes: ['id', 'index_number', 'status_id'],
@@ -299,10 +316,7 @@ const getSummaryCdos = async (filter) => {
         ]
       }
     ],
-    order: [
-      [sequelize.col('registration.cdo_expiry'), 'ASC'],
-      [sequelize.col('registration.joined_exemption_scheme'), 'ASC']
-    ]
+    order
   })
 
   return cdos
