@@ -72,6 +72,11 @@ module.exports = [{
       }
     },
     handler: async (request, h) => {
+      const personAndDogs = await getPersonAndDogsByReference(request.params.reference)
+      if (personAndDogs?.length && personAndDogs[0].dog) {
+        return h.response().code(400)
+      }
+
       await deletePerson(request.params.reference, getCallingUser(request))
 
       return h.response().code(200)

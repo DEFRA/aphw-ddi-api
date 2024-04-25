@@ -127,6 +127,38 @@ describe('Processor tests', () => {
     expect(mockSave).toHaveBeenCalled()
   })
 
+  test('should get police force but not save if rollback', async () => {
+    const mockSave = jest.fn()
+    lookupPoliceForceByPostcode.mockResolvedValue({ name: 'police force 1' })
+    getPoliceForce.mockResolvedValue({ id: 123 })
+    dbFindOne.mockResolvedValue({ save: mockSave })
+
+    const data = {
+      add: [
+        {
+          owner: {
+            firstName: 'John',
+            phoneNumber: '0123456789012',
+            address: {
+              postcode: 'AB1 2CD'
+            }
+          },
+          dogs: [{
+            name: 'Bruno',
+            gender: 'Male',
+            colour: 'Brown',
+            birthDate: new Date(2020, 1, 5),
+            insuranceStartDate: new Date(2023, 11, 10)
+          }]
+        }
+      ]
+    }
+
+    await populatePoliceForce(data, true)
+
+    expect(mockSave).not.toHaveBeenCalled()
+  })
+
   test('should show errors for police force', async () => {
     const mockSave = jest.fn()
     lookupPoliceForceByPostcode.mockResolvedValue({ name: 'police force 1' })

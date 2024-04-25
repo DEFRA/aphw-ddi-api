@@ -6,7 +6,13 @@ const schema = Joi.object({
   port: Joi.number().default(3001),
   env: Joi.string().valid('development', 'test', 'production').default('development'),
   robotSheetName: Joi.string().required(),
-  robotImportPoliceApiUrl: Joi.string().required()
+  osPlacesApi: {
+    baseUrl: Joi.string().default('https://api.os.uk/search/places/v1'),
+    token: Joi.string().required()
+  },
+  policeApi: {
+    baseUrl: Joi.string().default('https://data.police.uk/api')
+  }
 })
 
 // Build config
@@ -15,7 +21,13 @@ const config = {
   port: process.env.PORT,
   env: process.env.NODE_ENV,
   robotSheetName: process.env.ROBOT_SHEET_NAME,
-  robotImportPoliceApiUrl: process.env.ROBOT_IMPORT_POLICE_API_URL
+  osPlacesApi: {
+    baseUrl: process.env.OS_PLACES_API_BASE_URL,
+    token: process.env.OS_PLACES_API_KEY
+  },
+  policeApi: {
+    baseUrl: process.env.POLICE_API_BASE_URL
+  }
 }
 
 // Validate config

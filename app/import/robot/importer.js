@@ -6,9 +6,13 @@ const map = require('./schema/map')
 const { baseSchema } = require('./schema')
 const config = require('../../config/index')
 const { formatDate } = require('../../lib/date-helpers')
+const { log } = require('../../lib/import-helper')
 
 const processRows = async (register, sheet, map, schema) => {
   let rows
+
+  const errors = []
+  const logBuffer = []
 
   try {
     const { rows: sheetRows } = await readXlsxFile(register, { sheet, map, dateFormat: 'dd/mm/yyyy' })
@@ -16,49 +20,49 @@ const processRows = async (register, sheet, map, schema) => {
     rows = sheetRows
   } catch (err) {
     console.error(`Error reading xlsx file: ${err}`)
-
-    throw err
+    errors.push(`Error reading xlsx file: ${err}`)
   }
-
-  const errors = []
 
   const registerMap = new Map()
 
-  for (let i = 0; i < rows.length; i++) {
-    const rowNum = i + 1
-    const row = rows[i]
+  if (!errors.length) {
+    for (let i = 0; i < rows.length; i++) {
+      const rowNum = i + 1
+      const row = rows[i]
 
-    autoCorrectDataValues(row)
+      autoCorrectDataValues(row, logBuffer)
 
-    replaceUnicodeCharacters(row)
+      replaceUnicodeCharacters(row, logBuffer)
 
-    const result = schema.validate(row)
+      const result = schema.validate(row)
 
-    if (!result.isValid) {
-      if (result.errors.details.length === 1 && result.errors.details[0].message === '"owner.email" must be a valid email') {
-        console.log(`IndexNumber ${row.dog.indexNumber} Invalid email ${row.owner.email} - setting to blank`)
-        row.owner.email = ''
-      } else {
-        errors.push({ rowNum, row, errors: result.errors.details })
-        continue
+      if (!result.isValid) {
+        if (result.errors.details.length === 1 && result.errors.details[0].message === '"owner.email" must be a valid email') {
+          console.log(`IndexNumber ${row.dog.indexNumber} Invalid email ${row.owner.email} - setting to blank`)
+          row.owner.email = ''
+        } else {
+          errors.push({ rowNum, row, errors: result.errors.details })
+          continue
+        }
       }
+
+      const owner = row.owner
+      const dog = row.dog
+
+      const key = `${owner.lastName}^${owner.address.postcode}^${owner.birthDate.getDate()}^${owner.birthDate.getMonth()}`
+
+      const value = registerMap.get(key) || { owner, dogs: [] }
+
+      value.dogs.push(dog)
+
+      registerMap.set(key, value)
     }
-
-    const owner = row.owner
-    const dog = row.dog
-
-    const key = `${owner.lastName}^${owner.address.postcode}^${owner.birthDate.getDate()}^${owner.birthDate.getMonth()}`
-
-    const value = registerMap.get(key) || { owner, dogs: [] }
-
-    value.dogs.push(dog)
-
-    registerMap.set(key, value)
   }
 
   const result = {
     add: [...registerMap.values()],
-    errors
+    errors,
+    log: logBuffer
   }
 
   return result
@@ -69,33 +73,34 @@ const importRegister = async register => {
 
   return {
     add: [].concat(passed.add),
-    errors: [].concat(passed.errors)
+    errors: [].concat(passed.errors),
+    log: [].concat(passed.log)
   }
 }
 
-const truncateIfTooLong = (elem, maxLength, row, colName) => {
+const truncateIfTooLong = (elem, maxLength, row, colName, logBuffer) => {
   if (elem && elem.length > maxLength) {
     elem = elem.substring(0, maxLength)
-    console.log(`IndexNumber ${row.dog.indexNumber} truncating ${colName} - too long`)
+    log(logBuffer, `IndexNumber ${row.dog.indexNumber} truncating ${colName} - too long`)
   }
   return elem
 }
 
-const autoCorrectDataValues = (row) => {
+const autoCorrectDataValues = (row, logBuffer) => {
   row.dog.insuranceStartDate = autoCorrectDate(row.dog.insuranceStartDate)
   row.dog.birthDate = autoCorrectDate(row.dog.birthDate)
   row.owner.address.town = row.owner.address?.town ?? ' '
   row.owner.birthDate = autoCorrectDate(row.owner.birthDate)
-  row.dog.name = truncateIfTooLong(row.dog.name, 32, row, 'dogName')
-  row.dog.colour = truncateIfTooLong(row.dog.colour, 50, row, 'colour')
+  row.dog.name = truncateIfTooLong(row.dog.name, 32, row, 'dogName', logBuffer)
+  row.dog.colour = truncateIfTooLong(row.dog.colour, 50, row, 'colour', logBuffer)
   const microchipClean = (row.dog.microchipNumber ? row.dog.microchipNumber : '').toString().replace(/\u0020/g, '').replace(/-/g, '').replace(/\u2013/g, '')
-  row.dog.microchipNumber = truncateIfTooLong(microchipClean, 24, row, 'microchipNumber')
-  row.owner.address.addressLine1 = truncateIfTooLong(row.owner.address.addressLine1, 50, row, 'addressLine1')
-  row.owner.address.addressLine2 = truncateIfTooLong(row.owner.address.addressLine2, 50, row, 'addressLine2')
-  row.owner.address.town = truncateIfTooLong(row.owner.address.town, 50, row, 'town')
-  row.owner.address.county = truncateIfTooLong(row.owner.address.county, 30, row, 'county')
-  row.owner.firstName = truncateIfTooLong(row.owner.firstName, 30, row, 'firstName')
-  row.owner.lastName = truncateIfTooLong(row.owner.lastName, 24, row, 'lastName')
+  row.dog.microchipNumber = truncateIfTooLong(microchipClean, 24, row, 'microchipNumber', logBuffer)
+  row.owner.address.addressLine1 = truncateIfTooLong(row.owner.address.addressLine1, 50, row, 'addressLine1', logBuffer)
+  row.owner.address.addressLine2 = truncateIfTooLong(row.owner.address.addressLine2, 50, row, 'addressLine2', logBuffer)
+  row.owner.address.town = truncateIfTooLong(row.owner.address.town, 50, row, 'town', logBuffer)
+  row.owner.address.county = truncateIfTooLong(row.owner.address.county, 30, row, 'county', logBuffer)
+  row.owner.firstName = truncateIfTooLong(row.owner.firstName, 30, row, 'firstName', logBuffer)
+  row.owner.lastName = truncateIfTooLong(row.owner.lastName, 24, row, 'lastName', logBuffer)
   row.dog.certificateIssued = autoCorrectDate(row.dog.certificateIssued)
 }
 
@@ -115,43 +120,43 @@ const autoCorrectDate = (inDate) => {
   return dayjs(inDate, 'DD/MM/YYYY').toDate()
 }
 
-const replaceUnicodeCharacters = (row) => {
+const replaceUnicodeCharacters = (row, logBuffer) => {
   if (containsNonLatinCodepoints(row.owner.address?.addressLine1)) {
-    logReplacement(row.owner.address.addressLine1, row.dog.indexNumber, 'addressLine1')
+    logReplacement(row.owner.address.addressLine1, row.dog.indexNumber, 'addressLine1', logBuffer)
     row.owner.address.addressLine1 = replaceInvalidCharacters(row.owner.address.addressLine1)
   }
   if (containsNonLatinCodepoints(row.owner.address?.addressLine2)) {
-    logReplacement(row.owner.address.addressLine2, row.dog.indexNumber, 'addressLine2')
+    logReplacement(row.owner.address.addressLine2, row.dog.indexNumber, 'addressLine2', logBuffer)
     row.owner.address.addressLine2 = replaceInvalidCharacters(row.owner.address.addressLine2)
   }
   if (containsNonLatinCodepoints(row.owner.address?.town)) {
-    logReplacement(row.owner.address.town, row.dog.indexNumber, 'town')
+    logReplacement(row.owner.address.town, row.dog.indexNumber, 'town', logBuffer)
     row.owner.address.town = replaceInvalidCharacters(row.owner.address.town)
   }
   if (containsNonLatinCodepoints(row.owner.address?.county)) {
-    logReplacement(row.owner.address.county, row.dog.indexNumber, 'county')
+    logReplacement(row.owner.address.county, row.dog.indexNumber, 'county', logBuffer)
     row.owner.address.county = replaceInvalidCharacters(row.owner.address.county)
   }
   if (containsNonLatinCodepoints(row.owner.firstName)) {
-    logReplacement(row.owner.firstName, row.dog.indexNumber, 'firstName')
+    logReplacement(row.owner.firstName, row.dog.indexNumber, 'firstName', logBuffer)
     row.owner.firstName = replaceInvalidCharacters(row.owner.firstName)
   }
   if (containsNonLatinCodepoints(row.owner.lastName)) {
-    logReplacement(row.owner.lastName, row.dog.indexNumber, 'lastName')
+    logReplacement(row.owner.lastName, row.dog.indexNumber, 'lastName', logBuffer)
     row.owner.lastName = replaceInvalidCharacters(row.owner.lastName)
   }
   if (containsNonLatinCodepoints(row.dog.name)) {
-    logReplacement(row.dog.name, row.dog.indexNumber, 'dogName')
+    logReplacement(row.dog.name, row.dog.indexNumber, 'dogName', logBuffer)
     row.dog.name = replaceInvalidCharacters(row.dog.name)
   }
   if (containsNonLatinCodepoints(row.dog.microchipNumber)) {
-    logReplacement(row.dog.microchipNumber, row.dog.indexNumber, 'microchipNumber')
+    logReplacement(row.dog.microchipNumber, row.dog.indexNumber, 'microchipNumber', logBuffer)
     row.dog.microchipNumber = replaceInvalidCharacters(row.dog.microchipNumber)
   }
 }
 
-const logReplacement = (elem, indexNumber, desc) => {
-  console.log(`IndexNumber ${indexNumber} replacing invalid characters in ${desc} with value ${elem}`)
+const logReplacement = (elem, indexNumber, desc, logBuffer) => {
+  log(logBuffer, `IndexNumber ${indexNumber} replacing invalid characters in ${desc} with value ${elem}`)
 }
 
 const replaceInvalidCharacters = (elem) => {
