@@ -51,7 +51,7 @@ const autoChangeStatus = async (cdo, data, transaction) => {
   const currentStatus = cdo?.status?.status
 
   if (currentStatus === constants.statuses.PreExempt) {
-    if (!cdo.registration.removed_from_cdo_process && data.removedFromCdoProcess) {
+    if (!cdo.registration.non_compliance_letter_sent && data.nonComplianceLetterSent) {
       return await updateStatus(cdo.index_number, constants.statuses.Failed, transaction)
     } else if (data.insurance?.renewalDate && isFuture(data.insurance?.renewalDate) && !cdo.registration.certificate_issued && data.certificateIssued) {
       return await updateStatus(cdo.index_number, constants.statuses.Exempt, transaction)
@@ -103,7 +103,7 @@ const updateRegistration = (registration, data, policeForce) => {
   registration.neutering_confirmation = data.neuteringConfirmation ?? null
   registration.microchip_verification = data.microchipVerification ?? null
   registration.joined_exemption_scheme = data.joinedExemptionScheme ?? null
-  registration.removed_from_cdo_process = data.removedFromCdoProcess ?? null
+  registration.non_compliance_letter_sent = data.nonComplianceLetterSent ?? null
 }
 
 const handleOrder2023 = (registration, data) => {

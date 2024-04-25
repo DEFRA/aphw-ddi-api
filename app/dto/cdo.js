@@ -90,7 +90,7 @@ const cdoViewDto = (data) => {
       neuteringConfirmation: data.registration.neutering_confirmation,
       microchipVerification: data.registration.microchip_verification,
       joinedExemptionScheme: data.registration.joined_exemption_scheme,
-      removedFromCdoProcess: data.registration.removed_from_cdo_process,
+      nonComplianceLetterSent: data.registration.non_compliance_letter_sent,
       ...generateOrderSpecificData(data)
     }
   }

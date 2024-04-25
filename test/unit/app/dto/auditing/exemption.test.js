@@ -21,7 +21,7 @@ describe('ExemptionAudit test', () => {
       microchip_verification: null,
       neutering_confirmation: null,
       police_force: null,
-      removed_from_cdo_process: null,
+      non_compliance_letter_sent: null,
       typed_by_dlo: null,
       withdrawn: null,
       status: null
@@ -41,7 +41,7 @@ describe('ExemptionAudit test', () => {
         microchip_deadline: new Date(2024, 1, 7),
         microchip_verification: new Date(2024, 1, 8),
         neutering_confirmation: new Date(2024, 1, 9),
-        removed_from_cdo_process: new Date(2024, 1, 10),
+        non_compliance_letter_sent: new Date(2024, 1, 10),
         typed_by_dlo: new Date(2024, 1, 11),
         withdrawn: new Date(2024, 1, 12),
         police_force: {
@@ -75,7 +75,7 @@ describe('ExemptionAudit test', () => {
       microchip_verification: '2024-02-08T00:00:00.000Z',
       neutering_confirmation: '2024-02-09T00:00:00.000Z',
       police_force: 'force name 1',
-      removed_from_cdo_process: '2024-02-10T00:00:00.000Z',
+      non_compliance_letter_sent: '2024-02-10T00:00:00.000Z',
       typed_by_dlo: '2024-02-11T00:00:00.000Z',
       withdrawn: '2024-02-12T00:00:00.000Z',
       status: 'Exempt'
@@ -127,7 +127,7 @@ describe('ExemptionAudit test', () => {
       microchip_verification: null,
       neutering_confirmation: null,
       police_force: null,
-      removed_from_cdo_process: null,
+      non_compliance_letter_sent: null,
       typed_by_dlo: null,
       withdrawn: null,
       status: null
@@ -153,7 +153,7 @@ describe('ExemptionAudit test', () => {
       microchip_verification: null,
       neutering_confirmation: null,
       police_force: null,
-      removed_from_cdo_process: null,
+      non_compliance_letter_sent: null,
       typed_by_dlo: null,
       withdrawn: null,
       status: null
@@ -184,7 +184,7 @@ describe('ExemptionAudit test', () => {
       microchip_verification: null,
       neutering_confirmation: null,
       police_force: null,
-      removed_from_cdo_process: null,
+      non_compliance_letter_sent: null,
       typed_by_dlo: null,
       withdrawn: null,
       status: null
@@ -215,7 +215,7 @@ describe('ExemptionAudit test', () => {
       microchip_verification: null,
       neutering_confirmation: null,
       police_force: null,
-      removed_from_cdo_process: null,
+      non_compliance_letter_sent: null,
       typed_by_dlo: null,
       withdrawn: null,
       status: null
