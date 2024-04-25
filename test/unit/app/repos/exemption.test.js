@@ -326,7 +326,7 @@ describe('Exemption repo', () => {
     }
 
     const payload = {
-      removedFromCdoProcess: new Date().toISOString()
+      nonComplianceLetterSent: new Date().toISOString()
     }
 
     await autoChangeStatus(cdo, payload, {})

@@ -95,7 +95,7 @@ const { Op } = require('sequelize')
  * @property {null|string} typed_by_dlo
  * @property {null|string} microchip_deadline
  * @property {null|string} neutering_deadline
- * @property {null|string} removed_from_cdo_process
+ * @property {null|string} non_compliance_letter_sent
  * @property {null|string} deleted_at
  * @property {string} created_at
  * @property {string} updated_at
