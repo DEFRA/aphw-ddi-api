@@ -5,10 +5,12 @@ const { lookupPoliceForceByPostcode } = require('./police')
 const getPoliceForce = require('../../lookups/police-force')
 const sequelize = require('../../config/db')
 const { dbFindOne } = require('../../lib/db-functions')
+const { log } = require('../../lib/import-helper')
 const { robotImportUser } = require('../../constants/import')
 
 const processRegisterRows = async (register, t) => {
   let currentDataRow
+  register.log = register.log || []
   for (const record of register.add) {
     const owner = record.owner
 
@@ -46,26 +48,31 @@ const processRegisterRows = async (register, t) => {
     try {
       await createCdo(data, robotImportUser, t)
     } catch (err) {
-      console.log(err)
-      console.log('Row in error:', JSON.parse(JSON.stringify(currentDataRow)))
+      log(register.log, 'Row in error:' + JSON.stringify(currentDataRow) + err)
     }
   }
 }
 
-const populatePoliceForce = async (register) => {
+const populatePoliceForce = async (register, rollback, transaction) => {
+  register.log = register.log || []
   for (const record of register.add) {
     const forceId = await lookupPoliceForce(record.owner.address.postcode)
 
     if (!forceId) {
       record.dogs.forEach(x => {
-        console.log(`IndexNumber ${x.indexNumber} error: Cannot find police force for postcode ${record.owner.address.postcode}`)
+        log(register.log, `IndexNumber ${x.indexNumber} error: Cannot find police force for postcode ${record.owner.address.postcode}`)
       })
+      continue
+    }
+
+    if (rollback) {
       continue
     }
 
     for (const dog of record.dogs) {
       const registration = await dbFindOne(sequelize.models.registration, {
-        where: { dog_id: dog.indexNumber }
+        where: { dog_id: dog.indexNumber },
+        transaction
       })
 
       if (!registration) {
@@ -81,7 +88,7 @@ const populatePoliceForce = async (register) => {
 }
 
 const lookupPoliceForce = async (postcode) => {
-  const policeForce = await lookupPoliceForceByPostcode(postcode.replace(' ', ''), true)
+  const policeForce = await lookupPoliceForceByPostcode(postcode.replace(' ', ''))
 
   if (policeForce) {
     const force = await getPoliceForce(policeForce.name)

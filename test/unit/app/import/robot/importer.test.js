@@ -2,12 +2,12 @@ const { truncateIfTooLong, autoCorrectDate, replaceUnicodeCharacters } = require
 
 describe('Importer tests', () => {
   test('should truncate if too long', async () => {
-    const res = truncateIfTooLong('test string', 6, { dog: { indexNumber: 123 } }, 'col1')
+    const res = truncateIfTooLong('test string', 6, { dog: { indexNumber: 123 } }, 'col1', [])
     expect(res).toBe('test s')
   })
 
   test('should not truncate if not too long', async () => {
-    const res = truncateIfTooLong('test string', 15, { dog: { indexNumber: 123 } }, 'col1')
+    const res = truncateIfTooLong('test string', 15, { dog: { indexNumber: 123 } }, 'col1', [])
     expect(res).toBe('test string')
   })
 
@@ -70,7 +70,7 @@ describe('Importer tests', () => {
 
     const clonedBadRow = JSON.parse(JSON.stringify(badRow))
 
-    replaceUnicodeCharacters(clonedBadRow)
+    replaceUnicodeCharacters(clonedBadRow, [])
     expect(clonedBadRow).toEqual(cleansedRow)
   })
 })
