@@ -81,7 +81,7 @@ const populatePoliceForce = async (register, rollback, transaction) => {
 
       if (!registration.police_force_id) {
         registration.police_force_id = forceId
-        registration.save()
+        await registration.save({ transaction })
       }
     }
   }
