@@ -99,7 +99,7 @@ module.exports = (sequelize, DataTypes) => {
       type: DataTypes.DATE,
       allowNull: true
     },
-    removed_from_cdo_process: {
+    non_compliance_letter_sent: {
       type: DataTypes.DATE,
       allowNull: true
     },
