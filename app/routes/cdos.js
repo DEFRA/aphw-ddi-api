@@ -25,22 +25,21 @@ module.exports = [
       },
       handler: async (request, h) => {
         try {
-          const status = request.query.status
-          const withinDays = request.query.withinDays
-          const key = request.query.sortKey
-          const order = request.query.sortOrder
+          const {
+            status,
+            withinDays,
+            nonComplianceLetterSent,
+            sortKey: key,
+            sortOrder: order
+          } = request.query
 
           /**
-           * @type {{ status?: CdoStatus[]; withinDays?: number }}
+           * @type {{ status?: CdoStatus[]; withinDays?: number; nonComplianceLetterSent?: boolean }}
            */
-          const filter = {}
-
-          if (status && status.length) {
-            filter.status = status
-          }
-
-          if (!isNaN(withinDays)) {
-            filter.withinDays = withinDays
+          const filter = {
+            status,
+            withinDays,
+            nonComplianceLetterSent
           }
 
           let sort

@@ -116,6 +116,20 @@ describe('CDO endpoint', () => {
     expect(getSummaryCdos).toHaveBeenCalledWith(expectedFilter, undefined)
   })
 
+  test('GET /cdos route returns 200 given nonComplianceLetterSent false filter applied', async () => {
+    getSummaryCdos.mockResolvedValue([])
+    const options = {
+      method: 'GET',
+      url: '/cdos?status=Failed&nonComplianceLetterSent=false'
+    }
+
+    const expectedFilter = { status: ['Failed'], nonComplianceLetterSent: false }
+
+    const response = await server.inject(options)
+    expect(response.statusCode).toBe(200)
+    expect(getSummaryCdos).toHaveBeenCalledWith(expectedFilter, undefined)
+  })
+
   test('GET /cdos route returns 200 given sorting requested', async () => {
     getSummaryCdos.mockResolvedValue([])
     const options = {
