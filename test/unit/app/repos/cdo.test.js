@@ -2,7 +2,6 @@ const { payload: mockCdoPayload, payloadWithPersonReference: mockCdoPayloadWithR
 const { NotFoundError } = require('../../../../app/errors/not-found')
 const { personDao: mockPersonPayload, createdPersonDao: mockCreatedPersonPayload } = require('../../../mocks/person')
 const { devUser } = require('../../../mocks/auth')
-const { Op } = require('sequelize')
 
 describe('CDO repo', () => {
   jest.mock('../../../../app/config/db', () => ({
