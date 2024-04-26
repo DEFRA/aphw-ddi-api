@@ -4,6 +4,7 @@ const getCdosQuerySchema = Joi.object({
   withinDays: Joi.number(),
   status: Joi.array().items(Joi.string()).single(),
   sortKey: Joi.string().valid('cdoExpiry', 'joinedExemptionScheme'),
+  nonComplianceLetterSent: Joi.boolean(),
   sortOrder: Joi.string().valid('ASC', 'DESC')
 }).or('withinDays', 'status')
 
@@ -23,7 +24,8 @@ const getCdosResponseSchema = Joi.object({
     exemption: Joi.object({
       policeForce: Joi.string().required(),
       cdoExpiry: Joi.string().allow(null).required(),
-      joinedExemptionScheme: Joi.string().allow(null).required()
+      joinedExemptionScheme: Joi.string().allow(null).required(),
+      nonComplianceLetterSent: Joi.string().allow(null).required()
     }).unknown().required()
   })).required()
 }).unknown()
