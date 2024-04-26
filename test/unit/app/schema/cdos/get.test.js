@@ -17,6 +17,36 @@ describe('cdos - GET schema', () => {
       expect(validation.error).not.toBeDefined()
     })
 
+    test('should validate if only a status is passed', () => {
+      const queryParams = {
+        status: 'PreExempt'
+      }
+
+      const validation = getCdosQuerySchema.validate(queryParams, { abortEarly: false })
+      const expectedQueryParams = {
+        status: ['PreExempt']
+      }
+
+      expect(validation).toEqual({ value: expectedQueryParams })
+      expect(validation.error).not.toBeDefined()
+    })
+
+    test('should validate if nonComplianceLetterSent is passed', () => {
+      const queryParams = {
+        status: 'Failed',
+        nonComplianceLetterSent: 'true'
+      }
+
+      const validation = getCdosQuerySchema.validate(queryParams, { abortEarly: false })
+      const expectedQueryParams = {
+        status: ['Failed'],
+        nonComplianceLetterSent: true
+      }
+
+      expect(validation).toEqual({ value: expectedQueryParams })
+      expect(validation.error).not.toBeDefined()
+    })
+
     test('should validate if array of status is passed', () => {
       const queryParams = {
         status: ['PreExempt', 'InterimExempt'],
@@ -125,7 +155,8 @@ describe('cdos - GET schema', () => {
             exemption: {
               policeForce: 'Cheshire Constabulary',
               cdoExpiry: '2024-03-01',
-              joinedExemptionScheme: '2023-11-12'
+              joinedExemptionScheme: '2023-11-12',
+              nonComplianceLetterSent: '2024-03-10'
             }
           }
         ]
@@ -149,7 +180,62 @@ describe('cdos - GET schema', () => {
             exemption: {
               policeForce: 'Cheshire Constabulary',
               cdoExpiry: '2024-03-01',
-              joinedExemptionScheme: '2023-11-12'
+              joinedExemptionScheme: '2023-11-12',
+              nonComplianceLetterSent: '2024-03-10'
+            }
+          }
+        ]
+      }
+
+      expect(validation).toEqual({ value: expectedResponseValues })
+      expect(validation.error).not.toBeDefined()
+    })
+
+    test('should validate with results returns some null values', () => {
+      const response = {
+        cdos: [
+          {
+            person: {
+              id: 10,
+              firstName: 'Scott',
+              lastName: 'Pilgrim',
+              personReference: 'P-2655-0A37'
+            },
+            dog: {
+              id: 1,
+              dogReference: 'ED300001',
+              status: 'Pre-exempt'
+            },
+            exemption: {
+              policeForce: 'Cheshire Constabulary',
+              cdoExpiry: null,
+              joinedExemptionScheme: null,
+              nonComplianceLetterSent: null
+            }
+          }
+        ]
+      }
+
+      const validation = getCdosResponseSchema.validate(response, { abortEarly: false })
+      const expectedResponseValues = {
+        cdos: [
+          {
+            person: {
+              id: 10,
+              firstName: 'Scott',
+              lastName: 'Pilgrim',
+              personReference: 'P-2655-0A37'
+            },
+            dog: {
+              id: 1,
+              dogReference: 'ED300001',
+              status: 'Pre-exempt'
+            },
+            exemption: {
+              policeForce: 'Cheshire Constabulary',
+              cdoExpiry: null,
+              joinedExemptionScheme: null,
+              nonComplianceLetterSent: null
             }
           }
         ]
@@ -181,7 +267,8 @@ describe('cdos - GET schema', () => {
               policeForce: 'Cheshire Constabulary',
               cdoExpiry: '2024-03-01',
               deathDate: '2024-04-19',
-              joinedExemptionScheme: '2023-11-12'
+              joinedExemptionScheme: '2023-11-12',
+              nonComplianceLetterSent: null
             }
           }
         ]
@@ -209,7 +296,8 @@ describe('cdos - GET schema', () => {
               policeForce: 'Cheshire Constabulary',
               cdoExpiry: '2024-03-01',
               deathDate: '2024-04-19',
-              joinedExemptionScheme: '2023-11-12'
+              joinedExemptionScheme: '2023-11-12',
+              nonComplianceLetterSent: null
             }
           }
         ]

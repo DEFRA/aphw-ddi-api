@@ -106,8 +106,9 @@ const { Op } = require('sequelize')
 /**
  * @typedef SummaryRegistrationDao
  * @property {number} id
- * @property {string} cdo_expiry
- * @property {string} joined_exemption_scheme
+ * @property {string|null} cdo_expiry
+ * @property {string|null} joined_exemption_scheme
+ * @property {string|null} non_compliance_letter_sent
  * @property {PoliceForceDao} police_force
  */
 /**
@@ -253,7 +254,7 @@ const sortKeys = {
 
 /**
  *
- * @param {{ status?: CdoStatus[]; withinDays?: number; }} [filter]
+ * @param {{ status?: CdoStatus[]; withinDays?: number; nonComplianceLetterSent?: boolean }} [filter]
  * @param {{ key: string; order?: 'ASC'|'DESC' }} [sort]
  * @return {Promise<SummaryCdo[]>}
  */
@@ -275,6 +276,14 @@ const getSummaryCdos = async (filter, sort) => {
 
     where['$registration.cdo_expiry$'] = {
       [Op.lte]: withinDaysDate
+    }
+  }
+
+  if (filter.nonComplianceLetterSent !== undefined) {
+    const operation = filter.nonComplianceLetterSent === false ? Op.is : Op.not
+
+    where['$registration.non_compliance_letter_sent$'] = {
+      [operation]: null
     }
   }
 
@@ -307,7 +316,7 @@ const getSummaryCdos = async (filter, sort) => {
       {
         model: sequelize.models.registration,
         as: 'registration',
-        attributes: ['id', 'cdo_expiry', 'joined_exemption_scheme'],
+        attributes: ['id', 'cdo_expiry', 'joined_exemption_scheme', 'non_compliance_letter_sent'],
         include: [
           {
             model: sequelize.models.police_force,
