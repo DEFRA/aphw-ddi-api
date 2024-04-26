@@ -17,6 +17,36 @@ describe('cdos - GET schema', () => {
       expect(validation.error).not.toBeDefined()
     })
 
+    test('should validate if only a status is passed', () => {
+      const queryParams = {
+        status: 'PreExempt'
+      }
+
+      const validation = getCdosQuerySchema.validate(queryParams, { abortEarly: false })
+      const expectedQueryParams = {
+        status: ['PreExempt']
+      }
+
+      expect(validation).toEqual({ value: expectedQueryParams })
+      expect(validation.error).not.toBeDefined()
+    })
+
+    test('should validate if nonComplianceLetterSent is passed', () => {
+      const queryParams = {
+        status: 'Failed',
+        nonComplianceLetterSent: 'true'
+      }
+
+      const validation = getCdosQuerySchema.validate(queryParams, { abortEarly: false })
+      const expectedQueryParams = {
+        status: ['Failed'],
+        nonComplianceLetterSent: true
+      }
+
+      expect(validation).toEqual({ value: expectedQueryParams })
+      expect(validation.error).not.toBeDefined()
+    })
+
     test('should validate if array of status is passed', () => {
       const queryParams = {
         status: ['PreExempt', 'InterimExempt'],
