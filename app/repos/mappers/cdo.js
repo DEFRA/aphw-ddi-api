@@ -14,8 +14,9 @@
 /**
  * @typedef SummaryExemptionDto
  * @property {string} policeForce - e.g. 'Cheshire Constabulary',
- * @property {string} cdoExpiry - e.g. '2024-03-01'
- * @property {string} joinedExemptionScheme - e.g. '2024-03-01'
+ * @property {string|null} cdoExpiry - e.g. '2024-03-01'
+ * @property {string|null} joinedExemptionScheme - e.g. '2024-03-01'
+ * @property {string|null} nonComplianceLetterSent - e.g. '2024-03-01'
  */
 /**
  * @typedef SummaryCdoDto
@@ -48,7 +49,8 @@ const mapSummaryCdoDaoToDto = (summaryCdo) => {
     exemption: {
       policeForce: registration.police_force.name,
       cdoExpiry: registration.cdo_expiry,
-      joinedExemptionScheme: registration.joined_exemption_scheme
+      joinedExemptionScheme: registration.joined_exemption_scheme,
+      nonComplianceLetterSent: registration.non_compliance_letter_sent
     }
   }
 }

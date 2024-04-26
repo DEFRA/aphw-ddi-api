@@ -106,8 +106,9 @@ const { Op } = require('sequelize')
 /**
  * @typedef SummaryRegistrationDao
  * @property {number} id
- * @property {string} cdo_expiry
- * @property {string} joined_exemption_scheme
+ * @property {string|null} cdo_expiry
+ * @property {string|null} joined_exemption_scheme
+ * @property {string|null} non_compliance_letter_sent
  * @property {PoliceForceDao} police_force
  */
 /**

@@ -31,7 +31,8 @@ describe('CDO endpoint', () => {
         exemption: {
           policeForce: 'Cheshire Constabulary',
           cdoExpiry: '2024-03-01',
-          joinedExemptionScheme: null
+          joinedExemptionScheme: null,
+          nonComplianceLetterSent: '2024-04-01'
         }
       }
     ]
@@ -60,6 +61,7 @@ describe('CDO endpoint', () => {
           id: 13,
           cdo_expiry: '2024-03-01',
           joined_exemption_scheme: null,
+          non_compliance_letter_sent: '2024-04-01',
           police_force: {
             id: 5,
             name: 'Cheshire Constabulary'
