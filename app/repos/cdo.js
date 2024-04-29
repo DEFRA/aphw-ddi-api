@@ -249,7 +249,13 @@ const getAllCdos = async () => {
 
 const sortKeys = {
   cdoExpiry: undefined,
-  joinedExemptionScheme: 'registration.joined_exemption_scheme'
+  joinedExemptionScheme: 'registration.joined_exemption_scheme',
+  policeForce: 'registration.police_force.name',
+  owner: [
+    'registered_person.person.last_name',
+    'registered_person.person.first_name'
+  ],
+  indexNumber: 'id'
 }
 
 /**
@@ -290,7 +296,13 @@ const getSummaryCdos = async (filter, sort) => {
   const order = []
 
   if (sortKey !== undefined) {
-    order.push([sequelize.col(sortKey), sortOrder])
+    if (Array.isArray(sortKey)) {
+      sortKey.forEach(key => {
+        order.push([sequelize.col(key), sortOrder])
+      })
+    } else {
+      order.push([sequelize.col(sortKey), sortOrder])
+    }
   }
 
   order.push([sequelize.col('registration.cdo_expiry'), sortOrder])
