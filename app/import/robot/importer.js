@@ -7,6 +7,7 @@ const { baseSchema } = require('./schema')
 const config = require('../../config/index')
 const { formatDate } = require('../../lib/date-helpers')
 const { log } = require('../../lib/import-helper')
+const { checkMaxRows } = require('./max-rows')
 
 const processRows = async (register, sheet, map, schema) => {
   let rows
@@ -25,6 +26,7 @@ const processRows = async (register, sheet, map, schema) => {
 
   const registerMap = new Map()
 
+  console.log('errors', errors)
   if (!errors.length) {
     for (let i = 0; i < rows.length; i++) {
       const rowNum = i + 1
@@ -64,6 +66,9 @@ const processRows = async (register, sheet, map, schema) => {
 
 const importRegister = async register => {
   const passed = await processRows(register, config.robotSheetName, map, baseSchema)
+
+  console.log('passed', passed)
+  checkMaxRows(passed)
 
   return {
     add: [].concat(passed.add),
