@@ -69,7 +69,6 @@ describe('SearchBasic repo', () => {
     const testList = JSON.parse(JSON.stringify(mockResultsForSorting))
     testList.sort(sortOwnerSearch)
 
-    console.log('testList', testList)
     expect(testList[0].firstName).toBe('Peter')
     expect(testList[0].lastName).toBe('White')
     expect(testList[1].firstName).toBe('John')

@@ -12,7 +12,7 @@ const schema = Joi.object({
       country: Joi.string().trim().required(),
       postcode: Joi.string().trim().required()
     }).required(),
-    birthDate: Joi.any().required(),
+    birthDate: Joi.date().required(),
     phoneNumber: Joi.alternatives().try(
       Joi.number(),
       Joi.string().trim()
@@ -21,7 +21,7 @@ const schema = Joi.object({
   }).required(),
   dog: Joi.object({
     name: Joi.string().trim().required(),
-    birthDate: Joi.any().required(),
+    birthDate: Joi.date().required(),
     colour: Joi.string().trim().required(),
     gender: Joi.string().trim().required(),
     insuranceStartDate: Joi.any().required(),

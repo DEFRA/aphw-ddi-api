@@ -7,6 +7,7 @@ const { baseSchema } = require('./schema')
 const config = require('../../config/index')
 const { formatDate } = require('../../lib/date-helpers')
 const { log } = require('../../lib/import-helper')
+const { checkMaxRows } = require('./max-rows')
 
 const processRows = async (register, sheet, map, schema) => {
   let rows
@@ -65,6 +66,8 @@ const processRows = async (register, sheet, map, schema) => {
 const importRegister = async register => {
   const passed = await processRows(register, config.robotSheetName, map, baseSchema)
 
+  checkMaxRows(passed)
+
   return {
     add: [].concat(passed.add),
     errors: [].concat(passed.errors),
@@ -114,6 +117,12 @@ const autoCorrectDataValues = (row, rowNum, logBuffer) => {
   const microchipClean = (row.dog.microchipNumber ? row.dog.microchipNumber : '').toString().replace(/\u0020/g, '').replace(/-/g, '').replace(/\u2013/g, '')
   row.dog.microchipNumber = truncateIfTooLong(microchipClean, 24, row, 'microchipNumber', logBuffer)
   row.dog.certificateIssued = autoCorrectDate(row.dog.certificateIssued)
+
+  if (!row.owner) {
+    log(logBuffer, `Row ${rowNum} Missing owner fields`)
+    return
+  }
+
   row.owner.birthDate = autoCorrectDate(row.owner.birthDate)
   row.owner.firstName = truncateIfTooLong(row.owner.firstName, 30, row, 'firstName', logBuffer)
   row.owner.lastName = truncateIfTooLong(row.owner.lastName, 24, row, 'lastName', logBuffer)

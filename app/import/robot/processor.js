@@ -7,6 +7,7 @@ const sequelize = require('../../config/db')
 const { dbFindOne } = require('../../lib/db-functions')
 const { log } = require('../../lib/import-helper')
 const { robotImportUser } = require('../../constants/import')
+const { ownerSearch } = require('../../import/robot/owner-search')
 
 const processRegisterRows = async (register, t) => {
   let currentDataRow
@@ -46,6 +47,7 @@ const processRegisterRows = async (register, t) => {
     currentDataRow = data
 
     try {
+      await isExistingPerson(data, register.log)
       await createCdo(data, robotImportUser, t)
     } catch (err) {
       log(register.log, `Row in error: ${JSON.stringify(currentDataRow)} - ${err}`)
@@ -99,6 +101,20 @@ const lookupPoliceForce = async (postcode) => {
   }
 
   return null
+}
+
+const isExistingPerson = async (data, logBuffer) => {
+  const criteria = {
+    firstName: data.owner.firstName,
+    lastName: data.owner.lastName,
+    birthDate: data.owner.birthDate
+  }
+
+  const foundRef = await ownerSearch(criteria)
+  if (foundRef) {
+    data.owner.personReference = foundRef
+    log(logBuffer, `IndexNumber ${data.dogs[0].indexNumber} - Existing owner '${data.owner.firstName} ${data.owner.lastName}' found - imported dogs will be added to this owner`)
+  }
 }
 
 module.exports = {
