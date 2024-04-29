@@ -36,7 +36,7 @@ const processRows = async (register, sheet, map, schema) => {
 
       const result = schema.validate(row)
 
-      if (checkErrorDetails(result, row, rowNum, errors)) {
+      if (checkErrorDetails(result, row, rowNum, errors, logBuffer)) {
         continue
       }
 
@@ -72,10 +72,10 @@ const importRegister = async register => {
   }
 }
 
-const checkErrorDetails = (result, row, rowNum, errors) => {
+const checkErrorDetails = (result, row, rowNum, errors, logBuffer) => {
   if (!result.isValid) {
     if (result.errors.details.length === 1 && result.errors.details[0].message === '"owner.email" must be a valid email') {
-      console.log(`IndexNumber ${row.dog.indexNumber} Invalid email ${row.owner.email} - setting to blank`)
+      log(logBuffer, `IndexNumber ${row.dog.indexNumber} Invalid email ${row.owner.email} - setting to blank`)
       row.owner.email = ''
     } else {
       errors.push(`Row ${rowNum} IndexNumber ${row.dog?.indexNumber} ${concatErrors(result.errors.details)}`)
@@ -213,10 +213,6 @@ const containsNonLatinCodepoints = (str, log) => {
   }
   for (let i = 0, n = str.length; i < n; i++) {
     if (str.charCodeAt(i) > 127) {
-      if (log) {
-        console.log('Char code:', str.charCodeAt(i))
-        console.log('str', str)
-      }
       return true
     }
   }
@@ -227,5 +223,8 @@ module.exports = {
   importRegister,
   truncateIfTooLong,
   autoCorrectDate,
-  replaceUnicodeCharacters
+  autoCorrectDataValues,
+  replaceUnicodeCharacters,
+  checkErrorDetails,
+  concatErrors
 }
