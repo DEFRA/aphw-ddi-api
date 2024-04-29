@@ -12,6 +12,9 @@ const { lookupPoliceForceByPostcode } = require('../../../../../app/import/robot
 jest.mock('../../../../../app/lookups/police-force')
 const getPoliceForce = require('../../../../../app/lookups/police-force')
 
+jest.mock('../../../../../app/import/robot/owner-search')
+const { ownerSearch } = require('../../../../../app/import/robot/owner-search')
+
 describe('Processor tests', () => {
   beforeEach(async () => {
     jest.clearAllMocks()
@@ -19,6 +22,7 @@ describe('Processor tests', () => {
 
   test('should process rows', async () => {
     createCdo.mockResolvedValue()
+    ownerSearch.mockResolvedValue()
 
     const data = {
       add: [
@@ -58,6 +62,7 @@ describe('Processor tests', () => {
 
   test('should handle error is DB error', async () => {
     createCdo.mockImplementation(() => { throw new Error('dummy error') })
+    ownerSearch.mockResolvedValue()
 
     const data = {
       add: [
@@ -100,6 +105,7 @@ describe('Processor tests', () => {
     lookupPoliceForceByPostcode.mockResolvedValue({ name: 'police force 1' })
     getPoliceForce.mockResolvedValue({ id: 123 })
     dbFindOne.mockResolvedValue({ save: mockSave })
+    ownerSearch.mockResolvedValue()
 
     const data = {
       add: [
@@ -132,6 +138,7 @@ describe('Processor tests', () => {
     lookupPoliceForceByPostcode.mockResolvedValue({ name: 'police force 1' })
     getPoliceForce.mockResolvedValue({ id: 123 })
     dbFindOne.mockResolvedValue({ save: mockSave })
+    ownerSearch.mockResolvedValue()
 
     const data = {
       add: [
@@ -164,6 +171,7 @@ describe('Processor tests', () => {
     lookupPoliceForceByPostcode.mockResolvedValue({ name: 'police force 1' })
     getPoliceForce.mockResolvedValue()
     dbFindOne.mockResolvedValue({ save: mockSave })
+    ownerSearch.mockResolvedValue()
 
     const data = {
       add: [
@@ -195,6 +203,7 @@ describe('Processor tests', () => {
     lookupPoliceForceByPostcode.mockResolvedValue({ name: 'police force 1' })
     getPoliceForce.mockResolvedValue({ id: 123 })
     dbFindOne.mockResolvedValue()
+    ownerSearch.mockResolvedValue()
 
     const data = {
       add: [
@@ -218,5 +227,36 @@ describe('Processor tests', () => {
     }
 
     await expect(populatePoliceForce(data)).rejects.toThrow('CDO not found - indexNumber undefined')
+  })
+
+  test('should handle existing owner', async () => {
+    createCdo.mockResolvedValue()
+    ownerSearch.mockResolvedValue(['P-123'])
+
+    const data = {
+      add: [
+        {
+          owner: {
+            firstName: 'John',
+            lastName: 'Timpson',
+            phoneNumber: '0123456789012'
+          },
+          dogs: [{
+            name: 'Bruno',
+            gender: 'Male',
+            colour: 'Brown',
+            birthDate: new Date(2020, 1, 5),
+            insuranceStartDate: new Date(2023, 11, 10),
+            indexNumber: '12345'
+          }]
+        }
+      ]
+    }
+
+    await processRegisterRows(data, {})
+
+    expect(createCdo).toHaveBeenCalledTimes(1)
+    expect(data.log).toHaveLength(1)
+    expect(data.log[0]).toBe('IndexNumber 12345 - Existing owner \'John Timpson\' found - imported dogs will be added to this owner')
   })
 })

@@ -99,6 +99,13 @@ describe('Importer tests', () => {
   })
 
   describe('autoCorrectDataValues', () => {
+    test('aborts if no owner', async () => {
+      const logBuffer = []
+      autoCorrectDataValues({ dog: {} }, 1, logBuffer)
+      expect(logBuffer).toHaveLength(1)
+      expect(logBuffer[0]).toBe('Row 1 Missing owner fields')
+    })
+
     test('aborts if no address', async () => {
       const logBuffer = []
       autoCorrectDataValues({ dog: {}, owner: {} }, 1, logBuffer)

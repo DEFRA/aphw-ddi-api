@@ -114,6 +114,12 @@ const autoCorrectDataValues = (row, rowNum, logBuffer) => {
   const microchipClean = (row.dog.microchipNumber ? row.dog.microchipNumber : '').toString().replace(/\u0020/g, '').replace(/-/g, '').replace(/\u2013/g, '')
   row.dog.microchipNumber = truncateIfTooLong(microchipClean, 24, row, 'microchipNumber', logBuffer)
   row.dog.certificateIssued = autoCorrectDate(row.dog.certificateIssued)
+
+  if (!row.owner) {
+    log(logBuffer, `Row ${rowNum} Missing owner fields`)
+    return
+  }
+
   row.owner.birthDate = autoCorrectDate(row.owner.birthDate)
   row.owner.firstName = truncateIfTooLong(row.owner.firstName, 30, row, 'firstName', logBuffer)
   row.owner.lastName = truncateIfTooLong(row.owner.lastName, 24, row, 'lastName', logBuffer)
