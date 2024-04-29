@@ -1,12 +1,17 @@
 const {
   isDataUnchanged, sendEventToAudit, sendCreateToAudit, sendActivityToAudit, sendUpdateToAudit,
-  determineCreatePk, determineUpdatePk, sendDeleteToAudit
+  determineCreatePk, determineUpdatePk, sendDeleteToAudit, sendImportToAudit
 } = require('../../../../app/messaging/send-audit')
 
 jest.mock('../../../../app/messaging/send-event')
 const { sendEvent } = require('../../../../app/messaging/send-event')
 const { robotImportUser, accessImportUser } = require('../../../../app/constants/import')
-const { COURT } = require('../../../../app/constants/event/audit-event-object-types')
+const { CDO, COURT, DOG, EXEMPTION, PERSON } = require('../../../../app/constants/event/audit-event-object-types')
+
+const devUser = {
+  username: 'dev-user@test.com',
+  displayname: 'Dev User'
+}
 
 describe('SendAudit test', () => {
   afterEach(() => {
@@ -123,6 +128,13 @@ describe('SendAudit test', () => {
       await sendActivityToAudit({}, robotImportUser)
       expect(sendEvent).not.toHaveBeenCalled()
     })
+    test('should send', async () => {
+      await sendActivityToAudit({
+        activityLabel: 'LABEL',
+        pk: 'l100'
+      }, devUser)
+      expect(sendEvent).toHaveBeenCalledTimes(1)
+    })
   })
 
   describe('sendUpdateToAudit', () => {
@@ -161,12 +173,61 @@ describe('SendAudit test', () => {
     })
   })
 
+  describe('sendImportToAudit', () => {
+    const hal9000 = { username: 'hal-9000', displayname: 'Hal 9000' }
+
+    test('should fail given no user', async () => {
+      await expect(sendImportToAudit({}, {})).rejects.toThrow('Username and displayname are required for auditing import of records')
+    })
+
+    test('should send correct message payload', async () => {
+      await sendImportToAudit({
+        dogs: [
+          { indexNumber: 'ED123' },
+          { indexNumber: 'ED234' }
+        ]
+      }, hal9000)
+      expect(sendEvent).toHaveBeenCalledTimes(2)
+      /*
+      {
+        type: 'uk.gov.defra.ddi.event.delete',
+        source: 'aphw-ddi-portal',
+        partitionKey: 'P-123',
+        id: expect.any(String),
+        subject: 'DDI Delete person',
+        data: {
+          message: '{"actioningUser":{"username":"hal-9000","displayname":"Hal 9000"},"operation":"deleted person","deleted":{"personReference":"P-123"}}'
+        }
+      })
+      */
+    })
+  })
+
   describe('determineCreatePk', () => {
     test('should get court id if obj is a court', () => {
       const court = { id: 3, name: 'Metropolis City Court' }
       const pk = determineCreatePk(COURT, court)
 
       expect(pk).toBe('3')
+    })
+
+    test('should get index number of CDO', () => {
+      const entity = { id: 1, dog: { index_number: 'ED123', name: 'my dog' } }
+      const pk = determineCreatePk(CDO, entity)
+
+      expect(pk).toBe('ED123')
+    })
+
+    test('should get index number of dog', () => {
+      const entity = { id: 1, index_number: 'ED123', name: 'my dog' }
+      const pk = determineCreatePk(DOG, entity)
+
+      expect(pk).toBe('ED123')
+    })
+
+    test('should throw for invalid object', () => {
+      const entity = { id: 1, index_number: 'ED123', name: 'my dog' }
+      expect(() => determineCreatePk('invalid', entity)).toThrow('Invalid object for create audit: invalid')
     })
   })
 
@@ -176,6 +237,32 @@ describe('SendAudit test', () => {
       const pk = determineUpdatePk(COURT, court)
 
       expect(pk).toBe('3')
+    })
+
+    test('should get reference number of person', () => {
+      const entity = { id: 1, personReference: 'P-123', first_name: 'John' }
+      const pk = determineUpdatePk(PERSON, entity)
+
+      expect(pk).toBe('P-123')
+    })
+
+    test('should get index number of dog', () => {
+      const entity = { id: 1, index_number: 'ED123', name: 'my dog' }
+      const pk = determineUpdatePk(DOG, entity)
+
+      expect(pk).toBe('ED123')
+    })
+
+    test('should get index number of exemption', () => {
+      const entity = { id: 1, index_number: 'ED123', name: 'my dog' }
+      const pk = determineUpdatePk(EXEMPTION, entity)
+
+      expect(pk).toBe('ED123')
+    })
+
+    test('should throw for invalid object', () => {
+      const entity = { id: 1, index_number: 'ED123', name: 'my dog' }
+      expect(() => determineUpdatePk('invalid', entity)).toThrow('Invalid object for update audit: invalid')
     })
   })
 })
