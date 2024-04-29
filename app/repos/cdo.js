@@ -277,8 +277,9 @@ const getSummaryCdos = async (filter, sort) => {
   if (filter.withinDays) {
     const day = 24 * 60 * 60 * 1000
     const withinMilliseconds = filter.withinDays * day
-    const now = Date.now()
-    const withinDaysDate = new Date(now + withinMilliseconds)
+    const now = new Date()
+    now.setUTCHours(0, 0, 0, 0)
+    const withinDaysDate = new Date(now.getTime() + withinMilliseconds)
 
     where['$registration.cdo_expiry$'] = {
       [Op.lte]: withinDaysDate

@@ -389,8 +389,9 @@ describe('CDO repo', () => {
     test('should be a get all cdos within 30 days', async () => {
       const thirtyDays = 30 * 24 * 60 * 60 * 1000
 
-      const now = Date.now()
-      const dayInThirtyDays = new Date(now + thirtyDays)
+      const now = new Date()
+      now.setUTCHours(0, 0, 0, 0)
+      const dayInThirtyDays = new Date(now.getTime() + thirtyDays)
 
       sequelize.models.dog.findAll.mockResolvedValue([])
 
