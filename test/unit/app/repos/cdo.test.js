@@ -349,5 +349,41 @@ describe('CDO repo', () => {
         }
       })
     })
+
+    test('should get FAILED cdos within Non-compliance Letter not sent', async () => {
+      sequelize.models.dog.findAll.mockResolvedValue([])
+
+      await getSummaryCdos({ status: ['PreExempt'], nonComplianceLetterSent: false })
+      expect(sequelize.models.dog.findAll).toHaveBeenCalledWith({
+        attributes: ['id', 'index_number', 'status_id'],
+        include: expect.any(Array),
+        order: [[expect.anything(), 'ASC']],
+        where: {
+          '$status.status$': ['Pre-exempt'],
+          '$registration.non_compliance_letter_sent$': {
+            [Op.is]: null
+          }
+        }
+      })
+      expect(sequelize.col).toHaveBeenCalledWith('registration.cdo_expiry')
+    })
+
+    test('should get FAILED cdos within Non-compliance Letter sent', async () => {
+      sequelize.models.dog.findAll.mockResolvedValue([])
+
+      const res = await getSummaryCdos({ status: ['Failed'], nonComplianceLetterSent: true })
+      expect(res).toEqual([])
+      expect(sequelize.models.dog.findAll).toHaveBeenCalledWith({
+        attributes: ['id', 'index_number', 'status_id'],
+        include: expect.any(Array),
+        order: expect.any(Array),
+        where: {
+          '$status.status$': ['Failed'],
+          '$registration.non_compliance_letter_sent$': {
+            [Op.not]: null
+          }
+        }
+      })
+    })
   })
 })
