@@ -2,6 +2,7 @@ const Joi = require('joi')
 const { downloadBlob } = require('../storage')
 const { stages } = require('../constants/import')
 const { importRegister, processRegister } = require('../import/robot')
+const { getCallingUser } = require('../auth/get-user')
 
 module.exports = [{
   method: 'POST',
@@ -33,7 +34,7 @@ module.exports = [{
 
       console.log('Import insert starting')
 
-      await processRegister(register, stage === stages.importValidation)
+      await processRegister(register, stage === stages.importValidation, getCallingUser(request))
 
       console.log('Import finished')
 

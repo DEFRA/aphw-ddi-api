@@ -25,7 +25,6 @@ const map = {
       DogColour: 'colour',
       DogGender: 'gender',
       DogDOB: 'birthDate',
-      Neutered: 'neutered',
       MicrochipNumber: 'microchipNumber',
       'Insurance Start Date': 'insuranceStartDate',
       'Certificate Issued': 'certificateIssued'

@@ -30,20 +30,14 @@ const processRows = async (register, sheet, map, schema) => {
       const rowNum = i + 1
       const row = rows[i]
 
-      autoCorrectDataValues(row, logBuffer)
+      autoCorrectDataValues(row, rowNum, logBuffer)
 
       replaceUnicodeCharacters(row, logBuffer)
 
       const result = schema.validate(row)
 
-      if (!result.isValid) {
-        if (result.errors.details.length === 1 && result.errors.details[0].message === '"owner.email" must be a valid email') {
-          console.log(`IndexNumber ${row.dog.indexNumber} Invalid email ${row.owner.email} - setting to blank`)
-          row.owner.email = ''
-        } else {
-          errors.push({ rowNum, row, errors: result.errors.details })
-          continue
-        }
+      if (checkErrorDetails(result, row, rowNum, errors, logBuffer)) {
+        continue
       }
 
       const owner = row.owner
@@ -78,6 +72,32 @@ const importRegister = async register => {
   }
 }
 
+const checkErrorDetails = (result, row, rowNum, errors, logBuffer) => {
+  if (!result.isValid) {
+    if (result.errors.details.length === 1 && result.errors.details[0].message === '"owner.email" must be a valid email') {
+      log(logBuffer, `IndexNumber ${row.dog.indexNumber} Invalid email ${row.owner.email} - setting to blank`)
+      row.owner.email = ''
+    } else {
+      errors.push(`Row ${rowNum} IndexNumber ${row.dog?.indexNumber} ${concatErrors(result.errors.details)}`)
+      return true
+    }
+  }
+
+  if (!row.owner.birthDate) {
+    errors.push(`Row ${rowNum} IndexNumber ${row.dog?.indexNumber} Missing owner birth date`)
+    return true
+  }
+
+  return false
+}
+
+const concatErrors = (errors) => {
+  if (errors?.length) {
+    return errors.map(x => x.message)
+  }
+  return errors
+}
+
 const truncateIfTooLong = (elem, maxLength, row, colName, logBuffer) => {
   if (elem && elem.length > maxLength) {
     elem = elem.substring(0, maxLength)
@@ -86,22 +106,28 @@ const truncateIfTooLong = (elem, maxLength, row, colName, logBuffer) => {
   return elem
 }
 
-const autoCorrectDataValues = (row, logBuffer) => {
+const autoCorrectDataValues = (row, rowNum, logBuffer) => {
   row.dog.insuranceStartDate = autoCorrectDate(row.dog.insuranceStartDate)
   row.dog.birthDate = autoCorrectDate(row.dog.birthDate)
-  row.owner.address.town = row.owner.address?.town ?? ' '
-  row.owner.birthDate = autoCorrectDate(row.owner.birthDate)
   row.dog.name = truncateIfTooLong(row.dog.name, 32, row, 'dogName', logBuffer)
   row.dog.colour = truncateIfTooLong(row.dog.colour, 50, row, 'colour', logBuffer)
   const microchipClean = (row.dog.microchipNumber ? row.dog.microchipNumber : '').toString().replace(/\u0020/g, '').replace(/-/g, '').replace(/\u2013/g, '')
   row.dog.microchipNumber = truncateIfTooLong(microchipClean, 24, row, 'microchipNumber', logBuffer)
+  row.dog.certificateIssued = autoCorrectDate(row.dog.certificateIssued)
+  row.owner.birthDate = autoCorrectDate(row.owner.birthDate)
+  row.owner.firstName = truncateIfTooLong(row.owner.firstName, 30, row, 'firstName', logBuffer)
+  row.owner.lastName = truncateIfTooLong(row.owner.lastName, 24, row, 'lastName', logBuffer)
+
+  if (!row.owner?.address) {
+    log(logBuffer, `Row ${rowNum} Missing owner address fields`)
+    return
+  }
+
+  row.owner.address.town = row.owner.address?.town ?? ' '
   row.owner.address.addressLine1 = truncateIfTooLong(row.owner.address.addressLine1, 50, row, 'addressLine1', logBuffer)
   row.owner.address.addressLine2 = truncateIfTooLong(row.owner.address.addressLine2, 50, row, 'addressLine2', logBuffer)
   row.owner.address.town = truncateIfTooLong(row.owner.address.town, 50, row, 'town', logBuffer)
   row.owner.address.county = truncateIfTooLong(row.owner.address.county, 30, row, 'county', logBuffer)
-  row.owner.firstName = truncateIfTooLong(row.owner.firstName, 30, row, 'firstName', logBuffer)
-  row.owner.lastName = truncateIfTooLong(row.owner.lastName, 24, row, 'lastName', logBuffer)
-  row.dog.certificateIssued = autoCorrectDate(row.dog.certificateIssued)
 }
 
 const autoCorrectDate = (inDate) => {
@@ -121,6 +147,9 @@ const autoCorrectDate = (inDate) => {
 }
 
 const replaceUnicodeCharacters = (row, logBuffer) => {
+  if (!row.dog || !row.owner?.address) {
+    return
+  }
   if (containsNonLatinCodepoints(row.owner.address?.addressLine1)) {
     logReplacement(row.owner.address.addressLine1, row.dog.indexNumber, 'addressLine1', logBuffer)
     row.owner.address.addressLine1 = replaceInvalidCharacters(row.owner.address.addressLine1)
@@ -184,10 +213,6 @@ const containsNonLatinCodepoints = (str, log) => {
   }
   for (let i = 0, n = str.length; i < n; i++) {
     if (str.charCodeAt(i) > 127) {
-      if (log) {
-        console.log('Char code:', str.charCodeAt(i))
-        console.log('str', str)
-      }
       return true
     }
   }
@@ -198,5 +223,8 @@ module.exports = {
   importRegister,
   truncateIfTooLong,
   autoCorrectDate,
-  replaceUnicodeCharacters
+  autoCorrectDataValues,
+  replaceUnicodeCharacters,
+  checkErrorDetails,
+  concatErrors
 }
