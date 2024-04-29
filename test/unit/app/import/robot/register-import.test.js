@@ -60,7 +60,6 @@ describe('register import', () => {
     const { errors } = await importRegister([])
 
     expect(errors).toHaveLength(1)
-    console.log('errors', errors)
     expect(errors[0]).toBe('Row 1 IndexNumber 1234 "owner.address.addressLine1" is required,"owner.address.postcode" is required')
   })
 })
