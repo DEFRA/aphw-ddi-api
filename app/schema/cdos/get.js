@@ -3,7 +3,7 @@ const Joi = require('joi')
 const getCdosQuerySchema = Joi.object({
   withinDays: Joi.number(),
   status: Joi.array().items(Joi.string()).single(),
-  sortKey: Joi.string().valid('cdoExpiry', 'joinedExemptionScheme'),
+  sortKey: Joi.string().valid('cdoExpiry', 'joinedExemptionScheme', 'indexNumber', 'policeForce', 'owner'),
   nonComplianceLetterSent: Joi.boolean(),
   sortOrder: Joi.string().valid('ASC', 'DESC')
 }).or('withinDays', 'status')

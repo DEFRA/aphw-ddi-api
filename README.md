@@ -91,6 +91,12 @@ process.env.ROBOT_IMPORT_POLICE_API_URL = 'http://localhost/force'
 process.env.PACT_BROKER_URL = 'http://host.docker.internal:9292'
 ```
 
+alternatively add `--setupFilesAfterEnv=<rootDir>/jest.setup.single.js` to your jest run script:
+
+```
+npm run test <path>/<filename> --setupFilesAfterEnv=<rootDir>/jest.setup.single.js
+```
+
 ## Licence 
 
 THIS INFORMATION IS LICENSED UNDER THE CONDITIONS OF THE OPEN GOVERNMENT LICENCE found at:
