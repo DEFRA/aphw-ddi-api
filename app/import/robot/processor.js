@@ -111,8 +111,10 @@ const isExistingPerson = async (data, logBuffer) => {
   }
 
   const foundRef = await ownerSearch(criteria)
-  data.owner.personReference = foundRef
-  log(logBuffer, `IndexNumber ${data.dogs[0].indexNumber} - Existing owner '${data.owner.firstName} ${data.owner.lastName}' found - imported dogs will be added to this owner`)
+  if (foundRef) {
+    data.owner.personReference = foundRef
+    log(logBuffer, `IndexNumber ${data.dogs[0].indexNumber} - Existing owner '${data.owner.firstName} ${data.owner.lastName}' found - imported dogs will be added to this owner`)
+  }
 }
 
 module.exports = {
