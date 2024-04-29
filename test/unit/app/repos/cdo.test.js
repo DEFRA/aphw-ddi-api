@@ -313,6 +313,64 @@ describe('CDO repo', () => {
       expect(sequelize.col).toHaveBeenCalledWith('registration.cdo_expiry')
     })
 
+    test('should sort by policeForce DESC', async () => {
+      const dbResponse = []
+      sequelize.models.dog.findAll.mockResolvedValue(dbResponse)
+      sequelize.col.mockReturnValue('registration.joined_exemption_scheme')
+
+      const res = await getSummaryCdos({ status: ['PreExempt'] }, { key: 'policeForce', order: 'DESC' })
+      expect(res).toEqual(dbResponse)
+      expect(sequelize.models.dog.findAll).toHaveBeenCalledWith({
+        attributes: ['id', 'index_number', 'status_id'],
+        include: expect.any(Array),
+        order: [[expect.anything(), 'DESC'], [expect.anything(), 'DESC']],
+        where: {
+          '$status.status$': ['Pre-exempt']
+        }
+      })
+      expect(sequelize.col).toHaveBeenCalledWith('registration.police_force.name')
+      expect(sequelize.col).toHaveBeenCalledWith('registration.cdo_expiry')
+    })
+
+    test('should sort by owner lastname', async () => {
+      const dbResponse = []
+      sequelize.models.dog.findAll.mockResolvedValue(dbResponse)
+      sequelize.col.mockReturnValue('registration.joined_exemption_scheme')
+
+      const res = await getSummaryCdos({ status: ['PreExempt'] }, { key: 'owner' })
+      expect(res).toEqual(dbResponse)
+      expect(sequelize.models.dog.findAll).toHaveBeenCalledWith({
+        attributes: ['id', 'index_number', 'status_id'],
+        include: expect.any(Array),
+        order: [[expect.anything(), 'ASC'], [expect.anything(), 'ASC'], [expect.anything(), 'ASC']],
+        where: {
+          '$status.status$': ['Pre-exempt']
+        }
+      })
+      expect(sequelize.col).toHaveBeenCalledWith('registered_person.person.last_name')
+      expect(sequelize.col).toHaveBeenCalledWith('registered_person.person.first_name')
+      expect(sequelize.col).toHaveBeenCalledWith('registration.cdo_expiry')
+    })
+
+    test('should sort by dog index number', async () => {
+      const dbResponse = []
+      sequelize.models.dog.findAll.mockResolvedValue(dbResponse)
+      sequelize.col.mockReturnValue('registration.joined_exemption_scheme')
+
+      const res = await getSummaryCdos({ status: ['PreExempt'] }, { key: 'indexNumber' })
+      expect(res).toEqual(dbResponse)
+      expect(sequelize.models.dog.findAll).toHaveBeenCalledWith({
+        attributes: ['id', 'index_number', 'status_id'],
+        include: expect.any(Array),
+        order: [[expect.anything(), 'ASC'], [expect.anything(), 'ASC']],
+        where: {
+          '$status.status$': ['Pre-exempt']
+        }
+      })
+      expect(sequelize.col).toHaveBeenCalledWith('id')
+      expect(sequelize.col).toHaveBeenCalledWith('registration.cdo_expiry')
+    })
+
     test('should be a get all cdos by multiple exemption statuses', async () => {
       sequelize.models.dog.findAll.mockResolvedValue([])
 
@@ -331,8 +389,9 @@ describe('CDO repo', () => {
     test('should be a get all cdos within 30 days', async () => {
       const thirtyDays = 30 * 24 * 60 * 60 * 1000
 
-      const now = Date.now()
-      const dayInThirtyDays = new Date(now + thirtyDays)
+      const now = new Date()
+      now.setUTCHours(0, 0, 0, 0)
+      const dayInThirtyDays = new Date(now.getTime() + thirtyDays)
 
       sequelize.models.dog.findAll.mockResolvedValue([])
 
