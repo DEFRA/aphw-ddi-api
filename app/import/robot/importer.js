@@ -36,23 +36,12 @@ const processRows = async (register, sheet, map, schema) => {
 
       const result = schema.validate(row)
 
-      if (!result.isValid) {
-        if (result.errors.details.length === 1 && result.errors.details[0].message === '"owner.email" must be a valid email') {
-          console.log(`IndexNumber ${row.dog.indexNumber} Invalid email ${row.owner.email} - setting to blank`)
-          row.owner.email = ''
-        } else {
-          errors.push(`Row ${rowNum} IndexNumber ${row.dog?.indexNumber} ${concatErrors(result.errors.details)}`)
-          continue
-        }
+      if (checkErrorDetails(result, row, rowNum, errors)) {
+        continue
       }
 
       const owner = row.owner
       const dog = row.dog
-
-      if (!owner.birthDate) {
-        errors.push(`Row ${rowNum} IndexNumber ${row.dog?.indexNumber} Missing owner birth date`)
-        continue
-      }
 
       const key = `${owner.lastName}^${owner.address.postcode}^${owner.birthDate.getDate()}^${owner.birthDate.getMonth()}`
 
@@ -81,6 +70,25 @@ const importRegister = async register => {
     errors: [].concat(passed.errors),
     log: [].concat(passed.log)
   }
+}
+
+const checkErrorDetails = (result, row, rowNum, errors) => {
+  if (!result.isValid) {
+    if (result.errors.details.length === 1 && result.errors.details[0].message === '"owner.email" must be a valid email') {
+      console.log(`IndexNumber ${row.dog.indexNumber} Invalid email ${row.owner.email} - setting to blank`)
+      row.owner.email = ''
+    } else {
+      errors.push(`Row ${rowNum} IndexNumber ${row.dog?.indexNumber} ${concatErrors(result.errors.details)}`)
+      return true
+    }
+  }
+
+  if (!row.owner.birthDate) {
+    errors.push(`Row ${rowNum} IndexNumber ${row.dog?.indexNumber} Missing owner birth date`)
+    return true
+  }
+
+  return false
 }
 
 const concatErrors = (errors) => {
@@ -139,7 +147,7 @@ const autoCorrectDate = (inDate) => {
 }
 
 const replaceUnicodeCharacters = (row, logBuffer) => {
-  if (!row.dog || !row.owner || !row.owner.address) {
+  if (!row.dog || !row.owner?.address) {
     return
   }
   if (containsNonLatinCodepoints(row.owner.address?.addressLine1)) {
