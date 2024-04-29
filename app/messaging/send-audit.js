@@ -1,5 +1,5 @@
 const { v4: uuidv4 } = require('uuid')
-const { CREATE, UPDATE, DELETE, ACTIVITY, IMPORT } = require('../constants/event/events')
+const { CREATE, UPDATE, DELETE, ACTIVITY, IMPORT_MANUAL } = require('../constants/event/events')
 const { SOURCE } = require('../constants/event/source')
 const { getDiff } = require('json-difference')
 const { sendEvent } = require('./send-event')
@@ -204,7 +204,7 @@ const sendImportToAudit = async (row, actioningUser) => {
     })
 
     const event = {
-      type: IMPORT,
+      type: IMPORT_MANUAL,
       source: SOURCE,
       id: uuidv4(),
       partitionKey: `ED${dog.indexNumber}`,
