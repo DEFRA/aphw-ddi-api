@@ -95,6 +95,56 @@ describe('cdos - GET schema', () => {
       expect(validation.error).not.toBeDefined()
     })
 
+    test('should validate given sort key is policeForce', () => {
+      const queryParams = {
+        status: 'PreExempt',
+        sortKey: 'policeForce',
+        sortOrder: 'DESC'
+      }
+
+      const validation = getCdosQuerySchema.validate(queryParams, { abortEarly: false })
+      const expectedQueryParams = {
+        status: ['PreExempt'],
+        sortKey: 'policeForce',
+        sortOrder: 'DESC'
+      }
+
+      expect(validation).toEqual({ value: expectedQueryParams })
+      expect(validation.error).not.toBeDefined()
+    })
+
+    test('should validate given sort key is owner', () => {
+      const queryParams = {
+        status: 'PreExempt',
+        sortKey: 'owner'
+      }
+
+      const validation = getCdosQuerySchema.validate(queryParams, { abortEarly: false })
+      const expectedQueryParams = {
+        status: ['PreExempt'],
+        sortKey: 'owner'
+      }
+
+      expect(validation).toEqual({ value: expectedQueryParams })
+      expect(validation.error).not.toBeDefined()
+    })
+
+    test('should validate given sort key is indexNumber', () => {
+      const queryParams = {
+        status: 'PreExempt',
+        sortKey: 'indexNumber'
+      }
+
+      const validation = getCdosQuerySchema.validate(queryParams, { abortEarly: false })
+      const expectedQueryParams = {
+        status: ['PreExempt'],
+        sortKey: 'indexNumber'
+      }
+
+      expect(validation).toEqual({ value: expectedQueryParams })
+      expect(validation.error).not.toBeDefined()
+    })
+
     test('should not validate if unknown filters are passed', () => {
       const queryParams = {
         unknown: 'something',
@@ -132,7 +182,7 @@ describe('cdos - GET schema', () => {
       }
 
       const validation = getCdosQuerySchema.validate(queryParams, { abortEarly: false })
-      expect(validation.error.message).toEqual('"sortKey" must be one of [cdoExpiry, joinedExemptionScheme]')
+      expect(validation.error.message).toEqual('"sortKey" must be one of [cdoExpiry, joinedExemptionScheme, indexNumber, policeForce, owner]')
     })
   })
 
