@@ -1,4 +1,4 @@
-describe('OnwerSearch test', () => {
+describe('OwnerSearch test', () => {
   jest.mock('../../../../../app/config/db', () => ({
     models: {
       person: {
