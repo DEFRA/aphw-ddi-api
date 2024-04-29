@@ -1,5 +1,5 @@
 const { v4: uuidv4 } = require('uuid')
-const { CREATE, UPDATE, DELETE, ACTIVITY } = require('../constants/event/events')
+const { CREATE, UPDATE, DELETE, ACTIVITY, IMPORT } = require('../constants/event/events')
 const { SOURCE } = require('../constants/event/source')
 const { getDiff } = require('json-difference')
 const { sendEvent } = require('./send-event')
@@ -191,6 +191,33 @@ const isImporting = user => {
   return user?.username === accessImportUser.username || user?.username === robotImportUser.username
 }
 
+const sendImportToAudit = async (row, actioningUser) => {
+  if (!isUserValid(actioningUser)) {
+    throw new Error('Username and displayname are required for auditing import of records')
+  }
+
+  for (const dog of row.dogs) {
+    const messagePayload = JSON.stringify({
+      actioningUser,
+      operation: `imported index number ${dog.indexNumber}`,
+      imported: row
+    })
+
+    const event = {
+      type: IMPORT,
+      source: SOURCE,
+      id: uuidv4(),
+      partitionKey: `ED${dog.indexNumber}`,
+      subject: 'DDI Import Record',
+      data: {
+        message: messagePayload
+      }
+    }
+
+    await sendEvent(event)
+  }
+}
+
 module.exports = {
   sendCreateToAudit,
   sendUpdateToAudit,
@@ -199,5 +226,6 @@ module.exports = {
   sendDeleteToAudit,
   isDataUnchanged,
   determineCreatePk,
-  determineUpdatePk
+  determineUpdatePk,
+  sendImportToAudit
 }
