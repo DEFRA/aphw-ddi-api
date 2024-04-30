@@ -1,0 +1,83 @@
+<?xml version="1.1" encoding="utf-8" standalone="no"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog" xmlns:ext="http://www.liquibase.org/xml/ns/dbchangelog-ext" xmlns:pro="http://www.liquibase.org/xml/ns/pro" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog-ext http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-ext.xsd http://www.liquibase.org/xml/ns/pro http://www.liquibase.org/xml/ns/pro/liquibase-pro-3.9.xsd http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.9.xsd">
+  <changeSet author="J Barnsley" id="1">
+    <tagDatabase tag="v1.61.0" />
+  </changeSet>
+  <changeSet author="J Barnsley" id="2">
+    <insert tableName="activity">
+      <column name="label" value="Application pack" />
+      <column name="activity_type_id" value="1" />
+      <column name="activity_source_id" value="1" />
+      <column name="activity_event_id" value="1" />
+      <column name="display_order" value="10" />
+    </insert>
+    <insert tableName="activity">
+      <column name="label" value="Form 2" />
+      <column name="activity_type_id" value="1" />
+      <column name="activity_source_id" value="1" />
+      <column name="activity_event_id" value="1" />
+      <column name="display_order" value="30" />
+    </insert>
+    <insert tableName="activity">
+      <column name="label" value="Request to court for corrected CDO" />
+      <column name="activity_type_id" value="1" />
+      <column name="activity_source_id" value="1" />
+      <column name="activity_event_id" value="1" />
+      <column name="display_order" value="60" />
+    </insert>
+    <insert tableName="activity">
+      <column name="label" value="Reminder to owner" />
+      <column name="activity_type_id" value="1" />
+      <column name="activity_source_id" value="1" />
+      <column name="activity_event_id" value="1" />
+      <column name="display_order" value="50" />
+    </insert>
+    <insert tableName="activity">
+      <column name="label" value="Reminder to DLO" />
+      <column name="activity_type_id" value="1" />
+      <column name="activity_source_id" value="1" />
+      <column name="activity_event_id" value="1" />
+      <column name="display_order" value="40" />
+    </insert>
+    <insert tableName="activity">
+      <column name="label" value="Application pack" />
+      <column name="activity_type_id" value="2" />
+      <column name="activity_source_id" value="1" />
+      <column name="activity_event_id" value="1" />
+      <column name="display_order" value="10" />
+    </insert>
+    <insert tableName="activity">
+      <column name="label" value="Corrected CDO" />
+      <column name="activity_type_id" value="2" />
+      <column name="activity_source_id" value="1" />
+      <column name="activity_event_id" value="1" />
+      <column name="display_order" value="20" />
+    </insert>
+  </changeSet>
+  <changeSet author="J Barnsley" id="3">
+    <update tableName="activity">
+      <column name="display_order" value="10" />
+      <where>label = 'Change of address form'</where>
+    </update>
+    <update tableName="activity">
+      <column name="display_order" value="20" />
+      <where>label = 'Death of a dog form'</where>
+    </update>
+    <update tableName="activity">
+      <column name="display_order" value="70" />
+      <where>label = 'Witness statement'</where>
+    </update>
+    <update tableName="activity">
+      <column name="display_order" value="30" />
+      <where>label = 'Judicial review notice'</where>
+    </update>
+    <update tableName="activity">
+      <column name="display_order" value="40" />
+      <where>label = 'Police correspondence'</where>
+    </update>
+    <update tableName="activity">
+      <column name="display_order" value="50" />
+      <where>label = 'Witness statement request'</where>
+    </update>
+  </changeSet>
+</databaseChangeLog>
