@@ -6,7 +6,9 @@ const { dbLogWarningToBacklog } = require('../../../lib/db-functions')
 const dateFormats = ['D MMMM YYYY', 'DD MMMM YYYY', 'DD/MM/YYYY']
 
 const breedTransforms = [
-  { in: 'Pit Bull Terrier Type', out: 'Pit Bull Terrier', caseInsensitive: true }
+  { in: 'Pit Bull Terrier Type', out: 'Pit Bull Terrier', caseInsensitive: true },
+  { in: 'Pit Bull Type', out: 'Pit Bull Terrier', caseInsensitive: true },
+  { in: 'XL Bully Type', out: 'XL Bully', caseInsensitive: true }
 ]
 const policeForceTransforms = [
   { in: 'Cheshire Police', out: 'Cheshire Constabulary' },
@@ -14,7 +16,8 @@ const policeForceTransforms = [
   { in: 'Devon and Cornwall Constabulary', out: 'Devon and Cornwall Police' },
   { in: 'Leicestershire Constabulary', out: 'Leicestershire Police' },
   { in: 'Dumfries & Galloway Police', out: 'Dumfries and Galloway Constabulary' },
-  { in: 'Dumfries & Galloway Constabulary', out: 'Dumfries and Galloway Constabulary' }
+  { in: 'Dumfries & Galloway Constabulary', out: 'Dumfries and Galloway Constabulary' },
+  { in: 'Hertfordshire Police', out: 'Hertfordshire Constabulary' }
 ]
 
 const cleanseRow = async (rowObj) => {
