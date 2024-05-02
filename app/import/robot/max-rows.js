@@ -4,8 +4,8 @@ const checkMaxRows = passed => {
     dogCount += x.dogs.length
   })
 
-  if (dogCount > 100) {
-    passed.errors.push('A single import cannot have more than 100 dogs')
+  if (dogCount > 30) {
+    passed.errors.push('A single import cannot have more than 30 dogs')
   }
 }
 
