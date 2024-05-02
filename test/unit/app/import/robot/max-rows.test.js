@@ -44,13 +44,13 @@ describe('Check max rows tests', () => {
 
   test('should detect too many rows', async () => {
     const tooManyRows = []
-    for (let i = 0; i < 102; i++) {
+    for (let i = 0; i < 32; i++) {
       tooManyRows.push(mockRow)
     }
     mockReadXlsxFile.mockReturnValue({ rows: tooManyRows })
     const res = await importRegister([])
     expect(res).not.toBe(null)
     expect(res.errors).toHaveLength(1)
-    expect(res.errors[0]).toBe('A single import cannot have more than 100 dogs')
+    expect(res.errors[0]).toBe('A single import cannot have more than 30 dogs')
   })
 })
