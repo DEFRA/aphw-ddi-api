@@ -1,4 +1,4 @@
-const { getActivityList, getActivityById } = require('../repos/activity')
+const { getActivityList, getActivityById, deleteActivity } = require('../repos/activity')
 const { getCallingUser } = require('../auth/get-user')
 const { sendActivityToAudit } = require('../messaging/send-audit')
 const schema = require('../schema/activity/event')
