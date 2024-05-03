@@ -13,6 +13,12 @@ const getPoliceForces = async () => {
   }
 }
 
+const addForce = (policeForce, user) => ({})
+
+const deleteForce = (policeForceId, user) => {}
+
 module.exports = {
-  getPoliceForces
+  getPoliceForces,
+  addForce,
+  deleteForce
 }
