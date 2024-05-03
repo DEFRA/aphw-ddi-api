@@ -10,11 +10,23 @@ module.exports = (sequelize, DataTypes) => {
     name: {
       type: DataTypes.STRING(64),
       allowNull: false
+    },
+    created_at: {
+      type: DataTypes.DATE,
+      allowNull: false,
+      defaultValue: sequelize.fn('now')
+    },
+    deleted_at: {
+      type: DataTypes.DATE,
+      allowNull: true
     }
   }, {
     sequelize,
     tableName: 'police_force',
-    timestamps: false,
+    paranoid: true,
+    createdAt: 'created_at',
+    deletedAt: 'deleted_at',
+    updatedAt: 'updated_at',
     indexes: [
       {
         name: 'police_force_pkey',
