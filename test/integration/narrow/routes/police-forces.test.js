@@ -1,4 +1,5 @@
 const { DuplicateResourceError } = require('../../../../app/errors/duplicate-record')
+const { NotFoundError } = require('../../../../app/errors/not-found')
 
 describe('Police force endpoint', () => {
   const { forces: mockForces } = require('../../../mocks/police-forces')
@@ -10,7 +11,7 @@ describe('Police force endpoint', () => {
   const { getCallingUser } = require('../../../../app/auth/get-user')
 
   jest.mock('../../../../app/repos/police-forces')
-  const { getPoliceForces, addForce } = require('../../../../app/repos/police-forces')
+  const { getPoliceForces, addForce, deleteForce } = require('../../../../app/repos/police-forces')
 
   beforeEach(async () => {
     jest.clearAllMocks()
@@ -18,7 +19,7 @@ describe('Police force endpoint', () => {
     await server.initialize()
   })
 
-  describe('GET /police-force', () => {
+  describe('GET /police-forces', () => {
     test('GET /police-force route returns 200', async () => {
       getPoliceForces.mockResolvedValue(mockForces)
 
@@ -62,7 +63,7 @@ describe('Police force endpoint', () => {
     })
   })
 
-  describe('POST /police-force', () => {
+  describe('POST /police-forces', () => {
     getCallingUser.mockReturnValue({
       username: 'internal-user',
       displayname: 'User, Internal'
@@ -130,6 +131,59 @@ describe('Police force endpoint', () => {
         payload: {
           name: 'Gondor Constabulary'
         }
+      }
+
+      const response = await server.inject(options)
+
+      expect(response.statusCode).toBe(500)
+    })
+  })
+
+  describe('DELETE /police-forces', () => {
+    getCallingUser.mockReturnValue({
+      username: 'internal-user',
+      displayname: 'User, Internal'
+    })
+
+    afterEach(() => {
+      jest.resetAllMocks()
+    })
+
+    test('should return 204', async () => {
+      deleteForce.mockResolvedValue({
+        id: 1,
+        name: 'Gondor Constabulary'
+      })
+      const options = {
+        method: 'DELETE',
+        url: '/police-forces/1'
+      }
+
+      const response = await server.inject(options)
+
+      expect(response.statusCode).toBe(204)
+
+      expect(response.payload).toBe('')
+    })
+
+    test('should return 409 given NotFoundError error', async () => {
+      deleteForce.mockRejectedValue(new NotFoundError())
+
+      const options = {
+        method: 'DELETE',
+        url: '/police-forces/1'
+      }
+
+      const response = await server.inject(options)
+      expect(response.statusCode).toBe(404)
+    })
+
+    test('should return 500 given db error', async () => {
+      deleteForce.mockRejectedValue(new Error('Test error'))
+
+      const options = {
+        method: 'DELETE',
+        url: '/police-forces/1'
       }
 
       const response = await server.inject(options)
