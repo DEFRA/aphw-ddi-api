@@ -4,5 +4,6 @@ module.exports = {
   EXEMPTION: 'exemption',
   PERSON: 'person',
   COMMENT: 'comment',
-  COURT: 'court'
+  COURT: 'court',
+  ACTIVITY: 'activity'
 }
