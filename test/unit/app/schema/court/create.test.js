@@ -1,10 +1,10 @@
-const { createCourtSchema } = require('../../../../../app/schema/court/create')
+const { createAdminItem } = require('../../../../../app/schema/admin/create')
 
 describe('createCourt schem', () => {
   describe('queryParams', () => {
     test('should validate given no filters are passed', () => {
       const queryParams = {}
-      const validation = createCourtSchema.validate(queryParams, { abortEarly: false })
+      const validation = createAdminItem.validate(queryParams, { abortEarly: false })
 
       expect(validation.error.message).toEqual('"name" is required')
     })
@@ -16,7 +16,7 @@ describe('createCourt schem', () => {
       const expectedQueryParams = {
         name: 'Tatooine Court of Appeals'
       }
-      const validation = createCourtSchema.validate(queryParams, { abortEarly: false })
+      const validation = createAdminItem.validate(queryParams, { abortEarly: false })
 
       expect(validation).toEqual({ value: expectedQueryParams })
       expect(validation.error).not.toBeDefined()
@@ -26,7 +26,7 @@ describe('createCourt schem', () => {
       const queryParams = {
         name: null
       }
-      const validation = createCourtSchema.validate(queryParams, { abortEarly: false })
+      const validation = createAdminItem.validate(queryParams, { abortEarly: false })
 
       expect(validation.error.message).toEqual('"name" must be a string')
     })

@@ -1,6 +1,6 @@
 const { getCourts, createCourt, deleteCourt } = require('../repos/courts')
 const { getCallingUser } = require('../auth/get-user')
-const { createCourtSchema } = require('../schema/court/create')
+const { createAdminItem } = require('../schema/admin/create')
 
 module.exports = [
   {
@@ -19,7 +19,7 @@ module.exports = [
     path: '/courts',
     options: {
       validate: {
-        payload: createCourtSchema,
+        payload: createAdminItem,
         failAction: (request, h, err) => {
           console.error(err)
 
