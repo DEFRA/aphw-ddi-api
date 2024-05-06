@@ -1,7 +1,6 @@
 const { getPoliceForces, addForce, deleteForce } = require('../repos/police-forces')
 const { createAdminItem } = require('../schema/admin/create')
 const { getCallingUser } = require('../auth/get-user')
-const { deleteCourt } = require('../repos/courts')
 
 module.exports = [
   {
