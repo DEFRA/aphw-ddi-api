@@ -1,8 +1,9 @@
 const sequelize = require('../config/db')
 const { Op } = require('sequelize')
 const { DuplicateResourceError } = require('../errors/duplicate-record')
-const { sendCreateToAudit } = require('../messaging/send-audit')
-const { POLICE } = require('../constants/event/audit-event-object-types')
+const { sendCreateToAudit, sendDeleteToAudit } = require('../messaging/send-audit')
+const { POLICE, COURT } = require('../constants/event/audit-event-object-types')
+const { NotFoundError } = require('../errors/not-found')
 
 const getPoliceForces = async () => {
   try {
@@ -60,7 +61,32 @@ const addForce = async (policeForce, user, transaction) => {
   return createdPoliceForce
 }
 
-const deleteForce = (policeForceId, user) => {}
+const deleteForce = async (policeForceId, user, transaction) => {
+  if (!transaction) {
+    return await sequelize.transaction(async (t) => deleteForce(policeForceId, user, t))
+  }
+
+  const foundPoliceForce = await sequelize.models.police_force.findOne({
+    where: {
+      id: policeForceId
+    }
+  })
+
+  if (foundPoliceForce === null) {
+    throw new NotFoundError(`Police Force with id ${policeForceId} does not exist`)
+  }
+
+  const destroyedCourt = await sequelize.models.police_force.destroy({
+    where: {
+      id: policeForceId
+    },
+    transaction
+  })
+
+  await sendDeleteToAudit(POLICE, foundPoliceForce, user)
+
+  return destroyedCourt
+}
 
 module.exports = {
   getPoliceForces,

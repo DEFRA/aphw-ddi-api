@@ -2,6 +2,7 @@ const { forces: mockForces } = require('../../../mocks/police-forces')
 const { devUser } = require('../../../mocks/auth')
 const { POLICE } = require('../../../../app/constants/event/audit-event-object-types')
 const { DuplicateResourceError } = require('../../../../app/errors/duplicate-record')
+const { NotFoundError } = require('../../../../app/errors/not-found')
 
 describe('Police force repo', () => {
   jest.mock('../../../../app/config/db', () => ({
@@ -10,6 +11,7 @@ describe('Police force repo', () => {
         findAll: jest.fn(),
         findOne: jest.fn(),
         create: jest.fn(),
+        destroy: jest.fn(),
         restore: jest.fn()
       }
     },
@@ -19,7 +21,7 @@ describe('Police force repo', () => {
   const sequelize = require('../../../../app/config/db')
 
   jest.mock('../../../../app/messaging/send-audit')
-  const { sendCreateToAudit } = require('../../../../app/messaging/send-audit')
+  const { sendCreateToAudit, sendDeleteToAudit } = require('../../../../app/messaging/send-audit')
 
   const { getPoliceForces, addForce, deleteForce } = require('../../../../app/repos/police-forces')
 
@@ -131,8 +133,30 @@ describe('Police force repo', () => {
   })
 
   describe('deleteForce', () => {
-    test('should be a function', () => {
-      expect(deleteForce).toBeInstanceOf(Function)
+    test('should create start new transaction if none passed', async () => {
+      await deleteForce(2, devUser)
+
+      expect(sequelize.transaction).toHaveBeenCalledTimes(1)
+    })
+
+    test('should delete the police force', async () => {
+      sequelize.models.police_force.findOne.mockResolvedValue({
+        id: 5,
+        name: 'The Shire Constabulary'
+      })
+      sequelize.models.police_force.destroy.mockResolvedValue(5)
+      await deleteForce(2, devUser, {})
+      expect(sequelize.models.police_force.destroy).toHaveBeenCalled()
+      expect(sendDeleteToAudit).toHaveBeenCalledWith(POLICE, {
+        id: 5,
+        name: 'The Shire Constabulary'
+      }, devUser)
+    })
+
+    test('should throw a NotFound given court id does not exist', async () => {
+      sequelize.models.police_force.findOne.mockResolvedValue(null)
+
+      await expect(deleteForce(2, devUser, {})).rejects.toThrow(new NotFoundError('Police Force with id 2 does not exist'))
     })
   })
 })
