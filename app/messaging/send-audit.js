@@ -167,7 +167,7 @@ const determineUpdatePk = (objName, entity) => {
     return entity.personReference || entity.person_reference
   } else if (objName === EXEMPTION) {
     return entity.index_number
-  } else if (objName === COURT) {
+  } else if (objName === COURT || objName === POLICE) {
     return entity.id.toString()
   }
   throw new Error(`Invalid object for update audit: ${objName}`)

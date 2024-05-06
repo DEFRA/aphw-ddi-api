@@ -246,6 +246,13 @@ describe('SendAudit test', () => {
       expect(pk).toBe('3')
     })
 
+    test('should get police force id if obj is a court', () => {
+      const court = { id: 3, name: 'Metropolis Police Department' }
+      const pk = determineUpdatePk(POLICE, court)
+
+      expect(pk).toBe('3')
+    })
+
     test('should get reference number of person', () => {
       const entity = { id: 1, personReference: 'P-123', first_name: 'John' }
       const pk = determineUpdatePk(PERSON, entity)
