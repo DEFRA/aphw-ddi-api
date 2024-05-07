@@ -22,6 +22,7 @@ const addForce = async (policeForce, user, transaction) => {
   if (!transaction) {
     return await sequelize.transaction(async (t) => addForce(policeForce, user, t))
   }
+
   const findQuery = {
     where: {
       name: {
