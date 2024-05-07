@@ -134,6 +134,10 @@ describe('Police force repo', () => {
 
   describe('deleteForce', () => {
     test('should create start new transaction if none passed', async () => {
+      sequelize.models.police_force.findOne.mockResolvedValueOnce({
+        id: 2,
+        name: 'Rohan Police Constabulary'
+      })
       await deleteForce(2, devUser)
 
       expect(sequelize.transaction).toHaveBeenCalledTimes(1)
@@ -153,7 +157,7 @@ describe('Police force repo', () => {
       }, devUser)
     })
 
-    test('should throw a NotFound given court id does not exist', async () => {
+    test('should throw a NotFound given police force id does not exist', async () => {
       sequelize.models.police_force.findOne.mockResolvedValue(null)
 
       await expect(deleteForce(2, devUser, {})).rejects.toThrow(new NotFoundError('Police Force with id 2 does not exist'))
