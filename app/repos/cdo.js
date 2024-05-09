@@ -333,7 +333,8 @@ const getSummaryCdos = async (filter, sort) => {
         include: [
           {
             model: sequelize.models.police_force,
-            as: 'police_force'
+            as: 'police_force',
+            paranoid: false
           }
         ]
       }
