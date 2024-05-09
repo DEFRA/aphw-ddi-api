@@ -1,6 +1,7 @@
 const sequelize = require('../config/db')
 const { ACTIVITY } = require('../constants/event/audit-event-object-types')
 const { DuplicateResourceError } = require('../errors/duplicate-record')
+const { NotFoundError } = require('../errors/not-found')
 const { sendCreateToAudit, sendDeleteToAudit } = require('../messaging/send-audit')
 
 const getActivityList = async (typeName, sourceName) => {
@@ -90,12 +91,12 @@ const createActivity = async (activityData, user, transaction) => {
   })
 
   const activity = await sequelize.models.activity.create({
-      label: activityData.label,
-      activity_source_id: activitySource.id,
-      activity_type_id: activityType.id,
-      activity_event_id: activitySource.id,
-      display_order: 10
-    }, { transaction })
+    label: activityData.label,
+    activity_source_id: activitySource.id,
+    activity_type_id: activityType.id,
+    activity_event_id: activitySource.id,
+    display_order: 10
+  }, { transaction })
 
   await sendCreateToAudit(ACTIVITY, {
     id: activity.id,
@@ -128,7 +129,7 @@ const deleteActivity = async (activityId, user, transaction) => {
     throw new NotFoundError(`Activity with id ${activityId} does not exist`)
   }
 
-  const destroyedActivity = await sequelize.models.activity.destroy({
+  await sequelize.models.activity.destroy({
     where: {
       id: activityId
     },

@@ -68,7 +68,6 @@ module.exports = [{
       }
     },
     handler: async (request, h) => {
-      try {
       const activity = await createActivity(request.payload, getCallingUser(request))
 
       return h.response({
@@ -77,9 +76,6 @@ module.exports = [{
         activityType: activity.activityType,
         activitySource: activity.activitySource
       }).code(201)
-    } catch (err) {
-      console.log('err', err)
-    }
     }
   }
 },
