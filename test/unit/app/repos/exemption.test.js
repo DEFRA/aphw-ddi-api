@@ -137,7 +137,7 @@ describe('Exemption repo', () => {
         exemptionOrder: 2015
       }
 
-      const mockedCdoExpirySetter = jest.fn()
+      const mockSaveFunction = jest.fn()
 
       const registration = {
         police_force_id: 30,
@@ -153,21 +153,21 @@ describe('Exemption repo', () => {
         exemption_order: {
           exemption_order: '2015'
         },
-        save: jest.fn()
+        previous: jest.fn().mockReturnValue(null),
+        save () {
+          mockSaveFunction(this)
+        }
       }
-
-      Object.defineProperty(registration, 'cdo_expiry', {
-        get: jest.fn().mockReturnValue(null),
-        set: mockedCdoExpirySetter,
-        configurable: true
-      })
 
       getCdo.mockResolvedValue({ registration, insurance: [] })
       getCourt.mockResolvedValue({ id: 1, name: 'Test Court' })
       getPoliceForce.mockResolvedValue({ id: 30, name: 'Test Police Force' })
 
       await updateExemption(data, dummyUser, {})
-      expect(mockedCdoExpirySetter).toHaveBeenCalledWith('2024-07-01T00:00:00.000Z')
+      expect(mockSaveFunction).toHaveBeenCalledWith(expect.objectContaining({
+        cdo_issued: '2024-05-01T00:00:00.000Z',
+        cdo_expiry: '2024-07-01T00:00:00.000Z'
+      }))
       expect(createOrUpdateInsurance).toHaveBeenCalled()
     })
 
@@ -459,8 +459,8 @@ describe('Exemption repo', () => {
       const data = {
         exemptionOrder: '2015',
         indexNumber: 'ED123',
-        cdoIssued: '2020-01-01',
-        cdoExpiry: '2020-02-01',
+        cdoIssued: undefined,
+        cdoExpiry: undefined,
         court: 'Test Court',
         policeForce: 'Test Police Force',
         legislationOfficer: 'Test Officer',
@@ -472,8 +472,8 @@ describe('Exemption repo', () => {
       }
 
       const registration = {
-        cdo_issued: '2020-01-01',
-        cdo_expiry: '2020-02-01',
+        cdo_issued: undefined,
+        cdo_expiry: undefined,
         court_id: 1,
         police_force_id: 1,
         legislation_officer: 'Test Officer',
@@ -484,7 +484,9 @@ describe('Exemption repo', () => {
         exemption_scheme_join: '2020-05-01',
         exemption_order: {
           exemption_order: '2015'
-        }
+        },
+        save: jest.fn(),
+        previous: jest.fn().mockReturnValue(undefined)
       }
 
       const expectedRegistration = {
@@ -515,6 +517,7 @@ describe('Exemption repo', () => {
         cdo_expiry: null,
         certificate_issued: null,
         legislation_officer: '',
+        previous: jest.fn().mockReturnValue(null),
         application_fee_paid: null,
         neutering_confirmation: null,
         microchip_verification: null,
@@ -548,6 +551,7 @@ describe('Exemption repo', () => {
         court_id: null,
         cdo_issued: undefined,
         cdo_expiry: undefined,
+        previous: jest.fn().mockReturnValue(undefined),
         certificate_issued: null,
         legislation_officer: '',
         application_fee_paid: null,

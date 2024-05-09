@@ -25,8 +25,6 @@ const updateExemption = async (data, user, transaction) => {
 
     const registration = cdo.registration
 
-    setDefaults(registration, data)
-
     updateRegistration(registration, data, policeForce)
 
     handleOrder2023(registration, data)
@@ -34,6 +32,8 @@ const updateExemption = async (data, user, transaction) => {
     await handleCourt(registration, data, cdo)
 
     await createOrUpdateInsurance(data, cdo, transaction)
+
+    setDefaults(registration, data)
 
     const res = registration.save({ transaction })
 
@@ -122,9 +122,9 @@ const handleOrder2023 = (registration, data) => {
  */
 const setDefaults = (registration, data) => {
   if (
-    (registration.cdo_expiry === null || registration.cdo_expiry === undefined) &&
-    (registration.cdo_issued === null || registration.cdo_issued === undefined) &&
-    (data.cdoIssued !== null && data.cdoIssued !== undefined)
+    (data.cdoExpiry === null || data.cdoExpiry === undefined) &&
+    (data.cdoIssued !== null && data.cdoIssued !== undefined) &&
+    (registration.previous('cdo_issued') === null || registration.previous('cdo_issued') === undefined)
   ) {
     const cdoExpiryDate = new Date(data.cdoIssued)
     cdoExpiryDate.setMonth(cdoExpiryDate.getMonth() + 2)
