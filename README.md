@@ -94,7 +94,7 @@ process.env.PACT_BROKER_URL = 'http://host.docker.internal:9292'
 alternatively add `--setupFilesAfterEnv=<rootDir>/jest.setup.single.js` to your jest run script:
 
 ```
-npm run test <path>/<filename> --setupFilesAfterEnv=<rootDir>/jest.setup.single.js
+npm run test <path>/<filename> -- --setupFilesAfterEnv=<rootDir>/jest.setup.single.js
 ```
 
 ## Licence 
