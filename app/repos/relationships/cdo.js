@@ -27,7 +27,8 @@ const cdoRelationship = sequelize => [
     },
     {
       model: sequelize.models.court,
-      as: 'court'
+      as: 'court',
+      paranoid: false
     },
     {
       model: sequelize.models.exemption_order,
