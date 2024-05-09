@@ -1,6 +1,7 @@
 const sequelize = require('../config/db')
 const { ACTIVITY } = require('../constants/event/audit-event-object-types')
 const activitySource = require('../data/models/activity-source')
+const { sendCreateToAudit, sendDeleteToAudit } = require('../messaging/send-audit')
 
 const getActivityList = async (typeName, sourceName) => {
   try {
@@ -22,7 +23,6 @@ const getActivityList = async (typeName, sourceName) => {
       }]
     })
 
-    console.log('list', activities)
     return activities
   } catch (e) {
     console.log(`Error retrieving activities for type ${typeName} and source ${sourceName}: ${e}`)
@@ -99,10 +99,12 @@ const deleteActivity = async (activityId, user, transaction) => {
   if (!transaction) {
     return await sequelize.transaction(async (t) => deleteActivity(activityId, user, t))
   }
+
   const foundActivity = await sequelize.models.activity.findOne({
     where: {
       id: activityId
-    }
+    },
+    transaction
   })
 
   if (foundActivity === null) {
@@ -118,7 +120,7 @@ const deleteActivity = async (activityId, user, transaction) => {
 
   await sendDeleteToAudit(ACTIVITY, foundActivity, user)
 
-  return destroyedActivity
+  console.log('done send to audit activity', destroyedActivity)
 }
 
 module.exports = {

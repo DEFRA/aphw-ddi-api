@@ -1,11 +1,11 @@
 const { v4: uuidv4 } = require('uuid')
-const { CREATE, UPDATE, DELETE, ACTIVITY, IMPORT_MANUAL } = require('../constants/event/events')
+const { CREATE, UPDATE, DELETE, IMPORT_MANUAL } = require('../constants/event/events')
 const { SOURCE } = require('../constants/event/source')
 const { getDiff } = require('json-difference')
 const { sendEvent } = require('./send-event')
 const { deepClone } = require('../lib/deep-clone')
 const { isUserValid } = require('../auth/get-user')
-const { CDO, DOG, PERSON, EXEMPTION, COURT } = require('../constants/event/audit-event-object-types')
+const { CDO, DOG, PERSON, EXEMPTION, COURT, ACTIVITY } = require('../constants/event/audit-event-object-types')
 const { accessImportUser, robotImportUser } = require('../constants/import')
 
 const sendEventToAudit = async (eventType, eventSubject, eventDescription, actioningUser) => {
@@ -168,6 +168,8 @@ const determineUpdatePk = (objName, entity) => {
   } else if (objName === EXEMPTION) {
     return entity.index_number
   } else if (objName === COURT) {
+    return entity.id.toString()
+  } else if (objName === ACTIVITY) {
     return entity.id.toString()
   }
   throw new Error(`Invalid object for update audit: ${objName}`)
