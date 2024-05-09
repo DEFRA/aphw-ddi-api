@@ -30,6 +30,7 @@ module.exports = [{
     validate: {
       payload: cdoCreateSchema,
       failAction: (request, h, err) => {
+        console.log('~~~~~~ Chris Debug ~~~~~~ ', 'Request', request.payload)
         console.error(err)
 
         return h.response({ errors: err.details.map(e => e.message) }).code(400).takeover()
@@ -37,9 +38,11 @@ module.exports = [{
     },
     handler: async (request, h) => {
       try {
+        console.log('~~~~~~ Chris Debug ~~~~~~ ', 'Request.payload', request.payload)
         const created = await createCdo(request.payload, getCallingUser(request))
         const res = cdoCreateDto(created)
-
+        console.log('~~~~~~ Chris Debug ~~~~~~ ', 'Created', created)
+        console.log('~~~~~~ Chris Debug ~~~~~~ ', 'Res', res)
         return h.response(res).code(200)
       } catch (e) {
         if (e instanceof NotFoundError) {
