@@ -124,6 +124,57 @@ describe('Exemption repo', () => {
     expect(createOrUpdateInsurance).toHaveBeenCalled()
   })
 
+  test('updateExemption should set a default cdoExpiry given ', async () => {
+    const data = {
+      indexNumber: 'ED300245',
+      cdoIssued: '2024-05-01T00:00:00.000Z',
+      cdoExpiry: null,
+      court: '',
+      policeForce: 'Metropolitan Police Service',
+      legislationOfficer: '',
+      joinedExemptionScheme: '2024-05-08T00:00:00.000Z',
+      exemptionOrder: 2015
+    }
+
+    const saveDbMock = jest.fn()
+
+    const registration = {
+      police_force_id: 30,
+      court_id: null,
+      cdo_issued: null,
+      cdo_expiry: null,
+      _previousDataValues: {
+        cdo_issued: null,
+        cdo_expiry: null
+      },
+      certificate_issued: null,
+      legislation_officer: '',
+      application_fee_paid: null,
+      neutering_confirmation: null,
+      microchip_verification: null,
+      joined_exemption_scheme: '2024-05-08',
+      exemption_order: {
+        exemption_order: '2015'
+      },
+      async save () {
+        // mock method in order for us to be able to view registration internals
+        await saveDbMock(this)
+      }
+    }
+
+    getCdo.mockResolvedValue({ registration, insurance: [] })
+    getCourt.mockResolvedValue({ id: 1, name: 'Test Court' })
+    getPoliceForce.mockResolvedValue({ id: 30, name: 'Test Police Force' })
+
+    await updateExemption(data, dummyUser, {})
+
+    expect(saveDbMock).toHaveBeenCalledWith(expect.objectContaining({
+      cdo_issued: '2024-05-01T00:00:00.000Z',
+      cdo_expiry: '2024-07-01T00:00:00.000Z'
+    }))
+    expect(createOrUpdateInsurance).toHaveBeenCalled()
+  })
+
   test('updateExemption should not call getCourt if no court supplied', async () => {
     const data = {
       exemptionOrder: '2023',
@@ -254,7 +305,10 @@ describe('Exemption repo', () => {
     getCdo.mockResolvedValue({ registration: {}, insurance: [] })
     getPoliceForce.mockResolvedValue(null)
 
-    await expect(updateExemption({ indexNumber: '123', policeForce: 'test' }, dummyUser, {})).rejects.toThrow('Police force not found: test')
+    await expect(updateExemption({
+      indexNumber: '123',
+      policeForce: 'test'
+    }, dummyUser, {})).rejects.toThrow('Police force not found: test')
   })
 
   test('updateExemption should throw error if no username for auditing', async () => {
@@ -301,12 +355,10 @@ describe('Exemption repo', () => {
     updateStatus.mockResolvedValue()
 
     const cdo = {
-      registration: {
-      }
+      registration: {}
     }
 
-    const payload = {
-    }
+    const payload = {}
 
     await autoChangeStatus(cdo, payload)
 
@@ -321,8 +373,7 @@ describe('Exemption repo', () => {
       status: {
         status: 'Pre-exempt'
       },
-      registration: {
-      }
+      registration: {}
     }
 
     const payload = {
@@ -342,8 +393,7 @@ describe('Exemption repo', () => {
       status: {
         status: 'Pre-exempt'
       },
-      registration: {
-      }
+      registration: {}
     }
 
     const payload = {
@@ -366,8 +416,7 @@ describe('Exemption repo', () => {
       status: {
         status: 'Interim exempt'
       },
-      registration: {
-      }
+      registration: {}
     }
 
     const payload = {

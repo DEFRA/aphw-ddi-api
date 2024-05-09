@@ -27,6 +27,8 @@ const updateExemption = async (data, user, transaction) => {
 
     updateRegistration(registration, data, policeForce)
 
+    setDefaults(registration, data)
+
     handleOrder2023(registration, data)
 
     await handleCourt(registration, data, cdo)
@@ -111,6 +113,22 @@ const handleOrder2023 = (registration, data) => {
     registration.microchip_deadline = data.microchipDeadline ?? null
     registration.typed_by_dlo = data.typedByDlo ?? null
     registration.withdrawn = data.withdrawn ?? null
+  }
+}
+
+/**
+ * @param registration
+ * @param data
+ */
+const setDefaults = (registration, data) => {
+  if (
+    registration.cdo_expiry === null &&
+    data.cdoIssued !== null &&
+    registration._previousDataValues.cdo_issued === null
+  ) {
+    const cdoExpiryDate = new Date(data.cdoIssued)
+    cdoExpiryDate.setMonth(cdoExpiryDate.getMonth() + 2)
+    registration.cdo_expiry = cdoExpiryDate.toISOString()
   }
 }
 
