@@ -1,4 +1,4 @@
-const { getActivityList, getActivityById, deleteActivity } = require('../repos/activity')
+const { getActivityList, getActivityById, createActivity, deleteActivity } = require('../repos/activity')
 const { getCallingUser } = require('../auth/get-user')
 const { sendActivityToAudit } = require('../messaging/send-audit')
 const schema = require('../schema/activity/event')
@@ -68,14 +68,18 @@ module.exports = [{
       }
     },
     handler: async (request, h) => {
+      try {
       const activity = await createActivity(request.payload, getCallingUser(request))
 
       return h.response({
         id: activity.id,
         label: activity.label,
         activityType: activity.activityType,
-        activitySource: activity.activitySOurce
+        activitySource: activity.activitySource
       }).code(201)
+    } catch (err) {
+      console.log('err', err)
+    }
     }
   }
 },

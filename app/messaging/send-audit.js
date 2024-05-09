@@ -154,7 +154,7 @@ const determineCreatePk = (objName, entity) => {
     return entity.dog.index_number
   } else if (objName === DOG) {
     return entity.index_number
-  } else if (objName === COURT) {
+  } else if (objName === COURT || objName === ACTIVITY) {
     return entity.id.toString()
   }
   throw new Error(`Invalid object for create audit: ${objName}`)
