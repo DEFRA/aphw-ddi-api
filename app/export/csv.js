@@ -53,7 +53,7 @@ const convertRow = (row) => {
     exemption.certificate_issued,
     exemption.cdo_issued,
     exemption.cdo_expiry,
-    exemption.court?.name,
+    exemption.court?.name ?? '',
     exemption.police_force?.name,
     exemption.legislation_officer,
     exemption.application_fee_paid,
