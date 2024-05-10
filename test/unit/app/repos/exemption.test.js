@@ -1,3 +1,4 @@
+const { deepClone } = require('../../../../app/lib/deep-clone')
 const dummyUser = {
   username: 'dummy-user',
   displayname: 'Dummy User'
@@ -527,7 +528,7 @@ describe('Exemption repo', () => {
         }
       }
 
-      setDefaults(registration, data)
+      setDefaults(registration, data, deepClone(registration))
 
       expect(registration).toEqual({
         ...registration,
@@ -563,7 +564,7 @@ describe('Exemption repo', () => {
         }
       }
 
-      setDefaults(registration, data)
+      setDefaults(registration, data, deepClone(registration))
 
       expect(registration).toEqual({
         ...registration,
