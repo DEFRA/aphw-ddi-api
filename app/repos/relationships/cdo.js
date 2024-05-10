@@ -23,11 +23,13 @@ const cdoRelationship = sequelize => [
     as: 'registration',
     include: [{
       model: sequelize.models.police_force,
-      as: 'police_force'
+      as: 'police_force',
+      paranoid: false
     },
     {
       model: sequelize.models.court,
-      as: 'court'
+      as: 'court',
+      paranoid: false
     },
     {
       model: sequelize.models.exemption_order,
