@@ -27,8 +27,6 @@ const updateExemption = async (data, user, transaction) => {
     const registration = cdo.registration
     const previousRegistration = deepClone(registration)
 
-    setDefaults(registration, data)
-
     updateRegistration(registration, data, policeForce)
 
     handleOrder2023(registration, data)
