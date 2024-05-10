@@ -1,5 +1,5 @@
 const { v4: uuidv4 } = require('uuid')
-const { CREATE, UPDATE, DELETE, IMPORT_MANUAL } = require('../constants/event/events')
+const { CREATE, UPDATE, DELETE, IMPORT_MANUAL, ACTIVITY: ACTIVITY_EVENT } = require('../constants/event/events')
 const { SOURCE } = require('../constants/event/source')
 const { getDiff } = require('json-difference')
 const { sendEvent } = require('./send-event')
@@ -68,7 +68,7 @@ const sendActivityToAudit = async (activity, actioningUser) => {
   }
 
   const event = {
-    type: ACTIVITY,
+    type: ACTIVITY_EVENT,
     source: SOURCE,
     id: uuidv4(),
     partitionKey: activity.pk,
@@ -167,9 +167,7 @@ const determineUpdatePk = (objName, entity) => {
     return entity.personReference || entity.person_reference
   } else if (objName === EXEMPTION) {
     return entity.index_number
-  } else if (objName === COURT || objName === POLICE) {
-    return entity.id.toString()
-  } else if (objName === ACTIVITY) {
+  } else if (objName === COURT || objName === POLICE || objName === ACTIVITY) {
     return entity.id.toString()
   }
   throw new Error(`Invalid object for update audit: ${objName}`)
