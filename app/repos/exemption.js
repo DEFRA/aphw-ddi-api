@@ -8,6 +8,7 @@ const { EXEMPTION } = require('../constants/event/audit-event-object-types')
 const constants = require('../constants/statuses')
 const { updateStatus } = require('../repos/dogs')
 const { preChangedExemptionAudit, postChangedExemptionAudit } = require('../dto/auditing/exemption')
+const { deepClone } = require('../lib/deep-clone')
 
 const updateExemption = async (data, user, transaction) => {
   if (!transaction) {
@@ -24,6 +25,7 @@ const updateExemption = async (data, user, transaction) => {
     const changedStatus = await autoChangeStatus(cdo, data, transaction)
 
     const registration = cdo.registration
+    const previousRegistration = deepClone(registration)
 
     updateRegistration(registration, data, policeForce)
 
@@ -32,6 +34,8 @@ const updateExemption = async (data, user, transaction) => {
     await handleCourt(registration, data, cdo)
 
     await createOrUpdateInsurance(data, cdo, transaction)
+
+    setDefaults(registration, data, previousRegistration)
 
     const res = registration.save({ transaction })
 
@@ -114,6 +118,23 @@ const handleOrder2023 = (registration, data) => {
   }
 }
 
+/**
+ * @param registration
+ * @param data
+ * @param previousRegistration
+ */
+const setDefaults = (registration, data, previousRegistration) => {
+  if (
+    (data.cdoExpiry === null || data.cdoExpiry === undefined) &&
+    (data.cdoIssued !== null && data.cdoIssued !== undefined) &&
+    (previousRegistration.cdo_issued === null || previousRegistration.cdo_issued === undefined)
+  ) {
+    const cdoExpiryDate = new Date(data.cdoIssued)
+    cdoExpiryDate.setMonth(cdoExpiryDate.getMonth() + 2)
+    registration.cdo_expiry = cdoExpiryDate.toISOString()
+  }
+}
+
 const handleCourt = async (registration, data, cdo) => {
   if (data.court && data.court !== '') {
     const court = await getCourt(data.court)
@@ -128,5 +149,6 @@ const handleCourt = async (registration, data, cdo) => {
 
 module.exports = {
   updateExemption,
+  setDefaults,
   autoChangeStatus
 }

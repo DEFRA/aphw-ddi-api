@@ -39,7 +39,6 @@ module.exports = [{
       try {
         const created = await createCdo(request.payload, getCallingUser(request))
         const res = cdoCreateDto(created)
-
         return h.response(res).code(200)
       } catch (e) {
         if (e instanceof NotFoundError) {
