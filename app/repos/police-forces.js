@@ -77,7 +77,7 @@ const deleteForce = async (policeForceId, user, transaction) => {
     throw new NotFoundError(`Police Force with id ${policeForceId} does not exist`)
   }
 
-  const destroyedCourt = await sequelize.models.police_force.destroy({
+  const destroyedPoliceForce = await sequelize.models.police_force.destroy({
     where: {
       id: policeForceId
     },
@@ -86,7 +86,7 @@ const deleteForce = async (policeForceId, user, transaction) => {
 
   await sendDeleteToAudit(POLICE, foundPoliceForce, user)
 
-  return destroyedCourt
+  return destroyedPoliceForce
 }
 
 module.exports = {
