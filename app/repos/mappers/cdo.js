@@ -47,7 +47,7 @@ const mapSummaryCdoDaoToDto = (summaryCdo) => {
       dogReference: summaryCdo.index_number
     },
     exemption: {
-      policeForce: registration.police_force.name,
+      policeForce: registration.police_force?.name ?? null,
       cdoExpiry: registration.cdo_expiry,
       joinedExemptionScheme: registration.joined_exemption_scheme,
       nonComplianceLetterSent: registration.non_compliance_letter_sent

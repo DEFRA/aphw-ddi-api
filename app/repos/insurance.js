@@ -1,5 +1,10 @@
 const sequelize = require('../config/db')
 const { getInsuranceCompany } = require('../lookups')
+const { Op } = require('sequelize')
+const { DuplicateResourceError } = require('../errors/duplicate-record')
+const { sendCreateToAudit, sendDeleteToAudit } = require('../messaging/send-audit')
+const { INSURANCE } = require('../constants/event/audit-event-object-types')
+const { NotFoundError } = require('../errors/not-found')
 
 const createInsurance = async (id, data, transaction) => {
   if (!transaction) {
@@ -77,9 +82,92 @@ const createOrUpdateInsurance = async (data, cdo, transaction) => {
   }
 }
 
+/**
+ * @param {{ id: number; company_name: string }} insuranceCompanyDao
+ * @return {{ id: number; name: string }}
+ */
+const mapInsuranceCompanyDaoToDto = (insuranceCompanyDao) => {
+  return { id: insuranceCompanyDao.id, name: insuranceCompanyDao.company_name }
+}
+
+const addCompany = async (insuranceCompany, user, transaction) => {
+  if (!transaction) {
+    return await sequelize.transaction(async (t) => addCompany(insuranceCompany, user, t))
+  }
+
+  const findQuery = {
+    where: {
+      company_name: {
+        [Op.iLike]: `%${insuranceCompany.name}%`
+      }
+    }
+  }
+  const foundInsuranceCompany = await sequelize.models.insurance_company.findOne(findQuery)
+
+  if (foundInsuranceCompany !== null) {
+    throw new DuplicateResourceError(`Insurance company with name ${insuranceCompany.name} already exists`)
+  }
+  let createdInsuranceCompany
+
+  const foundParanoid = await sequelize.models.insurance_company.findOne({
+    ...findQuery,
+    paranoid: false
+  })
+
+  if (foundParanoid) {
+    await sequelize.models.insurance_company.restore({
+      where: {
+        id: foundParanoid.id
+      },
+      transaction
+    })
+    createdInsuranceCompany = foundParanoid
+  } else {
+    createdInsuranceCompany = await sequelize.models.insurance_company.create({
+      company_name: insuranceCompany.name
+    }, { transaction })
+  }
+
+  const insuranceCompanyDto = mapInsuranceCompanyDaoToDto(createdInsuranceCompany)
+
+  await sendCreateToAudit(INSURANCE, insuranceCompanyDto, user)
+
+  return insuranceCompanyDto
+}
+
+const deleteCompany = async (insuranceCompanyId, user, transaction) => {
+  if (!transaction) {
+    return await sequelize.transaction(async (t) => deleteCompany(insuranceCompanyId, user, t))
+  }
+
+  const foundInsuranceCompany = await sequelize.models.insurance_company.findOne({
+    where: {
+      id: insuranceCompanyId
+    }
+  })
+
+  if (foundInsuranceCompany === null) {
+    throw new NotFoundError(`Insurance company with id ${insuranceCompanyId} does not exist`)
+  }
+
+  const destroyedInsuranceCompany = await sequelize.models.insurance_company.destroy({
+    where: {
+      id: insuranceCompanyId
+    },
+    transaction
+  })
+  const insuranceCompanyDto = mapInsuranceCompanyDaoToDto(foundInsuranceCompany)
+
+  await sendDeleteToAudit(INSURANCE, insuranceCompanyDto, user)
+
+  return destroyedInsuranceCompany
+}
+
 module.exports = {
   createInsurance,
   updateInsurance,
   createOrUpdateInsurance,
-  getCompanies
+  getCompanies,
+  addCompany,
+  deleteCompany
 }

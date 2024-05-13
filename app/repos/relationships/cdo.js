@@ -41,7 +41,8 @@ const cdoRelationship = sequelize => [
     as: 'insurance',
     include: {
       model: sequelize.models.insurance_company,
-      as: 'company'
+      as: 'company',
+      paranoid: false
     }
   },
   {
