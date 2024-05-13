@@ -6,7 +6,7 @@ const {
 jest.mock('../../../../app/messaging/send-event')
 const { sendEvent } = require('../../../../app/messaging/send-event')
 const { robotImportUser, accessImportUser } = require('../../../../app/constants/import')
-const { CDO, COURT, DOG, EXEMPTION, PERSON, POLICE } = require('../../../../app/constants/event/audit-event-object-types')
+const { CDO, COURT, DOG, EXEMPTION, PERSON, POLICE, INSURANCE } = require('../../../../app/constants/event/audit-event-object-types')
 
 const devUser = {
   username: 'dev-user@test.com',
@@ -246,9 +246,16 @@ describe('SendAudit test', () => {
       expect(pk).toBe('3')
     })
 
-    test('should get police force id if obj is a court', () => {
-      const court = { id: 3, name: 'Metropolis Police Department' }
-      const pk = determineUpdatePk(POLICE, court)
+    test('should get police force id if obj is a police force', () => {
+      const policeForce = { id: 3, name: 'Metropolis Police Department' }
+      const pk = determineUpdatePk(POLICE, policeForce)
+
+      expect(pk).toBe('3')
+    })
+
+    test('should get insurance company id if obj is an insurance company', () => {
+      const insuranceCompany = { id: 3, name: 'Pets R Us' }
+      const pk = determineUpdatePk(INSURANCE, insuranceCompany)
 
       expect(pk).toBe('3')
     })
