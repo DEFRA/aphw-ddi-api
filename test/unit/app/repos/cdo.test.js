@@ -286,7 +286,7 @@ describe('CDO repo', () => {
       expect(sequelize.models.dog.findAll).toHaveBeenCalledWith({
         attributes: ['id', 'index_number', 'status_id'],
         include: expect.any(Array),
-        order: [[expect.anything(), 'ASC']],
+        order: [[expect.anything(), 'NULLS LAST'], [expect.anything(), 'ASC']],
         where: {
           '$status.status$': ['Pre-exempt']
         }
@@ -304,7 +304,7 @@ describe('CDO repo', () => {
       expect(sequelize.models.dog.findAll).toHaveBeenCalledWith({
         attributes: ['id', 'index_number', 'status_id'],
         include: expect.any(Array),
-        order: [[expect.anything(), 'DESC'], [expect.anything(), 'DESC']],
+        order: [[expect.anything(), 'NULLS LAST'], [expect.anything(), 'DESC'], [expect.anything(), 'DESC']],
         where: {
           '$status.status$': ['Pre-exempt']
         }
@@ -323,7 +323,7 @@ describe('CDO repo', () => {
       expect(sequelize.models.dog.findAll).toHaveBeenCalledWith({
         attributes: ['id', 'index_number', 'status_id'],
         include: expect.any(Array),
-        order: [[expect.anything(), 'DESC'], [expect.anything(), 'DESC']],
+        order: [[expect.anything(), 'NULLS LAST'], [expect.anything(), 'DESC'], [expect.anything(), 'DESC']],
         where: {
           '$status.status$': ['Pre-exempt']
         }
@@ -342,7 +342,7 @@ describe('CDO repo', () => {
       expect(sequelize.models.dog.findAll).toHaveBeenCalledWith({
         attributes: ['id', 'index_number', 'status_id'],
         include: expect.any(Array),
-        order: [[expect.anything(), 'ASC'], [expect.anything(), 'ASC'], [expect.anything(), 'ASC']],
+        order: [[expect.anything(), 'NULLS LAST'], [expect.anything(), 'ASC'], [expect.anything(), 'ASC'], [expect.anything(), 'ASC']],
         where: {
           '$status.status$': ['Pre-exempt']
         }
@@ -362,7 +362,7 @@ describe('CDO repo', () => {
       expect(sequelize.models.dog.findAll).toHaveBeenCalledWith({
         attributes: ['id', 'index_number', 'status_id'],
         include: expect.any(Array),
-        order: [[expect.anything(), 'ASC'], [expect.anything(), 'ASC']],
+        order: [[expect.anything(), 'NULLS LAST'], [expect.anything(), 'ASC'], [expect.anything(), 'ASC']],
         where: {
           '$status.status$': ['Pre-exempt']
         }
@@ -416,7 +416,7 @@ describe('CDO repo', () => {
       expect(sequelize.models.dog.findAll).toHaveBeenCalledWith({
         attributes: ['id', 'index_number', 'status_id'],
         include: expect.any(Array),
-        order: [[expect.anything(), 'ASC']],
+        order: [[expect.anything(), 'NULLS LAST'], [expect.anything(), 'ASC']],
         where: {
           '$status.status$': ['Pre-exempt'],
           '$registration.non_compliance_letter_sent$': {

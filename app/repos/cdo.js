@@ -294,7 +294,9 @@ const getSummaryCdos = async (filter, sort) => {
     }
   }
 
-  const order = []
+  const order = [
+    [sequelize.col(sortKeys.policeForce), 'NULLS LAST']
+  ]
 
   if (sortKey !== undefined) {
     if (Array.isArray(sortKey)) {
