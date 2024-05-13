@@ -2,7 +2,7 @@ const { DuplicateResourceError } = require('../../../../app/errors/duplicate-rec
 const { NotFoundError } = require('../../../../app/errors/not-found')
 
 describe('Insurance endpoint', () => {
-  const { forces: mockForces } = require('../../../mocks/police-forces')
+  const { insuranceCompanies } = require('../../../mocks/insurance-companies')
 
   const createServer = require('../../../../app/server')
   let server
@@ -10,8 +10,8 @@ describe('Insurance endpoint', () => {
   jest.mock('../../../../app/auth/get-user')
   const { getCallingUser } = require('../../../../app/auth/get-user')
 
-  jest.mock('../../../../app/repos/police-forces')
-  const { getPoliceForces, addForce, deleteForce } = require('../../../../app/repos/police-forces')
+  jest.mock('../../../../app/repos/insurance')
+  const { getCompanies, addCompany, deleteCompany } = require('../../../../app/repos/insurance')
 
   beforeEach(async () => {
     jest.clearAllMocks()
@@ -19,42 +19,42 @@ describe('Insurance endpoint', () => {
     await server.initialize()
   })
 
-  describe('GET /police-forces', () => {
-    test('GET /police-force route returns 200', async () => {
-      getPoliceForces.mockResolvedValue(mockForces)
+  describe('GET /insurance/companies', () => {
+    test('GET /insurance/companies route returns 200', async () => {
+      getCompanies.mockResolvedValue(insuranceCompanies)
 
       const options = {
         method: 'GET',
-        url: '/police-forces'
+        url: '/insurance/companies'
       }
 
       const response = await server.inject(options)
       expect(response.statusCode).toBe(200)
     })
 
-    test('GET /police-force route returns forces', async () => {
-      getPoliceForces.mockResolvedValue(mockForces)
+    test('GET /insurance/companies route returns insurance companies', async () => {
+      getCompanies.mockResolvedValue(insuranceCompanies)
 
       const options = {
         method: 'GET',
-        url: '/police-forces'
+        url: '/insurance/companies'
       }
 
       const response = await server.inject(options)
-      const { policeForces } = JSON.parse(response.payload)
+      const { companies } = JSON.parse(response.payload)
 
-      expect(policeForces).toHaveLength(3)
-      expect(policeForces).toContainEqual({ id: 1, name: 'Northern Constabulary' })
-      expect(policeForces).toContainEqual({ id: 2, name: 'Southern Constabulary' })
-      expect(policeForces).toContainEqual({ id: 3, name: 'Eastern Constabulary' })
+      expect(companies).toHaveLength(3)
+      expect(companies).toContainEqual({ id: 1, name: 'Gotham City Dog Insurance' })
+      expect(companies).toContainEqual({ id: 2, name: 'Metropolis Insurance' })
+      expect(companies).toContainEqual({ id: 3, name: 'Smallville Pet Emporium' })
     })
 
-    test('GET /police-force route returns 500 if db error', async () => {
-      getPoliceForces.mockRejectedValue(new Error('Test error'))
+    test('GET /insurance/companies route returns 500 if db error', async () => {
+      getCompanies.mockRejectedValue(new Error('Test error'))
 
       const options = {
         method: 'GET',
-        url: '/police-forces'
+        url: '/insurance/companies'
       }
 
       const response = await server.inject(options)
@@ -63,7 +63,7 @@ describe('Insurance endpoint', () => {
     })
   })
 
-  describe('POST /police-forces', () => {
+  describe('POST /insurance/companies', () => {
     getCallingUser.mockReturnValue({
       username: 'internal-user',
       displayname: 'User, Internal'
@@ -74,15 +74,15 @@ describe('Insurance endpoint', () => {
     })
 
     test('should return 201', async () => {
-      addForce.mockResolvedValue({
+      addCompany.mockResolvedValue({
         id: 2,
-        name: 'Gondor Constabulary'
+        name: 'Gotham City Dog Insurance'
       })
       const options = {
         method: 'POST',
-        url: '/police-forces',
+        url: '/insurance/companies',
         payload: {
-          name: 'Gondor Constabulary'
+          name: 'Gotham City Dog Insurance'
         }
       }
 
@@ -92,14 +92,14 @@ describe('Insurance endpoint', () => {
 
       expect(court).toEqual({
         id: 2,
-        name: 'Gondor Constabulary'
+        name: 'Gotham City Dog Insurance'
       })
     })
 
     test('should return a 400 given schema is invalid', async () => {
       const options = {
         method: 'POST',
-        url: '/police-forces',
+        url: '/insurance/companies',
         payload: {}
       }
 
@@ -108,13 +108,13 @@ describe('Insurance endpoint', () => {
     })
 
     test('should return 409 given DuplicateResourceError error', async () => {
-      addForce.mockRejectedValue(new DuplicateResourceError())
+      addCompany.mockRejectedValue(new DuplicateResourceError())
 
       const options = {
         method: 'POST',
-        url: '/police-forces',
+        url: '/insurance/companies',
         payload: {
-          name: 'Gondor Constabulary'
+          name: 'Gotham City Dog Insurance'
         }
       }
 
@@ -123,13 +123,13 @@ describe('Insurance endpoint', () => {
     })
 
     test('should return 500 given db error', async () => {
-      addForce.mockRejectedValue(new Error('Test error'))
+      addCompany.mockRejectedValue(new Error('Test error'))
 
       const options = {
         method: 'POST',
-        url: '/police-forces',
+        url: '/insurance/companies',
         payload: {
-          name: 'Gondor Constabulary'
+          name: 'Gotham City Dog Insurance'
         }
       }
 
@@ -139,7 +139,7 @@ describe('Insurance endpoint', () => {
     })
   })
 
-  describe('DELETE /police-forces', () => {
+  describe('DELETE /insurance/companies', () => {
     getCallingUser.mockReturnValue({
       username: 'internal-user',
       displayname: 'User, Internal'
@@ -150,13 +150,13 @@ describe('Insurance endpoint', () => {
     })
 
     test('should return 204', async () => {
-      deleteForce.mockResolvedValue({
+      deleteCompany.mockResolvedValue({
         id: 1,
-        name: 'Gondor Constabulary'
+        name: 'Gotham City Dog Insurance'
       })
       const options = {
         method: 'DELETE',
-        url: '/police-forces/1'
+        url: '/insurance/companies/1'
       }
 
       const response = await server.inject(options)
@@ -167,11 +167,11 @@ describe('Insurance endpoint', () => {
     })
 
     test('should return 409 given NotFoundError error', async () => {
-      deleteForce.mockRejectedValue(new NotFoundError())
+      deleteCompany.mockRejectedValue(new NotFoundError())
 
       const options = {
         method: 'DELETE',
-        url: '/police-forces/1'
+        url: '/insurance/companies/1'
       }
 
       const response = await server.inject(options)
@@ -179,11 +179,11 @@ describe('Insurance endpoint', () => {
     })
 
     test('should return 500 given db error', async () => {
-      deleteForce.mockRejectedValue(new Error('Test error'))
+      deleteCompany.mockRejectedValue(new Error('Test error'))
 
       const options = {
         method: 'DELETE',
-        url: '/police-forces/1'
+        url: '/insurance/companies/1'
       }
 
       const response = await server.inject(options)

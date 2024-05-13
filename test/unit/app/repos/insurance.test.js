@@ -245,7 +245,7 @@ describe('Insurance repo', () => {
 
       sequelize.models.insurance_company.create.mockResolvedValue({
         id: 2,
-        name: 'Rohan Pets R Us'
+        company_name: 'Rohan Pets R Us'
       })
       const createdInsuranceCompany = await addCompany(mockInsuranceCompany, devUser, {})
 
@@ -265,7 +265,7 @@ describe('Insurance repo', () => {
       sequelize.models.insurance_company.findOne.mockResolvedValueOnce(null)
       sequelize.models.insurance_company.findOne.mockResolvedValueOnce({
         id: 2,
-        name: 'Rohan Pets R Us'
+        company_name: 'Rohan Pets R Us'
       })
 
       const createdInsuranceCompany = await addCompany(mockInsuranceCompany, devUser, {})
@@ -286,7 +286,7 @@ describe('Insurance repo', () => {
     test('should throw a DuplicateRecordError given insurance company already exists', async () => {
       sequelize.models.insurance_company.findOne.mockResolvedValue({
         id: 5,
-        name: 'Rohan Pets R Us'
+        company_name: 'Rohan Pets R Us'
       })
       const mockInsuranceCompanyPayload = {
         name: 'Rohan Pets R Us'
@@ -318,7 +318,7 @@ describe('Insurance repo', () => {
     test('should create start new transaction if none passed', async () => {
       sequelize.models.insurance_company.findOne.mockResolvedValueOnce({
         id: 2,
-        name: 'Rohan Pets R Us'
+        company_name: 'Rohan Pets R Us'
       })
       await deleteCompany(2, devUser)
 
@@ -328,14 +328,14 @@ describe('Insurance repo', () => {
     test('should delete the insurance company', async () => {
       sequelize.models.insurance_company.findOne.mockResolvedValue({
         id: 5,
-        name: 'The Shire Constabulary'
+        company_name: 'Rohan Pets R Us'
       })
       sequelize.models.insurance_company.destroy.mockResolvedValue(5)
       await deleteCompany(2, devUser, {})
       expect(sequelize.models.insurance_company.destroy).toHaveBeenCalled()
       expect(sendDeleteToAudit).toHaveBeenCalledWith(INSURANCE, {
         id: 5,
-        name: 'The Shire Constabulary'
+        name: 'Rohan Pets R Us'
       }, devUser)
     })
 

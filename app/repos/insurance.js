@@ -82,6 +82,14 @@ const createOrUpdateInsurance = async (data, cdo, transaction) => {
   }
 }
 
+/**
+ * @param {{ id: number; company_name: string }} insuranceCompanyDao
+ * @return {{ id: number; name: string }}
+ */
+const mapInsuranceCompanyDaoToDto = (insuranceCompanyDao) => {
+  return { id: insuranceCompanyDao.id, name: insuranceCompanyDao.company_name }
+}
+
 const addCompany = async (insuranceCompany, user, transaction) => {
   if (!transaction) {
     return await sequelize.transaction(async (t) => addCompany(insuranceCompany, user, t))
@@ -89,17 +97,16 @@ const addCompany = async (insuranceCompany, user, transaction) => {
 
   const findQuery = {
     where: {
-      name: {
+      company_name: {
         [Op.iLike]: `%${insuranceCompany.name}%`
       }
     }
   }
-  const foundPoliceForce = await sequelize.models.insurance_company.findOne(findQuery)
+  const foundInsuranceCompany = await sequelize.models.insurance_company.findOne(findQuery)
 
-  if (foundPoliceForce !== null) {
+  if (foundInsuranceCompany !== null) {
     throw new DuplicateResourceError(`Insurance company with name ${insuranceCompany.name} already exists`)
   }
-
   let createdInsuranceCompany
 
   const foundParanoid = await sequelize.models.insurance_company.findOne({
@@ -117,13 +124,15 @@ const addCompany = async (insuranceCompany, user, transaction) => {
     createdInsuranceCompany = foundParanoid
   } else {
     createdInsuranceCompany = await sequelize.models.insurance_company.create({
-      name: insuranceCompany.name
+      company_name: insuranceCompany.name
     }, { transaction })
   }
 
-  await sendCreateToAudit(INSURANCE, { id: createdInsuranceCompany.id, name: createdInsuranceCompany.name }, user)
+  const insuranceCompanyDto = mapInsuranceCompanyDaoToDto(createdInsuranceCompany)
 
-  return createdInsuranceCompany
+  await sendCreateToAudit(INSURANCE, insuranceCompanyDto, user)
+
+  return insuranceCompanyDto
 }
 
 const deleteCompany = async (insuranceCompanyId, user, transaction) => {
@@ -147,8 +156,9 @@ const deleteCompany = async (insuranceCompanyId, user, transaction) => {
     },
     transaction
   })
+  const insuranceCompanyDto = mapInsuranceCompanyDaoToDto(foundInsuranceCompany)
 
-  await sendDeleteToAudit(INSURANCE, foundInsuranceCompany, user)
+  await sendDeleteToAudit(INSURANCE, insuranceCompanyDto, user)
 
   return destroyedInsuranceCompany
 }
