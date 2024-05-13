@@ -22,7 +22,7 @@ const getCdosResponseSchema = Joi.object({
       status: Joi.string().required()
     }).unknown().required(),
     exemption: Joi.object({
-      policeForce: Joi.string().required(),
+      policeForce: Joi.string().allow(null).required(),
       cdoExpiry: Joi.string().allow(null).required(),
       joinedExemptionScheme: Joi.string().allow(null).required(),
       nonComplianceLetterSent: Joi.string().allow(null).required()
