@@ -7,6 +7,7 @@ const { NotFoundError } = require('../../../../app/errors/not-found')
 describe('Courts repo', () => {
   jest.mock('../../../../app/config/db', () => ({
     transaction: jest.fn(),
+    col: jest.fn(),
     models: {
       court: {
         findAll: jest.fn(),
@@ -40,6 +41,7 @@ describe('Courts repo', () => {
       expect(courts).toContainEqual({ id: 1, name: 'Horsham Law Courts' })
       expect(courts).toContainEqual({ id: 2, name: 'Maidstone Magistrates\' Courts' })
       expect(courts).toContainEqual({ id: 3, name: 'North Somerset Courthouse' })
+      expect(sequelize.col).toHaveBeenCalledWith('name')
     })
 
     test('should throw if error', async () => {

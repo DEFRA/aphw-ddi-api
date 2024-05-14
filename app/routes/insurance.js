@@ -1,17 +1,36 @@
 const { getCompanies, addCompany, deleteCompany } = require('../repos/insurance')
 const { createAdminItem } = require('../schema/admin/create')
 const { getCallingUser } = require('../auth/get-user')
+const { insuranceQuerySchema } = require('../schema/admin/insurance')
+
+const sortKeys = {
+  updatedAt: 'updated_at',
+  name: 'company_name'
+}
 
 module.exports = [
   {
     method: 'GET',
     path: '/insurance/companies',
-    handler: async (request, h) => {
-      const companies = await getCompanies()
+    options: {
+      validate: {
+        query: insuranceQuerySchema,
+        failAction: (request, h, err) => {
+          console.error(err)
 
-      return h.response({
-        companies
-      }).code(200)
+          return h.response({ errors: err.details.map(e => e.message) }).code(400).takeover()
+        }
+      },
+      handler: async (request, h) => {
+        const companies = await getCompanies({
+          key: sortKeys[request.query.sortKey],
+          order: request.query.sortOrder
+        })
+
+        return h.response({
+          companies
+        }).code(200)
+      }
     }
   },
   {

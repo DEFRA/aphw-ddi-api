@@ -15,7 +15,8 @@ describe('Police force repo', () => {
         restore: jest.fn()
       }
     },
-    transaction: jest.fn()
+    transaction: jest.fn(),
+    col: jest.fn()
   }))
 
   const sequelize = require('../../../../app/config/db')
@@ -30,15 +31,16 @@ describe('Police force repo', () => {
   })
 
   describe('getForces', () => {
-    test('getForces should return police forces', async () => {
+    sequelize.col.mockReturnValue('name')
+    test('getForces should return police forces in alpha sort order', async () => {
       sequelize.models.police_force.findAll.mockResolvedValue(mockForces)
 
       const forces = await getPoliceForces()
 
       expect(forces).toHaveLength(3)
+      expect(forces).toContainEqual({ id: 3, name: 'Eastern Constabulary' })
       expect(forces).toContainEqual({ id: 1, name: 'Northern Constabulary' })
       expect(forces).toContainEqual({ id: 2, name: 'Southern Constabulary' })
-      expect(forces).toContainEqual({ id: 3, name: 'Eastern Constabulary' })
     })
 
     test('getForces should throw if error', async () => {

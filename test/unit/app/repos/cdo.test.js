@@ -12,7 +12,8 @@ describe('CDO repo', () => {
         findOne: jest.fn(),
         findAll: jest.fn()
       }
-    }
+    },
+    fn: jest.fn()
   }))
 
   const sequelize = require('../../../../app/config/db')
@@ -289,6 +290,7 @@ describe('CDO repo', () => {
         }
       }
     }
+    const expectedAttributes = ['id', 'index_number', 'status_id', expect.any(Array)]
 
     test('should be a get all cdos by exemption status', async () => {
       const dbResponse = [
@@ -301,7 +303,7 @@ describe('CDO repo', () => {
       const res = await getSummaryCdos({ status: ['PreExempt'] })
       expect(res).toEqual(dbResponse)
       expect(sequelize.models.dog.findAll).toHaveBeenCalledWith({
-        attributes: ['id', 'index_number', 'status_id'],
+        attributes: expectedAttributes,
         include: expect.any(Array),
         order: [[expect.anything(), 'ASC']],
         where: {
@@ -319,7 +321,7 @@ describe('CDO repo', () => {
       const res = await getSummaryCdos({ status: ['PreExempt'] }, { key: 'joinedExemptionScheme', order: 'DESC' })
       expect(res).toEqual(dbResponse)
       expect(sequelize.models.dog.findAll).toHaveBeenCalledWith({
-        attributes: ['id', 'index_number', 'status_id'],
+        attributes: ['id', 'index_number', 'status_id', expect.any(Array)],
         include: expect.any(Array),
         order: [[expect.anything(), 'DESC'], [expect.anything(), 'DESC']],
         where: {
@@ -327,6 +329,25 @@ describe('CDO repo', () => {
         }
       })
       expect(sequelize.col).toHaveBeenCalledWith('registration.joined_exemption_scheme')
+      expect(sequelize.col).toHaveBeenCalledWith('registration.cdo_expiry')
+    })
+
+    test('should sort by policeForce ASC', async () => {
+      const dbResponse = []
+      sequelize.models.dog.findAll.mockResolvedValue(dbResponse)
+      sequelize.col.mockReturnValue('registration.joined_exemption_scheme')
+
+      const res = await getSummaryCdos({ status: ['PreExempt'] }, { key: 'policeForce', order: 'ASC' })
+      expect(res).toEqual(dbResponse)
+      expect(sequelize.models.dog.findAll).toHaveBeenCalledWith({
+        attributes: expectedAttributes,
+        include: expect.any(Array),
+        order: [[expect.anything(), 'ASC'], [expect.anything(), 'ASC']],
+        where: {
+          '$status.status$': ['Pre-exempt']
+        }
+      })
+      expect(sequelize.col).toHaveBeenCalledWith('registration.police_force.name')
       expect(sequelize.col).toHaveBeenCalledWith('registration.cdo_expiry')
     })
 
@@ -338,7 +359,7 @@ describe('CDO repo', () => {
       const res = await getSummaryCdos({ status: ['PreExempt'] }, { key: 'policeForce', order: 'DESC' })
       expect(res).toEqual(dbResponse)
       expect(sequelize.models.dog.findAll).toHaveBeenCalledWith({
-        attributes: ['id', 'index_number', 'status_id'],
+        attributes: expectedAttributes,
         include: expect.any(Array),
         order: [[expect.anything(), 'DESC'], [expect.anything(), 'DESC']],
         where: {
@@ -357,7 +378,7 @@ describe('CDO repo', () => {
       const res = await getSummaryCdos({ status: ['PreExempt'] }, { key: 'owner' })
       expect(res).toEqual(dbResponse)
       expect(sequelize.models.dog.findAll).toHaveBeenCalledWith({
-        attributes: ['id', 'index_number', 'status_id'],
+        attributes: expectedAttributes,
         include: expect.any(Array),
         order: [[expect.anything(), 'ASC'], [expect.anything(), 'ASC'], [expect.anything(), 'ASC']],
         where: {
@@ -377,7 +398,7 @@ describe('CDO repo', () => {
       const res = await getSummaryCdos({ status: ['PreExempt'] }, { key: 'indexNumber' })
       expect(res).toEqual(dbResponse)
       expect(sequelize.models.dog.findAll).toHaveBeenCalledWith({
-        attributes: ['id', 'index_number', 'status_id'],
+        attributes: expectedAttributes,
         include: expect.any(Array),
         order: [[expect.anything(), 'ASC'], [expect.anything(), 'ASC']],
         where: {
@@ -394,7 +415,7 @@ describe('CDO repo', () => {
       const res = await getSummaryCdos({ status: ['PreExempt', 'InterimExempt'] })
       expect(res).toEqual([])
       expect(sequelize.models.dog.findAll).toHaveBeenCalledWith({
-        attributes: ['id', 'index_number', 'status_id'],
+        attributes: expectedAttributes,
         include: expect.any(Array),
         order: expect.any(Array),
         where: {
@@ -415,7 +436,7 @@ describe('CDO repo', () => {
       const res = await getSummaryCdos({ withinDays: 30 })
       expect(res).toEqual([])
       expect(sequelize.models.dog.findAll).toHaveBeenCalledWith({
-        attributes: ['id', 'index_number', 'status_id'],
+        attributes: expectedAttributes,
         include: expect.any(Array),
         order: expect.any(Array),
         where: {
@@ -431,7 +452,7 @@ describe('CDO repo', () => {
 
       await getSummaryCdos({ status: ['PreExempt'], nonComplianceLetterSent: false })
       expect(sequelize.models.dog.findAll).toHaveBeenCalledWith({
-        attributes: ['id', 'index_number', 'status_id'],
+        attributes: expectedAttributes,
         include: expect.any(Array),
         order: [[expect.anything(), 'ASC']],
         where: {
@@ -450,7 +471,7 @@ describe('CDO repo', () => {
       const res = await getSummaryCdos({ status: ['Failed'], nonComplianceLetterSent: true })
       expect(res).toEqual([])
       expect(sequelize.models.dog.findAll).toHaveBeenCalledWith({
-        attributes: ['id', 'index_number', 'status_id'],
+        attributes: expectedAttributes,
         include: expect.any(Array),
         order: expect.any(Array),
         where: {

@@ -8,7 +8,8 @@ const { Op } = require('sequelize')
 const getCourts = async () => {
   try {
     const courts = await sequelize.models.court.findAll({
-      attributes: ['id', 'name']
+      attributes: ['id', 'name'],
+      order: [[sequelize.col('name'), 'ASC']]
     })
 
     return courts

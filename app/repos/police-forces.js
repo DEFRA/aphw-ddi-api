@@ -8,7 +8,8 @@ const { NotFoundError } = require('../errors/not-found')
 const getPoliceForces = async () => {
   try {
     const policeForces = await sequelize.models.police_force.findAll({
-      attributes: ['id', 'name']
+      attributes: ['id', 'name'],
+      order: [[sequelize.col('name'), 'ASC']]
     })
 
     return policeForces

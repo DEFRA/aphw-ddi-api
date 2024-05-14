@@ -253,7 +253,7 @@ const getAllCdos = async (idStart, rowLimit) => {
 const sortKeys = {
   cdoExpiry: undefined,
   joinedExemptionScheme: 'registration.joined_exemption_scheme',
-  policeForce: 'registration.police_force.name',
+  policeForce: 'police_force_aggregrate',
   owner: [
     'registered_person.person.last_name',
     'registered_person.person.first_name'
@@ -261,16 +261,47 @@ const sortKeys = {
   indexNumber: 'id'
 }
 
+const policeForceCol = 'registration.police_force.name'
+
+/**
+ * @typedef CdoSort
+ * @property {string} key
+ * @property {'ASC'|'DESC'} [order]
+ */
+
+/**
+ * @param {CdoSort} sort
+ * @return {*[]}
+ */
+const getSortOrder = (sort) => {
+  const order = []
+
+  const sortOrder = sort?.order ?? 'ASC'
+  const sortKey = sortKeys[sort?.key]
+
+  if (sortKey !== undefined) {
+    if (Array.isArray(sortKey)) {
+      sortKey.forEach(key => {
+        order.push([sequelize.col(key), sortOrder])
+      })
+    } else {
+      order.push([sequelize.col(sortKey), sortOrder])
+    }
+  }
+
+  order.push([sequelize.col('registration.cdo_expiry'), sortOrder])
+
+  return order
+}
+
 /**
  *
  * @param {{ status?: CdoStatus[]; withinDays?: number; nonComplianceLetterSent?: boolean }} [filter]
- * @param {{ key: string; order?: 'ASC'|'DESC' }} [sort]
+ * @param {CdoSort} [sort]
  * @return {Promise<SummaryCdo[]>}
  */
 const getSummaryCdos = async (filter, sort) => {
   const where = {}
-  const sortOrder = sort?.order ?? 'ASC'
-  const sortKey = sortKeys[sort?.key]
 
   if (filter.status) {
     const statusArray = filter.status.map(status => statuses[status])
@@ -297,22 +328,13 @@ const getSummaryCdos = async (filter, sort) => {
     }
   }
 
-  const order = []
-
-  if (sortKey !== undefined) {
-    if (Array.isArray(sortKey)) {
-      sortKey.forEach(key => {
-        order.push([sequelize.col(key), sortOrder])
-      })
-    } else {
-      order.push([sequelize.col(sortKey), sortOrder])
-    }
-  }
-
-  order.push([sequelize.col('registration.cdo_expiry'), sortOrder])
+  const order = getSortOrder(sort)
 
   const cdos = await sequelize.models.dog.findAll({
-    attributes: ['id', 'index_number', 'status_id'],
+    attributes: [
+      'id', 'index_number', 'status_id',
+      [sequelize.fn('COALESCE', sequelize.col(policeForceCol), 'ZZZZZZ'), 'police_force_aggregrate']
+    ],
     where,
     include: [
       {
