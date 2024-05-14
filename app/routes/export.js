@@ -2,6 +2,7 @@ const { getCallingUser } = require('../auth/get-user')
 const { readExportFile } = require('../export/read-export-file')
 const { EXPORT } = require('../constants/event/events')
 const { sendEventToAudit } = require('../messaging/send-audit')
+const { runExportNow } = require('../repos/regular-jobs')
 
 module.exports = [{
   method: 'GET',
@@ -14,5 +15,14 @@ module.exports = [{
     return h.response({
       csv
     }).code(200)
+  }
+},
+{
+  method: 'GET',
+  path: '/export-create-file',
+  handler: async (request, h) => {
+    await runExportNow(request.query.batchSize)
+
+    return h.response().code(200)
   }
 }]

@@ -1,4 +1,5 @@
 const sequelize = require('../config/db')
+const config = require('../config/index')
 const { Op } = require('sequelize')
 const { autoUpdateStatuses } = require('../overnight/auto-update-statuses')
 const { createExportFile } = require('../overnight/create-export-file')
@@ -21,12 +22,24 @@ const runOvernightJobs = async () => {
 
   if (jobId) {
     let result = await autoUpdateStatuses()
-    result = result + ' | ' + await createExportFile()
+    result = result + ' | ' + await createExportFile(config.overnightExportBatchSize)
     await endJob(jobId, result)
     return result
   }
 
   return 'Job for today already running or run'
+}
+
+const runExportNow = async (rowsPerBatch) => {
+  const newJob = await sequelize.models.regular_job.create({
+    run_date: new Date(),
+    start_time: new Date(),
+    result: 'Running'
+  })
+
+  const res = await createExportFile(rowsPerBatch)
+
+  await endJob(newJob.id, `${res} batchSize ${rowsPerBatch}`)
 }
 
 const tryStartJob = async (trans) => {
@@ -95,6 +108,7 @@ const endJob = async (jobId, resultText, trans) => {
 
 module.exports = {
   runOvernightJobs,
+  runExportNow,
   tryStartJob,
   endJob,
   getRegularJobs
