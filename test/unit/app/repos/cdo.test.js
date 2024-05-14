@@ -198,14 +198,31 @@ describe('CDO repo', () => {
   })
 
   describe('getAllCdos', () => {
-    test('getAllCdos should return CDOs', async () => {
+    test('getAllCdos should return all CDOs in one batch if no param passed', async () => {
       sequelize.models.dog.findAll.mockResolvedValue([
         { id: 123, breed: 'breed', name: 'Bruno' },
         { id: 456, breed: 'breed2', name: 'Fido' }
       ])
 
       const res = await getAllCdos()
-      expect(sequelize.models.dog.findAll).toHaveBeenCalledTimes(1)
+      const dbQuery = sequelize.models.dog.findAll.mock.calls[0]
+      expect(dbQuery[0].where).toBe(undefined)
+      expect(dbQuery[0].limit).toBe(undefined)
+      expect(res).not.toBe(null)
+      expect(res.length).toBe(2)
+      expect(res[1].id).toBe(456)
+    })
+
+    test('getAllCdos should return batch of CDOs when params passed', async () => {
+      sequelize.models.dog.findAll.mockResolvedValue([
+        { id: 123, breed: 'breed', name: 'Bruno' },
+        { id: 456, breed: 'breed2', name: 'Fido' }
+      ])
+
+      const res = await getAllCdos(100, 250)
+      const dbQuery = sequelize.models.dog.findAll.mock.calls[0]
+      expect(dbQuery[0].where).toEqual({ '$dog.id$': { [Op.gte]: 100 } })
+      expect(dbQuery[0].limit).toBe(250)
       expect(res).not.toBe(null)
       expect(res.length).toBe(2)
       expect(res[1].id).toBe(456)
