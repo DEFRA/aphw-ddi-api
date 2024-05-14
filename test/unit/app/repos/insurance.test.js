@@ -2,8 +2,6 @@ const { devUser } = require('../../../mocks/auth')
 const { INSURANCE } = require('../../../../app/constants/event/audit-event-object-types')
 const { DuplicateResourceError } = require('../../../../app/errors/duplicate-record')
 const { NotFoundError } = require('../../../../app/errors/not-found')
-const { seq } = require('talisman/helpers')
-const sequelize = require('../../../../app/config/db')
 
 describe('Insurance repo', () => {
   jest.mock('../../../../app/config/db', () => ({

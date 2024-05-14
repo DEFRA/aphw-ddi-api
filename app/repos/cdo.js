@@ -294,7 +294,7 @@ const getSortOrder = (sort) => {
 /**
  *
  * @param {{ status?: CdoStatus[]; withinDays?: number; nonComplianceLetterSent?: boolean }} [filter]
- * @param {} [sort]
+ * @param {CdoSort} [sort]
  * @return {Promise<SummaryCdo[]>}
  */
 const getSummaryCdos = async (filter, sort) => {
