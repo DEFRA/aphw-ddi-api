@@ -55,8 +55,22 @@ const updateInsurance = async (insurance, data, transaction) => {
   }
 }
 
-const getCompanies = async () => {
-  const companies = await sequelize.models.insurance_company.findAll()
+/**
+ * @param {{key: string; order?: 'ASC'|'DESC'}} [sort]
+ * @return {Promise<{name: string, id: number}[]>}
+ */
+const getCompanies = async (sort = { key: 'company_name', order: 'ASC' }) => {
+  let sortColumn = sequelize.col('company_name')
+
+  if (sort.key === 'updated_at') {
+    sortColumn = sequelize.col('updated_at')
+  }
+
+  const sortOrder = sort.order === 'DESC' ? 'DESC' : 'ASC'
+
+  const companies = await sequelize.models.insurance_company.findAll({
+    order: [[sortColumn, sortOrder]]
+  })
 
   return companies.map((company) => ({
     id: company.id,
