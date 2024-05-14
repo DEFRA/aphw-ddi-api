@@ -22,7 +22,8 @@ describe('Insurance repo', () => {
       }
     },
     transaction: jest.fn(),
-    col: jest.fn().mockReturnValue('')
+    col: jest.fn().mockReturnValue(''),
+    fn: jest.fn().mockReturnValue('')
   }))
 
   const sequelize = require('../../../../app/config/db')
@@ -40,6 +41,9 @@ describe('Insurance repo', () => {
   })
 
   describe('getCompanies', () => {
+    const expectedAttributes = {
+      include: [[expect.any(String), 'updatedOrCreatedAt']]
+    }
     test('should sort companies alpha', async () => {
       sequelize.models.insurance_company.findAll.mockResolvedValue([
         {
@@ -49,6 +53,7 @@ describe('Insurance repo', () => {
       ])
       const insuranceCompanies = await getCompanies()
       expect(sequelize.models.insurance_company.findAll).toHaveBeenCalledWith({
+        attributes: expectedAttributes,
         order: [[expect.anything(), 'ASC']]
       })
       expect(sequelize.col).toHaveBeenCalledWith('company_name')
@@ -59,6 +64,7 @@ describe('Insurance repo', () => {
       sequelize.models.insurance_company.findAll.mockResolvedValue([])
       await getCompanies({ key: 'company_name' })
       expect(sequelize.models.insurance_company.findAll).toHaveBeenCalledWith({
+        attributes: expectedAttributes,
         order: [[expect.anything(), 'ASC']]
       })
       expect(sequelize.col).toHaveBeenCalledWith('company_name')
@@ -68,6 +74,7 @@ describe('Insurance repo', () => {
       sequelize.models.insurance_company.findAll.mockResolvedValue([])
       await getCompanies({ key: 'updated_at', order: 'DESC' })
       expect(sequelize.models.insurance_company.findAll).toHaveBeenCalledWith({
+        attributes: expectedAttributes,
         order: [[expect.anything(), 'DESC']]
       })
       expect(sequelize.col).toHaveBeenCalledWith('updated_at')
