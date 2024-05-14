@@ -9,6 +9,6 @@ ignore:
   SNYK-JS-BRACES-6838727:
     - '*':
         reason: Used by jest and nodemon - only used for testing
-        expires: 2024-07-14T13:13:33.654Z
-        created: 2024-04-14T13:13:33.660Z
+        expires: 2024-07-14T11:13:33.654Z
+        created: 2024-04-14T11:13:33.660Z
 patch: {}
