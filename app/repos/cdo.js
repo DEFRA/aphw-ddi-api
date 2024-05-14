@@ -228,19 +228,22 @@ const getCdo = async (indexNumber) => {
 /**
  * @return {Promise<CdoDao[]>}
  */
-const getAllCdos = async () => {
-  const cdos = await sequelize.models.dog.findAll({
+const getAllCdos = async (idStart, rowLimit) => {
+  const query = {
     order: [
       [sequelize.col('dog.id'), 'ASC'],
       [sequelize.col('registered_person.person.addresses.address.id'), 'DESC']
     ],
     include: cdoRelationship(sequelize)
-  })
+  }
 
-  // Workaround due to Sequelize bug when using 'raw: true'
-  // Multiple rows aren't returned from an array when using 'raw: true'
-  // so the temporary solution is to omit 'raw: true'
-  return cdos
+  if (idStart && rowLimit) {
+    query.where = { '$dog.id$': { [Op.gte]: idStart } }
+    query.limit = rowLimit
+    query.subQuery = false
+  }
+
+  return await sequelize.models.dog.findAll(query)
 }
 
 /**
