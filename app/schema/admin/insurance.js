@@ -1,7 +1,7 @@
 const Joi = require('joi')
 const insuranceQuerySchema = Joi.object({
-  sort: Joi.string().valid('updatedAt', 'name'),
-  order: Joi.string().valid('ASC', 'DESC')
+  sortKey: Joi.string().valid('updatedAt', 'name').default('name'),
+  sortOrder: Joi.string().valid('ASC', 'DESC').default('ASC')
 })
 
 module.exports = {

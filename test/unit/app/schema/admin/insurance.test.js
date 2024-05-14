@@ -4,71 +4,78 @@ describe('insurance schema', () => {
     test('should allow empty value', () => {
       const { value, error } = insuranceQuerySchema.validate({})
       expect(error).not.toBeDefined()
-      expect(value).toEqual({})
+      expect(value).toEqual({
+        sortKey: 'name',
+        sortOrder: 'ASC'
+      })
     })
 
-    test('should allow updatedAt sort key value', () => {
+    test('should allow updatedAt sortKey key value', () => {
       const { value, error } = insuranceQuerySchema.validate({
-        sort: 'updatedAt'
+        sortKey: 'updatedAt'
       })
       expect(error).not.toBeDefined()
       expect(value).toEqual({
-        sort: 'updatedAt'
+        sortKey: 'updatedAt',
+        sortOrder: 'ASC'
       })
     })
 
-    test('should allow name sort key value', () => {
+    test('should allow name sortKey key value', () => {
       const { value, error } = insuranceQuerySchema.validate({
-        sort: 'name'
+        sortKey: 'name'
       })
       expect(error).not.toBeDefined()
       expect(value).toEqual({
-        sort: 'name'
+        sortKey: 'name',
+        sortOrder: 'ASC'
       })
     })
 
-    test('should allow DESC sort order value', () => {
+    test('should allow DESC sortKey sortOrder value', () => {
       const { value, error } = insuranceQuerySchema.validate({
-        order: 'DESC'
+        sortOrder: 'DESC'
       })
       expect(error).not.toBeDefined()
       expect(value).toEqual({
-        order: 'DESC'
+        sortKey: 'name',
+        sortOrder: 'DESC'
       })
     })
 
-    test('should allow ASC sort order value', () => {
+    test('should allow ASC sortKey sortOrder value', () => {
       const { value, error } = insuranceQuerySchema.validate({
-        order: 'ASC'
+        sortOrder: 'ASC'
       })
       expect(error).not.toBeDefined()
       expect(value).toEqual({
-        order: 'ASC'
+        sortKey: 'name',
+        sortOrder: 'ASC'
       })
     })
 
-    test('should allow sort order and key value', () => {
+    test('should allow sortKey sortOrder and key value', () => {
       const { value, error } = insuranceQuerySchema.validate({
-        sort: 'updatedAt',
-        order: 'DESC'
+        sortKey: 'updatedAt',
+        sortOrder: 'DESC'
       })
       expect(error).not.toBeDefined()
       expect(value).toEqual({
-        sort: 'updatedAt',
-        order: 'DESC'
+        sortKey: 'updatedAt',
+        sortOrder: 'DESC'
       })
     })
 
-    test('should not validate with invalid sort key', () => {
+    test('should not validate with invalid sortKey key', () => {
       const { error } = insuranceQuerySchema.validate({
-        sort: 'unknownKey'
+        sortKey: 'unknownKey'
       })
       expect(error).toBeDefined()
     })
 
-    test('should not validate with invalid sort order', () => {
+    test('should not validate with invalid sortKey sortOrder', () => {
       const { error } = insuranceQuerySchema.validate({
-        order: 'HORIZONTAL'
+        sortOrder: 'HORIZONTAL'
       })
       expect(error).toBeDefined()
     })
