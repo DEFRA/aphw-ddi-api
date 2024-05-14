@@ -30,6 +30,38 @@ describe('Insurance endpoint', () => {
 
       const response = await server.inject(options)
       expect(response.statusCode).toBe(200)
+      expect(getCompanies).toBeCalledWith({
+        key: 'company_name',
+        order: 'ASC'
+      })
+    })
+
+    test('GET /insurance/companies route call sort order given query params passed', async () => {
+      getCompanies.mockResolvedValue(insuranceCompanies)
+
+      const options = {
+        method: 'GET',
+        url: '/insurance/companies?sortKey=updatedAt&sortOrder=DESC'
+      }
+
+      const response = await server.inject(options)
+      expect(response.statusCode).toBe(200)
+      expect(getCompanies).toBeCalledWith({
+        key: 'updated_at',
+        order: 'DESC'
+      })
+    })
+
+    test('GET /insurance/companies route returns 400 if query schema invalid', async () => {
+      getCompanies.mockResolvedValue(insuranceCompanies)
+
+      const options = {
+        method: 'GET',
+        url: '/insurance/companies?sort=ABC'
+      }
+
+      const response = await server.inject(options)
+      expect(response.statusCode).toBe(400)
     })
 
     test('GET /insurance/companies route returns insurance companies', async () => {
@@ -96,7 +128,7 @@ describe('Insurance endpoint', () => {
       })
     })
 
-    test('should return a 400 given schema is invalid', async () => {
+    test('should return a 400 given payload schema is invalid', async () => {
       const options = {
         method: 'POST',
         url: '/insurance/companies',
