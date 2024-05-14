@@ -23,7 +23,7 @@ describe('RegularJobs repo', () => {
   jest.mock('../../../../app/overnight/create-export-file')
   const { createExportFile } = require('../../../../app/overnight/create-export-file')
 
-  const { tryStartJob, endJob, getRegularJobs, runOvernightJobs } = require('../../../../app/repos/regular-jobs')
+  const { tryStartJob, endJob, getRegularJobs, runOvernightJobs, runExportNow } = require('../../../../app/repos/regular-jobs')
 
   beforeEach(async () => {
     jest.clearAllMocks()
@@ -152,5 +152,23 @@ describe('RegularJobs repo', () => {
     const res = await runOvernightJobs()
 
     expect(res).toBe('Job for today already running or run')
+  })
+
+  test('runExportNow should call createExportFile', async () => {
+    sequelize.models.regular_job.create.mockResolvedValue({ id: 123 })
+    sequelize.models.regular_job.findAll.mockResolvedValue()
+
+    await runExportNow()
+
+    expect(createExportFile).toHaveBeenCalledWith(undefined)
+  })
+
+  test('runExportNow should call createExportFile with param', async () => {
+    sequelize.models.regular_job.create.mockResolvedValue({ id: 123 })
+    sequelize.models.regular_job.findAll.mockResolvedValue()
+
+    await runExportNow('1000')
+
+    expect(createExportFile).toHaveBeenCalledWith('1000')
   })
 })
