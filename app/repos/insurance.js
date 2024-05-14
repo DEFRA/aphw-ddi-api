@@ -5,7 +5,6 @@ const { DuplicateResourceError } = require('../errors/duplicate-record')
 const { sendCreateToAudit, sendDeleteToAudit } = require('../messaging/send-audit')
 const { INSURANCE } = require('../constants/event/audit-event-object-types')
 const { NotFoundError } = require('../errors/not-found')
-const { seq } = require('talisman/helpers')
 
 const createInsurance = async (id, data, transaction) => {
   if (!transaction) {
