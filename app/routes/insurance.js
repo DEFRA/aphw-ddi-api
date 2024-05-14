@@ -3,6 +3,11 @@ const { createAdminItem } = require('../schema/admin/create')
 const { getCallingUser } = require('../auth/get-user')
 const { insuranceQuerySchema } = require('../schema/admin/insurance')
 
+const sortKeys = {
+  updatedAt: 'updated_at',
+  name: 'company_name'
+}
+
 module.exports = [
   {
     method: 'GET',
@@ -17,11 +22,10 @@ module.exports = [
         }
       },
       handler: async (request, h) => {
-        const sort = {
-          key: 'company_name',
-          order: 'ASC'
-        }
-        const companies = await getCompanies()
+        const companies = await getCompanies({
+          key: sortKeys[request.query.sortKey],
+          order: request.query.sortOrder
+        })
 
         return h.response({
           companies

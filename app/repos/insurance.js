@@ -5,6 +5,7 @@ const { DuplicateResourceError } = require('../errors/duplicate-record')
 const { sendCreateToAudit, sendDeleteToAudit } = require('../messaging/send-audit')
 const { INSURANCE } = require('../constants/event/audit-event-object-types')
 const { NotFoundError } = require('../errors/not-found')
+const { seq } = require('talisman/helpers')
 
 const createInsurance = async (id, data, transaction) => {
   if (!transaction) {
@@ -63,12 +64,15 @@ const getCompanies = async (sort = { key: 'company_name', order: 'ASC' }) => {
   let sortColumn = sequelize.col('company_name')
 
   if (sort.key === 'updated_at') {
-    sortColumn = sequelize.col('updated_at')
+    sortColumn = sequelize.col('updatedOrCreatedAt')
   }
 
   const sortOrder = sort.order === 'DESC' ? 'DESC' : 'ASC'
 
   const companies = await sequelize.models.insurance_company.findAll({
+    attributes: {
+      include: [[sequelize.fn('COALESCE', sequelize.col('updated_at'), sequelize.col('created_at'), new Date(0)), 'updatedOrCreatedAt']]
+    },
     order: [[sortColumn, sortOrder]]
   })
 

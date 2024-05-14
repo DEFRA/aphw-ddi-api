@@ -42,7 +42,7 @@ describe('Insurance endpoint', () => {
 
       const options = {
         method: 'GET',
-        url: '/insurance/companies?sort=updatedAt&order=DESC'
+        url: '/insurance/companies?sortKey=updatedAt&sortOrder=DESC'
       }
 
       const response = await server.inject(options)
