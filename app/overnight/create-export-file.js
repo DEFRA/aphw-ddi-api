@@ -4,10 +4,10 @@ const { uploadExportedFile } = require('../../app/storage/repos/export')
 
 const createExportFile = async (rowsPerBatch) => {
   let result = ''
+  rowsPerBatch = rowsPerBatch ?? 0
 
   try {
-    const cdos = await getAllCdosInBatches(rowsPerBatch)
-    const exportedData = convertToCsv(cdos)
+    const { exportedData, numRowsExported } = await convertToCsvInBatches(rowsPerBatch)
 
     const Readable = require('stream').Readable
     const str = new Readable()
@@ -16,7 +16,7 @@ const createExportFile = async (rowsPerBatch) => {
 
     await uploadExportedFile(str, 'daily_export.csv')
 
-    return `Success Export (${cdos.length} rows)`
+    return `Success Export (${numRowsExported} rows, batches of ${rowsPerBatch})`
   } catch (e) {
     console.log('Error create export file', e)
     result = `Error create export file: ${e}`
@@ -24,25 +24,36 @@ const createExportFile = async (rowsPerBatch) => {
   return result
 }
 
-const getAllCdosInBatches = async rowsPerBatch => {
+const convertToCsvInBatches = async rowsPerBatch => {
   if (!rowsPerBatch || rowsPerBatch === '0') {
-    return await getAllCdos()
+    const allCdos = await getAllCdos()
+    return {
+      exportedData: convertToCsv(allCdos),
+      numRowsExported: allCdos.length
+    }
   }
 
-  let cdosSoFar = []
+  let csvSoFar = ''
   let latestDogId = 1
   let numReturnedRows = 0
+  let totalRows = 0
+  let isNotFirstLoopIteration = false
 
   do {
     const cdoBatch = await getAllCdos(latestDogId, rowsPerBatch)
     numReturnedRows = cdoBatch.length
     if (numReturnedRows > 0) {
       latestDogId = cdoBatch[numReturnedRows - 1].id + 1
-      cdosSoFar = cdosSoFar.concat(cdoBatch)
+      csvSoFar = csvSoFar + convertToCsv(cdoBatch, isNotFirstLoopIteration)
+      totalRows += numReturnedRows
+      isNotFirstLoopIteration = true
     }
   } while (numReturnedRows > 0)
 
-  return cdosSoFar
+  return {
+    exportedData: csvSoFar,
+    numRowsExported: totalRows
+  }
 }
 
 module.exports = {

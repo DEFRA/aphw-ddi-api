@@ -39,7 +39,7 @@ const runExportNow = async (rowsPerBatch) => {
 
   const res = await createExportFile(rowsPerBatch)
 
-  await endJob(newJob.id, `${res} batchSize ${rowsPerBatch}`)
+  await endJob(newJob.id, res)
 }
 
 const tryStartJob = async (trans) => {

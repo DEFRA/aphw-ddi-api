@@ -1,9 +1,11 @@
 const { getMicrochip, extractLatestAddress, extractLatestInsurance, extractEmail, extractLatestPrimaryTelephoneNumber, extractLatestSecondaryTelephoneNumber, truncDate } = require('../dto/dto-helper')
 
-const convertToCsv = (rows) => {
+const convertToCsv = (rows, removeHeader = false) => {
   const csvRows = []
 
-  csvRows.push(headerRow)
+  if (!removeHeader) {
+    csvRows.push(headerRow)
+  }
 
   rows.forEach(x => {
     csvRows.push(convertRow(x))
