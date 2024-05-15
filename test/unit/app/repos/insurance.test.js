@@ -21,6 +21,7 @@ describe('Insurance repo', () => {
         destroy: jest.fn()
       }
     },
+    where: jest.fn(),
     transaction: jest.fn(),
     col: jest.fn().mockReturnValue(''),
     fn: jest.fn().mockReturnValue('')

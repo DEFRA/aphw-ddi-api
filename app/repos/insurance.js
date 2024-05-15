@@ -127,7 +127,9 @@ const addCompany = async (insuranceCompany, user, transaction) => {
   let createdInsuranceCompany
 
   const foundParanoid = await sequelize.models.insurance_company.findOne({
-    ...findQuery,
+    where: sequelize.where(
+      sequelize.fn('lower', sequelize.col('company_name'))
+    ),
     paranoid: false
   })
 
