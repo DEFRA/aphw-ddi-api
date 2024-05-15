@@ -3,11 +3,10 @@ const { convertToCsv } = require('../export/csv')
 const { uploadExportedFile } = require('../../app/storage/repos/export')
 
 const createExportFile = async (rowsPerBatch) => {
-  let result = ''
   rowsPerBatch = rowsPerBatch ?? 0
 
   try {
-    const { exportedData, numRowsExported } = await convertToCsvInBatches(rowsPerBatch)
+    const { exportedData, numRowsExported } = await generateCsv(rowsPerBatch)
 
     const Readable = require('stream').Readable
     const str = new Readable()
@@ -19,20 +18,27 @@ const createExportFile = async (rowsPerBatch) => {
     return `Success Export (${numRowsExported} rows, batches of ${rowsPerBatch})`
   } catch (e) {
     console.log('Error create export file', e)
-    result = `Error create export file: ${e}`
+    return `Error create export file: ${e}`
   }
-  return result
 }
 
-const convertToCsvInBatches = async rowsPerBatch => {
+const generateCsv = async rowsPerBatch => {
   if (!rowsPerBatch || rowsPerBatch === '0') {
-    const allCdos = await getAllCdos()
-    return {
-      exportedData: convertToCsv(allCdos),
-      numRowsExported: allCdos.length
-    }
+    return generateCsvAltogether()
   }
 
+  return generateCsvInBatches(rowsPerBatch)
+}
+
+const generateCsvAltogether = async () => {
+  const allCdos = await getAllCdos()
+  return {
+    exportedData: convertToCsv(allCdos),
+    numRowsExported: allCdos.length
+  }
+}
+
+const generateCsvInBatches = async rowsPerBatch => {
   let csvSoFar = ''
   let latestDogId = 1
   let numReturnedRows = 0
