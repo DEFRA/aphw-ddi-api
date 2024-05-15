@@ -1,9 +1,55 @@
 const { getMicrochip, extractLatestAddress, extractLatestInsurance, extractEmail, extractLatestPrimaryTelephoneNumber, extractLatestSecondaryTelephoneNumber, truncDate } = require('../dto/dto-helper')
 
-const convertToCsv = (rows) => {
-  const csvRows = []
+const headerRow = [
+  'IndexNumber',
+  'DogBreed',
+  'DogName',
+  'DogDateOfBirth',
+  'DogDateOfDeath',
+  'DogTattoo',
+  'DogColour',
+  'DogSex',
+  'DogMicrochip1',
+  'DogMicrochip2',
+  'DogExportedDate',
+  'DogStolenDate',
+  'DogUntraceableDate',
+  'OwnerOrganisation',
+  'OwnerFirstName',
+  'OwnerLastName',
+  'OwnerDateOfBirth',
+  'AddressLine1',
+  'AddressLine2',
+  'Town',
+  'County',
+  'Postcode',
+  'Country',
+  'Email',
+  'Telephone1',
+  'Telephone2',
+  'ExemptionStatus',
+  'CertificateIssued',
+  'CdoIssued',
+  'CdoExpiry',
+  'Court',
+  'PoliceForce',
+  'DogLegislationOfficer',
+  'ApplicationFeePaid',
+  'InsuranceCompany',
+  'InsuranceRenewalDate',
+  'NeuteringConfirmationDate',
+  'MicrochipVerificationDate',
+  'JoinedInterimSchemeDate',
+  'NonComplianceLetterSent',
+  'ExemptionOrder',
+  'Withdrawn',
+  'ExaminedByDlo',
+  'MicrochipDeadline',
+  'NeuteringDeadline'
+]
 
-  csvRows.push(headerRow)
+const convertToCsv = (rows, removeHeader = false) => {
+  const csvRows = removeHeader ? [] : [headerRow]
 
   rows.forEach(x => {
     csvRows.push(convertRow(x))
@@ -70,54 +116,6 @@ const convertRow = (row) => {
     exemption.neutering_deadline
   ]
 }
-
-const headerRow = [
-  'IndexNumber',
-  'DogBreed',
-  'DogName',
-  'DogDateOfBirth',
-  'DogDateOfDeath',
-  'DogTattoo',
-  'DogColour',
-  'DogSex',
-  'DogMicrochip1',
-  'DogMicrochip2',
-  'DogExportedDate',
-  'DogStolenDate',
-  'DogUntraceableDate',
-  'OwnerOrganisation',
-  'OwnerFirstName',
-  'OwnerLastName',
-  'OwnerDateOfBirth',
-  'AddressLine1',
-  'AddressLine2',
-  'Town',
-  'County',
-  'Postcode',
-  'Country',
-  'Email',
-  'Telephone1',
-  'Telephone2',
-  'ExemptionStatus',
-  'CertificateIssued',
-  'CdoIssued',
-  'CdoExpiry',
-  'Court',
-  'PoliceForce',
-  'DogLegislationOfficer',
-  'ApplicationFeePaid',
-  'InsuranceCompany',
-  'InsuranceRenewalDate',
-  'NeuteringConfirmationDate',
-  'MicrochipVerificationDate',
-  'JoinedInterimSchemeDate',
-  'NonComplianceLetterSent',
-  'ExemptionOrder',
-  'Withdrawn',
-  'ExaminedByDlo',
-  'MicrochipDeadline',
-  'NeuteringDeadline'
-]
 
 module.exports = {
   convertToCsv
