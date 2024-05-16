@@ -28,7 +28,7 @@ container:
   requestMemory: 100Mi
   requestCpu: 100m
   limitMemory: 2500Mi
-  limitCpu: 200m
+  limitCpu: 500m
   port: 3000
   messageQueueHost: namespace.servicebus.windows.net
   azureStorageConnectionString: dummy
