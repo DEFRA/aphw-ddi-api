@@ -4,8 +4,7 @@ const { DuplicateResourceError } = require('../errors/duplicate-record')
 const { sendCreateToAudit, sendDeleteToAudit } = require('../messaging/send-audit')
 const { INSURANCE } = require('../constants/event/audit-event-object-types')
 const { NotFoundError } = require('../errors/not-found')
-const { Op } = require('sequelize')
-const { getFindQuery, updateParanoid } = require('./shared')
+const { getFindQuery, updateParanoid, findQueryV2 } = require('./shared')
 
 const createInsurance = async (id, data, transaction) => {
   if (!transaction) {
@@ -123,7 +122,7 @@ const addCompany = async (insuranceCompany, user, transaction) => {
   let createdInsuranceCompany
 
   const foundParanoid = await sequelize.models.insurance_company.findOne({
-    ...findQuery,
+    ...findQueryV2(insuranceCompany.name, 'company_name'),
     paranoid: false
   })
 
