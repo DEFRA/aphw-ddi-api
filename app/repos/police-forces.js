@@ -4,12 +4,13 @@ const { DuplicateResourceError } = require('../errors/duplicate-record')
 const { sendCreateToAudit, sendDeleteToAudit } = require('../messaging/send-audit')
 const { POLICE } = require('../constants/event/audit-event-object-types')
 const { NotFoundError } = require('../errors/not-found')
+const { getFindQuery, updateParanoid, findQueryV2 } = require('./shared')
 
 const getPoliceForces = async () => {
   try {
     const policeForces = await sequelize.models.police_force.findAll({
       attributes: ['id', 'name'],
-      order: [[sequelize.col('name'), 'ASC']]
+      order: [[sequelize.fn('lower', sequelize.col('name')), 'ASC']]
     })
 
     return policeForces
@@ -24,13 +25,8 @@ const addForce = async (policeForce, user, transaction) => {
     return await sequelize.transaction(async (t) => addForce(policeForce, user, t))
   }
 
-  const findQuery = {
-    where: {
-      name: {
-        [Op.iLike]: `%${policeForce.name}%`
-      }
-    }
-  }
+  const findQuery = getFindQuery(policeForce.name, 'name')
+
   const foundPoliceForce = await sequelize.models.police_force.findOne(findQuery)
 
   if (foundPoliceForce !== null) {
@@ -40,18 +36,22 @@ const addForce = async (policeForce, user, transaction) => {
   let createdPoliceForce
 
   const foundParanoid = await sequelize.models.police_force.findOne({
-    ...findQuery,
+    ...findQueryV2(policeForce.name, 'name'),
     paranoid: false
   })
 
   if (foundParanoid) {
-    await sequelize.models.police_force.restore({
-      where: {
-        id: foundParanoid.id
-      },
+    // await sequelize.models.police_force.restore({
+    //   where: {
+    //     id: foundParanoid.id
+    //   },
+    //   transaction
+    // })
+    createdPoliceForce = await updateParanoid(
+      foundParanoid,
+      { name: policeForce.name },
       transaction
-    })
-    createdPoliceForce = foundParanoid
+    )
   } else {
     createdPoliceForce = await sequelize.models.police_force.create({
       name: policeForce.name
