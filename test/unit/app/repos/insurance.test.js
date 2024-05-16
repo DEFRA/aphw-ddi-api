@@ -36,7 +36,7 @@ describe('Insurance repo', () => {
   const { sendCreateToAudit, sendDeleteToAudit } = require('../../../../app/messaging/send-audit')
 
   jest.mock('../../../../app/repos/shared')
-  const { updateParanoid, getFindQuery } = require('../../../../app/repos/shared')
+  const { updateParanoid } = require('../../../../app/repos/shared')
 
   const { getCompanies, createInsurance, updateInsurance, createOrUpdateInsurance, addCompany, deleteCompany } = require('../../../../app/repos/insurance')
 

@@ -1,5 +1,4 @@
 const sequelize = require('../config/db')
-const { Op } = require('sequelize')
 const { DuplicateResourceError } = require('../errors/duplicate-record')
 const { sendCreateToAudit, sendDeleteToAudit } = require('../messaging/send-audit')
 const { POLICE } = require('../constants/event/audit-event-object-types')
