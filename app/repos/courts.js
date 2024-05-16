@@ -3,13 +3,13 @@ const { DuplicateResourceError } = require('../errors/duplicate-record')
 const { sendCreateToAudit, sendDeleteToAudit } = require('../messaging/send-audit')
 const { COURT } = require('../constants/event/audit-event-object-types')
 const { NotFoundError } = require('../errors/not-found')
-const { Op } = require('sequelize')
+const { getFindQuery, findQueryV2, updateParanoid } = require('./shared')
 
 const getCourts = async () => {
   try {
     const courts = await sequelize.models.court.findAll({
       attributes: ['id', 'name'],
-      order: [[sequelize.col('name'), 'ASC']]
+      order: [[sequelize.fn('lower', sequelize.col('name')), 'ASC']]
     })
 
     return courts
@@ -33,13 +33,8 @@ const createCourt = async (courtData, user, transaction) => {
   if (!transaction) {
     return await sequelize.transaction(async (t) => createCourt(courtData, user, t))
   }
-  const findQuery = {
-    where: {
-      name: {
-        [Op.iLike]: `%${courtData.name}%`
-      }
-    }
-  }
+  const findQuery = getFindQuery(courtData.name, 'name')
+
   const foundCourt = await sequelize.models.court.findOne(findQuery)
 
   if (foundCourt !== null) {
@@ -49,18 +44,16 @@ const createCourt = async (courtData, user, transaction) => {
   let court
 
   const foundParanoid = await sequelize.models.court.findOne({
-    ...findQuery,
+    ...findQueryV2(courtData.name, 'name'),
     paranoid: false
   })
 
   if (foundParanoid) {
-    await sequelize.models.court.restore({
-      where: {
-        id: foundParanoid.id
-      },
+    court = await updateParanoid(
+      foundParanoid,
+      { name: courtData.name },
       transaction
-    })
-    court = foundParanoid
+    )
   } else {
     court = await sequelize.models.court.create({
       name: courtData.name

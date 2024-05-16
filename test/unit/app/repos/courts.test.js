@@ -8,6 +8,8 @@ describe('Courts repo', () => {
   jest.mock('../../../../app/config/db', () => ({
     transaction: jest.fn(),
     col: jest.fn(),
+    fn: jest.fn(),
+    where: jest.fn(),
     models: {
       court: {
         findAll: jest.fn(),
@@ -82,11 +84,15 @@ describe('Courts repo', () => {
     })
 
     test('should create a court given it has been soft deleted', async () => {
+      const saveMock = jest.fn()
+      const restoreMock = jest.fn()
       sequelize.models.court.restore.mockResolvedValue()
       sequelize.models.court.findOne.mockResolvedValueOnce(null)
       sequelize.models.court.findOne.mockResolvedValueOnce({
         id: 2,
-        name: 'The Shire County Court'
+        name: 'The Shire County Court',
+        save: saveMock,
+        restore: restoreMock
       })
 
       const createdCourt = await createCourt(mockCourtPayload, devUser, {})
@@ -94,9 +100,12 @@ describe('Courts repo', () => {
       expect(sequelize.transaction).toHaveBeenCalledTimes(0)
       expect(createdCourt).toEqual({
         id: 2,
-        name: 'The Shire County Court'
+        name: 'The Shire County Court',
+        save: expect.any(Function),
+        restore: expect.any(Function)
       })
-      expect(sequelize.models.court.restore).toHaveBeenCalled()
+      expect(saveMock).toHaveBeenCalled()
+      expect(restoreMock).toHaveBeenCalled()
       expect(sequelize.models.court.create).not.toHaveBeenCalled()
       expect(sendCreateToAudit).toHaveBeenCalledWith(COURT, {
         id: 2,
