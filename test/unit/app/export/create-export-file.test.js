@@ -21,9 +21,10 @@ describe('CreateExportFile test', () => {
 
     expect(res).toBe('Success Export (1 rows, batches of 0)')
     expect(uploadExportedFile).toHaveBeenCalledWith(expect.anything(), 'daily_export.csv')
+    expect(getAllCdos).toHaveBeenCalledTimes(1)
   })
 
-  test('should handle error', async () => {
+  test('should handle error with retry', async () => {
     getAllCdos.mockImplementation(() => { throw new Error('cdo error') })
     uploadExportedFile.mockResolvedValue()
 
@@ -31,5 +32,6 @@ describe('CreateExportFile test', () => {
 
     expect(res).toBe('Error create export file: Error: cdo error')
     expect(uploadExportedFile).not.toHaveBeenCalled()
+    expect(getAllCdos).toHaveBeenCalledTimes(3)
   })
 })

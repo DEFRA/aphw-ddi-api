@@ -5,6 +5,21 @@ const { uploadExportedFile } = require('../../app/storage/repos/export')
 const createExportFile = async (rowsPerBatch) => {
   rowsPerBatch = rowsPerBatch ?? 0
 
+  let tryNum = 1
+  while (true) {
+    console.log('try', tryNum)
+    const res = await tryCreateExportFile(rowsPerBatch)
+
+    if (tryNum >= 3 || res?.startsWith('Success')) {
+      console.log('returing', res)
+      return res
+    }
+
+    tryNum++
+  }
+}
+
+const tryCreateExportFile = async (rowsPerBatch) => {
   try {
     const { exportedData, numRowsExported } = await generateCsv(rowsPerBatch)
 
@@ -21,7 +36,6 @@ const createExportFile = async (rowsPerBatch) => {
     return `Error create export file: ${e}`
   }
 }
-
 const generateCsv = async rowsPerBatch => {
   if (!rowsPerBatch || rowsPerBatch === '0') {
     return generateCsvAltogether()
@@ -63,5 +77,6 @@ const generateCsvInBatches = async rowsPerBatch => {
 }
 
 module.exports = {
-  createExportFile
+  createExportFile,
+  tryCreateExportFile
 }
