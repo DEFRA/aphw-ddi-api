@@ -14,6 +14,7 @@ const createExportFile = async (rowsPerBatch) => {
     }
 
     tryNum++
+    console.log(`Retry export file creation - attempt ${tryNum}`)
   }
 }
 
