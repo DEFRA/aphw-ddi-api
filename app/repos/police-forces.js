@@ -41,12 +41,6 @@ const addForce = async (policeForce, user, transaction) => {
   })
 
   if (foundParanoid) {
-    // await sequelize.models.police_force.restore({
-    //   where: {
-    //     id: foundParanoid.id
-    //   },
-    //   transaction
-    // })
     createdPoliceForce = await updateParanoid(
       foundParanoid,
       { name: policeForce.name },
