@@ -21,6 +21,7 @@ describe('Insurance repo', () => {
         destroy: jest.fn()
       }
     },
+    where: jest.fn(),
     transaction: jest.fn(),
     col: jest.fn().mockReturnValue(''),
     fn: jest.fn().mockReturnValue('')
@@ -33,6 +34,9 @@ describe('Insurance repo', () => {
 
   jest.mock('../../../../app/messaging/send-audit')
   const { sendCreateToAudit, sendDeleteToAudit } = require('../../../../app/messaging/send-audit')
+
+  jest.mock('../../../../app/repos/shared')
+  const { updateParanoid } = require('../../../../app/repos/shared')
 
   const { getCompanies, createInsurance, updateInsurance, createOrUpdateInsurance, addCompany, deleteCompany } = require('../../../../app/repos/insurance')
 
@@ -305,12 +309,21 @@ describe('Insurance repo', () => {
     })
 
     test('should create a insurance company given it has been soft deleted', async () => {
-      sequelize.models.insurance_company.restore.mockResolvedValue()
-      sequelize.models.insurance_company.findOne.mockResolvedValueOnce(null)
-      sequelize.models.insurance_company.findOne.mockResolvedValueOnce({
+      const restoreMock = jest.fn()
+      const saveMock = jest.fn()
+      updateParanoid.mockResolvedValue({
         id: 2,
         company_name: 'Rohan Pets R Us'
       })
+
+      sequelize.models.insurance_company.findOne.mockResolvedValueOnce(null)
+      const expectedParanoidModel = {
+        id: 2,
+        company_name: 'rohan Pets R Us',
+        restore: restoreMock,
+        save: saveMock
+      }
+      sequelize.models.insurance_company.findOne.mockResolvedValueOnce(expectedParanoidModel)
 
       const createdInsuranceCompany = await addCompany(mockInsuranceCompany, devUser, {})
 
@@ -319,12 +332,12 @@ describe('Insurance repo', () => {
         id: 2,
         name: 'Rohan Pets R Us'
       })
-      expect(sequelize.models.insurance_company.restore).toHaveBeenCalled()
       expect(sequelize.models.insurance_company.create).not.toHaveBeenCalled()
       expect(sendCreateToAudit).toHaveBeenCalledWith(INSURANCE, {
         id: 2,
         name: 'Rohan Pets R Us'
       }, devUser)
+      expect(updateParanoid).toHaveBeenCalledWith(expectedParanoidModel, { company_name: 'Rohan Pets R Us' }, {})
     })
 
     test('should throw a DuplicateRecordError given insurance company already exists', async () => {
