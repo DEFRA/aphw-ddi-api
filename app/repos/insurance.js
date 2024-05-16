@@ -1,10 +1,10 @@
 const sequelize = require('../config/db')
 const { getInsuranceCompany } = require('../lookups')
-const { Op } = require('sequelize')
 const { DuplicateResourceError } = require('../errors/duplicate-record')
 const { sendCreateToAudit, sendDeleteToAudit } = require('../messaging/send-audit')
 const { INSURANCE } = require('../constants/event/audit-event-object-types')
 const { NotFoundError } = require('../errors/not-found')
+const { getFindQuery, updateParanoid, findQueryV2 } = require('./shared')
 
 const createInsurance = async (id, data, transaction) => {
   if (!transaction) {
@@ -60,7 +60,7 @@ const updateInsurance = async (insurance, data, transaction) => {
  * @return {Promise<{name: string, id: number}[]>}
  */
 const getCompanies = async (sort = { key: 'company_name', order: 'ASC' }) => {
-  let sortColumn = sequelize.col('company_name')
+  let sortColumn = sequelize.fn('lower', sequelize.col('company_name'))
 
   if (sort.key === 'updated_at') {
     sortColumn = sequelize.col('updatedOrCreatedAt')
@@ -112,13 +112,8 @@ const addCompany = async (insuranceCompany, user, transaction) => {
     return await sequelize.transaction(async (t) => addCompany(insuranceCompany, user, t))
   }
 
-  const findQuery = {
-    where: {
-      company_name: {
-        [Op.iLike]: `%${insuranceCompany.name}%`
-      }
-    }
-  }
+  const findQuery = getFindQuery(insuranceCompany.name, 'company_name')
+
   const foundInsuranceCompany = await sequelize.models.insurance_company.findOne(findQuery)
 
   if (foundInsuranceCompany !== null) {
@@ -127,18 +122,16 @@ const addCompany = async (insuranceCompany, user, transaction) => {
   let createdInsuranceCompany
 
   const foundParanoid = await sequelize.models.insurance_company.findOne({
-    ...findQuery,
+    ...findQueryV2(insuranceCompany.name, 'company_name'),
     paranoid: false
   })
 
   if (foundParanoid) {
-    await sequelize.models.insurance_company.restore({
-      where: {
-        id: foundParanoid.id
-      },
+    createdInsuranceCompany = await updateParanoid(
+      foundParanoid,
+      { company_name: insuranceCompany.name },
       transaction
-    })
-    createdInsuranceCompany = foundParanoid
+    )
   } else {
     createdInsuranceCompany = await sequelize.models.insurance_company.create({
       company_name: insuranceCompany.name

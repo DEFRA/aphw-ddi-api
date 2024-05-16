@@ -16,7 +16,9 @@ describe('Police force repo', () => {
       }
     },
     transaction: jest.fn(),
-    col: jest.fn()
+    col: jest.fn(),
+    fn: jest.fn(),
+    where: jest.fn()
   }))
 
   const sequelize = require('../../../../app/config/db')
@@ -81,11 +83,15 @@ describe('Police force repo', () => {
     })
 
     test('should create a police force given it has been soft deleted', async () => {
+      const restoreMock = jest.fn()
+      const saveMock = jest.fn()
       sequelize.models.police_force.restore.mockResolvedValue()
       sequelize.models.police_force.findOne.mockResolvedValueOnce(null)
       sequelize.models.police_force.findOne.mockResolvedValueOnce({
         id: 2,
-        name: 'Rohan Police Constabulary'
+        name: 'Rohan Police Constabulary',
+        restore: restoreMock,
+        save: saveMock
       })
 
       const createdPoliceForce = await addForce(mockPoliceForce, devUser, {})
@@ -93,14 +99,17 @@ describe('Police force repo', () => {
       expect(sequelize.transaction).toHaveBeenCalledTimes(0)
       expect(createdPoliceForce).toEqual({
         id: 2,
-        name: 'Rohan Police Constabulary'
+        name: 'Rohan Police Constabulary',
+        restore: expect.any(Function),
+        save: expect.any(Function)
       })
-      expect(sequelize.models.police_force.restore).toHaveBeenCalled()
       expect(sequelize.models.police_force.create).not.toHaveBeenCalled()
       expect(sendCreateToAudit).toHaveBeenCalledWith(POLICE, {
         id: 2,
         name: 'Rohan Police Constabulary'
       }, devUser)
+      expect(restoreMock).toHaveBeenCalled()
+      expect(saveMock).toHaveBeenCalled()
     })
 
     test('should throw a DuplicateRecordError given police already exists', async () => {
