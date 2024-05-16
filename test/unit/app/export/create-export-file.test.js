@@ -19,7 +19,7 @@ describe('CreateExportFile test', () => {
 
     const res = await createExportFile()
 
-    expect(res).toBe('Success Export (1 rows)')
+    expect(res).toBe('Success Export (1 rows, batches of 0)')
     expect(uploadExportedFile).toHaveBeenCalledWith(expect.anything(), 'daily_export.csv')
   })
 
