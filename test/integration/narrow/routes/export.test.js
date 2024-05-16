@@ -2,9 +2,6 @@ describe('Export endpoint', () => {
   const createServer = require('../../../../app/server')
   let server
 
-  jest.mock('../../../../app/export/read-export-file')
-  const { readExportFile } = require('../../../../app/export/read-export-file')
-
   jest.mock('../../../../app/repos/regular-jobs')
   const { runExportNow } = require('../../../../app/repos/regular-jobs')
 
@@ -17,19 +14,18 @@ describe('Export endpoint', () => {
     await server.initialize()
   })
 
-  test('GET /export route returns 200 and calls readExportFile', async () => {
+  test('GET /export-audit route returns 200 and calls sendEventToAudit', async () => {
     const options = {
       method: 'GET',
-      url: '/export'
+      url: '/export-audit'
     }
 
-    readExportFile.mockResolvedValue([])
     sendEventToAudit.mockResolvedValue()
 
     const response = await server.inject(options)
 
     expect(response.statusCode).toBe(200)
-    expect(readExportFile).toHaveBeenCalled()
+    expect(sendEventToAudit).toHaveBeenCalled()
   })
 
   test('GET /export-create-file route returns 200 and calls createExportFile', async () => {

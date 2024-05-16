@@ -19,17 +19,19 @@ describe('CreateExportFile test', () => {
 
     const res = await createExportFile()
 
-    expect(res).toBe('Success Export (1 rows, batches of 0)')
+    expect(res).toBe('Success Export (1 rows, batches of 0) - try 1')
     expect(uploadExportedFile).toHaveBeenCalledWith(expect.anything(), 'daily_export.csv')
+    expect(getAllCdos).toHaveBeenCalledTimes(1)
   })
 
-  test('should handle error', async () => {
+  test('should handle error with retry', async () => {
     getAllCdos.mockImplementation(() => { throw new Error('cdo error') })
     uploadExportedFile.mockResolvedValue()
 
     const res = await createExportFile()
 
-    expect(res).toBe('Error create export file: Error: cdo error')
+    expect(res).toBe('Error create export file: Error: cdo error - try 3')
     expect(uploadExportedFile).not.toHaveBeenCalled()
+    expect(getAllCdos).toHaveBeenCalledTimes(3)
   })
 })
