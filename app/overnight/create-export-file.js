@@ -10,11 +10,10 @@ const createExportFile = async (rowsPerBatch) => {
     const res = await tryCreateExportFile(rowsPerBatch)
 
     if (tryNum >= 3 || res?.startsWith('Success')) {
-      return res
+      return `${res} - try ${tryNum}`
     }
 
     tryNum++
-    console.log(`Retry export file creation - attempt ${tryNum}`)
   }
 }
 
