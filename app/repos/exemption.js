@@ -57,7 +57,7 @@ const autoChangeStatus = async (cdo, data, transaction) => {
   if (currentStatus === constants.statuses.PreExempt) {
     if (!cdo.registration.non_compliance_letter_sent && data.nonComplianceLetterSent) {
       return await updateStatus(cdo.index_number, constants.statuses.Failed, transaction)
-    } else if (data.insurance?.renewalDate && isFuture(data.insurance?.renewalDate) && !cdo.registration.certificate_issued && data.certificateIssued) {
+    } else if (data.insurance?.renewalDate && isFuture(data.insurance?.renewalDate) && data.certificateIssued) {
       return await updateStatus(cdo.index_number, constants.statuses.Exempt, transaction)
     }
   } else if (currentStatus === constants.statuses.InterimExempt) {
