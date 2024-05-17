@@ -22,12 +22,12 @@ const microchipExists = async (dogId, microchipNumber, transaction) => {
   return microchip?.microchip_number ?? null
 }
 
-const updateMicrochips = async (dogFromDb, payload, transaction) => {
+const throwForDuplicates = async (payload, dogId, transaction) => {
   const duplicateMicrochips = []
   const microchipsToCheck = [payload.microchipNumber, payload.microchipNumber2].filter(mC => !!mC)
 
   for (const microchipNumber of microchipsToCheck) {
-    const duplicateMicrochip = await microchipExists(dogFromDb.id, microchipNumber, transaction)
+    const duplicateMicrochip = await microchipExists(dogId, microchipNumber, transaction)
     if (duplicateMicrochip !== null) {
       duplicateMicrochips.push(duplicateMicrochip)
     }
@@ -36,6 +36,10 @@ const updateMicrochips = async (dogFromDb, payload, transaction) => {
   if (duplicateMicrochips.length) {
     throw new DuplicateResourceError('The microchip number already exists', { microchipNumbers: duplicateMicrochips })
   }
+}
+
+const updateMicrochips = async (dogFromDb, payload, transaction) => {
+  await throwForDuplicates(payload, dogFromDb.id, transaction)
 
   await updateMicrochip(dogFromDb, payload.microchipNumber, 1, transaction)
   await updateMicrochip(dogFromDb, payload.microchipNumber2, 2, transaction)
