@@ -407,6 +407,47 @@ describe('Exemption repo', () => {
       expect(updateStatus).toHaveBeenCalledWith('ED123', 'Exempt', {})
     })
 
+    test('autoChangeStatus should not change Pre-exempt to Exempt', async () => {
+      updateStatus.mockResolvedValue()
+
+      const cdo = {
+        index_number: 'ED123',
+        status: {
+          status: 'Pre-exempt'
+        },
+        registration: {}
+      }
+
+      const payload = {
+        insurance: {
+          renewalDate: new Date(2040, 1, 1)
+        }
+      }
+
+      await autoChangeStatus(cdo, payload, {})
+
+      expect(updateStatus).not.toHaveBeenCalled()
+    })
+
+    test('autoChangeStatus should not change Pre-exempt to Exempt 2', async () => {
+      updateStatus.mockResolvedValue()
+
+      const cdo = {
+        index_number: 'ED123',
+        status: {
+          status: 'Pre-exempt'
+        },
+        registration: {}
+      }
+
+      const payload = {
+      }
+
+      await autoChangeStatus(cdo, payload, {})
+
+      expect(updateStatus).not.toHaveBeenCalled()
+    })
+
     test('autoChangeStatus should handle Interim-exempt to Pre-Exempt', async () => {
       updateStatus.mockResolvedValue()
 
@@ -428,6 +469,28 @@ describe('Exemption repo', () => {
       await autoChangeStatus(cdo, payload, {})
 
       expect(updateStatus).toHaveBeenCalledWith('ED123', 'Pre-exempt', {})
+    })
+
+    test('autoChangeStatus should not change Interim-exempt to Pre-Exempt', async () => {
+      updateStatus.mockResolvedValue()
+
+      const cdo = {
+        index_number: 'ED123',
+        status: {
+          status: 'Interim exempt'
+        },
+        registration: {}
+      }
+
+      const payload = {
+        insurance: {
+          renewalDate: new Date(2040, 1, 1)
+        }
+      }
+
+      await autoChangeStatus(cdo, payload, {})
+
+      expect(updateStatus).not.toHaveBeenCalled()
     })
 
     test('autoChangeStatus should handle 2023 order to Withdrawn', async () => {
