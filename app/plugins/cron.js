@@ -1,6 +1,6 @@
 const cron = require('node-cron')
 const config = require('../config/cron')
-const { runOvernightJobs } = require('../repos/regular-jobs')
+const { runOvernightJobs } = require('../overnight/run-jobs')
 
 const setupCron = () => {
   cron.schedule(config.overnightJobCrontab ?? '5 4 * * *', async () => {

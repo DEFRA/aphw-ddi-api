@@ -1,7 +1,7 @@
 const { getCallingUser } = require('../auth/get-user')
 const { EXPORT } = require('../constants/event/events')
 const { sendEventToAudit } = require('../messaging/send-audit')
-const { runExportNow } = require('../repos/regular-jobs')
+const { runExportNow } = require('../overnight/run-jobs')
 
 module.exports = [{
   method: 'GET',

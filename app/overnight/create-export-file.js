@@ -1,13 +1,15 @@
+const { limitStringLength } = require('../lib/string-helpers')
 const { getAllCdos } = require('../repos/cdo')
 const { convertToCsv } = require('../export/csv')
 const { uploadExportedFile } = require('../../app/storage/repos/export')
+const { updateRunningJobProgress } = require('../repos/regular-jobs')
 
-const createExportFile = async (rowsPerBatch) => {
+const createExportFile = async (rowsPerBatch, jobId) => {
   rowsPerBatch = rowsPerBatch ?? 0
 
   let tryNum = 1
   while (true) {
-    const res = await tryCreateExportFile(rowsPerBatch)
+    const res = await tryCreateExportFile(rowsPerBatch, jobId, tryNum)
 
     if (tryNum >= 3 || res?.startsWith('Success')) {
       return `${res} - try ${tryNum}`
@@ -17,9 +19,11 @@ const createExportFile = async (rowsPerBatch) => {
   }
 }
 
-const tryCreateExportFile = async (rowsPerBatch) => {
+const tryCreateExportFile = async (rowsPerBatch, jobId, tryNum) => {
   try {
-    const { exportedData, numRowsExported } = await generateCsv(rowsPerBatch)
+    await updateRunningJobProgress(jobId, `Try ${tryNum} rows `)
+
+    const { exportedData, numRowsExported } = await generateCsv(rowsPerBatch, jobId)
 
     const Readable = require('stream').Readable
     const str = new Readable()
@@ -31,15 +35,17 @@ const tryCreateExportFile = async (rowsPerBatch) => {
     return `Success Export (${numRowsExported} rows, batches of ${rowsPerBatch})`
   } catch (e) {
     console.log('Error create export file', e)
-    return `Error create export file: ${e}`
+    await updateRunningJobProgress(jobId, `Try ${tryNum} Error create export file: ${limitStringLength(e.stack, 180)}`)
+    return `Error create export file: ${limitStringLength(e.stack, 180)}`
   }
 }
-const generateCsv = async rowsPerBatch => {
+
+const generateCsv = async (rowsPerBatch, jobId) => {
   if (!rowsPerBatch || rowsPerBatch === '0') {
     return generateCsvAltogether()
   }
 
-  return generateCsvInBatches(rowsPerBatch)
+  return generateCsvInBatches(rowsPerBatch, jobId)
 }
 
 const generateCsvAltogether = async () => {
@@ -50,7 +56,7 @@ const generateCsvAltogether = async () => {
   }
 }
 
-const generateCsvInBatches = async rowsPerBatch => {
+const generateCsvInBatches = async (rowsPerBatch, jobId) => {
   let csvSoFar = ''
   let latestDogId = 1
   let numReturnedRows = 0
@@ -65,6 +71,8 @@ const generateCsvInBatches = async rowsPerBatch => {
       csvSoFar = csvSoFar + convertToCsv(cdoBatch, isNotFirstLoopIteration)
       totalRows += numReturnedRows
       isNotFirstLoopIteration = true
+      console.log(`Rows ${numReturnedRows} jobId ${jobId}`)
+      await updateRunningJobProgress(jobId, `${numReturnedRows}`)
     }
   } while (numReturnedRows > 0)
 
