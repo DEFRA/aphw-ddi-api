@@ -1,4 +1,5 @@
 const { DuplicateResourceError } = require('../../../../app/errors/duplicate-record')
+
 describe('microchip', () => {
   jest.mock('../../../../app/config/db', () => ({
     models: {
@@ -47,6 +48,36 @@ describe('microchip', () => {
   })
 
   describe('updateMicrochips', () => {
+    test('should update existing', async () => {
+      const mockSave = jest.fn()
+      sequelize.models.microchip.findAll.mockResolvedValue([{ microchip_number: '123', save: mockSave }])
+
+      const dogFromDb = {
+        id: 1
+      }
+      const payload = {
+        microchipNumber: '456'
+      }
+      await updateMicrochips(dogFromDb, payload, {})
+      expect(mockSave).toHaveBeenCalledTimes(1)
+    })
+
+    test('should create new if not existing', async () => {
+      const mockSave = jest.fn()
+      sequelize.models.microchip.findAll.mockResolvedValue([])
+      sequelize.models.microchip.create.mockResolvedValue({ id: 101 })
+
+      const dogFromDb = {
+        id: 1
+      }
+      const payload = {
+        microchipNumber: '456'
+      }
+      await updateMicrochips(dogFromDb, payload, {})
+      expect(mockSave).toHaveBeenCalledTimes(0)
+      expect(sequelize.models.microchip.create).toHaveBeenCalledTimes(1)
+    })
+
     test('should throw DuplicateResourceError is one microchip is a duplicates ', async () => {
       sequelize.models.microchip.findOne.mockResolvedValueOnce({
         id: 1,
