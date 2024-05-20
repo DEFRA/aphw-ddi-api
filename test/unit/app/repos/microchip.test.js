@@ -23,6 +23,10 @@ describe('microchip', () => {
 
   const { microchipExists, updateMicrochips, updateMicrochip } = require('../../../../app/repos/microchip')
 
+  afterEach(() => {
+    jest.clearAllMocks()
+  })
+
   describe('updateMicrochip', () => {
     test('should create new microchip given none exists', async () => {
       sequelize.models.microchip.findAll.mockResolvedValue(null)
