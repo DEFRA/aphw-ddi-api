@@ -103,6 +103,10 @@ const handleInsuranceAndMicrochipAndRegPerson = async (dogEntity, dog, dogResult
         person_type_id: 1
       }, { transaction })
     }
+  } else {
+    const currentOwner = await 
+    console.log('dogEntity', dogEntity)
+    console.log('owners', owners)
   }
   dogResult.microchipNumber = dog.microchipNumber
 }
