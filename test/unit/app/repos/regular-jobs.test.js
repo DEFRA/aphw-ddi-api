@@ -23,7 +23,7 @@ describe('RegularJobs repo', () => {
   jest.mock('../../../../app/overnight/create-export-file')
   const { createExportFile } = require('../../../../app/overnight/create-export-file')
 
-  const { tryStartJob, endJob, getRegularJobs, runOvernightJobs, runExportNow } = require('../../../../app/repos/regular-jobs')
+  const { tryStartJob, endJob, getRegularJobs, createNewJob, updateRunningJobProgress } = require('../../../../app/repos/regular-jobs')
 
   beforeEach(async () => {
     jest.clearAllMocks()
@@ -128,47 +128,35 @@ describe('RegularJobs repo', () => {
     await expect(getRegularJobs()).rejects.toThrow('DB error')
   })
 
-  test('runOvernightJobs should not run if already run today', async () => {
-    sequelize.models.regular_job.findOne.mockResolvedValue({ id: 456 })
-    sequelize.models.regular_job.create.mockResolvedValue()
-    sequelize.models.regular_job.findAll.mockResolvedValue()
-    sequelize.transaction.mockImplementation(() => {
-      return { id: 333 }
-    })
-
-    const res = await runOvernightJobs()
-
-    expect(res).toBe('autoUpdate ok | export file ok')
-  })
-
-  test('runOvernightJobs should run if not yet run today', async () => {
-    sequelize.models.regular_job.findOne.mockResolvedValue({ id: 456 })
-    sequelize.models.regular_job.create.mockResolvedValue()
-    sequelize.models.regular_job.findAll.mockResolvedValue()
-    sequelize.transaction.mockImplementation(() => {
-      return null
-    })
-
-    const res = await runOvernightJobs()
-
-    expect(res).toBe('Job for today already running or run')
-  })
-
-  test('runExportNow should call createExportFile', async () => {
+  test('createNewJob should call create', async () => {
     sequelize.models.regular_job.create.mockResolvedValue({ id: 123 })
-    sequelize.models.regular_job.findAll.mockResolvedValue()
 
-    await runExportNow()
+    const res = await createNewJob()
 
-    expect(createExportFile).toHaveBeenCalledWith(undefined)
+    expect(res.id).toBe(123)
+
+    expect(sequelize.models.regular_job.create).toHaveBeenCalledTimes(1)
   })
 
-  test('runExportNow should call createExportFile with param', async () => {
-    sequelize.models.regular_job.create.mockResolvedValue({ id: 123 })
-    sequelize.models.regular_job.findAll.mockResolvedValue()
+  test('updateRunningJobProgress should call update existing job', async () => {
+    const mockSave = jest.fn()
+    sequelize.models.regular_job.findByPk.mockResolvedValue({ id: 123, result: 'Some initial text', save: mockSave })
 
-    await runExportNow('1000')
+    const res = await updateRunningJobProgress(123, 'Extra text to add')
 
-    expect(createExportFile).toHaveBeenCalledWith('1000')
+    expect(res.id).toBe(123)
+    expect(res.result).toBe('Some initial text Extra text to add')
+    expect(mockSave).toHaveBeenCalledTimes(1)
+  })
+
+  test('updateRunningJobProgress should add text to existing', async () => {
+    const mockSave = jest.fn()
+    sequelize.models.regular_job.findByPk.mockResolvedValue({ id: 123, result: null, save: mockSave })
+
+    const res = await updateRunningJobProgress(123, 'Extra text to add')
+
+    expect(res.id).toBe(123)
+    expect(res.result).toBe(' Extra text to add')
+    expect(mockSave).toHaveBeenCalledTimes(1)
   })
 })
