@@ -1,8 +1,6 @@
 const sequelize = require('../config/db')
-const config = require('../config/index')
 const { Op } = require('sequelize')
-const { autoUpdateStatuses } = require('../overnight/auto-update-statuses')
-const { createExportFile } = require('../overnight/create-export-file')
+const { limitStringLength } = require('../lib/string-helpers')
 
 const getRegularJobs = async () => {
   try {
@@ -15,31 +13,6 @@ const getRegularJobs = async () => {
     console.log(`Error retrieving regular-jobs: ${e}`)
     throw e
   }
-}
-
-const runOvernightJobs = async () => {
-  const jobId = await tryStartJob()
-
-  if (jobId) {
-    let result = await autoUpdateStatuses()
-    result = result + ' | ' + await createExportFile(config.overnightExportBatchSize)
-    await endJob(jobId, result)
-    return result
-  }
-
-  return 'Job for today already running or run'
-}
-
-const runExportNow = async (rowsPerBatch) => {
-  const newJob = await sequelize.models.regular_job.create({
-    run_date: new Date(),
-    start_time: new Date(),
-    result: 'Running'
-  })
-
-  const res = await createExportFile(rowsPerBatch)
-
-  await endJob(newJob.id, res)
 }
 
 const tryStartJob = async (trans) => {
@@ -95,7 +68,8 @@ const endJob = async (jobId, resultText, trans) => {
 
     if (currentJob) {
       currentJob.end_time = new Date()
-      currentJob.result = resultText?.length >= 1000 ? resultText.substring(0, 999) : resultText
+      const newResultText = `${currentJob.result ?? ''} ${resultText}`
+      currentJob.result = limitStringLength(newResultText, 1000)
       await currentJob.save({ transaction: trans })
     } else {
       throw new Error(`Overnight jobId ${jobId} not found`)
@@ -106,10 +80,30 @@ const endJob = async (jobId, resultText, trans) => {
   }
 }
 
+const createNewJob = async () => {
+  const newJob = await sequelize.models.regular_job.create({
+    run_date: new Date(),
+    start_time: new Date(),
+    result: 'Running'
+  })
+
+  return newJob
+}
+
+const updateRunningJobProgress = async (jobId, progressText) => {
+  const currentJob = await sequelize.models.regular_job.findByPk(jobId)
+  if (currentJob) {
+    const newText = `${currentJob.result ?? ''} ${progressText}`
+    currentJob.result = limitStringLength(newText, 1000)
+    await currentJob.save()
+    return currentJob
+  }
+}
+
 module.exports = {
-  runOvernightJobs,
-  runExportNow,
   tryStartJob,
   endJob,
-  getRegularJobs
+  getRegularJobs,
+  updateRunningJobProgress,
+  createNewJob
 }

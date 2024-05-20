@@ -8,6 +8,9 @@ const { getAllCdos } = require('../../../../app/repos/cdo')
 jest.mock('../../../../app/storage/repos/export')
 const { uploadExportedFile } = require('../../../../app/storage/repos/export')
 
+jest.mock('../../../../app/repos/regular-jobs')
+const { updateRunningJobProgress } = require('../../../../app/repos/regular-jobs')
+
 describe('CreateExportFile test', () => {
   beforeEach(async () => {
     jest.clearAllMocks()
@@ -16,6 +19,7 @@ describe('CreateExportFile test', () => {
   test('should handle success', async () => {
     getAllCdos.mockResolvedValue([validRow])
     uploadExportedFile.mockResolvedValue()
+    updateRunningJobProgress.mockResolvedValue()
 
     const res = await createExportFile()
 
@@ -27,10 +31,13 @@ describe('CreateExportFile test', () => {
   test('should handle error with retry', async () => {
     getAllCdos.mockImplementation(() => { throw new Error('cdo error') })
     uploadExportedFile.mockResolvedValue()
+    updateRunningJobProgress.mockResolvedValue()
 
     const res = await createExportFile()
 
-    expect(res).toBe('Error create export file: Error: cdo error - try 3')
+    expect(res).toContain('Error create export file: Error: cdo error\n    at /')
+    expect(res).toContain('/test/unit/app/export/create-export-file.test.js:32:49\n    at /')
+    expect(res).toContain('- try 3')
     expect(uploadExportedFile).not.toHaveBeenCalled()
     expect(getAllCdos).toHaveBeenCalledTimes(3)
   })
