@@ -12,20 +12,23 @@ const { removeDogFromSearchIndex } = require('./search')
 
 /**
  * @typedef DogDao
- * @property {number} id: 300723,
- * @property {string} dog_reference: 'c4d783b7-2ba7-4367-b7e5-63658ec5a6bc',
- * @property {string} index_number: 'ED300723',
- * @property {number} dog_breed_id: 1,
- * @property {number} status_id: 4,
- * @property {string|null} name: 'Rex279',
- * @property {Date|null} birth_date: null,
- * @property {Date|null} death_date: null,
- * @property {string|null} tattoo: null,
- * @property {string|null} colour: null,
- * @property {string|null} sex: null,
- * @property {Date|null} exported_date: null,
- * @property {Date|null} stolen_date: null,
- * @property {Date|null} untraceable_date: null,
+ * @property {number} id
+ * @property {string} dog_reference
+ * @property {string} index_number
+ * @property {number} dog_breed_id
+ * @property {DogBreedDao} dog_breed
+ * @property {number} status_id
+ * @property {{ id: number, status: string, status_type: string }} status
+ * @property {string|null} name
+ * @property {Date|null} birth_date
+ * @property {Date|null} death_date
+ * @property {string|null} tattoo
+ * @property {string|null} colour
+ * @property {string|null} sex
+ * @property {Date|null} exported_date
+ * @property {Date|null} stolen_date
+ * @property {Date|null} untraceable_date
+ * @property {DogMicrochipDao[]} dog_microchips
  */
 
 const getBreeds = async () => {

@@ -311,7 +311,9 @@ const updatePersonFields = async (id, personFields, user, transaction) => {
  * @property {number} person_type_id
  * @property {DogDao} dog
  */
-
+/**
+ * @typedef {unknown} PersonContact
+ */
 /**
  * @typedef PersonWithRegisteredPeople
  * @property {number} id
@@ -320,7 +322,7 @@ const updatePersonFields = async (id, personFields, user, transaction) => {
  * @property {string} person_reference
  * @property {string} birth_date
  * @property {PersonAddressDao[]} addresses
- * @property {unknown[]} person_contacts
+ * @property {PersonContact[]} person_contacts
  * @property {RegisteredPerson[]} registered_people
  */
 
@@ -331,8 +333,7 @@ const updatePersonFields = async (id, personFields, user, transaction) => {
  * @property {number} dog_id
  * @property {number} person_type_id
  * @property {DogDao} dog
- * @property person
- *
+ * @property {PersonWithRegisteredPeople} person
  */
 
 /**
@@ -371,7 +372,8 @@ const getPersonAndDogsByIndex = async (indexNumber, transaction) => {
                       model: sequelize.models.microchip,
                       as: 'microchip'
                     }]
-                  }]
+                  }
+                  ]
                 }
               ]
             }
