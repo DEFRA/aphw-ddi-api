@@ -174,7 +174,7 @@ const getPersonByReference = async (reference, transaction) => {
 
 const getOwnerOfDog = async (indexNumber) => {
   try {
-    const person = await sequelize.models.registered_person.findOne({
+    return await sequelize.models.registered_person.findOne({
       include: [{
         model: sequelize.models.person,
         as: 'person'
@@ -185,8 +185,6 @@ const getOwnerOfDog = async (indexNumber) => {
         as: 'dog'
       }]
     })
-
-    return person
   } catch (err) {
     console.error(`Error getting owner of dog ${indexNumber}: ${err}`)
     throw err
@@ -338,7 +336,7 @@ const updatePersonFields = async (id, personFields, user, transaction) => {
 
 /**
  * @param {string} indexNumber
- * @param transaction
+ * @param [transaction]
  * @return {Promise<PersonAndDogsByIndexDao>}
  */
 const getPersonAndDogsByIndex = async (indexNumber, transaction) => {
