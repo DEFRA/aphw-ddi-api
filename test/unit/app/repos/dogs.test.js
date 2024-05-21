@@ -41,7 +41,8 @@ describe('Dog repo', () => {
         destroy: jest.fn()
       },
       registered_person: {
-        create: jest.fn()
+        create: jest.fn(),
+        findOne: jest.fn()
       },
       microchip: {
         findAll: jest.fn(),
@@ -65,7 +66,7 @@ describe('Dog repo', () => {
 
   const sequelize = require('../../../../app/config/db')
 
-  const { getBreeds, getStatuses, createDogs, addImportedDog, getDogByIndexNumber, getAllDogIds, updateDog, updateStatus, updateDogFields, deleteDogByIndexNumber, updateMicrochips } = require('../../../../app/repos/dogs')
+  const { getBreeds, getStatuses, createDogs, addImportedDog, getDogByIndexNumber, getAllDogIds, updateDog, updateStatus, updateDogFields, deleteDogByIndexNumber, updateMicrochips, switchOwnerIfNecessary } = require('../../../../app/repos/dogs')
 
   beforeEach(async () => {
     jest.clearAllMocks()
@@ -634,6 +635,56 @@ describe('Dog repo', () => {
       expect(mockDogMicrochipDestroy).toHaveBeenCalledTimes(2)
       expect(mockDogDestroy).toHaveBeenCalled()
       expect(sendDeleteToAudit).toHaveBeenCalledWith('dog', mockDogAggregrate, devUser)
+    })
+  })
+
+  describe('switchOwnerIfNecessary', () => {
+    test('should switch if different owner', async () => {
+      const mockSave = jest.fn()
+      sequelize.models.registered_person.findOne.mockResolvedValue({ person_id: 55555, save: mockSave })
+
+      const dogAndOwner = {
+        id: 12345,
+        name: 'Rex',
+        registered_person: [
+          {
+            person: { person_reference: 'P-123' }
+          }
+        ]
+      }
+
+      const newOwners = [
+        { person_reference: 'P-456' }
+      ]
+
+      await switchOwnerIfNecessary(dogAndOwner, newOwners, {})
+
+      expect(sequelize.models.registered_person.findOne).toHaveBeenCalledWith({ where: { dog_id: 12345 } })
+      expect(mockSave).toHaveBeenCalledTimes(1)
+    })
+
+    test('should not switch if same owner', async () => {
+      const mockSave = jest.fn()
+      sequelize.models.registered_person.findOne.mockResolvedValue({ person_id: 55555, save: mockSave })
+
+      const dogAndOwner = {
+        id: 12345,
+        name: 'Rex',
+        registered_person: [
+          {
+            person: { person_reference: 'P-123' }
+          }
+        ]
+      }
+
+      const newOwners = [
+        { person_reference: 'P-123' }
+      ]
+
+      await switchOwnerIfNecessary(dogAndOwner, newOwners, {})
+
+      expect(sequelize.models.registered_person.findOne).not.toHaveBeenCalled()
+      expect(mockSave).toHaveBeenCalledTimes(0)
     })
   })
 })

@@ -87,7 +87,6 @@ const createDogs = async (dogs, owners, enforcement, transaction) => {
 }
 
 const switchOwnerIfNecessary = async (dogAndOwner, newOwners, transaction) => {
-  console.log('dogAndOwner', dogAndOwner)
   const currentOwner = dogAndOwner.registered_person[0].person
   const newOwner = newOwners[0]
   if (currentOwner.person_reference !== newOwner.person_reference) {
@@ -446,5 +445,6 @@ module.exports = {
   updateDogFields,
   updateMicrochips,
   updateStatus,
-  deleteDogByIndexNumber
+  deleteDogByIndexNumber,
+  switchOwnerIfNecessary
 }
