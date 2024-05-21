@@ -2,8 +2,8 @@ describe('Export endpoint', () => {
   const createServer = require('../../../../app/server')
   let server
 
-  jest.mock('../../../../app/repos/regular-jobs')
-  const { runExportNow } = require('../../../../app/repos/regular-jobs')
+  jest.mock('../../../../app/overnight/run-jobs')
+  const { runExportNow } = require('../../../../app/overnight/run-jobs')
 
   jest.mock('../../../../app/messaging/send-audit')
   const { sendEventToAudit } = require('../../../../app/messaging/send-audit')

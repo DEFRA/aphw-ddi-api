@@ -14,8 +14,8 @@ const autoUpdateStatuses = async () => {
     const today = new Date()
 
     await sequelize.transaction(async (t) => {
-      result = result + await setExpiredCdosToFailed(today, user, t)
-      result = result + ' | ' + await setExpiredInsuranceToBreach(today, user, t)
+      result = result + await setExpiredCdosToFailed(today, user, t) + ' | '
+      result = result + await setExpiredInsuranceToBreach(today, user, t)
     })
   } catch (e) {
     console.log(`Error auto-updating statuses: ${e}`)
