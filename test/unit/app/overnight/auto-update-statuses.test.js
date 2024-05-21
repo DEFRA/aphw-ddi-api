@@ -18,6 +18,6 @@ describe('AutoUpdateStatus test', () => {
     setExpiredCdosToFailed.mockResolvedValue('ok - cdos 1 rows')
     setExpiredInsuranceToBreach.mockImplementation(() => { throw new Error('dummy error') })
     const res = await autoUpdateStatuses()
-    expect(res).toBe('Error auto-updating statuses: Error: dummy error ok - cdos 1 rows')
+    expect(res).toBe('Error auto-updating statuses: Error: dummy error ok - cdos 1 rows | ')
   })
 })

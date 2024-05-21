@@ -18,7 +18,7 @@ async function createServer () {
   })
 
   await server.register(require('./plugins/router'))
-  setupCron()
+  setupCron(server)
 
   return server
 }

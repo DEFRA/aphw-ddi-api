@@ -1,7 +1,7 @@
 const { setupCron } = require('../../../../app/plugins/cron')
 
-const { runOvernightJobs } = require('../../../../app/repos/regular-jobs')
-jest.mock('../../../../app/repos/regular-jobs')
+const { runOvernightJobs } = require('../../../../app/overnight/run-jobs')
+jest.mock('../../../../app/overnight/run-jobs')
 
 const cron = require('node-cron')
 jest.mock('node-cron')
