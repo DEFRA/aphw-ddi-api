@@ -9,8 +9,15 @@ jest.mock('../../../../app/overnight/create-export-file')
 const { updateRunningJobProgress, tryStartJob, endJob, createNewJob } = require('../../../../app/repos/regular-jobs')
 jest.mock('../../../../app/repos/regular-jobs')
 
+jest.mock('@hapi/wreck')
+const wreck = require('@hapi/wreck')
+
+let server
+
 describe('RunJobs test', () => {
   beforeEach(async () => {
+    wreck.get.mockResolvedValue()
+    server = { inject: jest.fn() }
     jest.clearAllMocks()
   })
 
@@ -18,12 +25,10 @@ describe('RunJobs test', () => {
     updateRunningJobProgress.mockResolvedValue()
     tryStartJob.mockResolvedValue(123)
     endJob.mockResolvedValue()
-    createExportFile.mockResolvedValue('Success export')
     autoUpdateStatuses.mockResolvedValue('ok - insurance 2 rows')
-    const res = await runOvernightJobs()
-    expect(res).toBe('Success export')
+    const res = await runOvernightJobs(server)
+    expect(res).toBe('ok - insurance 2 rows')
     expect(autoUpdateStatuses).toHaveBeenCalledTimes(1)
-    expect(createExportFile).toHaveBeenCalledTimes(1)
   })
 
   test('runExportNow should call createExportFile', async () => {

@@ -1,16 +1,22 @@
-const config = require('../config/index')
+const config = require('../config')
 const { autoUpdateStatuses } = require('./auto-update-statuses')
 const { createExportFile } = require('./create-export-file')
-const { tryStartJob, endJob, updateRunningJobProgress, createNewJob } = require('../repos/regular-jobs')
+const { tryStartJob, endJob, createNewJob } = require('../repos/regular-jobs')
 
-const runOvernightJobs = async () => {
+const triggerExportGeneration = server => {
+  server.inject({
+    method: 'GET',
+    url: `/export-create-file?batchSize=${config.overnightExportBatchSize ?? 10000}`
+  })
+}
+
+const runOvernightJobs = async (server) => {
   const jobId = await tryStartJob()
 
   if (jobId) {
-    let result = await autoUpdateStatuses()
-    await updateRunningJobProgress(jobId, result)
-    result = await createExportFile(config.overnightExportBatchSize, jobId)
+    const result = await autoUpdateStatuses()
     await endJob(jobId, result)
+    triggerExportGeneration(server)
     return result
   }
 
