@@ -225,10 +225,10 @@ const updatePerson = async (person, user, transaction) => {
     const existingAddress = existing.addresses[0].address
 
     if (existingAddress.address_line_1 !== person.address.addressLine1 ||
-        existingAddress.address_line_2 !== person.address.addressLine2 ||
-        existingAddress.town !== person.address.town ||
-        existingAddress.postcode !== person.address.postcode ||
-        existingAddress.country.country !== person.address.country) {
+      existingAddress.address_line_2 !== person.address.addressLine2 ||
+      existingAddress.town !== person.address.town ||
+      existingAddress.postcode !== person.address.postcode ||
+      existingAddress.country.country !== person.address.country) {
       const country = await getCountry(person.address.country)
 
       const address = await sequelize.models.address.create({
@@ -303,7 +303,43 @@ const updatePersonFields = async (id, personFields, user, transaction) => {
 
   return person
 }
+/**
+ * @typedef RegisteredPerson
+ * @property {number} id
+ * @property {number} person_id
+ * @property {number} dog_id
+ * @property {number} person_type_id
+ * @property {DogDao} dog
+ */
 
+/**
+ * @typedef PersonWithRegisteredPeople
+ * @property {number} id
+ * @property {string} first_name
+ * @property {string} last_name
+ * @property {string} person_reference
+ * @property {string} birth_date
+ * @property {PersonAddressDao[]} addresses
+ * @property {unknown[]} person_contacts
+ * @property {RegisteredPerson[]} registered_people
+ */
+
+/**
+ * @typedef PersonAndDogsByIndexDao
+ * @property {number} id
+ * @property {number} person_id
+ * @property {number} dog_id
+ * @property {number} person_type_id
+ * @property {DogDao} dog
+ * @property person
+ *
+ */
+
+/**
+ * @param {string} indexNumber
+ * @param transaction
+ * @return {Promise<PersonAndDogsByIndexDao>}
+ */
 const getPersonAndDogsByIndex = async (indexNumber, transaction) => {
   try {
     return await sequelize.models.registered_person.findOne({
