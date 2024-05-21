@@ -304,6 +304,57 @@ const updatePersonFields = async (id, personFields, user, transaction) => {
   return person
 }
 
+const getPersonAndDogsByIndex = async (indexNumber, transaction) => {
+  try {
+    return await sequelize.models.registered_person.findOne({
+      include: [
+        {
+          model: sequelize.models.person,
+          as: 'person',
+          include: [
+            ...personRelationship(sequelize),
+            {
+              model: sequelize.models.registered_person,
+              as: 'registered_people',
+              include: [
+                {
+                  model: sequelize.models.dog,
+                  as: 'dog',
+                  include: [{
+                    model: sequelize.models.dog_breed,
+                    as: 'dog_breed'
+                  },
+                  {
+                    model: sequelize.models.status,
+                    as: 'status'
+                  },
+                  {
+                    model: sequelize.models.dog_microchip,
+                    as: 'dog_microchips',
+                    include: [{
+                      model: sequelize.models.microchip,
+                      as: 'microchip'
+                    }]
+                  }]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          model: sequelize.models.dog,
+          where: { index_number: indexNumber },
+          as: 'dog'
+        }
+      ],
+      transaction
+    })
+  } catch (err) {
+    console.error(`Error getting owner of dog ${indexNumber}: ${err}`)
+    throw err
+  }
+}
+
 const getPersonAndDogsByReference = async (reference, transaction) => {
   try {
     const person = await sequelize.models.registered_person.findAll({
@@ -408,6 +459,7 @@ module.exports = {
   createPeople,
   getPersonByReference,
   getPersonAndDogsByReference,
+  getPersonAndDogsByIndex,
   updatePerson,
   updatePersonFields,
   getOwnerOfDog,

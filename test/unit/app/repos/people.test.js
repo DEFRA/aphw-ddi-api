@@ -64,7 +64,7 @@ describe('People repo', () => {
   jest.mock('../../../../app/repos/search')
   const { updateSearchIndexPerson } = require('../../../../app/repos/search')
 
-  const { createPeople, getPersonByReference, getPersonAndDogsByReference, updatePerson, getOwnerOfDog, updatePersonFields, deletePerson } = require('../../../../app/repos/people')
+  const { createPeople, getPersonByReference, getPersonAndDogsByReference, getPersonAndDogsByIndex, updatePerson, getOwnerOfDog, updatePersonFields, deletePerson } = require('../../../../app/repos/people')
 
   beforeEach(async () => {
     jest.clearAllMocks()
@@ -421,6 +421,84 @@ describe('People repo', () => {
     })
   })
 
+  describe('getPersonAndDogsByIndex', () => {
+    test('should return person with dogs', async () => {
+      sequelize.models.registered_person.findOne.mockResolvedValue({
+        dataValues: {
+          person: {
+            id: 1,
+            first_name: 'First',
+            last_name: 'Last',
+            person_reference: '1234',
+            addresses: [
+              {
+                id: 1,
+                address_line_1: 'Address 1',
+                address_line_2: 'Address 2',
+                town: 'Town',
+                postcode: 'Postcode'
+              }
+            ],
+            registered_people: [
+              {
+                dog: [
+                  { id: 1, name: 'dog1' }
+                ]
+              },
+              {
+                dog: [
+                  { id: 2, name: 'dog2' }
+                ]
+              }
+            ]
+          },
+          dog: { id: 1, name: 'dog1' }
+        }
+      })
+
+      const personAndDogs = await getPersonAndDogsByIndex('ED300719')
+
+      expect(personAndDogs).toEqual({
+        dataValues: {
+          person: {
+            id: 1,
+            first_name: 'First',
+            last_name: 'Last',
+            person_reference: '1234',
+            addresses: [
+              {
+                id: 1,
+                address_line_1: 'Address 1',
+                address_line_2: 'Address 2',
+                town: 'Town',
+                postcode: 'Postcode'
+              }
+            ],
+            registered_people: [
+              {
+                dog: [
+                  { id: 1, name: 'dog1' }
+                ]
+              },
+              {
+                dog: [
+                  { id: 2, name: 'dog2' }
+                ]
+              }
+            ]
+          },
+          dog: { id: 1, name: 'dog1' }
+        }
+      })
+    })
+
+    test('should throw if error', async () => {
+      sequelize.models.registered_person.findOne.mockRejectedValue(new Error('Test error'))
+
+      await expect(getPersonAndDogsByIndex('ED300001')).rejects.toThrow('Test error')
+    })
+  })
+
   describe('getOwnerOfDog', () => {
     test('getOwnerOfDog should return person', async () => {
       sequelize.models.registered_person.findOne.mockResolvedValue({
@@ -443,6 +521,38 @@ describe('People repo', () => {
             first_name: 'First',
             last_name: 'Last',
             person_reference: '1234'
+          }
+        }
+      })
+    })
+
+    test('getOwnerOfDog should return person with dogs', async () => {
+      sequelize.models.registered_person.findOne.mockResolvedValue({
+        person: {
+          dataValues: {
+            id: 1,
+            first_name: 'First',
+            last_name: 'Last',
+            person_reference: '1234',
+            dog: [
+              { id: 1, name: 'dog1' }
+            ]
+          }
+        }
+      })
+
+      const person = await getOwnerOfDog('1234', true)
+
+      expect(person).toEqual({
+        person: {
+          dataValues: {
+            id: 1,
+            first_name: 'First',
+            last_name: 'Last',
+            person_reference: '1234',
+            dog: [
+              { id: 1, name: 'dog1' }
+            ]
           }
         }
       })
