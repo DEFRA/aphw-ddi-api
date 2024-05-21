@@ -423,7 +423,7 @@ describe('People repo', () => {
 
   describe('getPersonAndDogsByIndex', () => {
     test('should return person with dogs', async () => {
-      sequelize.models.registered_person.findOne.mockResolvedValue({
+      sequelize.models.registered_person.findAll.mockResolvedValue([{
         dataValues: {
           person: {
             id: 1,
@@ -454,7 +454,7 @@ describe('People repo', () => {
           },
           dog: { id: 1, name: 'dog1' }
         }
-      })
+      }])
 
       const personAndDogs = await getPersonAndDogsByIndex('ED300719')
 
@@ -493,7 +493,7 @@ describe('People repo', () => {
     })
 
     test('should throw if error', async () => {
-      sequelize.models.registered_person.findOne.mockRejectedValue(new Error('Test error'))
+      sequelize.models.registered_person.findAll.mockRejectedValue(new Error('Test error'))
 
       await expect(getPersonAndDogsByIndex('ED300001')).rejects.toThrow('Test error')
     })

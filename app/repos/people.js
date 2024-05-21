@@ -341,7 +341,8 @@ const updatePersonFields = async (id, personFields, user, transaction) => {
  */
 const getPersonAndDogsByIndex = async (indexNumber, transaction) => {
   try {
-    return await sequelize.models.registered_person.findOne({
+    const [owner] = await sequelize.models.registered_person.findAll({
+      order: [[sequelize.col('person.addresses.address.id'), 'DESC']],
       include: [
         {
           model: sequelize.models.person,
@@ -385,6 +386,7 @@ const getPersonAndDogsByIndex = async (indexNumber, transaction) => {
       ],
       transaction
     })
+    return owner
   } catch (err) {
     console.error(`Error getting owner of dog ${indexNumber}: ${err}`)
     throw err
