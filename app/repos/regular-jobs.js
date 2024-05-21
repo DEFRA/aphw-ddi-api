@@ -1,6 +1,6 @@
 const sequelize = require('../config/db')
 const { Op } = require('sequelize')
-const { limitStringLength } = require('../lib/string-helpers')
+const { limitStringLength, removeFromStartOfString } = require('../lib/string-helpers')
 
 const getRegularJobs = async () => {
   try {
@@ -69,7 +69,7 @@ const endJob = async (jobId, resultText, trans) => {
     if (currentJob) {
       currentJob.end_time = new Date()
       const newResultText = `${currentJob.result ?? ''} ${resultText}`
-      currentJob.result = limitStringLength(newResultText, 1000)
+      currentJob.result = removeFromStartOfString(limitStringLength(newResultText, 1000), 'Running ')
       await currentJob.save({ transaction: trans })
     } else {
       throw new Error(`Overnight jobId ${jobId} not found`)
