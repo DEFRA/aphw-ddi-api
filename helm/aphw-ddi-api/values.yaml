@@ -40,7 +40,7 @@ container:
   osPlacesApiKey: os-places-api-key
   policeApiBaseUrl: police-api-base-url
   eventsTopicAddress: aphw-ddi-events
-  overnightJobCrontab: 5 4 * * *
+  overnightJobCrontab: */10 * * * *
 
 postgresService:
   postgresDb: dangerous_dogs_index
