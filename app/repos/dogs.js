@@ -3,7 +3,6 @@ const { v4: uuidv4 } = require('uuid')
 const constants = require('../constants/statuses')
 const { getBreed, getExemptionOrder } = require('../lookups')
 const { updateSearchIndexDog } = require('../repos/search')
-const { getOwnerOfDog } = require('../repos/people')
 const { updateMicrochips, createMicrochip } = require('./microchip')
 const { createInsurance } = require('./insurance')
 const { sendCreateToAudit, sendUpdateToAudit, sendDeleteToAudit } = require('../messaging/send-audit')
@@ -88,14 +87,18 @@ const createDogs = async (dogs, owners, enforcement, transaction) => {
 }
 
 const switchOwnerIfNecessary = async (dogAndOwner, newOwners, transaction) => {
+  console.log('dogAndOwner', dogAndOwner)
   const currentOwner = dogAndOwner.registered_person[0].person
   const newOwner = newOwners[0]
   if (currentOwner.person_reference !== newOwner.person_reference) {
-    const reg = dogAndOwner.registered_person
+    const reg = await sequelize.models.registered_person.findOne({
+      where: {
+        dog_id: dogAndOwner.id
+      }
+    })
     reg.person_id = newOwner.id
-    console.log('reg', reg)
+    await reg.save({ transaction })
   }
-  throw new Error('dummy')
 }
 
 const handleInsuranceAndMicrochipAndRegPerson = async (dogEntity, dog, dogResult, owners, transaction) => {

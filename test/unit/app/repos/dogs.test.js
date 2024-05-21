@@ -348,7 +348,12 @@ describe('Dog repo', () => {
         breed: 'Breed 1',
         name: 'Dog 1',
         indexNumber: 'ED1',
-        save: dogSave
+        save: dogSave,
+        registered_person: [{
+          person: {
+            person_reference: 'P-123'
+          }
+        }]
       }
 
       const mockRegistration = {
@@ -368,7 +373,7 @@ describe('Dog repo', () => {
         court: '1'
       }
 
-      const owners = [{ id: 1, ...mockCdoPayload.owner }]
+      const owners = [{ id: 1, person_reference: 'P-123', ...mockCdoPayload.owner }]
       const dogs = [{
         breed: 'Breed 1',
         name: 'Dog 1',
@@ -398,6 +403,9 @@ describe('Dog repo', () => {
         existingDog: true,
         indexNumber: 'ED1',
         microchipNumber: '12345',
+        registered_person: [{
+          person: { person_reference: 'P-123' }
+        }],
         registration: {
           id: 1,
           cdoIssued: '2020-01-01',
