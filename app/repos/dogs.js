@@ -87,6 +87,17 @@ const createDogs = async (dogs, owners, enforcement, transaction) => {
   }
 }
 
+const switchOwnerIfNecessary = async (dogAndOwner, newOwners, transaction) => {
+  const currentOwner = dogAndOwner.registered_person[0].person
+  const newOwner = newOwners[0]
+  if (currentOwner.person_reference !== newOwner.person_reference) {
+    const reg = dogAndOwner.registered_person
+    reg.person_id = newOwner.id
+    console.log('reg', reg)
+  }
+  throw new Error('dummy')
+}
+
 const handleInsuranceAndMicrochipAndRegPerson = async (dogEntity, dog, dogResult, owners, transaction) => {
   if (!dogResult.existingDog) {
     if (dog.insurance) {
@@ -105,10 +116,7 @@ const handleInsuranceAndMicrochipAndRegPerson = async (dogEntity, dog, dogResult
       }, { transaction })
     }
   } else {
-    const currentOwner = await getOwnerOfDog(dogEntity.indexNumber)
-    console.log('dogEntity', dogEntity)
-    console.log('owners', owners)
-    console.log('currentOwner', currentOwner)
+    await switchOwnerIfNecessary(dogEntity, owners, transaction)
   }
   dogResult.microchipNumber = dog.microchipNumber
 }
