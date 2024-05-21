@@ -3,6 +3,7 @@ const { v4: uuidv4 } = require('uuid')
 const constants = require('../constants/statuses')
 const { getBreed, getExemptionOrder } = require('../lookups')
 const { updateSearchIndexDog } = require('../repos/search')
+const { getOwnerOfDog } = require('../repos/people')
 const { updateMicrochips, createMicrochip } = require('./microchip')
 const { createInsurance } = require('./insurance')
 const { sendCreateToAudit, sendUpdateToAudit, sendDeleteToAudit } = require('../messaging/send-audit')
@@ -104,9 +105,10 @@ const handleInsuranceAndMicrochipAndRegPerson = async (dogEntity, dog, dogResult
       }, { transaction })
     }
   } else {
-    const currentOwner = await 
+    const currentOwner = await getOwnerOfDog(dogEntity.indexNumber)
     console.log('dogEntity', dogEntity)
     console.log('owners', owners)
+    console.log('currentOwner', currentOwner)
   }
   dogResult.microchipNumber = dog.microchipNumber
 }
