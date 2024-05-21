@@ -10,6 +10,27 @@ const { DOG } = require('../constants/event/audit-event-object-types')
 const { preChangedDogAudit, postChangedDogAudit } = require('../dto/auditing/dog')
 const { removeDogFromSearchIndex } = require('./search')
 
+/**
+ * @typedef DogDao
+ * @property {number} id
+ * @property {string} dog_reference
+ * @property {string} index_number
+ * @property {number} dog_breed_id
+ * @property {DogBreedDao} dog_breed
+ * @property {number} status_id
+ * @property {{ id: number, status: string, status_type: string }} status
+ * @property {string|null} name
+ * @property {Date|null} birth_date
+ * @property {Date|null} death_date
+ * @property {string|null} tattoo
+ * @property {string|null} colour
+ * @property {string|null} sex
+ * @property {Date|null} exported_date
+ * @property {Date|null} stolen_date
+ * @property {Date|null} untraceable_date
+ * @property {DogMicrochipDao[]} dog_microchips
+ */
+
 const getBreeds = async () => {
   try {
     const breeds = await sequelize.models.dog_breed.findAll({
