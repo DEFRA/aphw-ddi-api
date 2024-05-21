@@ -174,7 +174,7 @@ const getPersonByReference = async (reference, transaction) => {
 
 const getOwnerOfDog = async (indexNumber) => {
   try {
-    const person = await sequelize.models.registered_person.findOne({
+    return await sequelize.models.registered_person.findOne({
       include: [{
         model: sequelize.models.person,
         as: 'person'
@@ -185,8 +185,6 @@ const getOwnerOfDog = async (indexNumber) => {
         as: 'dog'
       }]
     })
-
-    return person
   } catch (err) {
     console.error(`Error getting owner of dog ${indexNumber}: ${err}`)
     throw err
@@ -225,10 +223,10 @@ const updatePerson = async (person, user, transaction) => {
     const existingAddress = existing.addresses[0].address
 
     if (existingAddress.address_line_1 !== person.address.addressLine1 ||
-        existingAddress.address_line_2 !== person.address.addressLine2 ||
-        existingAddress.town !== person.address.town ||
-        existingAddress.postcode !== person.address.postcode ||
-        existingAddress.country.country !== person.address.country) {
+      existingAddress.address_line_2 !== person.address.addressLine2 ||
+      existingAddress.town !== person.address.town ||
+      existingAddress.postcode !== person.address.postcode ||
+      existingAddress.country.country !== person.address.country) {
       const country = await getCountry(person.address.country)
 
       const address = await sequelize.models.address.create({
@@ -302,6 +300,97 @@ const updatePersonFields = async (id, personFields, user, transaction) => {
   }
 
   return person
+}
+/**
+ * @typedef RegisteredPerson
+ * @property {number} id
+ * @property {number} person_id
+ * @property {number} dog_id
+ * @property {number} person_type_id
+ * @property {DogDao} dog
+ */
+/**
+ * @typedef {unknown} PersonContact
+ */
+/**
+ * @typedef PersonWithRegisteredPeople
+ * @property {number} id
+ * @property {string} first_name
+ * @property {string} last_name
+ * @property {string} person_reference
+ * @property {string} birth_date
+ * @property {PersonAddressDao[]} addresses
+ * @property {PersonContact[]} person_contacts
+ * @property {RegisteredPerson[]} registered_people
+ */
+
+/**
+ * @typedef PersonAndDogsByIndexDao
+ * @property {number} id
+ * @property {number} person_id
+ * @property {number} dog_id
+ * @property {number} person_type_id
+ * @property {DogDao} dog
+ * @property {PersonWithRegisteredPeople} person
+ */
+
+/**
+ * @param {string} indexNumber
+ * @param [transaction]
+ * @return {Promise<PersonAndDogsByIndexDao>}
+ */
+const getPersonAndDogsByIndex = async (indexNumber, transaction) => {
+  try {
+    const [owner] = await sequelize.models.registered_person.findAll({
+      order: [[sequelize.col('person.addresses.address.id'), 'DESC']],
+      include: [
+        {
+          model: sequelize.models.person,
+          as: 'person',
+          include: [
+            ...personRelationship(sequelize),
+            {
+              model: sequelize.models.registered_person,
+              as: 'registered_people',
+              include: [
+                {
+                  model: sequelize.models.dog,
+                  as: 'dog',
+                  include: [{
+                    model: sequelize.models.dog_breed,
+                    as: 'dog_breed'
+                  },
+                  {
+                    model: sequelize.models.status,
+                    as: 'status'
+                  },
+                  {
+                    model: sequelize.models.dog_microchip,
+                    as: 'dog_microchips',
+                    include: [{
+                      model: sequelize.models.microchip,
+                      as: 'microchip'
+                    }]
+                  }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          model: sequelize.models.dog,
+          where: { index_number: indexNumber },
+          as: 'dog'
+        }
+      ],
+      transaction
+    })
+    return owner
+  } catch (err) {
+    console.error(`Error getting owner of dog ${indexNumber}: ${err}`)
+    throw err
+  }
 }
 
 const getPersonAndDogsByReference = async (reference, transaction) => {
@@ -408,6 +497,7 @@ module.exports = {
   createPeople,
   getPersonByReference,
   getPersonAndDogsByReference,
+  getPersonAndDogsByIndex,
   updatePerson,
   updatePersonFields,
   getOwnerOfDog,

@@ -3,10 +3,15 @@ describe('Dog endpoint', () => {
   let server
 
   jest.mock('../../../../app/repos/dogs')
-  const { getDogByIndexNumber, addImportedDog, updateDog, deleteDogByIndexNumber } = require('../../../../app/repos/dogs')
+  const {
+    getDogByIndexNumber,
+    addImportedDog,
+    updateDog,
+    deleteDogByIndexNumber
+  } = require('../../../../app/repos/dogs')
 
   jest.mock('../../../../app/repos/people')
-  const { getOwnerOfDog } = require('../../../../app/repos/people')
+  const { getOwnerOfDog, getPersonAndDogsByIndex } = require('../../../../app/repos/people')
 
   jest.mock('../../../../app/auth/get-user')
   const { getCallingUser } = require('../../../../app/auth/get-user')
@@ -67,6 +72,45 @@ describe('Dog endpoint', () => {
 
       const response = await server.inject(options)
       expect(response.statusCode).toBe(200)
+    })
+
+    test('GET /dog-owner/ED123?includeDogs=true route returns 200', async () => {
+      getPersonAndDogsByIndex.mockResolvedValue({
+        person: {
+          id: 123,
+          personReference: 'P-123',
+          addresses: [
+            {
+              address: {
+                address_line_1: 'address line 1',
+                country: { id: 1, country: 'England' }
+              }
+            }
+          ],
+          registered_people: [
+            {
+              firstName: 'Ralph',
+              lastName: 'Wreck it',
+              dog: {
+                id: 300724,
+                dog_breed: { id: 1, breed: 'XL Bully' },
+                status: { id: 1, status: 'Interim Exempt' }
+              }
+            }
+          ]
+        }
+      })
+
+      const options = {
+        method: 'GET',
+        url: '/dog-owner/ED123?includeDogs=true'
+      }
+
+      const response = await server.inject(options)
+      expect(response.statusCode).toBe(200)
+      const payload = JSON.parse(response.payload)
+
+      expect(payload.owner.dogs.length).toBeTruthy()
     })
 
     test('GET /dog-owner/ED123 route returns 404 if dog owner does not exist', async () => {
@@ -197,7 +241,10 @@ describe('Dog endpoint', () => {
       const response = await server.inject(options)
 
       expect(response.statusCode).toBe(204)
-      expect(deleteDogByIndexNumber).toBeCalledWith('ED123', { displayname: 'User, Internal', username: 'internal-user' })
+      expect(deleteDogByIndexNumber).toBeCalledWith('ED123', {
+        displayname: 'User, Internal',
+        username: 'internal-user'
+      })
     })
 
     test('DELETE /dog/ED123 route returns 404 with invalid dog index', async () => {

@@ -85,7 +85,45 @@ const personDto = (person, onlyLatestContacts) => ({
   contacts: person.person_contacts ? addContacts(person.person_contacts, onlyLatestContacts) : [],
   organisationName: person.organisation?.organisation_name
 })
-
+/**
+ * @typedef AddressDto
+ * @property {string} country
+ * @property {string} town
+ * @property {string} postcode
+ * @property {string} addressLine1
+ * @property {string} addressLine2
+ */
+/**
+ * @typedef DogDto
+ * @property {number} id
+ * @property {string} indexNumber
+ * @property {string} dogReference
+ * @property {string} microchipNumber
+ * @property {string} microchipNumber2
+ * @property {string} breed
+ * @property {string} name
+ * @property {string} status
+ * @property {Date} birthDate
+ * @property {string} tattoo
+ * @property {string} colour
+ * @property {string} sex
+ */
+/**
+ * @typedef PersonAndDogsDto
+ * @property {string} firstName
+ * @property {string} lastName
+ * @property {string} birthDate
+ * @property {string} personReference
+ * @property {string} organisationName
+ * @property {AddressDto} address
+ * @property {DogDto[]} dogs
+ * @property {PersonContact[]} contacts
+ */
+/**
+ *
+ * @param personAndDogs
+ * @return {PersonAndDogsDto}
+ */
 const personAndDogsDto = (personAndDogs) => ({
   firstName: personAndDogs[0].person.first_name,
   lastName: personAndDogs[0].person.last_name,
@@ -118,7 +156,56 @@ const personAndDogsDto = (personAndDogs) => ({
     : []
 })
 
+/**
+ * @param {RegisteredPerson} registeredPerson
+ * @return {DogDto}
+ */
+const mapRegisteredPersonToDog = (registeredPerson) => {
+  const { dog } = registeredPerson
+
+  return {
+    breed: dog.dog_breed.breed,
+    colour: dog.colour,
+    dogReference: dog.dog_reference,
+    id: dog.id,
+    indexNumber: dog.index_number,
+    microchipNumber: getMicrochip(dog, 1),
+    microchipNumber2: getMicrochip(dog, 2),
+    name: dog.name,
+    sex: dog.sex,
+    status: dog.status.status,
+    tattoo: dog.tattoo,
+    birthDate: dog.birth_date
+  }
+}
+
+/**
+ * @param {PersonAndDogsByIndexDao} personAndDogsByIndexDao
+ * @return {PersonAndDogsDto}
+ */
+const mapPersonAndDogsByIndexDao = (personAndDogsByIndexDao) => {
+  const { person } = personAndDogsByIndexDao
+
+  return {
+    firstName: person.first_name,
+    lastName: person.last_name,
+    birthDate: person.birth_date,
+    personReference: person.person_reference,
+    address: {
+      addressLine1: person.addresses[0].address.address_line_1,
+      addressLine2: person.addresses[0].address.address_line_2,
+      country: person.addresses[0].address.country.country,
+      postcode: person.addresses[0].address.postcode,
+      town: person.addresses[0].address.town
+    },
+    contacts: person.person_contacts,
+    dogs: person.registered_people.map(mapRegisteredPersonToDog),
+    organisationName: person.organisation?.organisation_name
+  }
+}
+
 module.exports = {
   personDto,
-  personAndDogsDto
+  personAndDogsDto,
+  mapPersonAndDogsByIndexDao
 }
