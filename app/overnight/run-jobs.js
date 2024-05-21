@@ -1,21 +1,22 @@
-const wreck = require('@hapi/wreck')
-const config = require('../config/index')
+const config = require('../config')
 const { autoUpdateStatuses } = require('./auto-update-statuses')
 const { createExportFile } = require('./create-export-file')
 const { tryStartJob, endJob, createNewJob } = require('../repos/regular-jobs')
 
-const triggerExportGeneration = () => {
-  // Don't 'await' as 'send and forget' call
-  wreck.get(`/export-create-file?batchSize=${config.overnightExportBatchSize}`)
+const triggerExportGeneration = server => {
+  server.inject({
+    method: 'GET',
+    url: `/export-create-file?batchSize=${config.overnightExportBatchSize ?? 10000}`
+  })
 }
 
-const runOvernightJobs = async () => {
+const runOvernightJobs = async (server) => {
   const jobId = await tryStartJob()
 
   if (jobId) {
     const result = await autoUpdateStatuses()
     await endJob(jobId, result)
-    triggerExportGeneration()
+    triggerExportGeneration(server)
     return result
   }
 
@@ -32,6 +33,5 @@ const runExportNow = async (rowsPerBatch) => {
 
 module.exports = {
   runOvernightJobs,
-  runExportNow,
-  triggerExportGeneration
+  runExportNow
 }

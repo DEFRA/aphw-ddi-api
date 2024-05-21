@@ -11,7 +11,7 @@ describe('AutoUpdateStatus test', () => {
     setExpiredCdosToFailed.mockResolvedValue('ok - cdos 1 rows')
     setExpiredInsuranceToBreach.mockResolvedValue('ok - insurance 2 rows')
     const res = await autoUpdateStatuses()
-    expect(res).toBe('ok - cdos 1 rows | ok - insurance 2 rows | ')
+    expect(res).toBe('ok - cdos 1 rows | ok - insurance 2 rows')
   })
 
   test('autoUpdateStatuses should handle errors', async () => {
