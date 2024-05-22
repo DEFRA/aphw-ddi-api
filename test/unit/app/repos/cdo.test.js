@@ -129,19 +129,21 @@ describe('CDO repo', () => {
     })
 
     test('createCdo should handle change of owner', async () => {
-      const owner = { id: 1, ...mockPersonPayload }
-      const expectedOwner = { id: 1, ...mockCreatedPersonPayload }
+      const owner = { id: 1, ...mockPersonPayload, person_reference: 'P-6076-A37C' }
+      const expectedOwner = { id: 1, ...mockCreatedPersonPayload, person_reference: 'P-6076-A37C' }
       const changedOwner = {
         oldOwner: {
           firstName: 'John',
-          lastName: 'Smith'
+          lastName: 'Smith',
+          personReference: 'P-6076-A37C'
         },
         newOwner: {
           firstName: 'Peter',
-          lastName: 'Snow'
+          lastName: 'Snow',
+          personReference: 'P-1010-23BA'
         }
       }
-      const dogs = [{ id: 1, ...mockCdoPayloadWithRef.dogs[0], changedOwner }]
+      const dogs = [{ id: 1, index_number: 'ED100', ...mockCdoPayloadWithRef.dogs[0], changedOwner }]
 
       getPersonByReference.mockResolvedValue(owner)
       createDogs.mockResolvedValue(dogs)
@@ -155,7 +157,46 @@ describe('CDO repo', () => {
       expect(createPeople).not.toHaveBeenCalled()
       expect(getPersonByReference).toHaveBeenCalledWith('P-6076-A37C', expect.anything())
       expect(updatePersonFields).not.toHaveBeenCalled()
-      expect(sendEvent).toHaveBeenCalledTimes(4)
+      expect(sendEvent.mock.calls[0]).toEqual([{
+        type: 'uk.gov.defra.ddi.event.create',
+        source: 'aphw-ddi-portal',
+        partitionKey: 'ED100',
+        id: expect.any(String),
+        subject: 'DDI Create cdo',
+        data: {
+          message: '{"actioningUser":{"username":"dev-user@test.com","displayname":"Dev User"},"operation":"created cdo","created":{"owner":{"id":1,"first_name":"Luke","last_name":"Skywalker","birth_date":"1951-09-25","person_reference":"P-6076-A37C","address":{"address_line_1":"Moisture Farm","address_line_2":null,"country":{"id":22,"country":"Tatooine"},"country_id":22,"county":"Mos Eisley State","id":1,"postcode":"ME1 2FF","town":"Eisley Dunes"}},"dog":{"id":1,"index_number":"ED100","breed":"Pit Bull Terrier","name":"Buster","cdoIssued":"2023-10-10","cdoExpiry":"2023-12-10","status":"Status 1","applicationType":"cdo","changedOwner":{"oldOwner":{"firstName":"John","lastName":"Smith","personReference":"P-6076-A37C"},"newOwner":{"firstName":"Peter","lastName":"Snow","personReference":"P-1010-23BA"}}}}}'
+        }
+      }])
+      expect(sendEvent.mock.calls[1]).toEqual([{
+        type: 'uk.gov.defra.ddi.event.change.owner',
+        source: 'aphw-ddi-portal',
+        partitionKey: 'ED100',
+        id: expect.any(String),
+        subject: 'DDI Changed Dog Owner',
+        data: {
+          message: '{"actioningUser":{"username":"dev-user@test.com","displayname":"Dev User"},"operation":"changed dog owner","details":"Owner changed from John Smith"}'
+        }
+      }])
+      expect(sendEvent.mock.calls[2]).toEqual([{
+        type: 'uk.gov.defra.ddi.event.change.owner',
+        source: 'aphw-ddi-portal',
+        partitionKey: 'P-6076-A37C',
+        id: expect.any(String),
+        subject: 'DDI Changed Dog Owner',
+        data: {
+          message: '{"actioningUser":{"username":"dev-user@test.com","displayname":"Dev User"},"operation":"changed dog owner","details":"Dog ED100 moved to Peter Snow"}'
+        }
+      }])
+      expect(sendEvent.mock.calls[3]).toEqual([{
+        type: 'uk.gov.defra.ddi.event.change.owner',
+        source: 'aphw-ddi-portal',
+        partitionKey: 'P-1010-23BA',
+        id: expect.any(String),
+        subject: 'DDI Changed Dog Owner',
+        data: {
+          message: '{"actioningUser":{"username":"dev-user@test.com","displayname":"Dev User"},"operation":"changed dog owner","details":"Dog ED100 moved from John Smith"}'
+        }
+      }])
     })
 
     test('createCdo throw a NotFoundError if invalid owner personReference is supplied', async () => {
