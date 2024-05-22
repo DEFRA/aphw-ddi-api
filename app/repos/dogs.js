@@ -9,6 +9,7 @@ const { sendCreateToAudit, sendUpdateToAudit, sendDeleteToAudit } = require('../
 const { DOG } = require('../constants/event/audit-event-object-types')
 const { preChangedDogAudit, postChangedDogAudit } = require('../dto/auditing/dog')
 const { removeDogFromSearchIndex } = require('./search')
+const { getPersonByReference } = require('./people')
 
 /**
  * @typedef DogDao
@@ -107,7 +108,19 @@ const createDogs = async (dogs, owners, enforcement, transaction) => {
   }
 }
 
-const switchOwnerIfNecessary = async (dogAndOwner, newOwners, transaction) => {
+const buildSwitchedOwner = async (owner) => {
+  const ownerInfo = await getPersonByReference(owner.person_reference)
+  return {
+    id: owner.id,
+    personReference: owner.person_reference,
+    firstName: owner.first_name,
+    lastName: owner.last_name,
+    address: owner.addresses ? owner.addresses[0].address : owner.address,
+    organisationName: ownerInfo?.organisation?.organisation_name
+  }
+}
+
+const switchOwnerIfNecessary = async (dogAndOwner, newOwners, dogResult, transaction) => {
   const currentOwner = dogAndOwner.registered_person[0].person
   const newOwner = newOwners[0]
   if (currentOwner.person_reference !== newOwner.person_reference) {
@@ -118,7 +131,14 @@ const switchOwnerIfNecessary = async (dogAndOwner, newOwners, transaction) => {
     })
     reg.person_id = newOwner.id
     await reg.save({ transaction })
+
+    dogResult.changedOwner = {
+      oldOwner: await buildSwitchedOwner(currentOwner),
+      newOwner: await buildSwitchedOwner(newOwner)
+    }
   }
+
+  return dogResult
 }
 
 const handleInsuranceAndMicrochipAndRegPerson = async (dogEntity, dog, dogResult, owners, transaction) => {
@@ -139,7 +159,7 @@ const handleInsuranceAndMicrochipAndRegPerson = async (dogEntity, dog, dogResult
       }, { transaction })
     }
   } else {
-    await switchOwnerIfNecessary(dogEntity, owners, transaction)
+    dogResult = await switchOwnerIfNecessary(dogEntity, owners, dogResult, transaction)
   }
   dogResult.microchipNumber = dog.microchipNumber
 }
@@ -467,5 +487,6 @@ module.exports = {
   updateMicrochips,
   updateStatus,
   deleteDogByIndexNumber,
-  switchOwnerIfNecessary
+  switchOwnerIfNecessary,
+  buildSwitchedOwner
 }

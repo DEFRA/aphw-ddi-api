@@ -5,5 +5,6 @@ module.exports = {
   IMPORT_MANUAL: 'uk.gov.defra.ddi.event.import.manual',
   DELETE: 'uk.gov.defra.ddi.event.delete',
   EXPORT: 'uk.gov.defra.ddi.event.export',
-  UPDATE: 'uk.gov.defra.ddi.event.update'
+  UPDATE: 'uk.gov.defra.ddi.event.update',
+  CHANGE_OWNER: 'uk.gov.defra.ddi.event.change.owner'
 }

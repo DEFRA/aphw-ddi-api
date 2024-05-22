@@ -71,7 +71,6 @@ const generateCsvInBatches = async (rowsPerBatch, jobId) => {
       csvSoFar = csvSoFar + convertToCsv(cdoBatch, isNotFirstLoopIteration)
       totalRows += numReturnedRows
       isNotFirstLoopIteration = true
-      console.log(`Rows ${numReturnedRows} jobId ${jobId}`)
       await updateRunningJobProgress(jobId, `${numReturnedRows}`)
     }
   } while (numReturnedRows > 0)
