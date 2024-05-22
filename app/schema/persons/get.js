@@ -3,6 +3,7 @@ const Joi = require('joi')
 const personsQueryParamsSchema = Joi.object({
   firstName: Joi.string().optional().allow('').allow(null),
   lastName: Joi.string().optional().allow('').allow(null),
+  orphaned: Joi.boolean().optional(),
   dateOfBirth: Joi.date().iso().allow(null).optional()
 })
 

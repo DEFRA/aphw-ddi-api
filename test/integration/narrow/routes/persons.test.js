@@ -1,4 +1,4 @@
-describe('CDO endpoint', () => {
+describe('Get persons endpoint', () => {
   const createServer = require('../../../../app/server')
   let server
 
@@ -85,6 +85,20 @@ describe('CDO endpoint', () => {
 
     expect(response.statusCode).toBe(200)
     expect(response.result).toEqual({ persons: expectedPersons })
+  })
+
+  test('GET /persons with orphaned true route returns 200 with valid payload', async () => {
+    const options = {
+      method: 'GET',
+      url: '/persons?orphaned=true'
+    }
+
+    getPersons.mockResolvedValue([])
+
+    const response = await server.inject(options)
+
+    expect(response.statusCode).toBe(200)
+    expect(getPersons).toHaveBeenCalledWith({ orphaned: true })
   })
 
   test('GET /persons route with search params returns 200 with valid payload', async () => {
