@@ -24,7 +24,8 @@ const mapPersonDaoToCreatedPersonDao = (personDao) => {
       id: personDaoAddress.id,
       postcode: personDaoAddress.postcode,
       town: personDaoAddress.town
-    }
+    },
+    organisation_name: personDao.organisation?.organisation_name
   }
 }
 

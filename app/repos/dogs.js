@@ -9,6 +9,7 @@ const { sendCreateToAudit, sendUpdateToAudit, sendDeleteToAudit } = require('../
 const { DOG } = require('../constants/event/audit-event-object-types')
 const { preChangedDogAudit, postChangedDogAudit } = require('../dto/auditing/dog')
 const { removeDogFromSearchIndex } = require('./search')
+const { getPersonByReference } = require('./people')
 
 /**
  * @typedef DogDao
@@ -107,14 +108,17 @@ const createDogs = async (dogs, owners, enforcement, transaction) => {
   }
 }
 
-const buildSwitchedOwner = owner => ({
-  id: owner.id,
-  personReference: owner.person_reference,
-  firstName: owner.first_name,
-  lastName: owner.last_name,
-  address: owner.addresses ? owner.addresses[0].address : owner.address,
-  organisationName: owner.organisationName
-})
+const buildSwitchedOwner = async (owner) => {
+  const ownerInfo = await getPersonByReference(owner.person_reference)
+  return {
+    id: owner.id,
+    personReference: owner.person_reference,
+    firstName: owner.first_name,
+    lastName: owner.last_name,
+    address: owner.addresses ? owner.addresses[0].address : owner.address,
+    organisationName: ownerInfo?.organisation?.organisation_name
+  }
+}
 
 const switchOwnerIfNecessary = async (dogAndOwner, newOwners, dogResult, transaction) => {
   const currentOwner = dogAndOwner.registered_person[0].person
@@ -129,8 +133,8 @@ const switchOwnerIfNecessary = async (dogAndOwner, newOwners, dogResult, transac
     await reg.save({ transaction })
 
     dogResult.changedOwner = {
-      oldOwner: buildSwitchedOwner(currentOwner),
-      newOwner: buildSwitchedOwner(newOwner)
+      oldOwner: await buildSwitchedOwner(currentOwner),
+      newOwner: await buildSwitchedOwner(newOwner)
     }
   }
 
@@ -483,5 +487,6 @@ module.exports = {
   updateMicrochips,
   updateStatus,
   deleteDogByIndexNumber,
-  switchOwnerIfNecessary
+  switchOwnerIfNecessary,
+  buildSwitchedOwner
 }
