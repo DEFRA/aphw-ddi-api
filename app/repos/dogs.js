@@ -107,7 +107,16 @@ const createDogs = async (dogs, owners, enforcement, transaction) => {
   }
 }
 
-const switchOwnerIfNecessary = async (dogAndOwner, newOwners, transaction) => {
+const buildSwitchedOwner = owner => ({
+  id: owner.id,
+  personReference: owner.person_reference,
+  firstName: owner.first_name,
+  lastName: owner.last_name,
+  address: owner.addresses ? owner.addresses[0].address : owner.address,
+  organisationName: owner.organisationName
+})
+
+const switchOwnerIfNecessary = async (dogAndOwner, newOwners, dogResult, transaction) => {
   const currentOwner = dogAndOwner.registered_person[0].person
   const newOwner = newOwners[0]
   if (currentOwner.person_reference !== newOwner.person_reference) {
@@ -118,7 +127,14 @@ const switchOwnerIfNecessary = async (dogAndOwner, newOwners, transaction) => {
     })
     reg.person_id = newOwner.id
     await reg.save({ transaction })
+
+    dogResult.changedOwner = {
+      oldOwner: buildSwitchedOwner(currentOwner),
+      newOwner: buildSwitchedOwner(newOwner)
+    }
   }
+
+  return dogResult
 }
 
 const handleInsuranceAndMicrochipAndRegPerson = async (dogEntity, dog, dogResult, owners, transaction) => {
@@ -139,7 +155,7 @@ const handleInsuranceAndMicrochipAndRegPerson = async (dogEntity, dog, dogResult
       }, { transaction })
     }
   } else {
-    await switchOwnerIfNecessary(dogEntity, owners, transaction)
+    dogResult = await switchOwnerIfNecessary(dogEntity, owners, dogResult, transaction)
   }
   dogResult.microchipNumber = dog.microchipNumber
 }

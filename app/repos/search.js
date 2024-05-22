@@ -10,6 +10,12 @@ const addToSearchIndex = async (person, dog, transaction) => {
 
   if (dog.existingDog) {
     await sequelize.models.search_index.destroy({ where: { dog_id: dog.id } }, { transaction })
+
+    if (dog.changedOwner) {
+      const persons = new Map()
+      persons.set(dog.changedOwner.oldOwner.id, dog.changedOwner.oldOwner)
+      await addPeopleOnlyIfNoDogsLeft(persons, transaction)
+    }
   }
 
   const refreshedDogEntity = await dbFindByPk(sequelize.models.dog, dog.id, {

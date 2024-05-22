@@ -1,5 +1,5 @@
 const { v4: uuidv4 } = require('uuid')
-const { CREATE, UPDATE, DELETE, IMPORT_MANUAL, ACTIVITY: ACTIVITY_EVENT } = require('../constants/event/events')
+const { CREATE, UPDATE, DELETE, IMPORT_MANUAL, ACTIVITY: ACTIVITY_EVENT, CHANGE_OWNER } = require('../constants/event/events')
 const { SOURCE } = require('../constants/event/source')
 const { getDiff } = require('json-difference')
 const { sendEvent } = require('./send-event')
@@ -218,6 +218,38 @@ const sendImportToAudit = async (row, actioningUser) => {
   }
 }
 
+const createChangeOwnerEvent = (pk, detailsMessage, user) => {
+  return {
+    type: CHANGE_OWNER,
+    source: SOURCE,
+    id: uuidv4(),
+    partitionKey: pk,
+    subject: 'DDI Changed Dog Owner',
+    data: {
+      message: JSON.stringify({
+        actioningUser: user,
+        operation: 'changed dog owner',
+        details: detailsMessage
+      })
+    }
+  }
+}
+
+const sendChangeOwnerToAudit = async (entity, user) => {
+  if (!isUserValid(user)) {
+    throw new Error('Username and displayname are required for auditing of ChangeOwner')
+  }
+
+  const dogEvent = createChangeOwnerEvent(entity.index_number, `Owner changed from ${entity.changedOwner.oldOwner.firstName} ${entity.changedOwner.oldOwner.lastName}`, user)
+  await sendEvent(dogEvent)
+
+  const oldOwnerEvent = createChangeOwnerEvent(entity.changedOwner.oldOwner.personReference, `Dog ${entity.index_number} moved to ${entity.changedOwner.newOwner.firstName} ${entity.changedOwner.newOwner.lastName}`, user)
+  await sendEvent(oldOwnerEvent)
+
+  const newOwnerEvent = createChangeOwnerEvent(entity.changedOwner.newOwner.personReference, `Dog ${entity.index_number} moved from ${entity.changedOwner.oldOwner.firstName} ${entity.changedOwner.oldOwner.lastName}`, user)
+  await sendEvent(newOwnerEvent)
+}
+
 module.exports = {
   sendCreateToAudit,
   sendUpdateToAudit,
@@ -227,5 +259,6 @@ module.exports = {
   isDataUnchanged,
   determineCreatePk,
   determineUpdatePk,
-  sendImportToAudit
+  sendImportToAudit,
+  sendChangeOwnerToAudit
 }
