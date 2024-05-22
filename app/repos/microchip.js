@@ -47,7 +47,7 @@ const updateMicrochips = async (dogFromDb, payload, transaction) => {
 
 const updateMicrochip = async (dogFromDb, newMicrochipNumber, position, transaction) => {
   const existingMicrochip = await getMicrochipDetails(dogFromDb.id, position)
-  if (newMicrochipNumber && existingMicrochip?.microchip_number !== newMicrochipNumber) {
+  if (existingMicrochip?.microchip_number !== newMicrochipNumber) {
     if (existingMicrochip) {
       existingMicrochip.microchip_number = newMicrochipNumber
       await existingMicrochip.save({ transaction })

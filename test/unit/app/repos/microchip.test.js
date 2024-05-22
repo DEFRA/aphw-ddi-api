@@ -37,6 +37,8 @@ describe('microchip', () => {
     })
 
     test('should update microchip given one exists', async () => {
+      const mockSave = jest.fn()
+
       sequelize.models.microchip.findAll.mockResolvedValue([
         {
           id: 1,
@@ -45,9 +47,35 @@ describe('microchip', () => {
             id: 15,
             dog_id: 300549,
             microchip_id: 15
-          }]
+          }],
+          save: mockSave
         }
       ])
+
+      await updateMicrochip({ id: 1 }, '277890823930400', 1, {})
+      expect(sequelize.models.dog_microchip.create).not.toHaveBeenCalled()
+      expect(mockSave).toHaveBeenCalled()
+    })
+
+    test('should allow microchip to be blanked', async () => {
+      const mockSave = jest.fn()
+
+      sequelize.models.microchip.findAll.mockResolvedValue([
+        {
+          id: 1,
+          microchip_number: '277890823930477',
+          dog_microchips: [{
+            id: 15,
+            dog_id: 300549,
+            microchip_id: 15
+          }],
+          save: mockSave
+        }
+      ])
+
+      await updateMicrochip({ id: 1 }, '', 1, {})
+      expect(sequelize.models.dog_microchip.create).not.toHaveBeenCalled()
+      expect(mockSave).toHaveBeenCalled()
     })
   })
 
