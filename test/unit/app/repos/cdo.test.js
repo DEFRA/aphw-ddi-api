@@ -128,6 +128,36 @@ describe('CDO repo', () => {
       expect(getPersonByReference).toHaveBeenCalledWith('P-6076-A37C', expect.anything())
     })
 
+    test('createCdo should handle change of owner', async () => {
+      const owner = { id: 1, ...mockPersonPayload }
+      const expectedOwner = { id: 1, ...mockCreatedPersonPayload }
+      const changedOwner = {
+        oldOwner: {
+          firstName: 'John',
+          lastName: 'Smith'
+        },
+        newOwner: {
+          firstName: 'Peter',
+          lastName: 'Snow'
+        }
+      }
+      const dogs = [{ id: 1, ...mockCdoPayloadWithRef.dogs[0], changedOwner }]
+
+      getPersonByReference.mockResolvedValue(owner)
+      createDogs.mockResolvedValue(dogs)
+      addToSearchIndex.mockResolvedValue()
+      getDogByIndexNumber.mockResolvedValue({ id: 1, index_number: 'ED1' })
+
+      const cdo = await createCdo(mockCdoPayloadWithRef, devUser, {})
+
+      expect(cdo.owner).toEqual(expectedOwner)
+      expect(cdo.dogs).toEqual(dogs)
+      expect(createPeople).not.toHaveBeenCalled()
+      expect(getPersonByReference).toHaveBeenCalledWith('P-6076-A37C', expect.anything())
+      expect(updatePersonFields).not.toHaveBeenCalled()
+      expect(sendEvent).toHaveBeenCalledTimes(4)
+    })
+
     test('createCdo throw a NotFoundError if invalid owner personReference is supplied', async () => {
       const owners = [{ id: 1, ...mockCdoPayloadWithRef.owner }]
       const dogs = [{ id: 1, ...mockCdoPayloadWithRef.dogs[0] }]
