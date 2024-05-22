@@ -89,6 +89,45 @@ describe('Search repo', () => {
       expect(sequelize.models.search_index.destroy).toHaveBeenCalledTimes(1)
     })
 
+    test('addToSearchIndex should call destroy for existing dog and handle change of owner', async () => {
+      sequelize.models.search_index.create.mockResolvedValue()
+      getDogByIndexNumber.mockResolvedValue({ id: 1, index_number: 'ED1' })
+
+      const person = {
+        id: 123,
+        firstName: 'John',
+        lastName: 'Smith',
+        address: {
+          address_line_1: '123 some address'
+        }
+      }
+
+      const dog = {
+        id: 456,
+        dogIndex: 123,
+        dogName: 'Bruno',
+        existingDog: true,
+        microchipNumber: 123456789012345,
+        changedOwner: {
+          oldOwner: {
+            firstName: 'John',
+            lastName: 'Smith'
+          },
+          newOwner: {
+            firstName: 'Peter',
+            lastName: 'Snow'
+          }
+        }
+      }
+
+      dbFindByPk.mockResolvedValue(dog)
+
+      await addToSearchIndex(person, dog, {})
+
+      expect(sequelize.models.search_index.create).toHaveBeenCalledTimes(2)
+      expect(sequelize.models.search_index.destroy).toHaveBeenCalledTimes(1)
+    })
+
     test('addToSearchIndex should create new transaction if none passed', async () => {
       sequelize.models.search_index.create.mockResolvedValue()
       getDogByIndexNumber.mockResolvedValue({ id: 1, index_number: 'ED1' })

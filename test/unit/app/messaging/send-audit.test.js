@@ -1,6 +1,6 @@
 const {
   isDataUnchanged, sendEventToAudit, sendCreateToAudit, sendActivityToAudit, sendUpdateToAudit,
-  determineCreatePk, determineUpdatePk, sendDeleteToAudit, sendImportToAudit
+  determineCreatePk, determineUpdatePk, sendDeleteToAudit, sendImportToAudit, sendChangeOwnerToAudit
 } = require('../../../../app/messaging/send-audit')
 
 jest.mock('../../../../app/messaging/send-event')
@@ -170,6 +170,68 @@ describe('SendAudit test', () => {
           message: '{"actioningUser":{"username":"hal-9000","displayname":"Hal 9000"},"operation":"deleted person","deleted":{"personReference":"P-123"}}'
         }
       })
+    })
+  })
+
+  describe('sendChangeOwnerToAudit', () => {
+    const hal9000 = { username: 'hal-9000', displayname: 'Hal 9000' }
+
+    test('should fail given no user', async () => {
+      await expect(sendChangeOwnerToAudit({}, {})).rejects.toThrow('Username and displayname are required for auditing of ChangeOwner')
+    })
+
+    test('should send correct message payload', async () => {
+      const entity = {
+        index_number: 'ED100',
+        changedOwner: {
+          oldOwner: {
+            firstName: 'John',
+            lastName: 'Smith',
+            personReference: 'P-123'
+          },
+          newOwner: {
+            firstName: 'Peter',
+            lastName: 'Snow',
+            personReference: 'P-456'
+          }
+        }
+      }
+      await sendChangeOwnerToAudit(entity, hal9000)
+
+      expect(sendEvent).toHaveBeenCalledTimes(3)
+
+      expect(sendEvent.mock.calls[0]).toEqual([{
+        type: 'uk.gov.defra.ddi.event.change.owner',
+        source: 'aphw-ddi-portal',
+        partitionKey: 'ED100',
+        id: expect.any(String),
+        subject: 'DDI Changed Dog Owner',
+        data: {
+          message: '{"actioningUser":{"username":"hal-9000","displayname":"Hal 9000"},"operation":"changed dog owner","details":"Owner changed from John Smith"}'
+        }
+      }])
+
+      expect(sendEvent.mock.calls[1]).toEqual([{
+        type: 'uk.gov.defra.ddi.event.change.owner',
+        source: 'aphw-ddi-portal',
+        partitionKey: 'P-123',
+        id: expect.any(String),
+        subject: 'DDI Changed Dog Owner',
+        data: {
+          message: '{"actioningUser":{"username":"hal-9000","displayname":"Hal 9000"},"operation":"changed dog owner","details":"Dog ED100 moved to Peter Snow"}'
+        }
+      }])
+
+      expect(sendEvent.mock.calls[2]).toEqual([{
+        type: 'uk.gov.defra.ddi.event.change.owner',
+        source: 'aphw-ddi-portal',
+        partitionKey: 'P-456',
+        id: expect.any(String),
+        subject: 'DDI Changed Dog Owner',
+        data: {
+          message: '{"actioningUser":{"username":"hal-9000","displayname":"Hal 9000"},"operation":"changed dog owner","details":"Dog ED100 moved from John Smith"}'
+        }
+      }])
     })
   })
 

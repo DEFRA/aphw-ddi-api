@@ -2,7 +2,7 @@ const sequelize = require('../config/db')
 const { createPeople, getPersonByReference, updatePersonFields } = require('./people')
 const { createDogs } = require('./dogs')
 const { addToSearchIndex } = require('./search')
-const { sendCreateToAudit } = require('../messaging/send-audit')
+const { sendCreateToAudit, sendChangeOwnerToAudit } = require('../messaging/send-audit')
 const { CDO } = require('../constants/event/audit-event-object-types')
 const { NotFoundError } = require('../errors/not-found')
 const { mapPersonDaoToCreatedPersonDao } = require('./mappers/person')
@@ -190,11 +190,10 @@ const createCdo = async (data, user, transaction) => {
     for (const owner of owners) {
       for (const dog of dogs) {
         await addToSearchIndex(owner, dog, transaction)
-        const entity = {
-          owner,
-          dog
+        await sendCreateToAudit(CDO, { owner, dog }, user)
+        if (dog.changedOwner) {
+          await sendChangeOwnerToAudit(dog, user)
         }
-        await sendCreateToAudit(CDO, entity, user)
       }
     }
 

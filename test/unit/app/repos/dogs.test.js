@@ -35,6 +35,9 @@ describe('Dog repo', () => {
         findAll: jest.fn(),
         destroy: jest.fn()
       },
+      person: {
+        findAll: jest.fn()
+      },
       registration: {
         findByPk: jest.fn(),
         create: jest.fn(),
@@ -67,7 +70,7 @@ describe('Dog repo', () => {
 
   const sequelize = require('../../../../app/config/db')
 
-  const { getBreeds, getStatuses, createDogs, addImportedDog, getDogByIndexNumber, getAllDogIds, updateDog, updateStatus, updateDogFields, deleteDogByIndexNumber, switchOwnerIfNecessary } = require('../../../../app/repos/dogs')
+  const { getBreeds, getStatuses, createDogs, addImportedDog, getDogByIndexNumber, getAllDogIds, updateDog, updateStatus, updateDogFields, deleteDogByIndexNumber, switchOwnerIfNecessary, buildSwitchedOwner } = require('../../../../app/repos/dogs')
 
   beforeEach(async () => {
     jest.clearAllMocks()
@@ -654,6 +657,70 @@ describe('Dog repo', () => {
 
       expect(sequelize.models.registered_person.findOne).not.toHaveBeenCalled()
       expect(mockSave).toHaveBeenCalledTimes(0)
+    })
+
+    test('buildSwitchedOwner should handle address format 1', async () => {
+      sequelize.models.person.findAll.mockResolvedValue([{ organisation: { organisation_name: 'my org' } }])
+
+      const owner = {
+        id: 10,
+        person_reference: 'P-123',
+        first_name: 'John',
+        last_name: 'Smith',
+        address: {
+          address_line_1: 'addr1',
+          address_line_2: 'addr2',
+          postcode: 'PS1 1PS'
+        }
+      }
+
+      const res = await buildSwitchedOwner(owner)
+
+      expect(res).toEqual({
+        id: 10,
+        personReference: 'P-123',
+        firstName: 'John',
+        lastName: 'Smith',
+        address: {
+          address_line_1: 'addr1',
+          address_line_2: 'addr2',
+          postcode: 'PS1 1PS'
+        },
+        organisationName: 'my org'
+      })
+    })
+
+    test('buildSwitchedOwner should handle address format 2', async () => {
+      sequelize.models.person.findAll.mockResolvedValue({ })
+
+      const owner = {
+        id: 10,
+        person_reference: 'P-123',
+        first_name: 'John',
+        last_name: 'Smith',
+        addresses: [{
+          address: {
+            address_line_1: 'addr1',
+            address_line_2: 'addr2',
+            postcode: 'PS1 1PS'
+          }
+        }]
+      }
+
+      const res = await buildSwitchedOwner(owner)
+
+      expect(res).toEqual({
+        id: 10,
+        personReference: 'P-123',
+        firstName: 'John',
+        lastName: 'Smith',
+        address: {
+          address_line_1: 'addr1',
+          address_line_2: 'addr2',
+          postcode: 'PS1 1PS'
+        },
+        organisationName: undefined
+      })
     })
   })
 })
