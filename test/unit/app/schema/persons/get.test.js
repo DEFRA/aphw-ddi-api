@@ -72,6 +72,16 @@ describe('getPersons schema', () => {
       expect(validation.error).toBeUndefined()
     })
 
+    test('should not valid given orphaned false is passed', () => {
+      const queryParams = {
+        orphaned: 'false',
+        limit: -1
+      }
+
+      const validation = personsQueryParamsSchema.validate(queryParams, { abortEarly: false })
+      expect(validation.error.message).toEqual('"orphaned" contains an invalid value')
+    })
+
     test('should not validate if unknown filters are passed', () => {
       const queryParams = {
         firstName: 'firstName',
