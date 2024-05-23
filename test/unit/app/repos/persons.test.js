@@ -40,6 +40,7 @@ describe('People repo', () => {
   }))
 
   const sequelize = require('../../../../app/config/db')
+  const { Op } = require('sequelize')
 
   jest.mock('../../../../app/lookups')
   const { getContactType, getCountry } = require('../../../../app/lookups')
@@ -123,7 +124,7 @@ describe('People repo', () => {
     }))
   })
 
-  test('getPersons should return up to 20 created people given query parameters are passed', async () => {
+  test('getPersons should return up to 30 created people given query parameters are passed and limit is set', async () => {
     sequelize.models.person.findAll.mockResolvedValue([{
       dataValues: {
         id: 1,
@@ -149,11 +150,57 @@ describe('People repo', () => {
     await getPersons({
       firstName: 'John',
       lastName: 'Smith',
-      dateOfBirth: '2000-01-01'
+      dateOfBirth: '2000-01-01',
+      limit: 30
     })
 
     expect(sequelize.models.person.findAll).toBeCalledWith(expect.objectContaining({
-      limit: 20
+      limit: 30
+    }))
+  })
+
+  test('getPersons should return unlimited number of orphaned owner given orphaned=true is passed and limit is set to -1', async () => {
+    sequelize.models.person.findAll.mockResolvedValue([{
+      dataValues: {
+        id: 1,
+        first_name: 'First',
+        last_name: 'Last',
+        person_reference: '1234',
+        addresses: [
+          {
+            id: 1,
+            address_line_1: 'Address 1',
+            address_line_2: 'Address 2',
+            town: 'Town',
+            postcode: 'Postcode',
+            country: {
+              id: 1,
+              country: 'England'
+            }
+          }
+        ]
+      }
+    }])
+
+    await getPersons({
+      orphaned: true,
+      limit: -1
+    })
+
+    expect(sequelize.models.person.findAll).toBeCalledWith(expect.objectContaining({
+      include: expect.arrayContaining([expect.objectContaining({
+        model: sequelize.models.registered_person,
+        as: 'registered_people'
+      })]),
+      where: {
+        '$registered_people.dog_id$': {
+          [Op.is]: null
+        }
+      }
+    }))
+
+    expect(sequelize.models.person.findAll).not.toHaveBeenCalledWith(expect.objectContaining({
+      limit: expect.anything()
     }))
   })
 
