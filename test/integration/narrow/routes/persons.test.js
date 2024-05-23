@@ -112,7 +112,7 @@ describe('Get persons endpoint', () => {
     const response = await server.inject(options)
 
     expect(response.statusCode).toBe(200)
-    expect(getPersons).toHaveBeenCalledWith({ orphaned: true }, -1)
+    expect(getPersons).toHaveBeenCalledWith({ orphaned: true, limit: -1 })
   })
 
   test('GET /persons route with search params returns 200 with valid payload', async () => {
