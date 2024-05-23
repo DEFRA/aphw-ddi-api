@@ -74,6 +74,16 @@ const getPersons = async (queryParams, options = {}, transaction) => {
     mappedOptions.limit = options.limit ?? MAX_RESULTS
   }
 
+  let order = [[sequelize.col('addresses.address.id'), 'DESC']]
+
+  if (options.sortKey === 'owner') {
+    const sortOrder = options.sortOrder ?? 'ASC'
+    order = [
+      [sequelize.col('last_name'), sortOrder],
+      [sequelize.col('first_name'), sortOrder]
+    ]
+  }
+
   try {
     return await sequelize.models.person.findAll({
       where,
@@ -81,7 +91,7 @@ const getPersons = async (queryParams, options = {}, transaction) => {
         ...personRelationship(sequelize),
         ...optionalIncludes
       ],
-      order: [[sequelize.col('addresses.address.id'), 'DESC']],
+      order,
       ...mappedOptions,
       transaction
     })

@@ -158,6 +158,42 @@ describe('People repo', () => {
     }))
   })
 
+  test('getPersons should sort by last name and first name ASC given owner key is set', async () => {
+    sequelize.models.person.findAll.mockResolvedValue([])
+    sequelize.col.mockImplementation(col => col)
+
+    await getPersons({
+      orphaned: true
+    }, { sortKey: 'owner' })
+
+    expect(sequelize.col.mock.calls[1]).toEqual(['last_name'])
+    expect(sequelize.col.mock.calls[2]).toEqual(['first_name'])
+    expect(sequelize.models.person.findAll).toBeCalledWith(expect.objectContaining({
+      order: [
+        ['last_name', 'ASC'],
+        ['first_name', 'ASC']
+      ]
+    }))
+  })
+
+  test('getPersons should sort by last name and first name ASC given owner key is set', async () => {
+    sequelize.models.person.findAll.mockResolvedValue([])
+    sequelize.col.mockImplementation(col => col)
+
+    await getPersons({
+      orphaned: true
+    }, { sortKey: 'owner', sortOrder: 'DESC' })
+
+    expect(sequelize.col.mock.calls[1]).toEqual(['last_name'])
+    expect(sequelize.col.mock.calls[2]).toEqual(['first_name'])
+    expect(sequelize.models.person.findAll).toBeCalledWith(expect.objectContaining({
+      order: [
+        ['last_name', 'DESC'],
+        ['first_name', 'DESC']
+      ]
+    }))
+  })
+
   test('getPersons should return unlimited number of orphaned owner given orphaned=true is passed and limit is set to -1', async () => {
     sequelize.models.person.findAll.mockResolvedValue([{
       dataValues: {
