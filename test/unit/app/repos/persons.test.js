@@ -63,7 +63,7 @@ describe('People repo', () => {
 
   test('getPersons should use a transaction if one is passed', async () => {
     const transaction = jest.fn()
-    await getPersons({}, transaction)
+    await getPersons({}, {}, transaction)
     expect(sequelize.models.person.findAll).toBeCalledWith(expect.objectContaining({
       transaction
     }))
@@ -150,9 +150,8 @@ describe('People repo', () => {
     await getPersons({
       firstName: 'John',
       lastName: 'Smith',
-      dateOfBirth: '2000-01-01',
-      limit: 30
-    })
+      dateOfBirth: '2000-01-01'
+    }, { limit: 30 })
 
     expect(sequelize.models.person.findAll).toBeCalledWith(expect.objectContaining({
       limit: 30
@@ -183,9 +182,8 @@ describe('People repo', () => {
     }])
 
     await getPersons({
-      orphaned: true,
-      limit: -1
-    })
+      orphaned: true
+    }, { limit: -1 })
 
     expect(sequelize.models.person.findAll).toBeCalledWith(expect.objectContaining({
       include: expect.arrayContaining([expect.objectContaining({

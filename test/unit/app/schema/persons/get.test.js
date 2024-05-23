@@ -1,4 +1,4 @@
-const { personsQueryParamsSchema, personsResponseSchema } = require('../../../../../app/schema/persons/get')
+const { personsSortQueryParamsSchema, personsQueryParamsSchema, personsResponseSchema } = require('../../../../../app/schema/persons/get')
 
 describe('getPersons schema', () => {
   describe('queryParams', () => {
@@ -6,7 +6,7 @@ describe('getPersons schema', () => {
       const queryParams = {}
       const validation = personsQueryParamsSchema.validate(queryParams, { abortEarly: false })
 
-      expect(validation).toEqual({ value: {} })
+      expect(validation).toEqual({ value: { sortOrder: 'ASC' } })
       expect(validation.error).not.toBeDefined()
     })
 
@@ -14,12 +14,21 @@ describe('getPersons schema', () => {
       const queryParams = {
         firstName: 'firstName',
         lastName: 'lastName',
-        dateOfBirth: '2000-01-01'
+        dateOfBirth: '2000-01-01',
+        orphaned: 'true',
+        limit: -1,
+        sortKey: 'owner',
+        sortOrder: 'DESC'
       }
+
       const expectedQueryParams = {
         firstName: 'firstName',
         lastName: 'lastName',
-        dateOfBirth: new Date('2000-01-01')
+        dateOfBirth: new Date('2000-01-01'),
+        orphaned: true,
+        limit: -1,
+        sortKey: 'owner',
+        sortOrder: 'DESC'
       }
       const validation = personsQueryParamsSchema.validate(queryParams, { abortEarly: false })
 
@@ -35,7 +44,7 @@ describe('getPersons schema', () => {
       }
       const validation = personsQueryParamsSchema.validate(queryParams, { abortEarly: false })
 
-      expect(validation).toEqual({ value: queryParams })
+      expect(validation).toEqual({ value: { ...queryParams, sortOrder: 'ASC' } })
       expect(validation.error).toBeUndefined()
     })
 
@@ -46,7 +55,7 @@ describe('getPersons schema', () => {
       }
       const validation = personsQueryParamsSchema.validate(queryParams, { abortEarly: false })
 
-      expect(validation).toEqual({ value: queryParams })
+      expect(validation).toEqual({ value: { ...queryParams, sortOrder: 'ASC' } })
       expect(validation.error).toBeUndefined()
     })
 
@@ -57,25 +66,23 @@ describe('getPersons schema', () => {
       }
 
       const validation = personsQueryParamsSchema.validate(queryParams, { abortEarly: false })
-      expect(validation).toEqual({ value: queryParams })
+      expect(validation).toEqual({ value: { ...queryParams, sortOrder: 'ASC' } })
       expect(validation.error).toBeUndefined()
     })
 
     test('should given orphaned true is passed', () => {
       const queryParams = {
-        orphaned: 'true',
-        limit: -1
+        orphaned: 'true'
       }
 
       const validation = personsQueryParamsSchema.validate(queryParams, { abortEarly: false })
-      expect(validation).toEqual({ value: { orphaned: true, limit: -1 } })
+      expect(validation).toEqual({ value: { orphaned: true, sortOrder: 'ASC' } })
       expect(validation.error).toBeUndefined()
     })
 
     test('should not valid given orphaned false is passed', () => {
       const queryParams = {
-        orphaned: 'false',
-        limit: -1
+        orphaned: 'false'
       }
 
       const validation = personsQueryParamsSchema.validate(queryParams, { abortEarly: false })
@@ -100,6 +107,49 @@ describe('getPersons schema', () => {
 
       const validation = personsQueryParamsSchema.validate(queryParams, { abortEarly: false })
       expect(validation.error.message).toEqual('"dateOfBirth" must be in ISO 8601 date format')
+    })
+  })
+
+  describe('sortQueryParams', () => {
+    test('should validate given no filters are passed', () => {
+      const sortQueryParams = {}
+      const validation = personsSortQueryParamsSchema.validate(sortQueryParams, { abortEarly: false })
+
+      expect(validation).toEqual({ value: { sortOrder: 'ASC' } })
+      expect(validation.error).not.toBeDefined()
+    })
+
+    test('should validate given all filters are passed', () => {
+      const sortQueryParams = {
+        sortKey: 'owner',
+        sortOrder: 'ASC',
+        limit: -1
+      }
+      const validation = personsSortQueryParamsSchema.validate(sortQueryParams, { abortEarly: false })
+
+      expect(validation).toEqual({ value: { sortKey: 'owner', sortOrder: 'ASC', limit: -1 } })
+      expect(validation.error).not.toBeDefined()
+    })
+
+    test('should validate sortKey is passed', () => {
+      const sortQueryParams = {
+        sortKey: 'owner'
+      }
+      const validation = personsSortQueryParamsSchema.validate(sortQueryParams, { abortEarly: false })
+
+      expect(validation).toEqual({ value: { sortKey: 'owner', sortOrder: 'ASC' } })
+      expect(validation.error).not.toBeDefined()
+    })
+
+    test('should validate sortKey and sortOrder are passed', () => {
+      const sortQueryParams = {
+        sortKey: 'owner',
+        sortOrder: 'DESC'
+      }
+      const validation = personsSortQueryParamsSchema.validate(sortQueryParams, { abortEarly: false })
+
+      expect(validation).toEqual({ value: { sortKey: 'owner', sortOrder: 'DESC' } })
+      expect(validation.error).not.toBeDefined()
     })
   })
 
