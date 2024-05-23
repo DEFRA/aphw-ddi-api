@@ -1,5 +1,5 @@
 const { getCallingUser } = require('../auth/get-user')
-const { addImportedDog, updateDog, getDogByIndexNumber, deleteDogByIndexNumber } = require('../repos/dogs')
+const { addImportedDog, updateDog, getDogByIndexNumber, deleteDogByIndexNumber, getDogsForPurging } = require('../repos/dogs')
 const { dogDto } = require('../dto/dog')
 const { personDto, mapPersonAndDogsByIndexDao } = require('../dto/person')
 const { getOwnerOfDog, getPersonAndDogsByIndex } = require('../repos/people')
@@ -107,6 +107,14 @@ module.exports = [
         console.log(`Error updating dog: ${e}`)
         throw e
       }
+    }
+  },
+  {
+    method: 'GET',
+    path: '/dogs-for-purging',
+    handler: async (request, h) => {
+      const dogs = await getDogsForPurging()
+      return h.response(dogs).code(200)
     }
   }
 ]

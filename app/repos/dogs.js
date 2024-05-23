@@ -475,6 +475,10 @@ const deleteDogByIndexNumber = async (indexNumber, user, transaction) => {
   await sendDeleteToAudit(DOG, dogAggregate, user)
 }
 
+const getDogsForPurging = async () => {
+
+}
+
 module.exports = {
   getBreeds,
   getStatuses,
@@ -488,5 +492,6 @@ module.exports = {
   updateStatus,
   deleteDogByIndexNumber,
   switchOwnerIfNecessary,
-  buildSwitchedOwner
+  buildSwitchedOwner,
+  getDogsForPurging
 }
