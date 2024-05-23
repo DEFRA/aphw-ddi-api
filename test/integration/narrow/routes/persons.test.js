@@ -101,6 +101,20 @@ describe('Get persons endpoint', () => {
     expect(getPersons).toHaveBeenCalledWith({ orphaned: true })
   })
 
+  test('GET /persons with orphaned true route returns 200 with valid payload', async () => {
+    const options = {
+      method: 'GET',
+      url: '/persons?orphaned=true&limit-1'
+    }
+
+    getPersons.mockResolvedValue([])
+
+    const response = await server.inject(options)
+
+    expect(response.statusCode).toBe(200)
+    expect(getPersons).toHaveBeenCalledWith({ orphaned: true }, -1)
+  })
+
   test('GET /persons route with search params returns 200 with valid payload', async () => {
     const options = {
       method: 'GET',

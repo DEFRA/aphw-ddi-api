@@ -7,6 +7,7 @@ const { personRelationship } = require('./relationships/person')
  * @property {string} [lastName]
  * @property {string} [dateOfBirth]
  * @property {boolean} [orphaned]
+ * @property {number} [limit]
  */
 const MAX_RESULTS = 20
 
@@ -18,10 +19,9 @@ const dtoToModelMapping = {
 
 /**
  * @param {GetPersonsFilter} queryParams
- * @param {number} [limit]
  * @param [transaction]
  */
-const getPersons = async (queryParams, limit = MAX_RESULTS, transaction) => {
+const getPersons = async (queryParams, transaction) => {
   /**
    * @type {{first_name?: string, last_name?: string, birth_date?: string}}
    */
@@ -64,8 +64,8 @@ const getPersons = async (queryParams, limit = MAX_RESULTS, transaction) => {
     subQuery: false
   }
 
-  if (limit !== -1) {
-    options.limit = limit
+  if (queryParams.limit !== -1) {
+    options.limit = queryParams.limit ?? MAX_RESULTS
   }
 
   try {

@@ -63,11 +63,12 @@ describe('getPersons schema', () => {
 
     test('should given orphaned true is passed', () => {
       const queryParams = {
-        orphaned: 'true'
+        orphaned: 'true',
+        limit: -1
       }
 
       const validation = personsQueryParamsSchema.validate(queryParams, { abortEarly: false })
-      expect(validation).toEqual({ value: { orphaned: true } })
+      expect(validation).toEqual({ value: { orphaned: true, limit: -1 } })
       expect(validation.error).toBeUndefined()
     })
 
