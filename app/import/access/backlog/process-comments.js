@@ -21,7 +21,7 @@ const processComments = async (maxRecords) => {
       await processComment(comment)
       rowsPublishedToEvents++
     } catch (error) {
-      console.error(`Error processing comment - ${error}`)
+      console.error('Error processing comment', error)
       rowsInError++
     }
   }

@@ -19,7 +19,7 @@ module.exports = [
 
         return h.response({ dog: dogDto(dog) }).code(200)
       } catch (e) {
-        console.log(e)
+        console.log('Error in GET /dog', e)
         throw e
       }
     }
@@ -51,7 +51,7 @@ module.exports = [
 
         return h.response({ owner }).code(200)
       } catch (e) {
-        console.log(e)
+        console.log('Error in GET /dog-owner', e)
         throw e
       }
     }
@@ -82,7 +82,7 @@ module.exports = [
 
         return h.response(updatedDog).code(200)
       } catch (e) {
-        console.log(`Error updating dog: ${e}`)
+        console.log('Error updating dog:', e)
         throw e
       }
     }
@@ -104,7 +104,7 @@ module.exports = [
 
         return h.response().code(204)
       } catch (e) {
-        console.log(`Error updating dog: ${e}`)
+        console.log('Error updating dog:', e)
         throw e
       }
     }

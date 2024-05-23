@@ -54,7 +54,7 @@ const getPersons = async (queryParams, transaction) => {
       transaction
     })
   } catch (err) {
-    console.error(`Error getting people: ${err}`)
+    console.error('Error getting people:', err)
     throw err
   }
 }

@@ -17,7 +17,7 @@ module.exports = {
     try {
       res = await processBacklog.process(config)
     } catch (e) {
-      console.log(e)
+      console.log('Error in GET /process-backlog', e)
     }
     return h.response({
       rowsProcessed: res.stats.rowsProcessed,

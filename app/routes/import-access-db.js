@@ -11,7 +11,7 @@ module.exports = {
       res = await accessDb.parseBlob(filename)
       await accessDb.saveParsedToBacklog(res)
     } catch (e) {
-      console.log(e)
+      console.log('Error in GET /import-access-db', e)
     }
     return h.response({
       rowsProcessed: res.rows.length,
