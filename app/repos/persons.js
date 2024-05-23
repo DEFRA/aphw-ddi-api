@@ -5,7 +5,8 @@ const { personRelationship } = require('./relationships/person')
  * @typedef GetPersonsFilter
  * @property {string} [firstName]
  * @property {string} [lastName]
- * @property {Date} [dateOfBirth]
+ * @property {string} [dateOfBirth]
+ * @property {boolean} [orphaned]
  */
 const MAX_RESULTS = 20
 
@@ -17,8 +18,10 @@ const dtoToModelMapping = {
 
 /**
  * @param {GetPersonsFilter} queryParams
+ * @param {number} [limit]
+ * @param [transaction]
  */
-const getPersons = async (queryParams, transaction) => {
+const getPersons = async (queryParams, limit = MAX_RESULTS, transaction) => {
   /**
    * @type {{first_name?: string, last_name?: string, birth_date?: string}}
    */
@@ -44,13 +47,36 @@ const getPersons = async (queryParams, transaction) => {
     return whereObject
   }, {})
 
+  const optionalIncludes = []
+
+  if (queryParams.orphaned) {
+    optionalIncludes.push({
+      model: sequelize.models.registered_person,
+      as: 'registered_people'
+    })
+
+    where['$registered_people.dog_id$'] = {
+      [Op.is]: null
+    }
+  }
+
+  const options = {
+    subQuery: false
+  }
+
+  if (limit !== -1) {
+    options.limit = limit
+  }
+
   try {
     return await sequelize.models.person.findAll({
       where,
-      include: personRelationship(sequelize),
+      include: [
+        ...personRelationship(sequelize),
+        ...optionalIncludes
+      ],
       order: [[sequelize.col('addresses.address.id'), 'DESC']],
-      limit: MAX_RESULTS,
-      subQuery: false,
+      ...options,
       transaction
     })
   } catch (err) {
