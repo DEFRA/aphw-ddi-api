@@ -64,7 +64,7 @@ describe('deletePersons schema', () => {
 
     test('should not validate given empty object', () => {
       const validation = deleteResponseSchema.validate({}, { abortEarly: false })
-      expect(validation.error).toEqual(['sdfd'])
+      expect(validation.error).toBeDefined()
     })
   })
 })
