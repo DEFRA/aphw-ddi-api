@@ -1,4 +1,3 @@
-const { getLatestAddress } = require('../sort/address')
 /**
  * @param {PersonDao} personDao
  * @returns {CreatedPersonDao}

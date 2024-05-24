@@ -1,7 +1,6 @@
 const sequelize = require('../config/db')
 const { Op } = require('sequelize')
 const { personRelationship } = require('./relationships/person')
-const { mapPersonDaoToPersonDaoWithLatestAddress } = require('./mappers/person')
 /**
  * @typedef GetPersonsFilter
  * @property {string} [firstName]
@@ -84,7 +83,7 @@ const getPersons = async (queryParams, options = {}, transaction) => {
   }
 
   try {
-    const results = await sequelize.models.person.findAll({
+    return await sequelize.models.person.findAll({
       where,
       include: [
         ...personRelationship(sequelize),
@@ -94,8 +93,6 @@ const getPersons = async (queryParams, options = {}, transaction) => {
       ...mappedOptions,
       transaction
     })
-
-    return results.map(mapPersonDaoToPersonDaoWithLatestAddress)
   } catch (err) {
     console.error('Error getting people:', err)
     throw err
