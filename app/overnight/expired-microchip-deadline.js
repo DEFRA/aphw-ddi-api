@@ -37,7 +37,7 @@ const setExpiredMicrochipDeadlineToInBreach = async (today, user, t) => {
     }
     return `Success Microchip Expiry - updated ${setToBreach.length} rows`
   } catch (e) {
-    console.log(`Error auto-updating statuses when Microchip Expiry: ${e} ${e.stack}`)
+    console.log('Error auto-updating statuses when Microchip Expiry:', e)
     throw new Error(`Error auto-updating statuses when Microchip Expiry: ${e}`)
   }
 }

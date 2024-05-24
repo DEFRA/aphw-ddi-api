@@ -44,7 +44,7 @@ const getBreeds = async () => {
 
     return breeds
   } catch (err) {
-    console.error(`Error retrieving dog breeds: ${err}`)
+    console.error('Error retrieving dog breeds:', err)
     throw err
   }
 }
@@ -60,7 +60,7 @@ const getStatuses = async () => {
 
     return statuses
   } catch (err) {
-    console.error(`Error retrieving statuses: ${err}`)
+    console.error('Error retrieving statuses:', err)
     throw err
   }
 }
@@ -103,7 +103,7 @@ const createDogs = async (dogs, owners, enforcement, transaction) => {
 
     return createdDogs
   } catch (err) {
-    console.error(`Error creating dog: ${err}`)
+    console.error('Error creating dog:', err)
     throw err
   }
 }

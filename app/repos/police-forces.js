@@ -14,7 +14,7 @@ const getPoliceForces = async () => {
 
     return policeForces
   } catch (e) {
-    console.log(`Error retrieving police forces: ${e}`)
+    console.log('Error retrieving police forces:', e)
     throw e
   }
 }

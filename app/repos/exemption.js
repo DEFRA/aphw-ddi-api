@@ -46,7 +46,7 @@ const updateExemption = async (data, user, transaction) => {
 
     return res
   } catch (err) {
-    console.error(`Error updating CDO: ${err}`)
+    console.error('Error updating CDO:', err)
     throw err
   }
 }

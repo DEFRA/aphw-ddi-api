@@ -18,7 +18,7 @@ const autoUpdateStatuses = async () => {
       result = result + await setExpiredInsuranceToBreach(today, user, t)
     })
   } catch (e) {
-    console.log(`Error auto-updating statuses: ${e}`)
+    console.log('Error auto-updating statuses:', e)
     result = `Error auto-updating statuses: ${e} ${result}`
   }
   return result
