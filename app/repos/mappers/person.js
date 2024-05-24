@@ -29,19 +29,6 @@ const mapPersonDaoToCreatedPersonDao = (personDao) => {
   }
 }
 
-/**
- * @param {PersonDao} personDao
- * @return {PersonDao}
- */
-const mapPersonDaoToPersonDaoWithLatestAddress = (personDao) => {
-  if (personDao.addresses) {
-    personDao.addresses = getLatestAddress(personDao.addresses)
-  }
-
-  return personDao
-}
-
 module.exports = {
-  mapPersonDaoToPersonDaoWithLatestAddress,
   mapPersonDaoToCreatedPersonDao
 }

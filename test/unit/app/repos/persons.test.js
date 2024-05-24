@@ -3,7 +3,7 @@ const { when } = require('jest-when')
 jest.mock('../../../../app/messaging/send-event')
 const { sendEvent } = require('../../../../app/messaging/send-event')
 
-describe('People repo', () => {
+describe('Persons repo', () => {
   jest.mock('../../../../app/config/db', () => ({
     models: {
       person: {
@@ -36,7 +36,8 @@ describe('People repo', () => {
     col: jest.fn(),
     transaction: jest.fn(),
     fn: jest.fn(),
-    where: jest.fn()
+    where: jest.fn(),
+    literal: jest.fn()
   }))
 
   const sequelize = require('../../../../app/config/db')
