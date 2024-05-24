@@ -166,8 +166,8 @@ describe('People repo', () => {
       orphaned: true
     }, { sortKey: 'owner' })
 
-    expect(sequelize.col.mock.calls[1]).toEqual(['last_name'])
-    expect(sequelize.col.mock.calls[2]).toEqual(['first_name'])
+    expect(sequelize.col.mock.calls[0]).toEqual(['last_name'])
+    expect(sequelize.col.mock.calls[1]).toEqual(['first_name'])
     expect(sequelize.models.person.findAll).toBeCalledWith(expect.objectContaining({
       order: [
         ['last_name', 'ASC'],
@@ -184,8 +184,8 @@ describe('People repo', () => {
       orphaned: true
     }, { sortKey: 'owner', sortOrder: 'DESC' })
 
-    expect(sequelize.col.mock.calls[1]).toEqual(['last_name'])
-    expect(sequelize.col.mock.calls[2]).toEqual(['first_name'])
+    expect(sequelize.col.mock.calls[0]).toEqual(['last_name'])
+    expect(sequelize.col.mock.calls[1]).toEqual(['first_name'])
     expect(sequelize.models.person.findAll).toBeCalledWith(expect.objectContaining({
       order: [
         ['last_name', 'DESC'],

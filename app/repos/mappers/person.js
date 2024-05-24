@@ -35,15 +35,11 @@ const mapPersonDaoToCreatedPersonDao = (personDao) => {
  * @return {PersonDao}
  */
 const mapPersonDaoToPersonDaoWithLatestAddress = (personDao) => {
-  return {
-    ...personDao,
-    id: personDao.id,
-    first_name: personDao.first_name,
-    last_name: personDao.last_name,
-    person_reference: personDao.person_reference,
-    birth_date: personDao.birth_date,
-    addresses: getLatestAddress(personDao.addresses)
+  if (personDao.addresses) {
+    personDao.addresses = getLatestAddress(personDao.addresses)
   }
+
+  return personDao
 }
 
 module.exports = {
