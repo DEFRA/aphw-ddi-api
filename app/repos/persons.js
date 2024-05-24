@@ -1,6 +1,7 @@
 const sequelize = require('../config/db')
 const { Op } = require('sequelize')
 const { personRelationship } = require('./relationships/person')
+const { mapPersonDaoToPersonDaoWithLatestAddress } = require('./mappers/person')
 /**
  * @typedef GetPersonsFilter
  * @property {string} [firstName]
@@ -74,18 +75,16 @@ const getPersons = async (queryParams, options = {}, transaction) => {
     mappedOptions.limit = options.limit ?? MAX_RESULTS
   }
 
-  let order = [[sequelize.col('addresses.address.id'), 'DESC']]
+  const order = []
 
   if (options.sortKey === 'owner') {
     const sortOrder = options.sortOrder ?? 'ASC'
-    order = [
-      [sequelize.col('last_name'), sortOrder],
-      [sequelize.col('first_name'), sortOrder]
-    ]
+    order.push([sequelize.col('last_name'), sortOrder])
+    order.push([sequelize.col('first_name'), sortOrder])
   }
 
   try {
-    return await sequelize.models.person.findAll({
+    const results = await sequelize.models.person.findAll({
       where,
       include: [
         ...personRelationship(sequelize),
@@ -95,6 +94,8 @@ const getPersons = async (queryParams, options = {}, transaction) => {
       ...mappedOptions,
       transaction
     })
+
+    return results.map(mapPersonDaoToPersonDaoWithLatestAddress)
   } catch (err) {
     console.error(`Error getting people: ${err}`)
     throw err

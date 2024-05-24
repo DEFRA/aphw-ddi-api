@@ -1,7 +1,9 @@
+
 const personRelationship = (sequelize) => [
   {
     model: sequelize.models.person_address,
     as: 'addresses',
+    sort: [[sequelize.col('id'), 'DESC']],
     include: [
       {
         model: sequelize.models.address,

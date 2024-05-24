@@ -1,3 +1,4 @@
+const { getLatestAddress } = require('../sort/address')
 /**
  * @param {PersonDao} personDao
  * @returns {CreatedPersonDao}
@@ -29,6 +30,23 @@ const mapPersonDaoToCreatedPersonDao = (personDao) => {
   }
 }
 
+/**
+ * @param {PersonDao} personDao
+ * @return {PersonDao}
+ */
+const mapPersonDaoToPersonDaoWithLatestAddress = (personDao) => {
+  return {
+    ...personDao,
+    id: personDao.id,
+    first_name: personDao.first_name,
+    last_name: personDao.last_name,
+    person_reference: personDao.person_reference,
+    birth_date: personDao.birth_date,
+    addresses: getLatestAddress(personDao.addresses)
+  }
+}
+
 module.exports = {
+  mapPersonDaoToPersonDaoWithLatestAddress,
   mapPersonDaoToCreatedPersonDao
 }
