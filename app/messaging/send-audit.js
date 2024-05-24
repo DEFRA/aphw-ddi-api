@@ -6,7 +6,7 @@ const { sendEvent } = require('./send-event')
 const { deepClone } = require('../lib/deep-clone')
 const { isUserValid } = require('../auth/get-user')
 const { CDO, DOG, PERSON, EXEMPTION, COURT, POLICE, ACTIVITY, INSURANCE } = require('../constants/event/audit-event-object-types')
-const { accessImportUser, robotImportUser } = require('../constants/import')
+const { robotImportUser } = require('../constants/import')
 
 const sendEventToAudit = async (eventType, eventSubject, eventDescription, actioningUser) => {
   if (!isUserValid(actioningUser)) {
@@ -188,7 +188,7 @@ const isDataUnchanged = payload => {
 }
 
 const isImporting = user => {
-  return user?.username === accessImportUser.username || user?.username === robotImportUser.username
+  return user?.username === robotImportUser.username
 }
 
 const sendImportToAudit = async (row, actioningUser) => {
