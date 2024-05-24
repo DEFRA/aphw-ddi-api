@@ -1,4 +1,4 @@
-const { personsSortQueryParamsSchema, personsQueryParamsSchema, personsResponseSchema } = require('../../../../../app/schema/persons/get')
+const { personsQueryParamsSchema, personsResponseSchema } = require('../../../../../app/schema/persons/get')
 
 describe('getPersons schema', () => {
   describe('queryParams', () => {
@@ -107,49 +107,6 @@ describe('getPersons schema', () => {
 
       const validation = personsQueryParamsSchema.validate(queryParams, { abortEarly: false })
       expect(validation.error.message).toEqual('"dateOfBirth" must be in ISO 8601 date format')
-    })
-  })
-
-  describe('sortQueryParams', () => {
-    test('should validate given no filters are passed', () => {
-      const sortQueryParams = {}
-      const validation = personsSortQueryParamsSchema.validate(sortQueryParams, { abortEarly: false })
-
-      expect(validation).toEqual({ value: { sortOrder: 'ASC' } })
-      expect(validation.error).not.toBeDefined()
-    })
-
-    test('should validate given all filters are passed', () => {
-      const sortQueryParams = {
-        sortKey: 'owner',
-        sortOrder: 'ASC',
-        limit: -1
-      }
-      const validation = personsSortQueryParamsSchema.validate(sortQueryParams, { abortEarly: false })
-
-      expect(validation).toEqual({ value: { sortKey: 'owner', sortOrder: 'ASC', limit: -1 } })
-      expect(validation.error).not.toBeDefined()
-    })
-
-    test('should validate sortKey is passed', () => {
-      const sortQueryParams = {
-        sortKey: 'owner'
-      }
-      const validation = personsSortQueryParamsSchema.validate(sortQueryParams, { abortEarly: false })
-
-      expect(validation).toEqual({ value: { sortKey: 'owner', sortOrder: 'ASC' } })
-      expect(validation.error).not.toBeDefined()
-    })
-
-    test('should validate sortKey and sortOrder are passed', () => {
-      const sortQueryParams = {
-        sortKey: 'owner',
-        sortOrder: 'DESC'
-      }
-      const validation = personsSortQueryParamsSchema.validate(sortQueryParams, { abortEarly: false })
-
-      expect(validation).toEqual({ value: { sortKey: 'owner', sortOrder: 'DESC' } })
-      expect(validation.error).not.toBeDefined()
     })
   })
 
