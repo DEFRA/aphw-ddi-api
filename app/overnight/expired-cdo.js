@@ -30,7 +30,7 @@ const setExpiredCdosToFailed = async (today, user, t) => {
     }
     return `Success CDO Expiry - updated ${setToFailed.length} rows`
   } catch (e) {
-    console.log(`Error auto-updating statuses when CDO Expiry: ${e} ${e.stack}`)
+    console.log('Error auto-updating statuses when CDO Expiry:', e)
     throw new Error(`Error auto-updating statuses when CDO Expiry: ${e}`)
   }
 }

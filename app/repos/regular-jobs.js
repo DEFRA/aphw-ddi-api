@@ -10,7 +10,7 @@ const getRegularJobs = async () => {
 
     return jobs
   } catch (e) {
-    console.log(`Error retrieving regular-jobs: ${e}`)
+    console.log('Error retrieving regular-jobs:', e)
     throw e
   }
 }
@@ -50,7 +50,7 @@ const tryStartJob = async (trans) => {
       console.log('Job for today already running or run')
     }
   } catch (e) {
-    console.log(`Error starting overnight job: ${e}`)
+    console.log('Error starting overnight job:', e)
     throw new Error(`Error starting overnight job: ${e} ${e.stack}`)
   }
   return jobId
@@ -75,7 +75,7 @@ const endJob = async (jobId, resultText, trans) => {
       throw new Error(`Overnight jobId ${jobId} not found`)
     }
   } catch (e) {
-    console.log(`Error finishing overnight job: ${jobId} ${e}`)
+    console.log(`Error finishing overnight job: ${jobId}`, e)
     throw new Error(`Error finishing overnight job: ${jobId} ${e} ${e.stack}`)
   }
 }

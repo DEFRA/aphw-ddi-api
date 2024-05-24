@@ -54,7 +54,7 @@ module.exports = [
 
           return h.response({ cdos: summaryCdosDto }).code(200)
         } catch (e) {
-          console.log(`Error retrieving cdos: ${e}`)
+          console.log('Error retrieving cdos:', e)
           throw e
         }
       }

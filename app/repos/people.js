@@ -122,7 +122,7 @@ const createPeople = async (owners, transaction) => {
 
     return createdPeople
   } catch (err) {
-    console.error(`Error creating owner: ${err}`)
+    console.error('Error creating owner:', err)
     throw err
   }
 }
@@ -167,7 +167,7 @@ const getPersonByReference = async (reference, transaction) => {
 
     return person?.length > 0 ? person[0] : null
   } catch (err) {
-    console.error(`Error getting person by reference: ${err}`)
+    console.error('Error getting person by reference:', err)
     throw err
   }
 }
@@ -186,7 +186,7 @@ const getOwnerOfDog = async (indexNumber) => {
       }]
     })
   } catch (err) {
-    console.error(`Error getting owner of dog ${indexNumber}: ${err}`)
+    console.error(`Error getting owner of dog ${indexNumber}:`, err)
     throw err
   }
 }
@@ -257,7 +257,7 @@ const updatePerson = async (person, user, transaction) => {
 
     return updatedPerson
   } catch (err) {
-    console.error(`Error updating person: ${err}`)
+    console.error('Error updating person:', err)
     throw err
   }
 }
@@ -388,7 +388,7 @@ const getPersonAndDogsByIndex = async (indexNumber, transaction) => {
     })
     return owner
   } catch (err) {
-    console.error(`Error getting owner of dog ${indexNumber}: ${err}`)
+    console.error(`Error getting owner of dog ${indexNumber}:`, err)
     throw err
   }
 }
@@ -437,7 +437,7 @@ const getPersonAndDogsByReference = async (reference, transaction) => {
 
     return person
   } catch (err) {
-    console.error(`Error getting person and dogs by reference: ${err}`)
+    console.error('Error getting person and dogs by reference:', err)
     throw err
   }
 }
