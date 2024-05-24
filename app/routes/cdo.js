@@ -18,7 +18,7 @@ module.exports = [{
 
       return h.response({ cdo: cdoViewDto(cdo) }).code(200)
     } catch (e) {
-      console.log(`Error retrieving cdo record: ${e}`)
+      console.log('Error retrieving cdo record:', e)
       throw e
     }
   }

@@ -14,7 +14,7 @@ const getCourts = async () => {
 
     return courts
   } catch (e) {
-    console.log(`Error retrieving courts: ${e}`)
+    console.log('Error retrieving courts:', e)
     throw e
   }
 }

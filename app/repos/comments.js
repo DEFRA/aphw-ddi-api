@@ -35,7 +35,7 @@ const getComments = async (count) => {
 
     return comments
   } catch (e) {
-    console.log(`Error retrieving comments: ${e}`)
+    console.log('Error retrieving comments:', e)
     throw e
   }
 }
