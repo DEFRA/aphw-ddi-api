@@ -1,4 +1,5 @@
 const { getCallingUser } = require('../auth/get-user')
+const { dogsQueryParamsSchema } = require('../schema/dogs/get')
 const { addImportedDog, updateDog, getDogByIndexNumber, deleteDogByIndexNumber, getDogsForPurging } = require('../repos/dogs')
 const { dogDto } = require('../dto/dog')
 const { personDto, mapPersonAndDogsByIndexDao } = require('../dto/person')
@@ -111,10 +112,23 @@ module.exports = [
   },
   {
     method: 'GET',
-    path: '/dogs-for-purging',
-    handler: async (request, h) => {
-      const dogs = await getDogsForPurging()
-      return h.response(dogs).code(200)
+    path: '/dogs',
+    options: {
+      validate: {
+        query: dogsQueryParamsSchema,
+        failAction: (request, h, error) => {
+          return h.response().code(400).takeover()
+        }
+      },
+      handler: async (request, h) => {
+        let dogs
+
+        if (request.query.forPurging === 'true') {
+          dogs = await getDogsForPurging('Pre-exempt,Exempt', { sortKey: 'indexNumber', sortOrder: 'ASC' }, new Date(2038, 2, 2))
+        }
+
+        return h.response(dogs).code(200)
+      }
     }
   }
 ]

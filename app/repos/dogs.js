@@ -1,4 +1,5 @@
 const sequelize = require('../config/db')
+const { Op } = require('sequelize')
 const { v4: uuidv4 } = require('uuid')
 const constants = require('../constants/statuses')
 const { getBreed, getExemptionOrder } = require('../lookups')
@@ -10,6 +11,7 @@ const { DOG } = require('../constants/event/audit-event-object-types')
 const { preChangedDogAudit, postChangedDogAudit } = require('../dto/auditing/dog')
 const { removeDogFromSearchIndex } = require('./search')
 const { getPersonByReference } = require('./people')
+const { addYears } = require('../lib/date-helpers')
 
 /**
  * @typedef DogDao
@@ -475,8 +477,96 @@ const deleteDogByIndexNumber = async (indexNumber, user, transaction) => {
   await sendDeleteToAudit(DOG, dogAggregate, user)
 }
 
-const getDogsForPurging = async () => {
+const constructDbSort = options => {
+  const sortDir = options.sortOrder ?? 'ASC'
+  const order = []
+  if (options.sortKey === 'status') {
+    // Need custom sort here, not in DB
+  } else if (options.sortKey === 'indexNumber') {
+    order.push([sequelize.col('dog.index_number'), sortDir])
+  } else if (options.sortKey === 'dateOfBirth') {
+    order.push([sequelize.col('dog.birth_date'), sortDir])
+  } else if (options.sortKey === 'cdoIssued') {
+    order.push([sequelize.col('cdoIssued'), sortDir])
+  } else if (options.sortKey === 'selected') {
+    // No DB sort available
+  }
+  return order
+}
 
+/*
+const constructJsSortFn = options => {
+  const sortDir = options.sortOrder ?? 'ASC'
+  if (options.sortKey === 'status') {
+    // Need custom sort here, not in DB
+  } else if (options.sortKey === 'selected') {
+    // No DB sort available
+  }
+  return order
+}
+*/
+
+const constructStatusList = async statusNamesCsvList => {
+  const statuses = await getStatuses()
+  const statusIds = []
+  const statusNames = statusNamesCsvList.split(',') ?? []
+  statusNames.forEach(name => statusIds.push(statuses.find(st => st.status === name).id))
+  return statusIds
+}
+
+const getDogsForPurging = async (statusList, sortOptions, today = null) => {
+  today = today ?? new Date()
+  const fifteenYearsAgo = addYears(today, -15)
+  const endDate2023Dogs = new Date(2038, 2, 1)
+
+  const order = constructDbSort(sortOptions)
+
+  const statusIds = await constructStatusList(statusList)
+
+  console.log('statusList', statusList)
+  console.log('order', order)
+  console.log('statusIds', statusIds)
+  const clausesForOr = [
+    { '$dog.birth_date$': { [Op.lte]: fifteenYearsAgo } },
+    {
+      [Op.and]: [
+        { '$dog.birth_date$': { [Op.eq]: null } },
+        { cdo_issued: { [Op.lte]: fifteenYearsAgo } }
+      ]
+    }
+  ]
+
+  if (today > endDate2023Dogs) {
+    clausesForOr.push({
+      [Op.and]: [
+        { '$dog.birth_date$': { [Op.eq]: null } },
+        { '$exemption_order.exemption_order$': '2023' }
+      ]
+    })
+  }
+
+  return sequelize.models.registration.findAll({
+    attributes: ['dog_id', 'dog.index_number', 'dog.birth_date', 'dog.status.status', 'cdo_issued'],
+    where: {
+      [Op.and]: [
+        { [Op.or]: clausesForOr },
+        { '$dog.status_id$': { [Op.in]: statusIds } }
+      ]
+    },
+    order,
+    include: [{
+      model: sequelize.models.dog,
+      as: 'dog',
+      include: [{
+        model: sequelize.models.status,
+        as: 'status'
+      }]
+    },
+    {
+      model: sequelize.models.exemption_order,
+      as: 'exemption_order'
+    }]
+  })
 }
 
 module.exports = {
