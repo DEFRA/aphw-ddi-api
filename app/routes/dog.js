@@ -124,7 +124,8 @@ module.exports = [
         let dogs
 
         if (request.query.forPurging === 'true') {
-          dogs = await getDogsForPurging('Pre-exempt,Exempt', { sortKey: 'indexNumber', sortOrder: 'ASC' }, new Date(2038, 2, 2))
+          dogs = await getDogsForPurging('Pre-exempt,Exempt', { sortKey: 'indexNumber', sortOrder: 'ASC' }) // , new Date(2038, 2, 2))
+          console.log('Dog count', dogs.length)
         }
 
         return h.response(dogs).code(200)
