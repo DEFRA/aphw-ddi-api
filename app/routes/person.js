@@ -48,7 +48,7 @@ module.exports = [{
 
         return h.response(personDto(updated)).code(200)
       } catch (err) {
-        console.error(`Error updating person: ${err}`)
+        console.error('Error updating person:', err)
 
         if (err.type === 'NOT_FOUND') {
           return h.response().code(400)

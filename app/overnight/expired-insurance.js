@@ -37,7 +37,7 @@ const setExpiredInsuranceToBreach = async (today, user, t) => {
     }
     return `Success Insurance Expiry - updated ${setToBreach.length} rows`
   } catch (e) {
-    console.log(`Error auto-updating statuses when Insurance Expiry: ${e} ${e.stack}`)
+    console.log('Error auto-updating statuses when Insurance Expiry:', e)
     throw new Error(`Error auto-updating statuses when Insurance Expiry: ${e}`)
   }
 }

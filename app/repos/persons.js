@@ -5,7 +5,9 @@ const { personRelationship } = require('./relationships/person')
  * @typedef GetPersonsFilter
  * @property {string} [firstName]
  * @property {string} [lastName]
- * @property {Date} [dateOfBirth]
+ * @property {string} [dateOfBirth]
+ * @property {boolean} [orphaned]
+ * @property {number} [limit]
  */
 const MAX_RESULTS = 20
 
@@ -17,6 +19,7 @@ const dtoToModelMapping = {
 
 /**
  * @param {GetPersonsFilter} queryParams
+ * @param [transaction]
  */
 const getPersons = async (queryParams, transaction) => {
   /**
@@ -44,17 +47,40 @@ const getPersons = async (queryParams, transaction) => {
     return whereObject
   }, {})
 
+  const optionalIncludes = []
+
+  if (queryParams.orphaned) {
+    optionalIncludes.push({
+      model: sequelize.models.registered_person,
+      as: 'registered_people'
+    })
+
+    where['$registered_people.dog_id$'] = {
+      [Op.is]: null
+    }
+  }
+
+  const options = {
+    subQuery: false
+  }
+
+  if (queryParams.limit !== -1) {
+    options.limit = queryParams.limit ?? MAX_RESULTS
+  }
+
   try {
     return await sequelize.models.person.findAll({
       where,
-      include: personRelationship(sequelize),
+      include: [
+        ...personRelationship(sequelize),
+        ...optionalIncludes
+      ],
       order: [[sequelize.col('addresses.address.id'), 'DESC']],
-      limit: MAX_RESULTS,
-      subQuery: false,
+      ...options,
       transaction
     })
   } catch (err) {
-    console.error(`Error getting people: ${err}`)
+    console.error('Error getting people:', err)
     throw err
   }
 }

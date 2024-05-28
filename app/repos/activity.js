@@ -26,7 +26,7 @@ const getActivityList = async (typeName, sourceName) => {
 
     return activities
   } catch (e) {
-    console.log(`Error retrieving activities for type ${typeName} and source ${sourceName}: ${e}`)
+    console.log(`Error retrieving activities for type ${typeName} and source ${sourceName}:`, e)
     throw e
   }
 }
@@ -51,7 +51,7 @@ const getActivityById = async (id) => {
 
     return activities
   } catch (e) {
-    console.log(`Error retrieving activity for id ${id}: ${e}`)
+    console.log(`Error retrieving activity for id ${id}:`, e)
     throw e
   }
 }

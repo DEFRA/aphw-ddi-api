@@ -36,6 +36,14 @@ describe('microchip', () => {
       expect(sequelize.models.dog_microchip.create).toHaveBeenCalled()
     })
 
+    test('should not create new microchip if new microchip value is null given no microchip record exists', async () => {
+      sequelize.models.microchip.findAll.mockResolvedValue(null)
+      sequelize.models.microchip.create.mockResolvedValue({ id: '277890823930477' })
+
+      await updateMicrochip({ id: 1 }, null, 1, {})
+      expect(sequelize.models.dog_microchip.create).not.toHaveBeenCalled()
+    })
+
     test('should update microchip given one exists', async () => {
       const mockSave = jest.fn()
 

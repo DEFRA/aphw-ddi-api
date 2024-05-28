@@ -204,7 +204,7 @@ const createCdo = async (data, user, transaction) => {
 
     return cdo
   } catch (err) {
-    console.error(`Error creating CDO: ${err}`)
+    console.error('Error creating CDO:', err)
     throw err
   }
 }
