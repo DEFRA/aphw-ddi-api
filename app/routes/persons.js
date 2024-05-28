@@ -1,7 +1,7 @@
 const { personsQueryParamsSchema } = require('../schema/persons/get')
 const { getPersons, deletePersons } = require('../repos/persons')
 const { personDto } = require('../dto/person')
-const { deletePayloadSchema, deleteResponseSchema } = require('../schema/persons/delete')
+const { deletePayloadSchema, deleteResponseSchema, deleteQuerySchema } = require('../schema/persons/delete')
 const { getCallingUser } = require('../auth/get-user')
 /**
  * @typedef GetPersonsQuery
@@ -49,6 +49,7 @@ module.exports = [
     options: {
       validate: {
         payload: deletePayloadSchema,
+        query: deleteQuerySchema,
         failAction: (request, h, error) => {
           return h.response().code(400).takeover()
         }
@@ -63,7 +64,13 @@ module.exports = [
       }
     },
     handler: async (request, h) => {
-      const result = await deletePersons(request.payload.personReferences, getCallingUser(request))
+      const personReferences = request.query['personReferences[]']?.length ? request.query['personReferences[]'] : request.payload.personReferences
+
+      if (!personReferences?.length) {
+        return h.response().code(400).takeover()
+      }
+
+      const result = await deletePersons(personReferences, getCallingUser(request))
       return h.response(result).code(200)
     }
   }

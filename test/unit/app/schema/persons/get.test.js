@@ -1,4 +1,4 @@
-const { personsSortQueryParamsSchema, personsQueryParamsSchema, personsResponseSchema } = require('../../../../../app/schema/persons/get')
+const { personsQueryParamsSchema, personsResponseSchema } = require('../../../../../app/schema/persons/get')
 
 describe('getPersons schema', () => {
   describe('queryParams', () => {

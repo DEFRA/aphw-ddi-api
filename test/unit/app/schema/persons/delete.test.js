@@ -1,4 +1,4 @@
-const { deletePayloadSchema, deleteResponseSchema } = require('../../../../../app/schema/persons/delete')
+const { deletePayloadSchema, deleteQuerySchema, deleteResponseSchema } = require('../../../../../app/schema/persons/delete')
 
 describe('deletePersons schema', () => {
   describe('payload schema', () => {
@@ -7,12 +7,6 @@ describe('deletePersons schema', () => {
       const { error, value } = deletePayloadSchema.validate(payload)
       expect(value).toEqual({ personReferences: ['P-1234-567', 'P-2345-678'] })
       expect(error).toBeUndefined()
-    })
-
-    test('should fail with empty payload', () => {
-      const payload = { }
-      const { error } = deletePayloadSchema.validate(payload)
-      expect(error.message).toEqual('"personReferences" is required')
     })
 
     test('should fail with empty personReferences array', () => {
@@ -25,6 +19,17 @@ describe('deletePersons schema', () => {
       const payload = { personReferences: ['P-1234-567', 'P-2345-678'], x: true }
       const { error } = deletePayloadSchema.validate(payload)
       expect(error.message).toEqual('"x" is not allowed')
+    })
+  })
+
+  describe('query schema', () => {
+    test('should get ids', () => {
+      const expectedResponse = {
+        'personReferences[]': ['P-1234-567', 'P-2345-678']
+      }
+      const validation = deleteQuerySchema.validate(expectedResponse, { abortEarly: false })
+      expect(validation.error).toBeUndefined()
+      expect(validation.value).toEqual(expectedResponse)
     })
   })
   describe('response', () => {
