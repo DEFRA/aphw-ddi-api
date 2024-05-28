@@ -2,8 +2,11 @@ describe('Get persons endpoint', () => {
   const createServer = require('../../../../app/server')
   let server
 
+  jest.mock('../../../../app/auth/get-user')
+  const { getCallingUser } = require('../../../../app/auth/get-user')
+
   jest.mock('../../../../app/repos/persons')
-  const { getPersons } = require('../../../../app/repos/persons')
+  const { getPersons, deletePersons } = require('../../../../app/repos/persons')
 
   beforeEach(async () => {
     jest.clearAllMocks()
@@ -186,18 +189,47 @@ describe('Get persons endpoint', () => {
 
   describe('DELETE /persons', () => {
     test('should return a 200 with list of deleted persons', async () => {
+      const expectedPersons = ['P-1234-567', 'P-2345-678']
+      const expectedUser = {
+        username: 'internal-user',
+        displayname: 'User, Internal'
+      }
+      deletePersons.mockResolvedValue({
+        count: {
+          failed: 0,
+          success: 2
+        },
+        deleted: {
+          failed: [],
+          success: expectedPersons
+        }
+      })
+      getCallingUser.mockReturnValue(expectedUser)
       const options = {
         method: 'DELETE',
         url: '/persons',
         payload: {
-          personReferences: ['P-1234-567', 'P-2345-678']
+          personReferences: expectedPersons
         }
       }
 
       const response = await server.inject(options)
       const payload = JSON.parse(response.payload)
       expect(response.statusCode).toBe(200)
-      expect(payload.persons).toEqual(['P-1234-567', 'P-2345-678'])
+      expect(payload.deleted.success).toEqual(['P-1234-567', 'P-2345-678'])
+      expect(deletePersons).toHaveBeenCalledWith(expectedPersons, expectedUser)
+    })
+
+    test('should return 400 given invalid paylod', async () => {
+      const options = {
+        method: 'DELETE',
+        url: '/persons',
+        payload: {}
+      }
+
+      const response = await server.inject(options)
+
+      expect(response.statusCode).toBe(400)
     })
   })
 

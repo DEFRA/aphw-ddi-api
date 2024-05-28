@@ -1,6 +1,7 @@
 const sequelize = require('../config/db')
 const { Op } = require('sequelize')
 const { personRelationship } = require('./relationships/person')
+const { deletePerson } = require('./people')
 /**
  * @typedef GetPersonsFilter
  * @property {string} [firstName]
@@ -101,6 +102,33 @@ const getPersons = async (queryParams, options = {}, transaction) => {
   }
 }
 
+const deletePersons = async (personsToDelete, user) => {
+  const result = {
+    count: {
+      failed: 0,
+      success: 0
+    },
+    deleted: {
+      failed: [],
+      success: []
+    }
+  }
+
+  for (const personReference of personsToDelete) {
+    try {
+      await deletePerson(personReference, user)
+      result.count.success++
+      result.deleted.success.push(personReference)
+    } catch (e) {
+      console.error('Failed to Delete personReference', e)
+      result.count.failed++
+      result.deleted.failed.push(personReference)
+    }
+  }
+
+  return result
+}
 module.exports = {
-  getPersons
+  getPersons,
+  deletePersons
 }
