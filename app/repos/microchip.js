@@ -51,7 +51,7 @@ const updateMicrochip = async (dogFromDb, newMicrochipNumber, position, transact
     if (existingMicrochip) {
       existingMicrochip.microchip_number = newMicrochipNumber
       await existingMicrochip.save({ transaction })
-    } else {
+    } else if (newMicrochipNumber) {
       await createMicrochip(newMicrochipNumber, dogFromDb.id, transaction)
     }
   }
