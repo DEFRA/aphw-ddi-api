@@ -158,7 +158,7 @@ describe('Get persons endpoint', () => {
       const response = await server.inject(options)
 
       expect(response.statusCode).toBe(200)
-      expect(getPersons).toHaveBeenCalledWith({ orphaned: true }, { sortOrder: 'ASC', limit: -1 })
+      expect(getPersons).toHaveBeenCalledWith({ orphaned: true }, { sortKey: 'owner', sortOrder: 'ASC', limit: -1 })
     })
 
     test('GET /persons with orphaned true, sortKey and sortOrder DESC returns 200 with valid payload', async () => {
