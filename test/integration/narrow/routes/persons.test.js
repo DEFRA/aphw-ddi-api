@@ -98,7 +98,7 @@ describe('Get persons endpoint', () => {
     const response = await server.inject(options)
 
     expect(response.statusCode).toBe(200)
-    expect(getPersons).toHaveBeenCalledWith({ orphaned: true })
+    expect(getPersons).toHaveBeenCalledWith({ orphaned: true }, { sortOrder: 'ASC' })
   })
 
   test('GET /persons with orphaned true route with limit -1 returns 200 with valid payload', async () => {
@@ -112,7 +112,49 @@ describe('Get persons endpoint', () => {
     const response = await server.inject(options)
 
     expect(response.statusCode).toBe(200)
-    expect(getPersons).toHaveBeenCalledWith({ orphaned: true, limit: -1 })
+    expect(getPersons).toHaveBeenCalledWith({ orphaned: true }, { sortOrder: 'ASC', limit: -1 })
+  })
+
+  test('GET /persons with orphaned true, sortKey and sortOrder DESC returns 200 with valid payload', async () => {
+    const options = {
+      method: 'GET',
+      url: '/persons?orphaned=true&limit=-1&sortKey=owner&sortOrder=DESC'
+    }
+
+    getPersons.mockResolvedValue([])
+
+    const response = await server.inject(options)
+
+    expect(response.statusCode).toBe(200)
+    expect(getPersons).toHaveBeenCalledWith({ orphaned: true }, { limit: -1, sortKey: 'owner', sortOrder: 'DESC' })
+  })
+
+  test('GET /persons with orphaned true, sortKey and sortOrder ASC returns 200 with valid payload', async () => {
+    const options = {
+      method: 'GET',
+      url: '/persons?orphaned=true&limit=-1&sortKey=owner&sortOrder=ASC'
+    }
+
+    getPersons.mockResolvedValue([])
+
+    const response = await server.inject(options)
+
+    expect(response.statusCode).toBe(200)
+    expect(getPersons).toHaveBeenCalledWith({ orphaned: true }, { sortKey: 'owner', sortOrder: 'ASC', limit: -1 })
+  })
+
+  test('GET /persons with orphaned true, sortKey returns 200 with valid payload', async () => {
+    const options = {
+      method: 'GET',
+      url: '/persons?orphaned=true&limit=-1&sortKey=owner'
+    }
+
+    getPersons.mockResolvedValue([])
+
+    const response = await server.inject(options)
+
+    expect(response.statusCode).toBe(200)
+    expect(getPersons).toHaveBeenCalledWith({ orphaned: true }, { sortKey: 'owner', sortOrder: 'ASC', limit: -1 })
   })
 
   test('GET /persons route with search params returns 200 with valid payload', async () => {

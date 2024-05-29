@@ -3,7 +3,7 @@ const { when } = require('jest-when')
 jest.mock('../../../../app/messaging/send-event')
 const { sendEvent } = require('../../../../app/messaging/send-event')
 
-describe('People repo', () => {
+describe('Persons repo', () => {
   jest.mock('../../../../app/config/db', () => ({
     models: {
       person: {
@@ -36,7 +36,8 @@ describe('People repo', () => {
     col: jest.fn(),
     transaction: jest.fn(),
     fn: jest.fn(),
-    where: jest.fn()
+    where: jest.fn(),
+    literal: jest.fn()
   }))
 
   const sequelize = require('../../../../app/config/db')
@@ -63,7 +64,7 @@ describe('People repo', () => {
 
   test('getPersons should use a transaction if one is passed', async () => {
     const transaction = jest.fn()
-    await getPersons({}, transaction)
+    await getPersons({}, {}, transaction)
     expect(sequelize.models.person.findAll).toBeCalledWith(expect.objectContaining({
       transaction
     }))
@@ -150,12 +151,47 @@ describe('People repo', () => {
     await getPersons({
       firstName: 'John',
       lastName: 'Smith',
-      dateOfBirth: '2000-01-01',
-      limit: 30
-    })
+      dateOfBirth: '2000-01-01'
+    }, { limit: 30 })
 
     expect(sequelize.models.person.findAll).toBeCalledWith(expect.objectContaining({
       limit: 30
+    }))
+  })
+
+  test('getPersons should sort by last name and first name ASC given owner key is set', async () => {
+    sequelize.models.person.findAll.mockResolvedValue([])
+    sequelize.col.mockImplementation(col => col)
+
+    await getPersons({
+      orphaned: true
+    }, { sortKey: 'owner' })
+
+    expect(sequelize.col.mock.calls[0]).toEqual(['last_name'])
+    expect(sequelize.col.mock.calls[1]).toEqual(['first_name'])
+    expect(sequelize.models.person.findAll).toBeCalledWith(expect.objectContaining({
+      order: [
+        ['last_name', 'ASC'],
+        ['first_name', 'ASC']
+      ]
+    }))
+  })
+
+  test('getPersons should sort by last name and first name ASC given owner key is set', async () => {
+    sequelize.models.person.findAll.mockResolvedValue([])
+    sequelize.col.mockImplementation(col => col)
+
+    await getPersons({
+      orphaned: true
+    }, { sortKey: 'owner', sortOrder: 'DESC' })
+
+    expect(sequelize.col.mock.calls[0]).toEqual(['last_name'])
+    expect(sequelize.col.mock.calls[1]).toEqual(['first_name'])
+    expect(sequelize.models.person.findAll).toBeCalledWith(expect.objectContaining({
+      order: [
+        ['last_name', 'DESC'],
+        ['first_name', 'DESC']
+      ]
     }))
   })
 
@@ -183,9 +219,8 @@ describe('People repo', () => {
     }])
 
     await getPersons({
-      orphaned: true,
-      limit: -1
-    })
+      orphaned: true
+    }, { limit: -1 })
 
     expect(sequelize.models.person.findAll).toBeCalledWith(expect.objectContaining({
       include: expect.arrayContaining([expect.objectContaining({
