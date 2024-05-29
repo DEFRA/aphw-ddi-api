@@ -274,6 +274,20 @@ describe('Dog endpoint', () => {
       expect(response.statusCode).toBe(500)
       expect(deleteDogByIndexNumber).not.toHaveBeenCalled()
     })
+
+    test('DELETE /dog/ED123 route returns 500 given delete error', async () => {
+      getDogByIndexNumber.mockResolvedValue({ id: 123, indexNumber: 'ED123' })
+      deleteDogByIndexNumber.mockRejectedValue(new Error('500 error'))
+
+      const options = {
+        method: 'DELETE',
+        url: '/dog/ED123'
+      }
+
+      const response = await server.inject(options)
+
+      expect(response.statusCode).toBe(500)
+    })
   })
 
   afterEach(async () => {

@@ -1,4 +1,3 @@
-const accessImportUser = { username: 'import-access-db', displayname: 'Import Access DB' }
 const robotImportUser = { username: 'robot-import-system-user', displayname: 'Robot Import' }
 
 const stages = {
@@ -8,7 +7,6 @@ const stages = {
 }
 
 module.exports = {
-  accessImportUser,
   robotImportUser,
   stages
 }

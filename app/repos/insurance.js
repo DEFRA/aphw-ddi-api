@@ -26,7 +26,7 @@ const createInsurance = async (id, data, transaction) => {
 
     return insurance
   } catch (err) {
-    console.error(`Error creating insurance: ${err}`)
+    console.error('Error creating insurance:', err)
     throw err
   }
 }
@@ -50,7 +50,7 @@ const updateInsurance = async (insurance, data, transaction) => {
 
     return insurance
   } catch (err) {
-    console.error(`Error updating insurance: ${err}`)
+    console.error('Error updating insurance:', err)
     throw err
   }
 }

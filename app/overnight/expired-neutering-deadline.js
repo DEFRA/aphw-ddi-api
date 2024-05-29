@@ -37,7 +37,7 @@ const setExpiredNeuteringDeadlineToInBreach = async (today, user, t) => {
     }
     return `Success Neutering Expiry - updated ${setStatusToBreach.length} rows`
   } catch (e) {
-    console.log(`Error auto-updating statuses when Neutering Expiry: ${e} ${e.stack}`)
+    console.log('Error auto-updating statuses when Neutering Expiry:', e)
     throw new Error(`Error auto-updating statuses when Neutering Expiry: ${e}`)
   }
 }

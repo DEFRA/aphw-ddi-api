@@ -20,7 +20,7 @@ const processRows = async (register, sheet, map, schema) => {
 
     rows = sheetRows
   } catch (err) {
-    console.error(`Error reading xlsx file: ${err}`)
+    console.error('Error reading xlsx file:', err)
     errors.push(`Error reading xlsx file: ${err}`)
   }
 
