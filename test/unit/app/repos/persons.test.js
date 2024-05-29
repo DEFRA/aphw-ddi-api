@@ -4,7 +4,7 @@ jest.mock('../../../../app/messaging/send-event')
 const { sendEvent } = require('../../../../app/messaging/send-event')
 const { NotFoundError } = require('../../../../app/errors/not-found')
 
-describe('People repo', () => {
+describe('Persons repo', () => {
   jest.mock('../../../../app/config/db', () => ({
     models: {
       person: {
@@ -37,7 +37,8 @@ describe('People repo', () => {
     col: jest.fn(),
     transaction: jest.fn(),
     fn: jest.fn(),
-    where: jest.fn()
+    where: jest.fn(),
+    literal: jest.fn()
   }))
 
   const sequelize = require('../../../../app/config/db')
@@ -71,7 +72,7 @@ describe('People repo', () => {
   })
 
   describe('getPersons', () => {
-    test('should use a transaction if one is passed', async () => {
+    test('getPersons should use a transaction if one is passed', async () => {
       const transaction = jest.fn()
       await getPersons({}, {}, transaction)
       expect(sequelize.models.person.findAll).toBeCalledWith(expect.objectContaining({
@@ -79,7 +80,7 @@ describe('People repo', () => {
       }))
     })
 
-    test('should return created people limited to 20 given no query params are passed', async () => {
+    test('getPersons should return created people limited to 20 given no query params are passed', async () => {
       sequelize.models.person.findAll.mockResolvedValue([{
         dataValues: {
           id: 1,
@@ -134,7 +135,7 @@ describe('People repo', () => {
       }))
     })
 
-    test('should return up to 30 created people given query parameters are passed and limit is set', async () => {
+    test('getPersons should return up to 30 created people given query parameters are passed and limit is set', async () => {
       sequelize.models.person.findAll.mockResolvedValue([{
         dataValues: {
           id: 1,
@@ -168,7 +169,7 @@ describe('People repo', () => {
       }))
     })
 
-    test('should sort by last name and first name ASC given owner key is set', async () => {
+    test('getPersons should sort by last name and first name ASC given owner key is set', async () => {
       sequelize.models.person.findAll.mockResolvedValue([])
       sequelize.col.mockImplementation(col => col)
 
@@ -176,8 +177,8 @@ describe('People repo', () => {
         orphaned: true
       }, { sortKey: 'owner' })
 
-      expect(sequelize.col.mock.calls[1]).toEqual(['last_name'])
-      expect(sequelize.col.mock.calls[2]).toEqual(['first_name'])
+      expect(sequelize.col.mock.calls[0]).toEqual(['last_name'])
+      expect(sequelize.col.mock.calls[1]).toEqual(['first_name'])
       expect(sequelize.models.person.findAll).toBeCalledWith(expect.objectContaining({
         order: [
           ['last_name', 'ASC'],
@@ -186,7 +187,7 @@ describe('People repo', () => {
       }))
     })
 
-    test('should sort by last name and first name ASC given owner key is set', async () => {
+    test('getPersons should sort by last name and first name ASC given owner key is set', async () => {
       sequelize.models.person.findAll.mockResolvedValue([])
       sequelize.col.mockImplementation(col => col)
 
@@ -194,8 +195,8 @@ describe('People repo', () => {
         orphaned: true
       }, { sortKey: 'owner', sortOrder: 'DESC' })
 
-      expect(sequelize.col.mock.calls[1]).toEqual(['last_name'])
-      expect(sequelize.col.mock.calls[2]).toEqual(['first_name'])
+      expect(sequelize.col.mock.calls[0]).toEqual(['last_name'])
+      expect(sequelize.col.mock.calls[1]).toEqual(['first_name'])
       expect(sequelize.models.person.findAll).toBeCalledWith(expect.objectContaining({
         order: [
           ['last_name', 'DESC'],
@@ -204,7 +205,7 @@ describe('People repo', () => {
       }))
     })
 
-    test('should return unlimited number of orphaned owner given orphaned=true is passed and limit is set to -1', async () => {
+    test('getPersons should return unlimited number of orphaned owner given orphaned=true is passed and limit is set to -1', async () => {
       sequelize.models.person.findAll.mockResolvedValue([{
         dataValues: {
           id: 1,
@@ -248,7 +249,7 @@ describe('People repo', () => {
       }))
     })
 
-    test('should throw if error', async () => {
+    test('getPersons should throw if error', async () => {
       sequelize.models.person.findAll.mockRejectedValue(new Error('Test error'))
 
       await expect(getPersons({})).rejects.toThrow('Test error')
