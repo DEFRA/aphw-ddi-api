@@ -478,17 +478,18 @@ const deleteDogByIndexNumber = async (indexNumber, user, transaction) => {
 }
 
 const constructDbSort = options => {
-  const sortDir = options.sortOrder ?? 'ASC'
+  const sortDir = options?.sortOrder ?? 'ASC'
   const order = []
-  if (options.sortKey === 'status') {
+  const sortKey = options?.sortKey ?? 'status'
+  if (sortKey === 'status') {
     // Need custom sort here, not in DB
-  } else if (options.sortKey === 'indexNumber') {
+  } else if (sortKey === 'indexNumber') {
     order.push([sequelize.col('dog.index_number'), sortDir])
-  } else if (options.sortKey === 'dateOfBirth') {
+  } else if (sortKey === 'dateOfBirth') {
     order.push([sequelize.col('dog.birth_date'), sortDir])
-  } else if (options.sortKey === 'cdoIssued') {
+  } else if (sortKey === 'cdoIssued') {
     order.push([sequelize.col('cdoIssued'), sortDir])
-  } else if (options.sortKey === 'selected') {
+  } else if (sortKey === 'selected') {
     // No DB sort available
   }
   return order
@@ -509,23 +510,12 @@ const constructJsSortFn = options => {
 const constructStatusList = async statusNamesCsvList => {
   const statuses = await getStatuses()
   const statusIds = []
-  const statusNames = statusNamesCsvList.split(',') ?? []
+  const statusNames = statusNamesCsvList?.split(',') ?? []
   statusNames.forEach(name => statusIds.push(statuses.find(st => st.status === name).id))
   return statusIds
 }
 
-const getDogsForPurging = async (statusList, sortOptions, today = null) => {
-  today = today ?? new Date()
-  const fifteenYearsAgo = addYears(today, -15)
-  const endDate2023Dogs = new Date(2038, 2, 1)
-
-  const order = constructDbSort(sortOptions)
-
-  const statusIds = await constructStatusList(statusList)
-
-  console.log('statusList', statusList)
-  console.log('order', order)
-  console.log('statusIds', statusIds)
+const generateClausesForOr = (today, fifteenYearsAgo, endDate2023Dogs) => {
   const clausesForOr = [
     { '$dog.birth_date$': { [Op.lte]: fifteenYearsAgo } },
     {
@@ -544,6 +534,23 @@ const getDogsForPurging = async (statusList, sortOptions, today = null) => {
       ]
     })
   }
+
+  return clausesForOr
+}
+const getOldDogs = async (statusList, sortOptions, today = null) => {
+  today = today ?? new Date()
+  const fifteenYearsAgo = addYears(today, -15)
+  const endDate2023Dogs = new Date(2038, 2, 1)
+
+  const order = constructDbSort(sortOptions)
+
+  const statusIds = await constructStatusList(statusList)
+
+  console.log('statusList', statusList)
+  console.log('order', order)
+  console.log('statusIds', statusIds)
+
+  const clausesForOr = generateClausesForOr(today, fifteenYearsAgo, endDate2023Dogs)
 
   return sequelize.models.registration.findAll({
     attributes: ['dog_id', 'dog.index_number', 'dog.birth_date', 'dog.status.status', 'cdo_issued'],
@@ -583,5 +590,8 @@ module.exports = {
   deleteDogByIndexNumber,
   switchOwnerIfNecessary,
   buildSwitchedOwner,
-  getDogsForPurging
+  getOldDogs,
+  constructStatusList,
+  constructDbSort,
+  generateClausesForOr
 }

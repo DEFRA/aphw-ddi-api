@@ -40,6 +40,7 @@ describe('Dog repo', () => {
       },
       registration: {
         findByPk: jest.fn(),
+        findAll: jest.fn(),
         create: jest.fn(),
         destroy: jest.fn()
       },
@@ -70,7 +71,7 @@ describe('Dog repo', () => {
 
   const sequelize = require('../../../../app/config/db')
 
-  const { getBreeds, getStatuses, createDogs, addImportedDog, getDogByIndexNumber, getAllDogIds, updateDog, updateStatus, updateDogFields, deleteDogByIndexNumber, switchOwnerIfNecessary, buildSwitchedOwner } = require('../../../../app/repos/dogs')
+  const { getBreeds, getStatuses, createDogs, addImportedDog, getDogByIndexNumber, getAllDogIds, updateDog, updateStatus, updateDogFields, deleteDogByIndexNumber, switchOwnerIfNecessary, buildSwitchedOwner, constructStatusList, constructDbSort, getOldDogs, generateClausesForOr } = require('../../../../app/repos/dogs')
 
   beforeEach(async () => {
     jest.clearAllMocks()
@@ -721,6 +722,83 @@ describe('Dog repo', () => {
         },
         organisationName: undefined
       })
+    })
+  })
+
+  describe('constructStatusList', () => {
+    test('should construct correct status id list if more than one status', async () => {
+      const statusList = 'Pre-exempt,Exempt,In breach'
+
+      const res = await constructStatusList(statusList)
+
+      expect(res).toEqual([2, 3, 5])
+    })
+
+    test('should construct correct status id list if only one status', async () => {
+      const statusList = 'Failed'
+
+      const res = await constructStatusList(statusList)
+
+      expect(res).toEqual([4])
+    })
+
+    test('should construct correct status id list if only one status', async () => {
+      const res = await constructStatusList(null)
+
+      expect(res).toEqual([])
+    })
+  })
+
+  describe('constructDbSort', () => {
+    test('should construct default sort construct when no params supplied', async () => {
+      sequelize.col.mockReturnValue((column) => column)
+
+      const res = constructDbSort()
+
+      // expect(res).toEqual([[sequelize.col('dog.index_number'), 'ASC']])
+      expect(res).toEqual([])
+    })
+
+    test('should construct correct sort construct', async () => {
+      sequelize.col.mockReturnValue((column) => column)
+
+      let res = constructDbSort({ sortOrder: 'DESC', sortKey: 'cdoIssued' })
+      expect(res).toEqual([[sequelize.col('dog.index_number'), 'DESC']])
+
+      res = constructDbSort({ sortOrder: 'DESC', sortKey: 'indexNumber' })
+      expect(res).toEqual([[sequelize.col('dog.index_number'), 'DESC']])
+
+      res = constructDbSort({ sortOrder: 'DESC', sortKey: 'dateOfBirth' })
+      expect(res).toEqual([[sequelize.col('dog.index_number'), 'DESC']])
+
+      res = constructDbSort({ sortOrder: 'ASC', sortKey: 'selected' })
+      expect(res).toEqual([])
+    })
+  })
+
+  describe('getOldDogs', () => {
+    test('should construct correct correct where clause', async () => {
+      sequelize.models.registration.findAll.mockResolvedValue()
+      const statusList = 'Pre-exempt,Exempt'
+
+      await getOldDogs(statusList)
+
+      // console.log('here1', sequelize.models.registration.findAll.mock.calls[0][0].where)
+      // expect(sequelize.models.registration.findAll.mock.calls[0][0].where.toString()).toContain('"where": {Symbol(and): [{Symbol(or): [{"$dog.birth_date$": {Symbol(lte): 2009-05-28T23:00:00.000Z}}, {Symbol(and): [{"$dog.birth_date$": {Symbol(eq): null}}, {"cdo_issued": {Symbol(lte): 2009-05-28T23:00:00.000Z}}]}]}, {"$dog.status_id$": {Symbol(in): [2, 3]}}]}}')
+    })
+  })
+
+  describe('generateClausesForOr', () => {
+    test('should handle dates before 2038', () => {
+      const res = generateClausesForOr(new Date(2024, 1, 1), new Date(2009, 1, 1), new Date(2038, 1, 1))
+
+      expect(res.length).toBe(2)
+    })
+
+    test('should handle dates from 2038 onwards', () => {
+      const res = generateClausesForOr(new Date(2038, 1, 2), new Date(2023, 1, 1), new Date(2038, 1, 1))
+
+      expect(res.length).toBe(3)
     })
   })
 })

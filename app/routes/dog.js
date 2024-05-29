@@ -1,6 +1,6 @@
 const { getCallingUser } = require('../auth/get-user')
 const { dogsQueryParamsSchema } = require('../schema/dogs/get')
-const { addImportedDog, updateDog, getDogByIndexNumber, deleteDogByIndexNumber, getDogsForPurging } = require('../repos/dogs')
+const { addImportedDog, updateDog, getDogByIndexNumber, deleteDogByIndexNumber, getOldDogs } = require('../repos/dogs')
 const { dogDto } = require('../dto/dog')
 const { personDto, mapPersonAndDogsByIndexDao } = require('../dto/person')
 const { getOwnerOfDog, getPersonAndDogsByIndex } = require('../repos/people')
@@ -124,7 +124,7 @@ module.exports = [
         let dogs
 
         if (request.query.forPurging === 'true') {
-          dogs = await getDogsForPurging('Pre-exempt,Exempt', { sortKey: 'indexNumber', sortOrder: 'ASC' }) // , new Date(2038, 2, 2))
+          dogs = await getOldDogs('Pre-exempt,Exempt', { sortKey: 'indexNumber', sortOrder: 'ASC' }) // , new Date(2038, 2, 2))
           console.log('Dog count', dogs.length)
         }
 
