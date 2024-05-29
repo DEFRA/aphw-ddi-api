@@ -1,7 +1,7 @@
 const { personsQueryParamsSchema } = require('../schema/persons/get')
 const { getPersons, deletePersons } = require('../repos/persons')
 const { personDto } = require('../dto/person')
-const { deletePayloadSchema, deleteResponseSchema, deleteQuerySchema } = require('../schema/persons/delete')
+const { deletePayloadSchema, deleteResponseSchema } = require('../schema/persons/delete')
 const { getCallingUser } = require('../auth/get-user')
 /**
  * @typedef GetPersonsQuery
@@ -44,12 +44,11 @@ module.exports = [
     }
   },
   {
-    method: 'DELETE',
-    path: '/persons',
+    method: 'POST',
+    path: '/persons:batch-delete',
     options: {
       validate: {
         payload: deletePayloadSchema,
-        query: deleteQuerySchema,
         failAction: (request, h, error) => {
           return h.response().code(400).takeover()
         }
@@ -64,11 +63,7 @@ module.exports = [
       }
     },
     handler: async (request, h) => {
-      const personReferences = request.query['personReferences[]']?.length ? request.query['personReferences[]'] : request.payload.personReferences
-
-      if (!personReferences?.length) {
-        return h.response().code(400).takeover()
-      }
+      const personReferences = request.payload.personReferences
 
       const result = await deletePersons(personReferences, getCallingUser(request))
       return h.response(result).code(200)

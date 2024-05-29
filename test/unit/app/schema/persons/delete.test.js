@@ -1,4 +1,4 @@
-const { deletePayloadSchema, deleteQuerySchema, deleteResponseSchema } = require('../../../../../app/schema/persons/delete')
+const { deletePayloadSchema, deleteResponseSchema } = require('../../../../../app/schema/persons/delete')
 
 describe('deletePersons schema', () => {
   describe('payload schema', () => {
@@ -22,16 +22,6 @@ describe('deletePersons schema', () => {
     })
   })
 
-  describe('query schema', () => {
-    test('should get ids', () => {
-      const expectedResponse = {
-        'personReferences[]': ['P-1234-567', 'P-2345-678']
-      }
-      const validation = deleteQuerySchema.validate(expectedResponse, { abortEarly: false })
-      expect(validation.error).toBeUndefined()
-      expect(validation.value).toEqual(expectedResponse)
-    })
-  })
   describe('response', () => {
     test('should return correct response schema', () => {
       const expectedResponse = {

@@ -187,7 +187,7 @@ describe('Get persons endpoint', () => {
     })
   })
 
-  describe('DELETE /persons', () => {
+  describe('POST /persons:batch-delete', () => {
     test('should return a 200 with list of deleted persons', async () => {
       const expectedPersons = ['P-1234-567', 'P-2345-678']
       const expectedUser = {
@@ -206,8 +206,8 @@ describe('Get persons endpoint', () => {
       })
       getCallingUser.mockReturnValue(expectedUser)
       const options = {
-        method: 'DELETE',
-        url: '/persons',
+        method: 'POST',
+        url: '/persons:batch-delete',
         payload: {
           personReferences: expectedPersons
         }
@@ -220,52 +220,11 @@ describe('Get persons endpoint', () => {
       expect(deletePersons).toHaveBeenCalledWith(expectedPersons, expectedUser)
     })
 
-    test('should return a 200 with list of deleted persons with ids in query', async () => {
-      const expectedPersons = ['P-1234-567', 'P-2345-678']
-      const expectedUser = {
-        username: 'internal-user',
-        displayname: 'User, Internal'
-      }
-      deletePersons.mockResolvedValue({
-        count: {
-          failed: 0,
-          success: 2
-        },
-        deleted: {
-          failed: [],
-          success: expectedPersons
-        }
-      })
-      getCallingUser.mockReturnValue(expectedUser)
-      const options = {
-        method: 'DELETE',
-        url: '/persons?personReferences[]=P-1234-567&personReferences[]=P-2345-678',
-        payload: {}
-      }
-
-      const response = await server.inject(options)
-      const payload = JSON.parse(response.payload)
-      expect(response.statusCode).toBe(200)
-      expect(payload.deleted.success).toEqual(['P-1234-567', 'P-2345-678'])
-      expect(deletePersons).toHaveBeenCalledWith(expectedPersons, expectedUser)
-    })
-
     test('should return 400 given invalid payload', async () => {
       const options = {
-        method: 'DELETE',
-        url: '/persons',
+        method: 'POST',
+        url: '/persons:batch-delete',
         payload: {}
-      }
-
-      const response = await server.inject(options)
-
-      expect(response.statusCode).toBe(400)
-    })
-
-    test('should return 400 given no payload', async () => {
-      const options = {
-        method: 'DELETE',
-        url: '/persons'
       }
 
       const response = await server.inject(options)

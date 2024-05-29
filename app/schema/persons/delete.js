@@ -1,11 +1,7 @@
 const Joi = require('joi')
 
 const deletePayloadSchema = Joi.object({
-  personReferences: Joi.array().items(Joi.string()).min(1)
-})
-
-const deleteQuerySchema = Joi.object({
-  'personReferences[]': Joi.array().items(Joi.string())
+  personReferences: Joi.array().items(Joi.string()).min(1).required()
 }).required()
 
 const deleteResponseSchema = Joi.object({
@@ -20,5 +16,5 @@ const deleteResponseSchema = Joi.object({
 }).required()
 
 module.exports = {
-  deletePayloadSchema, deleteQuerySchema, deleteResponseSchema
+  deletePayloadSchema, deleteResponseSchema
 }
