@@ -477,12 +477,19 @@ const deleteDogByIndexNumber = async (indexNumber, user, transaction) => {
   await sendDeleteToAudit(DOG, dogAggregate, user)
 }
 
-const constructDbSort = options => {
+const customSort = (columnName, ids, sortDir) => {
+  const sortElems = []
+  const idList = sortDir === 'ASC' ? ids.reverse() : ids
+  idList.forEach(id => sortElems.push(`${columnName}=${id}`))
+  return sortElems.join(',')
+}
+
+const constructDbSort = (options, statusIds) => {
   const sortDir = options?.sortOrder ?? 'ASC'
   const order = []
   const sortKey = options?.sortKey ?? 'status'
   if (sortKey === 'status') {
-    // Need custom sort here, not in DB
+    order.push([sequelize.literal(customSort('dog.status_id', statusIds, sortDir)), 'ASC'])
   } else if (sortKey === 'indexNumber') {
     order.push([sequelize.col('dog.index_number'), sortDir])
   } else if (sortKey === 'dateOfBirth') {
@@ -542,18 +549,14 @@ const getOldDogs = async (statusList, sortOptions, today = null) => {
   const fifteenYearsAgo = addYears(today, -15)
   const endDate2023Dogs = new Date(2038, 2, 1)
 
-  const order = constructDbSort(sortOptions)
-
   const statusIds = await constructStatusList(statusList)
 
-  console.log('statusList', statusList)
-  console.log('order', order)
-  console.log('statusIds', statusIds)
+  const order = constructDbSort(sortOptions, statusIds)
 
   const clausesForOr = generateClausesForOr(today, fifteenYearsAgo, endDate2023Dogs)
 
   return sequelize.models.registration.findAll({
-    attributes: ['dog_id', 'dog.index_number', 'dog.birth_date', 'dog.status.status', 'cdo_issued'],
+    attributes: ['dog_id', 'cdo_issued'],
     where: {
       [Op.and]: [
         { [Op.or]: clausesForOr },
@@ -564,9 +567,11 @@ const getOldDogs = async (statusList, sortOptions, today = null) => {
     include: [{
       model: sequelize.models.dog,
       as: 'dog',
+      attributes: ['index_number', 'birth_date'],
       include: [{
         model: sequelize.models.status,
-        as: 'status'
+        as: 'status',
+        attributes: ['status']
       }]
     },
     {

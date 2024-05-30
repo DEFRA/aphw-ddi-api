@@ -1,7 +1,7 @@
 const { getCallingUser } = require('../auth/get-user')
 const { dogsQueryParamsSchema } = require('../schema/dogs/get')
 const { addImportedDog, updateDog, getDogByIndexNumber, deleteDogByIndexNumber, getOldDogs } = require('../repos/dogs')
-const { dogDto } = require('../dto/dog')
+const { dogDto, oldDogDto } = require('../dto/dog')
 const { personDto, mapPersonAndDogsByIndexDao } = require('../dto/person')
 const { getOwnerOfDog, getPersonAndDogsByIndex } = require('../repos/people')
 
@@ -121,14 +121,20 @@ module.exports = [
         }
       },
       handler: async (request, h) => {
-        let dogs
+        let dogs = []
 
-        if (request.query.forPurging === 'true') {
-          dogs = await getOldDogs('Pre-exempt,Exempt', { sortKey: 'indexNumber', sortOrder: 'ASC' }) // , new Date(2038, 2, 2))
-          console.log('Dog count', dogs.length)
+        const sort = {
+          sortKey: request.query.sortKey,
+          sortOrder: request.query.sortOrder
         }
 
-        return h.response(dogs).code(200)
+        if (request.query.forPurging === 'true') {
+          dogs = await getOldDogs('Exempt,Inactive,Withdrawn,Failed', sort) // , new Date(2038, 7, 2))
+        }
+
+        const mappedDogs = dogs.map(oldDogDto)
+
+        return h.response(mappedDogs).code(200)
       }
     }
   }
