@@ -588,5 +588,6 @@ module.exports = {
   getOldDogs,
   constructStatusList,
   constructDbSort,
-  generateClausesForOr
+  generateClausesForOr,
+  customSort
 }

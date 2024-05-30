@@ -72,7 +72,7 @@ describe('Dog repo', () => {
 
   const sequelize = require('../../../../app/config/db')
 
-  const { getBreeds, getStatuses, createDogs, addImportedDog, getDogByIndexNumber, getAllDogIds, updateDog, updateStatus, updateDogFields, deleteDogByIndexNumber, switchOwnerIfNecessary, buildSwitchedOwner, constructStatusList, constructDbSort, getOldDogs, generateClausesForOr } = require('../../../../app/repos/dogs')
+  const { getBreeds, getStatuses, createDogs, addImportedDog, getDogByIndexNumber, getAllDogIds, updateDog, updateStatus, updateDogFields, deleteDogByIndexNumber, switchOwnerIfNecessary, buildSwitchedOwner, constructStatusList, constructDbSort, getOldDogs, generateClausesForOr, customSort } = require('../../../../app/repos/dogs')
 
   beforeEach(async () => {
     jest.clearAllMocks()
@@ -804,6 +804,28 @@ describe('Dog repo', () => {
       const res = generateClausesForOr(new Date(2038, 1, 2), new Date(2023, 1, 1), new Date(2038, 1, 1))
 
       expect(res.length).toBe(3)
+    })
+  })
+
+  describe('customSort', () => {
+    test('should handle zero elements', () => {
+      const res = customSort('mycol', [], 'DESC')
+      expect(res).toBe('')
+    })
+
+    test('should handle single element', () => {
+      const res = customSort('mycol', [7], 'DESC')
+      expect(res).toBe('mycol=7')
+    })
+
+    test('should handle multiple elements', () => {
+      const res = customSort('mycol', [3, 5, 7], 'DESC')
+      expect(res).toBe('mycol=3,mycol=5,mycol=7')
+    })
+
+    test('should reverse order', () => {
+      const res = customSort('mycol', [3, 5, 7], 'ASC')
+      expect(res).toBe('mycol=7,mycol=5,mycol=3')
     })
   })
 })
