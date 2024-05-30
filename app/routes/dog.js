@@ -117,6 +117,7 @@ module.exports = [
       validate: {
         query: dogsQueryParamsSchema,
         failAction: (request, h, error) => {
+          console.log(error)
           return h.response().code(400).takeover()
         }
       },
@@ -128,7 +129,7 @@ module.exports = [
           sortOrder: request.query.sortOrder
         }
 
-        if (request.query.forPurging === 'true') {
+        if (request.query.forPurging === true) {
           dogs = await getOldDogs('Exempt,Inactive,Withdrawn,Failed', sort) // , new Date(2038, 7, 2))
         }
 

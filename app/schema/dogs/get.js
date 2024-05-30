@@ -1,9 +1,9 @@
 const Joi = require('joi')
 
 const dogsQueryParamsSchema = Joi.object({
-  forPurging: Joi.string().optional().allow('').allow(null),
-  sortKey: Joi.string().optional().allow('').allow(null),
-  sortOrder: Joi.string().optional().allow('').allow(null)
+  forPurging: Joi.boolean().optional(),
+  sortKey: Joi.string().optional(),
+  sortOrder: Joi.string().optional().allow('ASC', 'DESC')
 })
 
 module.exports = {
