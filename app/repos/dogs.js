@@ -571,6 +571,10 @@ const getOldDogs = async (statusList, sortOptions, today = null) => {
   })
 }
 
+const deleteDogs = async () => {
+  return {}
+}
+
 module.exports = {
   getBreeds,
   getStatuses,
@@ -589,5 +593,6 @@ module.exports = {
   constructStatusList,
   constructDbSort,
   generateClausesForOr,
-  customSort
+  customSort,
+  deleteDogs
 }

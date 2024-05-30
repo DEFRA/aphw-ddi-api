@@ -8,7 +8,8 @@ describe('Dog endpoint', () => {
     addImportedDog,
     updateDog,
     deleteDogByIndexNumber,
-    getOldDogs
+    getOldDogs,
+    deleteDogs
   } = require('../../../../app/repos/dogs')
 
   jest.mock('../../../../app/repos/people')
@@ -226,7 +227,7 @@ describe('Dog endpoint', () => {
     })
   })
 
-  describe('', () => {
+  describe('DELETE /dog/ED123', () => {
     test('DELETE /dog/ED123 route returns 204 with valid index', async () => {
       getDogByIndexNumber.mockResolvedValue({ id: 123, indexNumber: 'ED123' })
       getCallingUser.mockReturnValue({
@@ -329,6 +330,52 @@ describe('Dog endpoint', () => {
       const response = await server.inject(options)
       expect(response.statusCode).toBe(400)
       expect(getOldDogs).not.toHaveBeenCalled()
+    })
+  })
+
+  describe('POST /dogs:batch-delete', () => {
+    test('should return a 200 with list of deleted persons', async () => {
+      const expectedDogs = ['ED300006', 'ED300053']
+      const expectedUser = {
+        username: 'internal-user',
+        displayname: 'User, Internal'
+      }
+      deleteDogs.mockResolvedValue({
+        count: {
+          failed: 0,
+          success: 2
+        },
+        deleted: {
+          failed: [],
+          success: expectedDogs
+        }
+      })
+      getCallingUser.mockReturnValue(expectedUser)
+      const options = {
+        method: 'POST',
+        url: '/dogs:batch-delete',
+        payload: {
+          dogPks: expectedDogs
+        }
+      }
+
+      const response = await server.inject(options)
+      const payload = JSON.parse(response.payload)
+      expect(response.statusCode).toBe(200)
+      expect(payload.deleted.success).toEqual(expectedDogs)
+      expect(deleteDogs).toHaveBeenCalledWith(expectedDogs, expectedUser)
+    })
+
+    test('should return 400 given invalid payload', async () => {
+      const options = {
+        method: 'POST',
+        url: '/dogs:batch-delete',
+        payload: {}
+      }
+
+      const response = await server.inject(options)
+
+      expect(response.statusCode).toBe(400)
     })
   })
 
