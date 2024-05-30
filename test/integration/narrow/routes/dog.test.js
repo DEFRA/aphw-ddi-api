@@ -366,6 +366,26 @@ describe('Dog endpoint', () => {
       expect(deleteDogs).toHaveBeenCalledWith(expectedDogs, expectedUser)
     })
 
+    test('should return a 400 given invalid response payload', async () => {
+      const expectedDogs = ['ED300006', 'ED300053']
+      const expectedUser = {
+        username: 'internal-user',
+        displayname: 'User, Internal'
+      }
+      deleteDogs.mockResolvedValue({})
+      getCallingUser.mockReturnValue(expectedUser)
+      const options = {
+        method: 'POST',
+        url: '/dogs:batch-delete',
+        payload: {
+          dogPks: expectedDogs
+        }
+      }
+
+      const response = await server.inject(options)
+      expect(response.statusCode).toBe(400)
+    })
+
     test('should return 400 given invalid payload', async () => {
       const options = {
         method: 'POST',
