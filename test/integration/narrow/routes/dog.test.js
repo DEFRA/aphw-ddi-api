@@ -7,7 +7,8 @@ describe('Dog endpoint', () => {
     getDogByIndexNumber,
     addImportedDog,
     updateDog,
-    deleteDogByIndexNumber
+    deleteDogByIndexNumber,
+    getOldDogs
   } = require('../../../../app/repos/dogs')
 
   jest.mock('../../../../app/repos/people')
@@ -287,6 +288,47 @@ describe('Dog endpoint', () => {
       const response = await server.inject(options)
 
       expect(response.statusCode).toBe(500)
+    })
+  })
+
+  describe('GET /dogs', () => {
+    test('/dogs?forPurging=true returns 200', async () => {
+      getOldDogs.mockResolvedValue([{ dog_id: 123, dog: { id: 123, index_number: 'ED123' } }])
+
+      const options = {
+        method: 'GET',
+        url: '/dogs?forPurging=true'
+      }
+
+      const response = await server.inject(options)
+      expect(response.statusCode).toBe(200)
+      expect(getOldDogs).toHaveBeenCalled()
+    })
+
+    test('/dogs returns 200 but doesnt call getOldDogs', async () => {
+      getOldDogs.mockResolvedValue([{ dog_id: 123, dog: { id: 123, index_number: 'ED123' } }])
+
+      const options = {
+        method: 'GET',
+        url: '/dogs'
+      }
+
+      const response = await server.inject(options)
+      expect(response.statusCode).toBe(200)
+      expect(getOldDogs).not.toHaveBeenCalled()
+    })
+
+    test('/dogs returns 400 when bad param', async () => {
+      getOldDogs.mockResolvedValue([{ dog_id: 123, dog: { id: 123, index_number: 'ED123' } }])
+
+      const options = {
+        method: 'GET',
+        url: '/dogs?invalid=true'
+      }
+
+      const response = await server.inject(options)
+      expect(response.statusCode).toBe(400)
+      expect(getOldDogs).not.toHaveBeenCalled()
     })
   })
 

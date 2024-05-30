@@ -1,6 +1,7 @@
 const { getCallingUser } = require('../auth/get-user')
-const { addImportedDog, updateDog, getDogByIndexNumber, deleteDogByIndexNumber } = require('../repos/dogs')
-const { dogDto } = require('../dto/dog')
+const { dogsQueryParamsSchema } = require('../schema/dogs/get')
+const { addImportedDog, updateDog, getDogByIndexNumber, deleteDogByIndexNumber, getOldDogs } = require('../repos/dogs')
+const { dogDto, oldDogDto } = require('../dto/dog')
 const { personDto, mapPersonAndDogsByIndexDao } = require('../dto/person')
 const { getOwnerOfDog, getPersonAndDogsByIndex } = require('../repos/people')
 
@@ -106,6 +107,35 @@ module.exports = [
       } catch (e) {
         console.log('Error updating dog:', e)
         throw e
+      }
+    }
+  },
+  {
+    method: 'GET',
+    path: '/dogs',
+    options: {
+      validate: {
+        query: dogsQueryParamsSchema,
+        failAction: (request, h, error) => {
+          console.log(error)
+          return h.response().code(400).takeover()
+        }
+      },
+      handler: async (request, h) => {
+        let dogs = []
+
+        const sort = {
+          sortKey: request.query.sortKey,
+          sortOrder: request.query.sortOrder
+        }
+
+        if (request.query.forPurging === true) {
+          dogs = await getOldDogs('Exempt,Inactive,Withdrawn,Failed', sort) // , new Date(2038, 7, 2))
+        }
+
+        const mappedDogs = dogs.map(oldDogDto)
+
+        return h.response(mappedDogs).code(200)
       }
     }
   }
