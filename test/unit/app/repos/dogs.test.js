@@ -66,7 +66,8 @@ describe('Dog repo', () => {
       }
     },
     col: jest.fn(),
-    transaction: jest.fn()
+    transaction: jest.fn(),
+    literal: jest.fn()
   }))
 
   const sequelize = require('../../../../app/config/db')
