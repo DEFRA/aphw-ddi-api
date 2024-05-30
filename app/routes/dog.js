@@ -4,7 +4,6 @@ const { addImportedDog, updateDog, getDogByIndexNumber, deleteDogByIndexNumber, 
 const { dogDto, oldDogDto } = require('../dto/dog')
 const { personDto, mapPersonAndDogsByIndexDao } = require('../dto/person')
 const { getOwnerOfDog, getPersonAndDogsByIndex } = require('../repos/people')
-const { deletePayloadSchema, deleteResponseSchema } = require('../schema/persons/delete')
 const { deleteDogsPayloadSchema, deleteDogsResponseSchema } = require('../schema/dogs/delete')
 
 module.exports = [
