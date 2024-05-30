@@ -778,14 +778,18 @@ describe('Dog repo', () => {
   })
 
   describe('getOldDogs', () => {
-    test('should construct correct correct where clause', async () => {
+    test('should call findAll with appropriate clause elements', async () => {
       sequelize.models.registration.findAll.mockResolvedValue()
       const statusList = 'Pre-exempt,Exempt'
 
       await getOldDogs(statusList)
 
-      // console.log('here1', sequelize.models.registration.findAll.mock.calls[0][0].where)
-      // expect(sequelize.models.registration.findAll.mock.calls[0][0].where.toString()).toContain('"where": {Symbol(and): [{Symbol(or): [{"$dog.birth_date$": {Symbol(lte): 2009-05-28T23:00:00.000Z}}, {Symbol(and): [{"$dog.birth_date$": {Symbol(eq): null}}, {"cdo_issued": {Symbol(lte): 2009-05-28T23:00:00.000Z}}]}]}, {"$dog.status_id$": {Symbol(in): [2, 3]}}]}}')
+      expect(sequelize.models.registration.findAll).toHaveBeenCalledWith({
+        attributes: expect.anything(),
+        include: expect.anything(),
+        order: expect.anything(),
+        where: expect.anything()
+      })
     })
   })
 

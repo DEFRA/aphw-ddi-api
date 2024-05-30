@@ -488,8 +488,7 @@ const constructDbSort = (options, statusIds) => {
   const sortDir = options?.sortOrder ?? 'ASC'
   const order = []
   const sortKey = options?.sortKey ?? 'status'
-  console.log('sortKey', sortKey)
-  console.log('sortDir', sortDir)
+
   if (sortKey === 'status') {
     order.push([sequelize.literal(customSort('dog.status_id', statusIds, sortDir)), 'ASC'])
     order.push([sequelize.col('dog.index_number'), sortDir])
