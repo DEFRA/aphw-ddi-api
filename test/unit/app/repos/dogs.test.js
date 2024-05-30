@@ -752,11 +752,11 @@ describe('Dog repo', () => {
   describe('constructDbSort', () => {
     test('should construct default sort construct when no params supplied', async () => {
       sequelize.col.mockReturnValue((column) => column)
+      sequelize.literal = jest.fn()
 
-      const res = constructDbSort()
+      const res = constructDbSort(null, [1, 2])
 
-      // expect(res).toEqual([[sequelize.col('dog.index_number'), 'ASC']])
-      expect(res).toEqual([])
+      expect(res.length).toBe(2)
     })
 
     test('should construct correct sort construct', async () => {

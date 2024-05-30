@@ -488,8 +488,11 @@ const constructDbSort = (options, statusIds) => {
   const sortDir = options?.sortOrder ?? 'ASC'
   const order = []
   const sortKey = options?.sortKey ?? 'status'
+  console.log('sortKey', sortKey)
+  console.log('sortDir', sortDir)
   if (sortKey === 'status') {
     order.push([sequelize.literal(customSort('dog.status_id', statusIds, sortDir)), 'ASC'])
+    order.push([sequelize.col('dog.index_number'), sortDir])
   } else if (sortKey === 'indexNumber') {
     order.push([sequelize.col('dog.index_number'), sortDir])
   } else if (sortKey === 'dateOfBirth') {
@@ -501,18 +504,6 @@ const constructDbSort = (options, statusIds) => {
   }
   return order
 }
-
-/*
-const constructJsSortFn = options => {
-  const sortDir = options.sortOrder ?? 'ASC'
-  if (options.sortKey === 'status') {
-    // Need custom sort here, not in DB
-  } else if (options.sortKey === 'selected') {
-    // No DB sort available
-  }
-  return order
-}
-*/
 
 const constructStatusList = async statusNamesCsvList => {
   const statuses = await getStatuses()
