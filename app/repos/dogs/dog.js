@@ -1,17 +1,17 @@
-const sequelize = require('../config/db')
+const sequelize = require('../../config/db')
 const { Op } = require('sequelize')
 const { v4: uuidv4 } = require('uuid')
-const constants = require('../constants/statuses')
-const { getBreed, getExemptionOrder } = require('../lookups')
-const { updateSearchIndexDog } = require('../repos/search')
-const { updateMicrochips, createMicrochip } = require('./microchip')
-const { createInsurance } = require('./insurance')
-const { sendCreateToAudit, sendUpdateToAudit, sendDeleteToAudit } = require('../messaging/send-audit')
-const { DOG } = require('../constants/event/audit-event-object-types')
-const { preChangedDogAudit, postChangedDogAudit } = require('../dto/auditing/dog')
-const { removeDogFromSearchIndex } = require('./search')
-const { getPersonByReference } = require('./people')
-const { addYears } = require('../lib/date-helpers')
+const constants = require('../../constants/statuses')
+const { getBreed, getExemptionOrder } = require('../../lookups')
+const { updateSearchIndexDog } = require('../search')
+const { updateMicrochips, createMicrochip } = require('../microchip')
+const { createInsurance } = require('../insurance')
+const { sendCreateToAudit, sendUpdateToAudit, sendDeleteToAudit } = require('../../messaging/send-audit')
+const { DOG } = require('../../constants/event/audit-event-object-types')
+const { preChangedDogAudit, postChangedDogAudit } = require('../../dto/auditing/dog')
+const { removeDogFromSearchIndex } = require('../search')
+const { getPersonByReference } = require('../people')
+const { addYears } = require('../../lib/date-helpers')
 
 /**
  * @typedef DogDao
@@ -571,10 +571,6 @@ const getOldDogs = async (statusList, sortOptions, today = null) => {
   })
 }
 
-const deleteDogs = async () => {
-  return {}
-}
-
 module.exports = {
   getBreeds,
   getStatuses,
@@ -593,6 +589,5 @@ module.exports = {
   constructStatusList,
   constructDbSort,
   generateClausesForOr,
-  customSort,
-  deleteDogs
+  customSort
 }

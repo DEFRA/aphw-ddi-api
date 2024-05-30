@@ -1,21 +1,21 @@
-const { breeds: mockBreeds } = require('../../../mocks/dog-breeds')
-const { statuses: mockStatuses } = require('../../../mocks/statuses')
-const { payload: mockCdoPayload } = require('../../../mocks/cdo/create')
+const { breeds: mockBreeds } = require('../../../../mocks/dog-breeds')
+const { statuses: mockStatuses } = require('../../../../mocks/statuses')
+const { payload: mockCdoPayload } = require('../../../../mocks/cdo/create')
 
-jest.mock('../../../../app/repos/insurance')
-const { createInsurance } = require('../../../../app/repos/insurance')
+jest.mock('../../../../../app/repos/insurance')
+const { createInsurance } = require('../../../../../app/repos/insurance')
 
-jest.mock('../../../../app/lookups')
-const { getBreed, getExemptionOrder } = require('../../../../app/lookups')
+jest.mock('../../../../../app/lookups')
+const { getBreed, getExemptionOrder } = require('../../../../../app/lookups')
 
-jest.mock('../../../../app/messaging/send-event')
-const { sendEvent } = require('../../../../app/messaging/send-event')
+jest.mock('../../../../../app/messaging/send-event')
+const { sendEvent } = require('../../../../../app/messaging/send-event')
 
-jest.mock('../../../../app/repos/search')
-const { removeDogFromSearchIndex } = require('../../../../app/repos/search')
+jest.mock('../../../../../app/repos/search')
+const { removeDogFromSearchIndex } = require('../../../../../app/repos/search')
 
-jest.mock('../../../../app/messaging/send-audit')
-const { sendDeleteToAudit } = require('../../../../app/messaging/send-audit')
+jest.mock('../../../../../app/messaging/send-audit')
+const { sendDeleteToAudit } = require('../../../../../app/messaging/send-audit')
 
 const devUser = {
   username: 'dev-user@test.com',
@@ -23,7 +23,7 @@ const devUser = {
 }
 
 describe('Dog repo', () => {
-  jest.mock('../../../../app/config/db', () => ({
+  jest.mock('../../../../../app/config/db', () => ({
     models: {
       dog_breed: {
         findAll: jest.fn()
@@ -70,9 +70,9 @@ describe('Dog repo', () => {
     literal: jest.fn()
   }))
 
-  const sequelize = require('../../../../app/config/db')
+  const sequelize = require('../../../../../app/config/db')
 
-  const { getBreeds, getStatuses, createDogs, addImportedDog, getDogByIndexNumber, getAllDogIds, updateDog, updateStatus, updateDogFields, deleteDogByIndexNumber, switchOwnerIfNecessary, buildSwitchedOwner, constructStatusList, constructDbSort, getOldDogs, generateClausesForOr, customSort } = require('../../../../app/repos/dogs')
+  const { getBreeds, getStatuses, createDogs, addImportedDog, getDogByIndexNumber, getAllDogIds, updateDog, updateStatus, updateDogFields, deleteDogByIndexNumber, switchOwnerIfNecessary, buildSwitchedOwner, constructStatusList, constructDbSort, getOldDogs, generateClausesForOr, customSort } = require('../../../../../app/repos/dogs')
 
   beforeEach(async () => {
     jest.clearAllMocks()
@@ -83,6 +83,10 @@ describe('Dog repo', () => {
     sequelize.models.status.findAll.mockResolvedValue(mockStatuses)
     createInsurance.mockResolvedValue()
     sendEvent.mockResolvedValue()
+  })
+
+  afterEach(() => {
+    jest.clearAllMocks()
   })
 
   describe('getBreeds', () => {
