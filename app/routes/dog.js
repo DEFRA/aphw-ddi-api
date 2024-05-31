@@ -132,9 +132,9 @@ module.exports = [
 
         if (request.query.forPurging === true) {
           if (request.query.stepNum === 1) {
-            dogs = await getOldDogs('Exempt,Inactive,Withdrawn,Failed', sort) // , new Date(2038, 7, 2))
+            dogs = await getOldDogs('Exempt,Inactive,Withdrawn,Failed', sort, request.query.today)
           } else if (request.query.stepNum === 2) {
-            dogs = await getOldDogs('In breach,Pre-exempt,Interim exempt', sort) // , new Date(2038, 7, 2))
+            dogs = await getOldDogs('In breach,Pre-exempt,Interim exempt', sort, request.query.today)
           }
         }
 

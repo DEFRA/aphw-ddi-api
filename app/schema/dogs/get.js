@@ -4,8 +4,8 @@ const dogsQueryParamsSchema = Joi.object({
   forPurging: Joi.boolean().optional(),
   sortKey: Joi.string().optional(),
   sortOrder: Joi.string().optional().allow('ASC', 'DESC'),
-  stepNum: Joi.number().optional().allow(1, 2)
-
+  stepNum: Joi.number().optional().allow(1, 2),
+  today: Joi.date().optional()
 })
 
 module.exports = {
