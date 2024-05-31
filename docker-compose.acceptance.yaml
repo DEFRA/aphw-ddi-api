@@ -1,7 +1,7 @@
 version: '3.8'
 
 x-common-migration: &common-migration
-  POSTGRES_HOST: ${POSTGRES_HOST:-aphw-ddi-api-postgres}
+  POSTGRES_HOST: ${POSTGRES_HOST:-aphw-ddi-api-postgres-acceptance}
   SCHEMA_ROLE: ${POSTGRES_SCHEMA_ROLE:-postgres}
   SCHEMA_USERNAME: ${POSTGRES_SCHEMA_USERNAME:-postgres}
   SCHEMA_PASSWORD: ${POSTGRES_SCHEMA_PASSWORD:-ppp}
@@ -21,23 +21,11 @@ services:
     entrypoint: >
       sh -c "/scripts/migration/database-up"
     depends_on:
-      - aphw-ddi-api-postgres
+      - aphw-ddi-api-postgres-acceptance
     volumes:
       - ./changelog:/liquibase/changelog
       - ./scripts:/scripts
-
-  database-down:
-    image: liquibase/liquibase:3.10.x
-    environment:
-      <<: [ *common-migration, *common-postgres ]
-    entrypoint: >
-      sh -c "/scripts/migration/database-down"
-    depends_on:
-      - aphw-ddi-api-postgres
-    volumes:
-      - ./changelog:/liquibase/changelog
-      - ./scripts:/scripts
-  aphw-ddi-api:
+  aphw-ddi-api-acceptance:
     build:
       target: development
     image: aphw-ddi-api-development
@@ -49,7 +37,7 @@ services:
       - ./app:/home/node/app
       - ./package.json:/home/node/package.json
     depends_on:
-      - aphw-ddi-api-postgres
+      - aphw-ddi-api-postgres-acceptance
       - aphw-ddi-api-azurite
     environment:
       APPINSIGHTS_CLOUDROLE: aphw-ddi-api-local
@@ -67,7 +55,7 @@ services:
       OS_PLACES_API_BASE_URL: ${OS_PLACES_API_BASE_URL:-test}
       POLICE_API_BASE_URL: ${POLICE_API_BASE_URL:-test}
       POSTGRES_DB: aphw-ddi
-      POSTGRES_HOST: ${POSTGRES_HOST:-aphw-ddi-api-postgres}
+      POSTGRES_HOST: ${POSTGRES_HOST:-aphw-ddi-api-postgres-acceptance}
       POSTGRES_PORT: 5432
       POSTGRES_SCHEMA_NAME: ${POSTGRES_SCHEMA_NAME:-public}
       POSTGRES_USERNAME: ${POSTGRES_SCHEMA_USERNAME:-postgres}
@@ -75,7 +63,7 @@ services:
       OVERNIGHT_JOB_CRONTAB: ${OVERNIGHT_JOB_CRONTAB:-5 4 * * *}
       OVERNIGHT_EXPORT_BATCH_SIZE: ${OVERNIGHT_EXPORT_BATCH_SIZE:-10000}
 
-  aphw-ddi-api-postgres:
+  aphw-ddi-api-postgres-acceptance:
     image: postgres:11.22-alpine
     ports:
       - "5432:5432"
@@ -96,8 +84,3 @@ services:
 
 volumes:
   azurite_data:
-
-networks:
-  default:
-    external:
-      name: dangerous-dogs-act

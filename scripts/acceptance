@@ -1,9 +1,4 @@
 #!/usr/bin/env sh
-if [ -z "$(docker network ls --filter name=^dangerous-dogs-act$ --format={{.Name}})" ]; then
-  echo "Creating dangerous-dogs-act Docker network"
-  docker network create dangerous-dogs-act
-fi
-
 set -e
 projectRoot="$(a="/$0"; a=${a%/*}; a=${a:-.}; a=${a#/}/; cd "$a/.." || return; pwd)"
 
@@ -13,8 +8,6 @@ cd "${projectRoot}"
 
 docker-compose down
 docker-compose -f docker-compose.acceptance.yaml down
-# Ensure container images are up to date
-docker-compose -f docker-compose.acceptance.yaml run --rm database-up
 
 docker-compose \
   -f docker-compose.acceptance.yaml \
