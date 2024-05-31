@@ -7,7 +7,9 @@ describe('Dog endpoint', () => {
     getDogByIndexNumber,
     addImportedDog,
     updateDog,
-    deleteDogByIndexNumber
+    deleteDogByIndexNumber,
+    getOldDogs,
+    deleteDogs
   } = require('../../../../app/repos/dogs')
 
   jest.mock('../../../../app/repos/people')
@@ -225,7 +227,7 @@ describe('Dog endpoint', () => {
     })
   })
 
-  describe('', () => {
+  describe('DELETE /dog/ED123', () => {
     test('DELETE /dog/ED123 route returns 204 with valid index', async () => {
       getDogByIndexNumber.mockResolvedValue({ id: 123, indexNumber: 'ED123' })
       getCallingUser.mockReturnValue({
@@ -287,6 +289,152 @@ describe('Dog endpoint', () => {
       const response = await server.inject(options)
 
       expect(response.statusCode).toBe(500)
+    })
+  })
+
+  describe('GET /dogs', () => {
+    test('/dogs?forPurging=true returns 200 for step 1', async () => {
+      getOldDogs.mockResolvedValue([{ dog_id: 123, dog: { id: 123, index_number: 'ED123' } }])
+
+      const options = {
+        method: 'GET',
+        url: '/dogs?forPurging=true&statuses=Exempt,Inactive,Withdrawn,Failed'
+      }
+
+      const response = await server.inject(options)
+      expect(response.statusCode).toBe(200)
+      expect(getOldDogs).toHaveBeenCalledWith('Exempt,Inactive,Withdrawn,Failed', { sortKey: undefined, sortOrder: undefined }, undefined)
+    })
+
+    test('/dogs?forPurging=true returns 200 for step 2', async () => {
+      getOldDogs.mockResolvedValue([{ dog_id: 123, dog: { id: 123, index_number: 'ED123' } }])
+
+      const options = {
+        method: 'GET',
+        url: '/dogs?forPurging=true&statuses=In breach,Pre-exempt,Interim exempt'
+      }
+
+      const response = await server.inject(options)
+      expect(response.statusCode).toBe(200)
+      expect(getOldDogs).toHaveBeenCalledWith('In breach,Pre-exempt,Interim exempt', { sortKey: undefined, sortOrder: undefined }, undefined)
+    })
+
+    test('/dogs?forPurging=true returns 200 when sort params', async () => {
+      getOldDogs.mockResolvedValue([{ dog_id: 123, dog: { id: 123, index_number: 'ED123' } }])
+
+      const options = {
+        method: 'GET',
+        url: '/dogs?forPurging=true&statuses=Exempt,Inactive,Withdrawn,Failed&sortKey=status&sortOrder=DESC'
+      }
+
+      const response = await server.inject(options)
+      expect(response.statusCode).toBe(200)
+      expect(getOldDogs).toHaveBeenCalledWith('Exempt,Inactive,Withdrawn,Failed', { sortKey: 'status', sortOrder: 'DESC' }, undefined)
+    })
+
+    test('/dogs?forPurging=true returns 200 and handle date override', async () => {
+      getOldDogs.mockResolvedValue([{ dog_id: 123, dog: { id: 123, index_number: 'ED123' } }])
+
+      const options = {
+        method: 'GET',
+        url: '/dogs?forPurging=true&statuses=Exempt,Inactive,Withdrawn,Failed&today=2000-05-01'
+      }
+
+      const response = await server.inject(options)
+      expect(response.statusCode).toBe(200)
+      expect(getOldDogs).toHaveBeenCalledWith('Exempt,Inactive,Withdrawn,Failed', { sortKey: undefined, sortOrder: undefined }, new Date(Date.UTC(2000, 4, 1)))
+    })
+
+    test('/dogs returns 200 but doesnt call getOldDogs', async () => {
+      getOldDogs.mockResolvedValue([{ dog_id: 123, dog: { id: 123, index_number: 'ED123' } }])
+
+      const options = {
+        method: 'GET',
+        url: '/dogs'
+      }
+
+      const response = await server.inject(options)
+      expect(response.statusCode).toBe(200)
+      expect(getOldDogs).not.toHaveBeenCalled()
+    })
+
+    test('/dogs returns 400 when bad param', async () => {
+      getOldDogs.mockResolvedValue([{ dog_id: 123, dog: { id: 123, index_number: 'ED123' } }])
+
+      const options = {
+        method: 'GET',
+        url: '/dogs?invalid=true'
+      }
+
+      const response = await server.inject(options)
+      expect(response.statusCode).toBe(400)
+      expect(getOldDogs).not.toHaveBeenCalled()
+    })
+  })
+
+  describe('POST /dogs:batch-delete', () => {
+    test('should return a 200 with list of deleted persons', async () => {
+      const expectedDogs = ['ED300006', 'ED300053']
+      const expectedUser = {
+        username: 'internal-user',
+        displayname: 'User, Internal'
+      }
+      deleteDogs.mockResolvedValue({
+        count: {
+          failed: 0,
+          success: 2
+        },
+        deleted: {
+          failed: [],
+          success: expectedDogs
+        }
+      })
+      getCallingUser.mockReturnValue(expectedUser)
+      const options = {
+        method: 'POST',
+        url: '/dogs:batch-delete',
+        payload: {
+          dogPks: expectedDogs
+        }
+      }
+
+      const response = await server.inject(options)
+      const payload = JSON.parse(response.payload)
+      expect(response.statusCode).toBe(200)
+      expect(payload.deleted.success).toEqual(expectedDogs)
+      expect(deleteDogs).toHaveBeenCalledWith(expectedDogs, expectedUser)
+    })
+
+    test('should return a 400 given invalid response payload', async () => {
+      const expectedDogs = ['ED300006', 'ED300053']
+      const expectedUser = {
+        username: 'internal-user',
+        displayname: 'User, Internal'
+      }
+      deleteDogs.mockResolvedValue({})
+      getCallingUser.mockReturnValue(expectedUser)
+      const options = {
+        method: 'POST',
+        url: '/dogs:batch-delete',
+        payload: {
+          dogPks: expectedDogs
+        }
+      }
+
+      const response = await server.inject(options)
+      expect(response.statusCode).toBe(400)
+    })
+
+    test('should return 400 given invalid payload', async () => {
+      const options = {
+        method: 'POST',
+        url: '/dogs:batch-delete',
+        payload: {}
+      }
+
+      const response = await server.inject(options)
+
+      expect(response.statusCode).toBe(400)
     })
   })
 
