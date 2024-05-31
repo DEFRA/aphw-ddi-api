@@ -298,7 +298,7 @@ describe('Dog endpoint', () => {
 
       const options = {
         method: 'GET',
-        url: '/dogs?forPurging=true&stepNum=1'
+        url: '/dogs?forPurging=true&statuses=Exempt,Inactive,Withdrawn,Failed'
       }
 
       const response = await server.inject(options)
@@ -311,7 +311,7 @@ describe('Dog endpoint', () => {
 
       const options = {
         method: 'GET',
-        url: '/dogs?forPurging=true&stepNum=2'
+        url: '/dogs?forPurging=true&statuses=In breach,Pre-exempt,Interim exempt'
       }
 
       const response = await server.inject(options)
@@ -324,7 +324,7 @@ describe('Dog endpoint', () => {
 
       const options = {
         method: 'GET',
-        url: '/dogs?forPurging=true&stepNum=1&sortKey=status&sortOrder=DESC'
+        url: '/dogs?forPurging=true&statuses=Exempt,Inactive,Withdrawn,Failed&sortKey=status&sortOrder=DESC'
       }
 
       const response = await server.inject(options)
@@ -337,7 +337,7 @@ describe('Dog endpoint', () => {
 
       const options = {
         method: 'GET',
-        url: '/dogs?forPurging=true&stepNum=1&today=2000-05-01'
+        url: '/dogs?forPurging=true&statuses=Exempt,Inactive,Withdrawn,Failed&today=2000-05-01'
       }
 
       const response = await server.inject(options)

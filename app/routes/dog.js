@@ -131,11 +131,7 @@ module.exports = [
         }
 
         if (request.query.forPurging === true) {
-          if (request.query.stepNum === 1) {
-            dogs = await getOldDogs('Exempt,Inactive,Withdrawn,Failed', sort, request.query.today)
-          } else if (request.query.stepNum === 2) {
-            dogs = await getOldDogs('In breach,Pre-exempt,Interim exempt', sort, request.query.today)
-          }
+          dogs = await getOldDogs(request.query.statuses, sort, request.query.today)
         }
 
         const mappedDogs = dogs.map(oldDogDto)
