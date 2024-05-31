@@ -293,17 +293,56 @@ describe('Dog endpoint', () => {
   })
 
   describe('GET /dogs', () => {
-    test('/dogs?forPurging=true returns 200', async () => {
+    test('/dogs?forPurging=true returns 200 for step 1', async () => {
       getOldDogs.mockResolvedValue([{ dog_id: 123, dog: { id: 123, index_number: 'ED123' } }])
 
       const options = {
         method: 'GET',
-        url: '/dogs?forPurging=true'
+        url: '/dogs?forPurging=true&statuses=Exempt,Inactive,Withdrawn,Failed'
       }
 
       const response = await server.inject(options)
       expect(response.statusCode).toBe(200)
-      expect(getOldDogs).toHaveBeenCalled()
+      expect(getOldDogs).toHaveBeenCalledWith('Exempt,Inactive,Withdrawn,Failed', { sortKey: undefined, sortOrder: undefined }, undefined)
+    })
+
+    test('/dogs?forPurging=true returns 200 for step 2', async () => {
+      getOldDogs.mockResolvedValue([{ dog_id: 123, dog: { id: 123, index_number: 'ED123' } }])
+
+      const options = {
+        method: 'GET',
+        url: '/dogs?forPurging=true&statuses=In breach,Pre-exempt,Interim exempt'
+      }
+
+      const response = await server.inject(options)
+      expect(response.statusCode).toBe(200)
+      expect(getOldDogs).toHaveBeenCalledWith('In breach,Pre-exempt,Interim exempt', { sortKey: undefined, sortOrder: undefined }, undefined)
+    })
+
+    test('/dogs?forPurging=true returns 200 when sort params', async () => {
+      getOldDogs.mockResolvedValue([{ dog_id: 123, dog: { id: 123, index_number: 'ED123' } }])
+
+      const options = {
+        method: 'GET',
+        url: '/dogs?forPurging=true&statuses=Exempt,Inactive,Withdrawn,Failed&sortKey=status&sortOrder=DESC'
+      }
+
+      const response = await server.inject(options)
+      expect(response.statusCode).toBe(200)
+      expect(getOldDogs).toHaveBeenCalledWith('Exempt,Inactive,Withdrawn,Failed', { sortKey: 'status', sortOrder: 'DESC' }, undefined)
+    })
+
+    test('/dogs?forPurging=true returns 200 and handle date override', async () => {
+      getOldDogs.mockResolvedValue([{ dog_id: 123, dog: { id: 123, index_number: 'ED123' } }])
+
+      const options = {
+        method: 'GET',
+        url: '/dogs?forPurging=true&statuses=Exempt,Inactive,Withdrawn,Failed&today=2000-05-01'
+      }
+
+      const response = await server.inject(options)
+      expect(response.statusCode).toBe(200)
+      expect(getOldDogs).toHaveBeenCalledWith('Exempt,Inactive,Withdrawn,Failed', { sortKey: undefined, sortOrder: undefined }, new Date(Date.UTC(2000, 4, 1)))
     })
 
     test('/dogs returns 200 but doesnt call getOldDogs', async () => {

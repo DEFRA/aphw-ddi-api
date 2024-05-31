@@ -131,7 +131,7 @@ module.exports = [
         }
 
         if (request.query.forPurging === true) {
-          dogs = await getOldDogs('Exempt,Inactive,Withdrawn,Failed', sort) // , new Date(2038, 7, 2))
+          dogs = await getOldDogs(request.query.statuses, sort, request.query.today)
         }
 
         const mappedDogs = dogs.map(oldDogDto)
