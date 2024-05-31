@@ -130,7 +130,11 @@ module.exports = [
         }
 
         if (request.query.forPurging === true) {
-          dogs = await getOldDogs('Exempt,Inactive,Withdrawn,Failed', sort) // , new Date(2038, 7, 2))
+          if (request.query.stepNum === 1) {
+            dogs = await getOldDogs('Exempt,Inactive,Withdrawn,Failed', sort) // , new Date(2038, 7, 2))
+          } else if (request.query.stepNum === 2) {
+            dogs = await getOldDogs('In breach,Pre-exempt,Interim exempt', sort) // , new Date(2038, 7, 2))
+          }
         }
 
         const mappedDogs = dogs.map(oldDogDto)
