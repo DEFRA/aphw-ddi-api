@@ -1,7 +1,7 @@
 version: '3.8'
 
 x-common-migration: &common-migration
-  POSTGRES_HOST: ${POSTGRES_HOST:-aphw-ddi-api-postgres-acceptance}
+  POSTGRES_HOST: ${POSTGRES_HOST:-aphw-ddi-api-postgres-api-tests}
   SCHEMA_ROLE: ${POSTGRES_SCHEMA_ROLE:-postgres}
   SCHEMA_USERNAME: ${POSTGRES_SCHEMA_USERNAME:-postgres}
   SCHEMA_PASSWORD: ${POSTGRES_SCHEMA_PASSWORD:-ppp}
@@ -29,7 +29,7 @@ services:
     build:
       target: development
     image: aphw-ddi-api-development
-    container_name: aphw-ddi-api-acceptance
+    container_name: aphw-ddi-api-api-tests
     ports:
       - "3001:3000"
       - "9230:9229"
@@ -55,7 +55,7 @@ services:
       OS_PLACES_API_BASE_URL: ${OS_PLACES_API_BASE_URL:-test}
       POLICE_API_BASE_URL: ${POLICE_API_BASE_URL:-test}
       POSTGRES_DB: aphw-ddi
-      POSTGRES_HOST: ${POSTGRES_HOST:-aphw-ddi-api-postgres-acceptance}
+      POSTGRES_HOST: ${POSTGRES_HOST:-aphw-ddi-api-postgres-api-tests}
       POSTGRES_PORT: 5432
       POSTGRES_SCHEMA_NAME: ${POSTGRES_SCHEMA_NAME:-public}
       POSTGRES_USERNAME: ${POSTGRES_SCHEMA_USERNAME:-postgres}

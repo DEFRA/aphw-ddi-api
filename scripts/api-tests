@@ -7,8 +7,8 @@ cd "${projectRoot}"
 . "${projectRoot}/.env"
 
 docker-compose down
-docker-compose -f docker-compose.acceptance.yaml down
+docker-compose -f docker-compose.api-tests.yaml down
 
 docker-compose \
-  -f docker-compose.acceptance.yaml \
+  -f docker-compose.api-tests.yaml \
   up $args $@
