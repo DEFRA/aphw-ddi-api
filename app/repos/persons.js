@@ -126,6 +126,7 @@ const deletePersons = async (personsToDelete, user) => {
 
   return result
 }
+
 module.exports = {
   getPersons,
   deletePersons
