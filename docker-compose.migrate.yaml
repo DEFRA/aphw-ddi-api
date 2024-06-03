@@ -41,3 +41,8 @@ services:
   aphw-ddi-api-postgres:
     image: postgres:11.22-alpine
     environment: *common-postgres
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+volumes:
+  postgres_data: {}
