@@ -7,8 +7,12 @@ cd "${projectRoot}"
 . "${projectRoot}/.env"
 
 docker-compose down
-docker-compose -f docker-compose.api-tests.yaml down
+docker-compose -f docker-compose.migrate.yaml -f docker-compose.override.api-tests.yaml down
+# Ensure container images are up to date
+docker-compose -f docker-compose.migrate.yaml -f docker-compose.override.api-tests.yaml run --rm database-up
 
 docker-compose \
-  -f docker-compose.api-tests.yaml \
+  -f docker-compose.yaml \
+  -f docker-compose.override.api-tests.yaml \
+  -f docker-compose.link.yaml \
   up $args $@

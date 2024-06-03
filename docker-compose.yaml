@@ -38,14 +38,9 @@ services:
       POSTGRES_DB: aphw-ddi
       POSTGRES_USERNAME: postgres
       POSTGRES_PASSWORD: ppp
-    volumes:
-      - postgres_data:/var/lib/postgres/data
 
   aphw-ddi-api-azurite:
     image: mcr.microsoft.com/azure-storage/azurite:3.23.0
     command: "azurite-blob --skipApiVersionCheck --loose --blobHost 0.0.0.0"
     labels:
       com.docker.compose.pay.role: aphw-ddi-api-azurite
-
-volumes:
-  postgres_data:
