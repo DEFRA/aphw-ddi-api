@@ -21,11 +21,11 @@ services:
     entrypoint: >
       sh -c "/scripts/migration/database-up"
     depends_on:
-      - aphw-ddi-api-postgres-acceptance
+      - aphw-ddi-api-postgres-api-tests
     volumes:
       - ./changelog:/liquibase/changelog
       - ./scripts:/scripts
-  aphw-ddi-api-acceptance:
+  aphw-ddi-api:
     build:
       target: development
     image: aphw-ddi-api-development
@@ -37,7 +37,7 @@ services:
       - ./app:/home/node/app
       - ./package.json:/home/node/package.json
     depends_on:
-      - aphw-ddi-api-postgres-acceptance
+      - aphw-ddi-api-postgres-api-tests
       - aphw-ddi-api-azurite
     environment:
       APPINSIGHTS_CLOUDROLE: aphw-ddi-api-local
@@ -63,7 +63,7 @@ services:
       OVERNIGHT_JOB_CRONTAB: ${OVERNIGHT_JOB_CRONTAB:-5 4 * * *}
       OVERNIGHT_EXPORT_BATCH_SIZE: ${OVERNIGHT_EXPORT_BATCH_SIZE:-10000}
 
-  aphw-ddi-api-postgres-acceptance:
+  aphw-ddi-api-postgres-api-tests:
     image: postgres:11.22-alpine
     ports:
       - "5432:5432"
