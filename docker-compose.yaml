@@ -38,6 +38,8 @@ services:
       POSTGRES_DB: aphw-ddi
       POSTGRES_USERNAME: postgres
       POSTGRES_PASSWORD: ppp
+    volumes:
+      - postgres_data:/var/lib/postgres/data
 
   aphw-ddi-api-azurite:
     image: mcr.microsoft.com/azure-storage/azurite:3.23.0
