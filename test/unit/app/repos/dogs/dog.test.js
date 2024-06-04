@@ -777,7 +777,7 @@ describe('Dog repo', () => {
       expect(res).toEqual([[sequelize.col('dog.index_number'), 'DESC']])
 
       res = constructDbSort({ sortOrder: 'ASC', sortKey: 'selected' })
-      expect(res).toEqual([])
+      expect(res).toEqual([[sequelize.col('dog.index_number'), 'ASC']])
     })
   })
 

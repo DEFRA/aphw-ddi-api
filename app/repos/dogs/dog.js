@@ -497,9 +497,9 @@ const constructDbSort = (options, statusIds) => {
   } else if (sortKey === 'dateOfBirth') {
     order.push([sequelize.col('dog.birth_date'), sortDir])
   } else if (sortKey === 'cdoIssued') {
-    order.push([sequelize.col('cdoIssued'), sortDir])
+    order.push([sequelize.col('cdo_issued'), sortDir])
   } else if (sortKey === 'selected') {
-    // No DB sort available
+    order.push([sequelize.col('dog.index_number'), 'ASC'])
   }
   return order
 }
