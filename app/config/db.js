@@ -1,4 +1,5 @@
 /* istanbul ignore file */
+
 const { Sequelize } = require('sequelize')
 const { DefaultAzureCredential } = require('@azure/identity')
 
