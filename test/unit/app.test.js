@@ -6,6 +6,10 @@ describe('Entry point test', () => {
     start: mockStart.mockReturnThis()
   }
 
+  jest.mock('../../app/messaging/create-message-sender')
+  const { closeAllConnections } = require('../../app/messaging/create-message-sender')
+  closeAllConnections.mockResolvedValue()
+
   jest.mock('../../app/server', () => jest.fn(() => {
     return {
       then (callback) {
@@ -26,5 +30,6 @@ describe('Entry point test', () => {
     require('../../app')
     expect(mockStart.mock.calls.length).toBe(1)
     expect(mockExit.mock.calls.length).toBe(1)
+    expect(closeAllConnections.mock.calls.length).toBe(1)
   })
 })
