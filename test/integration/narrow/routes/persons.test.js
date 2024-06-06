@@ -273,6 +273,37 @@ describe('Get persons endpoint', () => {
 
       expect(response.statusCode).toBe(400)
     })
+
+    test('should return a 400 with invalid response', async () => {
+      const expectedPersons = ['P-1234-567', 'P-2345-678']
+      const expectedUser = {
+        username: 'internal-user',
+        displayname: 'User, Internal'
+      }
+      deletePersons.mockResolvedValue({
+        countInvalidObj: {
+          failed: 0,
+          success: 2
+        },
+        deleted: {
+          failed: [],
+          success: expectedPersons
+        }
+      })
+      getCallingUser.mockReturnValue(expectedUser)
+      const options = {
+        method: 'POST',
+        url: '/persons:batch-delete',
+        payload: {
+          personReferences: expectedPersons
+        }
+      }
+
+      const response = await server.inject(options)
+      const payload = JSON.parse(response.payload)
+      expect(response.statusCode).toBe(400)
+      expect(payload.errors[0]).toBe('"count" is required')
+    })
   })
 
   afterEach(async () => {
