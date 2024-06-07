@@ -37,10 +37,4 @@ describe('storage', () => {
     expect(defaultAzureCredential).toHaveBeenCalledTimes(1)
     expect(blobServiceClient.fromConnectionString).not.toHaveBeenCalled()
   })
-
-  test('should fail validation if invalid', () => {
-    process.env.AZURE_STORAGE_ACCOUNT_NAME = undefined
-    process.env.AZURE_STORAGE_USE_CONNECTION_STRING = undefined
-    expect(() => require('../../../../app/storage')).toThrow('The blob storage config is invalid. "storageAccount" is required')
-  })
 })

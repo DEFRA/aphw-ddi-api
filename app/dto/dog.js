@@ -17,15 +17,6 @@ const dogDto = (data) => ({
   dateUntraceable: data.untraceable_date
 })
 
-const oldDogDto = (data) => ({
-  id: data.dog_id,
-  indexNumber: data.dog.index_number,
-  dateOfBirth: data.dog.birth_date,
-  cdoIssued: data.cdo_issued,
-  status: data.dog.status
-})
-
 module.exports = {
-  dogDto,
-  oldDogDto
+  dogDto
 }

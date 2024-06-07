@@ -119,6 +119,10 @@ const stripTime = (inDate) => {
     return null
   }
 
+  if (inDate === '') {
+    return ''
+  }
+
   if (typeof inDate === 'object') {
     return formatDateAsUTCNoTime(inDate)
   }

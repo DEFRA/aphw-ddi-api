@@ -1,4 +1,3 @@
-
 const Joi = require('joi')
 const { getCallingUser } = require('../auth/get-user')
 const { getPersonByReference, getPersonAndDogsByReference, updatePerson, deletePerson } = require('../repos/people')
