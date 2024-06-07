@@ -1,19 +1,13 @@
 const sequelize = require('../config/db')
 const { Op } = require('sequelize')
 const { personRelationship } = require('./relationships/person')
-const { deletePerson } = require('./people')
 /**
  * @typedef GetPersonsFilter
  * @property {string} [firstName]
  * @property {string} [lastName]
  * @property {string} [dateOfBirth]
  * @property {boolean} [orphaned]
- */
-/**
- * @typedef GetPersonsOptions
  * @property {number} [limit]
- * @property {string} [sortKey]
- * @property {string} [sortOrder]
  */
 const MAX_RESULTS = 20
 
@@ -25,10 +19,9 @@ const dtoToModelMapping = {
 
 /**
  * @param {GetPersonsFilter} queryParams
- * @param {GetPersonsOptions} [options]
  * @param [transaction]
  */
-const getPersons = async (queryParams, options = {}, transaction) => {
+const getPersons = async (queryParams, transaction) => {
   /**
    * @type {{first_name?: string, last_name?: string, birth_date?: string}}
    */
@@ -67,20 +60,12 @@ const getPersons = async (queryParams, options = {}, transaction) => {
     }
   }
 
-  const mappedOptions = {
+  const options = {
     subQuery: false
   }
 
-  if (options.limit !== -1) {
-    mappedOptions.limit = options.limit ?? MAX_RESULTS
-  }
-
-  const order = []
-
-  if (options.sortKey === 'owner') {
-    const sortOrder = options.sortOrder ?? 'ASC'
-    order.push([sequelize.col('last_name'), sortOrder])
-    order.push([sequelize.col('first_name'), sortOrder])
+  if (queryParams.limit !== -1) {
+    options.limit = queryParams.limit ?? MAX_RESULTS
   }
 
   try {
@@ -90,8 +75,8 @@ const getPersons = async (queryParams, options = {}, transaction) => {
         ...personRelationship(sequelize),
         ...optionalIncludes
       ],
-      order,
-      ...mappedOptions,
+      order: [[sequelize.col('addresses.address.id'), 'DESC']],
+      ...options,
       transaction
     })
   } catch (err) {
@@ -100,34 +85,6 @@ const getPersons = async (queryParams, options = {}, transaction) => {
   }
 }
 
-const deletePersons = async (personsToDelete, user) => {
-  const result = {
-    count: {
-      failed: 0,
-      success: 0
-    },
-    deleted: {
-      failed: [],
-      success: []
-    }
-  }
-
-  for (const personReference of personsToDelete) {
-    try {
-      await deletePerson(personReference, user)
-      result.count.success++
-      result.deleted.success.push(personReference)
-    } catch (e) {
-      console.error('Failed to Delete personReference', e)
-      result.count.failed++
-      result.deleted.failed.push(personReference)
-    }
-  }
-
-  return result
-}
-
 module.exports = {
-  getPersons,
-  deletePersons
+  getPersons
 }

@@ -53,8 +53,7 @@ describe('People repo', () => {
     transaction: jest.fn(() => ({
       commit: jest.fn(),
       rollback: jest.fn()
-    })),
-    literal: jest.fn()
+    }))
   }))
 
   const sequelize = require('../../../../app/config/db')

@@ -4,6 +4,8 @@ const getBreed = require('./dog-breed')
 const getInsuranceCompany = require('./insurance-company')
 const getPersonType = require('./person-type')
 const getPoliceForce = require('./police-force')
+const getDogStatus = require('./dog-status')
+const getRegistrationStatus = require('./registration-status')
 const getContactType = require('./contact-type')
 const getCourt = require('./court')
 const getExemptionOrder = require('./exemption-order')
@@ -15,6 +17,8 @@ module.exports = {
   getInsuranceCompany,
   getPersonType,
   getPoliceForce,
+  getDogStatus,
+  getRegistrationStatus,
   getContactType,
   getCourt,
   getExemptionOrder
