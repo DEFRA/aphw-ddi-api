@@ -1,4 +1,4 @@
-const { createExportFile } = require('../../../../app/overnight/create-export-file')
+const { createExportFile, generateCsv } = require('../../../../app/overnight/create-export-file')
 const { validRow } = require('../../../unit/app/export/input-data')
 
 const { getAllCdos } = require('../../../../app/repos/cdo')
@@ -30,5 +30,37 @@ describe('CreateExportFile test', () => {
     const res = await createExportFile(1500)
     expect(res).toBe('Success Export (2 rows, batches of 1500) - try 1')
     expect(getAllCdos).toHaveBeenCalledWith(1, 1500)
+  })
+
+  describe('generateCsv', () => {
+    test('should handle single batch', async () => {
+      getAllCdos.mockResolvedValue([validRow, validRow, validRow])
+      updateRunningJobProgress.mockResolvedValue()
+      const res = await generateCsv()
+      expect(res.numRowsExported).toBe(3)
+      expect(res.exportedData.indexOf('\n', 0)).toBe(725)
+      expect(res.exportedData.indexOf('\n', 726)).toBe(1264)
+      expect(res.exportedData.indexOf('\n', 1265)).toBe(1803)
+      expect(res.exportedData.indexOf('\n', 1804)).toBe(-1)
+    })
+
+    test('should handle multiple batches with linefeed between each batch', async () => {
+      getAllCdos
+        .mockResolvedValueOnce([validRow, validRow])
+        .mockResolvedValueOnce([validRow, validRow])
+        .mockResolvedValueOnce([validRow, validRow])
+        .mockResolvedValueOnce([])
+      updateRunningJobProgress.mockResolvedValue()
+      const res = await generateCsv(1)
+      expect(res.numRowsExported).toBe(6)
+      expect(res.exportedData.indexOf('\n', 0)).toBe(725)
+      expect(res.exportedData.indexOf('\n', 726)).toBe(1264)
+      expect(res.exportedData.indexOf('\n', 1265)).toBe(1803)
+      expect(res.exportedData.indexOf('\n', 1804)).toBe(2342)
+      expect(res.exportedData.indexOf('\n', 2343)).toBe(2881)
+      expect(res.exportedData.indexOf('\n', 2882)).toBe(3420)
+      expect(res.exportedData.indexOf('\n', 3421)).toBe(3959)
+      expect(res.exportedData.indexOf('\n', 3960)).toBe(-1)
+    })
   })
 })

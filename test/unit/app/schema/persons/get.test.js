@@ -6,7 +6,7 @@ describe('getPersons schema', () => {
       const queryParams = {}
       const validation = personsQueryParamsSchema.validate(queryParams, { abortEarly: false })
 
-      expect(validation).toEqual({ value: { sortOrder: 'ASC' } })
+      expect(validation).toEqual({ value: {} })
       expect(validation.error).not.toBeDefined()
     })
 
@@ -14,21 +14,12 @@ describe('getPersons schema', () => {
       const queryParams = {
         firstName: 'firstName',
         lastName: 'lastName',
-        dateOfBirth: '2000-01-01',
-        orphaned: 'true',
-        limit: -1,
-        sortKey: 'owner',
-        sortOrder: 'DESC'
+        dateOfBirth: '2000-01-01'
       }
-
       const expectedQueryParams = {
         firstName: 'firstName',
         lastName: 'lastName',
-        dateOfBirth: new Date('2000-01-01'),
-        orphaned: true,
-        limit: -1,
-        sortKey: 'owner',
-        sortOrder: 'DESC'
+        dateOfBirth: new Date('2000-01-01')
       }
       const validation = personsQueryParamsSchema.validate(queryParams, { abortEarly: false })
 
@@ -44,7 +35,7 @@ describe('getPersons schema', () => {
       }
       const validation = personsQueryParamsSchema.validate(queryParams, { abortEarly: false })
 
-      expect(validation).toEqual({ value: { ...queryParams, sortOrder: 'ASC' } })
+      expect(validation).toEqual({ value: queryParams })
       expect(validation.error).toBeUndefined()
     })
 
@@ -55,7 +46,7 @@ describe('getPersons schema', () => {
       }
       const validation = personsQueryParamsSchema.validate(queryParams, { abortEarly: false })
 
-      expect(validation).toEqual({ value: { ...queryParams, sortOrder: 'ASC' } })
+      expect(validation).toEqual({ value: queryParams })
       expect(validation.error).toBeUndefined()
     })
 
@@ -66,23 +57,25 @@ describe('getPersons schema', () => {
       }
 
       const validation = personsQueryParamsSchema.validate(queryParams, { abortEarly: false })
-      expect(validation).toEqual({ value: { ...queryParams, sortOrder: 'ASC' } })
+      expect(validation).toEqual({ value: queryParams })
       expect(validation.error).toBeUndefined()
     })
 
     test('should given orphaned true is passed', () => {
       const queryParams = {
-        orphaned: 'true'
+        orphaned: 'true',
+        limit: -1
       }
 
       const validation = personsQueryParamsSchema.validate(queryParams, { abortEarly: false })
-      expect(validation).toEqual({ value: { orphaned: true, sortOrder: 'ASC' } })
+      expect(validation).toEqual({ value: { orphaned: true, limit: -1 } })
       expect(validation.error).toBeUndefined()
     })
 
     test('should not valid given orphaned false is passed', () => {
       const queryParams = {
-        orphaned: 'false'
+        orphaned: 'false',
+        limit: -1
       }
 
       const validation = personsQueryParamsSchema.validate(queryParams, { abortEarly: false })

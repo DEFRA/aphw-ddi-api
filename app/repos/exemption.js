@@ -6,7 +6,7 @@ const { createOrUpdateInsurance } = require('./insurance')
 const { sendUpdateToAudit } = require('../messaging/send-audit')
 const { EXEMPTION } = require('../constants/event/audit-event-object-types')
 const constants = require('../constants/statuses')
-const { updateStatus } = require('./dogs')
+const { updateStatus } = require('../repos/dogs')
 const { preChangedExemptionAudit, postChangedExemptionAudit } = require('../dto/auditing/exemption')
 const { deepClone } = require('../lib/deep-clone')
 
