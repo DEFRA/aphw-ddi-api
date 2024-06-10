@@ -360,8 +360,6 @@ const recalcDeadlines = async (dog, transaction) => {
   const prevDeadline = reg.neutering_deadline
   const newDeadline = stripTime(calculateNeuteringDeadline(dog.birth_date))
 
-  console.log('prev', prevDeadline)
-  console.log('new', newDeadline)
   if (prevDeadline !== newDeadline) {
     reg.neutering_deadline = newDeadline
     await reg.save({ transaction })
