@@ -68,7 +68,7 @@ const generateCsvInBatches = async (rowsPerBatch, jobId) => {
     numReturnedRows = cdoBatch.length
     if (numReturnedRows > 0) {
       latestDogId = cdoBatch[numReturnedRows - 1].id + 1
-      csvSoFar = csvSoFar + convertToCsv(cdoBatch, isNotFirstLoopIteration)
+      csvSoFar = csvSoFar + convertToCsv(cdoBatch, isNotFirstLoopIteration) + '\n'
       totalRows += numReturnedRows
       isNotFirstLoopIteration = true
       await updateRunningJobProgress(jobId, `${numReturnedRows}`)
@@ -83,5 +83,6 @@ const generateCsvInBatches = async (rowsPerBatch, jobId) => {
 
 module.exports = {
   createExportFile,
-  tryCreateExportFile
+  tryCreateExportFile,
+  generateCsv
 }
