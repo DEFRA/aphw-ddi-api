@@ -764,11 +764,13 @@ describe('Dog repo', () => {
 
     test('should save if a 2023 dog and deadline is different to DB value', async () => {
       const mockSave = jest.fn()
-      sequelize.models.registration.findOne.mockResolvedValue({ exemption_order: { exemption_order: '2023' }, neutering_deadline: '2024-06-30', save: mockSave })
+      const reg = { exemption_order: { exemption_order: '2023' }, neutering_deadline: '2024-06-30', save: mockSave }
+      sequelize.models.registration.findOne.mockResolvedValue(reg)
 
       await recalcDeadlines({ id: 123, birth_date: '2023-02-01' }, {})
 
       expect(mockSave).toHaveBeenCalledTimes(1)
+      expect(reg.neutering_deadline).toBe('2024-12-31')
     })
   })
 })
