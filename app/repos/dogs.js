@@ -10,6 +10,7 @@ const { DOG } = require('../constants/event/audit-event-object-types')
 const { preChangedDogAudit, postChangedDogAudit } = require('../dto/auditing/dog')
 const { removeDogFromSearchIndex } = require('./search')
 const { getPersonByReference } = require('./people')
+const { calculateNeuteringDeadline, stripTime } = require('../dto/dto-helper')
 
 /**
  * @typedef DogDao
@@ -307,6 +308,8 @@ const updateDog = async (payload, user, transaction) => {
 
   await dogFromDB.save({ transaction })
 
+  await recalcDeadlines(dogFromDB, transaction)
+
   const refreshedDog = await getDogByIndexNumber(payload.indexNumber, transaction)
 
   await updateSearchIndexDog(refreshedDog, statuses, transaction)
@@ -334,6 +337,35 @@ const updateStatus = async (indexNumber, newStatus, transaction) => {
   await updateSearchIndexDog(refreshedDog, statuses, transaction)
 
   return newStatus
+}
+
+const recalcDeadlines = async (dog, transaction) => {
+  if (!transaction) {
+    return await sequelize.transaction(async (t) => recalcDeadlines(dog, t))
+  }
+
+  const reg = await sequelize.models.registration.findOne({
+    where: { dog_id: dog.id },
+    include: [{
+      model: sequelize.models.exemption_order,
+      as: 'exemption_order'
+    }]
+  },
+  { transaction })
+
+  if (reg?.exemption_order?.exemption_order !== '2023') {
+    return
+  }
+
+  const prevDeadline = reg.neutering_deadline
+  const newDeadline = stripTime(calculateNeuteringDeadline(dog.birth_date))
+
+  console.log('prev', prevDeadline)
+  console.log('new', newDeadline)
+  if (prevDeadline !== newDeadline) {
+    reg.neutering_deadline = newDeadline
+    await reg.save({ transaction })
+  }
 }
 
 const updateDogFields = (dbDog, payload, breeds, statuses) => {
@@ -488,5 +520,6 @@ module.exports = {
   updateStatus,
   deleteDogByIndexNumber,
   switchOwnerIfNecessary,
-  buildSwitchedOwner
+  buildSwitchedOwner,
+  recalcDeadlines
 }
