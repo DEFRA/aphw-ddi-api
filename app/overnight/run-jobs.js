@@ -6,7 +6,7 @@ const { tryStartJob, endJob, createNewJob } = require('../repos/regular-jobs')
 const triggerExportGeneration = server => {
   server.inject({
     method: 'GET',
-    url: `/export-create-file?batchSize=${config.overnightExportBatchSize ?? 10000}`
+    url: `/export-create-file?batchSize=${config.overnightExportBatchSize ?? 2000}`
   })
 }
 
