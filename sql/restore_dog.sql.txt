@@ -9,14 +9,31 @@ CREATE OR REPLACE FUNCTION restore_dog(p_index_number varchar) RETURNS varchar A
 DECLARE
 	v_dog_id integer;
 	v_person_id integer;
+	v_person_reference varchar;
+	v_status varchar := '';
 BEGIN
 	SELECT dog_id, person_id
-	INTO STRICT v_dog_id, v_person_id
+	INTO v_dog_id, v_person_id
 	FROM registered_person
 	WHERE dog_id IN
 		(SELECT id 
 		FROM dog 
-		WHERE index_number = restore_dog.p_index_number);
+		WHERE index_number = restore_dog.p_index_number
+		AND deleted_at IS NOT NULL);
+
+  IF v_dog_id IS NULL THEN
+	  RETURN 'Dog is already active or doesnt exist';
+	END IF;
+
+  SELECT person_reference
+	INTO v_person_reference
+	FROM person
+	WHERE id = v_person_id
+	AND deleted_at IS NOT NULL;
+
+  IF v_person_reference IS NOT NULL THEN
+		v_status := restore_owner(v_person_reference) || ' : ';
+	END IF;
 
 	UPDATE dog
 	SET    deleted_at = null
@@ -42,9 +59,9 @@ BEGIN
 	WHERE  dog_id = v_dog_id;
 
   IF generate_search_index(v_person_id, v_dog_id) = 'OK' THEN
-  	RETURN 'Dog successfully restored';
+  	RETURN v_status || 'Dog successfully restored';
   ELSE
-    RETURN 'Failed';
+    RETURN v_status ||'Failed';
   END IF;
 END;
 $$ LANGUAGE plpgsql;
