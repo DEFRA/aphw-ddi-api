@@ -1,12 +1,10 @@
-const { county } = require('../data')
+const { getCounties } = require('../repos/counties')
 
 module.exports = {
   method: 'GET',
   path: '/counties',
   handler: async (request, h) => {
-    const counties = await county.findAll({
-      attributes: ['county']
-    })
+    const counties = await getCounties()
 
     return h.response({
       counties: counties.map(county => county.county)

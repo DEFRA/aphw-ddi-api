@@ -1,16 +1,18 @@
-const sequelize = require('../config/db')
+const sequelize = require('../../config/db')
+const { Op } = require('sequelize')
 const { v4: uuidv4 } = require('uuid')
-const constants = require('../constants/statuses')
-const { getBreed, getExemptionOrder } = require('../lookups')
-const { updateSearchIndexDog } = require('../repos/search')
-const { updateMicrochips, createMicrochip } = require('./microchip')
-const { createInsurance } = require('./insurance')
-const { sendCreateToAudit, sendUpdateToAudit, sendDeleteToAudit } = require('../messaging/send-audit')
-const { DOG } = require('../constants/event/audit-event-object-types')
-const { preChangedDogAudit, postChangedDogAudit } = require('../dto/auditing/dog')
-const { removeDogFromSearchIndex } = require('./search')
-const { getPersonByReference } = require('./people')
-const { calculateNeuteringDeadline, stripTime } = require('../dto/dto-helper')
+const constants = require('../../constants/statuses')
+const { getBreed, getExemptionOrder } = require('../../lookups')
+const { updateSearchIndexDog } = require('../search')
+const { updateMicrochips, createMicrochip } = require('../microchip')
+const { createInsurance } = require('../insurance')
+const { sendCreateToAudit, sendUpdateToAudit, sendDeleteToAudit } = require('../../messaging/send-audit')
+const { DOG } = require('../../constants/event/audit-event-object-types')
+const { preChangedDogAudit, postChangedDogAudit } = require('../../dto/auditing/dog')
+const { removeDogFromSearchIndex } = require('../search')
+const { getPersonByReference } = require('../people')
+const { addYears } = require('../../lib/date-helpers')
+const { calculateNeuteringDeadline, stripTime } = require('../../dto/dto-helper')
 
 /**
  * @typedef DogDao
@@ -308,8 +310,6 @@ const updateDog = async (payload, user, transaction) => {
 
   await dogFromDB.save({ transaction })
 
-  await recalcDeadlines(dogFromDB, transaction)
-
   const refreshedDog = await getDogByIndexNumber(payload.indexNumber, transaction)
 
   await updateSearchIndexDog(refreshedDog, statuses, transaction)
@@ -331,6 +331,8 @@ const updateStatus = async (indexNumber, newStatus, transaction) => {
   dogFromDB.status_id = statuses.filter(x => x.status === newStatus)[0].id
 
   await dogFromDB.save({ transaction })
+
+  await recalcDeadlines(dogFromDB, transaction)
 
   const refreshedDog = await getDogByIndexNumber(indexNumber, transaction)
 
@@ -505,6 +507,100 @@ const deleteDogByIndexNumber = async (indexNumber, user, transaction) => {
   await sendDeleteToAudit(DOG, dogAggregate, user)
 }
 
+const customSort = (columnName, ids, sortDir) => {
+  const sortElems = []
+  const idList = sortDir === 'ASC' ? ids.reverse() : ids
+  idList.forEach(id => sortElems.push(`${columnName}=${id}`))
+  return sortElems.join(',')
+}
+
+const constructDbSort = (options, statusIds) => {
+  const sortDir = options?.sortOrder ?? 'ASC'
+  const order = []
+  const sortKey = options?.sortKey ?? 'status'
+
+  if (sortKey === 'status') {
+    order.push([sequelize.literal(customSort('dog.status_id', statusIds, sortDir)), 'ASC'])
+    order.push([sequelize.col('dog.index_number'), sortDir])
+  } else if (sortKey === 'indexNumber') {
+    order.push([sequelize.col('dog.index_number'), sortDir])
+  } else if (sortKey === 'dateOfBirth') {
+    order.push([sequelize.col('dog.birth_date'), sortDir])
+  } else if (sortKey === 'cdoIssued') {
+    order.push([sequelize.col('cdo_issued'), sortDir])
+  } else if (sortKey === 'selected') {
+    order.push([sequelize.col('dog.index_number'), 'ASC'])
+  }
+  return order
+}
+
+const constructStatusList = async statusNamesCsvList => {
+  const statuses = await getStatuses()
+  const statusIds = []
+  const statusNames = statusNamesCsvList?.split(',') ?? []
+  statusNames.forEach(name => statusIds.push(statuses.find(st => st.status === name).id))
+  return statusIds
+}
+
+const generateClausesForOr = (today, fifteenYearsAgo, endDate2023Dogs) => {
+  const clausesForOr = [
+    { '$dog.birth_date$': { [Op.lte]: fifteenYearsAgo } },
+    {
+      [Op.and]: [
+        { '$dog.birth_date$': { [Op.eq]: null } },
+        { cdo_issued: { [Op.lte]: fifteenYearsAgo } }
+      ]
+    }
+  ]
+
+  if (today > endDate2023Dogs) {
+    clausesForOr.push({
+      [Op.and]: [
+        { '$dog.birth_date$': { [Op.eq]: null } },
+        { '$exemption_order.exemption_order$': '2023' }
+      ]
+    })
+  }
+
+  return clausesForOr
+}
+const getOldDogs = async (statusList, sortOptions, today = null) => {
+  today = today ?? new Date()
+  const fifteenYearsAgo = addYears(today, -15)
+  const endDate2023Dogs = new Date(2038, 2, 1)
+
+  const statusIds = await constructStatusList(statusList)
+
+  const order = constructDbSort(sortOptions, statusIds)
+
+  const clausesForOr = generateClausesForOr(today, fifteenYearsAgo, endDate2023Dogs)
+
+  return sequelize.models.registration.findAll({
+    attributes: ['dog_id', 'cdo_issued'],
+    where: {
+      [Op.and]: [
+        { [Op.or]: clausesForOr },
+        { '$dog.status_id$': { [Op.in]: statusIds } }
+      ]
+    },
+    order,
+    include: [{
+      model: sequelize.models.dog,
+      as: 'dog',
+      attributes: ['index_number', 'birth_date'],
+      include: [{
+        model: sequelize.models.status,
+        as: 'status',
+        attributes: ['status']
+      }]
+    },
+    {
+      model: sequelize.models.exemption_order,
+      as: 'exemption_order'
+    }]
+  })
+}
+
 module.exports = {
   getBreeds,
   getStatuses,
@@ -519,5 +615,10 @@ module.exports = {
   deleteDogByIndexNumber,
   switchOwnerIfNecessary,
   buildSwitchedOwner,
-  recalcDeadlines
+  recalcDeadlines,
+  getOldDogs,
+  constructStatusList,
+  constructDbSort,
+  generateClausesForOr,
+  customSort
 }
