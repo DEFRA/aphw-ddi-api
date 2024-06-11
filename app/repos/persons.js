@@ -9,6 +9,11 @@ const { deletePerson } = require('./people')
  * @property {string} [dateOfBirth]
  * @property {boolean} [orphaned]
  */
+
+/**
+ * @typedef {'owner'|'birthDate'|'address'} GetPersonsSortKey
+ */
+
 /**
  * @typedef GetPersonsOptions
  * @property {number} [limit]
