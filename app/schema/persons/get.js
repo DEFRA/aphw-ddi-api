@@ -6,7 +6,7 @@ const personsQueryParamsSchema = Joi.object({
   orphaned: Joi.boolean().invalid(false).optional(),
   dateOfBirth: Joi.date().iso().allow(null).optional(),
   sortOrder: Joi.string().optional().valid('ASC', 'DESC').default('ASC'),
-  sortKey: Joi.string().optional().valid('owner'),
+  sortKey: Joi.string().optional().valid('owner', 'birthDate', 'address'),
   limit: Joi.number().optional()
 })
 
