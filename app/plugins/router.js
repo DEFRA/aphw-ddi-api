@@ -1,3 +1,5 @@
+require('../data')
+
 const routes = [].concat(
   require('../routes/countries'),
   require('../routes/counties'),

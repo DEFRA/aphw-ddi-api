@@ -1,21 +1,21 @@
-const { breeds: mockBreeds } = require('../../../mocks/dog-breeds')
-const { statuses: mockStatuses } = require('../../../mocks/statuses')
-const { payload: mockCdoPayload } = require('../../../mocks/cdo/create')
+const { breeds: mockBreeds } = require('../../../../mocks/dog-breeds')
+const { statuses: mockStatuses } = require('../../../../mocks/statuses')
+const { payload: mockCdoPayload } = require('../../../../mocks/cdo/create')
 
-jest.mock('../../../../app/repos/insurance')
-const { createInsurance } = require('../../../../app/repos/insurance')
+jest.mock('../../../../../app/repos/insurance')
+const { createInsurance } = require('../../../../../app/repos/insurance')
 
-jest.mock('../../../../app/lookups')
-const { getBreed, getExemptionOrder } = require('../../../../app/lookups')
+jest.mock('../../../../../app/lookups')
+const { getBreed, getExemptionOrder } = require('../../../../../app/lookups')
 
-jest.mock('../../../../app/messaging/send-event')
-const { sendEvent } = require('../../../../app/messaging/send-event')
+jest.mock('../../../../../app/messaging/send-event')
+const { sendEvent } = require('../../../../../app/messaging/send-event')
 
-jest.mock('../../../../app/repos/search')
-const { removeDogFromSearchIndex } = require('../../../../app/repos/search')
+jest.mock('../../../../../app/repos/search')
+const { removeDogFromSearchIndex } = require('../../../../../app/repos/search')
 
-jest.mock('../../../../app/messaging/send-audit')
-const { sendDeleteToAudit } = require('../../../../app/messaging/send-audit')
+jest.mock('../../../../../app/messaging/send-audit')
+const { sendDeleteToAudit } = require('../../../../../app/messaging/send-audit')
 
 const devUser = {
   username: 'dev-user@test.com',
@@ -23,7 +23,7 @@ const devUser = {
 }
 
 describe('Dog repo', () => {
-  jest.mock('../../../../app/config/db', () => ({
+  jest.mock('../../../../../app/config/db', () => ({
     models: {
       dog_breed: {
         findAll: jest.fn()
@@ -41,6 +41,7 @@ describe('Dog repo', () => {
       registration: {
         findOne: jest.fn(),
         findByPk: jest.fn(),
+        findAll: jest.fn(),
         create: jest.fn(),
         destroy: jest.fn()
       },
@@ -66,12 +67,13 @@ describe('Dog repo', () => {
       }
     },
     col: jest.fn(),
-    transaction: jest.fn()
+    transaction: jest.fn(),
+    literal: jest.fn()
   }))
 
-  const sequelize = require('../../../../app/config/db')
+  const sequelize = require('../../../../../app/config/db')
 
-  const { getBreeds, getStatuses, createDogs, addImportedDog, getDogByIndexNumber, getAllDogIds, updateDog, updateStatus, updateDogFields, deleteDogByIndexNumber, switchOwnerIfNecessary, buildSwitchedOwner, recalcDeadlines } = require('../../../../app/repos/dogs')
+  const { getBreeds, getStatuses, createDogs, addImportedDog, getDogByIndexNumber, getAllDogIds, updateDog, updateStatus, updateDogFields, deleteDogByIndexNumber, switchOwnerIfNecessary, buildSwitchedOwner, recalcDeadlines, constructStatusList, constructDbSort, getOldDogs, generateClausesForOr, customSort } = require('../../../../../app/repos/dogs')
 
   beforeEach(async () => {
     jest.clearAllMocks()
@@ -82,6 +84,10 @@ describe('Dog repo', () => {
     sequelize.models.status.findAll.mockResolvedValue(mockStatuses)
     createInsurance.mockResolvedValue()
     sendEvent.mockResolvedValue()
+  })
+
+  afterEach(() => {
+    jest.clearAllMocks()
   })
 
   describe('getBreeds', () => {
@@ -782,6 +788,109 @@ describe('Dog repo', () => {
 
       expect(mockSave).toHaveBeenCalledTimes(1)
       expect(reg.neutering_deadline).toBe('2024-06-30')
+    })
+  })
+
+  describe('constructStatusList', () => {
+    test('should construct correct status id list if more than one status', async () => {
+      const statusList = 'Pre-exempt,Exempt,In breach'
+
+      const res = await constructStatusList(statusList)
+
+      expect(res).toEqual([2, 3, 5])
+    })
+
+    test('should construct correct status id list if only one status', async () => {
+      const statusList = 'Failed'
+
+      const res = await constructStatusList(statusList)
+
+      expect(res).toEqual([4])
+    })
+
+    test('should construct correct status id list if only one status', async () => {
+      const res = await constructStatusList(null)
+
+      expect(res).toEqual([])
+    })
+  })
+
+  describe('constructDbSort', () => {
+    test('should construct default sort construct when no params supplied', async () => {
+      sequelize.col.mockReturnValue((column) => column)
+      sequelize.literal = jest.fn()
+
+      const res = constructDbSort(null, [1, 2])
+
+      expect(res.length).toBe(2)
+    })
+
+    test('should construct correct sort construct', async () => {
+      sequelize.col.mockReturnValue((column) => column)
+
+      let res = constructDbSort({ sortOrder: 'DESC', sortKey: 'cdoIssued' })
+      expect(res).toEqual([[sequelize.col('dog.index_number'), 'DESC']])
+
+      res = constructDbSort({ sortOrder: 'DESC', sortKey: 'indexNumber' })
+      expect(res).toEqual([[sequelize.col('dog.index_number'), 'DESC']])
+
+      res = constructDbSort({ sortOrder: 'DESC', sortKey: 'dateOfBirth' })
+      expect(res).toEqual([[sequelize.col('dog.index_number'), 'DESC']])
+
+      res = constructDbSort({ sortOrder: 'ASC', sortKey: 'selected' })
+      expect(res).toEqual([[sequelize.col('dog.index_number'), 'ASC']])
+    })
+  })
+
+  describe('getOldDogs', () => {
+    test('should call findAll with appropriate clause elements', async () => {
+      sequelize.models.registration.findAll.mockResolvedValue()
+      const statusList = 'Pre-exempt,Exempt'
+
+      await getOldDogs(statusList)
+
+      expect(sequelize.models.registration.findAll).toHaveBeenCalledWith({
+        attributes: expect.anything(),
+        include: expect.anything(),
+        order: expect.anything(),
+        where: expect.anything()
+      })
+    })
+  })
+
+  describe('generateClausesForOr', () => {
+    test('should handle dates before 2038', () => {
+      const res = generateClausesForOr(new Date(2024, 1, 1), new Date(2009, 1, 1), new Date(2038, 1, 1))
+
+      expect(res.length).toBe(2)
+    })
+
+    test('should handle dates from 2038 onwards', () => {
+      const res = generateClausesForOr(new Date(2038, 1, 2), new Date(2023, 1, 1), new Date(2038, 1, 1))
+
+      expect(res.length).toBe(3)
+    })
+  })
+
+  describe('customSort', () => {
+    test('should handle zero elements', () => {
+      const res = customSort('mycol', [], 'DESC')
+      expect(res).toBe('')
+    })
+
+    test('should handle single element', () => {
+      const res = customSort('mycol', [7], 'DESC')
+      expect(res).toBe('mycol=7')
+    })
+
+    test('should handle multiple elements', () => {
+      const res = customSort('mycol', [3, 5, 7], 'DESC')
+      expect(res).toBe('mycol=3,mycol=5,mycol=7')
+    })
+
+    test('should reverse order', () => {
+      const res = customSort('mycol', [3, 5, 7], 'ASC')
+      expect(res).toBe('mycol=7,mycol=5,mycol=3')
     })
   })
 })

@@ -1,4 +1,6 @@
-const { mapPersonDaoToCreatedPersonDao } = require('../../../../../app/repos/mappers/person')
+const {
+  mapPersonDaoToCreatedPersonDao
+} = require('../../../../../app/repos/mappers/person')
 
 describe('person', () => {
   describe('mapPersonDaoToCreatedPersonDao', () => {

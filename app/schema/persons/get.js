@@ -4,8 +4,10 @@ const personsQueryParamsSchema = Joi.object({
   firstName: Joi.string().optional().allow('').allow(null),
   lastName: Joi.string().optional().allow('').allow(null),
   orphaned: Joi.boolean().invalid(false).optional(),
-  limit: Joi.number().optional(),
-  dateOfBirth: Joi.date().iso().allow(null).optional()
+  dateOfBirth: Joi.date().iso().allow(null).optional(),
+  sortOrder: Joi.string().optional().valid('ASC', 'DESC').default('ASC'),
+  sortKey: Joi.string().optional().valid('owner'),
+  limit: Joi.number().optional()
 })
 
 const personsResponseSchema = Joi.object({
