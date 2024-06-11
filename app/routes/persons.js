@@ -1,7 +1,8 @@
 const { personsQueryParamsSchema } = require('../schema/persons/get')
 const { getPersons, deletePersons } = require('../repos/persons')
 const { personDto } = require('../dto/person')
-const { deletePayloadSchema, deleteResponseSchema } = require('../schema/persons/delete')
+const { deletePayloadSchema } = require('../schema/persons/delete')
+const { deleteResponseSchema } = require('../schema/shared/delete')
 const { getCallingUser } = require('../auth/get-user')
 /**
  * @typedef GetPersonsQuery
