@@ -16,7 +16,7 @@ const runOvernightJobs = async (server) => {
   if (jobId) {
     const result = await autoUpdateStatuses()
     await endJob(jobId, result)
-    // triggerExportGeneration(server)
+    triggerExportGeneration(server)
     return result
   }
 
