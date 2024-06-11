@@ -36,6 +36,18 @@ describe('getPersons schema', () => {
       expect(validation.error).not.toBeDefined()
     })
 
+    test.each(['birthDate', 'address'])('should validate given sort key %s passed', (sortKey) => {
+      const queryParams = {
+        firstName: 'firstName',
+        lastName: 'lastName',
+        sortKey,
+        sortOrder: 'DESC'
+      }
+      const validation = personsQueryParamsSchema.validate(queryParams, { abortEarly: false })
+
+      expect(validation.error).not.toBeDefined()
+    })
+
     test('should validate given all filters are passed with null values', () => {
       const queryParams = {
         firstName: null,

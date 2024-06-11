@@ -1,4 +1,5 @@
-const { deleteDogsPayloadSchema, deleteDogsResponseSchema } = require('../../../../../app/schema/dogs/delete')
+const { deleteDogsPayloadSchema } = require('../../../../../app/schema/dogs/delete')
+const { deleteResponseSchema } = require('../../../../../app/schema/shared/delete')
 
 describe('deleteDogs schema', () => {
   describe('payload schema', () => {
@@ -35,7 +36,7 @@ describe('deleteDogs schema', () => {
         }
       }
 
-      const validation = deleteDogsResponseSchema.validate(expectedResponse, { abortEarly: false })
+      const validation = deleteResponseSchema.validate(expectedResponse, { abortEarly: false })
       expect(validation.error).toBeUndefined()
       expect(validation.value).toEqual(expectedResponse)
     })
@@ -52,13 +53,13 @@ describe('deleteDogs schema', () => {
         }
       }
 
-      const validation = deleteDogsResponseSchema.validate(expectedDeleteDogsResponse, { abortEarly: false })
+      const validation = deleteResponseSchema.validate(expectedDeleteDogsResponse, { abortEarly: false })
       expect(validation.error).toBeUndefined()
       expect(validation.value).toEqual(expectedDeleteDogsResponse)
     })
 
     test('should not validate given empty object', () => {
-      const validation = deleteDogsResponseSchema.validate({}, { abortEarly: false })
+      const validation = deleteResponseSchema.validate({}, { abortEarly: false })
       expect(validation.error).toBeDefined()
     })
   })
