@@ -4,12 +4,25 @@ const { statuses } = require('../constants/statuses')
 const { updateStatusOnly } = require('../repos/status')
 const { dbFindAll } = require('../lib/db-functions')
 
+// 31/12/2024 deadline - keep as is
+// 30/06/2024 deadline - expire on 27/07/2024
 const setExpiredNeuteringDeadlineToInBreach = async (today, user, t) => {
   try {
+    const isAfterJuneDeadline = today >= new Date('2024-07-27')
+    const isAfterDecDeadline = today >= new Date('2025-01-01')
     const setStatusToBreach = await dbFindAll(sequelize.models.registration, {
       where: {
         neutering_deadline: {
-          [Op.lt]: today
+          [Op.or]: {
+            [Op.and]: {
+              [Op.eq]: '2024-06-30',
+              [Op.is]: isAfterJuneDeadline
+            },
+            [Op.and]: {
+              [Op.eq]: '2024-12-31',
+              [Op.is]: isAfterDecDeadline
+            }
+          }
         },
         neutering_confirmation: {
           [Op.eq]: null
