@@ -9,8 +9,6 @@ const setExpiredNeuteringDeadlineToInBreach = async (today, user, t) => {
     const isAfterJuneDeadline = today >= new Date('2024-07-27')
     const isAfterDecDeadline = today >= new Date('2025-01-01')
 
-    console.log('isAfterJune', isAfterJuneDeadline)
-    console.log('isAfterDec', isAfterDecDeadline)
     const setStatusToBreach = await dbFindAll(sequelize.models.registration, {
       where: {
         [Op.or]: [{
