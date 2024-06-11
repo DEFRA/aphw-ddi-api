@@ -13,8 +13,7 @@ describe('CDO repo', () => {
         findAll: jest.fn()
       }
     },
-    fn: jest.fn(),
-    literal: jest.fn()
+    fn: jest.fn()
   }))
 
   const sequelize = require('../../../../app/config/db')

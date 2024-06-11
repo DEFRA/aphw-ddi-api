@@ -1,10 +1,8 @@
 const { getCallingUser } = require('../auth/get-user')
-const { dogsQueryParamsSchema } = require('../schema/dogs/get')
-const { addImportedDog, updateDog, getDogByIndexNumber, deleteDogByIndexNumber, getOldDogs, deleteDogs } = require('../repos/dogs')
-const { dogDto, oldDogDto } = require('../dto/dog')
+const { addImportedDog, updateDog, getDogByIndexNumber, deleteDogByIndexNumber } = require('../repos/dogs')
+const { dogDto } = require('../dto/dog')
 const { personDto, mapPersonAndDogsByIndexDao } = require('../dto/person')
 const { getOwnerOfDog, getPersonAndDogsByIndex } = require('../repos/people')
-const { deleteDogsPayloadSchema, deleteDogsResponseSchema } = require('../schema/dogs/delete')
 
 module.exports = [
   {
@@ -109,61 +107,6 @@ module.exports = [
         console.log('Error updating dog:', e)
         throw e
       }
-    }
-  },
-  {
-    method: 'GET',
-    path: '/dogs',
-    options: {
-      validate: {
-        query: dogsQueryParamsSchema,
-        failAction: (request, h, error) => {
-          console.log(error)
-          return h.response().code(400).takeover()
-        }
-      },
-      handler: async (request, h) => {
-        let dogs = []
-
-        const sort = {
-          sortKey: request.query.sortKey,
-          sortOrder: request.query.sortOrder
-        }
-
-        if (request.query.forPurging === true) {
-          dogs = await getOldDogs(request.query.statuses, sort, request.query.today)
-        }
-
-        const mappedDogs = dogs.map(oldDogDto)
-
-        return h.response(mappedDogs).code(200)
-      }
-    }
-  },
-  {
-    method: 'POST',
-    path: '/dogs:batch-delete',
-    options: {
-      validate: {
-        payload: deleteDogsPayloadSchema,
-        failAction: (request, h, error) => {
-          return h.response().code(400).takeover()
-        }
-      },
-      response: {
-        schema: deleteDogsResponseSchema,
-        failAction: (request, h, err) => {
-          console.error(err)
-
-          return h.response({ errors: err.details.map(e => e.message) }).code(400).takeover()
-        }
-      }
-    },
-    handler: async (request, h) => {
-      const dogPks = request.payload.dogPks
-
-      const result = await deleteDogs(dogPks, getCallingUser(request))
-      return h.response(result).code(200)
     }
   }
 ]
