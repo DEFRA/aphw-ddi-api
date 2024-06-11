@@ -81,11 +81,15 @@ const getPersons = async (queryParams, options = {}, transaction) => {
   }
 
   const order = []
+  const sortOrder = options.sortOrder ?? 'ASC'
 
   if (options.sortKey === 'owner') {
-    const sortOrder = options.sortOrder ?? 'ASC'
     order.push([sequelize.col('last_name'), sortOrder])
     order.push([sequelize.col('first_name'), sortOrder])
+  } else if (options.sortKey === 'birthDate') {
+    order.push([sequelize.col('birth_date'), sortOrder])
+  } else if (options.sortKey === 'address') {
+    order.push([sequelize.col('addresses.address.address_line_1'), sortOrder])
   }
 
   try {
