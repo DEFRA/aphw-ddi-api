@@ -205,6 +205,38 @@ describe('Persons repo', () => {
       }))
     })
 
+    test('getPersons should sort by birth_date ASC given birthDate is set', async () => {
+      sequelize.models.person.findAll.mockResolvedValue([])
+      sequelize.col.mockImplementation(col => col)
+
+      await getPersons({
+        orphaned: true
+      }, { sortKey: 'birthDate', sortOrder: 'DESC' })
+
+      expect(sequelize.col.mock.calls[0]).toEqual(['birth_date'])
+      expect(sequelize.models.person.findAll).toBeCalledWith(expect.objectContaining({
+        order: [
+          ['birth_date', 'DESC']
+        ]
+      }))
+    })
+
+    test('getPersons should sort by address DESC given address is set', async () => {
+      sequelize.models.person.findAll.mockResolvedValue([])
+      sequelize.col.mockImplementation(col => col)
+
+      await getPersons({
+        orphaned: true
+      }, { sortKey: 'address', sortOrder: 'DESC' })
+
+      expect(sequelize.col.mock.calls[0]).toEqual(['addresses.address.address_line_1'])
+      expect(sequelize.models.person.findAll).toBeCalledWith(expect.objectContaining({
+        order: [
+          ['addresses.address.address_line_1', 'DESC']
+        ]
+      }))
+    })
+
     test('getPersons should return unlimited number of orphaned owner given orphaned=true is passed and limit is set to -1', async () => {
       sequelize.models.person.findAll.mockResolvedValue([{
         dataValues: {

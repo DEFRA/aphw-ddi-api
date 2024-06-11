@@ -1,4 +1,5 @@
-const { deletePayloadSchema, deleteResponseSchema } = require('../../../../../app/schema/persons/delete')
+const { deletePayloadSchema } = require('../../../../../app/schema/persons/delete')
+const { deleteResponseSchema } = require('../../../../../app/schema/shared/delete')
 
 describe('deletePersons schema', () => {
   describe('payload schema', () => {

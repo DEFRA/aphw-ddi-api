@@ -4,7 +4,8 @@ const { addImportedDog, updateDog, getDogByIndexNumber, deleteDogByIndexNumber, 
 const { dogDto, oldDogDto } = require('../dto/dog')
 const { personDto, mapPersonAndDogsByIndexDao } = require('../dto/person')
 const { getOwnerOfDog, getPersonAndDogsByIndex } = require('../repos/people')
-const { deleteDogsPayloadSchema, deleteDogsResponseSchema } = require('../schema/dogs/delete')
+const { deleteDogsPayloadSchema } = require('../schema/dogs/delete')
+const { deleteResponseSchema } = require('../schema/shared/delete')
 
 module.exports = [
   {
@@ -151,7 +152,7 @@ module.exports = [
         }
       },
       response: {
-        schema: deleteDogsResponseSchema,
+        schema: deleteResponseSchema,
         failAction: (request, h, err) => {
           console.error(err)
 
