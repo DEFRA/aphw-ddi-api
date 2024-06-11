@@ -39,6 +39,7 @@ describe('Dog repo', () => {
         findAll: jest.fn()
       },
       registration: {
+        findOne: jest.fn(),
         findByPk: jest.fn(),
         findAll: jest.fn(),
         create: jest.fn(),
@@ -72,7 +73,7 @@ describe('Dog repo', () => {
 
   const sequelize = require('../../../../../app/config/db')
 
-  const { getBreeds, getStatuses, createDogs, addImportedDog, getDogByIndexNumber, getAllDogIds, updateDog, updateStatus, updateDogFields, deleteDogByIndexNumber, switchOwnerIfNecessary, buildSwitchedOwner, constructStatusList, constructDbSort, getOldDogs, generateClausesForOr, customSort } = require('../../../../../app/repos/dogs')
+  const { getBreeds, getStatuses, createDogs, addImportedDog, getDogByIndexNumber, getAllDogIds, updateDog, updateStatus, updateDogFields, deleteDogByIndexNumber, switchOwnerIfNecessary, buildSwitchedOwner, recalcDeadlines, constructStatusList, constructDbSort, getOldDogs, generateClausesForOr, customSort } = require('../../../../../app/repos/dogs')
 
   beforeEach(async () => {
     jest.clearAllMocks()
@@ -727,6 +728,66 @@ describe('Dog repo', () => {
         },
         organisationName: undefined
       })
+    })
+  })
+
+  describe('recalcDeadlines', () => {
+    test('should create new transaction if not passed', async () => {
+      const mockSave = jest.fn()
+      sequelize.models.registration.findOne.mockResolvedValue({ exemption_order: { exemption_order: '2023' }, save: mockSave })
+
+      await recalcDeadlines({ id: 123 })
+
+      expect(sequelize.transaction).toHaveBeenCalledTimes(1)
+    })
+
+    test('should create new transaction if not passed', async () => {
+      const mockSave = jest.fn()
+      sequelize.models.registration.findOne.mockResolvedValue({ exemption_order: { exemption_order: '2023' }, save: mockSave })
+
+      await recalcDeadlines({ id: 123 }, {})
+
+      expect(sequelize.transaction).not.toHaveBeenCalled()
+    })
+
+    test('should ignore if not a 2023 dog', async () => {
+      const mockSave = jest.fn()
+      sequelize.models.registration.findOne.mockResolvedValue({ exemption_order: { exemption_order: '2015' }, save: mockSave })
+
+      await recalcDeadlines({ id: 123 }, {})
+
+      expect(mockSave).not.toHaveBeenCalled()
+    })
+
+    test('should ignore if a 2023 dog but deadline is already correct', async () => {
+      const mockSave = jest.fn()
+      sequelize.models.registration.findOne.mockResolvedValue({ exemption_order: { exemption_order: '2023' }, neutering_deadline: '2024-06-30', save: mockSave })
+
+      await recalcDeadlines({ id: 123, birth_date: '2020-02-01' }, {})
+
+      expect(mockSave).not.toHaveBeenCalled()
+    })
+
+    test('should save if a 2023 dog and deadline is different to DB value', async () => {
+      const mockSave = jest.fn()
+      const reg = { exemption_order: { exemption_order: '2023' }, neutering_deadline: '2024-06-30', save: mockSave }
+      sequelize.models.registration.findOne.mockResolvedValue(reg)
+
+      await recalcDeadlines({ id: 123, birth_date: '2023-02-01' }, {})
+
+      expect(mockSave).toHaveBeenCalledTimes(1)
+      expect(reg.neutering_deadline).toBe('2024-12-31')
+    })
+
+    test('should save if a 2023 dog and deadline is different to DB value - option 2', async () => {
+      const mockSave = jest.fn()
+      const reg = { exemption_order: { exemption_order: '2023' }, neutering_deadline: '2024-12-31', save: mockSave }
+      sequelize.models.registration.findOne.mockResolvedValue(reg)
+
+      await recalcDeadlines({ id: 123, birth_date: '2020-02-01' }, {})
+
+      expect(mockSave).toHaveBeenCalledTimes(1)
+      expect(reg.neutering_deadline).toBe('2024-06-30')
     })
   })
 

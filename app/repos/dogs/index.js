@@ -17,7 +17,8 @@ const {
   constructStatusList,
   constructDbSort,
   generateClausesForOr,
-  customSort
+  customSort,
+  recalcDeadlines
 } = require('./dog')
 
 const {
@@ -38,6 +39,7 @@ module.exports = {
   deleteDogByIndexNumber,
   switchOwnerIfNecessary,
   buildSwitchedOwner,
+  recalcDeadlines,
   getOldDogs,
   constructStatusList,
   constructDbSort,
