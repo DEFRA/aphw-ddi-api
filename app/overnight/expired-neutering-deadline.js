@@ -6,11 +6,31 @@ const { dbFindAll } = require('../lib/db-functions')
 
 const setExpiredNeuteringDeadlineToInBreach = async (today, user, t) => {
   try {
+    const isAfterJuneDeadline = today >= new Date('2024-07-27')
+    const isAfterDecDeadline = today >= new Date('2025-01-01')
+
     const setStatusToBreach = await dbFindAll(sequelize.models.registration, {
       where: {
-        neutering_deadline: {
-          [Op.lt]: today
+        [Op.or]: [{
+          [Op.and]: [
+            {
+              neutering_deadline: {
+                [Op.eq]: new Date('2024-06-30')
+              }
+            },
+            isAfterJuneDeadline ? sequelize.literal('1 = 1') : sequelize.literal('1 = 0')
+          ]
         },
+        {
+          [Op.and]: [
+            {
+              neutering_deadline: {
+                [Op.eq]: new Date('2024-12-31')
+              }
+            },
+            isAfterDecDeadline ? sequelize.literal('1 = 1') : sequelize.literal('1 = 0')
+          ]
+        }],
         neutering_confirmation: {
           [Op.eq]: null
         },
