@@ -9,6 +9,9 @@ const { setExpiredNeuteringDeadlineToInBreach } = require('../../../../app/overn
 
 const { autoUpdateStatuses } = require('../../../../app/overnight/auto-update-statuses')
 
+jest.mock('../../../../app/lib/environment-helpers')
+const { getEnvironmentVariableOrString } = require('../../../../app/lib/environment-helpers')
+
 describe('AutoUpdateStatus test', () => {
   jest.mock('../../../../app/config/db', () => ({
     transaction: jest.fn()
@@ -27,5 +30,25 @@ describe('AutoUpdateStatus test', () => {
     setExpiredInsuranceToBreach.mockImplementation(() => { throw new Error('dummy error') })
     const res = await autoUpdateStatuses()
     expect(res).toBe('Error auto-updating statuses: Error: dummy error ok - cdos 1 rows | ')
+  })
+
+  test('autoUpdateStatuses should run today as 2024-07-27 in dev', async () => {
+    getEnvironmentVariableOrString.mockResolvedValue('aphw-ddi-events-dev')
+    setExpiredCdosToFailed.mockResolvedValue('ok - cdos 1 rows')
+    setExpiredInsuranceToBreach.mockResolvedValue('ok - insurance 2 rows')
+    setExpiredNeuteringDeadlineToInBreach.mockResolvedValue('ok - neutering 2 rows')
+    const res = await autoUpdateStatuses()
+    expect(res).toBe('ok - cdos 1 rows | ok - insurance 2 rows | ok - neutering 2 rows')
+    expect(setExpiredNeuteringDeadlineToInBreach).toHaveBeenCalledWith(new Date('2024-07-27'), expect.anything(), undefined)
+  })
+
+  test('autoUpdateStatuses should run today as 2024-07-27 in snd', async () => {
+    getEnvironmentVariableOrString.mockResolvedValue('aphw-ddi-events-snd')
+    setExpiredCdosToFailed.mockResolvedValue('ok - cdos 2 rows')
+    setExpiredInsuranceToBreach.mockResolvedValue('ok - insurance 2 rows')
+    setExpiredNeuteringDeadlineToInBreach.mockResolvedValue('ok - neutering 2 rows')
+    const res = await autoUpdateStatuses()
+    expect(res).toBe('ok - cdos 2 rows | ok - insurance 2 rows | ok - neutering 2 rows')
+    expect(setExpiredNeuteringDeadlineToInBreach).toHaveBeenCalledWith(new Date('2024-07-27'), expect.anything(), undefined)
   })
 })

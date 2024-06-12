@@ -2,6 +2,7 @@ const sequelize = require('../config/db')
 const { setExpiredCdosToFailed } = require('./expired-cdo')
 const { setExpiredInsuranceToBreach } = require('./expired-insurance')
 const { setExpiredNeuteringDeadlineToInBreach } = require('./expired-neutering-deadline')
+const { getEnvironmentVariableOrString } = require('../lib/environment-helpers')
 
 const autoUpdateStatuses = async () => {
   let result = ''
@@ -16,8 +17,8 @@ const autoUpdateStatuses = async () => {
     let todayNeuteuring = new Date()
 
     if (
-      (process.env.EVENTS_TOPIC_ADDRESS ?? '').endsWith('-snd') ||
-      (process.env.EVENTS_TOPIC_ADDRESS ?? '').endsWith('-dev')
+      getEnvironmentVariableOrString('EVENTS_TOPIC_ADDRESS').endsWith('-snd') ||
+      getEnvironmentVariableOrString('EVENTS_TOPIC_ADDRESS').endsWith('-dev')
     ) {
       todayNeuteuring = new Date('2024-07-27')
     }
