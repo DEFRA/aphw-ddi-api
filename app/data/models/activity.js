@@ -22,11 +22,17 @@ module.exports = (sequelize, DataTypes) => {
     display_order: {
       type: DataTypes.INTEGER,
       allowNull: false
+    },
+    created_at: {
+      type: DataTypes.DATE,
+      allowNull: false,
+      defaultValue: sequelize.fn('now')
     }
   }, {
     sequelize,
     tableName: 'activity',
-    timestamps: false,
+    createdAt: 'created_at',
+    updatedAt: 'updated_at',
     indexes: [
       {
         name: 'activity_pkey',

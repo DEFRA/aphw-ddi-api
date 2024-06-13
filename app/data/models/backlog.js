@@ -22,11 +22,17 @@ module.exports = (sequelize, DataTypes) => {
     warnings: {
       type: DataTypes.TEXT,
       allowNull: true
+    },
+    created_at: {
+      type: DataTypes.DATE,
+      allowNull: false,
+      defaultValue: sequelize.fn('now')
     }
   }, {
     sequelize,
     tableName: 'backlog',
-    timestamps: false,
+    createdAt: 'created_at',
+    updatedAt: 'updated_at',
     indexes: [
       {
         name: 'backlog_pkey',
