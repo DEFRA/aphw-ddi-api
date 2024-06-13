@@ -20,7 +20,7 @@ const autoUpdateStatuses = async () => {
       getEnvironmentVariableOrString('EVENTS_TOPIC_ADDRESS').endsWith('-snd') ||
       getEnvironmentVariableOrString('EVENTS_TOPIC_ADDRESS').endsWith('-dev')
     ) {
-      todayNeuteuring = new Date('2024-07-27')
+      todayNeuteuring = new Date('2025-01-01')
     }
 
     await sequelize.transaction(async (t) => {
