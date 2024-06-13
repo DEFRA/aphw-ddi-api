@@ -21,11 +21,17 @@ module.exports = (sequelize, DataTypes) => {
     },
     json: {
       type: DataTypes.JSONB
+    },
+    created_at: {
+      type: DataTypes.DATE,
+      allowNull: false,
+      defaultValue: sequelize.fn('now')
     }
   }, {
     sequelize,
     tableName: 'search_index',
-    timestamps: false,
+    createdAt: 'created_at',
+    updatedAt: 'updated_at',
     indexes: [
       {
         name: 'search_index_pkey',
