@@ -23,6 +23,9 @@ const getCountsPerStatus = async () => {
       model: sequelize.models.status,
       as: 'status'
     }],
+    where: {
+      '$status.status_type$': 'STANDARD'
+    },
     order: [sequelize.literal(constructStatusOrderBy())],
     raw: true,
     nest: true
