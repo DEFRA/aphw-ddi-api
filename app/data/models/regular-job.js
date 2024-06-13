@@ -23,17 +23,11 @@ module.exports = (sequelize, DataTypes) => {
     result: {
       type: DataTypes.STRING(1000),
       allowNull: false
-    },
-    created_at: {
-      type: DataTypes.DATE,
-      allowNull: false,
-      defaultValue: sequelize.fn('now')
     }
   }, {
     sequelize,
     tableName: 'regular_job',
-    createdAt: 'created_at',
-    updatedAt: 'updated_at',
+    timestamps: false,
     indexes: [
       {
         name: 'regular_job_run_date_key',

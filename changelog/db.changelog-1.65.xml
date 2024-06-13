@@ -22,19 +22,13 @@
     </addColumn>
   </changeSet>
   <changeSet author="C Cole" id="5">
-    <addColumn tableName="regular_job">
+    <addColumn tableName="search_index">
       <column name="created_at" type="TIMESTAMP WITH TIME ZONE" />
       <column name="updated_at" type="TIMESTAMP WITH TIME ZONE" />
     </addColumn>
   </changeSet>
   <changeSet author="C Cole" id="6">
-    <addColumn tableName="backlog">
-      <column name="created_at" type="TIMESTAMP WITH TIME ZONE" />
-      <column name="updated_at" type="TIMESTAMP WITH TIME ZONE" />
-    </addColumn>
-  </changeSet>
-  <changeSet author="C Cole" id="7">
-    <addColumn tableName="search_index">
+    <addColumn tableName="dog_breed">
       <column name="created_at" type="TIMESTAMP WITH TIME ZONE" />
       <column name="updated_at" type="TIMESTAMP WITH TIME ZONE" />
     </addColumn>
