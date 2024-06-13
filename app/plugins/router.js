@@ -19,7 +19,8 @@ const routes = [].concat(
   require('../routes/insurance'),
   require('../routes/export'),
   require('../routes/activities'),
-  require('../routes/regular-jobs')
+  require('../routes/regular-jobs'),
+  require('../routes/statistics')
 )
 
 module.exports = {
