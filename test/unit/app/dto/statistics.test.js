@@ -38,4 +38,12 @@ describe('statistics Dto', () => {
 
     expect(dto).toEqual(expectedDto)
   })
+
+  test('should handle no data', () => {
+    const dto = countsPerStatusDto(null)
+
+    const expectedDto = []
+
+    expect(dto).toEqual(expectedDto)
+  })
 })
