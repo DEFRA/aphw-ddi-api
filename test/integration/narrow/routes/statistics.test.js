@@ -24,6 +24,20 @@ describe('Statistics endpoint', () => {
 
       const response = await server.inject(options)
       expect(response.statusCode).toBe(200)
+      expect(response.result[0].status.name).toBe('Interim exempt')
+      expect(response.result[0].total).toBe(20)
+      expect(response.result[1].status.name).toBe('Pre-exempt')
+      expect(response.result[1].total).toBe(30)
+      expect(response.result[2].status.name).toBe('Failed')
+      expect(response.result[2].total).toBe(40)
+      expect(response.result[3].status.name).toBe('Exempt')
+      expect(response.result[3].total).toBe(500)
+      expect(response.result[4].status.name).toBe('In breach')
+      expect(response.result[4].total).toBe(60)
+      expect(response.result[5].status.name).toBe('Withdrawn')
+      expect(response.result[5].total).toBe(70)
+      expect(response.result[6].status.name).toBe('Inactive')
+      expect(response.result[6].total).toBe(80)
     })
 
     test('route returns 400 if invalid param key name', async () => {
