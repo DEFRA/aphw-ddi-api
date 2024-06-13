@@ -31,23 +31,23 @@ describe('AutoUpdateStatus test', () => {
     expect(res).toBe('Error auto-updating statuses: Error: dummy error ok - cdos 1 rows | ')
   })
 
-  test('autoUpdateStatuses should run today as 2024-07-27 in dev', async () => {
+  test('autoUpdateStatuses should run today as 2025-01-01 in dev', async () => {
     getEnvironmentVariableOrString.mockReturnValue('aphw-ddi-events-dev')
     setExpiredCdosToFailed.mockResolvedValue('ok - cdos 1 rows')
     setExpiredInsuranceToBreach.mockResolvedValue('ok - insurance 2 rows')
     setExpiredNeuteringDeadlineToInBreach.mockResolvedValue('ok - neutering 2 rows')
     const res = await autoUpdateStatuses()
     expect(res).toBe('ok - cdos 1 rows | ok - insurance 2 rows | ok - neutering 2 rows')
-    expect(setExpiredNeuteringDeadlineToInBreach).toHaveBeenCalledWith(new Date('2024-07-27'), expect.anything(), expect.anything())
+    expect(setExpiredNeuteringDeadlineToInBreach).toHaveBeenCalledWith(new Date('2025-01-01'), expect.anything(), expect.anything())
   })
 
-  test('autoUpdateStatuses should run today as 2024-07-27 in snd', async () => {
+  test('autoUpdateStatuses should run today as 2025-01-01 in snd', async () => {
     getEnvironmentVariableOrString.mockReturnValue('aphw-ddi-events-snd')
     setExpiredCdosToFailed.mockResolvedValue('ok - cdos 2 rows')
     setExpiredInsuranceToBreach.mockResolvedValue('ok - insurance 2 rows')
     setExpiredNeuteringDeadlineToInBreach.mockResolvedValue('ok - neutering 2 rows')
     const res = await autoUpdateStatuses()
     expect(res).toBe('ok - cdos 2 rows | ok - insurance 2 rows | ok - neutering 2 rows')
-    expect(setExpiredNeuteringDeadlineToInBreach).toHaveBeenCalledWith(new Date('2024-07-27'), expect.anything(), expect.anything())
+    expect(setExpiredNeuteringDeadlineToInBreach).toHaveBeenCalledWith(new Date('2025-01-01'), expect.anything(), expect.anything())
   })
 })
