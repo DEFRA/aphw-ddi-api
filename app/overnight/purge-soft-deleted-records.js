@@ -13,9 +13,22 @@
  */
 
 /**
+ * @param {Date} date
  * @return {Promise<SoftDeletedRecordPayload>}
  */
-const purgeSoftDeletedRecords = async () => ({})
+const purgeSoftDeletedRecords = async (date) => {
+  return {
+    count: {
+      dogs: 0,
+      owners: 0,
+      total: 0
+    },
+    deleted: {
+      dogs: [],
+      owners: []
+    }
+  }
+}
 
 module.exports = {
   purgeSoftDeletedRecords
