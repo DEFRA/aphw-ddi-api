@@ -3,18 +3,16 @@
  * @returns object formatted as follows:
  * [
  *  {
- *    status: {
- *      id: 1,
- *      name: 'Interim exempt'
- *    },
- *    total: 123
+ *    status_id: 1,
+ *    status: 'Interim exempt',
+ *    total: 123,
+ *    dogs: { status_id: 1 }
  *  },
  *  {
- *    status: {
- *      id: 2,
- *      name: 'Exempt'
- *    },
- *    total: 456
+ *    status_id: 2,
+ *    status: 'Exempt'
+ *    total: 456,
+ *    dogs: { status_id: 2 }
  *  }
  * ]
  */
@@ -23,7 +21,7 @@ const countsPerStatusDto = (data) => {
     ? data.map(rowCount => ({
       total: rowCount.total ? parseInt(rowCount.total) : 0,
       status: {
-        name: rowCount.status.status,
+        name: rowCount.status,
         id: rowCount.status_id
       }
     }))
