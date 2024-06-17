@@ -1,16 +1,19 @@
 const { purgeSoftDeletedRecords } = require('../overnight/purge-soft-deleted-records')
-const { purgeSoftDelete } = require('../schema/jobs')
+const { purgeSoftDeleteQuerySchema, purgeSoftDeleteResponseSchema } = require('../schema/jobs')
 
 module.exports = {
   method: 'POST',
   path: '/jobs/purge-soft-delete',
   options: {
     validate: {
-      query: purgeSoftDelete,
+      query: purgeSoftDeleteQuerySchema,
       failAction: (request, h, error) => {
         console.log(error)
         return h.response().code(400).takeover()
       }
+    },
+    response: {
+      schema: purgeSoftDeleteResponseSchema
     },
     handler: async (request, h) => {
       const now = request.query.today
