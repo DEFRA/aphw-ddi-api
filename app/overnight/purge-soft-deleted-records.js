@@ -64,7 +64,7 @@ function DeletedRecords () {
  * @param {Date} date
  * @return {Promise<SoftDeletedRecordPayload>}
  */
-const purgeSoftDeletedRecords = async (date) => {
+const purgeSoftDeletedRecords = async (date = new Date()) => {
   try {
     const deleteAtCutOff = new Date(date)
     deleteAtCutOff.setUTCDate(deleteAtCutOff.getUTCDate() - paranoidRetentionPeriod)

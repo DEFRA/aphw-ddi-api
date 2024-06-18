@@ -121,7 +121,7 @@ describe('purge-soft-deleted-records', () => {
 
     test('should safely handle failures', async () => {
       sequelize.models.person.findAll.mockRejectedValue(new Error('server error'))
-      const result = await purgeSoftDeletedRecords(new Date('2024-06-17T00:00:00.000Z'))
+      const result = await purgeSoftDeletedRecords()
       expect('' + result).toEqual('Error purging soft deleted records: Error: server error')
     })
   })

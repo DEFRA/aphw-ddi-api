@@ -8,9 +8,11 @@ jest.mock('../../../../app/overnight/create-export-file')
 
 const { updateRunningJobProgress, tryStartJob, endJob, createNewJob } = require('../../../../app/repos/regular-jobs')
 jest.mock('../../../../app/repos/regular-jobs')
-
 jest.mock('@hapi/wreck')
 const wreck = require('@hapi/wreck')
+
+jest.mock('../../../../app/overnight/purge-soft-deleted-records')
+const { purgeSoftDeletedRecords } = require('../../../../app/overnight/purge-soft-deleted-records')
 
 let server
 
@@ -29,6 +31,7 @@ describe('RunJobs test', () => {
     const res = await runOvernightJobs(server)
     expect(res).toBe('ok - insurance 2 rows')
     expect(autoUpdateStatuses).toHaveBeenCalledTimes(1)
+    expect(purgeSoftDeletedRecords).toHaveBeenCalledTimes(1)
   })
 
   test('runExportNow should call createExportFile', async () => {
