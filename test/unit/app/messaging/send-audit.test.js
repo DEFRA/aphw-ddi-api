@@ -1,6 +1,6 @@
 const {
   isDataUnchanged, sendEventToAudit, sendCreateToAudit, sendActivityToAudit, sendUpdateToAudit,
-  determineCreatePk, determineUpdatePk, sendDeleteToAudit, sendImportToAudit, sendChangeOwnerToAudit
+  determineCreatePk, determineUpdatePk, sendDeleteToAudit, sendImportToAudit, sendChangeOwnerToAudit, sendHardDeleteToAudit
 } = require('../../../../app/messaging/send-audit')
 
 jest.mock('../../../../app/messaging/send-event')
@@ -154,6 +154,30 @@ describe('SendAudit test', () => {
         }
       })
     })
+  })
+
+  describe('sendHardDeleteToAudit', () => {
+    // const hal9000 = { username: 'hal-9000', displayname: 'Hal 9000' }
+    test('should be a function', () => {
+      expect(sendHardDeleteToAudit).toBeInstanceOf(Function)
+    })
+    // test('should fail given no user', async () => {
+    //   await expect(sendDeleteToAudit('OBJECT', {}, {})).rejects.toThrow('Username and displayname are required for auditing deletion of OBJECT')
+    // })
+    //
+    // test('should send correct message payload', async () => {
+    //   await sendDeleteToAudit('person', { personReference: 'P-123' }, hal9000)
+    //   expect(sendEvent).toHaveBeenCalledWith({
+    //     type: 'uk.gov.defra.ddi.event.delete',
+    //     source: 'aphw-ddi-portal',
+    //     partitionKey: 'P-123',
+    //     id: expect.any(String),
+    //     subject: 'DDI Delete person',
+    //     data: {
+    //       message: '{"actioningUser":{"username":"hal-9000","displayname":"Hal 9000"},"operation":"deleted person","deleted":{"personReference":"P-123"}}'
+    //     }
+    //   })
+    // })
   })
 
   describe('sendChangeOwnerToAudit', () => {

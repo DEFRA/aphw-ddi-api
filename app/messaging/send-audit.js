@@ -141,6 +141,27 @@ const sendDeleteToAudit = async (auditObjectName, entity, user) => {
   await sendEvent(event)
 }
 
+const sendHardDeleteToAudit = async (auditObjectName, entity, user) => {
+  // if (!isUserValid(user)) {
+  //   throw new Error(`Username and displayname are required for auditing deletion of ${auditObjectName}`)
+  // }
+  //
+  // const messagePayload = constructDeletePayload(auditObjectName, entity, user)
+  //
+  // const event = {
+  //   type: DELETE,
+  //   source: SOURCE,
+  //   id: uuidv4(),
+  //   partitionKey: determineUpdatePk(auditObjectName, entity),
+  //   subject: `DDI Delete ${auditObjectName}`,
+  //   data: {
+  //     message: messagePayload
+  //   }
+  // }
+  //
+  // await sendEvent(event)
+}
+
 const constructDeletePayload = (auditObjectName, entity, actioningUser) => {
   return JSON.stringify({
     actioningUser,
@@ -256,6 +277,7 @@ module.exports = {
   sendEventToAudit,
   sendActivityToAudit,
   sendDeleteToAudit,
+  sendHardDeleteToAudit,
   isDataUnchanged,
   determineCreatePk,
   determineUpdatePk,
