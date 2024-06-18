@@ -56,7 +56,8 @@ BEGIN
 
 	UPDATE registration
 	SET    deleted_at = null
-	WHERE  dog_id = v_dog_id;
+	WHERE  dog_id = v_dog_id
+	AND    deleted_at = (SELECT max(r2.deleted_at) from registration r2 where r2.dog_id = v_dog_id);
 
   IF generate_search_index(v_person_id, v_dog_id) = 'OK' THEN
   	RETURN v_status || 'Dog successfully restored';
