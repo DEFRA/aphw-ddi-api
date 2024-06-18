@@ -16,7 +16,7 @@ const runOvernightJobs = async (server) => {
 
   if (jobId) {
     let result = await autoUpdateStatuses()
-    result += '| ' + await purgeSoftDeletedRecords()
+    result += ' | ' + await purgeSoftDeletedRecords()
     await endJob(jobId, result)
     triggerExportGeneration(server)
     return result
