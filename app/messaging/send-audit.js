@@ -1,6 +1,6 @@
 const { v4: uuidv4 } = require('uuid')
 const { CREATE, UPDATE, DELETE, IMPORT_MANUAL, ACTIVITY: ACTIVITY_EVENT, CHANGE_OWNER, PURGE } = require('../constants/event/events')
-const { SOURCE } = require('../constants/event/source')
+const { SOURCE, SOURCE_API } = require('../constants/event/source')
 const { getDiff } = require('json-difference')
 const { sendEvent } = require('./send-event')
 const { deepClone } = require('../lib/deep-clone')
@@ -141,7 +141,7 @@ const sendDeleteToAudit = async (auditObjectName, entity, user) => {
   await sendEvent(event)
 }
 
-const stripPergeEntity = (objName, entity) => {
+const stripPermanentDeleteEntity = (objName, entity) => {
   if (objName === DOG) {
     return {
       indexNumber: entity.index_number
@@ -151,39 +151,39 @@ const stripPergeEntity = (objName, entity) => {
       personReference: entity.personReference || entity.person_reference
     }
   }
-  throw new Error(`Invalid object for purge audit: ${objName}`)
+  throw new Error(`Invalid object for permanent delete audit: ${objName}`)
 }
 
-const determinePergePk = (objName, entity) => {
+const determinePermanentDeletePk = (objName, entity) => {
   if (objName === DOG) {
     return entity.index_number
   } else if (objName === PERSON) {
     return entity.personReference || entity.person_reference
   }
-  throw new Error(`Invalid object for purge audit: ${objName}`)
+  throw new Error(`Invalid object for permanent delete audit: ${objName}`)
 }
 
-const constructPurgePayload = (auditObjectName, entity, actioningUser) => {
+const constructPermanentDeletePayload = (auditObjectName, entity, actioningUser) => {
   return JSON.stringify({
     actioningUser,
-    operation: `purged ${auditObjectName}`,
-    purged: stripPergeEntity(auditObjectName, entity)
+    operation: `permanently deleted ${auditObjectName}`,
+    purged: stripPermanentDeleteEntity(auditObjectName, entity)
   })
 }
 
-const sendPurgeToAudit = async (auditObjectName, entity, user) => {
+const sendPermanentDeleteToAudit = async (auditObjectName, entity, user) => {
   if (!isUserValid(user)) {
     throw new Error(`Username and displayname are required for auditing deletion of ${auditObjectName}`)
   }
 
-  const messagePayload = constructPurgePayload(auditObjectName, entity, user)
+  const messagePayload = constructPermanentDeletePayload(auditObjectName, entity, user)
 
   const event = {
     type: PURGE,
-    source: SOURCE,
+    source: SOURCE_API,
     id: uuidv4(),
-    partitionKey: determinePergePk(auditObjectName, entity),
-    subject: `DDI Purge ${auditObjectName}`,
+    partitionKey: determinePermanentDeletePk(auditObjectName, entity),
+    subject: `DDI Permanently delete ${auditObjectName}`,
     data: {
       message: messagePayload
     }
@@ -307,7 +307,7 @@ module.exports = {
   sendEventToAudit,
   sendActivityToAudit,
   sendDeleteToAudit,
-  sendPurgeToAudit,
+  sendPermanentDeleteToAudit,
   isDataUnchanged,
   determineCreatePk,
   determineUpdatePk,

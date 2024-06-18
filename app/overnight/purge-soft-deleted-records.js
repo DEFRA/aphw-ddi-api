@@ -95,16 +95,6 @@ const purgeSoftDeletedRecords = async (date) => {
     }
   }
 
-  for (const owner of ownerResults) {
-    try {
-      result.deleted.success.owners.push(owner.person_reference)
-      result.count.success.owners++
-    } catch (e) {
-      console.log(`Failed to hard delete owner record ${owner.person_reference}`, e)
-      result.count.failed.owners++
-    }
-  }
-
   const dogResults = await sequelize.models.dog.findAll({
     where: {
       deleted_at: {
@@ -122,6 +112,16 @@ const purgeSoftDeletedRecords = async (date) => {
     } catch (e) {
       console.log(`Failed to hard delete dog record ${dog.index_number}`, e)
       result.count.failed.dogs++
+    }
+  }
+
+  for (const owner of ownerResults) {
+    try {
+      result.deleted.success.owners.push(owner.person_reference)
+      result.count.success.owners++
+    } catch (e) {
+      console.log(`Failed to hard delete owner record ${owner.person_reference}`, e)
+      result.count.failed.owners++
     }
   }
 
