@@ -167,7 +167,7 @@ const constructPermanentDeletePayload = (auditObjectName, entity, actioningUser)
   return JSON.stringify({
     actioningUser,
     operation: `permanently deleted ${auditObjectName}`,
-    purged: stripPermanentDeleteEntity(auditObjectName, entity)
+    deleted: stripPermanentDeleteEntity(auditObjectName, entity)
   })
 }
 

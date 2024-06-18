@@ -171,7 +171,7 @@ describe('SendAudit test', () => {
         id: expect.any(String),
         subject: 'DDI Permanently delete person',
         data: {
-          message: '{"actioningUser":{"username":"hal-9000","displayname":"Hal 9000"},"operation":"permanently deleted person","purged":{"personReference":"P-123"}}'
+          message: '{"actioningUser":{"username":"hal-9000","displayname":"Hal 9000"},"operation":"permanently deleted person","deleted":{"personReference":"P-123"}}'
         }
       })
     })
