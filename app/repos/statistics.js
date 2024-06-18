@@ -16,13 +16,18 @@ const constructStatusOrderBy = () => {
 }
 
 const getCountsPerStatus = async () => {
-  const counts = await sequelize.models.dog.findAll({
-    group: ['status_id', 'status.id'],
-    attributes: ['status_id', 'status.id', [sequelize.fn('COUNT', 'status_id'), 'total']],
+  const counts = await sequelize.models.status.findAll({
+    group: ['status.id', 'dogs.status_id'],
+    attributes: ['dogs.status_id', 'status', [sequelize.fn('COALESCE', sequelize.fn('COUNT', sequelize.col('status_id')), 0), 'total']],
     include: [{
-      model: sequelize.models.status,
-      as: 'status'
+      attributes: ['status_id'],
+      model: sequelize.models.dog,
+      as: 'dogs',
+      required: false
     }],
+    where: {
+      '$status.status_type$': 'STANDARD'
+    },
     order: [sequelize.literal(constructStatusOrderBy())],
     raw: true,
     nest: true
