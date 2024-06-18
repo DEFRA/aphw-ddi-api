@@ -15,7 +15,7 @@ jest.mock('../../../../../app/repos/search')
 const { removeDogFromSearchIndex } = require('../../../../../app/repos/search')
 
 jest.mock('../../../../../app/messaging/send-audit')
-const { sendDeleteToAudit, sendHardDeleteToAudit } = require('../../../../../app/messaging/send-audit')
+const { sendDeleteToAudit, sendPurgeToAudit } = require('../../../../../app/messaging/send-audit')
 
 const devUser = {
   username: 'dev-user@test.com',
@@ -662,7 +662,7 @@ describe('Dog repo', () => {
       expect(mockMicrochipDestroy).toHaveBeenCalledWith({ force: true, transaction: {} })
       expect(mockDogMicrochipDestroy).toHaveBeenCalledWith({ force: true, transaction: {} })
       expect(mockDogDestroy).toHaveBeenCalledWith({ force: true, transaction: {} })
-      expect(sendHardDeleteToAudit).toHaveBeenCalledWith('dog', mockDogAggregrate, devUser)
+      expect(sendPurgeToAudit).toHaveBeenCalledWith('dog', mockDogAggregrate, devUser)
     })
   })
 

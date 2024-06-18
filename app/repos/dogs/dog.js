@@ -6,7 +6,7 @@ const { getBreed, getExemptionOrder } = require('../../lookups')
 const { updateSearchIndexDog } = require('../search')
 const { updateMicrochips, createMicrochip } = require('../microchip')
 const { createInsurance } = require('../insurance')
-const { sendCreateToAudit, sendUpdateToAudit, sendDeleteToAudit, sendHardDeleteToAudit } = require('../../messaging/send-audit')
+const { sendCreateToAudit, sendUpdateToAudit, sendDeleteToAudit, sendPurgeToAudit } = require('../../messaging/send-audit')
 const { DOG } = require('../../constants/event/audit-event-object-types')
 const { preChangedDogAudit, postChangedDogAudit } = require('../../dto/auditing/dog')
 const { removeDogFromSearchIndex } = require('../search')
@@ -557,7 +557,7 @@ const purgeDogByIndexNumber = async (indexNumber, user, transaction) => {
 
   await dogAggregate.destroy({ force: true, transaction })
 
-  await sendHardDeleteToAudit(DOG, dogAggregate, user)
+  await sendPurgeToAudit(DOG, dogAggregate, user)
 }
 
 const customSort = (columnName, ids, sortDir) => {
