@@ -87,27 +87,28 @@ describe('purge-soft-deleted-records', () => {
 
       expect(result).toEqual({
         count: {
-          success: {
+          success: expect.objectContaining({
             dogs: 1,
             owners: 1,
             total: 2
-          },
-          failed: {
+          }),
+          failed: expect.objectContaining({
             dogs: 0,
             owners: 0,
             total: 0
-          }
+          })
         },
         deleted: {
-          success: {
+          success: expect.objectContaining({
             dogs: ['ED300002'],
             owners: ['P-1234-56']
-          },
-          failed: {
+          }),
+          failed: expect.objectContaining({
             dogs: [],
             owners: []
-          }
-        }
+          })
+        },
+        toString: expect.any(Function)
       })
     })
   })
