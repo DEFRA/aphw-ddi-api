@@ -73,7 +73,7 @@ describe('Dog repo', () => {
 
   const sequelize = require('../../../../../app/config/db')
 
-  const { getBreeds, getStatuses, createDogs, addImportedDog, getDogByIndexNumber, getAllDogIds, updateDog, updateStatus, updateDogFields, deleteDogByIndexNumber, switchOwnerIfNecessary, buildSwitchedOwner, recalcDeadlines, constructStatusList, constructDbSort, getOldDogs, generateClausesForOr, customSort, hardDeleteDogByIndexNumber } = require('../../../../../app/repos/dogs')
+  const { getBreeds, getStatuses, createDogs, addImportedDog, getDogByIndexNumber, getAllDogIds, updateDog, updateStatus, updateDogFields, deleteDogByIndexNumber, switchOwnerIfNecessary, buildSwitchedOwner, recalcDeadlines, constructStatusList, constructDbSort, getOldDogs, generateClausesForOr, customSort, purgeDogByIndexNumber } = require('../../../../../app/repos/dogs')
 
   beforeEach(async () => {
     jest.clearAllMocks()
@@ -617,9 +617,9 @@ describe('Dog repo', () => {
     })
   })
 
-  describe('hardDeleteDogByIndexNumber', () => {
+  describe('purgeDogByIndexNumber', () => {
     test('should create a new transaction if not passed', async () => {
-      await hardDeleteDogByIndexNumber('ED123', devUser)
+      await purgeDogByIndexNumber('ED123', devUser)
       expect(sequelize.transaction).toHaveBeenCalledTimes(1)
     })
 
@@ -651,17 +651,17 @@ describe('Dog repo', () => {
       }
       sequelize.models.dog.findOne.mockResolvedValue(mockDogAggregrate)
 
-      await hardDeleteDogByIndexNumber('ED123', devUser, {})
+      await purgeDogByIndexNumber('ED123', devUser, {})
 
       expect(sequelize.models.dog.findOne).toBeCalledWith(expect.objectContaining({
         where: { index_number: 'ED123' },
         paranoid: false
       }))
-      expect(mockRegistrationDestroy).toHaveBeenCalledWith({ force: true })
-      expect(mockRegisteredPersonDestroy).toHaveBeenCalledWith({ force: true })
-      expect(mockMicrochipDestroy).toHaveBeenCalledWith({ force: true })
-      expect(mockDogMicrochipDestroy).toHaveBeenCalledWith({ force: true })
-      expect(mockDogDestroy).toHaveBeenCalledWith({ force: true })
+      expect(mockRegistrationDestroy).toHaveBeenCalledWith({ force: true, transaction: {} })
+      expect(mockRegisteredPersonDestroy).toHaveBeenCalledWith({ force: true, transaction: {} })
+      expect(mockMicrochipDestroy).toHaveBeenCalledWith({ force: true, transaction: {} })
+      expect(mockDogMicrochipDestroy).toHaveBeenCalledWith({ force: true, transaction: {} })
+      expect(mockDogDestroy).toHaveBeenCalledWith({ force: true, transaction: {} })
       expect(sendHardDeleteToAudit).toHaveBeenCalledWith('dog', mockDogAggregrate, devUser)
     })
   })

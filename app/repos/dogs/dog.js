@@ -507,31 +507,35 @@ const deleteDogByIndexNumber = async (indexNumber, user, transaction) => {
   await sendDeleteToAudit(DOG, dogAggregate, user)
 }
 
-const hardDeleteDogByIndexNumber = async (indexNumber, user, transaction) => {
+const purgeDogByIndexNumber = async (indexNumber, user, transaction) => {
   if (!transaction) {
-    return await sequelize.transaction(async (t) => hardDeleteDogByIndexNumber(indexNumber, user, t))
+    return await sequelize.transaction(async (t) => purgeDogByIndexNumber(indexNumber, user, t))
   }
 
   const dogAggregate = await sequelize.models.dog.findOne({
     where: { index_number: indexNumber },
     include: [
       {
+        model: sequelize.models.registration,
+        as: 'registration',
+        paranoid: false
+      },
+      {
         model: sequelize.models.registered_person,
-        as: 'registered_person'
+        as: 'registered_person',
+        paranoid: false
       },
       {
         model: sequelize.models.dog_microchip,
         as: 'dog_microchips',
+        paranoid: false,
         include: [
           {
             model: sequelize.models.microchip,
-            as: 'microchip'
+            as: 'microchip',
+            paranoid: false
           }
         ]
-      },
-      {
-        model: sequelize.models.registration,
-        as: 'registration'
       }
     ],
     transaction,
@@ -539,17 +543,19 @@ const hardDeleteDogByIndexNumber = async (indexNumber, user, transaction) => {
   })
 
   for (const dogMicrochip of dogAggregate.dog_microchips) {
-    await dogMicrochip.microchip.destroy({ force: true })
-    await dogMicrochip.destroy({ force: true })
+    await dogMicrochip.destroy({ force: true, transaction })
+    await dogMicrochip.microchip.destroy({ force: true, transaction })
   }
 
   for (const registeredPerson of dogAggregate.registered_person) {
-    await registeredPerson.destroy({ force: true })
+    await registeredPerson.destroy({ force: true, transaction })
   }
 
-  await dogAggregate.registration.destroy({ force: true })
+  if (dogAggregate.registration) {
+    await dogAggregate.registration.destroy({ force: true, transaction })
+  }
 
-  await dogAggregate.destroy({ force: true })
+  await dogAggregate.destroy({ force: true, transaction })
 
   await sendHardDeleteToAudit(DOG, dogAggregate, user)
 }
@@ -660,7 +666,7 @@ module.exports = {
   updateMicrochips,
   updateStatus,
   deleteDogByIndexNumber,
-  hardDeleteDogByIndexNumber,
+  purgeDogByIndexNumber,
   switchOwnerIfNecessary,
   buildSwitchedOwner,
   recalcDeadlines,
