@@ -115,6 +115,14 @@ describe('purge-soft-deleted-records', () => {
         },
         toString: expect.any(Function)
       })
+
+      expect('' + result).toBe('Purge deleted records. Success: 1 Dogs 1 Owners - [ED300002, P-1234-56]. Failed: 0 Dogs 0 Owners - [].')
+    })
+
+    test('should safely handle failures', async () => {
+      sequelize.models.person.findAll.mockRejectedValue(new Error('server error'))
+      const result = await purgeSoftDeletedRecords(new Date('2024-06-17T00:00:00.000Z'))
+      expect('' + result).toEqual('Error purging soft deleted records: Error: server error')
     })
   })
 })
