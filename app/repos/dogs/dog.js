@@ -6,7 +6,7 @@ const { getBreed, getExemptionOrder } = require('../../lookups')
 const { updateSearchIndexDog } = require('../search')
 const { updateMicrochips, createMicrochip } = require('../microchip')
 const { createInsurance } = require('../insurance')
-const { sendCreateToAudit, sendUpdateToAudit, sendDeleteToAudit } = require('../../messaging/send-audit')
+const { sendCreateToAudit, sendUpdateToAudit, sendDeleteToAudit, sendHardDeleteToAudit } = require('../../messaging/send-audit')
 const { DOG } = require('../../constants/event/audit-event-object-types')
 const { preChangedDogAudit, postChangedDogAudit } = require('../../dto/auditing/dog')
 const { removeDogFromSearchIndex } = require('../search')
@@ -507,6 +507,53 @@ const deleteDogByIndexNumber = async (indexNumber, user, transaction) => {
   await sendDeleteToAudit(DOG, dogAggregate, user)
 }
 
+const hardDeleteDogByIndexNumber = async (indexNumber, user, transaction) => {
+  if (!transaction) {
+    return await sequelize.transaction(async (t) => hardDeleteDogByIndexNumber(indexNumber, user, t))
+  }
+
+  const dogAggregate = await sequelize.models.dog.findOne({
+    where: { index_number: indexNumber },
+    include: [
+      {
+        model: sequelize.models.registered_person,
+        as: 'registered_person'
+      },
+      {
+        model: sequelize.models.dog_microchip,
+        as: 'dog_microchips',
+        include: [
+          {
+            model: sequelize.models.microchip,
+            as: 'microchip'
+          }
+        ]
+      },
+      {
+        model: sequelize.models.registration,
+        as: 'registration'
+      }
+    ],
+    transaction,
+    paranoid: false
+  })
+
+  for (const dogMicrochip of dogAggregate.dog_microchips) {
+    await dogMicrochip.microchip.destroy({ force: true })
+    await dogMicrochip.destroy({ force: true })
+  }
+
+  for (const registeredPerson of dogAggregate.registered_person) {
+    await registeredPerson.destroy({ force: true })
+  }
+
+  await dogAggregate.registration.destroy({ force: true })
+
+  await dogAggregate.destroy({ force: true })
+
+  await sendHardDeleteToAudit(DOG, dogAggregate, user)
+}
+
 const customSort = (columnName, ids, sortDir) => {
   const sortElems = []
   const idList = sortDir === 'ASC' ? ids.reverse() : ids
@@ -613,6 +660,7 @@ module.exports = {
   updateMicrochips,
   updateStatus,
   deleteDogByIndexNumber,
+  hardDeleteDogByIndexNumber,
   switchOwnerIfNecessary,
   buildSwitchedOwner,
   recalcDeadlines,

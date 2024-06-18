@@ -15,7 +15,7 @@ jest.mock('../../../../../app/repos/search')
 const { removeDogFromSearchIndex } = require('../../../../../app/repos/search')
 
 jest.mock('../../../../../app/messaging/send-audit')
-const { sendDeleteToAudit } = require('../../../../../app/messaging/send-audit')
+const { sendDeleteToAudit, sendHardDeleteToAudit } = require('../../../../../app/messaging/send-audit')
 
 const devUser = {
   username: 'dev-user@test.com',
@@ -73,7 +73,7 @@ describe('Dog repo', () => {
 
   const sequelize = require('../../../../../app/config/db')
 
-  const { getBreeds, getStatuses, createDogs, addImportedDog, getDogByIndexNumber, getAllDogIds, updateDog, updateStatus, updateDogFields, deleteDogByIndexNumber, switchOwnerIfNecessary, buildSwitchedOwner, recalcDeadlines, constructStatusList, constructDbSort, getOldDogs, generateClausesForOr, customSort } = require('../../../../../app/repos/dogs')
+  const { getBreeds, getStatuses, createDogs, addImportedDog, getDogByIndexNumber, getAllDogIds, updateDog, updateStatus, updateDogFields, deleteDogByIndexNumber, switchOwnerIfNecessary, buildSwitchedOwner, recalcDeadlines, constructStatusList, constructDbSort, getOldDogs, generateClausesForOr, customSort, hardDeleteDogByIndexNumber } = require('../../../../../app/repos/dogs')
 
   beforeEach(async () => {
     jest.clearAllMocks()
@@ -614,6 +614,55 @@ describe('Dog repo', () => {
       expect(mockDogMicrochipDestroy).toHaveBeenCalledTimes(2)
       expect(mockDogDestroy).toHaveBeenCalled()
       expect(sendDeleteToAudit).toHaveBeenCalledWith('dog', mockDogAggregrate, devUser)
+    })
+  })
+
+  describe('hardDeleteDogByIndexNumber', () => {
+    test('should create a new transaction if not passed', async () => {
+      await hardDeleteDogByIndexNumber('ED123', devUser)
+      expect(sequelize.transaction).toHaveBeenCalledTimes(1)
+    })
+
+    test('should delete a dog given dog is found', async () => {
+      const mockDogDestroy = jest.fn()
+      const mockMicrochipDestroy = jest.fn()
+      const mockDogMicrochipDestroy = jest.fn()
+      const mockRegistrationDestroy = jest.fn()
+      const mockRegisteredPersonDestroy = jest.fn()
+
+      const mockDogAggregrate = {
+        id: 123,
+        breed: 'Breed 1',
+        name: 'Bruno',
+        registration: {
+          id: 1,
+          cdoIssued: '2020-01-01',
+          cdoExpiry: '2020-02-01',
+          destroy: mockRegistrationDestroy
+        },
+        registered_person: [{
+          destroy: mockRegisteredPersonDestroy
+        }],
+        dog_microchips: [
+          { microchip: { microchip_number: 123456789012345, destroy: mockMicrochipDestroy }, destroy: mockDogMicrochipDestroy },
+          { microchip: { microchip_number: 112345678901234, destroy: mockMicrochipDestroy }, destroy: mockDogMicrochipDestroy }
+        ],
+        destroy: mockDogDestroy
+      }
+      sequelize.models.dog.findOne.mockResolvedValue(mockDogAggregrate)
+
+      await hardDeleteDogByIndexNumber('ED123', devUser, {})
+
+      expect(sequelize.models.dog.findOne).toBeCalledWith(expect.objectContaining({
+        where: { index_number: 'ED123' },
+        paranoid: false
+      }))
+      expect(mockRegistrationDestroy).toHaveBeenCalledWith({ force: true })
+      expect(mockRegisteredPersonDestroy).toHaveBeenCalledWith({ force: true })
+      expect(mockMicrochipDestroy).toHaveBeenCalledWith({ force: true })
+      expect(mockDogMicrochipDestroy).toHaveBeenCalledWith({ force: true })
+      expect(mockDogDestroy).toHaveBeenCalledWith({ force: true })
+      expect(sendHardDeleteToAudit).toHaveBeenCalledWith('dog', mockDogAggregrate, devUser)
     })
   })
 
