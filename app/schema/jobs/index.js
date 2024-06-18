@@ -4,15 +4,25 @@ const purgeSoftDeleteQuerySchema = Joi.object({
   today: Joi.date().optional().default(new Date())
 })
 
+const purgeSoftDeletedCount = Joi.object({
+  dogs: Joi.number().required(),
+  owners: Joi.number().required(),
+  total: Joi.number().required()
+}).required()
+
+const purgeSoftDeletedIndexes = Joi.object({
+  dogs: Joi.array().items(Joi.string()).min(0),
+  owners: Joi.array().items(Joi.string()).min(0)
+}).required()
+
 const purgeSoftDeleteResponseSchema = Joi.object({
   count: Joi.object({
-    dogs: Joi.number().required(),
-    owners: Joi.number().required(),
-    total: Joi.number().required()
+    success: purgeSoftDeletedCount,
+    failed: purgeSoftDeletedCount
   }).required(),
   deleted: Joi.object({
-    dogs: Joi.array().items(Joi.string()).min(0),
-    owners: Joi.array().items(Joi.string()).min(0)
+    success: purgeSoftDeletedIndexes,
+    failed: purgeSoftDeletedIndexes
   }).required()
 }).unknown(true)
 

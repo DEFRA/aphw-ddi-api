@@ -1,5 +1,6 @@
 const { purgeSoftDeletedRecords } = require('../overnight/purge-soft-deleted-records')
 const { purgeSoftDeleteQuerySchema, purgeSoftDeleteResponseSchema } = require('../schema/jobs')
+const { purgeSoftDeletedDto } = require('../dto/overnight')
 
 module.exports = {
   method: 'POST',
@@ -19,7 +20,7 @@ module.exports = {
       const now = request.query.today
       const purgeSoftDeletedRecordsResponse = await purgeSoftDeletedRecords(now)
 
-      return h.response(purgeSoftDeletedRecordsResponse).code(200)
+      return h.response(purgeSoftDeletedDto(purgeSoftDeletedRecordsResponse)).code(200)
     }
   }
 }

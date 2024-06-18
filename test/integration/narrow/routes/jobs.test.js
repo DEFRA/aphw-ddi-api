@@ -15,16 +15,33 @@ describe('Jobs endpoint', () => {
 
   describe('POST /jobs/purge-soft-delete', () => {
     test('should POST /jobs/purge-soft-delete route and return 200', async () => {
-      purgeSoftDeletedRecords.mockResolvedValue({
+      const expectedDto = {
         count: {
-          dogs: 2,
-          owners: 1,
-          total: 3
+          success: {
+            dogs: 2,
+            owners: 1,
+            total: 3
+          },
+          failed: {
+            dogs: 0,
+            owners: 0,
+            total: 0
+          }
         },
         deleted: {
-          dogs: ['ED100001', 'ED100002'],
-          owners: ['P-1234-56']
+          success: {
+            dogs: ['ED100001', 'ED100002'],
+            owners: ['P-1234-56']
+          },
+          failed: {
+            dogs: [],
+            owners: []
+          }
         }
+      }
+      purgeSoftDeletedRecords.mockResolvedValue({
+        ...expectedDto,
+        toString: jest.fn()
       })
 
       const options = {
@@ -36,29 +53,32 @@ describe('Jobs endpoint', () => {
       const responseData = JSON.parse(response.payload)
       expect(response.statusCode).toBe(200)
       expectDate(purgeSoftDeletedRecords.mock.calls[0][0]).toBeNow()
-      expect(responseData).toEqual({
-        count: {
-          dogs: 2,
-          owners: 1,
-          total: 3
-        },
-        deleted: {
-          dogs: ['ED100001', 'ED100002'],
-          owners: ['P-1234-56']
-        }
-      })
+      expect(responseData).toEqual(expectedDto)
     })
 
     test('should POST /jobs/purge-soft-delete?today=2024-03-16', async () => {
       purgeSoftDeletedRecords.mockResolvedValue({
         count: {
-          dogs: 2,
-          owners: 1,
-          total: 3
+          success: {
+            dogs: 0,
+            owners: 0,
+            total: 0
+          },
+          failed: {
+            dogs: 0,
+            owners: 0,
+            total: 0
+          }
         },
         deleted: {
-          dogs: ['ED100001', 'ED100002'],
-          owners: ['P-1234-56']
+          success: {
+            dogs: [],
+            owners: []
+          },
+          failed: {
+            dogs: [],
+            owners: []
+          }
         }
       })
 

@@ -1,3 +1,8 @@
+const user = {
+  username: 'overnight-job-system-user',
+  displayname: 'Overnight Job System User'
+}
+
 describe('purge-soft-deleted-records', () => {
   jest.mock('../../../../app/config/db', () => ({
     models: {
@@ -49,6 +54,9 @@ describe('purge-soft-deleted-records', () => {
 
   const { purgeSoftDeletedRecords } = require('../../../../app/overnight/purge-soft-deleted-records')
 
+  jest.mock('../../../../app/repos/dogs')
+  const { purgeDogByIndexNumber } = require('../../../../app/repos/dogs')
+
   describe('purgeSoftDeletedRecords', () => {
     test('should purge soft deleted records', async () => {
       sequelize.models.person.findAll.mockResolvedValue([{
@@ -74,15 +82,31 @@ describe('purge-soft-deleted-records', () => {
         },
         paranoid: false
       })
+      expect(purgeDogByIndexNumber).toHaveBeenCalledWith('ED300002', user)
+      expect(purgeDogByIndexNumber).toHaveBeenCalledTimes(1)
+
       expect(result).toEqual({
         count: {
-          dogs: 1,
-          owners: 1,
-          total: 2
+          success: {
+            dogs: 1,
+            owners: 1,
+            total: 2
+          },
+          failed: {
+            dogs: 0,
+            owners: 0,
+            total: 0
+          }
         },
         deleted: {
-          dogs: ['ED300002'],
-          owners: ['P-1234-56']
+          success: {
+            dogs: ['ED300002'],
+            owners: ['P-1234-56']
+          },
+          failed: {
+            dogs: [],
+            owners: []
+          }
         }
       })
     })
