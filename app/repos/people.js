@@ -7,6 +7,7 @@ const { sendUpdateToAudit, sendDeleteToAudit, sendPermanentDeleteToAudit } = req
 const { PERSON } = require('../constants/event/audit-event-object-types')
 const { personDto } = require('../dto/person')
 const { personRelationship } = require('./relationships/person')
+const { Op } = require('sequelize')
 
 /**
  * @typedef CountryDao
@@ -502,7 +503,38 @@ const purgePersonByReferenceNumber = async (reference, user, transaction) => {
     order: [[sequelize.col('addresses.address.id'), 'DESC']],
     where: { person_reference: reference },
     paranoid: false,
-    include: personRelationship(sequelize),
+    include: [
+      {
+        model: sequelize.models.person_address,
+        as: 'addresses',
+        where: {
+          id: {
+            [Op.not]: null
+          }
+        },
+        paranoid: false,
+        include: [
+          {
+            model: sequelize.models.address,
+            as: 'address',
+            paranoid: false
+          }
+        ]
+      },
+      {
+        model: sequelize.models.person_contact,
+        as: 'person_contacts',
+        paranoid: false,
+        separate: true, // workaround to prevent 'contact_type_id' being truncated to 'contact_type_i'
+        include: [
+          {
+            model: sequelize.models.contact,
+            as: 'contact',
+            paranoid: false
+          }
+        ]
+      }
+    ],
     transaction
   })
 

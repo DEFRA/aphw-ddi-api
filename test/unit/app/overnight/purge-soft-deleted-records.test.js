@@ -57,6 +57,9 @@ describe('purge-soft-deleted-records', () => {
   jest.mock('../../../../app/repos/dogs')
   const { purgeDogByIndexNumber } = require('../../../../app/repos/dogs')
 
+  jest.mock('../../../../app/repos/people')
+  const { purgePersonByReferenceNumber } = require('../../../../app/repos/people')
+
   describe('purgeSoftDeletedRecords', () => {
     test('should purge soft deleted records', async () => {
       sequelize.models.person.findAll.mockResolvedValue([{
@@ -84,6 +87,8 @@ describe('purge-soft-deleted-records', () => {
       })
       expect(purgeDogByIndexNumber).toHaveBeenCalledWith('ED300002', user)
       expect(purgeDogByIndexNumber).toHaveBeenCalledTimes(1)
+      expect(purgePersonByReferenceNumber).toHaveBeenCalledWith('P-1234-56', user)
+      expect(purgePersonByReferenceNumber).toHaveBeenCalledTimes(1)
 
       expect(result).toEqual({
         count: {

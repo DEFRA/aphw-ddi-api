@@ -4,6 +4,7 @@ const { overnightJobUser } = require('../constants/import')
 const sequelize = require('../config/db')
 const { Op } = require('sequelize')
 const { purgeDogByIndexNumber } = require('../repos/dogs')
+const { purgePersonByReferenceNumber } = require('../repos/people')
 
 /**
  * Class representing a count of deleted records.
@@ -117,6 +118,7 @@ const purgeSoftDeletedRecords = async (date) => {
 
   for (const owner of ownerResults) {
     try {
+      await purgePersonByReferenceNumber(owner.person_reference, overnightJobUser)
       result.deleted.success.owners.push(owner.person_reference)
       result.count.success.owners++
     } catch (e) {
