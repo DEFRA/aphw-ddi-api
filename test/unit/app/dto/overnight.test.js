@@ -35,7 +35,7 @@ describe('overnight', () => {
       toString: () => ''
     }
 
-    test('should ', () => {
+    test('should strip the toString method', () => {
       const response = purgeSoftDeletedDto(purgeSoftDeletedResponse)
       const { value, error } = purgeSoftDeleteResponseSchema.validate(response)
       expect(response).toEqual(expectedPurgeSoftDeletedDto)

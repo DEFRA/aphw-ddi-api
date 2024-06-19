@@ -1,5 +1,5 @@
 const { paranoidRetentionPeriod } = require('../config/index')
-const { overnightJobUser } = require('../constants/import')
+const { overnightJobUser } = require('../constants/auth')
 
 const sequelize = require('../config/db')
 const { Op } = require('sequelize')

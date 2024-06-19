@@ -20,4 +20,5 @@ data:
   EVENTS_TOPIC_ADDRESS: {{ quote .Values.container.eventsTopicAddress }}
   {{- end }}
   OVERNIGHT_JOB_CRONTAB: {{ quote .Values.container.overnightJobCrontab }}
+  PARANOID_RETENTION_PERIOD:  {{ quote .Values.container.paranoidRetentionPeriod }}
 {{- end -}}
