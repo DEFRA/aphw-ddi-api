@@ -14,13 +14,6 @@ const dateIsNow = (date1) => {
   expect(date1.getTime()).toBeLessThanOrEqual(getTimestampUpperRange(now))
 }
 
-const dateIsNotNow = (date1) => {
-  const now = new Date()
-
-  expect(date1.getTime()).toBeGreaterThan(getTimestampLowerRange(now))
-  expect(date1.getTime()).toBeLessThanOrEqual(getTimestampUpperRange(now))
-}
-
 const compareDates = (date1) => {
   return {
     toBeRoughlyEqual (date) {
@@ -60,7 +53,7 @@ const expectDateBase = (date1, inverse = false) => {
   }
 }
 
-const expectDate = (date1, inverse = false) => {
+const expectDate = (date1) => {
   return {
     ...expectDateBase(date1),
     not: expectDateBase(date1, true)
