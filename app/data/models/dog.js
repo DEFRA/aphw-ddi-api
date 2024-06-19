@@ -105,6 +105,11 @@ module.exports = (sequelize, DataTypes) => {
       foreignKey: 'dog_id'
     })
 
+    dog.hasMany(models.registration, {
+      as: 'registrations',
+      foreignKey: 'dog_id'
+    })
+
     dog.belongsTo(models.dog_breed, {
       as: 'dog_breed',
       foreignKey: 'dog_breed_id'

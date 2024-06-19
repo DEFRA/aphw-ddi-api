@@ -7,7 +7,6 @@ const { sendUpdateToAudit, sendDeleteToAudit, sendPermanentDeleteToAudit } = req
 const { PERSON } = require('../constants/event/audit-event-object-types')
 const { personDto } = require('../dto/person')
 const { personRelationship } = require('./relationships/person')
-const { Op } = require('sequelize')
 
 /**
  * @typedef CountryDao
@@ -507,11 +506,6 @@ const purgePersonByReferenceNumber = async (reference, user, transaction) => {
       {
         model: sequelize.models.person_address,
         as: 'addresses',
-        where: {
-          id: {
-            [Op.not]: null
-          }
-        },
         paranoid: false,
         include: [
           {

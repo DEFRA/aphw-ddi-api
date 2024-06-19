@@ -113,6 +113,7 @@ const purgeSoftDeletedRecords = async (date = new Date()) => {
         result.count.success.dogs++
       } catch (e) {
         console.log(`Failed to hard delete dog record ${dog.index_number}`, e)
+        result.deleted.failed.dogs.push(dog.index_number)
         result.count.failed.dogs++
       }
     }
@@ -124,6 +125,7 @@ const purgeSoftDeletedRecords = async (date = new Date()) => {
         result.count.success.owners++
       } catch (e) {
         console.log(`Failed to hard delete owner record ${owner.person_reference}`, e)
+        result.deleted.failed.owners.push(owner.person_reference)
         result.count.failed.owners++
       }
     }
