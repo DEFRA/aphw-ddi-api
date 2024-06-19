@@ -307,6 +307,8 @@ module.exports = {
   sendEventToAudit,
   sendActivityToAudit,
   sendDeleteToAudit,
+  stripPermanentDeleteEntity,
+  determinePermanentDeletePk,
   sendPermanentDeleteToAudit,
   isDataUnchanged,
   determineCreatePk,

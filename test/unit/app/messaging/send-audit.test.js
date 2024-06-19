@@ -1,6 +1,8 @@
 const {
   isDataUnchanged, sendEventToAudit, sendCreateToAudit, sendActivityToAudit, sendUpdateToAudit,
-  determineCreatePk, determineUpdatePk, sendDeleteToAudit, sendImportToAudit, sendChangeOwnerToAudit, sendPermanentDeleteToAudit
+  determineCreatePk, determineUpdatePk, sendDeleteToAudit, sendImportToAudit, sendChangeOwnerToAudit, sendPermanentDeleteToAudit,
+  stripPermanentDeleteEntity,
+  determinePermanentDeletePk
 } = require('../../../../app/messaging/send-audit')
 
 jest.mock('../../../../app/messaging/send-event')
@@ -153,6 +155,38 @@ describe('SendAudit test', () => {
           message: '{"actioningUser":{"username":"hal-9000","displayname":"Hal 9000"},"operation":"deleted person","deleted":{"personReference":"P-123"}}'
         }
       })
+    })
+  })
+
+  describe('stripPermanentDeleteEntity', () => {
+    test('should handle dogs', () => {
+      const strippedAuditData = stripPermanentDeleteEntity('dog', { index_number: 'ED300005', id: '300005', name: 'Rex' })
+      expect(strippedAuditData).toEqual({ indexNumber: 'ED300005' })
+    })
+
+    test('should handle person', () => {
+      const strippedAuditData = stripPermanentDeleteEntity('person', { id: '5', firstName: 'Jane', lastName: 'Doe', person_reference: 'P-1234-56' })
+      expect(strippedAuditData).toEqual({ personReference: 'P-1234-56' })
+    })
+
+    test('should throw an error', () => {
+      expect(() => stripPermanentDeleteEntity('exemption', { id: '5' })).toThrow('Invalid object for permanent delete audit: exemption')
+    })
+  })
+
+  describe('determinePermanentDeletePk', () => {
+    test('should handle dogs', () => {
+      const dogPk = determinePermanentDeletePk('dog', { index_number: 'ED300005', id: '300005', name: 'Rex' })
+      expect(dogPk).toBe('ED300005')
+    })
+
+    test('should handle person', () => {
+      const ownerPk = determinePermanentDeletePk('person', { id: '5', firstName: 'Jane', lastName: 'Doe', person_reference: 'P-1234-56' })
+      expect(ownerPk).toEqual('P-1234-56')
+    })
+
+    test('should throw an error', () => {
+      expect(() => determinePermanentDeletePk('exemption', { id: '5' })).toThrow('Invalid object for permanent delete audit: exemption')
     })
   })
 
