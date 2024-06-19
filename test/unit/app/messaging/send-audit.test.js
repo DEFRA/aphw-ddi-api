@@ -1,6 +1,6 @@
 const {
   isDataUnchanged, sendEventToAudit, sendCreateToAudit, sendActivityToAudit, sendUpdateToAudit,
-  determineCreatePk, determineUpdatePk, sendDeleteToAudit, sendImportToAudit, sendChangeOwnerToAudit
+  determineCreatePk, determineUpdatePk, sendDeleteToAudit, sendImportToAudit, sendChangeOwnerToAudit, sendPermanentDeleteToAudit
 } = require('../../../../app/messaging/send-audit')
 
 jest.mock('../../../../app/messaging/send-event')
@@ -151,6 +151,27 @@ describe('SendAudit test', () => {
         subject: 'DDI Delete person',
         data: {
           message: '{"actioningUser":{"username":"hal-9000","displayname":"Hal 9000"},"operation":"deleted person","deleted":{"personReference":"P-123"}}'
+        }
+      })
+    })
+  })
+
+  describe('sendPermanentDeleteToAudit', () => {
+    const hal9000 = { username: 'hal-9000', displayname: 'Hal 9000' }
+    test('should fail given no user', async () => {
+      await expect(sendPermanentDeleteToAudit('OBJECT', {}, {})).rejects.toThrow('Username and displayname are required for auditing deletion of OBJECT')
+    })
+
+    test('should send correct message payload', async () => {
+      await sendPermanentDeleteToAudit('person', { personReference: 'P-123', id: 1, firstName: 'Test' }, hal9000)
+      expect(sendEvent).toHaveBeenCalledWith({
+        type: 'uk.gov.defra.ddi.event.delete.permanent',
+        source: 'aphw-ddi-api',
+        partitionKey: 'P-123',
+        id: expect.any(String),
+        subject: 'DDI Permanently delete person',
+        data: {
+          message: '{"actioningUser":{"username":"hal-9000","displayname":"Hal 9000"},"operation":"permanently deleted person","deleted":{"personReference":"P-123"}}'
         }
       })
     })

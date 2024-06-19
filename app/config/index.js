@@ -13,7 +13,8 @@ const schema = Joi.object({
   policeApi: {
     baseUrl: Joi.string().default('https://data.police.uk/api')
   },
-  overnightExportBatchSize: Joi.number()
+  overnightExportBatchSize: Joi.number(),
+  paranoidRetentionPeriod: Joi.number()
 })
 
 // Build config
@@ -29,7 +30,8 @@ const config = {
   policeApi: {
     baseUrl: process.env.POLICE_API_BASE_URL
   },
-  overnightExportBatchSize: process.env.OVERNIGHT_EXPORT_BATCH_SIZE
+  overnightExportBatchSize: process.env.OVERNIGHT_EXPORT_BATCH_SIZE,
+  paranoidRetentionPeriod: process.env.PARANOID_RETENTION_PERIOD ?? 90
 }
 
 // Validate config

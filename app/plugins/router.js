@@ -20,6 +20,7 @@ const routes = [].concat(
   require('../routes/export'),
   require('../routes/activities'),
   require('../routes/regular-jobs'),
+  require('../routes/jobs'),
   require('../routes/statistics')
 )
 

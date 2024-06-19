@@ -2,6 +2,7 @@ const config = require('../config')
 const { autoUpdateStatuses } = require('./auto-update-statuses')
 const { createExportFile } = require('./create-export-file')
 const { tryStartJob, endJob, createNewJob } = require('../repos/regular-jobs')
+const { purgeSoftDeletedRecords } = require('./purge-soft-deleted-records')
 
 const triggerExportGeneration = server => {
   server.inject({
@@ -14,7 +15,8 @@ const runOvernightJobs = async (server) => {
   const jobId = await tryStartJob()
 
   if (jobId) {
-    const result = await autoUpdateStatuses()
+    let result = await autoUpdateStatuses()
+    result += ' | ' + await purgeSoftDeletedRecords()
     await endJob(jobId, result)
     triggerExportGeneration(server)
     return result
