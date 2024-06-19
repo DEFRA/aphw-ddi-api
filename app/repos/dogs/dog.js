@@ -6,7 +6,7 @@ const { getBreed, getExemptionOrder } = require('../../lookups')
 const { updateSearchIndexDog } = require('../search')
 const { updateMicrochips, createMicrochip } = require('../microchip')
 const { createInsurance } = require('../insurance')
-const { sendCreateToAudit, sendUpdateToAudit, sendDeleteToAudit } = require('../../messaging/send-audit')
+const { sendCreateToAudit, sendUpdateToAudit, sendDeleteToAudit, sendPermanentDeleteToAudit } = require('../../messaging/send-audit')
 const { DOG } = require('../../constants/event/audit-event-object-types')
 const { preChangedDogAudit, postChangedDogAudit } = require('../../dto/auditing/dog')
 const { removeDogFromSearchIndex } = require('../search')
@@ -507,6 +507,59 @@ const deleteDogByIndexNumber = async (indexNumber, user, transaction) => {
   await sendDeleteToAudit(DOG, dogAggregate, user)
 }
 
+const purgeDogByIndexNumber = async (indexNumber, user, transaction) => {
+  if (!transaction) {
+    return await sequelize.transaction(async (t) => purgeDogByIndexNumber(indexNumber, user, t))
+  }
+
+  const dogAggregate = await sequelize.models.dog.findOne({
+    where: { index_number: indexNumber },
+    include: [
+      {
+        model: sequelize.models.registration,
+        as: 'registration',
+        paranoid: false
+      },
+      {
+        model: sequelize.models.registered_person,
+        as: 'registered_person',
+        paranoid: false
+      },
+      {
+        model: sequelize.models.dog_microchip,
+        as: 'dog_microchips',
+        paranoid: false,
+        include: [
+          {
+            model: sequelize.models.microchip,
+            as: 'microchip',
+            paranoid: false
+          }
+        ]
+      }
+    ],
+    transaction,
+    paranoid: false
+  })
+
+  for (const dogMicrochip of dogAggregate.dog_microchips) {
+    await dogMicrochip.destroy({ force: true, transaction })
+    await dogMicrochip.microchip.destroy({ force: true, transaction })
+  }
+
+  for (const registeredPerson of dogAggregate.registered_person) {
+    await registeredPerson.destroy({ force: true, transaction })
+  }
+
+  if (dogAggregate.registration) {
+    await dogAggregate.registration.destroy({ force: true, transaction })
+  }
+
+  await dogAggregate.destroy({ force: true, transaction })
+
+  await sendPermanentDeleteToAudit(DOG, dogAggregate, user)
+}
+
 const customSort = (columnName, ids, sortDir) => {
   const sortElems = []
   const idList = sortDir === 'ASC' ? ids.reverse() : ids
@@ -613,6 +666,7 @@ module.exports = {
   updateMicrochips,
   updateStatus,
   deleteDogByIndexNumber,
+  purgeDogByIndexNumber,
   switchOwnerIfNecessary,
   buildSwitchedOwner,
   recalcDeadlines,

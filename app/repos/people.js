@@ -3,10 +3,11 @@ const { deepClone } = require('../lib/deep-clone')
 const createRegistrationNumber = require('../lib/create-registration-number')
 const { getCountry, getContactType } = require('../lookups')
 const { updateSearchIndexPerson } = require('./search')
-const { sendUpdateToAudit, sendDeleteToAudit } = require('../messaging/send-audit')
+const { sendUpdateToAudit, sendDeleteToAudit, sendPermanentDeleteToAudit } = require('../messaging/send-audit')
 const { PERSON } = require('../constants/event/audit-event-object-types')
 const { personDto } = require('../dto/person')
 const { personRelationship } = require('./relationships/person')
+const { Op } = require('sequelize')
 
 /**
  * @typedef CountryDao
@@ -493,6 +494,65 @@ const deletePerson = async (reference, user, transaction) => {
   await sendDeleteToAudit(PERSON, personWithRelationships, user)
 }
 
+const purgePersonByReferenceNumber = async (reference, user, transaction) => {
+  if (!transaction) {
+    return await sequelize.transaction(async (t) => purgePersonByReferenceNumber(reference, user, t))
+  }
+
+  const [person] = await sequelize.models.person.findAll({
+    order: [[sequelize.col('addresses.address.id'), 'DESC']],
+    where: { person_reference: reference },
+    paranoid: false,
+    include: [
+      {
+        model: sequelize.models.person_address,
+        as: 'addresses',
+        where: {
+          id: {
+            [Op.not]: null
+          }
+        },
+        paranoid: false,
+        include: [
+          {
+            model: sequelize.models.address,
+            as: 'address',
+            paranoid: false
+          }
+        ]
+      },
+      {
+        model: sequelize.models.person_contact,
+        as: 'person_contacts',
+        paranoid: false,
+        separate: true, // workaround to prevent 'contact_type_id' being truncated to 'contact_type_i'
+        include: [
+          {
+            model: sequelize.models.contact,
+            as: 'contact',
+            paranoid: false
+          }
+        ]
+      }
+    ],
+    transaction
+  })
+
+  for (const personAddress of person.addresses) {
+    await personAddress.destroy({ force: true, transaction })
+    await personAddress.address.destroy({ force: true, transaction })
+  }
+
+  for (const personContact of person.person_contacts) {
+    await personContact.destroy({ force: true, transaction })
+    await personContact.contact.destroy({ force: true, transaction })
+  }
+
+  await person.destroy({ force: true, transaction })
+
+  await sendPermanentDeleteToAudit(PERSON, person, user)
+}
+
 module.exports = {
   createPeople,
   getPersonByReference,
@@ -501,5 +561,6 @@ module.exports = {
   updatePerson,
   updatePersonFields,
   getOwnerOfDog,
-  deletePerson
+  deletePerson,
+  purgePersonByReferenceNumber
 }

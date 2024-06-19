@@ -11,11 +11,17 @@ module.exports = (sequelize, DataTypes) => {
       type: DataTypes.STRING(100),
       allowNull: false,
       unique: 'organisation_name_ukey'
+    },
+    created_at: {
+      type: DataTypes.DATE,
+      allowNull: false,
+      defaultValue: sequelize.fn('now')
     }
   }, {
     sequelize,
     tableName: 'organisation',
-    timestamps: false,
+    createdAt: 'created_at',
+    updatedAt: 'updated_at',
     indexes: [
       {
         name: 'organisation_name_ukey',
