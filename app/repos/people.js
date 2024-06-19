@@ -507,11 +507,6 @@ const purgePersonByReferenceNumber = async (reference, user, transaction) => {
       {
         model: sequelize.models.person_address,
         as: 'addresses',
-        where: {
-          id: {
-            [Op.not]: null
-          }
-        },
         paranoid: false,
         include: [
           {

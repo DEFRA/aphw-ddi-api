@@ -1,4 +1,5 @@
 const Joi = require('joi')
+const { getEnvironmentVariable } = require('../lib/environment-helpers')
 
 // Define config schema
 const schema = Joi.object({
@@ -25,13 +26,13 @@ const config = {
   robotSheetName: process.env.ROBOT_SHEET_NAME,
   osPlacesApi: {
     baseUrl: process.env.OS_PLACES_API_BASE_URL,
-    token: process.env.OS_PLACES_API_KEY
+    token: getEnvironmentVariable('OS_PLACES_API_KEY')
   },
   policeApi: {
     baseUrl: process.env.POLICE_API_BASE_URL
   },
   overnightExportBatchSize: process.env.OVERNIGHT_EXPORT_BATCH_SIZE,
-  paranoidRetentionPeriod: process.env.PARANOID_RETENTION_PERIOD ?? 90
+  paranoidRetentionPeriod: getEnvironmentVariable('PARANOID_RETENTION_PERIOD') ?? 90
 }
 
 // Validate config
