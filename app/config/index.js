@@ -20,18 +20,18 @@ const schema = Joi.object({
 
 // Build config
 const config = {
-  serviceName: process.env.SERVICE_NAME,
-  port: process.env.PORT,
-  env: process.env.NODE_ENV,
-  robotSheetName: process.env.ROBOT_SHEET_NAME,
+  serviceName: getEnvironmentVariable('SERVICE_NAME'),
+  port: getEnvironmentVariable('PORT'),
+  env: getEnvironmentVariable('NODE_ENV'),
+  robotSheetName: getEnvironmentVariable('ROBOT_SHEET_NAME'),
   osPlacesApi: {
-    baseUrl: process.env.OS_PLACES_API_BASE_URL,
+    baseUrl: getEnvironmentVariable('OS_PLACES_API_BASE_URL'),
     token: getEnvironmentVariable('OS_PLACES_API_KEY')
   },
   policeApi: {
-    baseUrl: process.env.POLICE_API_BASE_URL
+    baseUrl: getEnvironmentVariable('POLICE_API_BASE_URL')
   },
-  overnightExportBatchSize: process.env.OVERNIGHT_EXPORT_BATCH_SIZE,
+  overnightExportBatchSize: getEnvironmentVariable('OVERNIGHT_EXPORT_BATCH_SIZE'),
   paranoidRetentionPeriod: getEnvironmentVariable('PARANOID_RETENTION_PERIOD') ?? 90
 }
 
