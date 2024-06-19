@@ -65,7 +65,7 @@ describe('People repo', () => {
   jest.mock('../../../../app/repos/search')
   const { updateSearchIndexPerson } = require('../../../../app/repos/search')
 
-  const { createPeople, getPersonByReference, getPersonAndDogsByReference, getPersonAndDogsByIndex, updatePerson, getOwnerOfDog, updatePersonFields, deletePerson } = require('../../../../app/repos/people')
+  const { createPeople, getPersonByReference, getPersonAndDogsByReference, getPersonAndDogsByIndex, updatePerson, getOwnerOfDog, updatePersonFields, deletePerson, purgePersonByReferenceNumber } = require('../../../../app/repos/people')
 
   beforeEach(async () => {
     jest.clearAllMocks()
@@ -1093,6 +1093,80 @@ describe('People repo', () => {
       expect(destroyFnPersonContact).toHaveBeenCalledTimes(4)
       expect(destroyFnContact).toHaveBeenCalledTimes(4)
       expect(sequelize.models.search_index.destroy).toHaveBeenCalledTimes(1)
+    })
+  })
+
+  describe('purgePersonByReferenceNumber', () => {
+    const destroyFnPerson = jest.fn()
+    const destroyFnPersonAddress = jest.fn()
+    const destroyFnAddress = jest.fn()
+    const destroyFnPersonContact = jest.fn()
+    const destroyFnContact = jest.fn()
+
+    const combinedPerson = {
+      person_reference: 'P-123',
+      first_name: 'John',
+      last_name: 'Smith',
+      addresses: [
+        { destroy: destroyFnPersonAddress, address_id: 1, address: { destroy: destroyFnAddress } },
+        { destroy: destroyFnPersonAddress, address_id: 2, address: { destroy: destroyFnAddress } },
+        { destroy: destroyFnPersonAddress, address_id: 3, address: { destroy: destroyFnAddress } }
+      ],
+      person_contacts: [
+        { destroy: destroyFnPersonContact, contact_id: 1, contact: { destroy: destroyFnContact } },
+        { destroy: destroyFnPersonContact, contact_id: 2, contact: { destroy: destroyFnContact } },
+        { destroy: destroyFnPersonContact, contact_id: 3, contact: { destroy: destroyFnContact } },
+        { destroy: destroyFnPersonContact, contact_id: 4, contact: { destroy: destroyFnContact } }
+      ],
+      destroy: destroyFnPerson
+    }
+
+    afterEach(() => {
+      jest.clearAllMocks()
+    })
+
+    test('purgePersonByReferenceNumber should start new transaction if no transaction passed', async () => {
+      await purgePersonByReferenceNumber('P-12345', dummyUser)
+
+      expect(sequelize.transaction).toHaveBeenCalled()
+    })
+
+    test('purgePersonByReferenceNumber should not start new transaction if transaction passed', async () => {
+      sequelize.models.person.findAll.mockResolvedValue([combinedPerson])
+      await purgePersonByReferenceNumber('P-12345', dummyUser, {})
+
+      expect(sequelize.transaction).not.toHaveBeenCalled()
+    })
+
+    test('purgePersonByReferenceNumber should make appropriate delete calls', async () => {
+      sequelize.models.person.findAll.mockResolvedValue([combinedPerson])
+      sequelize.models.person.findOne.mockResolvedValue({ destroy: destroyFnPerson })
+      await purgePersonByReferenceNumber('P-12345', dummyUser, {})
+
+      expect(sequelize.models.person.findAll).toHaveBeenCalledWith(expect.objectContaining({
+        where: { person_reference: 'P-12345' },
+        paranoid: false
+      }))
+      expect(destroyFnPerson).toHaveBeenCalledWith({ force: true, transaction: {} })
+      expect(destroyFnPerson).toHaveBeenCalledTimes(1)
+      expect(destroyFnPersonAddress).toHaveBeenCalledWith({ force: true, transaction: {} })
+      expect(destroyFnPersonAddress).toHaveBeenCalledTimes(3)
+      expect(destroyFnAddress).toHaveBeenCalledWith({ force: true, transaction: {} })
+      expect(destroyFnAddress).toHaveBeenCalledTimes(3)
+      expect(destroyFnPersonContact).toHaveBeenCalledWith({ force: true, transaction: {} })
+      expect(destroyFnPersonContact).toHaveBeenCalledTimes(4)
+      expect(destroyFnContact).toHaveBeenCalledWith({ force: true, transaction: {} })
+      expect(destroyFnContact).toHaveBeenCalledTimes(4)
+      expect(sendEvent).toHaveBeenCalledWith({
+        type: 'uk.gov.defra.ddi.event.delete.permanent',
+        source: 'aphw-ddi-api',
+        partitionKey: 'P-123',
+        id: expect.any(String),
+        subject: 'DDI Permanently delete person',
+        data: {
+          message: '{"actioningUser":{"username":"dummy-user","displayname":"Dummy User"},"operation":"permanently deleted person","deleted":{"personReference":"P-123"}}'
+        }
+      })
     })
   })
 })

@@ -1,6 +1,6 @@
 const { v4: uuidv4 } = require('uuid')
-const { CREATE, UPDATE, DELETE, IMPORT_MANUAL, ACTIVITY: ACTIVITY_EVENT, CHANGE_OWNER } = require('../constants/event/events')
-const { SOURCE } = require('../constants/event/source')
+const { CREATE, UPDATE, DELETE, IMPORT_MANUAL, ACTIVITY: ACTIVITY_EVENT, CHANGE_OWNER, PURGE } = require('../constants/event/events')
+const { SOURCE, SOURCE_API } = require('../constants/event/source')
 const { getDiff } = require('json-difference')
 const { sendEvent } = require('./send-event')
 const { deepClone } = require('../lib/deep-clone')
@@ -141,6 +141,57 @@ const sendDeleteToAudit = async (auditObjectName, entity, user) => {
   await sendEvent(event)
 }
 
+const stripPermanentDeleteEntity = (objName, entity) => {
+  if (objName === DOG) {
+    return {
+      indexNumber: entity.index_number
+    }
+  } else if (objName === PERSON) {
+    return {
+      personReference: entity.personReference || entity.person_reference
+    }
+  }
+  throw new Error(`Invalid object for permanent delete audit: ${objName}`)
+}
+
+const determinePermanentDeletePk = (objName, entity) => {
+  if (objName === DOG) {
+    return entity.index_number
+  } else if (objName === PERSON) {
+    return entity.personReference || entity.person_reference
+  }
+  throw new Error(`Invalid object for permanent delete audit: ${objName}`)
+}
+
+const constructPermanentDeletePayload = (auditObjectName, entity, actioningUser) => {
+  return JSON.stringify({
+    actioningUser,
+    operation: `permanently deleted ${auditObjectName}`,
+    deleted: stripPermanentDeleteEntity(auditObjectName, entity)
+  })
+}
+
+const sendPermanentDeleteToAudit = async (auditObjectName, entity, user) => {
+  if (!isUserValid(user)) {
+    throw new Error(`Username and displayname are required for auditing deletion of ${auditObjectName}`)
+  }
+
+  const messagePayload = constructPermanentDeletePayload(auditObjectName, entity, user)
+
+  const event = {
+    type: PURGE,
+    source: SOURCE_API,
+    id: uuidv4(),
+    partitionKey: determinePermanentDeletePk(auditObjectName, entity),
+    subject: `DDI Permanently delete ${auditObjectName}`,
+    data: {
+      message: messagePayload
+    }
+  }
+
+  await sendEvent(event)
+}
+
 const constructDeletePayload = (auditObjectName, entity, actioningUser) => {
   return JSON.stringify({
     actioningUser,
@@ -256,6 +307,7 @@ module.exports = {
   sendEventToAudit,
   sendActivityToAudit,
   sendDeleteToAudit,
+  sendPermanentDeleteToAudit,
   isDataUnchanged,
   determineCreatePk,
   determineUpdatePk,
