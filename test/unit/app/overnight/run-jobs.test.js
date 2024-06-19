@@ -29,7 +29,7 @@ describe('RunJobs test', () => {
     endJob.mockResolvedValue()
     autoUpdateStatuses.mockResolvedValue('ok - insurance 2 rows')
     const res = await runOvernightJobs(server)
-    expect(res).toBe('ok - insurance 2 rows')
+    expect(res).toBe('ok - insurance 2 rows | undefined')
     expect(autoUpdateStatuses).toHaveBeenCalledTimes(1)
     expect(purgeSoftDeletedRecords).toHaveBeenCalledTimes(1)
   })
