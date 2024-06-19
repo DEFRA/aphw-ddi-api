@@ -7,7 +7,6 @@ const { sendUpdateToAudit, sendDeleteToAudit, sendPermanentDeleteToAudit } = req
 const { PERSON } = require('../constants/event/audit-event-object-types')
 const { personDto } = require('../dto/person')
 const { personRelationship } = require('./relationships/person')
-const { Op } = require('sequelize')
 
 /**
  * @typedef CountryDao
