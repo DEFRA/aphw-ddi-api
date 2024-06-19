@@ -634,12 +634,12 @@ describe('Dog repo', () => {
         id: 123,
         breed: 'Breed 1',
         name: 'Bruno',
-        registration: {
+        registrations: [{
           id: 1,
           cdoIssued: '2020-01-01',
           cdoExpiry: '2020-02-01',
           destroy: mockRegistrationDestroy
-        },
+        }],
         registered_person: [{
           destroy: mockRegisteredPersonDestroy
         }],
