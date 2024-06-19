@@ -119,7 +119,45 @@ describe('purge-soft-deleted-records', () => {
       expect('' + result).toBe('Purge deleted records. Success: 1 Dogs 1 Owners - [ED300002, P-1234-56]. Failed: 0 Dogs 0 Owners - [].')
     })
 
-    test('should safely handle failures', async () => {
+    test('should handle failures on deletes', async () => {
+      sequelize.models.person.findAll.mockResolvedValue([{
+        person_reference: 'P-1234-56'
+      }])
+      sequelize.models.dog.findAll.mockResolvedValue([{
+        index_number: 'ED300002'
+      }])
+      purgeDogByIndexNumber.mockRejectedValue(new Error('error while saving'))
+      purgePersonByReferenceNumber.mockRejectedValue(new Error('error while saving'))
+      const result = await purgeSoftDeletedRecords(new Date('2024-06-17T00:00:00.000Z'))
+
+      expect(result).toEqual({
+        count: {
+          success: expect.objectContaining({
+            dogs: 0,
+            owners: 0,
+            total: 0
+          }),
+          failed: expect.objectContaining({
+            dogs: 1,
+            owners: 1,
+            total: 2
+          })
+        },
+        deleted: {
+          success: expect.objectContaining({
+            dogs: [],
+            owners: []
+          }),
+          failed: expect.objectContaining({
+
+            dogs: ['ED300002'],
+            owners: ['P-1234-56']
+          })
+        },
+        toString: expect.any(Function)
+      })
+    })
+    test('should safely handle failure of the whole function', async () => {
       sequelize.models.person.findAll.mockRejectedValue(new Error('server error'))
       const result = await purgeSoftDeletedRecords()
       expect('' + result).toEqual('Error purging soft deleted records: Error: server error')
