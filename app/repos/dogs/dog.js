@@ -484,6 +484,10 @@ const deleteDogByIndexNumber = async (indexNumber, user, transaction) => {
       {
         model: sequelize.models.registration,
         as: 'registration'
+      },
+      {
+        model: sequelize.models.insurance,
+        as: 'insurance'
       }
     ],
     transaction
@@ -494,6 +498,10 @@ const deleteDogByIndexNumber = async (indexNumber, user, transaction) => {
   for (const dogMicrochip of dogAggregate.dog_microchips) {
     await dogMicrochip.microchip.destroy()
     await dogMicrochip.destroy()
+  }
+
+  for (const insuranceRecord of dogAggregate.insurance) {
+    await insuranceRecord.destroy()
   }
 
   for (const registeredPerson of dogAggregate.registered_person) {
@@ -536,6 +544,11 @@ const purgeDogByIndexNumber = async (indexNumber, user, transaction) => {
             paranoid: false
           }
         ]
+      },
+      {
+        model: sequelize.models.insurance,
+        as: 'insurance',
+        paranoid: false
       }
     ],
     transaction,
@@ -545,6 +558,10 @@ const purgeDogByIndexNumber = async (indexNumber, user, transaction) => {
   for (const dogMicrochip of dogAggregate.dog_microchips) {
     await dogMicrochip.destroy({ force: true, transaction })
     await dogMicrochip.microchip.destroy({ force: true, transaction })
+  }
+
+  for (const insurance of dogAggregate.insurance) {
+    await insurance.destroy({ force: true, transaction })
   }
 
   for (const registeredPerson of dogAggregate.registered_person) {
