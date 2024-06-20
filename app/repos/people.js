@@ -473,7 +473,12 @@ const deletePerson = async (reference, user, transaction) => {
     return await sequelize.transaction(async (t) => deletePerson(reference, user, t))
   }
 
-  const personWithRelationships = await getPersonByReference(reference, transaction)
+  const [personWithRelationships] = await sequelize.models.person.findAll({
+    order: [[sequelize.col('addresses.address.id'), 'DESC']],
+    where: { person_reference: reference },
+    include: personRelationship(sequelize, false),
+    transaction
+  })
 
   const person = await sequelize.models.person.findOne({ where: { person_reference: reference } })
   await person.destroy()

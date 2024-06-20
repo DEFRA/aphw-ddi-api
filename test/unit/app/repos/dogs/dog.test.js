@@ -54,6 +54,11 @@ describe('Dog repo', () => {
         findAll: jest.fn(),
         create: jest.fn()
       },
+      insurance: {
+        findOne: jest.fn(),
+        findAll: jest.fn(),
+        create: jest.fn()
+      },
       dog_microchip: {
         findAll: jest.fn(),
         create: jest.fn()
@@ -580,6 +585,7 @@ describe('Dog repo', () => {
       const mockDogMicrochipDestroy = jest.fn()
       const mockRegistrationDestroy = jest.fn()
       const mockRegisteredPersonDestroy = jest.fn()
+      const mockInsuranceDestroy = jest.fn()
 
       const mockDogAggregrate = {
         id: 123,
@@ -598,6 +604,7 @@ describe('Dog repo', () => {
           { microchip: { microchip_number: 123456789012345, destroy: mockMicrochipDestroy }, destroy: mockDogMicrochipDestroy },
           { microchip: { microchip_number: 112345678901234, destroy: mockMicrochipDestroy }, destroy: mockDogMicrochipDestroy }
         ],
+        insurance: [{ id: 6, policy_number: null, company_id: 1, renewal_date: '2020-06-01T00:00:00.000Z', dog_id: 300088, destroy: mockInsuranceDestroy }],
         destroy: mockDogDestroy
       }
       sequelize.models.dog.findOne.mockResolvedValue(mockDogAggregrate)
@@ -610,6 +617,7 @@ describe('Dog repo', () => {
       }))
       expect(mockRegistrationDestroy).toHaveBeenCalledTimes(1)
       expect(mockRegisteredPersonDestroy).toHaveBeenCalledTimes(1)
+      expect(mockInsuranceDestroy).toHaveBeenCalledTimes(1)
       expect(mockMicrochipDestroy).toHaveBeenCalledTimes(2)
       expect(mockDogMicrochipDestroy).toHaveBeenCalledTimes(2)
       expect(mockDogDestroy).toHaveBeenCalled()
@@ -629,6 +637,7 @@ describe('Dog repo', () => {
       const mockDogMicrochipDestroy = jest.fn()
       const mockRegistrationDestroy = jest.fn()
       const mockRegisteredPersonDestroy = jest.fn()
+      const mockInsuranceDestroy = jest.fn()
 
       const mockDogAggregrate = {
         id: 123,
@@ -647,6 +656,7 @@ describe('Dog repo', () => {
           { microchip: { microchip_number: 123456789012345, destroy: mockMicrochipDestroy }, destroy: mockDogMicrochipDestroy },
           { microchip: { microchip_number: 112345678901234, destroy: mockMicrochipDestroy }, destroy: mockDogMicrochipDestroy }
         ],
+        insurance: [{ id: 6, policy_number: null, company_id: 1, renewal_date: '2020-06-01T00:00:00.000Z', dog_id: 300088, destroy: mockInsuranceDestroy }],
         destroy: mockDogDestroy
       }
       sequelize.models.dog.findOne.mockResolvedValue(mockDogAggregrate)
@@ -661,6 +671,7 @@ describe('Dog repo', () => {
       expect(mockRegisteredPersonDestroy).toHaveBeenCalledWith({ force: true, transaction: {} })
       expect(mockMicrochipDestroy).toHaveBeenCalledWith({ force: true, transaction: {} })
       expect(mockDogMicrochipDestroy).toHaveBeenCalledWith({ force: true, transaction: {} })
+      expect(mockInsuranceDestroy).toHaveBeenCalledWith({ force: true, transaction: {} })
       expect(mockDogDestroy).toHaveBeenCalledWith({ force: true, transaction: {} })
       expect(sendPermanentDeleteToAudit).toHaveBeenCalledWith('dog', mockDogAggregrate, devUser)
     })
