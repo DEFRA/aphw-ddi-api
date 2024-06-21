@@ -2,7 +2,7 @@ const sequelize = require('../config/db')
 const { setExpiredCdosToFailed } = require('./expired-cdo')
 const { setExpiredInsuranceToBreach } = require('./expired-insurance')
 const { setExpiredNeuteringDeadlineToInBreach } = require('./expired-neutering-deadline')
-const { overnightJobUser: user } = require('../constants/import')
+const { overnightJobUser: user } = require('../constants/auth')
 
 const autoUpdateStatuses = async () => {
   let result = ''
