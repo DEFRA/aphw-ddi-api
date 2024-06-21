@@ -21,4 +21,5 @@ data:
   {{- end }}
   OVERNIGHT_JOB_CRONTAB: {{ quote .Values.container.overnightJobCrontab }}
   PARANOID_RETENTION_PERIOD:  {{ quote .Values.container.paranoidRetentionPeriod }}
+  FEATURE_FLAG_PURGE_DELETE:  {{ quote .Values.container.featureFlagPurgeDelete }}
 {{- end -}}
