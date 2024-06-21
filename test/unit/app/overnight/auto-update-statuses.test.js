@@ -10,6 +10,11 @@ const { setExpiredNeuteringDeadlineToInBreach } = require('../../../../app/overn
 jest.mock('../../../../app/lib/environment-helpers')
 const { getEnvironmentVariableOrString } = require('../../../../app/lib/environment-helpers')
 
+const overnightJobUser = {
+  username: 'overnight-job-system-user',
+  displayname: 'Overnight Job System User'
+}
+
 describe('AutoUpdateStatus test', () => {
   beforeEach(() => {
     getEnvironmentVariableOrString.mockReturnValue('')
@@ -22,7 +27,9 @@ describe('AutoUpdateStatus test', () => {
     setExpiredNeuteringDeadlineToInBreach.mockResolvedValue('ok - neutering 2 rows')
     const res = await autoUpdateStatuses()
     expect(res).toBe('ok - cdos 1 rows | ok - insurance 2 rows | ok - neutering 2 rows')
-    expect(setExpiredNeuteringDeadlineToInBreach).toHaveBeenCalled()
+    expect(setExpiredNeuteringDeadlineToInBreach).toHaveBeenCalledWith(expect.any(Date), overnightJobUser, expect.anything())
+    expect(setExpiredInsuranceToBreach).toHaveBeenCalledWith(expect.any(Date), overnightJobUser, expect.anything())
+    expect(setExpiredCdosToFailed).toHaveBeenCalledWith(expect.any(Date), overnightJobUser, expect.anything())
   })
 
   test('autoUpdateStatuses should handle errors', async () => {

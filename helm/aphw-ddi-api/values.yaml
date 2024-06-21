@@ -42,6 +42,7 @@ container:
   eventsTopicAddress: aphw-ddi-events
   overnightJobCrontab: 5 4 * * *
   paranoidRetentionPeriod: 90
+  featureFlagPurgeDelete: false
 
 postgresService:
   postgresDb: dangerous_dogs_index
