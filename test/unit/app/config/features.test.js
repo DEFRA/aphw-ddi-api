@@ -12,7 +12,7 @@ describe('features config', () => {
       }
       return undefined
     })
-    const { runPurgeDelete } = require('../../../../app/config/features.js')
+    const { runPurgeDelete } = require('../../../../app/config/featureFlags.js')
     expect(runPurgeDelete).toBe(true)
   })
 
@@ -25,7 +25,7 @@ describe('features config', () => {
       }
       return undefined
     })
-    const { runPurgeDelete } = require('../../../../app/config/features.js')
+    const { runPurgeDelete } = require('../../../../app/config/featureFlags.js')
     expect(runPurgeDelete).toBe(false)
   })
   test('should not use FEATURE_FLAG_PURGE_DELETE given set to false', () => {
@@ -33,7 +33,7 @@ describe('features config', () => {
     const { getEnvironmentVariable } = require('../../../../app/lib/environment-helpers')
     getEnvironmentVariable.mockReturnValue(undefined)
 
-    const { runPurgeDelete } = require('../../../../app/config/features.js')
+    const { runPurgeDelete } = require('../../../../app/config/featureFlags.js')
     expect(runPurgeDelete).toBe(false)
   })
 
@@ -42,6 +42,6 @@ describe('features config', () => {
     const { getEnvironmentVariable } = require('../../../../app/lib/environment-helpers')
     getEnvironmentVariable.mockReturnValue('not a boolean')
 
-    expect(() => require('../../../../app/config/features.js')).toThrow('The server config is invalid. "runPurgeDelete" must be a boolean')
+    expect(() => require('../../../../app/config/featureFlags.js')).toThrow('The server config is invalid. "runPurgeDelete" must be a boolean')
   })
 })

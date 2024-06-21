@@ -3,6 +3,7 @@ const { autoUpdateStatuses } = require('./auto-update-statuses')
 const { createExportFile } = require('./create-export-file')
 const { tryStartJob, endJob, createNewJob } = require('../repos/regular-jobs')
 const { purgeSoftDeletedRecords } = require('./purge-soft-deleted-records')
+const featureFlags = require('../config/featureFlags')
 
 const triggerExportGeneration = server => {
   server.inject({
@@ -16,7 +17,11 @@ const runOvernightJobs = async (server) => {
 
   if (jobId) {
     let result = await autoUpdateStatuses()
-    result += ' | ' + await purgeSoftDeletedRecords()
+
+    if (featureFlags.runPurgeDelete) {
+      result += ' | ' + await purgeSoftDeletedRecords()
+    }
+
     await endJob(jobId, result)
     triggerExportGeneration(server)
     return result
