@@ -51,6 +51,18 @@ describe('CDO endpoint', () => {
       expect(response.statusCode).toBe(200)
     })
 
+    test('GET /cdo/ED123 route returns 404 when not found', async () => {
+      getCdo.mockResolvedValue(null)
+
+      const options = {
+        method: 'GET',
+        url: '/cdo/ED123'
+      }
+
+      const response = await server.inject(options)
+      expect(response.statusCode).toBe(404)
+    })
+
     test('GET /cdo/ED123 route returns 500 when error', async () => {
       getCdo.mockImplementation(() => { throw new Error('cdo error') })
 
@@ -360,6 +372,18 @@ describe('CDO endpoint', () => {
 
       const response = await server.inject(options)
       expect(response.statusCode).toBe(404)
+    })
+
+    test('should returns 500 given server error thrown', async () => {
+      getCdo.mockImplementation(() => { throw new Error('cdo error') })
+
+      const options = {
+        method: 'GET',
+        url: '/cdo/ED123/manage'
+      }
+
+      const response = await server.inject(options)
+      expect(response.statusCode).toBe(500)
     })
   })
 })
