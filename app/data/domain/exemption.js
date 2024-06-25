@@ -1,3 +1,7 @@
+/**
+ * @param exemptionProperties
+ * @constructor
+ */
 function Exemption (exemptionProperties) {
   this.exemptionOrder = exemptionProperties.exemptionOrder
   this.cdoIssued = exemptionProperties.cdoIssued
@@ -12,6 +16,8 @@ function Exemption (exemptionProperties) {
   this.microchipVerification = exemptionProperties.microchipVerification
   this.joinedExemptionScheme = exemptionProperties.joinedExemptionScheme
   this.nonComplianceLetterSent = exemptionProperties.nonComplianceLetterSent
+  this.applicationPackSent = exemptionProperties.applicationPackSent
+  this.formTwoSent = exemptionProperties.formTwoSent
 }
 
 module.exports = Exemption

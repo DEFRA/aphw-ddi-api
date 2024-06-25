@@ -20,7 +20,9 @@ describe('Exemption', () => {
       neuteringConfirmation: null,
       microchipVerification: null,
       joinedExemptionScheme: '2023-12-10',
-      nonComplianceLetterSent: null
+      nonComplianceLetterSent: null,
+      applicationPackSent: null,
+      formTwoSent: null
     }
 
     const exemption = new Exemption(exemptionProperties)
@@ -43,7 +45,9 @@ describe('Exemption', () => {
       neuteringConfirmation: null,
       microchipVerification: null,
       joinedExemptionScheme: '2023-12-10',
-      nonComplianceLetterSent: null
+      nonComplianceLetterSent: null,
+      applicationPackSent: null,
+      formTwoSent: null
     }))
     expect(exemption).toBeInstanceOf(Exemption)
   })
