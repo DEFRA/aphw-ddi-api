@@ -22,6 +22,49 @@ describe('CdoTaskList', () => {
       readonly: false,
       timestamp: undefined
     }))
+    expect(cdoTaskList.insuranceDetailsRecorded).toEqual(expect.objectContaining({
+      key: 'insuranceDetailsRecorded',
+      available: false,
+      completed: false,
+      readonly: false,
+      timestamp: undefined
+    }))
+
+    expect(cdoTaskList.microchipNumberRecorded).toEqual(expect.objectContaining({
+      key: 'microchipNumberRecorded',
+      available: false,
+      completed: false,
+      readonly: false,
+      timestamp: undefined
+    }))
+    expect(cdoTaskList.applicationFeePaid).toEqual(expect.objectContaining({
+      key: 'applicationFeePaid',
+      available: false,
+      completed: false,
+      readonly: false,
+      timestamp: undefined
+    }))
+    expect(cdoTaskList.form2Sent).toEqual(expect.objectContaining({
+      key: 'form2Sent',
+      available: false,
+      completed: false,
+      readonly: false,
+      timestamp: undefined
+    }))
+    expect(cdoTaskList.verificationDateRecorded).toEqual(expect.objectContaining({
+      key: 'verificationDateRecorded',
+      available: false,
+      completed: false,
+      readonly: false,
+      timestamp: undefined
+    }))
+    expect(cdoTaskList.certificateIssued).toEqual(expect.objectContaining({
+      key: 'certificateIssued',
+      available: false,
+      completed: false,
+      readonly: false,
+      timestamp: undefined
+    }))
   })
 
   test('should show applicationPackSent in non-default state', () => {
