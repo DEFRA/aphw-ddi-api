@@ -157,10 +157,14 @@ const { Op } = require('sequelize')
  * @property {StatusDao} status
  */
 /**
+ * @typedef CreateCdo
  * @param data
  * @param user
  * @param transaction
  * @return {Promise<*|{owner: CreatedPersonDao, dogs: (Promise<*>|[])}|undefined|{owner: CreatedPersonDao, dogs: (*|[])}>}
+ */
+/**
+ * @type CreateCdo
  */
 const createCdo = async (data, user, transaction) => {
   if (!transaction) {
@@ -210,9 +214,14 @@ const createCdo = async (data, user, transaction) => {
 }
 
 /**
+ * @typedef GetCdo
  * @param indexNumber
  * @return {Promise<CdoDao>}
  */
+
+/**
+ * @type {GetCdo}
+ **/
 const getCdo = async (indexNumber) => {
   const cdo = await sequelize.models.dog.findAll({
     where: { index_number: indexNumber },
@@ -225,7 +234,13 @@ const getCdo = async (indexNumber) => {
 }
 
 /**
+ * @typedef GetAllCdos
+ * @param idStart
+ * @param rowLimit
  * @return {Promise<CdoDao[]>}
+ */
+/**
+ * @type {GetAllCdos}
  */
 const getAllCdos = async (idStart, rowLimit) => {
   const query = {
@@ -242,7 +257,7 @@ const getAllCdos = async (idStart, rowLimit) => {
     query.subQuery = false
   }
 
-  return await sequelize.models.dog.findAll(query)
+  return sequelize.models.dog.findAll(query)
 }
 
 /**
@@ -269,8 +284,13 @@ const policeForceCol = 'registration.police_force.name'
  */
 
 /**
+ * @typedef GetSortOrder
  * @param {CdoSort} sort
  * @return {*[]}
+ */
+
+/**
+ * @type {GetSortOrder}
  */
 const getSortOrder = (sort) => {
   const order = []
@@ -294,10 +314,14 @@ const getSortOrder = (sort) => {
 }
 
 /**
- *
+ * @typedef GetSummaryCdos
  * @param {{ status?: CdoStatus[]; withinDays?: number; nonComplianceLetterSent?: boolean }} [filter]
  * @param {CdoSort} [sort]
  * @return {Promise<SummaryCdo[]>}
+ */
+
+/**
+ * @type {GetSummaryCdos}
  */
 const getSummaryCdos = async (filter, sort) => {
   const where = {}
@@ -369,6 +393,13 @@ const getSummaryCdos = async (filter, sort) => {
   return cdos
 }
 
+/**
+ * @typedef {{getCdo: GetCdo, getSummaryCdos: GetSummaryCdos, getAllCdos: GetAllCdos, createCdo: CreateCdo}} CdoRepository
+ */
+
+/**
+ * @type {CdoRepository}
+ */
 module.exports = {
   createCdo,
   getCdo,
