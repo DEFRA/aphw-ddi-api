@@ -23,9 +23,9 @@ const buildAddress = (addressPartial = {}) => ({
   postcode: 'S1 1AA',
   county: null,
   country_id: 1,
-  created_at: '2024-06-24T09:12:07.814Z',
+  created_at: new Date('2024-06-24T09:12:07.814Z'),
   deleted_at: null,
-  updated_at: '2024-06-24T09:12:07.853Z',
+  updated_at: new Date('2024-06-24T09:12:07.853Z'),
   country: buildCountry(),
   ...addressPartial
 })
@@ -40,9 +40,9 @@ const buildPersonAddress = (personAddress = {}) => ({
   id: 110,
   person_id: 90,
   address_id: 110,
-  created_at: '2024-06-24T09:12:07.814Z',
+  created_at: new Date('2024-06-24T09:12:07.814Z'),
   deleted_at: null,
-  updated_at: '2024-06-24T09:12:07.867Z',
+  updated_at: new Date('2024-06-24T09:12:07.867Z'),
   address: buildAddress(),
   ...personAddress
 })
@@ -55,10 +55,10 @@ const personAddress = buildPersonAddress()
  */
 const buildPerson = (personPartial = {}) => ({
   id: 90,
-  first_name: 'Homer300',
-  last_name: 'Simpson300',
+  first_name: 'Alex',
+  last_name: 'Carter',
   person_reference: 'P-8AD0-561A',
-  birth_date: '1998-05-10',
+  birth_date: new Date('1998-05-10'),
   organisation_id: null,
   created_at: '2024-06-24T09:12:07.814Z',
   deleted_at: null,

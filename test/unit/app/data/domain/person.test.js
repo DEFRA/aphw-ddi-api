@@ -4,8 +4,8 @@ describe('Person', () => {
   const personProperties = {
     id: 90,
     personReference: 'P-8AD0-561A',
-    firstName: 'Homer300',
-    lastName: 'Simpson300',
+    firstName: 'Alex',
+    lastName: 'Carter',
     dateOfBirth: '1998-05-10',
     addresses: [
       {
@@ -43,8 +43,8 @@ describe('Person', () => {
     expect(person).toEqual(expect.objectContaining({
       id: 90,
       personReference: 'P-8AD0-561A',
-      firstName: 'Homer300',
-      lastName: 'Simpson300',
+      firstName: 'Alex',
+      lastName: 'Carter',
       dateOfBirth: '1998-05-10',
       addresses: [
         {
