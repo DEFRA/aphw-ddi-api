@@ -1,4 +1,5 @@
-const { buildPersonAddress, cdo } = require('./get')
+const { buildPersonAddress } = require('./get')
+const { Cdo, Person, Dog, Exemption } = require('../../../app/data/domain')
 
 /**
  * @param {Partial<CdoPerson>} cdoPersonPartial
@@ -71,6 +72,9 @@ const buildCdoInsurance = (insurancePartial = {}) => ({
  * @property {Date} joinedExemptionScheme - Date when joined the exemption scheme.
  * @property {string} policeForce - Name of the police force.
  * @property {Date|null} applicationFeePaid - Status of application fee payment, currently null.
+ * @property {Date|null} applicationPackSent - Date application pack was sent
+ * @property {Date|null} formTwoSent - Date Form Two was sent
+ * @property {Date|null} applicationFeePaid - Status of application fee payment, currently null.
  */
 
 /**
@@ -93,14 +97,20 @@ const buildExemption = (exemptionPartial = {}) => ({
   microchipVerification: null,
   joinedExemptionScheme: new Date('2023-12-10'),
   nonComplianceLetterSent: null,
+  applicationPackSent: null,
+  formTwoSent: null,
   ...exemptionPartial
 })
 
-const buildCdo = (cdoPartial) => ({
-  person: buildCdoPerson(),
-  dog: buildCdoDog(),
-  exemption: buildExemption()
-})
+const buildCdo = (cdoPartial = {}) => {
+  const personProps = buildCdoPerson(cdoPartial.person ?? {})
+  const exemptionProps = buildExemption(cdoPartial.exemption ?? {})
+  const dogProps = buildCdoDog(cdoPartial.dog ?? {})
+  const person = new Person(personProps)
+  const dog = new Dog(dogProps)
+  const exemption = new Exemption(exemptionProps)
+  return new Cdo(person, dog, exemption)
+}
 
 module.exports = {
   buildCdoPerson,
