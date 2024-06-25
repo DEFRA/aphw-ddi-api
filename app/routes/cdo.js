@@ -67,49 +67,49 @@ module.exports = [
             key: 'applicationPackSent',
             available: true,
             completed: false,
-            editable: true,
+            readonly: false,
             timestamp: undefined
           },
           insuranceDetailsRecorded: {
             key: 'insuranceDetailsRecorded',
             available: false,
             completed: false,
-            editable: false,
+            readonly: true,
             timestamp: undefined
           },
           microchipNumberRecorded: {
             key: 'microchipNumberRecorded',
             available: false,
             completed: false,
-            editable: false,
+            readonly: true,
             timestamp: undefined
           },
           applicationFeePaid: {
             key: 'applicationFeePaid',
             available: false,
             completed: false,
-            editable: false,
+            readonly: true,
             timestamp: undefined
           },
           form2Sent: {
             key: 'form2Sent',
             available: false,
             completed: false,
-            editable: false,
+            readonly: true,
             timestamp: undefined
           },
           verificationDateRecorded: {
             key: 'verificationDateRecorded',
             available: false,
             completed: false,
-            editable: false,
+            readonly: true,
             timestamp: undefined
           },
           certificateIssued: {
             key: 'certificateIssued',
             available: false,
             completed: false,
-            editable: false,
+            readonly: true,
             timestamp: undefined
           }
         }
