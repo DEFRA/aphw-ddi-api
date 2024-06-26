@@ -409,6 +409,10 @@ const getSummaryCdos = async (filter, sort) => {
 const getCdoModel = async (indexNumber) => {
   const cdoDao = await getCdo(indexNumber)
 
+  if (cdoDao === null) {
+    throw new NotFoundError(`Cdo does not exist with indexNumber: ${indexNumber}`)
+  }
+
   return mapCdoDaoToCdo(cdoDao)
 }
 

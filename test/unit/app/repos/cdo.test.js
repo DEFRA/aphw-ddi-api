@@ -565,6 +565,11 @@ describe('CDO repo', () => {
       const res = await getCdoModel('ED300097')
       expect(res).toBeInstanceOf(Cdo)
     })
+
+    test('should return throw a NotFoundError if index does not exist', async () => {
+      sequelize.models.dog.findAll.mockResolvedValue([])
+      await expect(getCdoModel('ED300097')).rejects.toThrow(NotFoundError)
+    })
   })
 
   describe('getTaskList', () => {
@@ -572,6 +577,11 @@ describe('CDO repo', () => {
       sequelize.models.dog.findAll.mockResolvedValue([buildCdoDao()])
       const res = await getCdoTaskList('ED300097')
       expect(res).toEqual(new CdoTaskList(buildCdo()))
+    })
+
+    test('should throw a NotFound error given cdo does not exist', async () => {
+      sequelize.models.dog.findAll.mockResolvedValue([])
+      await expect(getCdoTaskList('ED300097')).rejects.toThrow(NotFoundError)
     })
   })
 })
