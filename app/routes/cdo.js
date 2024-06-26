@@ -3,6 +3,8 @@ const { createCdo, getCdo } = require('../repos/cdo')
 const { getCallingUser } = require('../auth/get-user')
 const cdoCreateSchema = require('../schema/cdo/create')
 const { NotFoundError } = require('../errors/not-found')
+const ServiceProvider = require('../service/config')
+const { mapCdoTaskListToDto } = require('../dto/cdoTaskList')
 
 module.exports = [
   {
@@ -56,66 +58,16 @@ module.exports = [
     handler: async (request, h) => {
       const indexNumber = request.params.indexNumber
       try {
-        const cdo = await getCdo(indexNumber)
+        const cdoService = ServiceProvider.getCdoService()
+        const cdoTaskList = await cdoService.getTaskList(indexNumber)
 
-        if (!cdo) {
+        const manageCdo = mapCdoTaskListToDto(cdoTaskList)
+
+        return h.response(manageCdo).code(200)
+      } catch (e) {
+        if (e instanceof NotFoundError) {
           return h.response().code(404)
         }
-
-        const tasks = {
-          applicationPackSent: {
-            key: 'applicationPackSent',
-            available: true,
-            completed: false,
-            editable: true,
-            timestamp: undefined
-          },
-          insuranceDetailsRecorded: {
-            key: 'insuranceDetailsRecorded',
-            available: false,
-            completed: false,
-            editable: false,
-            timestamp: undefined
-          },
-          microchipNumberRecorded: {
-            key: 'microchipNumberRecorded',
-            available: false,
-            completed: false,
-            editable: false,
-            timestamp: undefined
-          },
-          applicationFeePaid: {
-            key: 'applicationFeePaid',
-            available: false,
-            completed: false,
-            editable: false,
-            timestamp: undefined
-          },
-          form2Sent: {
-            key: 'form2Sent',
-            available: false,
-            completed: false,
-            editable: false,
-            timestamp: undefined
-          },
-          verificationDateRecorded: {
-            key: 'verificationDateRecorded',
-            available: false,
-            completed: false,
-            editable: false,
-            timestamp: undefined
-          },
-          certificateIssued: {
-            key: 'certificateIssued',
-            available: false,
-            completed: false,
-            editable: false,
-            timestamp: undefined
-          }
-        }
-
-        return h.response({ tasks }).code(200)
-      } catch (e) {
         console.log('Error retrieving cdo record:', e)
         throw e
       }
