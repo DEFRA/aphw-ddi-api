@@ -1,5 +1,5 @@
 const { buildPersonAddressDao } = require('./get')
-const { Cdo, Person, Dog, Exemption } = require('../../../app/data/domain')
+const { Cdo, Person, Dog, Exemption, CdoTask } = require('../../../app/data/domain')
 
 /**
  * @param {Partial<CdoPerson>} cdoPersonPartial
@@ -110,10 +110,23 @@ const buildCdo = (cdoPartial = {}) => {
   return new Cdo(person, dog, exemption)
 }
 
+const buildTask = (cdoTask = {}) => {
+  return new CdoTask(
+    cdoTask.key ?? 'applicationPackSent',
+    {
+      available: cdoTask.available,
+      completed: cdoTask.completed,
+      readonly: cdoTask.readonly
+    },
+    cdoTask.timestamp
+  )
+}
+
 module.exports = {
   buildCdoPerson,
   buildCdoDog,
   buildCdoInsurance,
   buildExemption,
-  buildCdo
+  buildCdo,
+  buildTask
 }

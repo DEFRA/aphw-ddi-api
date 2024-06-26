@@ -1,53 +1,35 @@
+const buildCdoTaskDto = (partialTaskDto) => ({
+  key: 'applicationPackSent',
+  available: true,
+  completed: false,
+  readonly: false,
+  timestamp: undefined,
+  ...partialTaskDto
+})
+
 const buildCdoTaskListDtoTasks = (partialCdoTaskListDto = {}) => ({
   applicationPackSent: {
     key: 'applicationPackSent',
-    available: true,
-    completed: false,
-    readonly: false,
-    timestamp: undefined
+    available: true
   },
-  insuranceDetailsRecorded: {
-    key: 'insuranceDetailsRecorded',
-    available: false,
-    completed: false,
-    readonly: false,
-    timestamp: undefined
-  },
-  microchipNumberRecorded: {
-    key: 'microchipNumberRecorded',
-    available: false,
-    completed: false,
-    readonly: false,
-    timestamp: undefined
-  },
-  applicationFeePaid: {
-    key: 'applicationFeePaid',
-    available: false,
-    completed: false,
-    readonly: false,
-    timestamp: undefined
-  },
-  form2Sent: {
-    key: 'form2Sent',
-    available: false,
-    completed: false,
-    readonly: false,
-    timestamp: undefined
-  },
-  verificationDateRecorded: {
-    key: 'verificationDateRecorded',
-    available: false,
-    completed: false,
-    readonly: false,
-    timestamp: undefined
-  },
-  certificateIssued: {
-    key: 'certificateIssued',
-    available: false,
-    completed: false,
-    readonly: false,
-    timestamp: undefined
-  },
+  insuranceDetailsRecorded: buildCdoTaskDto({
+    key: 'insuranceDetailsRecorded'
+  }),
+  microchipNumberRecorded: buildCdoTaskDto({
+    key: 'microchipNumberRecorded'
+  }),
+  applicationFeePaid: buildCdoTaskDto({
+    key: 'applicationFeePaid'
+  }),
+  form2Sent: buildCdoTaskDto({
+    key: 'form2Sent'
+  }),
+  verificationDateRecorded: buildCdoTaskDto({
+    key: 'verificationDateRecorded'
+  }),
+  certificateIssued: buildCdoTaskDto({
+    key: 'certificateIssued'
+  }),
   ...partialCdoTaskListDto
 })
 
