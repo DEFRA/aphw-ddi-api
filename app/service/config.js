@@ -19,4 +19,4 @@ class ServiceProvider {
   }
 }
 
-module.exports = ServiceProvider
+module.exports = { ServiceProvider }
