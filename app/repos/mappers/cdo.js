@@ -25,6 +25,8 @@
  * @property {SummaryExemptionDto} exemption
  */
 
+const { Person, Cdo, Dog, Exemption } = require('../../data/domain')
+const { getMicrochip } = require('../../dto/dto-helper')
 /**
  * @param {SummaryCdo} summaryCdo
  * @return {SummaryCdoDto}
@@ -55,6 +57,74 @@ const mapSummaryCdoDaoToDto = (summaryCdo) => {
   }
 }
 
+const mapCdoPersonToPerson = (person) => {
+  const params = {
+    id: person.id,
+    personReference: person.person_reference,
+    firstName: person.first_name,
+    lastName: person.last_name,
+    dateOfBirth: person.birth_date,
+    addresses: person.addresses,
+    person_contacts: person.person_contacts,
+    organisationName: person.organisation?.organisation_name ?? null
+  }
+
+  return new Person(params)
+}
+
+const mapDogDaoToDog = (dogDao) => {
+  const dogProperties = {
+    id: dogDao.id,
+    dogReference: dogDao.dog_reference,
+    indexNumber: dogDao.index_number,
+    name: dogDao.name,
+    breed: dogDao.dog_breed.breed,
+    status: dogDao.status.status,
+    dateOfBirth: dogDao.birth_date,
+    dateOfDeath: dogDao.death_date,
+    tattoo: dogDao.tattoo,
+    colour: dogDao.colour,
+    sex: dogDao.sex,
+    dateExported: dogDao.exported_date,
+    dateStolen: dogDao.stolen_date,
+    dateUntraceable: dogDao.untraceable_date,
+    microchipNumber: getMicrochip(dogDao, 1),
+    microchipNumber2: getMicrochip(dogDao, 2)
+  }
+  return new Dog(dogProperties)
+}
+
+const mapCdoDaoToExemption = (registration, insurance) => {
+  const exemptionProperties = {
+    exemptionOrder: registration.exemption_order.exemption_order,
+    cdoIssued: new Date(registration.cdo_issued),
+    cdoExpiry: new Date(registration.cdo_expiry),
+    court: registration.court?.name,
+    policeForce: registration?.police_force?.name,
+    legislationOfficer: registration.legislation_officer,
+    certificateIssued: registration.certificate_issued,
+    applicationFeePaid: registration.application_fee_paid,
+    insurance: insurance?.sort((a, b) => a.id - b.id).map(i => ({
+      company: i.company.company_name,
+      insuranceRenewal: i.renewal_date
+    })),
+    neuteringConfirmation: registration.neutering_confirmation,
+    microchipVerification: registration.microchip_verification,
+    joinedExemptionScheme: new Date(registration.joined_exemption_scheme),
+    nonComplianceLetterSent: registration.non_compliance_letter_sent,
+    applicationPackSent: registration.application_pack_sent,
+    formTwoSent: registration.form_two_sent
+  }
+  return new Exemption(exemptionProperties)
+}
+const mapCdoDaoToCdo = (cdoDao) => {
+  const person = mapCdoPersonToPerson(cdoDao.registered_person[0].person)
+  const dog = mapDogDaoToDog(cdoDao)
+  const exemption = mapCdoDaoToExemption(cdoDao.registration, cdoDao.insurance)
+
+  return new Cdo(person, dog, exemption)
+}
 module.exports = {
-  mapSummaryCdoDaoToDto
+  mapSummaryCdoDaoToDto,
+  mapCdoDaoToCdo
 }

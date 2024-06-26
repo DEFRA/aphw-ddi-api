@@ -64,7 +64,7 @@ const buildPerson = (personPartial = {}) => ({
   deleted_at: null,
   updated_at: '2024-06-24T09:12:07.836Z',
   addresses: [
-    buildAddress()
+    buildPersonAddress()
   ],
   organisation: null,
   person_contacts: [],
@@ -195,6 +195,8 @@ const buildRegistration = (registrationPartial = {}) => ({
   neutering_deadline: null,
   non_compliance_letter_sent: null,
   deleted_at: null,
+  application_pack_sent: null,
+  form_two_sent: null,
   created_at: '2024-06-24T09:12:07.897Z',
   updated_at: '2024-06-24T09:12:07.897Z',
   police_force: buildPoliceForce(),
@@ -295,10 +297,10 @@ const buildCdo = (cdoPartial = {}) => ({
     buildRegisteredPerson()
   ],
   dog_breed: buildDogBreed(),
-  status,
-  registration,
-  insurance: [buildInsurance()],
-  dog_microchips: [buildDogMicrochip()],
+  status: buildStatus(),
+  registration: buildRegistration(),
+  insurance: [],
+  dog_microchips: [],
   ...cdoPartial
 })
 

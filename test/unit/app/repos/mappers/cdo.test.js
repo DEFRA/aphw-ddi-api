@@ -1,4 +1,7 @@
-const { mapSummaryCdoDaoToDto } = require('../../../../../app/repos/mappers/cdo')
+const { mapSummaryCdoDaoToDto, mapCdoDaoToCdo } = require('../../../../../app/repos/mappers/cdo')
+const { buildCdo: buildCdoDao } = require('../../../../mocks/cdo/get')
+const { buildCdo } = require('../../../../mocks/cdo/domain')
+
 describe('cdo mappers', () => {
   describe('mapSummaryCdoDaoToDto', () => {
     test('should map a summary cdo to a dto', () => {
@@ -119,6 +122,14 @@ describe('cdo mappers', () => {
 
       const mappedValues = mapSummaryCdoDaoToDto(summaryCdoDao)
       expect(mappedValues).toEqual(expectedSummaryCdoDto)
+    })
+  })
+
+  describe('mapCdoDaoToCdo', () => {
+    test('should map a CdoDao to a model', () => {
+      const cdoDao = buildCdoDao()
+      const expectedCdo = buildCdo()
+      expect(mapCdoDaoToCdo(cdoDao)).toEqual(expectedCdo)
     })
   })
 })

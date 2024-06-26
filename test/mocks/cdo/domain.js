@@ -31,15 +31,15 @@ const buildCdoDog = (cdoDogPartial) => ({
   name: 'Rex300',
   breed: 'XL Bully',
   status: 'Interim exempt',
-  dateOfBirth: '1999-01-01',
+  dateOfBirth: null,
   dateOfDeath: null,
-  tattoo: '',
-  colour: '',
-  sex: '',
+  tattoo: null,
+  colour: null,
+  sex: null,
   dateExported: null,
   dateStolen: null,
   dateUntraceable: null,
-  microchipNumber: '123456789012345',
+  microchipNumber: null,
   microchipNumber2: null,
   ...cdoDogPartial
 })
@@ -90,9 +90,7 @@ const buildExemption = (exemptionPartial = {}) => ({
   legislationOfficer: 'Sidney Lewis',
   certificateIssued: null,
   applicationFeePaid: null,
-  insurance: [
-    buildCdoInsurance()
-  ],
+  insurance: [],
   neuteringConfirmation: null,
   microchipVerification: null,
   joinedExemptionScheme: new Date('2023-12-10'),
