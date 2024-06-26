@@ -126,5 +126,6 @@ const mapCdoDaoToCdo = (cdoDao) => {
 }
 module.exports = {
   mapSummaryCdoDaoToDto,
-  mapCdoDaoToCdo
+  mapCdoDaoToCdo,
+  mapCdoDaoToExemption
 }

@@ -1,6 +1,6 @@
-const { mapSummaryCdoDaoToDto, mapCdoDaoToCdo } = require('../../../../../app/repos/mappers/cdo')
-const { buildCdoDao } = require('../../../../mocks/cdo/get')
-const { buildCdo } = require('../../../../mocks/cdo/domain')
+const { mapSummaryCdoDaoToDto, mapCdoDaoToCdo, mapCdoDaoToExemption } = require('../../../../../app/repos/mappers/cdo')
+const { buildCdoDao, buildInsuranceDao, buildRegistrationDao } = require('../../../../mocks/cdo/get')
+const { buildCdo, buildExemption, buildCdoInsurance } = require('../../../../mocks/cdo/domain')
 
 describe('cdo mappers', () => {
   describe('mapSummaryCdoDaoToDto', () => {
@@ -125,10 +125,59 @@ describe('cdo mappers', () => {
     })
   })
 
+  describe('mapCdoDaoToExemption', () => {
+    test('should map a CdoDao to an Exemption', () => {
+      const exemption = buildRegistrationDao()
+      const insurance = [
+        buildInsuranceDao({
+          id: 1
+        }),
+        buildInsuranceDao({
+          id: 0
+        })
+      ]
+      expect(mapCdoDaoToExemption(exemption, insurance)).toEqual(buildExemption({
+        insurance: [
+          buildCdoInsurance(),
+          buildCdoInsurance()
+        ]
+      }))
+    })
+
+    test('should map a CdoDao to an Exemption given insurance is undefined', () => {
+      const exemption = buildRegistrationDao()
+      const insurance = undefined
+      expect(mapCdoDaoToExemption(exemption, insurance)).toEqual(buildExemption({
+        insurance: undefined
+      }))
+    })
+  })
+
   describe('mapCdoDaoToCdo', () => {
     test('should map a CdoDao to a model', () => {
       const cdoDao = buildCdoDao()
       const expectedCdo = buildCdo()
+      expect(mapCdoDaoToCdo(cdoDao)).toEqual(expectedCdo)
+    })
+    test('should map a CdoDao to a model with insurance', () => {
+      const cdoDao = buildCdoDao({
+        insurance: [
+          buildInsuranceDao({
+            id: 1
+          }),
+          buildInsuranceDao({
+            id: 0
+          })
+        ]
+      })
+      const expectedCdo = buildCdo({
+        exemption: buildExemption({
+          insurance: [
+            buildCdoInsurance(),
+            buildCdoInsurance()
+          ]
+        })
+      })
       expect(mapCdoDaoToCdo(cdoDao)).toEqual(expectedCdo)
     })
   })

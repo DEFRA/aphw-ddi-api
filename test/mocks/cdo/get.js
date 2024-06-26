@@ -233,7 +233,8 @@ const buildDogMicrochipDao = (partialDogMicrochip = {}) => ({
   created_at: '2024-06-24T10:38:07.868Z',
   deleted_at: null,
   updated_at: '2024-06-24T10:38:07.910Z',
-  microchip: buildMicrochipDao()
+  microchip: buildMicrochipDao(),
+  ...partialDogMicrochip
 })
 
 const dogMicrochip = buildDogMicrochipDao()
@@ -266,7 +267,8 @@ const buildInsuranceDao = (insurance = {}) => ({
   deleted_at: null,
   updated_at: '2024-06-24T10:38:32.954Z',
   dog_id: 300097,
-  company: buildInsuranceCompanyDao()
+  company: buildInsuranceCompanyDao(),
+  ...insurance
 })
 
 const insurance = buildInsuranceDao()
