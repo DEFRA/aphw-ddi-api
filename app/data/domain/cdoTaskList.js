@@ -5,6 +5,10 @@ class CdoTaskList {
     this._cdo = cdo
   }
 
+  get _stageOneComplete () {
+    return this.applicationPackSent.completed
+  }
+
   get applicationPackSent () {
     const timestamp = this._cdo.exemption.applicationPackSent ?? undefined
     const completed = timestamp !== undefined
@@ -21,19 +25,39 @@ class CdoTaskList {
   }
 
   get insuranceDetailsRecorded () {
-    return new CdoTask('insuranceDetailsRecorded')
+    return new CdoTask(
+      'insuranceDetailsRecorded',
+      {
+        available: this._stageOneComplete
+      }
+    )
   }
 
   get microchipNumberRecorded () {
-    return new CdoTask('microchipNumberRecorded')
+    return new CdoTask(
+      'microchipNumberRecorded',
+      {
+        available: this._stageOneComplete
+      }
+    )
   }
 
   get applicationFeePaid () {
-    return new CdoTask('applicationFeePaid')
+    return new CdoTask(
+      'applicationFeePaid',
+      {
+        available: this._stageOneComplete
+      }
+    )
   }
 
   get form2Sent () {
-    return new CdoTask('form2Sent')
+    return new CdoTask(
+      'form2Sent',
+      {
+        available: this._stageOneComplete
+      }
+    )
   }
 
   get verificationDateRecorded () {

@@ -1,5 +1,5 @@
-const { CdoTaskList, Cdo, Exemption } = require('../../../../../app/data/domain')
-const { buildCdo, buildExemption } = require('../../../../mocks/cdo/domain')
+const { CdoTaskList, Cdo, Exemption, CdoTask } = require('../../../../../app/data/domain')
+const { buildCdo, buildExemption, buildTask } = require('../../../../mocks/cdo/domain')
 describe('CdoTaskList', () => {
   test('should instantiate ', () => {
     const cdo = buildCdo()
@@ -67,7 +67,7 @@ describe('CdoTaskList', () => {
     }))
   })
 
-  test('should show applicationPackSent in non-default state', () => {
+  test('should show task list given application has been sent', () => {
     const exemptionProperties = buildExemption({
       applicationPackSent: new Date('2024-06-25')
     })
@@ -75,12 +75,32 @@ describe('CdoTaskList', () => {
       exemption: new Exemption(exemptionProperties)
     })
     const cdoTaskList = new CdoTaskList(cdo)
-    expect(cdoTaskList.applicationPackSent).toEqual(expect.objectContaining({
-      key: 'applicationPackSent',
+    expect(cdoTaskList.applicationPackSent).toEqual(new CdoTask('applicationPackSent', {
       available: true,
       completed: true,
-      readonly: true,
-      timestamp: new Date('2024-06-25')
+      readonly: true
+    }, new Date('2024-06-25')))
+    expect(cdoTaskList.insuranceDetailsRecorded).toEqual(buildTask({
+      key: 'insuranceDetailsRecorded',
+      available: true
+    }))
+    expect(cdoTaskList.microchipNumberRecorded).toEqual(buildTask({
+      key: 'microchipNumberRecorded',
+      available: true
+    }))
+    expect(cdoTaskList.applicationFeePaid).toEqual(buildTask({
+      key: 'applicationFeePaid',
+      available: true
+    }))
+    expect(cdoTaskList.form2Sent).toEqual(buildTask({
+      key: 'form2Sent',
+      available: true
+    }))
+    expect(cdoTaskList.verificationDateRecorded).toEqual(buildTask({
+      key: 'verificationDateRecorded'
+    }))
+    expect(cdoTaskList.certificateIssued).toEqual(buildTask({
+      key: 'certificateIssued'
     }))
   })
 })
