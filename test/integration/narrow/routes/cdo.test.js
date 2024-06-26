@@ -1,12 +1,18 @@
 const { payload: mockCreatePayload, payloadWithPersonReference: mockCreateWithRefPayload } = require('../../../mocks/cdo/create')
 const { NotFoundError } = require('../../../../app/errors/not-found')
+const { CdoTaskList } = require('../../../../app/data/domain')
+const { buildCdo } = require('../../../mocks/cdo/domain')
 
 describe('CDO endpoint', () => {
   const createServer = require('../../../../app/server')
   let server
 
   jest.mock('../../../../app/repos/cdo')
-  const { createCdo, getCdo } = require('../../../../app/repos/cdo')
+  const cdoRepository = require('../../../../app/repos/cdo')
+  const { createCdo, getCdo } = cdoRepository
+
+  jest.mock('../../../../app/service/config')
+  const { getCdoService } = require('../../../../app/service/config')
 
   beforeEach(async () => {
     jest.clearAllMocks()
@@ -275,30 +281,11 @@ describe('CDO endpoint', () => {
 
   describe('GET /cdo/ED123/manage', () => {
     test('should return an initialised manage cdo task list', async () => {
-      getCdo.mockResolvedValue({
-        id: 123,
-        indexNumber: 'ED123',
-        dog_breed: {
-          breed: 'breed1'
-        },
-        status: {
-          status: 'NEW'
-        },
-        registration: {
-          court: {
-            name: 'court1'
-          },
-          police_force: {
-            name: 'force1'
-          },
-          exemption_order: {
-            exemption_order: 2015
-          }
-        },
-        registered_person: [{
-          person: {
-          }
-        }]
+      const cdoTaskList = new CdoTaskList(buildCdo())
+      cdoRepository.getCdoTaskList.mockResolvedValue(cdoTaskList)
+      const getTaskListMock = jest.fn((indexNumber) => cdoTaskList)
+      getCdoService.mockReturnValue({
+        getTaskList: getTaskListMock
       })
       const options = {
         method: 'GET',
@@ -308,6 +295,7 @@ describe('CDO endpoint', () => {
       const response = await server.inject(options)
       const payload = JSON.parse(response.payload)
       expect(response.statusCode).toBe(200)
+      expect(getTaskListMock).toHaveBeenCalledWith('ED123')
       expect(payload).toEqual({
         tasks: {
           applicationPackSent: {
@@ -321,42 +309,42 @@ describe('CDO endpoint', () => {
             key: 'insuranceDetailsRecorded',
             available: false,
             completed: false,
-            readonly: true,
+            readonly: false,
             timestamp: undefined
           },
           microchipNumberRecorded: {
             key: 'microchipNumberRecorded',
             available: false,
             completed: false,
-            readonly: true,
+            readonly: false,
             timestamp: undefined
           },
           applicationFeePaid: {
             key: 'applicationFeePaid',
             available: false,
             completed: false,
-            readonly: true,
+            readonly: false,
             timestamp: undefined
           },
           form2Sent: {
             key: 'form2Sent',
             available: false,
             completed: false,
-            readonly: true,
+            readonly: false,
             timestamp: undefined
           },
           verificationDateRecorded: {
             key: 'verificationDateRecorded',
             available: false,
             completed: false,
-            readonly: true,
+            readonly: false,
             timestamp: undefined
           },
           certificateIssued: {
             key: 'certificateIssued',
             available: false,
             completed: false,
-            readonly: true,
+            readonly: false,
             timestamp: undefined
           }
         }
@@ -364,7 +352,11 @@ describe('CDO endpoint', () => {
     })
 
     test('should throw a 404 given index does not exist', async () => {
-      getCdo.mockResolvedValue(null)
+      getCdoService.mockReturnValue({
+        getTaskList: async () => {
+          throw new NotFoundError('not found')
+        }
+      })
       const options = {
         method: 'GET',
         url: '/cdo/ED123/manage'
@@ -375,7 +367,11 @@ describe('CDO endpoint', () => {
     })
 
     test('should returns 500 given server error thrown', async () => {
-      getCdo.mockImplementation(() => { throw new Error('cdo error') })
+      getCdoService.mockReturnValue({
+        getTaskList: async () => {
+          throw new Error('cdo error')
+        }
+      })
 
       const options = {
         method: 'GET',
