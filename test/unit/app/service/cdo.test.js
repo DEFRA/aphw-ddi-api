@@ -1,4 +1,4 @@
-const CdoService = require('../../../../app/service/cdo')
+const { CdoService } = require('../../../../app/service/cdo')
 const { buildCdo } = require('../../../mocks/cdo/domain')
 const { CdoTaskList } = require('../../../../app/data/domain')
 

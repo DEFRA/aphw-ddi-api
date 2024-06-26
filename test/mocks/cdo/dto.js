@@ -1,6 +1,6 @@
 const buildCdoTaskDto = (partialTaskDto) => ({
-  key: 'applicationPackSent',
-  available: true,
+  key: 'insuranceDetailsRecorded',
+  available: false,
   completed: false,
   readonly: false,
   timestamp: undefined,
