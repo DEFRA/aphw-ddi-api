@@ -1,11 +1,11 @@
-const { ServiceProvider } = require('../../../../app/service/config')
+const ServiceProvider = require('../../../../app/service/config')
 
 describe('ServiceProvider', () => {
   jest.mock('../../../../app/repos/cdo')
   const cdoRepository = require('../../../../app/repos/cdo')
 
   test('should instantiate', () => {
-    expect(new ServiceProvider()).toBeInstanceOf(ServiceProvider)
+    expect(ServiceProvider.getCdoService).toBeInstanceOf(Function)
   })
 
   describe('getCdoService', () => {

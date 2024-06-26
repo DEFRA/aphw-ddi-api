@@ -1,22 +1,18 @@
+/**
+ * @type {CdoService}
+ */
+let cdoService
 
-class ServiceProvider {
-  /**
-   * @type {CdoService}
-   */
-  static cdoService
+const getCdoService = () => {
+  if (cdoService === undefined) {
+    const cdoRepository = require('../repos/cdo')
+    const { CdoService } = require('./cdo')
 
-  /**
-   * @return {CdoService}
-   */
-  static getCdoService () {
-    if (ServiceProvider.cdoService === undefined) {
-      const cdoRepository = require('../repos/cdo')
-      const CdoService = require('./cdo')
-
-      ServiceProvider.cdoService = new CdoService(cdoRepository)
-    }
-    return ServiceProvider.cdoService
+    cdoService = new CdoService(cdoRepository)
   }
+  return cdoService
 }
 
-module.exports = { ServiceProvider }
+module.exports = {
+  getCdoService
+}
