@@ -2,20 +2,20 @@
  * @param {Partial<CountryDao>} partialCountry
  * @return {CountryDao}
  */
-const buildCountry = (partialCountry = {}) => ({
+const buildCountryDao = (partialCountry = {}) => ({
   id: 1,
   country: 'England',
   ...partialCountry
 })
 
-const country = buildCountry()
+const country = buildCountryDao()
 
 /**
  *
  * @param {AddressDao} addressPartial
  * @return {AddressDao}
  */
-const buildAddress = (addressPartial = {}) => ({
+const buildAddressDao = (addressPartial = {}) => ({
   id: 110,
   address_line_1: '300 Anywhere St',
   address_line_2: 'Anywhere Estate',
@@ -26,34 +26,34 @@ const buildAddress = (addressPartial = {}) => ({
   created_at: new Date('2024-06-24T09:12:07.814Z'),
   deleted_at: null,
   updated_at: new Date('2024-06-24T09:12:07.853Z'),
-  country: buildCountry(),
+  country: buildCountryDao(),
   ...addressPartial
 })
 
-const address = buildAddress()
+const address = buildAddressDao()
 
 /**
  * @param {Partial<PersonAddressDao>} personAddress
  * @return {PersonAddressDao}
  */
-const buildPersonAddress = (personAddress = {}) => ({
+const buildPersonAddressDao = (personAddress = {}) => ({
   id: 110,
   person_id: 90,
   address_id: 110,
   created_at: new Date('2024-06-24T09:12:07.814Z'),
   deleted_at: null,
   updated_at: new Date('2024-06-24T09:12:07.867Z'),
-  address: buildAddress(),
+  address: buildAddressDao(),
   ...personAddress
 })
 
-const personAddress = buildPersonAddress()
+const personAddress = buildPersonAddressDao()
 
 /**
  * @param {Partial<PersonDao>} personPartial
  * @return {PersonDao}
  */
-const buildPerson = (personPartial = {}) => ({
+const buildPersonDao = (personPartial = {}) => ({
   id: 90,
   first_name: 'Alex',
   last_name: 'Carter',
@@ -64,20 +64,20 @@ const buildPerson = (personPartial = {}) => ({
   deleted_at: null,
   updated_at: '2024-06-24T09:12:07.836Z',
   addresses: [
-    buildPersonAddress()
+    buildPersonAddressDao()
   ],
   organisation: null,
   person_contacts: [],
   ...personPartial
 })
 
-const person = buildPerson()
+const person = buildPersonDao()
 
 /**
  * @param {Partial<RegisteredPersonDao>} registeredPersonPartial
  * @return {RegisteredPersonDao}
  */
-const buildRegisteredPerson = (registeredPersonPartial = {}) => ({
+const buildRegisteredPersonDao = (registeredPersonPartial = {}) => ({
   id: 96,
   person_id: 90,
   dog_id: 300097,
@@ -85,20 +85,20 @@ const buildRegisteredPerson = (registeredPersonPartial = {}) => ({
   created_at: '2024-06-24T09:12:07.814Z',
   deleted_at: null,
   updated_at: '2024-06-24T09:12:07.904Z',
-  person: buildPerson(),
+  person: buildPersonDao(),
   ...registeredPersonPartial
 })
 
 /**
  * @type {RegisteredPersonDao}
  */
-const registeredPerson = buildRegisteredPerson()
+const registeredPerson = buildRegisteredPersonDao()
 
 /**
  * @param {Partial<DogBreedDao>} dogBreedPartial
  * @return {DogBreedDao}
  */
-const buildDogBreed = (dogBreedPartial = {}) => ({
+const buildDogBreedDao = (dogBreedPartial = {}) => ({
   id: 1,
   breed: 'XL Bully',
   active: true,
@@ -110,28 +110,28 @@ const buildDogBreed = (dogBreedPartial = {}) => ({
 /**
  * @type {DogBreedDao}
  */
-const dogBreed = buildDogBreed()
+const dogBreed = buildDogBreedDao()
 
 /**
  *
  * @param {Partial<StatusDao>} statusPartial
  * @return {StatusDao}
  */
-const buildStatus = (statusPartial = {}) => ({
+const buildStatusDao = (statusPartial = {}) => ({
   id: 4,
   status: 'Interim exempt',
   status_type: 'STANDARD',
   ...statusPartial
 })
 
-const status = buildStatus()
+const status = buildStatusDao()
 
 /**
  *
  * @param {PoliceForceDao} partialPoliceForce
  * @return {PoliceForceDao}
  */
-const buildPoliceForce = (partialPoliceForce = {}) => ({
+const buildPoliceForceDao = (partialPoliceForce = {}) => ({
   id: 1,
   name: 'Avon and Somerset Constabulary',
   created_at: null,
@@ -142,14 +142,14 @@ const buildPoliceForce = (partialPoliceForce = {}) => ({
 /**
  * @type {PoliceForceDao}
  */
-const policeForce = buildPoliceForce()
+const policeForce = buildPoliceForceDao()
 
 /**
  *
  * @param {Partial<CourtDao>} partialCourt
  * @return {CourtDao}
  */
-const buildCourt = (partialCourt = {}) => ({
+const buildCourtDao = (partialCourt = {}) => ({
   id: 1,
   name: 'Aberystwyth Justice Centre',
   created_at: null,
@@ -161,7 +161,7 @@ const buildCourt = (partialCourt = {}) => ({
 /**
  * @type {CourtDao}
  */
-const court = buildCourt()
+const court = buildCourtDao()
 
 const exemptionOrder2015 = {
   id: 1,
@@ -173,7 +173,7 @@ const exemptionOrder2015 = {
  * @param {RegistrationDao} registrationPartial
  * @return {RegistrationDao}
  */
-const buildRegistration = (registrationPartial = {}) => ({
+const buildRegistrationDao = (registrationPartial = {}) => ({
   id: 97,
   dog_id: 300097,
   status_id: 1,
@@ -199,19 +199,19 @@ const buildRegistration = (registrationPartial = {}) => ({
   form_two_sent: null,
   created_at: '2024-06-24T09:12:07.897Z',
   updated_at: '2024-06-24T09:12:07.897Z',
-  police_force: buildPoliceForce(),
-  court: buildCourt(),
+  police_force: buildPoliceForceDao(),
+  court: buildCourtDao(),
   exemption_order: exemptionOrder2015,
   ...registrationPartial
 })
 
-const registration = buildRegistration()
+const registration = buildRegistrationDao()
 
 /**
  * @param {MicrochipDao} microchipPartial
  * @return {MicrochipDao}
  */
-const buildMicrochip = (microchipPartial = {}) => ({
+const buildMicrochipDao = (microchipPartial = {}) => ({
   id: 5,
   microchip_number: '123456789012345',
   created_at: '2024-06-24T10:38:07.868Z',
@@ -220,29 +220,29 @@ const buildMicrochip = (microchipPartial = {}) => ({
   ...microchipPartial
 })
 
-const microchip = buildMicrochip()
+const microchip = buildMicrochipDao()
 
 /**
  * @param {DogMicrochipDao} partialDogMicrochip
  * @return {DogMicrochipDao}
  */
-const buildDogMicrochip = (partialDogMicrochip = {}) => ({
+const buildDogMicrochipDao = (partialDogMicrochip = {}) => ({
   id: 5,
   dog_id: 300097,
   microchip_id: 5,
   created_at: '2024-06-24T10:38:07.868Z',
   deleted_at: null,
   updated_at: '2024-06-24T10:38:07.910Z',
-  microchip: buildMicrochip()
+  microchip: buildMicrochipDao()
 })
 
-const dogMicrochip = buildDogMicrochip()
+const dogMicrochip = buildDogMicrochipDao()
 
 /**
  * @param {Partial<{id: number; company_name: string}>} insuranceCompanyPartial
  * @return {{id: number; company_name: string}}
  */
-const buildInsuranceCompany = (insuranceCompanyPartial = {}) => ({
+const buildInsuranceCompanyDao = (insuranceCompanyPartial = {}) => ({
   id: 4,
   company_name: 'Allianz',
   created_at: '2024-06-14T10:02:17.613Z',
@@ -251,13 +251,13 @@ const buildInsuranceCompany = (insuranceCompanyPartial = {}) => ({
   ...insuranceCompanyPartial
 })
 
-const insuranceCompany = buildInsuranceCompany()
+const insuranceCompany = buildInsuranceCompanyDao()
 
 /**
  * @param {InsuranceDao} insurance
  * @return {InsuranceDao}
  */
-const buildInsurance = (insurance = {}) => ({
+const buildInsuranceDao = (insurance = {}) => ({
   id: 9,
   policy_number: null,
   company_id: 4,
@@ -266,16 +266,16 @@ const buildInsurance = (insurance = {}) => ({
   deleted_at: null,
   updated_at: '2024-06-24T10:38:32.954Z',
   dog_id: 300097,
-  company: buildInsuranceCompany()
+  company: buildInsuranceCompanyDao()
 })
 
-const insurance = buildInsurance()
+const insurance = buildInsuranceDao()
 
 /**
  * @param {Partial<CdoDao>} cdoPartial
  * @return {CdoDao}
  */
-const buildCdo = (cdoPartial = {}) => ({
+const buildCdoDao = (cdoPartial = {}) => ({
   id: 300097,
   dog_reference: '5270aad5-77d1-47ce-b41d-99a6e8f6e5fe',
   index_number: 'ED300097',
@@ -294,48 +294,48 @@ const buildCdo = (cdoPartial = {}) => ({
   deleted_at: null,
   updated_at: '2024-06-24T09:12:07.885Z',
   registered_person: [
-    buildRegisteredPerson()
+    buildRegisteredPersonDao()
   ],
-  dog_breed: buildDogBreed(),
-  status: buildStatus(),
-  registration: buildRegistration(),
+  dog_breed: buildDogBreedDao(),
+  status: buildStatusDao(),
+  registration: buildRegistrationDao(),
   insurance: [],
   dog_microchips: [],
   ...cdoPartial
 })
 
-const cdo = buildCdo()
+const cdo = buildCdoDao()
 
 module.exports = {
-  buildCountry,
+  buildCountryDao,
   country,
-  buildAddress,
+  buildAddressDao,
   address,
-  buildPersonAddress,
+  buildPersonAddressDao,
   personAddress,
-  buildPerson,
+  buildPersonDao,
   person,
-  buildRegisteredPerson,
+  buildRegisteredPersonDao,
   registeredPerson,
-  buildDogBreed,
+  buildDogBreedDao,
   dogBreed,
-  buildStatus,
+  buildStatusDao,
   status,
-  buildPoliceForce,
+  buildPoliceForceDao,
   policeForce,
-  buildCourt,
+  buildCourtDao,
   court,
   exemptionOrder2015,
-  buildRegistration,
+  buildRegistrationDao,
   registration,
-  buildMicrochip,
+  buildMicrochipDao,
   microchip,
-  buildDogMicrochip,
+  buildDogMicrochipDao,
   dogMicrochip,
-  buildInsuranceCompany,
+  buildInsuranceCompanyDao,
   insuranceCompany,
-  buildInsurance,
+  buildInsuranceDao,
   insurance,
-  buildCdo,
+  buildCdoDao,
   cdo
 }

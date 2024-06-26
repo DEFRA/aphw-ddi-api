@@ -1,4 +1,4 @@
-const { buildPersonAddress } = require('./get')
+const { buildPersonAddressDao } = require('./get')
 const { Cdo, Person, Dog, Exemption } = require('../../../app/data/domain')
 
 /**
@@ -12,7 +12,7 @@ const buildCdoPerson = (cdoPersonPartial = {}) => ({
   lastName: 'Carter',
   dateOfBirth: new Date('1998-05-10'),
   addresses: [
-    buildPersonAddress()
+    buildPersonAddressDao()
   ],
   person_contacts: [],
   organisationName: null,

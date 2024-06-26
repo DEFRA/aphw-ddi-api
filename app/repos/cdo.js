@@ -9,6 +9,8 @@ const { mapPersonDaoToCreatedPersonDao } = require('./mappers/person')
 const { cdoRelationship } = require('./relationships/cdo')
 const { statuses } = require('../constants/statuses')
 const { Op } = require('sequelize')
+const { mapCdoDaoToCdo } = require('./mappers/cdo')
+const { CdoTaskList } = require('../data/domain')
 
 /**
  * @typedef DogBreedDao
@@ -392,9 +394,47 @@ const getSummaryCdos = async (filter, sort) => {
 
   return cdos
 }
+/**
+ *
+ */
 
 /**
- * @typedef {{getCdo: GetCdo, getSummaryCdos: GetSummaryCdos, getAllCdos: GetAllCdos, createCdo: CreateCdo}} CdoRepository
+ * @typedef GetCdoModel
+ * @param {string} indexNumber
+ * @return {Promise<Cdo>}
+ */
+/**
+ * @type {GetCdoModel}
+ */
+const getCdoModel = async (indexNumber) => {
+  const cdoDao = await getCdo(indexNumber)
+
+  return mapCdoDaoToCdo(cdoDao)
+}
+
+/**
+ * @typedef GetCdoTaskList
+ * @param {string} indexNumber
+ * @return {Promise<CdoTaskList>}
+ */
+
+/**
+ * @type {GetCdoTaskList}
+ */
+const getCdoTaskList = async (indexNumber) => {
+  const cdo = await getCdoModel(indexNumber)
+
+  return new CdoTaskList(cdo)
+}
+/**
+ * @typedef {{
+ *    getCdo: GetCdo,
+ *    getSummaryCdos: GetSummaryCdos,
+ *    getAllCdos: GetAllCdos,
+ *    createCdo: CreateCdo,
+ *    getCdoModel: GetCdoModel,
+ *    getCdoTaskList: GetCdoTaskList
+ * }} CdoRepository
  */
 
 /**
@@ -404,5 +444,7 @@ module.exports = {
   createCdo,
   getCdo,
   getSummaryCdos,
-  getAllCdos
+  getAllCdos,
+  getCdoModel,
+  getCdoTaskList
 }

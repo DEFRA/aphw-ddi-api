@@ -2,6 +2,9 @@ const { payload: mockCdoPayload, payloadWithPersonReference: mockCdoPayloadWithR
 const { NotFoundError } = require('../../../../app/errors/not-found')
 const { personDao: mockPersonPayload, createdPersonDao: mockCreatedPersonPayload } = require('../../../mocks/person')
 const { devUser } = require('../../../mocks/auth')
+const { buildCdoDao } = require('../../../mocks/cdo/get')
+const { Cdo, CdoTaskList } = require('../../../../app/data/domain')
+const { buildCdo } = require('../../../mocks/cdo/domain')
 
 describe('CDO repo', () => {
   jest.mock('../../../../app/config/db', () => ({
@@ -32,7 +35,7 @@ describe('CDO repo', () => {
   jest.mock('../../../../app/messaging/send-event')
   const { sendEvent } = require('../../../../app/messaging/send-event')
 
-  const { createCdo, getCdo, getAllCdos, getSummaryCdos } = require('../../../../app/repos/cdo')
+  const { createCdo, getCdo, getAllCdos, getSummaryCdos, getCdoModel, getCdoTaskList } = require('../../../../app/repos/cdo')
 
   beforeEach(async () => {
     jest.clearAllMocks()
@@ -553,6 +556,22 @@ describe('CDO repo', () => {
           }
         }
       })
+    })
+  })
+
+  describe('getCdoModel', () => {
+    test('should return getCdo but as a domain model', async () => {
+      sequelize.models.dog.findAll.mockResolvedValue([buildCdoDao()])
+      const res = await getCdoModel('ED300097')
+      expect(res).toBeInstanceOf(Cdo)
+    })
+  })
+
+  describe('getTaskList', () => {
+    test('should return getCdoTaskList', async () => {
+      sequelize.models.dog.findAll.mockResolvedValue([buildCdoDao()])
+      const res = await getCdoTaskList('ED300097')
+      expect(res).toEqual(new CdoTaskList(buildCdo()))
     })
   })
 })

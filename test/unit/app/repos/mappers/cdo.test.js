@@ -1,5 +1,5 @@
 const { mapSummaryCdoDaoToDto, mapCdoDaoToCdo } = require('../../../../../app/repos/mappers/cdo')
-const { buildCdo: buildCdoDao } = require('../../../../mocks/cdo/get')
+const { buildCdoDao } = require('../../../../mocks/cdo/get')
 const { buildCdo } = require('../../../../mocks/cdo/domain')
 
 describe('cdo mappers', () => {
