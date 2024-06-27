@@ -410,7 +410,7 @@ const getSummaryCdos = async (filter, sort) => {
  */
 const getCdoModel = async (indexNumber) => {
   const cdoDao = await getCdo(indexNumber)
-  console.log('~~~~~~ Chris Debug ~~~~~~ ', 'CdoDao', cdoDao)
+
   if (cdoDao === null) {
     throw new NotFoundError(`CDO does not exist with indexNumber: ${indexNumber}`)
   }
@@ -429,7 +429,6 @@ const getCdoModel = async (indexNumber) => {
  */
 const getCdoTaskList = async (indexNumber) => {
   const cdo = await getCdoModel(indexNumber)
-  console.log('~~~~~~ Chris Debug ~~~~~~ getCdoTaskList', 'Cdo', cdo)
   return new CdoTaskList(cdo)
 }
 /**

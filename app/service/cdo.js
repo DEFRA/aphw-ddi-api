@@ -17,10 +17,7 @@ function CdoService (cdoRepository) {
  * @type {CdoService.GetTaskList}
  */
 CdoService.prototype.getTaskList = async function (cdoId) {
-  const taskList = await this.cdoRepository.getCdoTaskList(cdoId)
-
-  console.log('~~~~~~ Chris Debug ~~~~~~ ', 'taskList', taskList)
-  return taskList
+  return this.cdoRepository.getCdoTaskList(cdoId)
 }
 
 module.exports = { CdoService }
