@@ -1,6 +1,21 @@
 /**
  * @param exemptionProperties
  * @constructor
+ * @property {string} exemptionOrder
+ * @property {Date} cdoIssued
+ * @property {Date} cdoExpiry
+ * @property {string|null} court
+ * @property {string|null} policeForce
+ * @property {string|null} legislationOfficer
+ * @property {Date|null} certificateIssued
+ * @property {Date|null} applicationFeePaid
+ * @property {{company: string; insuranceRenewal: Date }[]} insurance
+ * @property {Date|null} neuteringConfirmation
+ * @property {Date|null} microchipVerification
+ * @property {Date} joinedExemptionScheme
+ * @property {Date|null} nonComplianceLetterSent
+ * @property {Date|null} applicationPackSent
+ * @property {Date|null} formTwoSent
  */
 function Exemption (exemptionProperties) {
   this.exemptionOrder = exemptionProperties.exemptionOrder

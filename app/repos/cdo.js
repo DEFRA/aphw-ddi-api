@@ -87,17 +87,19 @@ const { CdoTaskList } = require('../data/domain')
  * @property {string} cdo_issued
  * @property {string} cdo_expiry
  * @property {null|string} time_limit
- * @property {string} certificate_issued
- * @property {string} legislation_officer
- * @property {string} application_fee_paid
- * @property {string} neutering_confirmation
- * @property {string} microchip_verification
- * @property {string} joined_exemption_scheme
- * @property {null|string} withdrawn
+ * @property {null|string} legislation_officer
+ * @property {null|Date} certificate_issued
+ * @property {null|Date} application_fee_paid
+ * @property {null|Date} neutering_confirmation
+ * @property {null|Date} microchip_verification
+ * @property {null|Date} joined_exemption_scheme
+ * @property {null|Date} withdrawn
  * @property {null|string} typed_by_dlo
- * @property {null|string} microchip_deadline
- * @property {null|string} neutering_deadline
- * @property {null|string} non_compliance_letter_sent
+ * @property {null|Date} microchip_deadline
+ * @property {null|Date} neutering_deadline
+ * @property {null|Date} non_compliance_letter_sent
+ * @property {null|Date} application_pack_sent
+ * @property {null|Date} form_two_sent
  * @property {null|string} deleted_at
  * @property {string} created_at
  * @property {string} updated_at
@@ -141,9 +143,9 @@ const { CdoTaskList } = require('../data/domain')
  * @property {null|string} sex
  * @property {StatusDao} status
  * @property {number} status_id
- * @property {null|string} stolen_date
- * @property {null|string} tattoo
- * @property {null|string} untraceable_date
+ * @property {null|Date} stolen_date
+ * @property {null|Date} tattoo
+ * @property {null|Date} untraceable_date
  * @property {string} updated_at
  * @property {string} created_at
  * @property {null|string} deleted_at
@@ -410,7 +412,7 @@ const getCdoModel = async (indexNumber) => {
   const cdoDao = await getCdo(indexNumber)
 
   if (cdoDao === null) {
-    throw new NotFoundError(`Cdo does not exist with indexNumber: ${indexNumber}`)
+    throw new NotFoundError(`CDO does not exist with indexNumber: ${indexNumber}`)
   }
 
   return mapCdoDaoToCdo(cdoDao)
