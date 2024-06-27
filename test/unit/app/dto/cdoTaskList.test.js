@@ -2,7 +2,6 @@ const { buildCdo, buildExemption, buildCdoInsurance, buildCdoDog } = require('..
 const { CdoTaskList } = require('../../../../app/data/domain')
 const { mapCdoTaskListToDto } = require('../../../../app/dto/cdoTaskList')
 const { buildCdoTaskListDto, buildCdoTaskListDtoTasks } = require('../../../mocks/cdo/dto')
-const { buildInsuranceDao, buildInsuranceCompanyDao } = require('../../../mocks/cdo/get')
 
 describe('mapCdoTaskListToDto', () => {
   test('should map cdoTaskListToDto', () => {

@@ -1,5 +1,4 @@
 const CdoTask = require('./cdoTask')
-const { Cdo } = require('./index')
 
 class CdoTaskList {
   /**
