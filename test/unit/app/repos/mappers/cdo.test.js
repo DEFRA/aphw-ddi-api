@@ -151,6 +151,33 @@ describe('cdo mappers', () => {
         insurance: undefined
       }))
     })
+
+    test('should deserialise dates', () => {
+      const registrationDao = buildRegistrationDao({
+        application_pack_sent: '2024-05-01',
+        cdo_expiry: '2024-05-02',
+        cdo_issued: '2024-05-03',
+        application_fee_paid: '2024-05-05',
+        form_two_sent: '2024-05-07',
+        microchip_verification: '2024-05-06',
+        neutering_confirmation: '2024-05-08',
+        certificate_issued: '2024-05-04'
+      })
+      const insurance = [buildInsuranceDao({
+        id: 1,
+        renewal_date: '2024-05-04'
+      })]
+      const mappedRegistration = mapCdoDaoToExemption(registrationDao, insurance)
+      expect(mappedRegistration.applicationPackSent).toEqual(new Date('2024-05-01'))
+      expect(mappedRegistration.cdoExpiry).toEqual(new Date('2024-05-02'))
+      expect(mappedRegistration.cdoIssued).toEqual(new Date('2024-05-03'))
+      expect(mappedRegistration.applicationFeePaid).toEqual(new Date('2024-05-05'))
+      expect(mappedRegistration.formTwoSent).toEqual(new Date('2024-05-07'))
+      expect(mappedRegistration.microchipVerification).toEqual(new Date('2024-05-06'))
+      expect(mappedRegistration.neuteringConfirmation).toEqual(new Date('2024-05-08'))
+      expect(mappedRegistration.certificateIssued).toEqual(new Date('2024-05-04'))
+      expect(mappedRegistration.insurance[0].insuranceRenewal).toEqual(new Date('2024-05-04'))
+    })
   })
 
   describe('mapCdoDaoToCdo', () => {
