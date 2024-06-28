@@ -72,5 +72,12 @@ module.exports = [
         throw e
       }
     }
+  },
+  {
+    method: 'POST',
+    path: '/cdo/{indexNumber}/manage:sendApplicationPack',
+    handler: async (request, h) => {
+      return h.response().code(204)
+    }
   }
 ]

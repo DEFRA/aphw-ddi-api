@@ -39,14 +39,14 @@ function Exemption (exemptionProperties) {
   this.formTwoSent = exemptionProperties.formTwoSent
 }
 
-Exemption.prototype.sendApplicationPack = function () {
+Exemption.prototype.sendApplicationPack = function (callback) {
   const auditDate = new Date()
   this.applicationPackSent = auditDate
-  this._updates.update('applicationPackSent', auditDate)
+  this._updates.update('applicationPackSent', auditDate, callback)
 }
 
-Exemption.prototype.getBulkChanges = function () {
-  return this._updates.bulkChanges
+Exemption.prototype.getChanges = function () {
+  return this._updates.changes
 }
 
 module.exports = Exemption

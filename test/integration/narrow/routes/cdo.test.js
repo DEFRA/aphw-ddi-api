@@ -382,4 +382,15 @@ describe('CDO endpoint', () => {
       expect(response.statusCode).toBe(500)
     })
   })
+
+  describe('POST /cdo/ED123/manage:sendApplicationPack', () => {
+    test('should return 204', async () => {
+      const options = {
+        method: 'POST',
+        url: '/cdo/ED123/manage:sendApplicationPack'
+      }
+      const response = await server.inject(options)
+      expect(response.statusCode).toBe(204)
+    })
+  })
 })

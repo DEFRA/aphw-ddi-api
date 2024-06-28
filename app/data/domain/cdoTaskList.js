@@ -1,4 +1,5 @@
 const CdoTask = require('./cdoTask')
+const { ActionAlreadyPerformedError } = require('../../errors/domain/actionAlreadyPerformed')
 
 class CdoTaskList {
   /**
@@ -145,6 +146,21 @@ class CdoTaskList {
       },
       this.cdoSummary.certificateIssued
     )
+  }
+
+  sendApplicationPack (callback) {
+    if (this.applicationPackSent.completed) {
+      throw new ActionAlreadyPerformedError('Application pack can only be sent once')
+    }
+    this._cdo.exemption.sendApplicationPack(callback)
+  }
+
+  getUpdates () {
+    return {
+      exemption: this._cdo.exemption.getChanges(),
+      dog: undefined,
+      person: undefined
+    }
   }
 }
 

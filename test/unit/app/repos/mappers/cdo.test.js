@@ -1,6 +1,7 @@
 const { mapSummaryCdoDaoToDto, mapCdoDaoToCdo, mapCdoDaoToExemption } = require('../../../../../app/repos/mappers/cdo')
 const { buildCdoDao, buildInsuranceDao, buildRegistrationDao } = require('../../../../mocks/cdo/get')
 const { buildCdo, buildExemption, buildCdoInsurance } = require('../../../../mocks/cdo/domain')
+const { Exemption } = require('../../../../../app/data/domain')
 
 describe('cdo mappers', () => {
   describe('mapSummaryCdoDaoToDto', () => {
@@ -136,20 +137,20 @@ describe('cdo mappers', () => {
           id: 0
         })
       ]
-      expect(mapCdoDaoToExemption(exemption, insurance)).toEqual(buildExemption({
+      expect(mapCdoDaoToExemption(exemption, insurance)).toEqual(new Exemption(buildExemption({
         insurance: [
           buildCdoInsurance(),
           buildCdoInsurance()
         ]
-      }))
+      })))
     })
 
     test('should map a CdoDao to an Exemption given insurance is undefined', () => {
       const exemption = buildRegistrationDao()
       const insurance = undefined
-      expect(mapCdoDaoToExemption(exemption, insurance)).toEqual(buildExemption({
+      expect(mapCdoDaoToExemption(exemption, insurance)).toEqual(new Exemption(buildExemption({
         insurance: undefined
-      }))
+      })))
     })
 
     test('should deserialise dates', () => {

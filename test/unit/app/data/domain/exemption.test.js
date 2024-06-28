@@ -56,8 +56,10 @@ describe('Exemption', () => {
     const exemption = new Exemption(exemptionProperties)
     exemption.sendApplicationPack()
     expect(exemption.applicationPackSent).toEqual(expect.any(Date))
-    expect(exemption.getBulkChanges()).toEqual({
-      applicationPackSent: expect.any(Date)
-    })
+    expect(exemption.getChanges()).toEqual([{
+      key: 'applicationPackSent',
+      value: expect.any(Date),
+      callback: undefined
+    }])
   })
 })

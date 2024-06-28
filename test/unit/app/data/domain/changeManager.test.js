@@ -9,9 +9,6 @@ describe('ChangeManager', () => {
     expect(changeManager).toEqual(changeMangerChanges)
     expect(changeManager.changes).toEqual([{ key: 'applicationPackSent', value: expect.any(Date), callback: expect.any(Function) }])
     expect(changeManager.updatedFields).toEqual(['applicationPackSent'])
-    expect(changeManager.bulkChanges).toEqual({
-      applicationPackSent: expect.any(Date)
-    })
   })
 
   test('should instantiate change manager and update', () => {

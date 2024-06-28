@@ -3,9 +3,9 @@ class ChangeManager {
     this._changes = []
   }
 
-  static singleChange (key, value) {
+  static singleChange (key, value, callback) {
     const changeManager = new ChangeManager()
-    changeManager.update(key, value)
+    changeManager.update(key, value, callback)
     return changeManager
   }
 
@@ -27,15 +27,6 @@ class ChangeManager {
 
   get updatedFields () {
     return this._changes.map(({ key }) => key)
-  }
-
-  get bulkChanges () {
-    return this._changes.reduce((changeObject, change) => {
-      return {
-        ...changeObject,
-        [change.key]: change.value
-      }
-    }, {})
   }
 }
 
