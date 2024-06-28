@@ -9,8 +9,15 @@ class ChangeManager {
     return changeManager
   }
 
-  update (key, value) {
-    this._changes.push({ key, value })
+  /**
+   *
+   * @param key
+   * @param value
+   * @param [callback]
+   * @return {ChangeManager}
+   */
+  update (key, value, callback) {
+    this._changes.push({ key, value, callback })
     return this
   }
 

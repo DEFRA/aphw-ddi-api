@@ -1,12 +1,13 @@
 const { ChangeManager } = require('../../../../../app/data/domain/changeManager')
 describe('ChangeManager', () => {
   test('should add changes', () => {
+    const callback = jest.fn()
     const changeManager = new ChangeManager()
-    const changeMangerChanges = changeManager.update('applicationPackSent', new Date())
+    const changeMangerChanges = changeManager.update('applicationPackSent', new Date(), callback)
     expect(changeManager).toBeInstanceOf(ChangeManager)
     expect(changeMangerChanges).toBeInstanceOf(ChangeManager)
     expect(changeManager).toEqual(changeMangerChanges)
-    expect(changeManager.changes).toEqual([{ key: 'applicationPackSent', value: expect.any(Date) }])
+    expect(changeManager.changes).toEqual([{ key: 'applicationPackSent', value: expect.any(Date), callback: expect.any(Function) }])
     expect(changeManager.updatedFields).toEqual(['applicationPackSent'])
     expect(changeManager.bulkChanges).toEqual({
       applicationPackSent: expect.any(Date)
