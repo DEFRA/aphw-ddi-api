@@ -421,7 +421,7 @@ const getCdoModel = async (indexNumber) => {
 /**
  * @typedef GetCdoTaskList
  * @param {string} indexNumber
- * @return {Promise<CdoTaskList>}
+ * @return {Promise<import('../data/domain/cdoTaskList').CdoTaskList>}
  */
 
 /**
