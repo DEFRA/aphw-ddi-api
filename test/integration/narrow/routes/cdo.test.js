@@ -2,8 +2,8 @@ const { payload: mockCreatePayload, payloadWithPersonReference: mockCreateWithRe
 const { NotFoundError } = require('../../../../app/errors/not-found')
 const { CdoTaskList } = require('../../../../app/data/domain')
 const { buildCdo } = require('../../../mocks/cdo/domain')
-const { getCdoService } = require('../../../../app/service/config')
 const { ActionAlreadyPerformedError } = require('../../../../app/errors/domain/actionAlreadyPerformed')
+const { devUser } = require('../../../mocks/auth')
 
 describe('CDO endpoint', () => {
   const createServer = require('../../../../app/server')
@@ -13,12 +13,16 @@ describe('CDO endpoint', () => {
   const cdoRepository = require('../../../../app/repos/cdo')
   const { createCdo, getCdo } = cdoRepository
 
+  jest.mock('../../../../app/auth/get-user')
+  const { getCallingUser } = require('../../../../app/auth/get-user')
+
   jest.mock('../../../../app/service/config')
   const { getCdoService } = require('../../../../app/service/config')
 
   beforeEach(async () => {
     jest.clearAllMocks()
     server = await createServer()
+    getCallingUser.mockReturnValue(devUser)
     await server.initialize()
   })
 
@@ -387,9 +391,11 @@ describe('CDO endpoint', () => {
 
   describe('POST /cdo/ED123/manage:sendApplicationPack', () => {
     test('should return 204', async () => {
+      const sendApplicationPackMock = jest.fn()
       getCdoService.mockReturnValue({
-        sendApplicationPack: async () => {}
+        sendApplicationPack: sendApplicationPackMock
       })
+      sendApplicationPackMock.mockResolvedValue(undefined)
 
       const options = {
         method: 'POST',
@@ -397,6 +403,7 @@ describe('CDO endpoint', () => {
       }
       const response = await server.inject(options)
       expect(response.statusCode).toBe(204)
+      expect(sendApplicationPackMock).toHaveBeenCalledWith('ED123', devUser)
     })
 
     test('should throw a 404 given index does not exist', async () => {
