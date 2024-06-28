@@ -22,7 +22,9 @@ CdoService.prototype.getTaskList = async function (cdoId) {
 
 CdoService.prototype.sendApplicationPack = async function (cdoId, user) {
   const cdoTaskList = await this.cdoRepository.getCdoTaskList(cdoId)
-  const sendEvent = () => {}
+  const sendEvent = () => {
+    throw new Error('Event should be implemented')
+  }
 
   try {
     await cdoTaskList.sendApplicationPack(sendEvent)

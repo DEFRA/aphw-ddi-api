@@ -34,6 +34,7 @@ class CdoTaskList {
     const microchipNumber = this._cdo.dog.microchipNumber !== null && `${this._cdo.dog.microchipNumber}`.length > 0 ? this._cdo.dog.microchipNumber : undefined
 
     return {
+      indexNumber: this._cdo.dog.indexNumber,
       applicationPackSent: this._cdo.exemption.applicationPackSent ?? undefined,
       insuranceCompany: this._cdo.exemption.insurance[0]?.company ?? undefined,
       insuranceRenewalDate: this._cdo.exemption.insurance[0]?.insuranceRenewal ?? undefined,
@@ -158,8 +159,8 @@ class CdoTaskList {
   getUpdates () {
     return {
       exemption: this._cdo.exemption.getChanges(),
-      dog: undefined,
-      person: undefined
+      dog: [],
+      person: []
     }
   }
 }

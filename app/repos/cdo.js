@@ -106,6 +106,7 @@ const { CdoTaskList } = require('../data/domain')
  * @property {PoliceForceDao} police_force
  * @property {CourtDao} court
  * @property {ExemptionOrderDao} exemption_order
+ * @property {() => void} [save]
  */
 /**
  * @typedef SummaryRegistrationDao
@@ -442,6 +443,47 @@ const getCdoTaskList = async (indexNumber) => {
  * }} CdoRepository
  */
 
+const updateMappings = {
+  applicationPackSent: 'dog.registration.application_pack_sent',
+  applicationFeePaid: 'dog.registration.application_fee_paid',
+  form2Sent: 'dog.registration.form_two_sent',
+  neuteringConfirmation: 'dog.registration.neutering_confirmation',
+  microchipVerification: 'dog.registration.microchip_verification',
+  certificateIssued: 'dog.registration.certificate_issued',
+  insuranceCompany: new Error('Not implemented'),
+  insuranceRenewalDate: new Error('Not implemented'),
+  microchipNumber: new Error('Not implemented')
+}
+
+/**
+ * @param {import('../data/domain/cdoTaskList').CdoTaskList} cdoTaskList
+ * @param transaction
+ * @return {Promise<void>}
+ */
+const saveCdoTaskList = async (cdoTaskList, transaction) => {
+  if (!transaction) {
+    return await sequelize.transaction(async (t) => saveCdoTaskList(cdoTaskList, t))
+  }
+
+  const updates = cdoTaskList.getUpdates()
+  const cdoDao = await getCdo(cdoTaskList.cdoSummary.indexNumber)
+
+  for (const update of updates.exemption) {
+    const mapping = updateMappings[update.key].split('.')
+    const field = mapping.pop()
+    const [, subModel] = mapping
+    const model = cdoDao[subModel]
+    model[field] = update.value
+
+    await model.save({ transaction })
+
+    // this will publish the event
+    if (update.callback) {
+      await update.callback()
+    }
+  }
+}
+
 /**
  * @type {CdoRepository}
  */
@@ -451,5 +493,6 @@ module.exports = {
   getSummaryCdos,
   getAllCdos,
   getCdoModel,
-  getCdoTaskList
+  getCdoTaskList,
+  saveCdoTaskList
 }

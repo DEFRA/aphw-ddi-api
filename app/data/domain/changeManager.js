@@ -1,5 +1,9 @@
 class ChangeManager {
   constructor () {
+    /**
+     * @type {{key: string; value: any; callback: () => any}[]}
+     * @private
+     */
     this._changes = []
   }
 
@@ -11,9 +15,9 @@ class ChangeManager {
 
   /**
    *
-   * @param key
+   * @param {string} key
    * @param value
-   * @param [callback]
+   * @param {(function(): *)} [callback]
    * @return {ChangeManager}
    */
   update (key, value, callback) {
@@ -21,6 +25,9 @@ class ChangeManager {
     return this
   }
 
+  /**
+   * @return {{key: string, value: *, callback: (function(): *)}[]}
+   */
   get changes () {
     return this._changes
   }

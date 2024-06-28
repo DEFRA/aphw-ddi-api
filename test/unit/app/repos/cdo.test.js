@@ -2,9 +2,10 @@ const { payload: mockCdoPayload, payloadWithPersonReference: mockCdoPayloadWithR
 const { NotFoundError } = require('../../../../app/errors/not-found')
 const { personDao: mockPersonPayload, createdPersonDao: mockCreatedPersonPayload } = require('../../../mocks/person')
 const { devUser } = require('../../../mocks/auth')
-const { buildCdoDao } = require('../../../mocks/cdo/get')
+const { buildCdoDao, buildRegistrationDao } = require('../../../mocks/cdo/get')
 const { Cdo, CdoTaskList } = require('../../../../app/data/domain')
 const { buildCdo } = require('../../../mocks/cdo/domain')
+const sequelize = require('../../../../app/config/db')
 
 describe('CDO repo', () => {
   jest.mock('../../../../app/config/db', () => ({
@@ -35,7 +36,7 @@ describe('CDO repo', () => {
   jest.mock('../../../../app/messaging/send-event')
   const { sendEvent } = require('../../../../app/messaging/send-event')
 
-  const { createCdo, getCdo, getAllCdos, getSummaryCdos, getCdoModel, getCdoTaskList } = require('../../../../app/repos/cdo')
+  const { createCdo, getCdo, getAllCdos, getSummaryCdos, getCdoModel, getCdoTaskList, saveCdoTaskList } = require('../../../../app/repos/cdo')
 
   beforeEach(async () => {
     jest.clearAllMocks()
@@ -582,6 +583,35 @@ describe('CDO repo', () => {
     test('should throw a NotFound error given cdo does not exist', async () => {
       sequelize.models.dog.findAll.mockResolvedValue([])
       await expect(getCdoTaskList('ED300097')).rejects.toThrow(NotFoundError)
+    })
+  })
+
+  describe('saveCdoTaskList', () => {
+    test('should create start new transaction if none passed', async () => {
+      await saveCdoTaskList({})
+
+      expect(sequelize.transaction).toHaveBeenCalledTimes(1)
+    })
+
+    test('should update applicationPackSent', async () => {
+      const dog = buildCdoDao({
+        registration: buildRegistrationDao({
+          save: jest.fn()
+        })
+      })
+
+      sequelize.models.dog.findAll.mockResolvedValue([dog])
+
+      const callback = jest.fn()
+      const cdoTaskList = new CdoTaskList(buildCdo())
+      expect(dog.registration.application_pack_sent).toBeNull()
+      cdoTaskList.sendApplicationPack(callback)
+      await saveCdoTaskList(cdoTaskList, {})
+      expect(sequelize.models.dog.findAll).toHaveBeenCalledWith(expect.objectContaining({
+        where: { index_number: 'ED300097' }
+      }))
+      expect(dog.registration.save).toHaveBeenCalled()
+      expect(callback).toHaveBeenCalled()
     })
   })
 })

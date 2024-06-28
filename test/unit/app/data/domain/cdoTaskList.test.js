@@ -10,7 +10,7 @@ describe('CdoTaskList', () => {
       applicationPackSent: null
     })
     const cdo = buildCdo({
-      exemption: new Exemption(exemptionProperties)
+      exemption: exemptionProperties
     })
     return new CdoTaskList(cdo)
   }
@@ -75,6 +75,7 @@ describe('CdoTaskList', () => {
         timestamp: undefined
       }))
       expect(cdoTaskList.cdoSummary).toEqual({
+        indexNumber: 'ED300097',
         applicationPackSent: undefined,
         insuranceCompany: undefined,
         insuranceRenewalDate: undefined,
@@ -124,6 +125,7 @@ describe('CdoTaskList', () => {
         key: 'certificateIssued'
       }))
       expect(cdoTaskList.cdoSummary).toEqual({
+        indexNumber: 'ED300097',
         applicationPackSent: new Date('2024-06-25'),
         insuranceCompany: undefined,
         insuranceRenewalDate: undefined,
@@ -501,6 +503,7 @@ describe('CdoTaskList', () => {
       }))
 
       expect(cdoTaskList.cdoSummary).toEqual({
+        indexNumber: 'ED300097',
         applicationPackSent: new Date('2024-06-25'),
         insuranceCompany: 'Dogs R Us',
         insuranceRenewalDate: futureDate,
