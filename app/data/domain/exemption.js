@@ -1,3 +1,6 @@
+const { func } = require('joi')
+const { ChangeManager } = require('./changeManager')
+
 /**
  * @param exemptionProperties
  * @constructor
@@ -18,6 +21,7 @@
  * @property {Date|null} formTwoSent
  */
 function Exemption (exemptionProperties) {
+  this._updates = new ChangeManager()
   this.exemptionOrder = exemptionProperties.exemptionOrder
   this.cdoIssued = exemptionProperties.cdoIssued
   this.cdoExpiry = exemptionProperties.cdoExpiry
@@ -33,6 +37,16 @@ function Exemption (exemptionProperties) {
   this.nonComplianceLetterSent = exemptionProperties.nonComplianceLetterSent
   this.applicationPackSent = exemptionProperties.applicationPackSent
   this.formTwoSent = exemptionProperties.formTwoSent
+}
+
+Exemption.prototype.sendApplicationPack = function () {
+  const auditDate = new Date()
+  this.applicationPackSent = auditDate
+  this._updates.update('applicationPackSent', auditDate)
+}
+
+Exemption.prototype.getBulkChanges = function () {
+  return this._updates.bulkChanges
 }
 
 module.exports = Exemption
