@@ -1,8 +1,8 @@
-const { CdoService } = require('../../../../app/service/cdo')
 const { buildCdo, buildExemption } = require('../../../mocks/cdo/domain')
 const { CdoTaskList } = require('../../../../app/data/domain')
 const { devUser } = require('../../../mocks/auth')
 const { ActionAlreadyPerformedError } = require('../../../../app/errors/domain/actionAlreadyPerformed')
+const { EXEMPTION } = require('../../../../app/constants/event/audit-event-object-types')
 
 describe('CdoService', function () {
   /**
@@ -10,6 +10,11 @@ describe('CdoService', function () {
    */
   let mockCdoRepository
   let cdoService
+
+  jest.mock('../../../../app/messaging/send-audit')
+  const { sendUpdateToAudit } = require('../../../../app/messaging/send-audit')
+
+  const { CdoService } = require('../../../../app/service/cdo')
 
   beforeEach(function () {
     // Create a mock CdoRepository
@@ -49,6 +54,8 @@ describe('CdoService', function () {
       const cdoIndexNumber = 'ED300097'
       const cdoTaskList = new CdoTaskList(buildCdo())
       mockCdoRepository.getCdoTaskList.mockResolvedValue(cdoTaskList)
+      const preAudit = { applicationPackSent: null }
+      const postAudit = { applicationPackSent: new Date('2024-05-03') }
 
       await cdoService.sendApplicationPack(cdoIndexNumber, devUser)
       expect(mockCdoRepository.getCdoTaskList).toHaveBeenCalledWith(cdoIndexNumber)
@@ -58,7 +65,8 @@ describe('CdoService', function () {
         value: expect.any(Date),
         callback: expect.any(Function)
       }])
-      // do event call
+      await cdoTaskList.getUpdates().exemption[0].callback(preAudit, postAudit)
+      expect(sendUpdateToAudit).toHaveBeenCalledWith(EXEMPTION, preAudit, postAudit, devUser)
     })
 
     test('should not send application pack a second time', async () => {

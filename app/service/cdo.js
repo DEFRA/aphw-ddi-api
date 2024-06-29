@@ -4,6 +4,9 @@
  * @return {Promise<CdoTaskList>}
  */
 
+const { sendUpdateToAudit } = require('../messaging/send-audit')
+const { EXEMPTION } = require('../constants/event/audit-event-object-types')
+
 /**
  * @param {CdoRepository} cdoRepository
  * @constructor
@@ -22,8 +25,8 @@ CdoService.prototype.getTaskList = async function (cdoId) {
 
 CdoService.prototype.sendApplicationPack = async function (cdoId, user) {
   const cdoTaskList = await this.cdoRepository.getCdoTaskList(cdoId)
-  const sendEvent = () => {
-    throw new Error('Event should be implemented')
+  const sendEvent = async (preChanged, postChanged) => {
+    await sendUpdateToAudit(EXEMPTION, preChanged, postChanged, user)
   }
 
   try {

@@ -5,7 +5,6 @@ const { devUser } = require('../../../mocks/auth')
 const { buildCdoDao, buildRegistrationDao } = require('../../../mocks/cdo/get')
 const { Cdo, CdoTaskList } = require('../../../../app/data/domain')
 const { buildCdo } = require('../../../mocks/cdo/domain')
-const sequelize = require('../../../../app/config/db')
 
 describe('CDO repo', () => {
   jest.mock('../../../../app/config/db', () => ({
@@ -14,7 +13,8 @@ describe('CDO repo', () => {
     models: {
       dog: {
         findOne: jest.fn(),
-        findAll: jest.fn()
+        findAll: jest.fn(),
+        reload: jest.fn()
       }
     },
     fn: jest.fn(),
@@ -595,6 +595,7 @@ describe('CDO repo', () => {
 
     test('should update applicationPackSent', async () => {
       const dog = buildCdoDao({
+        reload: jest.fn(),
         registration: buildRegistrationDao({
           save: jest.fn()
         })
@@ -611,6 +612,7 @@ describe('CDO repo', () => {
         where: { index_number: 'ED300097' }
       }))
       expect(dog.registration.save).toHaveBeenCalled()
+      expect(dog.reload).toHaveBeenCalled()
       expect(callback).toHaveBeenCalled()
     })
   })
