@@ -1,4 +1,4 @@
-const { CdoTaskList, Cdo, Exemption, CdoTask } = require('../../../../../app/data/domain')
+const { CdoTaskList, Cdo, CdoTask } = require('../../../../../app/data/domain')
 const { buildCdo, buildExemption, buildTask, buildCdoInsurance, buildCdoDog } = require('../../../../mocks/cdo/domain')
 const { ActionAlreadyPerformedError } = require('../../../../../app/errors/domain/actionAlreadyPerformed')
 describe('CdoTaskList', () => {
