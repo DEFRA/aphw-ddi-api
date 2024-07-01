@@ -8,9 +8,9 @@
  * @param {Date|undefined} [timestamp]
  * @constructor
  * @property {string} key
- * @property {boolean} available
- * @property {boolean} completed
- * @property {boolean} readonly
+ * @property {boolean} [available]
+ * @property {boolean} [completed]
+ * @property {boolean} [readonly]
  * @property {Date|undefined} timestamp
  */
 function CdoTask (key, state = {}, timestamp) {

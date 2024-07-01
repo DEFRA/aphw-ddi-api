@@ -94,6 +94,10 @@ const mapDogDaoToDog = (dogDao) => {
   return new Dog(dogProperties)
 }
 
+const returnDateOrNull = (dateOrNull) => {
+  return dateOrNull === null ? null : new Date(dateOrNull)
+}
+
 const mapCdoDaoToExemption = (registration, insurance) => {
   const exemptionProperties = {
     exemptionOrder: registration.exemption_order.exemption_order,
@@ -102,18 +106,18 @@ const mapCdoDaoToExemption = (registration, insurance) => {
     court: registration.court?.name,
     policeForce: registration?.police_force?.name,
     legislationOfficer: registration.legislation_officer,
-    certificateIssued: registration.certificate_issued,
-    applicationFeePaid: registration.application_fee_paid,
+    certificateIssued: returnDateOrNull(registration.certificate_issued),
+    applicationFeePaid: returnDateOrNull(registration.application_fee_paid),
     insurance: insurance?.sort((a, b) => a.id - b.id).map(i => ({
       company: i.company.company_name,
-      insuranceRenewal: i.renewal_date
+      insuranceRenewal: returnDateOrNull(i.renewal_date)
     })),
-    neuteringConfirmation: registration.neutering_confirmation,
-    microchipVerification: registration.microchip_verification,
+    neuteringConfirmation: returnDateOrNull(registration.neutering_confirmation),
+    microchipVerification: returnDateOrNull(registration.microchip_verification),
     joinedExemptionScheme: new Date(registration.joined_exemption_scheme),
-    nonComplianceLetterSent: registration.non_compliance_letter_sent,
-    applicationPackSent: registration.application_pack_sent,
-    formTwoSent: registration.form_two_sent
+    nonComplianceLetterSent: returnDateOrNull(registration.non_compliance_letter_sent),
+    applicationPackSent: returnDateOrNull(registration.application_pack_sent),
+    formTwoSent: returnDateOrNull(registration.form_two_sent)
   }
   return new Exemption(exemptionProperties)
 }
