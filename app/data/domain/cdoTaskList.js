@@ -1,5 +1,7 @@
 const CdoTask = require('./cdoTask')
 const { ActionAlreadyPerformedError } = require('../../errors/domain/actionAlreadyPerformed')
+const { SequenceViolationError } = require('../../errors/domain/sequenceViolation')
+const { dateTodayOrInFuture } = require('../../lib/date-helpers')
 
 class CdoTaskList {
   /**
@@ -13,15 +15,17 @@ class CdoTaskList {
     return stage instanceof Date
   }
 
-  static dateIsInTheFuture (date) {
-    return date.getTime() > Date.now()
-  }
-
-  get _stageOneComplete () {
+  get _actionPackStageComplete () {
     return this.applicationPackSent.completed
   }
 
-  get _stageTwoComplete () {
+  _actionPackCompleteGuard () {
+    if (!this._actionPackStageComplete) {
+      throw new SequenceViolationError('Application pack must be sent before performing this action')
+    }
+  }
+
+  get _preCertificateStepsComplete () {
     return this.applicationPackSent.completed &&
     this.insuranceDetailsRecorded.completed &&
     this.microchipNumberRecorded.completed &&
@@ -64,7 +68,7 @@ class CdoTaskList {
 
   get insuranceDetailsRecorded () {
     const [insurance] = this._cdo.exemption.insurance
-    const completed = this.cdoSummary.insuranceCompany !== undefined && CdoTaskList.dateStageComplete(this.cdoSummary.insuranceRenewalDate) && CdoTaskList.dateIsInTheFuture(this.cdoSummary.insuranceRenewalDate)
+    const completed = this.cdoSummary.insuranceCompany !== undefined && CdoTaskList.dateStageComplete(this.cdoSummary.insuranceRenewalDate) && dateTodayOrInFuture(this.cdoSummary.insuranceRenewalDate)
     let timestamp
 
     if (completed) {
@@ -74,7 +78,7 @@ class CdoTaskList {
     return new CdoTask(
       'insuranceDetailsRecorded',
       {
-        available: this._stageOneComplete,
+        available: this._actionPackStageComplete,
         completed
       },
       timestamp
@@ -85,7 +89,7 @@ class CdoTaskList {
     return new CdoTask(
       'microchipNumberRecorded',
       {
-        available: this._stageOneComplete,
+        available: this._actionPackStageComplete,
         completed: this.cdoSummary.microchipNumber !== undefined
       }
     )
@@ -95,7 +99,7 @@ class CdoTaskList {
     return new CdoTask(
       'applicationFeePaid',
       {
-        available: this._stageOneComplete,
+        available: this._actionPackStageComplete,
         completed: CdoTaskList.dateStageComplete(this.cdoSummary.applicationFeePaid)
       },
       this.cdoSummary.applicationFeePaid
@@ -107,7 +111,7 @@ class CdoTaskList {
     return new CdoTask(
       'form2Sent',
       {
-        available: this._stageOneComplete,
+        available: this._actionPackStageComplete,
         completed,
         readonly: completed
       },
@@ -142,7 +146,7 @@ class CdoTaskList {
     return new CdoTask(
       'certificateIssued',
       {
-        available: this._stageTwoComplete && !completed,
+        available: this._preCertificateStepsComplete && !completed,
         completed
       },
       this.cdoSummary.certificateIssued
@@ -154,6 +158,11 @@ class CdoTaskList {
       throw new ActionAlreadyPerformedError('Application pack can only be sent once')
     }
     this._cdo.exemption.sendApplicationPack(callback)
+  }
+
+  addInsuranceDetails (company, renewalDate, callback) {
+    this._actionPackCompleteGuard()
+    this._cdo.exemption.setInsuranceDetails(company, renewalDate, callback)
   }
 
   getUpdates () {

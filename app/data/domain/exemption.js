@@ -1,4 +1,7 @@
 const { ChangeManager } = require('./changeManager')
+const { dateTodayOrInFuture } = require('../../lib/date-helpers')
+const { InvalidDateError } = require('../../errors/domain/invalidDate')
+const { IncompleteDataError } = require('../../errors/domain/incompleteData')
 
 /**
  * @param exemptionProperties
@@ -19,33 +22,63 @@ const { ChangeManager } = require('./changeManager')
  * @property {Date|null} applicationPackSent
  * @property {Date|null} formTwoSent
  */
-function Exemption (exemptionProperties) {
-  this._updates = new ChangeManager()
-  this.exemptionOrder = exemptionProperties.exemptionOrder
-  this.cdoIssued = exemptionProperties.cdoIssued
-  this.cdoExpiry = exemptionProperties.cdoExpiry
-  this.court = exemptionProperties.court
-  this.policeForce = exemptionProperties.policeForce
-  this.legislationOfficer = exemptionProperties.legislationOfficer
-  this.certificateIssued = exemptionProperties.certificateIssued
-  this.applicationFeePaid = exemptionProperties.applicationFeePaid
-  this.insurance = exemptionProperties.insurance
-  this.neuteringConfirmation = exemptionProperties.neuteringConfirmation
-  this.microchipVerification = exemptionProperties.microchipVerification
-  this.joinedExemptionScheme = exemptionProperties.joinedExemptionScheme
-  this.nonComplianceLetterSent = exemptionProperties.nonComplianceLetterSent
-  this.applicationPackSent = exemptionProperties.applicationPackSent
-  this.formTwoSent = exemptionProperties.formTwoSent
-}
+class Exemption {
+  constructor (exemptionProperties) {
+    this._updates = new ChangeManager()
+    this.exemptionOrder = exemptionProperties.exemptionOrder
+    this.cdoIssued = exemptionProperties.cdoIssued
+    this.cdoExpiry = exemptionProperties.cdoExpiry
+    this.court = exemptionProperties.court
+    this.policeForce = exemptionProperties.policeForce
+    this.legislationOfficer = exemptionProperties.legislationOfficer
+    this.certificateIssued = exemptionProperties.certificateIssued
+    this.applicationFeePaid = exemptionProperties.applicationFeePaid
+    this._insurance = exemptionProperties.insurance
+    this.neuteringConfirmation = exemptionProperties.neuteringConfirmation
+    this.microchipVerification = exemptionProperties.microchipVerification
+    this.joinedExemptionScheme = exemptionProperties.joinedExemptionScheme
+    this.nonComplianceLetterSent = exemptionProperties.nonComplianceLetterSent
+    this.applicationPackSent = exemptionProperties.applicationPackSent
+    this.formTwoSent = exemptionProperties.formTwoSent
+  }
 
-Exemption.prototype.sendApplicationPack = function (callback) {
-  const auditDate = new Date()
-  this.applicationPackSent = auditDate
-  this._updates.update('applicationPackSent', auditDate, callback)
-}
+  sendApplicationPack (callback) {
+    const auditDate = new Date()
+    this.applicationPackSent = auditDate
+    this._updates.update('applicationPackSent', auditDate, callback)
+  }
 
-Exemption.prototype.getChanges = function () {
-  return this._updates.changes
-}
+  getChanges () {
+    return this._updates.changes
+  }
 
+  get insurance () {
+    return this._insurance
+  }
+
+  setInsuranceDetails (company, insuranceRenewal, callback) {
+    if (insuranceRenewal instanceof Date && !dateTodayOrInFuture(insuranceRenewal)) {
+      throw new InvalidDateError('Insurance renewal date must be in the future')
+    }
+
+    const insurance = {
+      company: company || undefined,
+      insuranceRenewal
+    }
+
+    if (insurance.company === undefined && insuranceRenewal instanceof Date) {
+      throw new IncompleteDataError('Insurance company must be submitted')
+    } else if (insuranceRenewal === undefined && insurance.company !== undefined) {
+      throw new IncompleteDataError('Insurance renewal date must be submitted')
+    }
+
+    if (insurance.company === undefined && insuranceRenewal === undefined) {
+      this._insurance = []
+    } else {
+      this._insurance = [insurance]
+    }
+
+    this._updates.update('insurance', insurance, callback)
+  }
+}
 module.exports = Exemption

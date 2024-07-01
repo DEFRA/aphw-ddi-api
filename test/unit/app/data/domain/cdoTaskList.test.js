@@ -1,9 +1,12 @@
 const { CdoTaskList, Cdo, CdoTask } = require('../../../../../app/data/domain')
 const { buildCdo, buildExemption, buildTask, buildCdoInsurance, buildCdoDog } = require('../../../../mocks/cdo/domain')
 const { ActionAlreadyPerformedError } = require('../../../../../app/errors/domain/actionAlreadyPerformed')
+const { SequenceViolationError } = require('../../../../../app/errors/domain/sequenceViolation')
+const { inXDays } = require('../../../../time-helper')
 describe('CdoTaskList', () => {
-  const futureDate = new Date()
-  futureDate.setDate(futureDate.getDate() + 60)
+  const dogsTrustCompany = 'Dog\'s Trust'
+
+  const in60Days = inXDays(60)
 
   const buildDefaultTaskList = () => {
     const exemptionProperties = buildExemption({
@@ -179,7 +182,7 @@ describe('CdoTaskList', () => {
         applicationFeePaid: new Date('2024-06-24'),
         insurance: [buildCdoInsurance({
           company: 'Dogs R Us',
-          insuranceRenewal: futureDate
+          insuranceRenewal: in60Days
         })]
       })
       const dogProperties = buildCdoDog({
@@ -216,7 +219,7 @@ describe('CdoTaskList', () => {
         microchipVerification: new Date('2024-03-09'),
         insurance: [buildCdoInsurance({
           company: 'Dogs R Us',
-          insuranceRenewal: futureDate
+          insuranceRenewal: in60Days
         })]
       })
       const dogProperties = buildCdoDog({
@@ -252,7 +255,7 @@ describe('CdoTaskList', () => {
         neuteringConfirmation: new Date('2024-02-10'),
         insurance: [buildCdoInsurance({
           company: 'Dogs R Us',
-          insuranceRenewal: futureDate
+          insuranceRenewal: in60Days
         })]
       })
       const dogProperties = buildCdoDog({
@@ -320,6 +323,41 @@ describe('CdoTaskList', () => {
       }))
     })
 
+    test('should be completable given insurance renewal date is today', () => {
+      const today = new Date()
+      today.setHours(0)
+      today.setMinutes(0)
+      today.setMilliseconds(0)
+
+      const exemptionProperties = buildExemption({
+        applicationPackSent: new Date('2024-06-25'),
+        formTwoSent: new Date('2024-05-24'),
+        applicationFeePaid: new Date('2024-06-24'),
+        neuteringConfirmation: new Date('2024-02-10'),
+        microchipVerification: new Date('2024-03-09'),
+        insurance: [buildCdoInsurance({
+          company: 'Dogs R Us',
+          insuranceRenewal: today
+        })]
+      })
+      const dogProperties = buildCdoDog({
+        microchipNumber: '123456789012345'
+      })
+      const cdo = buildCdo({
+        dog: dogProperties,
+        exemption: exemptionProperties
+      })
+      const cdoTaskList = new CdoTaskList(cdo)
+
+      expect(cdoTaskList.certificateIssued).toEqual(expect.objectContaining({
+        key: 'certificateIssued',
+        available: true,
+        completed: false,
+        readonly: false,
+        timestamp: undefined
+      }))
+    })
+
     test('should not be completable given insurance company is set, but renewal is not', () => {
       const yesterday = new Date()
       yesterday.setDate(yesterday.getDate() - 1)
@@ -372,7 +410,7 @@ describe('CdoTaskList', () => {
         microchipVerification: new Date('2024-03-09'),
         insurance: [buildCdoInsurance({
           company: null,
-          insuranceRenewal: futureDate
+          insuranceRenewal: in60Days
         })]
       })
       const dogProperties = buildCdoDog({
@@ -439,7 +477,7 @@ describe('CdoTaskList', () => {
         microchipVerification: new Date('2024-03-09'),
         insurance: [buildCdoInsurance({
           company: 'Dogs R Us',
-          insuranceRenewal: futureDate
+          insuranceRenewal: in60Days
         })],
         certificateIssued: new Date('2024-06-27')
       })
@@ -461,7 +499,7 @@ describe('CdoTaskList', () => {
         available: true,
         completed: true,
         readonly: false,
-        timestamp: futureDate
+        timestamp: in60Days
       }))
       expect(cdoTaskList.microchipNumberRecorded).toEqual(expect.objectContaining({
         key: 'microchipNumberRecorded',
@@ -506,7 +544,7 @@ describe('CdoTaskList', () => {
         indexNumber: 'ED300097',
         applicationPackSent: new Date('2024-06-25'),
         insuranceCompany: 'Dogs R Us',
-        insuranceRenewalDate: futureDate,
+        insuranceRenewalDate: in60Days,
         microchipNumber: '123456789012345',
         applicationFeePaid: new Date('2024-06-24'),
         form2Sent: new Date('2024-05-24'),
@@ -517,35 +555,65 @@ describe('CdoTaskList', () => {
     })
   })
 
-  describe('sendApplicationPack', () => {
-    test('should send application pack given applicationPackSent is not complete', () => {
-      const transactionCallback = jest.fn()
-      const cdoListInDefaultState = buildDefaultTaskList()
-      expect(cdoListInDefaultState.applicationPackSent.completed).toBe(false)
-      expect(cdoListInDefaultState.cdoSummary.applicationPackSent).not.toBeInstanceOf(Date)
-      cdoListInDefaultState.sendApplicationPack(transactionCallback)
-      expect(cdoListInDefaultState.applicationPackSent.completed).toBe(true)
-      expect(cdoListInDefaultState.cdoSummary.applicationPackSent).toBeInstanceOf(Date)
-      expect(cdoListInDefaultState.getUpdates().exemption).toEqual([{
-        key: 'applicationPackSent',
-        value: expect.any(Date),
-        callback: expect.any(Function)
-      }])
-      cdoListInDefaultState.getUpdates().exemption[0].callback()
-      expect(transactionCallback).toHaveBeenCalled()
+  describe('steps', () => {
+    const transactionCallback = jest.fn()
+    const cdoTaskList = buildDefaultTaskList()
+
+    test('should not permit recording of Insurance Details before application pack is sent', () => {
+      expect(() => cdoTaskList.addInsuranceDetails(dogsTrustCompany, inXDays(60), transactionCallback)).toThrow(new SequenceViolationError('Application pack must be sent before performing this action'))
+
+      expect(cdoTaskList.insuranceDetailsRecorded.completed).toBe(false)
+      expect(cdoTaskList.cdoSummary.insuranceCompany).toBeUndefined()
+      expect(cdoTaskList.cdoSummary.insuranceRenewalDate).not.toBeInstanceOf(Date)
     })
 
-    test('should fail if application pack has already been sent', () => {
-      const exemptionProperties = buildExemption({
-        applicationPackSent: new Date('2024-06-25')
-      })
-      const cdo = buildCdo({
-        exemption: exemptionProperties,
-        dog: buildCdoDog({ microchipNumber: '' })
-      })
-      const cdoTaskListWithApplicationSent = new CdoTaskList(cdo)
+    describe('sendApplicationPack', () => {
+      test('should send application pack given applicationPackSent is not complete', () => {
+        expect(cdoTaskList.applicationPackSent.completed).toBe(false)
+        expect(cdoTaskList.cdoSummary.applicationPackSent).not.toBeInstanceOf(Date)
 
-      expect(() => cdoTaskListWithApplicationSent.sendApplicationPack()).toThrow(new ActionAlreadyPerformedError('Application pack can only be sent once'))
+        cdoTaskList.sendApplicationPack(transactionCallback)
+        expect(cdoTaskList.applicationPackSent.completed).toBe(true)
+        expect(cdoTaskList.cdoSummary.applicationPackSent).toBeInstanceOf(Date)
+        expect(cdoTaskList.getUpdates().exemption).toEqual([{
+          key: 'applicationPackSent',
+          value: expect.any(Date),
+          callback: expect.any(Function)
+        }])
+        cdoTaskList.getUpdates().exemption[0].callback()
+        expect(transactionCallback).toHaveBeenCalledTimes(1)
+      })
+
+      test('should fail if application pack has already been sent', () => {
+        expect(() => cdoTaskList.sendApplicationPack(transactionCallback)).toThrow(new ActionAlreadyPerformedError('Application pack can only be sent once'))
+      })
+    })
+
+    describe('recordInsuranceDetails', () => {
+      test('should start with correct details', () => {
+        expect(cdoTaskList.insuranceDetailsRecorded.completed).toBe(false)
+        expect(cdoTaskList.cdoSummary.insuranceCompany).toBeUndefined()
+        expect(cdoTaskList.cdoSummary.insuranceRenewalDate).not.toBeInstanceOf(Date)
+      })
+
+      test('should record insurance details given date is in the future', async () => {
+        const renewalDate = inXDays(1)
+
+        cdoTaskList.addInsuranceDetails(dogsTrustCompany, renewalDate, transactionCallback)
+        expect(cdoTaskList.insuranceDetailsRecorded.completed).toBe(true)
+        expect(cdoTaskList.cdoSummary.insuranceCompany).toBe(dogsTrustCompany)
+        expect(cdoTaskList.cdoSummary.insuranceRenewalDate).toBeInstanceOf(Date)
+        expect(cdoTaskList.getUpdates().exemption[1]).toEqual({
+          key: 'insurance',
+          value: {
+            company: dogsTrustCompany,
+            insuranceRenewal: expect.any(Date)
+          },
+          callback: expect.any(Function)
+        })
+        cdoTaskList.getUpdates().exemption[1].callback()
+        expect(transactionCallback).toHaveBeenCalledTimes(2)
+      })
     })
   })
 })
