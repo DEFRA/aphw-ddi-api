@@ -2,6 +2,8 @@ const { payload: mockCreatePayload, payloadWithPersonReference: mockCreateWithRe
 const { NotFoundError } = require('../../../../app/errors/not-found')
 const { CdoTaskList } = require('../../../../app/data/domain')
 const { buildCdo } = require('../../../mocks/cdo/domain')
+const { ActionAlreadyPerformedError } = require('../../../../app/errors/domain/actionAlreadyPerformed')
+const { devUser } = require('../../../mocks/auth')
 
 describe('CDO endpoint', () => {
   const createServer = require('../../../../app/server')
@@ -11,12 +13,16 @@ describe('CDO endpoint', () => {
   const cdoRepository = require('../../../../app/repos/cdo')
   const { createCdo, getCdo } = cdoRepository
 
+  jest.mock('../../../../app/auth/get-user')
+  const { getCallingUser } = require('../../../../app/auth/get-user')
+
   jest.mock('../../../../app/service/config')
   const { getCdoService } = require('../../../../app/service/config')
 
   beforeEach(async () => {
     jest.clearAllMocks()
     server = await createServer()
+    getCallingUser.mockReturnValue(devUser)
     await server.initialize()
   })
 
@@ -376,6 +382,70 @@ describe('CDO endpoint', () => {
       const options = {
         method: 'GET',
         url: '/cdo/ED123/manage'
+      }
+
+      const response = await server.inject(options)
+      expect(response.statusCode).toBe(500)
+    })
+  })
+
+  describe('POST /cdo/ED123/manage:sendApplicationPack', () => {
+    test('should return 204', async () => {
+      const sendApplicationPackMock = jest.fn()
+      getCdoService.mockReturnValue({
+        sendApplicationPack: sendApplicationPackMock
+      })
+      sendApplicationPackMock.mockResolvedValue(undefined)
+
+      const options = {
+        method: 'POST',
+        url: '/cdo/ED123/manage:sendApplicationPack'
+      }
+      const response = await server.inject(options)
+      expect(response.statusCode).toBe(204)
+      expect(sendApplicationPackMock).toHaveBeenCalledWith('ED123', devUser)
+    })
+
+    test('should throw a 404 given index does not exist', async () => {
+      getCdoService.mockReturnValue({
+        sendApplicationPack: async () => {
+          throw new NotFoundError('not found')
+        }
+      })
+      const options = {
+        method: 'POST',
+        url: '/cdo/ED123/manage:sendApplicationPack'
+      }
+
+      const response = await server.inject(options)
+      expect(response.statusCode).toBe(404)
+    })
+
+    test('should throw a 409 given action already performed', async () => {
+      getCdoService.mockReturnValue({
+        sendApplicationPack: async () => {
+          throw new ActionAlreadyPerformedError('not found')
+        }
+      })
+      const options = {
+        method: 'POST',
+        url: '/cdo/ED123/manage:sendApplicationPack'
+      }
+
+      const response = await server.inject(options)
+      expect(response.statusCode).toBe(409)
+    })
+
+    test('should returns 500 given server error thrown', async () => {
+      getCdoService.mockReturnValue({
+        sendApplicationPack: async () => {
+          throw new Error('cdo error')
+        }
+      })
+
+      const options = {
+        method: 'POST',
+        url: '/cdo/ED123/manage:sendApplicationPack'
       }
 
       const response = await server.inject(options)

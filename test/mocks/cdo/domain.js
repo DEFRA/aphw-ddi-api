@@ -18,11 +18,13 @@ const buildCdoPerson = (cdoPersonPartial = {}) => ({
   organisationName: null,
   ...cdoPersonPartial
 })
-
+/**
+ * @typedef {{dateExported: null|Date, dateStolen: null|Date, microchipNumber: string|null, dateOfDeath: null|Date, sex: string|null, dogReference: string, dateOfBirth: string|null, indexNumber: string, breed: string, microchipNumber2: string|null, tattoo: string|null, colour: string|null, name: string|null, id: number, dateUntraceable: null|Date, status: string}} CdoDogParams
+ */
 /**
  *
- * @param cdoDogPartial
- * @return {*&{dateExported: null, dateStolen: null, microchipNumber: string, dateOfDeath: null, sex: string, dogReference: string, dateOfBirth: string, indexNumber: string, breed: string, microchipNumber2: null, tattoo: string, colour: string, name: string, id: number, dateUntraceable: null, status: string}}
+ * @param {Partial<CdoDogParams>}  cdoDogPartial
+ * @return {CdoDogParams}
  */
 const buildCdoDog = (cdoDogPartial) => ({
   id: 300097,
@@ -45,7 +47,7 @@ const buildCdoDog = (cdoDogPartial) => ({
 })
 
 /**
- * @typedef {{company: string, insuranceRenewal: string}} CdoInsurance
+ * @typedef {{company: string, insuranceRenewal: Date}} CdoInsurance
  */
 /**
  *
@@ -54,7 +56,7 @@ const buildCdoDog = (cdoDogPartial) => ({
  */
 const buildCdoInsurance = (insurancePartial = {}) => ({
   company: 'Allianz',
-  insuranceRenewal: '2024-01-01T00:00:00.000Z',
+  insuranceRenewal: new Date('2024-01-01T00:00:00.000Z'),
   ...insurancePartial
 })
 /**
@@ -100,6 +102,10 @@ const buildExemption = (exemptionPartial = {}) => ({
   ...exemptionPartial
 })
 
+/**
+ * @param {{ person?: Partial<CdoPerson>; dog?: Partial<CdoDogParams>; exemption?: Partial<Exemption>;  }} cdoPartial
+ * @return {Cdo}
+ */
 const buildCdo = (cdoPartial = {}) => {
   const personProps = buildCdoPerson(cdoPartial.person ?? {})
   const exemptionProps = buildExemption(cdoPartial.exemption ?? {})

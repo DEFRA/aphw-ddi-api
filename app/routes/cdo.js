@@ -5,6 +5,7 @@ const cdoCreateSchema = require('../schema/cdo/create')
 const { NotFoundError } = require('../errors/not-found')
 const ServiceProvider = require('../service/config')
 const { mapCdoTaskListToDto } = require('../dto/cdoTaskList')
+const { ActionAlreadyPerformedError } = require('../errors/domain/actionAlreadyPerformed')
 
 module.exports = [
   {
@@ -67,6 +68,29 @@ module.exports = [
       } catch (e) {
         if (e instanceof NotFoundError) {
           return h.response().code(404)
+        }
+        console.log('Error retrieving cdo record:', e)
+        throw e
+      }
+    }
+  },
+  {
+    method: 'POST',
+    path: '/cdo/{indexNumber}/manage:sendApplicationPack',
+    handler: async (request, h) => {
+      const indexNumber = request.params.indexNumber
+
+      try {
+        const cdoService = ServiceProvider.getCdoService()
+        await cdoService.sendApplicationPack(indexNumber, getCallingUser(request))
+
+        return h.response().code(204)
+      } catch (e) {
+        if (e instanceof NotFoundError) {
+          return h.response().code(404)
+        }
+        if (e instanceof ActionAlreadyPerformedError) {
+          return h.response().code(409)
         }
         console.log('Error retrieving cdo record:', e)
         throw e

@@ -1,8 +1,26 @@
+const { ChangeManager } = require('./changeManager')
+
 /**
  * @param exemptionProperties
  * @constructor
+ * @property {string} exemptionOrder
+ * @property {Date} cdoIssued
+ * @property {Date} cdoExpiry
+ * @property {string|null} court
+ * @property {string|null} policeForce
+ * @property {string|null} legislationOfficer
+ * @property {Date|null} certificateIssued
+ * @property {Date|null} applicationFeePaid
+ * @property {{company: string; insuranceRenewal: Date }[]} insurance
+ * @property {Date|null} neuteringConfirmation
+ * @property {Date|null} microchipVerification
+ * @property {Date} joinedExemptionScheme
+ * @property {Date|null} nonComplianceLetterSent
+ * @property {Date|null} applicationPackSent
+ * @property {Date|null} formTwoSent
  */
 function Exemption (exemptionProperties) {
+  this._updates = new ChangeManager()
   this.exemptionOrder = exemptionProperties.exemptionOrder
   this.cdoIssued = exemptionProperties.cdoIssued
   this.cdoExpiry = exemptionProperties.cdoExpiry
@@ -18,6 +36,16 @@ function Exemption (exemptionProperties) {
   this.nonComplianceLetterSent = exemptionProperties.nonComplianceLetterSent
   this.applicationPackSent = exemptionProperties.applicationPackSent
   this.formTwoSent = exemptionProperties.formTwoSent
+}
+
+Exemption.prototype.sendApplicationPack = function (callback) {
+  const auditDate = new Date()
+  this.applicationPackSent = auditDate
+  this._updates.update('applicationPackSent', auditDate, callback)
+}
+
+Exemption.prototype.getChanges = function () {
+  return this._updates.changes
 }
 
 module.exports = Exemption
