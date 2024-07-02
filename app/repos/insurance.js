@@ -31,6 +31,12 @@ const createInsurance = async (id, data, transaction) => {
   }
 }
 
+/**
+ * @param {InsuranceDao} insurance
+ * @param {{ company: string; renewalDate: Date }} data
+ * @param transaction
+ * @return {Promise<*|undefined>}
+ */
 const updateInsurance = async (insurance, data, transaction) => {
   if (!transaction) {
     return await sequelize.transaction(async (t) => updateInsurance(insurance, data, t))
