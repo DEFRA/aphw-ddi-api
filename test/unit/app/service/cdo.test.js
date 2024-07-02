@@ -2,6 +2,7 @@ const { buildCdo, buildExemption } = require('../../../mocks/cdo/domain')
 const { CdoTaskList } = require('../../../../app/data/domain')
 const { devUser } = require('../../../mocks/auth')
 const { ActionAlreadyPerformedError } = require('../../../../app/errors/domain/actionAlreadyPerformed')
+const { inXDays } = require('../../../time-helper')
 
 describe('CdoService', function () {
   /**
@@ -98,6 +99,50 @@ describe('CdoService', function () {
       mockCdoRepository.saveCdoTaskList.mockRejectedValue(new Error('error whilst saving'))
 
       await expect(cdoService.sendApplicationPack(cdoIndexNumber, devUser)).rejects.toThrow(new Error('error whilst saving'))
+    })
+  })
+
+  describe('recordInsuranceDetails', () => {
+    test('should record insurance details', async () => {
+      const cdoIndexNumber = 'ED300097'
+      const cdoTaskList = new CdoTaskList(buildCdo({
+        exemption: buildExemption({
+          applicationPackSent: new Date()
+        })
+      }))
+      mockCdoRepository.getCdoTaskList.mockResolvedValue(cdoTaskList)
+      mockCdoRepository.saveCdoTaskList.mockResolvedValue(cdoTaskList)
+
+      const in60Days = inXDays(60)
+
+      const result = await cdoService.recordInsuranceDetails(cdoIndexNumber, {
+        insuranceCompany: 'Dog\'s Trust',
+        insuranceRenewal: in60Days
+      })
+      expect(mockCdoRepository.getCdoTaskList).toHaveBeenCalledWith(cdoIndexNumber)
+      expect(mockCdoRepository.saveCdoTaskList).toHaveBeenCalledWith(cdoTaskList)
+      expect(result).toEqual({
+        insuranceCompany: 'Dog\'s Trust',
+        insuranceRenewal: in60Days
+      })
+      expect(cdoTaskList.getUpdates().exemption).toEqual([{
+        key: 'insurance',
+        value: {
+          company: 'Dog\'s Trust',
+          insuranceRenewal: in60Days
+        },
+        callback: expect.any(Function)
+      }])
+      await cdoTaskList.getUpdates().exemption[0].callback()
+      // expect(sendActivityToAudit).toHaveBeenCalledWith({
+      //   activity: 9,
+      //   activityType: 'sent',
+      //   pk: 'ED300097',
+      //   source: 'dog',
+      //   activityDate: sentDate,
+      //   targetPk: 'dog',
+      //   activityLabel: 'Application pack'
+      // }, devUser)
     })
   })
 })
