@@ -5,4 +5,9 @@ const recordInsuranceDetailsSchema = Joi.object({
   insuranceRenewal: Joi.date().required().when('insuranceCompany', { is: '', then: Joi.valid(null).required(), otherwise: Joi.date().required() })
 }).required()
 
-module.exports = { recordInsuranceDetailsSchema }
+const recordInsuranceDetailsResponseSchema = Joi.object({
+  insuranceCompany: Joi.string().allow('').required(),
+  insuranceRenewal: Joi.date().allow(null).required()
+}).required()
+
+module.exports = { recordInsuranceDetailsSchema, recordInsuranceDetailsResponseSchema }

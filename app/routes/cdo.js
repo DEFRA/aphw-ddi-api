@@ -6,7 +6,7 @@ const { NotFoundError } = require('../errors/not-found')
 const ServiceProvider = require('../service/config')
 const { mapCdoTaskListToDto } = require('../dto/cdoTaskList')
 const { ActionAlreadyPerformedError } = require('../errors/domain/actionAlreadyPerformed')
-const { recordInsuranceDetailsSchema } = require('../schema/cdo/manage')
+const { recordInsuranceDetailsSchema, recordInsuranceDetailsResponseSchema } = require('../schema/cdo/manage')
 const { SequenceViolationError } = require('../errors/domain/sequenceViolation')
 
 module.exports = [
@@ -111,16 +111,20 @@ module.exports = [
           return h.response({ errors: err.details.map(e => e.message) }).code(400).takeover()
         }
       },
+      response: {
+        schema: recordInsuranceDetailsResponseSchema
+      },
       handler: async (request, h) => {
         const indexNumber = request.params.indexNumber
         const { insuranceCompany, insuranceRenewal } = request.payload
 
         try {
           const cdoService = ServiceProvider.getCdoService()
-          await cdoService.recordInsuranceDetails(indexNumber, { insuranceCompany, insuranceRenewal }, getCallingUser(request))
+          const response = await cdoService.recordInsuranceDetails(indexNumber, { insuranceCompany, insuranceRenewal }, getCallingUser(request))
 
           return h.response({
-            insuranceCompany, insuranceRenewal
+            insuranceCompany: response.insuranceCompany,
+            insuranceRenewal: response.insuranceRenewal
           }).code(201)
         } catch (e) {
           if (e instanceof NotFoundError) {
