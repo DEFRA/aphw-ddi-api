@@ -92,7 +92,7 @@ const getActivityByLabel = async (label) => {
 
     return activities
   } catch (e) {
-    console.log(`Error retrieving activity for id ${label}:`, e)
+    console.log(`Error retrieving activity for label ${label}:`, e)
     throw e
   }
 }
