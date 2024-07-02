@@ -55,23 +55,28 @@ class Exemption {
     return this._insurance
   }
 
-  setInsuranceDetails (company, insuranceRenewal, callback) {
-    if (insuranceRenewal instanceof Date && !dateTodayOrInFuture(insuranceRenewal)) {
+  /**
+   * @param {string} company
+   * @param {Date|null} renewalDate
+   * @param {() => void} callback
+   */
+  setInsuranceDetails (company, renewalDate, callback) {
+    if (renewalDate instanceof Date && !dateTodayOrInFuture(renewalDate)) {
       throw new InvalidDateError('Insurance renewal date must be in the future')
     }
 
     const insurance = {
       company: company || undefined,
-      insuranceRenewal
+      renewalDate
     }
 
-    if (insurance.company === undefined && insuranceRenewal instanceof Date) {
+    if (insurance.company === undefined && renewalDate instanceof Date) {
       throw new IncompleteDataError('Insurance company must be submitted')
-    } else if (insuranceRenewal === undefined && insurance.company !== undefined) {
+    } else if (renewalDate === undefined && insurance.company !== undefined) {
       throw new IncompleteDataError('Insurance renewal date must be submitted')
     }
 
-    if (insurance.company === undefined && insuranceRenewal === undefined) {
+    if (insurance.company === undefined && renewalDate === undefined) {
       this._insurance = []
     } else {
       this._insurance = [insurance]
