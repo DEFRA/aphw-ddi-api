@@ -52,7 +52,7 @@ const mapCdoTaskListToDto = (cdoTaskList) => ({
   },
   applicationPackSent: cdoTaskList.cdoSummary.applicationPackSent,
   insuranceCompany: cdoTaskList.cdoSummary.insuranceCompany,
-  insuranceRenewalDate: cdoTaskList.cdoSummary.insuranceRenewalDate,
+  insuranceRenewal: cdoTaskList.cdoSummary.insuranceRenewal,
   microchipNumber: cdoTaskList.cdoSummary.microchipNumber,
   applicationFeePaid: cdoTaskList.cdoSummary.applicationFeePaid,
   form2Sent: cdoTaskList.cdoSummary.form2Sent,

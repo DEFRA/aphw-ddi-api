@@ -41,7 +41,7 @@ class CdoTaskList {
       indexNumber: this._cdo.dog.indexNumber,
       applicationPackSent: this._cdo.exemption.applicationPackSent ?? undefined,
       insuranceCompany: this._cdo.exemption.insurance[0]?.company ?? undefined,
-      insuranceRenewalDate: this._cdo.exemption.insurance[0]?.insuranceRenewal ?? undefined,
+      insuranceRenewal: this._cdo.exemption.insurance[0]?.insuranceRenewal ?? undefined,
       microchipNumber,
       applicationFeePaid: this._cdo.exemption.applicationFeePaid ?? undefined,
       form2Sent: this._cdo.exemption.formTwoSent ?? undefined,
@@ -68,7 +68,7 @@ class CdoTaskList {
 
   get insuranceDetailsRecorded () {
     const [insurance] = this._cdo.exemption.insurance
-    const completed = this.cdoSummary.insuranceCompany !== undefined && CdoTaskList.dateStageComplete(this.cdoSummary.insuranceRenewalDate) && dateTodayOrInFuture(this.cdoSummary.insuranceRenewalDate)
+    const completed = this.cdoSummary.insuranceCompany !== undefined && CdoTaskList.dateStageComplete(this.cdoSummary.insuranceRenewal) && dateTodayOrInFuture(this.cdoSummary.insuranceRenewal)
     let timestamp
 
     if (completed) {

@@ -564,7 +564,7 @@ describe('CdoTaskList', () => {
 
       expect(cdoTaskList.insuranceDetailsRecorded.completed).toBe(false)
       expect(cdoTaskList.cdoSummary.insuranceCompany).toBeUndefined()
-      expect(cdoTaskList.cdoSummary.insuranceRenewalDate).not.toBeInstanceOf(Date)
+      expect(cdoTaskList.cdoSummary.insuranceRenewal).not.toBeInstanceOf(Date)
     })
 
     describe('sendApplicationPack', () => {
@@ -594,7 +594,7 @@ describe('CdoTaskList', () => {
       test('should start with correct details', () => {
         expect(cdoTaskList.insuranceDetailsRecorded.completed).toBe(false)
         expect(cdoTaskList.cdoSummary.insuranceCompany).toBeUndefined()
-        expect(cdoTaskList.cdoSummary.insuranceRenewalDate).not.toBeInstanceOf(Date)
+        expect(cdoTaskList.cdoSummary.insuranceRenewal).not.toBeInstanceOf(Date)
       })
 
       test('should record insurance details given date is in the future', async () => {
@@ -603,7 +603,7 @@ describe('CdoTaskList', () => {
         cdoTaskList.addInsuranceDetails(dogsTrustCompany, renewalDate, transactionCallback)
         expect(cdoTaskList.insuranceDetailsRecorded.completed).toBe(true)
         expect(cdoTaskList.cdoSummary.insuranceCompany).toBe(dogsTrustCompany)
-        expect(cdoTaskList.cdoSummary.insuranceRenewalDate).toBeInstanceOf(Date)
+        expect(cdoTaskList.cdoSummary.insuranceRenewal).toBeInstanceOf(Date)
         expect(cdoTaskList.getUpdates().exemption[1]).toEqual({
           key: 'insurance',
           value: {
