@@ -13,45 +13,47 @@ const { activities } = require('../constants/event/events')
  * @constructor
  * @property {CdoService.GetTaskList} getTaskList
  */
-function CdoService (cdoRepository) {
-  this.cdoRepository = cdoRepository
-}
-
-/**
- * @type {CdoService.GetTaskList}
- */
-CdoService.prototype.getTaskList = async function (cdoId) {
-  return this.cdoRepository.getCdoTaskList(cdoId)
-}
-
-CdoService.prototype.sendApplicationPack = async function (cdoId, sentDate, user) {
-  const cdoTaskList = await this.cdoRepository.getCdoTaskList(cdoId)
-  const activityType = await getActivityByLabel(activities.applicationPack)
-
-  const sendEvent = async () => {
-    await sendActivityToAudit({
-      activity: activityType.id,
-      activityType: 'sent',
-      pk: cdoId,
-      source: 'dog',
-      activityDate: sentDate,
-      targetPk: 'dog',
-      activityLabel: activities.applicationPack
-    }, user)
+class CdoService {
+  constructor (cdoRepository) {
+    this.cdoRepository = cdoRepository
   }
 
-  try {
-    await cdoTaskList.sendApplicationPack(sentDate, sendEvent)
-  } catch (e) {
-    console.error('Error in CdoService.sendApplicationPack while updating domain model')
-    throw e
+  /**
+   * @type {CdoService.GetTaskList}
+   */
+  async getTaskList (cdoId) {
+    return this.cdoRepository.getCdoTaskList(cdoId)
   }
 
-  try {
-    await this.cdoRepository.saveCdoTaskList(cdoTaskList)
-  } catch (e) {
-    console.error('Error in CdoService.sendApplicationPack whilst updating the aggregrate')
-    throw e
+  async sendApplicationPack (cdoId, sentDate, user) {
+    const cdoTaskList = await this.cdoRepository.getCdoTaskList(cdoId)
+    const activityType = await getActivityByLabel(activities.applicationPack)
+
+    const sendEvent = async () => {
+      await sendActivityToAudit({
+        activity: activityType.id,
+        activityType: 'sent',
+        pk: cdoId,
+        source: 'dog',
+        activityDate: sentDate,
+        targetPk: 'dog',
+        activityLabel: activities.applicationPack
+      }, user)
+    }
+
+    try {
+      await cdoTaskList.sendApplicationPack(sentDate, sendEvent)
+    } catch (e) {
+      console.error('Error in CdoService.sendApplicationPack while updating domain model')
+      throw e
+    }
+
+    try {
+      await this.cdoRepository.saveCdoTaskList(cdoTaskList)
+    } catch (e) {
+      console.error('Error in CdoService.sendApplicationPack whilst updating the aggregrate')
+      throw e
+    }
   }
 }
 
