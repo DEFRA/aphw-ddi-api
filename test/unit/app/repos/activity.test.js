@@ -27,7 +27,7 @@ describe('Activity repo', () => {
   jest.mock('../../../../app/messaging/send-audit')
   const { sendCreateToAudit, sendDeleteToAudit } = require('../../../../app/messaging/send-audit')
 
-  const { getActivityList, getActivityById, createActivity, deleteActivity } = require('../../../../app/repos/activity')
+  const { getActivityList, getActivityById, createActivity, deleteActivity, getActivityByLabel } = require('../../../../app/repos/activity')
 
   beforeEach(async () => {
     jest.clearAllMocks()
@@ -41,9 +41,9 @@ describe('Activity repo', () => {
 
       expect(activities).toHaveLength(3)
       expect(activities).toStrictEqual([
-        { id: 1, name: 'act 1', display_order: 1 },
-        { id: 2, name: 'act 2', display_order: 2 },
-        { id: 3, name: 'act 3', display_order: 3 }
+        { id: 1, label: 'act 1', display_order: 1 },
+        { id: 2, label: 'act 2', display_order: 2 },
+        { id: 3, label: 'act 3', display_order: 3 }
       ])
     })
 
@@ -60,13 +60,29 @@ describe('Activity repo', () => {
 
       const activity = await getActivityById(2)
 
-      expect(activity).toEqual({ id: 2, name: 'act 2', display_order: 2 })
+      expect(activity).toEqual({ id: 2, label: 'act 2', display_order: 2 })
     })
 
     test('should throw if error', async () => {
       sequelize.models.activity.findOne.mockRejectedValue(new Error('Test error'))
 
       await expect(getActivityById(2)).rejects.toThrow('Test error')
+    })
+  })
+
+  describe('getActivityByLabel', () => {
+    test('should return activity', async () => {
+      sequelize.models.activity.findOne.mockResolvedValue(mockActivities[1])
+
+      const activity = await getActivityByLabel('act 2')
+
+      expect(activity).toEqual({ id: 2, label: 'act 2', display_order: 2 })
+    })
+
+    test('should throw if error', async () => {
+      sequelize.models.activity.findOne.mockRejectedValue(new Error('Test error'))
+
+      await expect(getActivityByLabel('Application pack')).rejects.toThrow('Test error')
     })
   })
 

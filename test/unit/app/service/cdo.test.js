@@ -2,7 +2,6 @@ const { buildCdo, buildExemption } = require('../../../mocks/cdo/domain')
 const { CdoTaskList } = require('../../../../app/data/domain')
 const { devUser } = require('../../../mocks/auth')
 const { ActionAlreadyPerformedError } = require('../../../../app/errors/domain/actionAlreadyPerformed')
-const { EXEMPTION } = require('../../../../app/constants/event/audit-event-object-types')
 
 describe('CdoService', function () {
   /**
@@ -11,10 +10,13 @@ describe('CdoService', function () {
   let mockCdoRepository
   let cdoService
 
-  jest.mock('../../../../app/messaging/send-audit')
-  const { sendUpdateToAudit } = require('../../../../app/messaging/send-audit')
-
   const { CdoService } = require('../../../../app/service/cdo')
+
+  jest.mock('../../../../app/messaging/send-audit')
+  const { sendActivityToAudit } = require('../../../../app/messaging/send-audit')
+
+  jest.mock('../../../../app/repos/activity')
+  const { getActivityByLabel } = require('../../../../app/repos/activity')
 
   beforeEach(function () {
     // Create a mock CdoRepository
@@ -51,22 +53,30 @@ describe('CdoService', function () {
 
   describe('sendApplicationPack', () => {
     test('should send application pack', async () => {
+      getActivityByLabel.mockResolvedValue({ id: 9, label: 'Application pack' })
+      const sentDate = new Date()
       const cdoIndexNumber = 'ED300097'
       const cdoTaskList = new CdoTaskList(buildCdo())
       mockCdoRepository.getCdoTaskList.mockResolvedValue(cdoTaskList)
-      const preAudit = { applicationPackSent: null }
-      const postAudit = { applicationPackSent: new Date('2024-05-03') }
 
-      await cdoService.sendApplicationPack(cdoIndexNumber, devUser)
+      await cdoService.sendApplicationPack(cdoIndexNumber, sentDate, devUser)
       expect(mockCdoRepository.getCdoTaskList).toHaveBeenCalledWith(cdoIndexNumber)
       expect(mockCdoRepository.saveCdoTaskList).toHaveBeenCalledWith(cdoTaskList)
       expect(cdoTaskList.getUpdates().exemption).toEqual([{
         key: 'applicationPackSent',
-        value: expect.any(Date),
+        value: sentDate,
         callback: expect.any(Function)
       }])
-      await cdoTaskList.getUpdates().exemption[0].callback(preAudit, postAudit)
-      expect(sendUpdateToAudit).toHaveBeenCalledWith(EXEMPTION, preAudit, postAudit, devUser)
+      await cdoTaskList.getUpdates().exemption[0].callback()
+      expect(sendActivityToAudit).toHaveBeenCalledWith({
+        activity: 9,
+        activityType: 'sent',
+        pk: 'ED300097',
+        source: 'dog',
+        activityDate: sentDate,
+        targetPk: 'dog',
+        activityLabel: 'Application pack'
+      }, devUser)
     })
 
     test('should not send application pack a second time', async () => {
@@ -78,7 +88,7 @@ describe('CdoService', function () {
       }))
       mockCdoRepository.getCdoTaskList.mockResolvedValue(cdoTaskList)
 
-      await expect(cdoService.sendApplicationPack(cdoIndexNumber, devUser)).rejects.toThrow(ActionAlreadyPerformedError)
+      await expect(cdoService.sendApplicationPack(cdoIndexNumber, new Date(), devUser)).rejects.toThrow(ActionAlreadyPerformedError)
     })
 
     test('should handle repo error', async () => {

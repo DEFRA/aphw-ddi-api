@@ -11,7 +11,6 @@ const { statuses } = require('../constants/statuses')
 const { Op } = require('sequelize')
 const { mapCdoDaoToCdo } = require('./mappers/cdo')
 const { CdoTaskList } = require('../data/domain')
-const { preChangedExemptionAudit, postChangedExemptionAudit } = require('../dto/auditing/exemption')
 
 /**
  * @typedef DogBreedDao
@@ -467,8 +466,6 @@ const saveCdoTaskList = async (cdoTaskList, transaction) => {
   }
   const updates = cdoTaskList.getUpdates()
   const cdoDao = await getCdo(cdoTaskList.cdoSummary.indexNumber)
-  let preAudit
-  const preChangedExemptionAuditRecord = preChangedExemptionAudit(cdoDao)
 
   for (const update of updates.exemption) {
     const mapping = updateMappings[update.key].split('.')
@@ -480,20 +477,8 @@ const saveCdoTaskList = async (cdoTaskList, transaction) => {
 
     await model.save({ transaction })
 
-    // if (subModel === 'registration') {
-    //   preAudit = preChangedExemptionAuditRecord
-    //   await cdoDao.reload()
-    //   postAudit = postChangedExemptionAudit(cdoDao)
-    // }
-    preAudit = preChangedExemptionAuditRecord
-    await cdoDao.reload()
-    const postAudit = postChangedExemptionAudit(cdoDao)
-
     // this will publish the event
-    await update.callback(preAudit, postAudit)
-    // if (update.callback) {
-    //   await update.callback(preAudit, postAudit)
-    // }
+    await update.callback()
   }
 }
 
