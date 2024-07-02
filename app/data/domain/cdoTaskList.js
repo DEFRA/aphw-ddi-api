@@ -153,11 +153,11 @@ class CdoTaskList {
     )
   }
 
-  sendApplicationPack (callback) {
+  sendApplicationPack (sentDate, callback) {
     if (this.applicationPackSent.completed) {
       throw new ActionAlreadyPerformedError('Application pack can only be sent once')
     }
-    this._cdo.exemption.sendApplicationPack(callback)
+    this._cdo.exemption.sendApplicationPack(sentDate, callback)
   }
 
   addInsuranceDetails (company, renewalDate, callback) {

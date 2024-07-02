@@ -42,8 +42,7 @@ class Exemption {
     this.formTwoSent = exemptionProperties.formTwoSent
   }
 
-  sendApplicationPack (callback) {
-    const auditDate = new Date()
+  sendApplicationPack (auditDate, callback) {
     this.applicationPackSent = auditDate
     this._updates.update('applicationPackSent', auditDate, callback)
   }

@@ -569,15 +569,16 @@ describe('CdoTaskList', () => {
 
     describe('sendApplicationPack', () => {
       test('should send application pack given applicationPackSent is not complete', () => {
+        const sentDate = new Date()
         expect(cdoTaskList.applicationPackSent.completed).toBe(false)
         expect(cdoTaskList.cdoSummary.applicationPackSent).not.toBeInstanceOf(Date)
 
-        cdoTaskList.sendApplicationPack(transactionCallback)
+        cdoTaskList.sendApplicationPack(sentDate, transactionCallback)
         expect(cdoTaskList.applicationPackSent.completed).toBe(true)
         expect(cdoTaskList.cdoSummary.applicationPackSent).toBeInstanceOf(Date)
         expect(cdoTaskList.getUpdates().exemption).toEqual([{
           key: 'applicationPackSent',
-          value: expect.any(Date),
+          value: sentDate,
           callback: expect.any(Function)
         }])
         cdoTaskList.getUpdates().exemption[0].callback()
@@ -585,7 +586,7 @@ describe('CdoTaskList', () => {
       })
 
       test('should fail if application pack has already been sent', () => {
-        expect(() => cdoTaskList.sendApplicationPack(transactionCallback)).toThrow(new ActionAlreadyPerformedError('Application pack can only be sent once'))
+        expect(() => cdoTaskList.sendApplicationPack(new Date(), transactionCallback)).toThrow(new ActionAlreadyPerformedError('Application pack can only be sent once'))
       })
     })
 

@@ -452,4 +452,90 @@ describe('CDO endpoint', () => {
       expect(response.statusCode).toBe(500)
     })
   })
+
+  describe('POST /cdo/ED123/manage:recordInsuranceDetails', () => {
+    test('should return 204', async () => {
+      const insuranceRenewal = new Date()
+      insuranceRenewal.setFullYear(insuranceRenewal.getFullYear() + 1)
+      insuranceRenewal.setMonth(0, 1)
+      insuranceRenewal.setHours(0, 0, 0, 0)
+      const recordInsuranceDetailsMock = jest.fn()
+      getCdoService.mockReturnValue({
+        recordInsuranceDetails: recordInsuranceDetailsMock
+      })
+      recordInsuranceDetailsMock.mockResolvedValue({
+        insuranceCompany: 'Dog\'s Trust',
+        insuranceRenewal
+      })
+
+      const options = {
+        method: 'POST',
+        url: '/cdo/ED123/manage:recordInsuranceDetails',
+        payload: {
+          insuranceCompany: 'Dog\'s Trust',
+          insuranceRenewal: `${insuranceRenewal.getFullYear()}-01-01`
+        }
+      }
+      const response = await server.inject(options)
+      const payload = JSON.stringify(response.payload)
+      expect(response.statusCode).toBe(201)
+      expect(payload).toEqual({
+        insuranceCompany: 'Dog\'s Trust',
+        insuranceRenewal: `${insuranceRenewal.getFullYear()}-01-01`
+      })
+      expect(recordInsuranceDetailsMock).toHaveBeenCalledWith(
+        'ED123',
+        {
+          insuranceCompany: 'Dog\'s Trust',
+          insuranceRenewal: `${insuranceRenewal.getFullYear()}-01-01`
+        },
+        devUser)
+    })
+
+    test('should throw a 404 given index does not exist', async () => {
+      getCdoService.mockReturnValue({
+        sendApplicationPack: async () => {
+          throw new NotFoundError('not found')
+        }
+      })
+      const options = {
+        method: 'POST',
+        url: '/cdo/ED123/manage:sendApplicationPack'
+      }
+
+      const response = await server.inject(options)
+      expect(response.statusCode).toBe(404)
+    })
+
+    test('should throw a 409 given action already performed', async () => {
+      getCdoService.mockReturnValue({
+        sendApplicationPack: async () => {
+          throw new ActionAlreadyPerformedError('not found')
+        }
+      })
+      const options = {
+        method: 'POST',
+        url: '/cdo/ED123/manage:sendApplicationPack'
+      }
+
+      const response = await server.inject(options)
+      expect(response.statusCode).toBe(409)
+    })
+
+    test('should returns 500 given server error thrown', async () => {
+      getCdoService.mockReturnValue({
+        sendApplicationPack: async () => {
+          throw new Error('cdo error')
+        }
+      })
+
+      const options = {
+        method: 'POST',
+        url: '/cdo/ED123/manage:sendApplicationPack'
+      }
+
+      const response = await server.inject(options)
+      expect(response.statusCode).toBe(500)
+    })
+  })
 })
