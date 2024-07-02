@@ -4,8 +4,8 @@
  * @return {Promise<CdoTaskList>}
  */
 
-const { sendUpdateToAudit } = require('../messaging/send-audit')
-const { EXEMPTION } = require('../constants/event/audit-event-object-types')
+const { sendActivityToAudit } = require('../messaging/send-audit')
+const { getActivityByLabel } = require('../repos/activity')
 
 /**
  * @param {CdoRepository} cdoRepository
@@ -25,8 +25,18 @@ CdoService.prototype.getTaskList = async function (cdoId) {
 
 CdoService.prototype.sendApplicationPack = async function (cdoId, sentDate, user) {
   const cdoTaskList = await this.cdoRepository.getCdoTaskList(cdoId)
-  const sendEvent = async (preChanged, postChanged) => {
-    await sendUpdateToAudit(EXEMPTION, preChanged, postChanged, user)
+  const activityType = await getActivityByLabel('Application pack')
+
+  const sendEvent = async () => {
+    await sendActivityToAudit({
+      activity: activityType.id,
+      activityType: 'sent',
+      pk: cdoId,
+      source: 'dog',
+      activityDate: sentDate,
+      targetPk: 'dog',
+      activityLabel: 'Application pack'
+    }, user)
   }
 
   try {

@@ -82,7 +82,7 @@ module.exports = [
 
       try {
         const cdoService = ServiceProvider.getCdoService()
-        await cdoService.sendApplicationPack(indexNumber, getCallingUser(request))
+        await cdoService.sendApplicationPack(indexNumber, new Date(), getCallingUser(request))
 
         return h.response().code(204)
       } catch (e) {

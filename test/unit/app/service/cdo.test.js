@@ -16,7 +16,7 @@ describe('CdoService', function () {
   const { sendActivityToAudit } = require('../../../../app/messaging/send-audit')
 
   jest.mock('../../../../app/repos/activity')
-  const { getActivityById } = require('../../../../app/repos/activity')
+  const { getActivityByLabel } = require('../../../../app/repos/activity')
 
   beforeEach(function () {
     // Create a mock CdoRepository
@@ -53,7 +53,7 @@ describe('CdoService', function () {
 
   describe('sendApplicationPack', () => {
     test('should send application pack', async () => {
-      getActivityById.mockResolvedValue({ id: 9, label: 'Application pack' })
+      getActivityByLabel.mockResolvedValue({ id: 9, label: 'Application pack' })
       const sentDate = new Date()
       const cdoIndexNumber = 'ED300097'
       const cdoTaskList = new CdoTaskList(buildCdo())
@@ -69,7 +69,7 @@ describe('CdoService', function () {
       }])
       await cdoTaskList.getUpdates().exemption[0].callback()
       expect(sendActivityToAudit).toHaveBeenCalledWith({
-        activity: '9',
+        activity: 9,
         activityType: 'sent',
         pk: 'ED300097',
         source: 'dog',

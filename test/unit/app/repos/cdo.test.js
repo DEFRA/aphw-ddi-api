@@ -595,7 +595,6 @@ describe('CDO repo', () => {
 
     test('should update applicationPackSent', async () => {
       const dog = buildCdoDao({
-        reload: jest.fn(),
         registration: buildRegistrationDao({
           save: jest.fn()
         })
@@ -606,13 +605,12 @@ describe('CDO repo', () => {
       const callback = jest.fn()
       const cdoTaskList = new CdoTaskList(buildCdo())
       expect(dog.registration.application_pack_sent).toBeNull()
-      cdoTaskList.sendApplicationPack(callback)
+      cdoTaskList.sendApplicationPack(new Date(), callback)
       await saveCdoTaskList(cdoTaskList, {})
       expect(sequelize.models.dog.findAll).toHaveBeenCalledWith(expect.objectContaining({
         where: { index_number: 'ED300097' }
       }))
       expect(dog.registration.save).toHaveBeenCalled()
-      expect(dog.reload).toHaveBeenCalled()
       expect(callback).toHaveBeenCalled()
     })
   })
