@@ -14,7 +14,7 @@ describe('CdoService', function () {
   const { CdoService } = require('../../../../app/service/cdo')
 
   jest.mock('../../../../app/messaging/send-audit')
-  const { sendActivityToAudit } = require('../../../../app/messaging/send-audit')
+  const { sendActivityToAudit, sendUpdateToAudit } = require('../../../../app/messaging/send-audit')
 
   jest.mock('../../../../app/repos/activity')
   const { getActivityByLabel } = require('../../../../app/repos/activity')
@@ -118,7 +118,7 @@ describe('CdoService', function () {
       const result = await cdoService.recordInsuranceDetails(cdoIndexNumber, {
         insuranceCompany: 'Dog\'s Trust',
         insuranceRenewal: in60Days
-      })
+      }, devUser)
       expect(mockCdoRepository.getCdoTaskList).toHaveBeenCalledWith(cdoIndexNumber)
       expect(mockCdoRepository.saveCdoTaskList).toHaveBeenCalledWith(cdoTaskList)
       expect(result).toEqual({
@@ -129,20 +129,23 @@ describe('CdoService', function () {
         key: 'insurance',
         value: {
           company: 'Dog\'s Trust',
-          insuranceRenewal: in60Days
+          renewalDate: in60Days
         },
         callback: expect.any(Function)
       }])
       await cdoTaskList.getUpdates().exemption[0].callback()
-      // expect(sendActivityToAudit).toHaveBeenCalledWith({
-      //   activity: 9,
-      //   activityType: 'sent',
-      //   pk: 'ED300097',
-      //   source: 'dog',
-      //   activityDate: sentDate,
-      //   targetPk: 'dog',
-      //   activityLabel: 'Application pack'
-      // }, devUser)
+      expect(sendUpdateToAudit).toHaveBeenCalledWith(
+        'exemption',
+        {
+          index_number: 'ED300097',
+          insurance_company: null,
+          insurance_renewal_date: null
+        },
+        {
+          index_number: 'ED300097',
+          insurance_company: "Dog's Trust",
+          insurance_renewal_date: '2024-08-31'
+        }, devUser)
     })
   })
 })

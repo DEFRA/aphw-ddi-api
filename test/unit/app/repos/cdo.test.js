@@ -2,7 +2,7 @@ const { payload: mockCdoPayload, payloadWithPersonReference: mockCdoPayloadWithR
 const { NotFoundError } = require('../../../../app/errors/not-found')
 const { personDao: mockPersonPayload, createdPersonDao: mockCreatedPersonPayload } = require('../../../mocks/person')
 const { devUser } = require('../../../mocks/auth')
-const { buildCdoDao, buildRegistrationDao, buildInsuranceDao } = require('../../../mocks/cdo/get')
+const { buildCdoDao, buildRegistrationDao, buildInsuranceDao, buildInsuranceCompanyDao } = require('../../../mocks/cdo/get')
 const { Cdo, CdoTaskList } = require('../../../../app/data/domain')
 const { buildCdo, buildExemption } = require('../../../mocks/cdo/domain')
 
@@ -631,6 +631,9 @@ describe('CDO repo', () => {
           save: jest.fn()
         }),
         insurance: [buildInsuranceDao({
+          company: buildInsuranceCompanyDao({
+            company_name: 'Allianz'
+          }),
           renewal_date: renewalDate
         })]
       })

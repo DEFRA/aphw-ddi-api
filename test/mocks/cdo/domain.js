@@ -47,7 +47,7 @@ const buildCdoDog = (cdoDogPartial) => ({
 })
 
 /**
- * @typedef {{company: string, insuranceRenewal: Date}} CdoInsurance
+ * @typedef {{company: string, renewalDate: Date}} CdoInsurance
  */
 /**
  *
@@ -56,7 +56,7 @@ const buildCdoDog = (cdoDogPartial) => ({
  */
 const buildCdoInsurance = (insurancePartial = {}) => ({
   company: 'Allianz',
-  insuranceRenewal: new Date('2024-01-01T00:00:00.000Z'),
+  renewalDate: new Date('2024-01-01T00:00:00.000Z'),
   ...insurancePartial
 })
 /**

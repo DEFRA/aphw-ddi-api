@@ -81,7 +81,7 @@ describe('CdoTaskList', () => {
         indexNumber: 'ED300097',
         applicationPackSent: undefined,
         insuranceCompany: undefined,
-        insuranceRenewalDate: undefined,
+        insuranceRenewal: undefined,
         microchipNumber: undefined,
         applicationFeePaid: undefined,
         form2Sent: undefined,
@@ -131,7 +131,7 @@ describe('CdoTaskList', () => {
         indexNumber: 'ED300097',
         applicationPackSent: new Date('2024-06-25'),
         insuranceCompany: undefined,
-        insuranceRenewalDate: undefined,
+        insuranceRenewal: undefined,
         microchipNumber: undefined,
         applicationFeePaid: undefined,
         form2Sent: undefined,
@@ -337,7 +337,7 @@ describe('CdoTaskList', () => {
         microchipVerification: new Date('2024-03-09'),
         insurance: [buildCdoInsurance({
           company: 'Dogs R Us',
-          insuranceRenewal: today
+          renewalDate: today
         })]
       })
       const dogProperties = buildCdoDog({
@@ -447,7 +447,7 @@ describe('CdoTaskList', () => {
         microchipVerification: new Date('2024-03-09'),
         insurance: [buildCdoInsurance({
           company: 'Dogs R Us',
-          insuranceRenewal: new Date('2025-06-25')
+          renewalDate: new Date('2025-06-25')
         })]
       })
       const dogProperties = buildCdoDog({
@@ -477,7 +477,7 @@ describe('CdoTaskList', () => {
         microchipVerification: new Date('2024-03-09'),
         insurance: [buildCdoInsurance({
           company: 'Dogs R Us',
-          insuranceRenewal: in60Days
+          renewalDate: in60Days
         })],
         certificateIssued: new Date('2024-06-27')
       })
@@ -544,7 +544,7 @@ describe('CdoTaskList', () => {
         indexNumber: 'ED300097',
         applicationPackSent: new Date('2024-06-25'),
         insuranceCompany: 'Dogs R Us',
-        insuranceRenewalDate: in60Days,
+        insuranceRenewal: in60Days,
         microchipNumber: '123456789012345',
         applicationFeePaid: new Date('2024-06-24'),
         form2Sent: new Date('2024-05-24'),
@@ -608,7 +608,7 @@ describe('CdoTaskList', () => {
           key: 'insurance',
           value: {
             company: dogsTrustCompany,
-            insuranceRenewal: expect.any(Date)
+            renewalDate: expect.any(Date)
           },
           callback: expect.any(Function)
         })

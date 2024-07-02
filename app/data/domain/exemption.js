@@ -14,7 +14,7 @@ const { IncompleteDataError } = require('../../errors/domain/incompleteData')
  * @property {string|null} legislationOfficer
  * @property {Date|null} certificateIssued
  * @property {Date|null} applicationFeePaid
- * @property {{company: string; insuranceRenewal: Date }[]} insurance
+ * @property {{company: string; renewalDate: Date }[]} insurance
  * @property {Date|null} neuteringConfirmation
  * @property {Date|null} microchipVerification
  * @property {Date} joinedExemptionScheme

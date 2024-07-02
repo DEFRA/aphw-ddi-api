@@ -28,7 +28,7 @@ const mapTaskToTaskDto = (task) => ({
  * @property {CdoTaskListTasksDto} tasks
  * @property {Date|undefined} applicationPackSent
  * @property {string|undefined} insuranceCompany
- * @property {Date|undefined} insuranceRenewalDate
+ * @property {Date|undefined} insuranceRenewal
  * @property {string|undefined} microchipNumber
  * @property {Date|undefined} applicationFeePaid
  * @property {Date|undefined} form2Sent
