@@ -4,6 +4,7 @@ const { sendActivityToAudit } = require('../messaging/send-audit')
 const schema = require('../schema/activity/event')
 const { createActivitySchema } = require('../schema/activity/create')
 const ServiceProvider = require('../service/config')
+const { activities } = require('../constants/event/events')
 
 module.exports = [{
   method: 'GET',
@@ -50,7 +51,7 @@ module.exports = [{
         activityLabel: (await getActivityById(request.payload.activity)).label
       }
 
-      if (payload.activityLabel === 'Application pack' && payload.activityType === 'sent') {
+      if (payload.activityLabel === activities.applicationPack && payload.activityType === 'sent') {
         const cdoService = ServiceProvider.getCdoService()
         await cdoService.sendApplicationPack(payload.pk, payload.activityDate, getCallingUser(request))
       } else {

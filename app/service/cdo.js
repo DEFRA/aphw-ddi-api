@@ -6,6 +6,7 @@
 
 const { sendActivityToAudit } = require('../messaging/send-audit')
 const { getActivityByLabel } = require('../repos/activity')
+const { activities } = require('../constants/event/events')
 
 /**
  * @param {CdoRepository} cdoRepository
@@ -25,7 +26,7 @@ CdoService.prototype.getTaskList = async function (cdoId) {
 
 CdoService.prototype.sendApplicationPack = async function (cdoId, sentDate, user) {
   const cdoTaskList = await this.cdoRepository.getCdoTaskList(cdoId)
-  const activityType = await getActivityByLabel('Application pack')
+  const activityType = await getActivityByLabel(activities.applicationPack)
 
   const sendEvent = async () => {
     await sendActivityToAudit({
@@ -35,7 +36,7 @@ CdoService.prototype.sendApplicationPack = async function (cdoId, sentDate, user
       source: 'dog',
       activityDate: sentDate,
       targetPk: 'dog',
-      activityLabel: 'Application pack'
+      activityLabel: activities.applicationPack
     }, user)
   }
 
