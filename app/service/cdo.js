@@ -71,7 +71,7 @@ class CdoService {
    * @param {string} cdoIndexNumber
    * @param {InsuranceDetails} insuranceDetails
    * @param user
-   * @return {Promise<InsuranceDetails>}
+   * @return {Promise<import('../data/domain').CdoTaskList>}
    */
   async recordInsuranceDetails (cdoIndexNumber, insuranceDetails, user) {
     const cdoTaskList = await this.cdoRepository.getCdoTaskList(cdoIndexNumber)
@@ -94,11 +94,7 @@ class CdoService {
 
     cdoTaskList.recordInsuranceDetails(insuranceDetails.insuranceCompany, insuranceDetails.insuranceRenewal, sendEvent)
 
-    const returnedCdoTaskList = await this.cdoRepository.saveCdoTaskList(cdoTaskList)
-
-    const { insuranceCompany, insuranceRenewal } = returnedCdoTaskList.cdoSummary
-
-    return { insuranceCompany, insuranceRenewal }
+    return this.cdoRepository.saveCdoTaskList(cdoTaskList)
   }
 
   /**
