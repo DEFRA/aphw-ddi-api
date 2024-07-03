@@ -42,6 +42,9 @@ describe('CDO repo', () => {
   jest.mock('../../../../app/messaging/send-event')
   const { sendEvent } = require('../../../../app/messaging/send-event')
 
+  jest.mock('../../../../app/repos/microchip')
+  const { updateMicrochip } = require('../../../../app/repos/microchip')
+
   const { createCdo, getCdo, getAllCdos, getSummaryCdos, getCdoModel, getCdoTaskList, saveCdoTaskList } = require('../../../../app/repos/cdo')
 
   beforeEach(async () => {
@@ -664,6 +667,45 @@ describe('CDO repo', () => {
 
       expect(createOrUpdateInsurance).toHaveBeenCalledWith({ insurance: { company: 'Allianz', renewalDate } }, dog, {})
       expect(taskList.insuranceDetailsRecorded.completed).toBe(true)
+      expect(callback).toHaveBeenCalled()
+    })
+
+    test('should update microchip number', async () => {
+      const saveDogMock = jest.fn()
+
+      const dog = buildCdoDao({
+        dog_microchips: []
+      })
+      const editedDog = buildCdoDao({
+        dog_microchips: [buildDogMicrochipDao({
+          microchip: buildMicrochipDao({
+            microchip_number: '123456789012345'
+          })
+        })]
+      })
+
+      sequelize.models.dog.findAll.mockResolvedValueOnce([dog])
+      sequelize.models.dog.findAll.mockResolvedValueOnce([editedDog])
+
+      const callback = jest.fn()
+
+      const cdoTaskList = new CdoTaskList(buildCdo({
+        exemption: buildExemption({
+          applicationPackSent: new Date()
+        }),
+        dog: buildCdoDog({
+          microchipNumber: null
+        })
+      }))
+      expect(cdoTaskList.microchipNumberRecorded.completed).toBe(false)
+
+      cdoTaskList.recordMicrochipNumber('123456789012345', null, callback)
+
+      const taskList = await saveCdoTaskList(cdoTaskList, {})
+
+      expect(updateMicrochip).toHaveBeenCalledWith(dog, '123456789012345', 1, {})
+      expect(taskList.cdoSummary.microchipNumber).toEqual('123456789012345')
+
       expect(callback).toHaveBeenCalled()
     })
   })
