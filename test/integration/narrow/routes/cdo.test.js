@@ -501,25 +501,6 @@ describe('CDO endpoint', () => {
       expect(response.statusCode).toBe(400)
     })
 
-    test('should returns 400 with invalid response', async () => {
-      const recordInsuranceDetailsMock = jest.fn().mockResolvedValue({})
-      getCdoService.mockReturnValue({
-        recordInsuranceDetails: recordInsuranceDetailsMock
-      })
-
-      const options = {
-        method: 'POST',
-        url: '/cdo/ED123/manage:recordInsuranceDetails',
-        payload: {
-          insuranceCompany: 'Dogs Trust',
-          insuranceRenewal: '9999-01-01'
-        }
-      }
-
-      const response = await server.inject(options)
-      expect(response.statusCode).toBe(500)
-    })
-
     test('should throw a 404 given index does not exist', async () => {
       getCdoService.mockReturnValue({
         recordInsuranceDetails: async () => {

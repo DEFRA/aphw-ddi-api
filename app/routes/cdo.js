@@ -112,12 +112,7 @@ module.exports = [
         }
       },
       response: {
-        schema: recordInsuranceDetailsResponseSchema,
-        failAction: (request, h, err) => {
-          console.error(err)
-
-          return h.response({ errors: err.details.map(e => e.message) }).code(400).takeover()
-        }
+        schema: recordInsuranceDetailsResponseSchema
       },
       handler: async (request, h) => {
         const indexNumber = request.params.indexNumber
