@@ -110,7 +110,7 @@ const mapCdoDaoToExemption = (registration, insurance) => {
     applicationFeePaid: returnDateOrNull(registration.application_fee_paid),
     insurance: insurance?.sort((a, b) => a.id - b.id).map(i => ({
       company: i.company.company_name,
-      insuranceRenewal: returnDateOrNull(i.renewal_date)
+      renewalDate: returnDateOrNull(i.renewal_date)
     })),
     neuteringConfirmation: returnDateOrNull(registration.neutering_confirmation),
     microchipVerification: returnDateOrNull(registration.microchip_verification),

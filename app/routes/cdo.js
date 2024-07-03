@@ -6,6 +6,8 @@ const { NotFoundError } = require('../errors/not-found')
 const ServiceProvider = require('../service/config')
 const { mapCdoTaskListToDto } = require('../dto/cdoTaskList')
 const { ActionAlreadyPerformedError } = require('../errors/domain/actionAlreadyPerformed')
+const { recordInsuranceDetailsSchema, recordInsuranceDetailsResponseSchema } = require('../schema/cdo/manage')
+const { SequenceViolationError } = require('../errors/domain/sequenceViolation')
 
 module.exports = [
   {
@@ -94,6 +96,46 @@ module.exports = [
         }
         console.log('Error retrieving cdo record:', e)
         throw e
+      }
+    }
+  },
+  {
+    method: 'POST',
+    path: '/cdo/{indexNumber}/manage:recordInsuranceDetails',
+    options: {
+      validate: {
+        payload: recordInsuranceDetailsSchema,
+        failAction: (request, h, err) => {
+          console.error(err)
+
+          return h.response({ errors: err.details.map(e => e.message) }).code(400).takeover()
+        }
+      },
+      response: {
+        schema: recordInsuranceDetailsResponseSchema
+      },
+      handler: async (request, h) => {
+        const indexNumber = request.params.indexNumber
+        const { insuranceCompany, insuranceRenewal } = request.payload
+
+        try {
+          const cdoService = ServiceProvider.getCdoService()
+          await cdoService.recordInsuranceDetails(indexNumber, { insuranceCompany, insuranceRenewal }, getCallingUser(request))
+
+          return h.response({
+            insuranceCompany,
+            insuranceRenewal
+          }).code(201)
+        } catch (e) {
+          if (e instanceof NotFoundError) {
+            return h.response().code(404)
+          }
+          if (e instanceof SequenceViolationError) {
+            return h.response().code(409)
+          }
+          console.log('Error retrieving cdo record:', e)
+          throw e
+        }
       }
     }
   }

@@ -177,7 +177,7 @@ describe('cdo mappers', () => {
       expect(mappedRegistration.microchipVerification).toEqual(new Date('2024-05-06'))
       expect(mappedRegistration.neuteringConfirmation).toEqual(new Date('2024-05-08'))
       expect(mappedRegistration.certificateIssued).toEqual(new Date('2024-05-04'))
-      expect(mappedRegistration.insurance[0].insuranceRenewal).toEqual(new Date('2024-05-04'))
+      expect(mappedRegistration.insurance[0].renewalDate).toEqual(new Date('2024-05-04'))
     })
   })
 

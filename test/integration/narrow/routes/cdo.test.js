@@ -4,6 +4,7 @@ const { CdoTaskList } = require('../../../../app/data/domain')
 const { buildCdo } = require('../../../mocks/cdo/domain')
 const { ActionAlreadyPerformedError } = require('../../../../app/errors/domain/actionAlreadyPerformed')
 const { devUser } = require('../../../mocks/auth')
+const { SequenceViolationError } = require('../../../../app/errors/domain/sequenceViolation')
 
 describe('CDO endpoint', () => {
   const createServer = require('../../../../app/server')
@@ -453,89 +454,109 @@ describe('CDO endpoint', () => {
     })
   })
 
-  // describe('POST /cdo/ED123/manage:recordInsuranceDetails', () => {
-  //   test('should return 204', async () => {
-  //     const insuranceRenewal = new Date()
-  //     insuranceRenewal.setFullYear(insuranceRenewal.getFullYear() + 1)
-  //     insuranceRenewal.setMonth(0, 1)
-  //     insuranceRenewal.setHours(0, 0, 0, 0)
-  //     const recordInsuranceDetailsMock = jest.fn()
-  //     getCdoService.mockReturnValue({
-  //       recordInsuranceDetails: recordInsuranceDetailsMock
-  //     })
-  //     recordInsuranceDetailsMock.mockResolvedValue({
-  //       insuranceCompany: 'Dog\'s Trust',
-  //       insuranceRenewal
-  //     })
-  //
-  //     const options = {
-  //       method: 'POST',
-  //       url: '/cdo/ED123/manage:recordInsuranceDetails',
-  //       payload: {
-  //         insuranceCompany: 'Dog\'s Trust',
-  //         insuranceRenewal: `${insuranceRenewal.getFullYear()}-01-01`
-  //       }
-  //     }
-  //     const response = await server.inject(options)
-  //     const payload = JSON.stringify(response.payload)
-  //     expect(response.statusCode).toBe(201)
-  //     expect(payload).toEqual({
-  //       insuranceCompany: 'Dog\'s Trust',
-  //       insuranceRenewal: `${insuranceRenewal.getFullYear()}-01-01`
-  //     })
-  //     expect(recordInsuranceDetailsMock).toHaveBeenCalledWith(
-  //       'ED123',
-  //       {
-  //         insuranceCompany: 'Dog\'s Trust',
-  //         insuranceRenewal: `${insuranceRenewal.getFullYear()}-01-01`
-  //       },
-  //       devUser)
-  //   })
-  //
-  //   test('should throw a 404 given index does not exist', async () => {
-  //     getCdoService.mockReturnValue({
-  //       sendApplicationPack: async () => {
-  //         throw new NotFoundError('not found')
-  //       }
-  //     })
-  //     const options = {
-  //       method: 'POST',
-  //       url: '/cdo/ED123/manage:sendApplicationPack'
-  //     }
-  //
-  //     const response = await server.inject(options)
-  //     expect(response.statusCode).toBe(404)
-  //   })
-  //
-  //   test('should throw a 409 given action already performed', async () => {
-  //     getCdoService.mockReturnValue({
-  //       sendApplicationPack: async () => {
-  //         throw new ActionAlreadyPerformedError('not found')
-  //       }
-  //     })
-  //     const options = {
-  //       method: 'POST',
-  //       url: '/cdo/ED123/manage:sendApplicationPack'
-  //     }
-  //
-  //     const response = await server.inject(options)
-  //     expect(response.statusCode).toBe(409)
-  //   })
-  //
-  //   test('should returns 500 given server error thrown', async () => {
-  //     getCdoService.mockReturnValue({
-  //       sendApplicationPack: async () => {
-  //         throw new Error('cdo error')
-  //       }
-  //     })
-  //
-  //     const options = {
-  //       method: 'POST',
-  //       url: '/cdo/ED123/manage:sendApplicationPack'
-  //     }
-  //
-  //     const response = await server.inject(options)
-  //     expect(response.statusCode).toBe(500)
-  //   })
-  // })
+  describe('POST /cdo/ED123/manage:recordInsuranceDetails', () => {
+    test('should return 201', async () => {
+      const insuranceRenewal = new Date('9999-01-01')
+      const recordInsuranceDetailsMock = jest.fn()
+      getCdoService.mockReturnValue({
+        recordInsuranceDetails: recordInsuranceDetailsMock
+      })
+      recordInsuranceDetailsMock.mockResolvedValue({
+        insuranceCompany: 'Dog\'s Trust',
+        insuranceRenewal
+      })
+
+      const options = {
+        method: 'POST',
+        url: '/cdo/ED123/manage:recordInsuranceDetails',
+        payload: {
+          insuranceCompany: 'Dog\'s Trust',
+          insuranceRenewal: '9999-01-01'
+        }
+      }
+      const response = await server.inject(options)
+      const payload = JSON.parse(response.payload)
+      expect(response.statusCode).toBe(201)
+      expect(payload).toEqual({
+        insuranceCompany: 'Dog\'s Trust',
+        insuranceRenewal: '9999-01-01T00:00:00.000Z'
+      })
+      expect(recordInsuranceDetailsMock).toHaveBeenCalledWith(
+        'ED123',
+        {
+          insuranceCompany: 'Dog\'s Trust',
+          insuranceRenewal: new Date('9999-01-01')
+        },
+        devUser)
+    })
+
+    test('should returns 400 with invalid payload', async () => {
+      const options = {
+        method: 'POST',
+        url: '/cdo/ED123/manage:recordInsuranceDetails',
+        payload: {}
+      }
+
+      const response = await server.inject(options)
+      expect(response.statusCode).toBe(400)
+    })
+
+    test('should throw a 404 given index does not exist', async () => {
+      getCdoService.mockReturnValue({
+        recordInsuranceDetails: async () => {
+          throw new NotFoundError('not found')
+        }
+      })
+      const options = {
+        method: 'POST',
+        url: '/cdo/ED123/manage:recordInsuranceDetails',
+        payload: {
+          insuranceCompany: 'Dog\'s Trust',
+          insuranceRenewal: '2024-01-01'
+        }
+      }
+
+      const response = await server.inject(options)
+      expect(response.statusCode).toBe(404)
+    })
+
+    test('should throw a 409 given action performed out of sequence', async () => {
+      getCdoService.mockReturnValue({
+        recordInsuranceDetails: async () => {
+          throw new SequenceViolationError('Application pack must be sent before performing this action')
+        }
+      })
+      const options = {
+        method: 'POST',
+        url: '/cdo/ED123/manage:recordInsuranceDetails',
+        payload: {
+          insuranceCompany: 'Dog\'s Trust',
+          insuranceRenewal: '2024-01-01'
+        }
+      }
+
+      const response = await server.inject(options)
+      expect(response.statusCode).toBe(409)
+    })
+
+    test('should returns 500 given server error thrown', async () => {
+      getCdoService.mockReturnValue({
+        recordInsuranceDetails: async () => {
+          throw new Error('cdo error')
+        }
+      })
+
+      const options = {
+        method: 'POST',
+        url: '/cdo/ED123/manage:recordInsuranceDetails',
+        payload: {
+          insuranceCompany: 'Dog\'s Trust',
+          insuranceRenewal: '2024-01-01'
+        }
+      }
+
+      const response = await server.inject(options)
+      expect(response.statusCode).toBe(500)
+    })
+  })
 })

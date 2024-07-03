@@ -11,6 +11,7 @@ const { statuses } = require('../constants/statuses')
 const { Op } = require('sequelize')
 const { mapCdoDaoToCdo } = require('./mappers/cdo')
 const { CdoTaskList } = require('../data/domain')
+const { createOrUpdateInsurance } = require('./insurance')
 
 /**
  * @typedef DogBreedDao
@@ -46,6 +47,7 @@ const { CdoTaskList } = require('../data/domain')
  * @property {string} renewal_date
  * @property {number} dog_id
  * @property  {{id: number; company_name: string}} company
+ * @property update
  */
 
 /**
@@ -432,16 +434,6 @@ const getCdoTaskList = async (indexNumber) => {
   const cdo = await getCdoModel(indexNumber)
   return new CdoTaskList(cdo)
 }
-/**
- * @typedef {{
- *    getCdo: GetCdo,
- *    getSummaryCdos: GetSummaryCdos,
- *    getAllCdos: GetAllCdos,
- *    createCdo: CreateCdo,
- *    getCdoModel: GetCdoModel,
- *    getCdoTaskList: GetCdoTaskList
- * }} CdoRepository
- */
 
 const updateMappings = {
   applicationPackSent: 'dog.registration.application_pack_sent',
@@ -450,15 +442,17 @@ const updateMappings = {
   neuteringConfirmation: 'dog.registration.neutering_confirmation',
   microchipVerification: 'dog.registration.microchip_verification',
   certificateIssued: 'dog.registration.certificate_issued',
-  insuranceCompany: new Error('Not implemented'),
-  insuranceRenewalDate: new Error('Not implemented'),
+  insurance: 'dog.insurance',
   microchipNumber: new Error('Not implemented')
 }
-
 /**
+ * @typedef SaveCdoTaskList
  * @param {import('../data/domain/cdoTaskList').CdoTaskList} cdoTaskList
  * @param transaction
- * @return {Promise<void>}
+ * @return {Promise<import('../data/domain/cdoTaskList').CdoTaskList>}
+ */
+/**
+ * @type {SaveCdoTaskList}
  */
 const saveCdoTaskList = async (cdoTaskList, transaction) => {
   if (!transaction) {
@@ -468,20 +462,35 @@ const saveCdoTaskList = async (cdoTaskList, transaction) => {
   const cdoDao = await getCdo(cdoTaskList.cdoSummary.indexNumber)
 
   for (const update of updates.exemption) {
-    const mapping = updateMappings[update.key].split('.')
-    const field = mapping.pop()
-    const [, subModel] = mapping
-    const model = cdoDao[subModel]
+    const mappingArray = updateMappings[update.key].split('.')
 
-    model[field] = update.value
+    if (mappingArray[1] === 'registration') {
+      const [,, field] = mappingArray
+      const registration = cdoDao.registration
+      registration[field] = update.value
 
-    await model.save({ transaction })
+      await registration.save({ transaction })
+    } else if (mappingArray[1] === 'insurance') {
+      await createOrUpdateInsurance({ insurance: update.value }, cdoDao, transaction)
+    }
 
     // this will publish the event
     await update.callback()
   }
-}
 
+  return getCdoTaskList(cdoTaskList.cdoSummary.indexNumber)
+}
+/**
+ * @typedef {{
+ *    getCdo: GetCdo,
+ *    getSummaryCdos: GetSummaryCdos,
+ *    getAllCdos: GetAllCdos,
+ *    createCdo: CreateCdo,
+ *    getCdoModel: GetCdoModel,
+ *    getCdoTaskList: GetCdoTaskList,
+ *    saveCdoTaskList: SaveCdoTaskList
+ * }} CdoRepository
+ */
 /**
  * @type {CdoRepository}
  */
