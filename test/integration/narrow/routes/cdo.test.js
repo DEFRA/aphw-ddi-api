@@ -1,7 +1,7 @@
 const { payload: mockCreatePayload, payloadWithPersonReference: mockCreateWithRefPayload } = require('../../../mocks/cdo/create')
 const { NotFoundError } = require('../../../../app/errors/not-found')
 const { CdoTaskList } = require('../../../../app/data/domain')
-const { buildCdo } = require('../../../mocks/cdo/domain')
+const { buildCdo, buildCdoDog } = require('../../../mocks/cdo/domain')
 const { ActionAlreadyPerformedError } = require('../../../../app/errors/domain/actionAlreadyPerformed')
 const { devUser } = require('../../../mocks/auth')
 const { SequenceViolationError } = require('../../../../app/errors/domain/sequenceViolation')
@@ -569,9 +569,11 @@ describe('CDO endpoint', () => {
       getCdoService.mockReturnValue({
         recordMicrochipNumber: recordMicrochipNumberMock
       })
-      recordMicrochipNumberMock.mockResolvedValue({
-        microchipNumber: '123456789012345'
-      })
+      recordMicrochipNumberMock.mockResolvedValue(new CdoTaskList(buildCdo({
+        dog: buildCdoDog({
+          microchipNumber: '123456789012345'
+        })
+      })))
 
       const options = {
         method: 'POST',

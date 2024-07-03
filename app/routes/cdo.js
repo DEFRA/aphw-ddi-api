@@ -165,10 +165,10 @@ module.exports = [
 
         try {
           const cdoService = ServiceProvider.getCdoService()
-          await cdoService.recordMicrochipNumber(indexNumber, { microchipNumber }, getCallingUser(request))
+          const cdoTaskList = await cdoService.recordMicrochipNumber(indexNumber, { microchipNumber }, getCallingUser(request))
 
           return h.response({
-            microchipNumber
+            microchipNumber: cdoTaskList.cdoSummary.microchipNumber
           }).code(201)
         } catch (e) {
           if (e instanceof NotFoundError) {

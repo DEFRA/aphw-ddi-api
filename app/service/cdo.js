@@ -8,7 +8,8 @@ const { sendActivityToAudit, sendUpdateToAudit } = require('../messaging/send-au
 const { getActivityByLabel } = require('../repos/activity')
 const { activities } = require('../constants/event/events')
 const { stripTime } = require('../dto/dto-helper')
-const { EXEMPTION } = require('../constants/event/audit-event-object-types')
+const { EXEMPTION, DOG } = require('../constants/event/audit-event-object-types')
+const { microchipExists } = require('../repos/microchip')
 
 /**
  * @param {CdoRepository} cdoRepository
@@ -67,22 +68,22 @@ class CdoService {
    * @property {Date|null} insuranceRenewal
    */
   /**
-   * @param {string} cdoId
+   * @param {string} cdoIndexNumber
    * @param {InsuranceDetails} insuranceDetails
    * @param user
    * @return {Promise<InsuranceDetails>}
    */
-  async recordInsuranceDetails (cdoId, insuranceDetails, user) {
-    const cdoTaskList = await this.cdoRepository.getCdoTaskList(cdoId)
+  async recordInsuranceDetails (cdoIndexNumber, insuranceDetails, user) {
+    const cdoTaskList = await this.cdoRepository.getCdoTaskList(cdoIndexNumber)
 
     const preChanged = {
-      index_number: cdoId,
+      index_number: cdoIndexNumber,
       insurance_company: cdoTaskList.cdoSummary.insuranceCompany ?? null,
       insurance_renewal_date: stripTime(cdoTaskList.cdoSummary.insuranceRenewal) ?? null
     }
 
     const postChanged = {
-      index_number: cdoId,
+      index_number: cdoIndexNumber,
       insurance_company: insuranceDetails.insuranceCompany ?? null,
       insurance_renewal_date: stripTime(insuranceDetails.insuranceRenewal) ?? null
     }
@@ -98,6 +99,38 @@ class CdoService {
     const { insuranceCompany, insuranceRenewal } = returnedCdoTaskList.cdoSummary
 
     return { insuranceCompany, insuranceRenewal }
+  }
+
+  /**
+   *
+   * @param {string} cdoIndexNumber
+   * @param {{microchipNumber: string}} microchip
+   * @param user
+   * @return {Promise<import('../data/domain').CdoTaskList>}
+   */
+  async recordMicrochipNumber (cdoIndexNumber, microchip, user) {
+    const microchipNumber = microchip.microchipNumber
+
+    const cdoTaskList = await this.cdoRepository.getCdoTaskList(cdoIndexNumber)
+    const preMicrochipNumber = cdoTaskList.cdoSummary.microchipNumber
+
+    const callback = async () => {
+      const preAudit = {
+        index_number: cdoIndexNumber,
+        microchip1: preMicrochipNumber ?? null
+      }
+      const postAudit = {
+        index_number: cdoIndexNumber,
+        microchip1: microchipNumber
+      }
+      await sendUpdateToAudit(DOG, preAudit, postAudit, user)
+    }
+
+    const duplicateMicrochip = await microchipExists(cdoTaskList.cdoSummary.id, microchipNumber)
+
+    cdoTaskList.recordMicrochipNumber(microchipNumber, duplicateMicrochip, callback)
+
+    return this.cdoRepository.saveCdoTaskList(cdoTaskList)
   }
 }
 
