@@ -112,7 +112,12 @@ module.exports = [
         }
       },
       response: {
-        schema: recordInsuranceDetailsResponseSchema
+        schema: recordInsuranceDetailsResponseSchema,
+        failAction: (request, h, err) => {
+          console.error(err)
+
+          return h.response({ errors: err.details.map(e => e.message) }).code(400).takeover()
+        }
       },
       handler: async (request, h) => {
         const indexNumber = request.params.indexNumber
@@ -120,11 +125,11 @@ module.exports = [
 
         try {
           const cdoService = ServiceProvider.getCdoService()
-          const response = await cdoService.recordInsuranceDetails(indexNumber, { insuranceCompany, insuranceRenewal }, getCallingUser(request))
+          await cdoService.recordInsuranceDetails(indexNumber, { insuranceCompany, insuranceRenewal }, getCallingUser(request))
 
           return h.response({
-            insuranceCompany: response.insuranceCompany,
-            insuranceRenewal: response.insuranceRenewal
+            insuranceCompany,
+            insuranceRenewal
           }).code(201)
         } catch (e) {
           if (e instanceof NotFoundError) {
