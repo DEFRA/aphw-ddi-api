@@ -87,14 +87,14 @@ describe('Exemption', () => {
       exemption.setInsuranceDetails(dogsTrustCompany, validRenewalDate, callback)
       expect(exemption.insurance).toEqual([{
         company: dogsTrustCompany,
-        insuranceRenewal: validRenewalDate
+        renewalDate: validRenewalDate
       }])
       expect(exemption.getChanges()).toEqual([
         {
           key: 'insurance',
           value: {
             company: dogsTrustCompany,
-            insuranceRenewal: validRenewalDate
+            renewalDate: validRenewalDate
           },
           callback
         }

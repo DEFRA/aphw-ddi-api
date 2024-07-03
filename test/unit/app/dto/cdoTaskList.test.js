@@ -20,7 +20,7 @@ describe('mapCdoTaskListToDto', () => {
       }),
       applicationPackSent: undefined,
       insuranceCompany: undefined,
-      insuranceRenewalDate: undefined,
+      insuranceRenewal: undefined,
       microchipNumber: undefined,
       applicationFeePaid: undefined,
       form2Sent: undefined,
@@ -32,7 +32,7 @@ describe('mapCdoTaskListToDto', () => {
     expect(cdoTaskListDto).toEqual(expectedDto)
     expect(Object.hasOwn(cdoTaskListDto, 'applicationPackSent')).toBe(true)
     expect(Object.hasOwn(cdoTaskListDto, 'insuranceCompany')).toBe(true)
-    expect(Object.hasOwn(cdoTaskListDto, 'insuranceRenewalDate')).toBe(true)
+    expect(Object.hasOwn(cdoTaskListDto, 'insuranceRenewal')).toBe(true)
     expect(Object.hasOwn(cdoTaskListDto, 'microchipNumber')).toBe(true)
     expect(Object.hasOwn(cdoTaskListDto, 'applicationFeePaid')).toBe(true)
     expect(Object.hasOwn(cdoTaskListDto, 'form2Sent')).toBe(true)
@@ -47,7 +47,7 @@ describe('mapCdoTaskListToDto', () => {
         insurance: [
           buildCdoInsurance({
             company: 'Pets R Us',
-            insuranceRenewal: undefined
+            renewalDate: undefined
           })
         ]
       })
@@ -66,7 +66,7 @@ describe('mapCdoTaskListToDto', () => {
       }),
       applicationPackSent: undefined,
       insuranceCompany: 'Pets R Us',
-      insuranceRenewalDate: undefined,
+      insuranceRenewal: undefined,
       microchipNumber: undefined,
       applicationFeePaid: undefined,
       form2Sent: undefined,
@@ -89,7 +89,7 @@ describe('mapCdoTaskListToDto', () => {
       microchipVerification: new Date('2024-03-09'),
       insurance: [buildCdoInsurance({
         company: 'Dogs R Us',
-        insuranceRenewal: futureDate
+        renewalDate: futureDate
       })],
       certificateIssued: new Date('2024-06-27')
     })
@@ -106,7 +106,7 @@ describe('mapCdoTaskListToDto', () => {
     expect(cdoTaskListDto).toEqual(expect.objectContaining({
       applicationPackSent: new Date('2024-06-25'),
       insuranceCompany: cdoTaskList.cdoSummary.insuranceCompany,
-      insuranceRenewalDate: futureDate,
+      insuranceRenewal: futureDate,
       microchipNumber: '123456789012345',
       applicationFeePaid: new Date('2024-06-24'),
       form2Sent: new Date('2024-05-24'),

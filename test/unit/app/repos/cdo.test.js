@@ -2,9 +2,9 @@ const { payload: mockCdoPayload, payloadWithPersonReference: mockCdoPayloadWithR
 const { NotFoundError } = require('../../../../app/errors/not-found')
 const { personDao: mockPersonPayload, createdPersonDao: mockCreatedPersonPayload } = require('../../../mocks/person')
 const { devUser } = require('../../../mocks/auth')
-const { buildCdoDao, buildRegistrationDao } = require('../../../mocks/cdo/get')
+const { buildCdoDao, buildRegistrationDao, buildInsuranceDao, buildInsuranceCompanyDao } = require('../../../mocks/cdo/get')
 const { Cdo, CdoTaskList } = require('../../../../app/data/domain')
-const { buildCdo } = require('../../../mocks/cdo/domain')
+const { buildCdo, buildExemption } = require('../../../mocks/cdo/domain')
 
 describe('CDO repo', () => {
   jest.mock('../../../../app/config/db', () => ({
@@ -32,6 +32,9 @@ describe('CDO repo', () => {
 
   jest.mock('../../../../app/repos/search')
   const { addToSearchIndex } = require('../../../../app/repos/search')
+
+  jest.mock('../../../../app/repos/insurance')
+  const { createOrUpdateInsurance } = require('../../../../app/repos/insurance')
 
   jest.mock('../../../../app/messaging/send-event')
   const { sendEvent } = require('../../../../app/messaging/send-event')
@@ -606,11 +609,58 @@ describe('CDO repo', () => {
       const cdoTaskList = new CdoTaskList(buildCdo())
       expect(dog.registration.application_pack_sent).toBeNull()
       cdoTaskList.sendApplicationPack(new Date(), callback)
-      await saveCdoTaskList(cdoTaskList, {})
+      const taskList = await saveCdoTaskList(cdoTaskList, {})
       expect(sequelize.models.dog.findAll).toHaveBeenCalledWith(expect.objectContaining({
         where: { index_number: 'ED300097' }
       }))
       expect(dog.registration.save).toHaveBeenCalled()
+      expect(callback).toHaveBeenCalled()
+      expect(taskList.applicationPackSent.completed).toBe(true)
+    })
+
+    test('should update insurance details', async () => {
+      const renewalDate = new Date()
+
+      const dog = buildCdoDao({
+        registration: buildRegistrationDao({
+          save: jest.fn()
+        })
+      })
+      const editedDog = buildCdoDao({
+        registration: buildRegistrationDao({
+          save: jest.fn()
+        }),
+        insurance: [buildInsuranceDao({
+          company: buildInsuranceCompanyDao({
+            company_name: 'Allianz'
+          }),
+          renewal_date: renewalDate
+        })]
+      })
+
+      createOrUpdateInsurance.mockResolvedValue({
+        company_id: 9,
+        renewal_data: renewalDate
+      })
+
+      sequelize.models.dog.findAll.mockResolvedValueOnce([dog])
+      sequelize.models.dog.findAll.mockResolvedValueOnce([editedDog])
+
+      const callback = jest.fn()
+
+      const cdoTaskList = new CdoTaskList(buildCdo({
+        exemption: buildExemption({
+          applicationPackSent: new Date()
+        })
+      }))
+      expect(cdoTaskList.insuranceDetailsRecorded.completed).toBe(false)
+
+      cdoTaskList.addInsuranceDetails('Allianz', renewalDate, callback)
+
+      const taskList = await saveCdoTaskList(cdoTaskList, {})
+
+      expect(createOrUpdateInsurance).toHaveBeenCalledWith({ insurance: { company: 'Allianz', renewalDate } }, dog, {})
+      expect(taskList.insuranceDetailsRecorded.completed).toBe(true)
       expect(callback).toHaveBeenCalled()
     })
   })

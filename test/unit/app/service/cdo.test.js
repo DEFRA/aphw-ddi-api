@@ -13,7 +13,7 @@ describe('CdoService', function () {
   const { CdoService } = require('../../../../app/service/cdo')
 
   jest.mock('../../../../app/messaging/send-audit')
-  const { sendActivityToAudit } = require('../../../../app/messaging/send-audit')
+  const { sendActivityToAudit, sendUpdateToAudit } = require('../../../../app/messaging/send-audit')
 
   jest.mock('../../../../app/repos/activity')
   const { getActivityByLabel } = require('../../../../app/repos/activity')
@@ -98,6 +98,53 @@ describe('CdoService', function () {
       mockCdoRepository.saveCdoTaskList.mockRejectedValue(new Error('error whilst saving'))
 
       await expect(cdoService.sendApplicationPack(cdoIndexNumber, devUser)).rejects.toThrow(new Error('error whilst saving'))
+    })
+  })
+
+  describe('recordInsuranceDetails', () => {
+    test('should record insurance details', async () => {
+      const cdoIndexNumber = 'ED300097'
+      const cdoTaskList = new CdoTaskList(buildCdo({
+        exemption: buildExemption({
+          applicationPackSent: new Date()
+        })
+      }))
+      mockCdoRepository.getCdoTaskList.mockResolvedValue(cdoTaskList)
+      mockCdoRepository.saveCdoTaskList.mockResolvedValue(cdoTaskList)
+
+      const inTheFuture = new Date('9999-01-01')
+
+      const result = await cdoService.recordInsuranceDetails(cdoIndexNumber, {
+        insuranceCompany: 'Dog\'s Trust',
+        insuranceRenewal: inTheFuture
+      }, devUser)
+      expect(mockCdoRepository.getCdoTaskList).toHaveBeenCalledWith(cdoIndexNumber)
+      expect(mockCdoRepository.saveCdoTaskList).toHaveBeenCalledWith(cdoTaskList)
+      expect(result).toEqual({
+        insuranceCompany: 'Dog\'s Trust',
+        insuranceRenewal: inTheFuture
+      })
+      expect(cdoTaskList.getUpdates().exemption).toEqual([{
+        key: 'insurance',
+        value: {
+          company: 'Dog\'s Trust',
+          renewalDate: inTheFuture
+        },
+        callback: expect.any(Function)
+      }])
+      await cdoTaskList.getUpdates().exemption[0].callback()
+      expect(sendUpdateToAudit).toHaveBeenCalledWith(
+        'exemption',
+        {
+          index_number: 'ED300097',
+          insurance_company: null,
+          insurance_renewal_date: null
+        },
+        {
+          index_number: 'ED300097',
+          insurance_company: "Dog's Trust",
+          insurance_renewal_date: '9999-01-01'
+        }, devUser)
     })
   })
 })
