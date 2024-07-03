@@ -18,6 +18,9 @@ describe('CdoService', function () {
   jest.mock('../../../../app/repos/activity')
   const { getActivityByLabel } = require('../../../../app/repos/activity')
 
+  jest.mock('../../../../app/repos/microchip')
+  const { microchipExists } = require('../../../../app/repos/microchip')
+
   beforeEach(function () {
     // Create a mock CdoRepository
     /**
@@ -144,6 +147,52 @@ describe('CdoService', function () {
           index_number: 'ED300097',
           insurance_company: "Dog's Trust",
           insurance_renewal_date: '9999-01-01'
+        }, devUser)
+    })
+  })
+
+  describe('recordMicrochipNumber', () => {
+    test('should record microchip number', async () => {
+      microchipExists.mockResolvedValue(null)
+
+      const cdoIndexNumber = 'ED300097'
+      const cdoTaskList = new CdoTaskList(buildCdo({
+        exemption: buildExemption({
+          applicationPackSent: new Date()
+        })
+      }))
+      mockCdoRepository.getCdoTaskList.mockResolvedValue(cdoTaskList)
+      mockCdoRepository.saveCdoTaskList.mockResolvedValue(cdoTaskList)
+
+      const microchipNumber = '123456789012345'
+
+      expect(cdoTaskList.microchipNumberRecorded.completed).toBe(false)
+
+      const result = await cdoService.recordMicrochipNumber(cdoIndexNumber, {
+        microchipNumber
+      }, devUser)
+
+      expect(mockCdoRepository.getCdoTaskList).toHaveBeenCalledWith(cdoIndexNumber)
+      expect(microchipExists).toHaveBeenCalledWith(300097, '123456789012345')
+      expect(cdoTaskList.microchipNumberRecorded.completed).toBe(true)
+      expect(cdoTaskList.getUpdates().dog).toEqual([{
+        key: 'microchip',
+        value: microchipNumber,
+        callback: expect.any(Function)
+      }])
+
+      expect(mockCdoRepository.saveCdoTaskList).toHaveBeenCalledWith(cdoTaskList)
+      expect(result).toEqual(cdoTaskList)
+      await cdoTaskList.getUpdates().dog[0].callback()
+      expect(sendUpdateToAudit).toHaveBeenCalledWith(
+        'dog',
+        {
+          index_number: 'ED300097',
+          microchip1: null
+        },
+        {
+          index_number: 'ED300097',
+          microchip1: '123456789012345'
         }, devUser)
     })
   })

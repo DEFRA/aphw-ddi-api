@@ -78,6 +78,7 @@ describe('CdoTaskList', () => {
         timestamp: undefined
       }))
       expect(cdoTaskList.cdoSummary).toEqual({
+        id: 300097,
         indexNumber: 'ED300097',
         applicationPackSent: undefined,
         insuranceCompany: undefined,
@@ -128,6 +129,7 @@ describe('CdoTaskList', () => {
         key: 'certificateIssued'
       }))
       expect(cdoTaskList.cdoSummary).toEqual({
+        id: 300097,
         indexNumber: 'ED300097',
         applicationPackSent: new Date('2024-06-25'),
         insuranceCompany: undefined,
@@ -541,6 +543,7 @@ describe('CdoTaskList', () => {
       }))
 
       expect(cdoTaskList.cdoSummary).toEqual({
+        id: 300097,
         indexNumber: 'ED300097',
         applicationPackSent: new Date('2024-06-25'),
         insuranceCompany: 'Dogs R Us',
