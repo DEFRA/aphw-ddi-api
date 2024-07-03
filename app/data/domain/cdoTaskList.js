@@ -166,10 +166,15 @@ class CdoTaskList {
     this._cdo.exemption.setInsuranceDetails(company, renewalDate, callback)
   }
 
+  recordMicrochipNumber (microchipNumber1, duplicateMicrochipNumber, callback) {
+    this._actionPackCompleteGuard()
+    this._cdo.dog.setMicrochipNumber(microchipNumber1, duplicateMicrochipNumber, callback)
+  }
+
   getUpdates () {
     return {
       exemption: this._cdo.exemption.getChanges(),
-      dog: [],
+      dog: this._cdo.dog.getChanges(),
       person: []
     }
   }
