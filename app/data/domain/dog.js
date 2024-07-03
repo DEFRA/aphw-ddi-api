@@ -1,5 +1,6 @@
 const { Changeable } = require('./changeable')
 const { DuplicateResourceError } = require('../../errors/duplicate-record')
+const { InvalidDataError } = require('../../errors/domain/invalidData')
 
 class Dog extends Changeable {
   constructor (dogProperties) {
@@ -29,6 +30,14 @@ class Dog extends Changeable {
   setMicrochipNumber (microchipNumber1, duplicateMicrochip, callback) {
     if (this._microchipNumber === microchipNumber1) {
       return
+    }
+
+    if (!microchipNumber1.match(/^[0-9]*$/)) {
+      throw new InvalidDataError('Invalid Microchip number - contains a non-numeric character')
+    }
+
+    if (microchipNumber1.length < 15) {
+      throw new InvalidDataError('Invalid Microchip number - must be at least 15 characters long')
     }
 
     if (microchipNumber1 === duplicateMicrochip) {
