@@ -38,6 +38,7 @@ class CdoTaskList {
     const microchipNumber = this._cdo.dog.microchipNumber !== null && `${this._cdo.dog.microchipNumber}`.length > 0 ? this._cdo.dog.microchipNumber : undefined
 
     return {
+      id: this._cdo.dog.id,
       indexNumber: this._cdo.dog.indexNumber,
       applicationPackSent: this._cdo.exemption.applicationPackSent ?? undefined,
       insuranceCompany: this._cdo.exemption.insurance[0]?.company ?? undefined,
