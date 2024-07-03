@@ -443,7 +443,7 @@ const updateMappings = {
   microchipVerification: 'dog.registration.microchip_verification',
   certificateIssued: 'dog.registration.certificate_issued',
   insurance: 'dog.insurance',
-  microchipNumber: new Error('Not implemented')
+  microchipNumber: 'dog.microchip'
 }
 /**
  * @typedef SaveCdoTaskList

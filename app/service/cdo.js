@@ -91,7 +91,7 @@ class CdoService {
       await sendUpdateToAudit(EXEMPTION, preChanged, postChanged, user)
     }
 
-    cdoTaskList.addInsuranceDetails(insuranceDetails.insuranceCompany, insuranceDetails.insuranceRenewal, sendEvent)
+    cdoTaskList.recordInsuranceDetails(insuranceDetails.insuranceCompany, insuranceDetails.insuranceRenewal, sendEvent)
 
     const returnedCdoTaskList = await this.cdoRepository.saveCdoTaskList(cdoTaskList)
 

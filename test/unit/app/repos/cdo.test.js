@@ -2,9 +2,12 @@ const { payload: mockCdoPayload, payloadWithPersonReference: mockCdoPayloadWithR
 const { NotFoundError } = require('../../../../app/errors/not-found')
 const { personDao: mockPersonPayload, createdPersonDao: mockCreatedPersonPayload } = require('../../../mocks/person')
 const { devUser } = require('../../../mocks/auth')
-const { buildCdoDao, buildRegistrationDao, buildInsuranceDao, buildInsuranceCompanyDao } = require('../../../mocks/cdo/get')
+const {
+  buildCdoDao, buildRegistrationDao, buildInsuranceDao, buildInsuranceCompanyDao, buildDogMicrochipDao,
+  buildMicrochipDao
+} = require('../../../mocks/cdo/get')
 const { Cdo, CdoTaskList } = require('../../../../app/data/domain')
-const { buildCdo, buildExemption } = require('../../../mocks/cdo/domain')
+const { buildCdo, buildExemption, buildCdoDog } = require('../../../mocks/cdo/domain')
 
 describe('CDO repo', () => {
   jest.mock('../../../../app/config/db', () => ({
@@ -655,7 +658,7 @@ describe('CDO repo', () => {
       }))
       expect(cdoTaskList.insuranceDetailsRecorded.completed).toBe(false)
 
-      cdoTaskList.addInsuranceDetails('Allianz', renewalDate, callback)
+      cdoTaskList.recordInsuranceDetails('Allianz', renewalDate, callback)
 
       const taskList = await saveCdoTaskList(cdoTaskList, {})
 

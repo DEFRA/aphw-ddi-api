@@ -161,7 +161,7 @@ class CdoTaskList {
     this._cdo.exemption.sendApplicationPack(sentDate, callback)
   }
 
-  addInsuranceDetails (company, renewalDate, callback) {
+  recordInsuranceDetails (company, renewalDate, callback) {
     this._actionPackCompleteGuard()
     this._cdo.exemption.setInsuranceDetails(company, renewalDate, callback)
   }
