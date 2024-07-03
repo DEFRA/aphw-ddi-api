@@ -671,8 +671,6 @@ describe('CDO repo', () => {
     })
 
     test('should update microchip number', async () => {
-      const saveDogMock = jest.fn()
-
       const dog = buildCdoDao({
         dog_microchips: []
       })

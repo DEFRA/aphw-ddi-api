@@ -6,7 +6,6 @@ const { ActionAlreadyPerformedError } = require('../../../../app/errors/domain/a
 const { devUser } = require('../../../mocks/auth')
 const { SequenceViolationError } = require('../../../../app/errors/domain/sequenceViolation')
 const { DuplicateResourceError } = require('../../../../app/errors/duplicate-record')
-const { getCdoService } = require('../../../../app/service/config')
 const { InvalidDataError } = require('../../../../app/errors/domain/invalidData')
 
 describe('CDO endpoint', () => {

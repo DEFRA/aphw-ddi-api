@@ -463,32 +463,30 @@ const saveCdoTaskList = async (cdoTaskList, transaction) => {
   if (!transaction) {
     return await sequelize.transaction(async (t) => saveCdoTaskList(cdoTaskList, t))
   }
-  const updates = cdoTaskList.getUpdates()
+  const updates = Object.values(cdoTaskList.getUpdates()).flat()
   const cdoDao = await getCdo(cdoTaskList.cdoSummary.indexNumber)
 
-  for (const update of updates.exemption) {
-    const mappingArray = updateMappings[update.key].split('.')
+  for (const update of updates) {
+    switch (update.key) {
+      case 'microchip': {
+        await updateMicrochip(cdoDao, update.value, 1, transaction)
+        break
+      }
+      case 'insurance': {
+        await createOrUpdateInsurance({ insurance: update.value }, cdoDao, transaction)
+        break
+      }
+      default: {
+        const mappingArray = updateMappings[update.key].split('.')
+        const [, relationship, field] = mappingArray
+        const model = cdoDao[relationship ?? field]
+        model[field] = update.value
 
-    if (mappingArray[1] === 'registration') {
-      const [,, field] = mappingArray
-      const registration = cdoDao.registration
-      registration[field] = update.value
-
-      await registration.save({ transaction })
-    } else if (mappingArray[1] === 'insurance') {
-      await createOrUpdateInsurance({ insurance: update.value }, cdoDao, transaction)
+        await model.save({ transaction })
+      }
     }
 
     // this will publish the event
-    await update.callback()
-  }
-  for (const update of updates.dog) {
-    const mappingArray = updateMappings[update.key].split('.')
-
-    if (mappingArray[1] === 'microchip') {
-      await updateMicrochip(cdoDao, update.value, 1, transaction)
-    }
-
     await update.callback()
   }
 
