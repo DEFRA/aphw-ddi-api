@@ -2,7 +2,6 @@ const { buildCdo, buildExemption } = require('../../../mocks/cdo/domain')
 const { CdoTaskList } = require('../../../../app/data/domain')
 const { devUser } = require('../../../mocks/auth')
 const { ActionAlreadyPerformedError } = require('../../../../app/errors/domain/actionAlreadyPerformed')
-const { inXDays } = require('../../../time-helper')
 
 describe('CdoService', function () {
   /**
@@ -113,23 +112,23 @@ describe('CdoService', function () {
       mockCdoRepository.getCdoTaskList.mockResolvedValue(cdoTaskList)
       mockCdoRepository.saveCdoTaskList.mockResolvedValue(cdoTaskList)
 
-      const in60Days = inXDays(60)
+      const inTheFuture = new Date('9999-01-01')
 
       const result = await cdoService.recordInsuranceDetails(cdoIndexNumber, {
         insuranceCompany: 'Dog\'s Trust',
-        insuranceRenewal: in60Days
+        insuranceRenewal: inTheFuture
       }, devUser)
       expect(mockCdoRepository.getCdoTaskList).toHaveBeenCalledWith(cdoIndexNumber)
       expect(mockCdoRepository.saveCdoTaskList).toHaveBeenCalledWith(cdoTaskList)
       expect(result).toEqual({
         insuranceCompany: 'Dog\'s Trust',
-        insuranceRenewal: in60Days
+        insuranceRenewal: inTheFuture
       })
       expect(cdoTaskList.getUpdates().exemption).toEqual([{
         key: 'insurance',
         value: {
           company: 'Dog\'s Trust',
-          renewalDate: in60Days
+          renewalDate: inTheFuture
         },
         callback: expect.any(Function)
       }])
@@ -144,7 +143,7 @@ describe('CdoService', function () {
         {
           index_number: 'ED300097',
           insurance_company: "Dog's Trust",
-          insurance_renewal_date: '2024-08-31'
+          insurance_renewal_date: '9999-01-01'
         }, devUser)
     })
   })
