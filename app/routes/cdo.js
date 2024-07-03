@@ -6,8 +6,12 @@ const { NotFoundError } = require('../errors/not-found')
 const ServiceProvider = require('../service/config')
 const { mapCdoTaskListToDto } = require('../dto/cdoTaskList')
 const { ActionAlreadyPerformedError } = require('../errors/domain/actionAlreadyPerformed')
-const { recordInsuranceDetailsSchema, recordInsuranceDetailsResponseSchema } = require('../schema/cdo/manage')
+const {
+  recordInsuranceDetailsSchema, recordInsuranceDetailsResponseSchema, recordMicrochipNumberSchema,
+  recordMicrochipNumberResponseSchema
+} = require('../schema/cdo/manage')
 const { SequenceViolationError } = require('../errors/domain/sequenceViolation')
+const { InvalidDataError } = require('../errors/domain/invalidData')
 
 module.exports = [
   {
@@ -94,7 +98,7 @@ module.exports = [
         if (e instanceof ActionAlreadyPerformedError) {
           return h.response().code(409)
         }
-        console.log('Error retrieving cdo record:', e)
+        console.error('Error sending application pack cdo record:', e)
         throw e
       }
     }
@@ -128,12 +132,58 @@ module.exports = [
           }).code(201)
         } catch (e) {
           if (e instanceof NotFoundError) {
+            console.error('CDO record not found:', e)
             return h.response().code(404)
           }
           if (e instanceof SequenceViolationError) {
             return h.response().code(409)
           }
           console.log('Error retrieving cdo record:', e)
+          throw e
+        }
+      }
+    }
+  },
+  {
+    method: 'POST',
+    path: '/cdo/{indexNumber}/manage:recordMicrochipNumber',
+    options: {
+      validate: {
+        payload: recordMicrochipNumberSchema,
+        failAction: (request, h, err) => {
+          console.error(err)
+
+          return h.response({ errors: err.details.map(e => e.message) }).code(400).takeover()
+        }
+      },
+      response: {
+        schema: recordMicrochipNumberResponseSchema
+      },
+      handler: async (request, h) => {
+        const indexNumber = request.params.indexNumber
+        const { microchipNumber } = request.payload
+
+        try {
+          const cdoService = ServiceProvider.getCdoService()
+          await cdoService.recordMicrochipNumber(indexNumber, { microchipNumber }, getCallingUser(request))
+
+          return h.response({
+            microchipNumber
+          }).code(201)
+        } catch (e) {
+          if (e instanceof NotFoundError) {
+            console.error('CDO record not found:', e)
+            return h.response().code(404)
+          }
+          if (e instanceof SequenceViolationError) {
+            console.error('CDO action out of sequence:', e)
+            return h.response().code(409)
+          }
+          if (e instanceof InvalidDataError) {
+            console.error('Error recording MicrochipNumber:', e)
+            return h.response().code(400)
+          }
+          console.log('Error recording MicrochipNumber:', e)
           throw e
         }
       }
