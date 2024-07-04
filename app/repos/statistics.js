@@ -1,5 +1,6 @@
 const sequelize = require('../config/db')
 const constants = require('../constants/statuses')
+const { getBreeds } = require('./dogs')
 
 const statusReverseOrder = [
   constants.statuses.Inactive,
@@ -36,7 +37,32 @@ const getCountsPerStatus = async () => {
   return counts
 }
 
+const getCountsPerCountry = async () => {
+  const breeds = await getBreeds()
+
+  const querySql = `
+  select db.breed, c.country, count(*) as total
+  from dog_breed db,
+     dog d,
+     registered_person rp,
+     person_address pa,
+     address a,
+     country c
+  where rp.dog_id = d.id
+  and d.dog_breed_id = db.id
+  and rp.person_id = pa.person_id
+  and pa.address_id = a.id
+  and a.country_id = c.id
+  group by db.breed, db.id, c.country, c.id
+  order by db.id, c.id
+  `
+
+  const counts = await sequelize.query(querySql, { type: sequelize.QueryTypes.SELECT })
+  return { counts, breeds }
+}
+
 module.exports = {
   getCountsPerStatus,
-  constructStatusOrderBy
+  constructStatusOrderBy,
+  getCountsPerCountry
 }
