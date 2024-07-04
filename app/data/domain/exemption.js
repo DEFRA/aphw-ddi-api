@@ -34,8 +34,8 @@ class Exemption extends Changeable {
     this.certificateIssued = exemptionProperties.certificateIssued
     this._applicationFeePaid = exemptionProperties.applicationFeePaid
     this._insurance = exemptionProperties.insurance
-    this.neuteringConfirmation = exemptionProperties.neuteringConfirmation
-    this.microchipVerification = exemptionProperties.microchipVerification
+    this._neuteringConfirmation = exemptionProperties.neuteringConfirmation
+    this._microchipVerification = exemptionProperties.microchipVerification
     this.joinedExemptionScheme = exemptionProperties.joinedExemptionScheme
     this.nonComplianceLetterSent = exemptionProperties.nonComplianceLetterSent
     this.applicationPackSent = exemptionProperties.applicationPackSent
@@ -57,6 +57,14 @@ class Exemption extends Changeable {
 
   get form2Sent () {
     return this._form2Sent
+  }
+
+  get neuteringConfirmation () {
+    return this._neuteringConfirmation
+  }
+
+  get microchipVerification () {
+    return this._microchipVerification
   }
 
   /**
@@ -103,6 +111,21 @@ class Exemption extends Changeable {
   sendForm2 (auditDate, callback) {
     this._form2Sent = auditDate
     this._updates.update('form2Sent', auditDate, callback)
+  }
+
+  verifyDates (microchipVerification, neuteringConfirmation, callback) {
+    if (microchipVerification.getTime() > Date.now() || neuteringConfirmation.getTime() > Date.now()) {
+      throw new InvalidDateError('Date must be today or in the past')
+    }
+    this._microchipVerification = microchipVerification
+    this._neuteringConfirmation = neuteringConfirmation
+    this._updates.update(
+      'verifyDates',
+      {
+        microchipVerification,
+        neuteringConfirmation
+      },
+      callback)
   }
 }
 module.exports = Exemption
