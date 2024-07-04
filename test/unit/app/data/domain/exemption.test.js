@@ -164,4 +164,22 @@ describe('Exemption', () => {
       ])
     })
   })
+
+  describe('sendForm2', () => {
+    const auditDate = new Date()
+
+    test('should set form two as sent', () => {
+      const callback = jest.fn()
+      const exemption = new Exemption({ ...exemptionProperties, formTwoSent: null })
+      exemption.sendForm2(auditDate, callback)
+      expect(exemption.formTwoSent).toEqual(auditDate)
+      expect(exemption.getChanges()).toEqual([{
+        key: 'formTwoSent',
+        value: auditDate,
+        callback
+      }])
+      expect(() => exemption.getChanges()[0].callback()).not.toThrow()
+      expect(callback).toHaveBeenCalled()
+    })
+  })
 })

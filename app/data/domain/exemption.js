@@ -39,7 +39,7 @@ class Exemption extends Changeable {
     this.joinedExemptionScheme = exemptionProperties.joinedExemptionScheme
     this.nonComplianceLetterSent = exemptionProperties.nonComplianceLetterSent
     this.applicationPackSent = exemptionProperties.applicationPackSent
-    this.formTwoSent = exemptionProperties.formTwoSent
+    this._formTwoSent = exemptionProperties.formTwoSent
   }
 
   sendApplicationPack (auditDate, callback) {
@@ -53,6 +53,10 @@ class Exemption extends Changeable {
 
   get applicationFeePaid () {
     return this._applicationFeePaid
+  }
+
+  get formTwoSent () {
+    return this._formTwoSent
   }
 
   /**
@@ -94,6 +98,11 @@ class Exemption extends Changeable {
     }
     this._applicationFeePaid = applicationFeePaidDate
     this._updates.update('applicationFeePaid', applicationFeePaid, callback)
+  }
+
+  sendForm2 (auditDate, callback) {
+    this._formTwoSent = auditDate
+    this._updates.update('formTwoSent', auditDate, callback)
   }
 }
 module.exports = Exemption
