@@ -33,7 +33,7 @@ class CdoService {
 
   async sendApplicationPack (cdoId, sentDate, user) {
     const cdoTaskList = await this.cdoRepository.getCdoTaskList(cdoId)
-    const activityType = await getActivityByLabel(activities.applicationPack)
+    const activityType = await getActivityByLabel(activities.applicationPackSent)
 
     const sendEvent = async () => {
       await sendActivityToAudit({
@@ -43,7 +43,7 @@ class CdoService {
         source: 'dog',
         activityDate: sentDate,
         targetPk: 'dog',
-        activityLabel: activities.applicationPack
+        activityLabel: activities.applicationPackSent
       }, user)
     }
 
@@ -158,7 +158,7 @@ class CdoService {
 
   async sendForm2 (cdoIndexNumber, sentDate, user) {
     const cdoTaskList = await this.cdoRepository.getCdoTaskList(cdoIndexNumber)
-    const activityType = await getActivityByLabel(activities.applicationPack)
+    const activityType = await getActivityByLabel(activities.applicationPackSent)
 
     const callback = async () => {
       await sendActivityToAudit({
