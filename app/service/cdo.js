@@ -98,7 +98,6 @@ class CdoService {
   }
 
   /**
-   *
    * @param {string} cdoIndexNumber
    * @param {{microchipNumber: string}} microchip
    * @param user
@@ -130,33 +129,29 @@ class CdoService {
   }
 
   /**
-   *
    * @param {string} cdoIndexNumber
-   * @param {{microchipNumber: string}} microchip
+   * @param {{ applicationFeePaid: Date }} applicationFeeObject
    * @param user
-   * @return {Promise<import('../data/domain').CdoTaskList>}
+   * @return {Promise<import('../data/domain/cdoTaskList').CdoTaskList>}
    */
-  async recordMicrochipNumber (cdoIndexNumber, microchip, user) {
-    const microchipNumber = microchip.microchipNumber
-
+  async recordApplicationFee (cdoIndexNumber, applicationFeeObject, user) {
+    const applicationFeePaid = applicationFeeObject.applicationFeePaid
     const cdoTaskList = await this.cdoRepository.getCdoTaskList(cdoIndexNumber)
-    const preMicrochipNumber = cdoTaskList.cdoSummary.microchipNumber
+    const preApplicationFeePaid = cdoTaskList.cdoSummary.applicationFeePaid
 
     const callback = async () => {
       const preAudit = {
         index_number: cdoIndexNumber,
-        microchip1: preMicrochipNumber ?? null
+        application_fee_paid: preApplicationFeePaid ?? null
       }
       const postAudit = {
         index_number: cdoIndexNumber,
-        microchip1: microchipNumber
+        application_fee_paid: applicationFeePaid
       }
-      await sendUpdateToAudit(DOG, preAudit, postAudit, user)
+      await sendUpdateToAudit(EXEMPTION, preAudit, postAudit, user)
     }
 
-    const duplicateMicrochip = await microchipExists(cdoTaskList.cdoSummary.id, microchipNumber)
-
-    cdoTaskList.recordMicrochipNumber(microchipNumber, duplicateMicrochip, callback)
+    cdoTaskList.recordApplicationFee(applicationFeePaid, callback)
 
     return this.cdoRepository.saveCdoTaskList(cdoTaskList)
   }
