@@ -206,7 +206,7 @@ describe('Exemption', () => {
       expect(exemption.neuteringConfirmation).toEqual(neuteringConfirmation)
       expect(exemption.getChanges()).toEqual([
         {
-          key: 'verifyDates',
+          key: 'verificationDateRecorded',
           value: {
             neuteringConfirmation,
             microchipVerification
