@@ -2,6 +2,12 @@ const sequelize = require('../config/db')
 const { DuplicateResourceError } = require('../errors/duplicate-record')
 const { Op } = require('sequelize')
 
+/**
+ * @param {number} dogId
+ * @param {string} microchipNumber
+ * @param transaction
+ * @return {Promise<*|null>}
+ */
 const microchipExists = async (dogId, microchipNumber, transaction) => {
   const microchip = await sequelize.models.microchip.findOne({
     include: [{
