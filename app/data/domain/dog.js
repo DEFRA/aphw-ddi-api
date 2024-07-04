@@ -36,8 +36,8 @@ class Dog extends Changeable {
       throw new InvalidDataError('Invalid Microchip number - contains a non-numeric character')
     }
 
-    if (microchipNumber1.length < 15) {
-      throw new InvalidDataError('Invalid Microchip number - must be at least 15 characters long')
+    if (microchipNumber1.length !== 15) {
+      throw new InvalidDataError('Invalid Microchip number - must be 15 characters long')
     }
 
     if (microchipNumber1 === duplicateMicrochip) {

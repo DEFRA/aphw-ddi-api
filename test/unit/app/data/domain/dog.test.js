@@ -99,7 +99,13 @@ describe('Dog', () => {
     test('should throw InvalidDataError error when updating microchip number that is shorter than 15 characters', () => {
       const callback = jest.fn()
       const dog = new Dog(buildCdoDog({ microchipNumber: null }))
-      expect(() => dog.setMicrochipNumber('12345678901234', null, callback)).toThrow(new InvalidDataError('Invalid Microchip number - must be at least 15 characters long'))
+      expect(() => dog.setMicrochipNumber('12345678901234', null, callback)).toThrow(new InvalidDataError('Invalid Microchip number - must be 15 characters long'))
+    })
+
+    test('should throw InvalidDataError error when updating microchip number that is longer than 15 characters', () => {
+      const callback = jest.fn()
+      const dog = new Dog(buildCdoDog({ microchipNumber: null }))
+      expect(() => dog.setMicrochipNumber('1234567890123456', null, callback)).toThrow(new InvalidDataError('Invalid Microchip number - must be 15 characters long'))
     })
   })
 })
