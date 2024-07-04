@@ -1,6 +1,9 @@
 const { statisticsQuerySchema } = require('../schema/admin/statistics')
-const { getCountsPerStatus } = require('../repos/statistics')
-const { countsPerStatusDto } = require('../dto/statistics')
+const { getCountsPerStatus, getCountsPerCountry } = require('../repos/statistics')
+const { countsPerStatusDto, countsPerCountryDto } = require('../dto/statistics')
+
+const queryCountsPerStatus = 'countsPerStatus'
+const queryCountsPerCountry = 'countsPerCountry'
 
 module.exports = {
   method: 'GET',
@@ -15,9 +18,18 @@ module.exports = {
       }
     },
     handler: async (request, h) => {
-      const counts = await getCountsPerStatus()
+      const queryName = request.query.queryName
 
-      return h.response(countsPerStatusDto(counts)).code(200)
+      let results
+      if (queryName === queryCountsPerStatus) {
+        const counts = await getCountsPerStatus()
+        results = countsPerStatusDto(counts)
+      } else if (queryName === queryCountsPerCountry) {
+        const counts = await getCountsPerCountry()
+        results = countsPerCountryDto(counts)
+      }
+
+      return h.response(results).code(200)
     }
   }
 }
