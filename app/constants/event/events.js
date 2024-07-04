@@ -9,6 +9,7 @@ module.exports = {
   UPDATE: 'uk.gov.defra.ddi.event.update',
   CHANGE_OWNER: 'uk.gov.defra.ddi.event.change.owner',
   activities: {
-    applicationPack: 'Application pack'
+    applicationPack: 'Application pack',
+    form2Sent: 'Form 2'
   }
 }

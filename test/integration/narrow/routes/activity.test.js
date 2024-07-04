@@ -166,6 +166,58 @@ describe('Activity endpoint', () => {
       expect(sendActivityToAudit).toHaveBeenCalled()
     })
 
+    test('returns 200 with Form 2 sent', async () => {
+      const sendForm2Mock = jest.fn()
+      getCdoService.mockReturnValue({
+        sendForm2: sendForm2Mock
+      })
+      sendForm2Mock.mockResolvedValue(undefined)
+
+      getActivityById.mockResolvedValue({ id: 10, name: 'act 1', label: 'Form 2' })
+
+      const activityDate = new Date()
+      const options = {
+        method: 'POST',
+        url: '/activity',
+        payload: {
+          activity: '10',
+          activityType: 'sent',
+          pk: 'ED300000',
+          source: 'dog',
+          activityDate
+        }
+      }
+
+      const response = await server.inject(options)
+
+      expect(response.statusCode).toBe(200)
+      expect(sendActivityToAudit).not.toHaveBeenCalled()
+      expect(sendForm2Mock).toHaveBeenCalledWith('ED300000', activityDate, devUser)
+    })
+
+    test('returns 200 with Form 2 received', async () => {
+      sendActivityToAudit.mockResolvedValue()
+
+      getActivityById.mockResolvedValue({ id: 10, name: 'act 1', label: 'Form 2' })
+
+      const options = {
+        method: 'POST',
+        url: '/activity',
+        payload: {
+          activity: '10',
+          activityType: 'received',
+          pk: 'ED300000',
+          source: 'dog',
+          activityDate: new Date()
+        }
+      }
+
+      const response = await server.inject(options)
+
+      expect(response.statusCode).toBe(200)
+      expect(sendActivityToAudit).toHaveBeenCalled()
+    })
+
     test('returns 400 with invalid payload', async () => {
       sendActivityToAudit.mockResolvedValue()
 

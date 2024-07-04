@@ -52,8 +52,9 @@ module.exports = [{
       }
 
       if (payload.activityLabel === activities.applicationPack && payload.activityType === 'sent') {
-        const cdoService = ServiceProvider.getCdoService()
-        await cdoService.sendApplicationPack(payload.pk, payload.activityDate, getCallingUser(request))
+        await ServiceProvider.getCdoService().sendApplicationPack(payload.pk, payload.activityDate, getCallingUser(request))
+      } else if (payload.activityLabel === activities.form2Sent && payload.activityType === 'sent') {
+        await ServiceProvider.getCdoService().sendForm2(payload.pk, payload.activityDate, getCallingUser(request))
       } else {
         await sendActivityToAudit(payload, getCallingUser(request))
       }

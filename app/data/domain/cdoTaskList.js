@@ -45,7 +45,7 @@ class CdoTaskList {
       insuranceRenewal: this._cdo.exemption.insurance[0]?.renewalDate ?? undefined,
       microchipNumber,
       applicationFeePaid: this._cdo.exemption.applicationFeePaid ?? undefined,
-      form2Sent: this._cdo.exemption.formTwoSent ?? undefined,
+      form2Sent: this._cdo.exemption.form2Sent ?? undefined,
       neuteringConfirmation: this._cdo.exemption.neuteringConfirmation ?? undefined,
       microchipVerification: this._cdo.exemption.microchipVerification ?? undefined,
       certificateIssued: this._cdo.exemption.certificateIssued ?? undefined
@@ -175,6 +175,16 @@ class CdoTaskList {
   recordApplicationFee (applicationFeePaid, callback) {
     this._actionPackCompleteGuard()
     this._cdo.exemption.setApplicationFee(applicationFeePaid, callback)
+  }
+
+  sendForm2 (sentDate, callback) {
+    this._actionPackCompleteGuard()
+
+    if (this.form2Sent.completed) {
+      throw new ActionAlreadyPerformedError('Form Two can only be sent once')
+    }
+
+    this._cdo.exemption.sendForm2(sentDate, callback)
   }
 
   getUpdates () {

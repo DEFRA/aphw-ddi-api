@@ -146,7 +146,7 @@ describe('CdoTaskList', () => {
     test('should show task list with record dates available given send form 2 has been recorded', () => {
       const exemptionProperties = buildExemption({
         applicationPackSent: new Date('2024-06-25'),
-        formTwoSent: new Date('2024-06-25')
+        form2Sent: new Date('2024-06-25')
       })
       const cdo = buildCdo({
         exemption: exemptionProperties
@@ -216,7 +216,7 @@ describe('CdoTaskList', () => {
     test('should show task list with record dates incomplete given microchipVerification complete but neuteringConfirmation not', () => {
       const exemptionProperties = buildExemption({
         applicationPackSent: new Date('2024-06-25'),
-        formTwoSent: new Date('2024-05-24'),
+        form2Sent: new Date('2024-05-24'),
         applicationFeePaid: new Date('2024-06-24'),
         microchipVerification: new Date('2024-03-09'),
         insurance: [buildCdoInsurance({
@@ -252,7 +252,7 @@ describe('CdoTaskList', () => {
     test('should show task list with record dates incomplete given neuteringConfirmation complete but microchipVerification not', () => {
       const exemptionProperties = buildExemption({
         applicationPackSent: new Date('2024-06-25'),
-        formTwoSent: new Date('2024-05-24'),
+        form2Sent: new Date('2024-05-24'),
         applicationFeePaid: new Date('2024-06-24'),
         neuteringConfirmation: new Date('2024-02-10'),
         insurance: [buildCdoInsurance({
@@ -291,7 +291,7 @@ describe('CdoTaskList', () => {
 
       const exemptionProperties = buildExemption({
         applicationPackSent: new Date('2024-06-25'),
-        formTwoSent: new Date('2024-05-24'),
+        form2Sent: new Date('2024-05-24'),
         applicationFeePaid: new Date('2024-06-24'),
         neuteringConfirmation: new Date('2024-02-10'),
         microchipVerification: new Date('2024-03-09'),
@@ -333,7 +333,7 @@ describe('CdoTaskList', () => {
 
       const exemptionProperties = buildExemption({
         applicationPackSent: new Date('2024-06-25'),
-        formTwoSent: new Date('2024-05-24'),
+        form2Sent: new Date('2024-05-24'),
         applicationFeePaid: new Date('2024-06-24'),
         neuteringConfirmation: new Date('2024-02-10'),
         microchipVerification: new Date('2024-03-09'),
@@ -366,7 +366,7 @@ describe('CdoTaskList', () => {
 
       const exemptionProperties = buildExemption({
         applicationPackSent: new Date('2024-06-25'),
-        formTwoSent: new Date('2024-05-24'),
+        form2Sent: new Date('2024-05-24'),
         applicationFeePaid: new Date('2024-06-24'),
         neuteringConfirmation: new Date('2024-02-10'),
         microchipVerification: new Date('2024-03-09'),
@@ -406,7 +406,7 @@ describe('CdoTaskList', () => {
 
       const exemptionProperties = buildExemption({
         applicationPackSent: new Date('2024-06-25'),
-        formTwoSent: new Date('2024-05-24'),
+        form2Sent: new Date('2024-05-24'),
         applicationFeePaid: new Date('2024-06-24'),
         neuteringConfirmation: new Date('2024-02-10'),
         microchipVerification: new Date('2024-03-09'),
@@ -443,7 +443,7 @@ describe('CdoTaskList', () => {
     test('should return certificate issued as available given all other items are complete', () => {
       const exemptionProperties = buildExemption({
         applicationPackSent: new Date('2024-06-25'),
-        formTwoSent: new Date('2024-05-24'),
+        form2Sent: new Date('2024-05-24'),
         applicationFeePaid: new Date('2024-06-24'),
         neuteringConfirmation: new Date('2024-02-10'),
         microchipVerification: new Date('2024-03-09'),
@@ -473,7 +473,7 @@ describe('CdoTaskList', () => {
     test('should not have issue certificate btn available given all records are complete', () => {
       const exemptionProperties = buildExemption({
         applicationPackSent: new Date('2024-06-25'),
-        formTwoSent: new Date('2024-05-24'),
+        form2Sent: new Date('2024-05-24'),
         applicationFeePaid: new Date('2024-06-24'),
         neuteringConfirmation: new Date('2024-02-10'),
         microchipVerification: new Date('2024-03-09'),
@@ -566,6 +566,7 @@ describe('CdoTaskList', () => {
       expect(() => cdoTaskList.recordInsuranceDetails(dogsTrustCompany, inXDays(60), transactionCallback)).toThrow(new SequenceViolationError('Application pack must be sent before performing this action'))
       expect(() => cdoTaskList.recordMicrochipNumber('123456789012345', null, transactionCallback)).toThrow(new SequenceViolationError('Application pack must be sent before performing this action'))
       expect(() => cdoTaskList.recordApplicationFee(new Date('2024-07-04'), transactionCallback)).toThrow(new SequenceViolationError('Application pack must be sent before performing this action'))
+      expect(() => cdoTaskList.sendForm2(new Date('2024-07-04'), transactionCallback)).toThrow(new SequenceViolationError('Application pack must be sent before performing this action'))
 
       expect(cdoTaskList.insuranceDetailsRecorded.completed).toBe(false)
       expect(cdoTaskList.cdoSummary.insuranceCompany).toBeUndefined()
@@ -649,6 +650,29 @@ describe('CdoTaskList', () => {
         expect(cdoTaskList.cdoSummary.applicationFeePaid).toEqual(applicationFeePaid)
         cdoTaskList.getUpdates().exemption[0].callback()
         expect(transactionCallback).toHaveBeenCalledTimes(4)
+      })
+    })
+
+    describe('sendForm2', () => {
+      test('should send application pack given sendForm2 is not complete', () => {
+        const sentDate = new Date()
+        expect(cdoTaskList.form2Sent.completed).toBe(false)
+        expect(cdoTaskList.cdoSummary.form2Sent).not.toBeInstanceOf(Date)
+
+        cdoTaskList.sendForm2(sentDate, transactionCallback)
+        expect(cdoTaskList.form2Sent.completed).toBe(true)
+        expect(cdoTaskList.cdoSummary.form2Sent).toEqual(sentDate)
+        expect(cdoTaskList.getUpdates().exemption[3]).toEqual({
+          key: 'form2Sent',
+          value: sentDate,
+          callback: transactionCallback
+        })
+        cdoTaskList.getUpdates().exemption[3].callback()
+        expect(transactionCallback).toHaveBeenCalledTimes(5)
+      })
+
+      test('should fail if sendForm2  has already been sent', () => {
+        expect(() => cdoTaskList.sendForm2(new Date(), transactionCallback)).toThrow(new ActionAlreadyPerformedError('Form Two can only be sent once'))
       })
     })
   })
