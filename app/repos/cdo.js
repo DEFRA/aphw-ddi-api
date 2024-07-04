@@ -440,16 +440,27 @@ const getCdoTaskList = async (indexNumber, transaction) => {
   return new CdoTaskList(cdo)
 }
 
+const updateKeys = {
+  applicationPackSent: ['applicationPackSent'],
+  applicationFeePaid: ['applicationFeePaid'],
+  form2Sent: ['form2Sent'],
+  neuteringConfirmation: ['neuteringConfirmation'],
+  microchipVerification: ['microchipVerification'],
+  verificationDateRecorded: [
+    'neuteringConfirmation',
+    'microchipVerification'
+  ],
+  certificateIssued: ['certificateIssued'],
+  insurance: ['insurance'],
+  microchip: ['microchip']
+}
+
 const updateMappings = {
   applicationPackSent: 'dog.registration.application_pack_sent',
   applicationFeePaid: 'dog.registration.application_fee_paid',
   form2Sent: 'dog.registration.form_two_sent',
   neuteringConfirmation: 'dog.registration.neutering_confirmation',
   microchipVerification: 'dog.registration.microchip_verification',
-  verificationDateRecorded: [
-    'dog.registration.microchip_verification',
-    'dog.registration.neutering_confirmation'
-  ],
   certificateIssued: 'dog.registration.certificate_issued',
   insurance: 'dog.insurance',
   microchip: 'dog.microchip'
@@ -481,12 +492,29 @@ const saveCdoTaskList = async (cdoTaskList, transaction) => {
         break
       }
       default: {
-        const mappingArray = updateMappings[update.key].split('.')
-        const [, relationship, field] = mappingArray
-        const model = cdoDao[relationship ?? field]
-        model[field] = update.value
+        const keys = updateKeys[update.key]
+        let model
 
-        await model.save({ transaction })
+        for (const key of keys) {
+          const mappingArray = updateMappings[key].split('.')
+          const [, relationship, field] = mappingArray
+
+          if (!model) {
+            model = cdoDao[relationship ?? field]
+          }
+
+          if (Object.prototype.hasOwnProperty.call(update.value, key)) {
+            model[field] = update.value[key]
+          } else {
+            model[field] = update.value
+          }
+        }
+
+        if (model) {
+          await model.save({ transaction })
+        } else {
+          throw new Error(`Missing model when updating ${update.key}`)
+        }
       }
     }
 
