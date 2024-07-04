@@ -128,6 +128,38 @@ class CdoService {
 
     return this.cdoRepository.saveCdoTaskList(cdoTaskList)
   }
+
+  /**
+   *
+   * @param {string} cdoIndexNumber
+   * @param {{microchipNumber: string}} microchip
+   * @param user
+   * @return {Promise<import('../data/domain').CdoTaskList>}
+   */
+  async recordMicrochipNumber (cdoIndexNumber, microchip, user) {
+    const microchipNumber = microchip.microchipNumber
+
+    const cdoTaskList = await this.cdoRepository.getCdoTaskList(cdoIndexNumber)
+    const preMicrochipNumber = cdoTaskList.cdoSummary.microchipNumber
+
+    const callback = async () => {
+      const preAudit = {
+        index_number: cdoIndexNumber,
+        microchip1: preMicrochipNumber ?? null
+      }
+      const postAudit = {
+        index_number: cdoIndexNumber,
+        microchip1: microchipNumber
+      }
+      await sendUpdateToAudit(DOG, preAudit, postAudit, user)
+    }
+
+    const duplicateMicrochip = await microchipExists(cdoTaskList.cdoSummary.id, microchipNumber)
+
+    cdoTaskList.recordMicrochipNumber(microchipNumber, duplicateMicrochip, callback)
+
+    return this.cdoRepository.saveCdoTaskList(cdoTaskList)
+  }
 }
 
 module.exports = { CdoService }
