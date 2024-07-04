@@ -8,6 +8,16 @@ const countsPerStatus = [
   { status_id: 10, total: '80', status: 'Inactive', dogs: { status_id: 10 } }
 ]
 
+const countsPerCountry = [
+  { breed: 'Breed 1', country: 'England', total: '55' },
+  { breed: 'Breed 1', country: 'Wales', total: '2' },
+  { breed: 'Breed 1', country: 'Scotland', total: '30' },
+  { breed: 'Breed 2', country: 'England', total: '257' },
+  { breed: 'Breed 2', country: 'Scotland', total: '10' },
+  { breed: 'Breed 3', country: 'Wales', total: '128' }
+]
+
 module.exports = {
-  countsPerStatus
+  countsPerStatus,
+  countsPerCountry
 }
