@@ -176,6 +176,29 @@ class CdoService {
 
     return this.cdoRepository.saveCdoTaskList(cdoTaskList)
   }
+
+  async verifyDates (cdoIndexNumber, verificationDates, user) {
+    const cdoTaskList = await this.cdoRepository.getCdoTaskList(cdoIndexNumber)
+    const preNeuteringConfirmation = cdoTaskList.cdoSummary.neuteringConfirmation
+    const preMicrochipVerificationn = cdoTaskList.cdoSummary.microchipVerification
+
+    const callback = async () => {
+      const preAudit = {
+        index_number: cdoIndexNumber,
+        neutering_confirmation: preNeuteringConfirmation ?? null,
+        microchip_verification: preMicrochipVerificationn ?? null
+      }
+      const postAudit = {
+        index_number: cdoIndexNumber,
+        neutering_confirmation: verificationDates.neuteringConfirmation,
+        microchip_verification: verificationDates.microchipVerification
+      }
+      await sendUpdateToAudit(EXEMPTION, preAudit, postAudit, user)
+    }
+
+    cdoTaskList.verifyDates(verificationDates.microchipVerification, verificationDates.neuteringConfirmation, callback)
+    return this.cdoRepository.saveCdoTaskList(cdoTaskList)
+  }
 }
 
 module.exports = { CdoService }

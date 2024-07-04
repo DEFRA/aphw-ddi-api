@@ -120,7 +120,7 @@ class Exemption extends Changeable {
     this._microchipVerification = microchipVerification
     this._neuteringConfirmation = neuteringConfirmation
     this._updates.update(
-      'verifyDates',
+      'verificationDateRecorded',
       {
         microchipVerification,
         neuteringConfirmation

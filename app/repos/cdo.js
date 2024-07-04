@@ -446,6 +446,10 @@ const updateMappings = {
   form2Sent: 'dog.registration.form_two_sent',
   neuteringConfirmation: 'dog.registration.neutering_confirmation',
   microchipVerification: 'dog.registration.microchip_verification',
+  verificationDateRecorded: [
+    'dog.registration.microchip_verification',
+    'dog.registration.neutering_confirmation'
+  ],
   certificateIssued: 'dog.registration.certificate_issued',
   insurance: 'dog.insurance',
   microchip: 'dog.microchip'
