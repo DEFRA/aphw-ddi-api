@@ -117,7 +117,7 @@ const mapCdoDaoToExemption = (registration, insurance) => {
     joinedExemptionScheme: new Date(registration.joined_exemption_scheme),
     nonComplianceLetterSent: returnDateOrNull(registration.non_compliance_letter_sent),
     applicationPackSent: returnDateOrNull(registration.application_pack_sent),
-    formTwoSent: returnDateOrNull(registration.form_two_sent)
+    form2Sent: returnDateOrNull(registration.form_two_sent)
   }
   return new Exemption(exemptionProperties)
 }

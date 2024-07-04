@@ -155,6 +155,27 @@ class CdoService {
 
     return this.cdoRepository.saveCdoTaskList(cdoTaskList)
   }
+
+  async sendForm2 (cdoIndexNumber, sentDate, user) {
+    const cdoTaskList = await this.cdoRepository.getCdoTaskList(cdoIndexNumber)
+    const activityType = await getActivityByLabel(activities.applicationPack)
+
+    const callback = async () => {
+      await sendActivityToAudit({
+        activity: activityType.id,
+        activityType: 'sent',
+        pk: cdoIndexNumber,
+        source: 'dog',
+        activityDate: sentDate,
+        targetPk: 'dog',
+        activityLabel: activities.form2Sent
+      }, user)
+    }
+
+    cdoTaskList.sendForm2(sentDate, callback)
+
+    return this.cdoRepository.saveCdoTaskList(cdoTaskList)
+  }
 }
 
 module.exports = { CdoService }

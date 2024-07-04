@@ -173,7 +173,7 @@ describe('cdo mappers', () => {
       expect(mappedRegistration.cdoExpiry).toEqual(new Date('2024-05-02'))
       expect(mappedRegistration.cdoIssued).toEqual(new Date('2024-05-03'))
       expect(mappedRegistration.applicationFeePaid).toEqual(new Date('2024-05-05'))
-      expect(mappedRegistration.formTwoSent).toEqual(new Date('2024-05-07'))
+      expect(mappedRegistration.form2Sent).toEqual(new Date('2024-05-07'))
       expect(mappedRegistration.microchipVerification).toEqual(new Date('2024-05-06'))
       expect(mappedRegistration.neuteringConfirmation).toEqual(new Date('2024-05-08'))
       expect(mappedRegistration.certificateIssued).toEqual(new Date('2024-05-04'))
