@@ -239,4 +239,61 @@ describe('CdoService', function () {
         }, devUser)
     })
   })
+
+  describe('sendForm2', () => {
+    test('should send Form 2', async () => {
+      getActivityByLabel.mockResolvedValue({ id: 10, label: 'Form 2' })
+      const sentDate = new Date()
+      const cdoIndexNumber = 'ED300097'
+      const cdoTaskList = new CdoTaskList(buildCdo({
+        exemption: buildExemption({ applicationPackSent: new Date() })
+      }))
+      mockCdoRepository.getCdoTaskList.mockResolvedValue(cdoTaskList)
+
+      await cdoService.sendForm2(cdoIndexNumber, sentDate, devUser)
+      expect(mockCdoRepository.getCdoTaskList).toHaveBeenCalledWith(cdoIndexNumber)
+      expect(mockCdoRepository.saveCdoTaskList).toHaveBeenCalledWith(cdoTaskList)
+      expect(cdoTaskList.getUpdates().exemption).toEqual([{
+        key: 'form2Sent',
+        value: sentDate,
+        callback: expect.any(Function)
+      }])
+      await cdoTaskList.getUpdates().exemption[0].callback()
+      expect(sendActivityToAudit).toHaveBeenCalledWith({
+        activity: 10,
+        activityType: 'sent',
+        pk: 'ED300097',
+        source: 'dog',
+        activityDate: sentDate,
+        targetPk: 'dog',
+        activityLabel: 'Form 2'
+      }, devUser)
+    })
+
+    test('should not send Form 2 a second time', async () => {
+      const cdoIndexNumber = 'ED300097'
+      const cdoTaskList = new CdoTaskList(buildCdo({
+        exemption: buildExemption({
+          applicationPackSent: new Date('2024-05-03'),
+          form2Sent: new Date()
+        })
+      }))
+      mockCdoRepository.getCdoTaskList.mockResolvedValue(cdoTaskList)
+
+      await expect(cdoService.sendForm2(cdoIndexNumber, new Date(), devUser)).rejects.toThrow(ActionAlreadyPerformedError)
+    })
+
+    test('should handle repo error', async () => {
+      const cdoIndexNumber = 'ED300097'
+      const cdoTaskList = new CdoTaskList(buildCdo({
+        exemption: buildExemption({
+          applicationPackSent: new Date()
+        })
+      }))
+      mockCdoRepository.getCdoTaskList.mockResolvedValue(cdoTaskList)
+      mockCdoRepository.saveCdoTaskList.mockRejectedValue(new Error('error whilst saving'))
+
+      await expect(cdoService.sendForm2(cdoIndexNumber, devUser)).rejects.toThrow(new Error('error whilst saving'))
+    })
+  })
 })
