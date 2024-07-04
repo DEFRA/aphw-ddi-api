@@ -172,6 +172,11 @@ class CdoTaskList {
     this._cdo.dog.setMicrochipNumber(microchipNumber1, duplicateMicrochipNumber, callback)
   }
 
+  recordApplicationFee (applicationFeePaid, callback) {
+    this._actionPackCompleteGuard()
+    this._cdo.exemption.setApplicationFee(applicationFeePaid, callback)
+  }
+
   getUpdates () {
     return {
       exemption: this._cdo.exemption.getChanges(),
