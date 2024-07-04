@@ -19,9 +19,19 @@ class CdoTaskList {
     return this.applicationPackSent.completed
   }
 
+  get _form2StageComplete () {
+    return this.form2Sent.completed
+  }
+
   _actionPackCompleteGuard () {
     if (!this._actionPackStageComplete) {
       throw new SequenceViolationError('Application pack must be sent before performing this action')
+    }
+  }
+
+  _form2CompleteGuard () {
+    if (!this._form2StageComplete) {
+      throw new SequenceViolationError('Form 2 must be sent before performing this action')
     }
   }
 
@@ -185,6 +195,13 @@ class CdoTaskList {
     }
 
     this._cdo.exemption.sendForm2(sentDate, callback)
+  }
+
+  verifyDates (microchipVerification, neuteringConfirmation, callback) {
+    this._actionPackCompleteGuard()
+    this._form2CompleteGuard()
+
+    this._cdo.exemption.verifyDates(microchipVerification, neuteringConfirmation, callback)
   }
 
   getUpdates () {
