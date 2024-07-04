@@ -8,10 +8,11 @@ const { mapCdoTaskListToDto } = require('../dto/cdoTaskList')
 const { ActionAlreadyPerformedError } = require('../errors/domain/actionAlreadyPerformed')
 const {
   recordInsuranceDetailsSchema, recordInsuranceDetailsResponseSchema, recordMicrochipNumberSchema,
-  recordMicrochipNumberResponseSchema
+  recordMicrochipNumberResponseSchema, recordApplicationFeeSchema
 } = require('../schema/cdo/manage')
 const { SequenceViolationError } = require('../errors/domain/sequenceViolation')
 const { InvalidDataError } = require('../errors/domain/invalidData')
+const { InvalidDateError } = require('../errors/domain/invalidDate')
 
 module.exports = [
   {
@@ -120,15 +121,14 @@ module.exports = [
       },
       handler: async (request, h) => {
         const indexNumber = request.params.indexNumber
-        const { insuranceCompany, insuranceRenewal } = request.payload
 
         try {
           const cdoService = ServiceProvider.getCdoService()
-          await cdoService.recordInsuranceDetails(indexNumber, { insuranceCompany, insuranceRenewal }, getCallingUser(request))
+          const cdoTaskList = await cdoService.recordInsuranceDetails(indexNumber, request.payload, getCallingUser(request))
 
           return h.response({
-            insuranceCompany,
-            insuranceRenewal
+            insuranceCompany: cdoTaskList.cdoSummary.insuranceCompany,
+            insuranceRenewal: cdoTaskList.cdoSummary.insuranceRenewal
           }).code(201)
         } catch (e) {
           if (e instanceof NotFoundError) {
@@ -161,11 +161,10 @@ module.exports = [
       },
       handler: async (request, h) => {
         const indexNumber = request.params.indexNumber
-        const { microchipNumber } = request.payload
 
         try {
           const cdoService = ServiceProvider.getCdoService()
-          const cdoTaskList = await cdoService.recordMicrochipNumber(indexNumber, { microchipNumber }, getCallingUser(request))
+          const cdoTaskList = await cdoService.recordMicrochipNumber(indexNumber, request.payload, getCallingUser(request))
 
           return h.response({
             microchipNumber: cdoTaskList.cdoSummary.microchipNumber
@@ -184,6 +183,50 @@ module.exports = [
             return h.response().code(400)
           }
           console.log('Error recording MicrochipNumber:', e)
+          throw e
+        }
+      }
+    }
+  },
+  {
+    method: 'POST',
+    path: '/cdo/{indexNumber}/manage:recordApplicationFee',
+    options: {
+      validate: {
+        payload: recordApplicationFeeSchema,
+        failAction: (request, h, err) => {
+          console.error(err)
+
+          return h.response({ errors: err.details.map(e => e.message) }).code(400).takeover()
+        }
+      },
+      response: {
+        schema: recordApplicationFeeSchema
+      },
+      handler: async (request, h) => {
+        const indexNumber = request.params.indexNumber
+
+        try {
+          const cdoService = ServiceProvider.getCdoService()
+          const cdoTaskList = await cdoService.recordApplicationFee(indexNumber, request.payload, getCallingUser(request))
+
+          return h.response({
+            applicationFeePaid: cdoTaskList.cdoSummary.applicationFeePaid
+          }).code(201)
+        } catch (e) {
+          if (e instanceof NotFoundError) {
+            console.error('CDO record not found:', e)
+            return h.response().code(404)
+          }
+          if (e instanceof SequenceViolationError) {
+            console.error('CDO action out of sequence:', e)
+            return h.response().code(409)
+          }
+          if (e instanceof InvalidDateError) {
+            console.error('Error recording Application Fee:', e)
+            return h.response().code(400)
+          }
+          console.log('Error recording Application Fee:', e)
           throw e
         }
       }
