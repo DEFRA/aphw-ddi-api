@@ -8,7 +8,7 @@ const { mapCdoTaskListToDto } = require('../dto/cdoTaskList')
 const { ActionAlreadyPerformedError } = require('../errors/domain/actionAlreadyPerformed')
 const {
   recordInsuranceDetailsSchema, recordInsuranceDetailsResponseSchema, recordMicrochipNumberSchema,
-  recordMicrochipNumberResponseSchema, recordApplicationFeeSchema
+  recordMicrochipNumberResponseSchema, recordApplicationFeeSchema, verifyDatesSchema
 } = require('../schema/cdo/manage')
 const { SequenceViolationError } = require('../errors/domain/sequenceViolation')
 const { InvalidDataError } = require('../errors/domain/invalidData')
@@ -261,5 +261,51 @@ module.exports = [
         throw e
       }
     }
+  },
+  {
+    method: 'POST',
+    path: '/cdo/{indexNumber}/manage:verifyDates',
+    options: {
+      validate: {
+        payload: verifyDatesSchema,
+        failAction: (request, h, err) => {
+          console.error(err)
+
+          return h.response({ errors: err.details.map(e => e.message) }).code(400).takeover()
+        }
+      },
+      response: {
+        schema: verifyDatesSchema
+      },
+      handler: async (request, h) => {
+        const indexNumber = request.params.indexNumber
+
+        try {
+          const cdoService = ServiceProvider.getCdoService()
+          const cdoTaskList = await cdoService.verifyDates(indexNumber, request.payload, getCallingUser(request))
+
+          return h.response({
+            microchipVerification: cdoTaskList.cdoSummary.microchipVerification,
+            neuteringConfirmation: cdoTaskList.cdoSummary.neuteringConfirmation
+          }).code(201)
+        } catch (e) {
+          if (e instanceof NotFoundError) {
+            console.error(`CDO record ${indexNumber} not found:`, e)
+            return h.response().code(404)
+          }
+          if (e instanceof SequenceViolationError) {
+            console.error(`CDO action on ${indexNumber} out of sequence:`, e)
+            return h.response().code(409)
+          }
+          if (e instanceof InvalidDateError) {
+            console.error(`Error recording Application Fee on ${indexNumber}:`, e)
+            return h.response().code(400)
+          }
+          console.error(`Error sending verifyDates on CDO ${indexNumber}:`, e)
+          throw e
+        }
+      }
+    }
+
   }
 ]

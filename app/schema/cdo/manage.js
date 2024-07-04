@@ -22,10 +22,16 @@ const recordApplicationFeeSchema = Joi.object({
   applicationFeePaid: Joi.date().required()
 }).required()
 
+const verifyDatesSchema = Joi.object({
+  microchipVerification: Joi.date().required(),
+  neuteringConfirmation: Joi.date().required()
+}).required()
+
 module.exports = {
   recordInsuranceDetailsSchema,
   recordInsuranceDetailsResponseSchema,
   recordMicrochipNumberSchema,
   recordMicrochipNumberResponseSchema,
-  recordApplicationFeeSchema
+  recordApplicationFeeSchema,
+  verifyDatesSchema
 }
