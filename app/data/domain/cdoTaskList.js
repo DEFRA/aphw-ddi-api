@@ -177,6 +177,16 @@ class CdoTaskList {
     this._cdo.exemption.setApplicationFee(applicationFeePaid, callback)
   }
 
+  sendForm2 (sentDate, callback) {
+    this._actionPackCompleteGuard()
+
+    if (this.form2Sent.completed) {
+      throw new ActionAlreadyPerformedError('Form Two can only be sent once')
+    }
+
+    this._cdo.exemption.sendForm2(sentDate, callback)
+  }
+
   getUpdates () {
     return {
       exemption: this._cdo.exemption.getChanges(),

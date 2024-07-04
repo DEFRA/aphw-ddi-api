@@ -566,6 +566,7 @@ describe('CdoTaskList', () => {
       expect(() => cdoTaskList.recordInsuranceDetails(dogsTrustCompany, inXDays(60), transactionCallback)).toThrow(new SequenceViolationError('Application pack must be sent before performing this action'))
       expect(() => cdoTaskList.recordMicrochipNumber('123456789012345', null, transactionCallback)).toThrow(new SequenceViolationError('Application pack must be sent before performing this action'))
       expect(() => cdoTaskList.recordApplicationFee(new Date('2024-07-04'), transactionCallback)).toThrow(new SequenceViolationError('Application pack must be sent before performing this action'))
+      expect(() => cdoTaskList.sendForm2(new Date('2024-07-04'), transactionCallback)).toThrow(new SequenceViolationError('Application pack must be sent before performing this action'))
 
       expect(cdoTaskList.insuranceDetailsRecorded.completed).toBe(false)
       expect(cdoTaskList.cdoSummary.insuranceCompany).toBeUndefined()
@@ -649,6 +650,29 @@ describe('CdoTaskList', () => {
         expect(cdoTaskList.cdoSummary.applicationFeePaid).toEqual(applicationFeePaid)
         cdoTaskList.getUpdates().exemption[0].callback()
         expect(transactionCallback).toHaveBeenCalledTimes(4)
+      })
+    })
+
+    describe('sendForm2', () => {
+      test('should send application pack given sendForm2 is not complete', () => {
+        const sentDate = new Date()
+        expect(cdoTaskList.form2Sent.completed).toBe(false)
+        expect(cdoTaskList.cdoSummary.form2Sent).not.toBeInstanceOf(Date)
+
+        cdoTaskList.sendForm2(sentDate, transactionCallback)
+        expect(cdoTaskList.form2Sent.completed).toBe(true)
+        expect(cdoTaskList.cdoSummary.form2Sent).toEqual(sentDate)
+        expect(cdoTaskList.getUpdates().exemption[3]).toEqual({
+          key: 'formTwoSent',
+          value: sentDate,
+          callback: transactionCallback
+        })
+        cdoTaskList.getUpdates().exemption[3].callback()
+        expect(transactionCallback).toHaveBeenCalledTimes(5)
+      })
+
+      test('should fail if sendForm2  has already been sent', () => {
+        expect(() => cdoTaskList.sendForm2(new Date(), transactionCallback)).toThrow(new ActionAlreadyPerformedError('Form Two can only be sent once'))
       })
     })
   })
