@@ -45,7 +45,7 @@ class CdoTaskList {
       insuranceRenewal: this._cdo.exemption.insurance[0]?.renewalDate ?? undefined,
       microchipNumber,
       applicationFeePaid: this._cdo.exemption.applicationFeePaid ?? undefined,
-      form2Sent: this._cdo.exemption.formTwoSent ?? undefined,
+      form2Sent: this._cdo.exemption.form2Sent ?? undefined,
       neuteringConfirmation: this._cdo.exemption.neuteringConfirmation ?? undefined,
       microchipVerification: this._cdo.exemption.microchipVerification ?? undefined,
       certificateIssued: this._cdo.exemption.certificateIssued ?? undefined

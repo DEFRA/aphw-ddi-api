@@ -75,7 +75,7 @@ const buildCdoInsurance = (insurancePartial = {}) => ({
  * @property {string} policeForce - Name of the police force.
  * @property {Date|null} applicationFeePaid - Status of application fee payment, currently null.
  * @property {Date|null} applicationPackSent - Date application pack was sent
- * @property {Date|null} formTwoSent - Date Form Two was sent
+ * @property {Date|null} form2Sent - Date Form Two was sent
  * @property {Date|null} applicationFeePaid - Status of application fee payment, currently null.
  */
 
@@ -98,7 +98,7 @@ const buildExemption = (exemptionPartial = {}) => ({
   joinedExemptionScheme: new Date('2023-12-10'),
   nonComplianceLetterSent: null,
   applicationPackSent: null,
-  formTwoSent: null,
+  form2Sent: null,
   ...exemptionPartial
 })
 

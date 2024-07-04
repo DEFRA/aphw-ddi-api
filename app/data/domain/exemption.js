@@ -20,7 +20,7 @@ const { Changeable } = require('./changeable')
  * @property {Date} joinedExemptionScheme
  * @property {Date|null} nonComplianceLetterSent
  * @property {Date|null} applicationPackSent
- * @property {Date|null} formTwoSent
+ * @property {Date|null} form2Sent
  */
 class Exemption extends Changeable {
   constructor (exemptionProperties) {
@@ -39,7 +39,7 @@ class Exemption extends Changeable {
     this.joinedExemptionScheme = exemptionProperties.joinedExemptionScheme
     this.nonComplianceLetterSent = exemptionProperties.nonComplianceLetterSent
     this.applicationPackSent = exemptionProperties.applicationPackSent
-    this._formTwoSent = exemptionProperties.formTwoSent
+    this._form2Sent = exemptionProperties.form2Sent
   }
 
   sendApplicationPack (auditDate, callback) {
@@ -55,8 +55,8 @@ class Exemption extends Changeable {
     return this._applicationFeePaid
   }
 
-  get formTwoSent () {
-    return this._formTwoSent
+  get form2Sent () {
+    return this._form2Sent
   }
 
   /**
@@ -101,8 +101,8 @@ class Exemption extends Changeable {
   }
 
   sendForm2 (auditDate, callback) {
-    this._formTwoSent = auditDate
-    this._updates.update('formTwoSent', auditDate, callback)
+    this._form2Sent = auditDate
+    this._updates.update('form2Sent', auditDate, callback)
   }
 }
 module.exports = Exemption

@@ -83,7 +83,7 @@ describe('mapCdoTaskListToDto', () => {
 
     const exemptionProperties = buildExemption({
       applicationPackSent: new Date('2024-06-25'),
-      formTwoSent: new Date('2024-05-24'),
+      form2Sent: new Date('2024-05-24'),
       applicationFeePaid: new Date('2024-06-24'),
       neuteringConfirmation: new Date('2024-02-10'),
       microchipVerification: new Date('2024-03-09'),

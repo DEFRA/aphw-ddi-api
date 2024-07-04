@@ -25,7 +25,7 @@ describe('Exemption', () => {
     joinedExemptionScheme: '2023-12-10',
     nonComplianceLetterSent: null,
     applicationPackSent: null,
-    formTwoSent: null
+    form2Sent: null
   }
 
   test('should create an exemption', () => {
@@ -51,7 +51,7 @@ describe('Exemption', () => {
       joinedExemptionScheme: '2023-12-10',
       nonComplianceLetterSent: null,
       applicationPackSent: null,
-      formTwoSent: null
+      form2Sent: null
     }))
     expect(exemption).toBeInstanceOf(Exemption)
   })
@@ -170,11 +170,11 @@ describe('Exemption', () => {
 
     test('should set form two as sent', () => {
       const callback = jest.fn()
-      const exemption = new Exemption({ ...exemptionProperties, formTwoSent: null })
+      const exemption = new Exemption({ ...exemptionProperties, form2Sent: null })
       exemption.sendForm2(auditDate, callback)
-      expect(exemption.formTwoSent).toEqual(auditDate)
+      expect(exemption.form2Sent).toEqual(auditDate)
       expect(exemption.getChanges()).toEqual([{
-        key: 'formTwoSent',
+        key: 'form2Sent',
         value: auditDate,
         callback
       }])
