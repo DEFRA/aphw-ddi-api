@@ -12,6 +12,7 @@ const { Op } = require('sequelize')
 const { mapCdoDaoToCdo } = require('./mappers/cdo')
 const { CdoTaskList } = require('../data/domain')
 const { createOrUpdateInsurance } = require('./insurance')
+const { updateMicrochip } = require('./microchip')
 
 /**
  * @typedef DogBreedDao
@@ -223,18 +224,20 @@ const createCdo = async (data, user, transaction) => {
 /**
  * @typedef GetCdo
  * @param indexNumber
+ * @param {*} [transaction]
  * @return {Promise<CdoDao>}
  */
 
 /**
  * @type {GetCdo}
  **/
-const getCdo = async (indexNumber) => {
+const getCdo = async (indexNumber, transaction) => {
   const cdo = await sequelize.models.dog.findAll({
     where: { index_number: indexNumber },
     order: [[sequelize.col('registered_person.person.addresses.address.id'), 'DESC'],
       [sequelize.col('dog_microchips.microchip.id'), 'ASC']],
-    include: cdoRelationship(sequelize)
+    include: cdoRelationship(sequelize),
+    transaction
   })
 
   return cdo?.length > 0 ? cdo[0] : null
@@ -406,13 +409,14 @@ const getSummaryCdos = async (filter, sort) => {
 /**
  * @typedef GetCdoModel
  * @param {string} indexNumber
+ * @param {*} [transaction]
  * @return {Promise<Cdo>}
  */
 /**
  * @type {GetCdoModel}
  */
-const getCdoModel = async (indexNumber) => {
-  const cdoDao = await getCdo(indexNumber)
+const getCdoModel = async (indexNumber, transaction) => {
+  const cdoDao = await getCdo(indexNumber, transaction)
 
   if (cdoDao === null) {
     throw new NotFoundError(`CDO does not exist with indexNumber: ${indexNumber}`)
@@ -424,14 +428,15 @@ const getCdoModel = async (indexNumber) => {
 /**
  * @typedef GetCdoTaskList
  * @param {string} indexNumber
+ * @param {*} [transaction]
  * @return {Promise<import('../data/domain/cdoTaskList').CdoTaskList>}
  */
 
 /**
  * @type {GetCdoTaskList}
  */
-const getCdoTaskList = async (indexNumber) => {
-  const cdo = await getCdoModel(indexNumber)
+const getCdoTaskList = async (indexNumber, transaction) => {
+  const cdo = await getCdoModel(indexNumber, transaction)
   return new CdoTaskList(cdo)
 }
 
@@ -443,7 +448,7 @@ const updateMappings = {
   microchipVerification: 'dog.registration.microchip_verification',
   certificateIssued: 'dog.registration.certificate_issued',
   insurance: 'dog.insurance',
-  microchipNumber: new Error('Not implemented')
+  microchip: 'dog.microchip'
 }
 /**
  * @typedef SaveCdoTaskList
@@ -458,27 +463,34 @@ const saveCdoTaskList = async (cdoTaskList, transaction) => {
   if (!transaction) {
     return await sequelize.transaction(async (t) => saveCdoTaskList(cdoTaskList, t))
   }
-  const updates = cdoTaskList.getUpdates()
+  const updates = Object.values(cdoTaskList.getUpdates()).flat()
   const cdoDao = await getCdo(cdoTaskList.cdoSummary.indexNumber)
 
-  for (const update of updates.exemption) {
-    const mappingArray = updateMappings[update.key].split('.')
+  for (const update of updates) {
+    switch (update.key) {
+      case 'microchip': {
+        await updateMicrochip(cdoDao, update.value, 1, transaction)
+        break
+      }
+      case 'insurance': {
+        await createOrUpdateInsurance({ insurance: update.value }, cdoDao, transaction)
+        break
+      }
+      default: {
+        const mappingArray = updateMappings[update.key].split('.')
+        const [, relationship, field] = mappingArray
+        const model = cdoDao[relationship ?? field]
+        model[field] = update.value
 
-    if (mappingArray[1] === 'registration') {
-      const [,, field] = mappingArray
-      const registration = cdoDao.registration
-      registration[field] = update.value
-
-      await registration.save({ transaction })
-    } else if (mappingArray[1] === 'insurance') {
-      await createOrUpdateInsurance({ insurance: update.value }, cdoDao, transaction)
+        await model.save({ transaction })
+      }
     }
 
     // this will publish the event
     await update.callback()
   }
 
-  return getCdoTaskList(cdoTaskList.cdoSummary.indexNumber)
+  return getCdoTaskList(cdoTaskList.cdoSummary.indexNumber, transaction)
 }
 /**
  * @typedef {{

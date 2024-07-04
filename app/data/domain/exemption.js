@@ -1,7 +1,7 @@
-const { ChangeManager } = require('./changeManager')
 const { dateTodayOrInFuture } = require('../../lib/date-helpers')
 const { InvalidDateError } = require('../../errors/domain/invalidDate')
 const { IncompleteDataError } = require('../../errors/domain/incompleteData')
+const { Changeable } = require('./changeable')
 
 /**
  * @param exemptionProperties
@@ -22,9 +22,9 @@ const { IncompleteDataError } = require('../../errors/domain/incompleteData')
  * @property {Date|null} applicationPackSent
  * @property {Date|null} formTwoSent
  */
-class Exemption {
+class Exemption extends Changeable {
   constructor (exemptionProperties) {
-    this._updates = new ChangeManager()
+    super()
     this.exemptionOrder = exemptionProperties.exemptionOrder
     this.cdoIssued = exemptionProperties.cdoIssued
     this.cdoExpiry = exemptionProperties.cdoExpiry
@@ -45,10 +45,6 @@ class Exemption {
   sendApplicationPack (auditDate, callback) {
     this.applicationPackSent = auditDate
     this._updates.update('applicationPackSent', auditDate, callback)
-  }
-
-  getChanges () {
-    return this._updates.changes
   }
 
   get insurance () {

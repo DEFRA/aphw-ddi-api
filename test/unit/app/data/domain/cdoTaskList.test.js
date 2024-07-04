@@ -78,6 +78,7 @@ describe('CdoTaskList', () => {
         timestamp: undefined
       }))
       expect(cdoTaskList.cdoSummary).toEqual({
+        id: 300097,
         indexNumber: 'ED300097',
         applicationPackSent: undefined,
         insuranceCompany: undefined,
@@ -128,6 +129,7 @@ describe('CdoTaskList', () => {
         key: 'certificateIssued'
       }))
       expect(cdoTaskList.cdoSummary).toEqual({
+        id: 300097,
         indexNumber: 'ED300097',
         applicationPackSent: new Date('2024-06-25'),
         insuranceCompany: undefined,
@@ -541,6 +543,7 @@ describe('CdoTaskList', () => {
       }))
 
       expect(cdoTaskList.cdoSummary).toEqual({
+        id: 300097,
         indexNumber: 'ED300097',
         applicationPackSent: new Date('2024-06-25'),
         insuranceCompany: 'Dogs R Us',
@@ -560,11 +563,13 @@ describe('CdoTaskList', () => {
     const cdoTaskList = buildDefaultTaskList()
 
     test('should not permit recording of Insurance Details before application pack is sent', () => {
-      expect(() => cdoTaskList.addInsuranceDetails(dogsTrustCompany, inXDays(60), transactionCallback)).toThrow(new SequenceViolationError('Application pack must be sent before performing this action'))
+      expect(() => cdoTaskList.recordInsuranceDetails(dogsTrustCompany, inXDays(60), transactionCallback)).toThrow(new SequenceViolationError('Application pack must be sent before performing this action'))
+      expect(() => cdoTaskList.recordMicrochipNumber('123456789012345', null, transactionCallback)).toThrow(new SequenceViolationError('Application pack must be sent before performing this action'))
 
       expect(cdoTaskList.insuranceDetailsRecorded.completed).toBe(false)
       expect(cdoTaskList.cdoSummary.insuranceCompany).toBeUndefined()
       expect(cdoTaskList.cdoSummary.insuranceRenewal).not.toBeInstanceOf(Date)
+      expect(cdoTaskList.cdoSummary.microchipNumber).toBeUndefined()
     })
 
     describe('sendApplicationPack', () => {
@@ -600,7 +605,7 @@ describe('CdoTaskList', () => {
       test('should record insurance details given date is in the future', async () => {
         const renewalDate = inXDays(1)
 
-        cdoTaskList.addInsuranceDetails(dogsTrustCompany, renewalDate, transactionCallback)
+        cdoTaskList.recordInsuranceDetails(dogsTrustCompany, renewalDate, transactionCallback)
         expect(cdoTaskList.insuranceDetailsRecorded.completed).toBe(true)
         expect(cdoTaskList.cdoSummary.insuranceCompany).toBe(dogsTrustCompany)
         expect(cdoTaskList.cdoSummary.insuranceRenewal).toBeInstanceOf(Date)
@@ -614,6 +619,20 @@ describe('CdoTaskList', () => {
         })
         cdoTaskList.getUpdates().exemption[1].callback()
         expect(transactionCallback).toHaveBeenCalledTimes(2)
+      })
+    })
+
+    describe('recordMicrochipNumber', () => {
+      test('should start with correct details', () => {
+        expect(cdoTaskList.microchipNumberRecorded.completed).toBe(false)
+        expect(cdoTaskList.cdoSummary.microchipNumber).toBeUndefined()
+      })
+
+      test('should record microchip number', () => {
+        cdoTaskList.recordMicrochipNumber('123456789012345', null, transactionCallback)
+        expect(cdoTaskList.cdoSummary.microchipNumber).toEqual('123456789012345')
+        cdoTaskList.getUpdates().dog[0].callback()
+        expect(transactionCallback).toHaveBeenCalledTimes(3)
       })
     })
   })
