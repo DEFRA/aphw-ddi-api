@@ -8,6 +8,7 @@ const { SequenceViolationError } = require('../../../../app/errors/domain/sequen
 const { DuplicateResourceError } = require('../../../../app/errors/duplicate-record')
 const { InvalidDataError } = require('../../../../app/errors/domain/invalidData')
 const { InvalidDateError } = require('../../../../app/errors/domain/invalidDate')
+const { getCdoService } = require('../../../../app/service/config')
 
 describe('CDO endpoint', () => {
   const createServer = require('../../../../app/server')
@@ -813,6 +814,85 @@ describe('CDO endpoint', () => {
         payload: {
           applicationFeePaid: '2024-07-02'
         }
+      }
+
+      const response = await server.inject(options)
+      expect(response.statusCode).toBe(500)
+    })
+  })
+
+  describe('POST /cdo/ED123/manage:sendForm2', () => {
+    test('should return 204', async () => {
+      const sendForm2Mock = jest.fn()
+      getCdoService.mockReturnValue({
+        sendForm2: sendForm2Mock
+      })
+      sendForm2Mock.mockResolvedValue(undefined)
+
+      const options = {
+        method: 'POST',
+        url: '/cdo/ED123/manage:sendForm2'
+      }
+      const response = await server.inject(options)
+      expect(response.statusCode).toBe(204)
+      expect(sendForm2Mock).toHaveBeenCalledWith('ED123', expect.any(Date), devUser)
+    })
+
+    test('should throw a 404 given index does not exist', async () => {
+      getCdoService.mockReturnValue({
+        sendForm2: async () => {
+          throw new NotFoundError('not found')
+        }
+      })
+      const options = {
+        method: 'POST',
+        url: '/cdo/ED123/manage:sendForm2'
+      }
+
+      const response = await server.inject(options)
+      expect(response.statusCode).toBe(404)
+    })
+
+    test('should throw a 409 given action already performed', async () => {
+      getCdoService.mockReturnValue({
+        sendForm2: async () => {
+          throw new ActionAlreadyPerformedError('action repeated')
+        }
+      })
+      const options = {
+        method: 'POST',
+        url: '/cdo/ED123/manage:sendForm2'
+      }
+
+      const response = await server.inject(options)
+      expect(response.statusCode).toBe(409)
+    })
+
+    test('should throw a 409 given action performed out of sequence', async () => {
+      getCdoService.mockReturnValue({
+        sendForm2: async () => {
+          throw new SequenceViolationError('Application pack must be sent before performing this action')
+        }
+      })
+      const options = {
+        method: 'POST',
+        url: '/cdo/ED123/manage:sendForm2'
+      }
+
+      const response = await server.inject(options)
+      expect(response.statusCode).toBe(409)
+    })
+
+    test('should returns 500 given server error thrown', async () => {
+      getCdoService.mockReturnValue({
+        sendForm2: async () => {
+          throw new Error('cdo error')
+        }
+      })
+
+      const options = {
+        method: 'POST',
+        url: '/cdo/ED123/manage:sendForm2'
       }
 
       const response = await server.inject(options)

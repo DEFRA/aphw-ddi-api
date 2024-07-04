@@ -132,10 +132,11 @@ module.exports = [
           }).code(201)
         } catch (e) {
           if (e instanceof NotFoundError) {
-            console.error('CDO record not found:', e)
+            console.error(`CDO record ${indexNumber} not found:`, e)
             return h.response().code(404)
           }
           if (e instanceof SequenceViolationError) {
+            console.error(`CDO action on ${indexNumber} out of sequence:`, e)
             return h.response().code(409)
           }
           console.log('Error retrieving cdo record:', e)
@@ -171,18 +172,18 @@ module.exports = [
           }).code(201)
         } catch (e) {
           if (e instanceof NotFoundError) {
-            console.error('CDO record not found:', e)
+            console.error(`CDO record ${indexNumber} not found:`, e)
             return h.response().code(404)
           }
           if (e instanceof SequenceViolationError) {
-            console.error('CDO action out of sequence:', e)
+            console.error(`CDO action on ${indexNumber} out of sequence:`, e)
             return h.response().code(409)
           }
           if (e instanceof InvalidDataError) {
-            console.error('Error recording MicrochipNumber:', e)
+            console.error(`Error recording MicrochipNumber on ${indexNumber}:`, e)
             return h.response().code(400)
           }
-          console.log('Error recording MicrochipNumber:', e)
+          console.log(`Error recording MicrochipNumber on ${indexNumber}:`, e)
           throw e
         }
       }
@@ -215,20 +216,49 @@ module.exports = [
           }).code(201)
         } catch (e) {
           if (e instanceof NotFoundError) {
-            console.error('CDO record not found:', e)
+            console.error(`CDO record ${indexNumber} not found:`, e)
             return h.response().code(404)
           }
           if (e instanceof SequenceViolationError) {
-            console.error('CDO action out of sequence:', e)
+            console.error(`CDO action on ${indexNumber} out of sequence:`, e)
             return h.response().code(409)
           }
           if (e instanceof InvalidDateError) {
-            console.error('Error recording Application Fee:', e)
+            console.error(`Error recording Application Fee on ${indexNumber}:`, e)
             return h.response().code(400)
           }
-          console.log('Error recording Application Fee:', e)
+          console.log(`Error recording Application Fee on ${indexNumber}:`, e)
           throw e
         }
+      }
+    }
+  },
+  {
+    method: 'POST',
+    path: '/cdo/{indexNumber}/manage:sendForm2',
+    handler: async (request, h) => {
+      const indexNumber = request.params.indexNumber
+
+      try {
+        const cdoService = ServiceProvider.getCdoService()
+        await cdoService.sendForm2(indexNumber, new Date(), getCallingUser(request))
+
+        return h.response().code(204)
+      } catch (e) {
+        if (e instanceof NotFoundError) {
+          console.error(`CDO record ${indexNumber} not found:`, e)
+          return h.response().code(404)
+        }
+        if (e instanceof SequenceViolationError) {
+          console.error(`CDO action on ${indexNumber} out of sequence:`, e)
+          return h.response().code(409)
+        }
+        if (e instanceof ActionAlreadyPerformedError) {
+          console.error(`Action sendForm2 already performed on ${indexNumber}:`, e)
+          return h.response().code(409)
+        }
+        console.error(`Error sending Form 2 on CDO ${indexNumber}:`, e)
+        throw e
       }
     }
   }
