@@ -565,6 +565,7 @@ describe('CdoTaskList', () => {
     test('should not permit recording of Insurance Details before application pack is sent', () => {
       expect(() => cdoTaskList.recordInsuranceDetails(dogsTrustCompany, inXDays(60), transactionCallback)).toThrow(new SequenceViolationError('Application pack must be sent before performing this action'))
       expect(() => cdoTaskList.recordMicrochipNumber('123456789012345', null, transactionCallback)).toThrow(new SequenceViolationError('Application pack must be sent before performing this action'))
+      expect(() => cdoTaskList.recordApplicationFee(new Date('2024-07-04'), transactionCallback)).toThrow(new SequenceViolationError('Application pack must be sent before performing this action'))
 
       expect(cdoTaskList.insuranceDetailsRecorded.completed).toBe(false)
       expect(cdoTaskList.cdoSummary.insuranceCompany).toBeUndefined()
@@ -633,6 +634,21 @@ describe('CdoTaskList', () => {
         expect(cdoTaskList.cdoSummary.microchipNumber).toEqual('123456789012345')
         cdoTaskList.getUpdates().dog[0].callback()
         expect(transactionCallback).toHaveBeenCalledTimes(3)
+      })
+    })
+
+    describe('recordApplicationFee', () => {
+      test('should start with correct details', () => {
+        expect(cdoTaskList.applicationFeePaid.completed).toBe(false)
+        expect(cdoTaskList.cdoSummary.applicationFeePaid).toBeUndefined()
+      })
+
+      test('should record Application Fee', () => {
+        const applicationFeePaid = new Date('2024-07-03')
+        cdoTaskList.recordApplicationFee(applicationFeePaid, transactionCallback)
+        expect(cdoTaskList.cdoSummary.applicationFeePaid).toEqual(applicationFeePaid)
+        cdoTaskList.getUpdates().exemption[0].callback()
+        expect(transactionCallback).toHaveBeenCalledTimes(4)
       })
     })
   })

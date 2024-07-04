@@ -2,6 +2,7 @@ const Exemption = require('../../../../../app/data/domain/exemption')
 const { inXDays } = require('../../../../time-helper')
 const { InvalidDateError } = require('../../../../../app/errors/domain/invalidDate')
 const { IncompleteDataError } = require('../../../../../app/errors/domain/incompleteData')
+const { buildExemption } = require('../../../../mocks/cdo/domain')
 
 describe('Exemption', () => {
   const exemptionProperties = {
@@ -131,6 +132,36 @@ describe('Exemption', () => {
       exemption.setInsuranceDetails('', undefined, callback())
 
       expect(exemption.insurance).toEqual([])
+    })
+  })
+
+  describe('setApplicationFee', () => {
+    const applicationFeeExemptionProperties = buildExemption({
+      applicationFeePaid: null
+    })
+    const exemption = new Exemption(applicationFeeExemptionProperties)
+    const callback = jest.fn()
+
+    test('should start with correct details', () => {
+      expect(exemption.applicationFeePaid).toBeNull()
+    })
+
+    test('should not allow a date in the future', () => {
+      expect(() => exemption.setApplicationFee(new Date('9999-01-01'), callback)).toThrow(new InvalidDateError('Date must be today or in the past'))
+      expect(exemption.applicationFeePaid).toBeNull()
+    })
+
+    test('should set application fee', () => {
+      const validApplicationFeePaid = new Date('2024-07-04')
+      exemption.setApplicationFee(validApplicationFeePaid, callback)
+      expect(exemption.applicationFeePaid).toEqual(validApplicationFeePaid)
+      expect(exemption.getChanges()).toEqual([
+        {
+          key: 'applicationFeePaid',
+          value: validApplicationFeePaid,
+          callback
+        }
+      ])
     })
   })
 })

@@ -32,7 +32,7 @@ class Exemption extends Changeable {
     this.policeForce = exemptionProperties.policeForce
     this.legislationOfficer = exemptionProperties.legislationOfficer
     this.certificateIssued = exemptionProperties.certificateIssued
-    this.applicationFeePaid = exemptionProperties.applicationFeePaid
+    this._applicationFeePaid = exemptionProperties.applicationFeePaid
     this._insurance = exemptionProperties.insurance
     this.neuteringConfirmation = exemptionProperties.neuteringConfirmation
     this.microchipVerification = exemptionProperties.microchipVerification
@@ -49,6 +49,10 @@ class Exemption extends Changeable {
 
   get insurance () {
     return this._insurance
+  }
+
+  get applicationFeePaid () {
+    return this._applicationFeePaid
   }
 
   /**
@@ -79,6 +83,17 @@ class Exemption extends Changeable {
     }
 
     this._updates.update('insurance', insurance, callback)
+  }
+
+  setApplicationFee (applicationFeePaid, callback) {
+    const applicationFeePaidDate = new Date(applicationFeePaid)
+    applicationFeePaidDate.setUTCHours(0, 0, 0, 0)
+
+    if (applicationFeePaid.getTime() > Date.now()) {
+      throw new InvalidDateError('Date must be today or in the past')
+    }
+    this._applicationFeePaid = applicationFeePaidDate
+    this._updates.update('applicationFeePaid', applicationFeePaid, callback)
   }
 }
 module.exports = Exemption

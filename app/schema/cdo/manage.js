@@ -18,9 +18,14 @@ const recordMicrochipNumberResponseSchema = Joi.object({
   microchipNumber: Joi.string().required()
 }).required()
 
+const recordApplicationFeeSchema = Joi.object({
+  applicationFeePaid: Joi.date().required()
+}).required()
+
 module.exports = {
   recordInsuranceDetailsSchema,
   recordInsuranceDetailsResponseSchema,
   recordMicrochipNumberSchema,
-  recordMicrochipNumberResponseSchema
+  recordMicrochipNumberResponseSchema,
+  recordApplicationFeeSchema
 }

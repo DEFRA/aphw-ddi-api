@@ -71,7 +71,7 @@ class CdoService {
    * @param {string} cdoIndexNumber
    * @param {InsuranceDetails} insuranceDetails
    * @param user
-   * @return {Promise<InsuranceDetails>}
+   * @return {Promise<import('../data/domain').CdoTaskList>}
    */
   async recordInsuranceDetails (cdoIndexNumber, insuranceDetails, user) {
     const cdoTaskList = await this.cdoRepository.getCdoTaskList(cdoIndexNumber)
@@ -94,15 +94,10 @@ class CdoService {
 
     cdoTaskList.recordInsuranceDetails(insuranceDetails.insuranceCompany, insuranceDetails.insuranceRenewal, sendEvent)
 
-    const returnedCdoTaskList = await this.cdoRepository.saveCdoTaskList(cdoTaskList)
-
-    const { insuranceCompany, insuranceRenewal } = returnedCdoTaskList.cdoSummary
-
-    return { insuranceCompany, insuranceRenewal }
+    return this.cdoRepository.saveCdoTaskList(cdoTaskList)
   }
 
   /**
-   *
    * @param {string} cdoIndexNumber
    * @param {{microchipNumber: string}} microchip
    * @param user
@@ -129,6 +124,34 @@ class CdoService {
     const duplicateMicrochip = await microchipExists(cdoTaskList.cdoSummary.id, microchipNumber)
 
     cdoTaskList.recordMicrochipNumber(microchipNumber, duplicateMicrochip, callback)
+
+    return this.cdoRepository.saveCdoTaskList(cdoTaskList)
+  }
+
+  /**
+   * @param {string} cdoIndexNumber
+   * @param {{ applicationFeePaid: Date }} applicationFeeObject
+   * @param user
+   * @return {Promise<import('../data/domain/cdoTaskList').CdoTaskList>}
+   */
+  async recordApplicationFee (cdoIndexNumber, applicationFeeObject, user) {
+    const applicationFeePaid = applicationFeeObject.applicationFeePaid
+    const cdoTaskList = await this.cdoRepository.getCdoTaskList(cdoIndexNumber)
+    const preApplicationFeePaid = cdoTaskList.cdoSummary.applicationFeePaid
+
+    const callback = async () => {
+      const preAudit = {
+        index_number: cdoIndexNumber,
+        application_fee_paid: preApplicationFeePaid ?? null
+      }
+      const postAudit = {
+        index_number: cdoIndexNumber,
+        application_fee_paid: applicationFeePaid
+      }
+      await sendUpdateToAudit(EXEMPTION, preAudit, postAudit, user)
+    }
+
+    cdoTaskList.recordApplicationFee(applicationFeePaid, callback)
 
     return this.cdoRepository.saveCdoTaskList(cdoTaskList)
   }
