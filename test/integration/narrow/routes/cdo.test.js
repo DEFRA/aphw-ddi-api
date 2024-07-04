@@ -1,10 +1,13 @@
 const { payload: mockCreatePayload, payloadWithPersonReference: mockCreateWithRefPayload } = require('../../../mocks/cdo/create')
 const { NotFoundError } = require('../../../../app/errors/not-found')
 const { CdoTaskList } = require('../../../../app/data/domain')
-const { buildCdo } = require('../../../mocks/cdo/domain')
+const { buildCdo, buildCdoDog, buildExemption, buildCdoInsurance } = require('../../../mocks/cdo/domain')
 const { ActionAlreadyPerformedError } = require('../../../../app/errors/domain/actionAlreadyPerformed')
 const { devUser } = require('../../../mocks/auth')
 const { SequenceViolationError } = require('../../../../app/errors/domain/sequenceViolation')
+const { DuplicateResourceError } = require('../../../../app/errors/duplicate-record')
+const { InvalidDataError } = require('../../../../app/errors/domain/invalidData')
+const { InvalidDateError } = require('../../../../app/errors/domain/invalidDate')
 
 describe('CDO endpoint', () => {
   const createServer = require('../../../../app/server')
@@ -461,10 +464,14 @@ describe('CDO endpoint', () => {
       getCdoService.mockReturnValue({
         recordInsuranceDetails: recordInsuranceDetailsMock
       })
-      recordInsuranceDetailsMock.mockResolvedValue({
-        insuranceCompany: 'Dog\'s Trust',
-        insuranceRenewal
-      })
+      recordInsuranceDetailsMock.mockResolvedValue(new CdoTaskList(buildCdo({
+        exemption: buildExemption({
+          insurance: [buildCdoInsurance({
+            renewalDate: insuranceRenewal,
+            company: 'Dog\'s Trust'
+          })]
+        })
+      })))
 
       const options = {
         method: 'POST',
@@ -552,6 +559,259 @@ describe('CDO endpoint', () => {
         payload: {
           insuranceCompany: 'Dog\'s Trust',
           insuranceRenewal: '2024-01-01'
+        }
+      }
+
+      const response = await server.inject(options)
+      expect(response.statusCode).toBe(500)
+    })
+  })
+
+  describe('POST /cdo/ED123/manage:recordMicrochipNumber', () => {
+    test('should return 201', async () => {
+      const recordMicrochipNumberMock = jest.fn()
+      getCdoService.mockReturnValue({
+        recordMicrochipNumber: recordMicrochipNumberMock
+      })
+      recordMicrochipNumberMock.mockResolvedValue(new CdoTaskList(buildCdo({
+        dog: buildCdoDog({
+          microchipNumber: '123456789012345'
+        })
+      })))
+
+      const options = {
+        method: 'POST',
+        url: '/cdo/ED123/manage:recordMicrochipNumber',
+        payload: {
+          microchipNumber: '123456789012345'
+        }
+      }
+      const response = await server.inject(options)
+      const payload = JSON.parse(response.payload)
+      expect(response.statusCode).toBe(201)
+      expect(payload).toEqual({
+        microchipNumber: '123456789012345'
+      })
+      expect(recordMicrochipNumberMock).toHaveBeenCalledWith(
+        'ED123',
+        {
+          microchipNumber: '123456789012345'
+        },
+        devUser)
+    })
+
+    test('should returns 400 with invalid payload', async () => {
+      const options = {
+        method: 'POST',
+        url: '/cdo/ED123/manage:recordMicrochipNumber',
+        payload: {}
+      }
+
+      const response = await server.inject(options)
+      expect(response.statusCode).toBe(400)
+    })
+    test('should returns 400 with invalid microchip', async () => {
+      getCdoService.mockReturnValue({
+        recordMicrochipNumber: async () => {
+          throw new InvalidDataError('microchip invalid')
+        }
+      })
+      const options = {
+        method: 'POST',
+        url: '/cdo/ED123/manage:recordMicrochipNumber',
+        payload: {
+          microchipNumber: '1234567890123a5'
+        }
+      }
+
+      const response = await server.inject(options)
+      expect(response.statusCode).toBe(400)
+    })
+
+    test('should throw a 404 given index does not exist', async () => {
+      getCdoService.mockReturnValue({
+        recordMicrochipNumber: async () => {
+          throw new NotFoundError('not found')
+        }
+      })
+      const options = {
+        method: 'POST',
+        url: '/cdo/ED123/manage:recordMicrochipNumber',
+        payload: {
+          microchipNumber: '123456789012345'
+        }
+      }
+
+      const response = await server.inject(options)
+      expect(response.statusCode).toBe(404)
+    })
+
+    test('should throw a 409 given action performed out of sequence', async () => {
+      getCdoService.mockReturnValue({
+        recordMicrochipNumber: async () => {
+          throw new SequenceViolationError('Application pack must be sent before performing this action')
+        }
+      })
+      const options = {
+        method: 'POST',
+        url: '/cdo/ED123/manage:recordMicrochipNumber',
+        payload: {
+          microchipNumber: '123456789012345'
+        }
+      }
+
+      const response = await server.inject(options)
+      expect(response.statusCode).toBe(409)
+    })
+
+    test('should throw a 409 given duplicate microchip', async () => {
+      getCdoService.mockReturnValue({
+        recordMicrochipNumber: async () => {
+          throw new DuplicateResourceError('The microchip number already exists', { microchipNumbers: ['123456789012345'] })
+        }
+      })
+      const options = {
+        method: 'POST',
+        url: '/cdo/ED123/manage:recordMicrochipNumber',
+        payload: {
+          microchipNumber: '123456789012345'
+        }
+      }
+
+      const response = await server.inject(options)
+      expect(response.statusCode).toBe(409)
+    })
+
+    test('should returns 500 given server error thrown', async () => {
+      getCdoService.mockReturnValue({
+        recordMicrochipNumber: async () => {
+          throw new Error('cdo error')
+        }
+      })
+
+      const options = {
+        method: 'POST',
+        url: '/cdo/ED123/manage:recordMicrochipNumber',
+        payload: {
+          microchipNumber: '123456789012345'
+        }
+      }
+
+      const response = await server.inject(options)
+      expect(response.statusCode).toBe(500)
+    })
+  })
+
+  describe('POST /cdo/ED123/manage:recordApplicationFee', () => {
+    test('should return 201', async () => {
+      const recordApplicationFeeMock = jest.fn()
+      const applicationFeePaidDate = new Date('2024-07-02T00:00:00.000Z')
+      getCdoService.mockReturnValue({
+        recordApplicationFee: recordApplicationFeeMock
+      })
+      recordApplicationFeeMock.mockResolvedValue(new CdoTaskList(buildCdo({
+        exemption: buildExemption({
+          applicationFeePaid: applicationFeePaidDate
+        })
+      })))
+
+      const options = {
+        method: 'POST',
+        url: '/cdo/ED123/manage:recordApplicationFee',
+        payload: {
+          applicationFeePaid: '2024-07-02'
+        }
+      }
+      const response = await server.inject(options)
+      const payload = JSON.parse(response.payload)
+      expect(response.statusCode).toBe(201)
+      expect(payload).toEqual({
+        applicationFeePaid: '2024-07-02T00:00:00.000Z'
+      })
+      expect(recordApplicationFeeMock).toHaveBeenCalledWith(
+        'ED123',
+        {
+          applicationFeePaid: applicationFeePaidDate
+        },
+        devUser)
+    })
+
+    test('should return 400 given invalid payload', async () => {
+      const options = {
+        method: 'POST',
+        url: '/cdo/ED123/manage:recordApplicationFee',
+        payload: {}
+      }
+
+      const response = await server.inject(options)
+      expect(response.statusCode).toBe(400)
+    })
+    test('should return 400 given invalid date', async () => {
+      getCdoService.mockReturnValue({
+        recordApplicationFee: async () => {
+          throw new InvalidDateError('Date must be today or in the past')
+        }
+      })
+      const options = {
+        method: 'POST',
+        url: '/cdo/ED123/manage:recordApplicationFee',
+        payload: {
+          applicationFeePaid: '9999-07-02'
+        }
+      }
+
+      const response = await server.inject(options)
+      expect(response.statusCode).toBe(400)
+    })
+
+    test('should throw a 404 given index does not exist', async () => {
+      getCdoService.mockReturnValue({
+        recordApplicationFee: async () => {
+          throw new NotFoundError('not found')
+        }
+      })
+      const options = {
+        method: 'POST',
+        url: '/cdo/ED123/manage:recordApplicationFee',
+        payload: {
+          applicationFeePaid: '2024-07-02'
+        }
+      }
+
+      const response = await server.inject(options)
+      expect(response.statusCode).toBe(404)
+    })
+
+    test('should throw a 409 given action performed out of sequence', async () => {
+      getCdoService.mockReturnValue({
+        recordApplicationFee: async () => {
+          throw new SequenceViolationError('Application pack must be sent before performing this action')
+        }
+      })
+      const options = {
+        method: 'POST',
+        url: '/cdo/ED123/manage:recordApplicationFee',
+        payload: {
+          applicationFeePaid: '2024-07-02'
+        }
+      }
+
+      const response = await server.inject(options)
+      expect(response.statusCode).toBe(409)
+    })
+
+    test('should returns 500 given server error thrown', async () => {
+      getCdoService.mockReturnValue({
+        recordApplicationFee: async () => {
+          throw new Error('cdo error')
+        }
+      })
+
+      const options = {
+        method: 'POST',
+        url: '/cdo/ED123/manage:recordApplicationFee',
+        payload: {
+          applicationFeePaid: '2024-07-02'
         }
       }
 

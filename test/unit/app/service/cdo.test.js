@@ -18,6 +18,9 @@ describe('CdoService', function () {
   jest.mock('../../../../app/repos/activity')
   const { getActivityByLabel } = require('../../../../app/repos/activity')
 
+  jest.mock('../../../../app/repos/microchip')
+  const { microchipExists } = require('../../../../app/repos/microchip')
+
   beforeEach(function () {
     // Create a mock CdoRepository
     /**
@@ -120,10 +123,7 @@ describe('CdoService', function () {
       }, devUser)
       expect(mockCdoRepository.getCdoTaskList).toHaveBeenCalledWith(cdoIndexNumber)
       expect(mockCdoRepository.saveCdoTaskList).toHaveBeenCalledWith(cdoTaskList)
-      expect(result).toEqual({
-        insuranceCompany: 'Dog\'s Trust',
-        insuranceRenewal: inTheFuture
-      })
+      expect(result).toEqual(cdoTaskList)
       expect(cdoTaskList.getUpdates().exemption).toEqual([{
         key: 'insurance',
         value: {
@@ -144,6 +144,98 @@ describe('CdoService', function () {
           index_number: 'ED300097',
           insurance_company: "Dog's Trust",
           insurance_renewal_date: '9999-01-01'
+        }, devUser)
+    })
+  })
+
+  describe('recordMicrochipNumber', () => {
+    test('should record microchip number', async () => {
+      microchipExists.mockResolvedValue(null)
+
+      const cdoIndexNumber = 'ED300097'
+      const cdoTaskList = new CdoTaskList(buildCdo({
+        exemption: buildExemption({
+          applicationPackSent: new Date()
+        })
+      }))
+      mockCdoRepository.getCdoTaskList.mockResolvedValue(cdoTaskList)
+      mockCdoRepository.saveCdoTaskList.mockResolvedValue(cdoTaskList)
+
+      const microchipNumber = '123456789012345'
+
+      expect(cdoTaskList.microchipNumberRecorded.completed).toBe(false)
+
+      const result = await cdoService.recordMicrochipNumber(cdoIndexNumber, {
+        microchipNumber
+      }, devUser)
+
+      expect(mockCdoRepository.getCdoTaskList).toHaveBeenCalledWith(cdoIndexNumber)
+      expect(microchipExists).toHaveBeenCalledWith(300097, '123456789012345')
+      expect(cdoTaskList.microchipNumberRecorded.completed).toBe(true)
+      expect(cdoTaskList.getUpdates().dog).toEqual([{
+        key: 'microchip',
+        value: microchipNumber,
+        callback: expect.any(Function)
+      }])
+
+      expect(mockCdoRepository.saveCdoTaskList).toHaveBeenCalledWith(cdoTaskList)
+      expect(result).toEqual(cdoTaskList)
+      await cdoTaskList.getUpdates().dog[0].callback()
+      expect(sendUpdateToAudit).toHaveBeenCalledWith(
+        'dog',
+        {
+          index_number: 'ED300097',
+          microchip1: null
+        },
+        {
+          index_number: 'ED300097',
+          microchip1: '123456789012345'
+        }, devUser)
+    })
+  })
+
+  describe('recordApplicationFee', () => {
+    test('should record application fee', async () => {
+      const cdoIndexNumber = 'ED300097'
+      const cdoTaskList = new CdoTaskList(buildCdo({
+        exemption: buildExemption({
+          applicationPackSent: new Date()
+        })
+      }))
+      mockCdoRepository.getCdoTaskList.mockResolvedValue(cdoTaskList)
+      mockCdoRepository.saveCdoTaskList.mockResolvedValue(cdoTaskList)
+
+      const applicationFeePaid = new Date('2024-07-03')
+
+      expect(cdoTaskList.applicationFeePaid.completed).toBe(false)
+
+      const result = await cdoService.recordApplicationFee(
+        cdoIndexNumber,
+        {
+          applicationFeePaid
+        },
+        devUser)
+
+      expect(mockCdoRepository.getCdoTaskList).toHaveBeenCalledWith(cdoIndexNumber)
+      expect(cdoTaskList.applicationFeePaid.completed).toBe(true)
+      expect(cdoTaskList.getUpdates().exemption).toEqual([{
+        key: 'applicationFeePaid',
+        value: applicationFeePaid,
+        callback: expect.any(Function)
+      }])
+
+      expect(mockCdoRepository.saveCdoTaskList).toHaveBeenCalledWith(cdoTaskList)
+      expect(result).toEqual(cdoTaskList)
+      await cdoTaskList.getUpdates().exemption[0].callback()
+      expect(sendUpdateToAudit).toHaveBeenCalledWith(
+        'exemption',
+        {
+          index_number: 'ED300097',
+          application_fee_paid: null
+        },
+        {
+          index_number: 'ED300097',
+          application_fee_paid: applicationFeePaid
         }, devUser)
     })
   })

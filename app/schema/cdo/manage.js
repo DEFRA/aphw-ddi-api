@@ -10,4 +10,22 @@ const recordInsuranceDetailsResponseSchema = Joi.object({
   insuranceRenewal: Joi.date().allow(null).required()
 }).required()
 
-module.exports = { recordInsuranceDetailsSchema, recordInsuranceDetailsResponseSchema }
+const recordMicrochipNumberSchema = Joi.object({
+  microchipNumber: Joi.string().min(15).required()
+}).required()
+
+const recordMicrochipNumberResponseSchema = Joi.object({
+  microchipNumber: Joi.string().required()
+}).required()
+
+const recordApplicationFeeSchema = Joi.object({
+  applicationFeePaid: Joi.date().required()
+}).required()
+
+module.exports = {
+  recordInsuranceDetailsSchema,
+  recordInsuranceDetailsResponseSchema,
+  recordMicrochipNumberSchema,
+  recordMicrochipNumberResponseSchema,
+  recordApplicationFeeSchema
+}

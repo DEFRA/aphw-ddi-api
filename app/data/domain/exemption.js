@@ -1,7 +1,7 @@
-const { ChangeManager } = require('./changeManager')
 const { dateTodayOrInFuture } = require('../../lib/date-helpers')
 const { InvalidDateError } = require('../../errors/domain/invalidDate')
 const { IncompleteDataError } = require('../../errors/domain/incompleteData')
+const { Changeable } = require('./changeable')
 
 /**
  * @param exemptionProperties
@@ -22,9 +22,9 @@ const { IncompleteDataError } = require('../../errors/domain/incompleteData')
  * @property {Date|null} applicationPackSent
  * @property {Date|null} formTwoSent
  */
-class Exemption {
+class Exemption extends Changeable {
   constructor (exemptionProperties) {
-    this._updates = new ChangeManager()
+    super()
     this.exemptionOrder = exemptionProperties.exemptionOrder
     this.cdoIssued = exemptionProperties.cdoIssued
     this.cdoExpiry = exemptionProperties.cdoExpiry
@@ -32,7 +32,7 @@ class Exemption {
     this.policeForce = exemptionProperties.policeForce
     this.legislationOfficer = exemptionProperties.legislationOfficer
     this.certificateIssued = exemptionProperties.certificateIssued
-    this.applicationFeePaid = exemptionProperties.applicationFeePaid
+    this._applicationFeePaid = exemptionProperties.applicationFeePaid
     this._insurance = exemptionProperties.insurance
     this.neuteringConfirmation = exemptionProperties.neuteringConfirmation
     this.microchipVerification = exemptionProperties.microchipVerification
@@ -47,12 +47,12 @@ class Exemption {
     this._updates.update('applicationPackSent', auditDate, callback)
   }
 
-  getChanges () {
-    return this._updates.changes
-  }
-
   get insurance () {
     return this._insurance
+  }
+
+  get applicationFeePaid () {
+    return this._applicationFeePaid
   }
 
   /**
@@ -83,6 +83,17 @@ class Exemption {
     }
 
     this._updates.update('insurance', insurance, callback)
+  }
+
+  setApplicationFee (applicationFeePaid, callback) {
+    const applicationFeePaidDate = new Date(applicationFeePaid)
+    applicationFeePaidDate.setUTCHours(0, 0, 0, 0)
+
+    if (applicationFeePaid.getTime() > Date.now()) {
+      throw new InvalidDateError('Date must be today or in the past')
+    }
+    this._applicationFeePaid = applicationFeePaidDate
+    this._updates.update('applicationFeePaid', applicationFeePaid, callback)
   }
 }
 module.exports = Exemption

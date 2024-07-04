@@ -8,7 +8,8 @@ const { sendActivityToAudit, sendUpdateToAudit } = require('../messaging/send-au
 const { getActivityByLabel } = require('../repos/activity')
 const { activities } = require('../constants/event/events')
 const { stripTime } = require('../dto/dto-helper')
-const { EXEMPTION } = require('../constants/event/audit-event-object-types')
+const { EXEMPTION, DOG } = require('../constants/event/audit-event-object-types')
+const { microchipExists } = require('../repos/microchip')
 
 /**
  * @param {CdoRepository} cdoRepository
@@ -67,22 +68,22 @@ class CdoService {
    * @property {Date|null} insuranceRenewal
    */
   /**
-   * @param {string} cdoId
+   * @param {string} cdoIndexNumber
    * @param {InsuranceDetails} insuranceDetails
    * @param user
-   * @return {Promise<InsuranceDetails>}
+   * @return {Promise<import('../data/domain').CdoTaskList>}
    */
-  async recordInsuranceDetails (cdoId, insuranceDetails, user) {
-    const cdoTaskList = await this.cdoRepository.getCdoTaskList(cdoId)
+  async recordInsuranceDetails (cdoIndexNumber, insuranceDetails, user) {
+    const cdoTaskList = await this.cdoRepository.getCdoTaskList(cdoIndexNumber)
 
     const preChanged = {
-      index_number: cdoId,
+      index_number: cdoIndexNumber,
       insurance_company: cdoTaskList.cdoSummary.insuranceCompany ?? null,
       insurance_renewal_date: stripTime(cdoTaskList.cdoSummary.insuranceRenewal) ?? null
     }
 
     const postChanged = {
-      index_number: cdoId,
+      index_number: cdoIndexNumber,
       insurance_company: insuranceDetails.insuranceCompany ?? null,
       insurance_renewal_date: stripTime(insuranceDetails.insuranceRenewal) ?? null
     }
@@ -91,13 +92,68 @@ class CdoService {
       await sendUpdateToAudit(EXEMPTION, preChanged, postChanged, user)
     }
 
-    cdoTaskList.addInsuranceDetails(insuranceDetails.insuranceCompany, insuranceDetails.insuranceRenewal, sendEvent)
+    cdoTaskList.recordInsuranceDetails(insuranceDetails.insuranceCompany, insuranceDetails.insuranceRenewal, sendEvent)
 
-    const returnedCdoTaskList = await this.cdoRepository.saveCdoTaskList(cdoTaskList)
+    return this.cdoRepository.saveCdoTaskList(cdoTaskList)
+  }
 
-    const { insuranceCompany, insuranceRenewal } = returnedCdoTaskList.cdoSummary
+  /**
+   * @param {string} cdoIndexNumber
+   * @param {{microchipNumber: string}} microchip
+   * @param user
+   * @return {Promise<import('../data/domain').CdoTaskList>}
+   */
+  async recordMicrochipNumber (cdoIndexNumber, microchip, user) {
+    const microchipNumber = microchip.microchipNumber
 
-    return { insuranceCompany, insuranceRenewal }
+    const cdoTaskList = await this.cdoRepository.getCdoTaskList(cdoIndexNumber)
+    const preMicrochipNumber = cdoTaskList.cdoSummary.microchipNumber
+
+    const callback = async () => {
+      const preAudit = {
+        index_number: cdoIndexNumber,
+        microchip1: preMicrochipNumber ?? null
+      }
+      const postAudit = {
+        index_number: cdoIndexNumber,
+        microchip1: microchipNumber
+      }
+      await sendUpdateToAudit(DOG, preAudit, postAudit, user)
+    }
+
+    const duplicateMicrochip = await microchipExists(cdoTaskList.cdoSummary.id, microchipNumber)
+
+    cdoTaskList.recordMicrochipNumber(microchipNumber, duplicateMicrochip, callback)
+
+    return this.cdoRepository.saveCdoTaskList(cdoTaskList)
+  }
+
+  /**
+   * @param {string} cdoIndexNumber
+   * @param {{ applicationFeePaid: Date }} applicationFeeObject
+   * @param user
+   * @return {Promise<import('../data/domain/cdoTaskList').CdoTaskList>}
+   */
+  async recordApplicationFee (cdoIndexNumber, applicationFeeObject, user) {
+    const applicationFeePaid = applicationFeeObject.applicationFeePaid
+    const cdoTaskList = await this.cdoRepository.getCdoTaskList(cdoIndexNumber)
+    const preApplicationFeePaid = cdoTaskList.cdoSummary.applicationFeePaid
+
+    const callback = async () => {
+      const preAudit = {
+        index_number: cdoIndexNumber,
+        application_fee_paid: preApplicationFeePaid ?? null
+      }
+      const postAudit = {
+        index_number: cdoIndexNumber,
+        application_fee_paid: applicationFeePaid
+      }
+      await sendUpdateToAudit(EXEMPTION, preAudit, postAudit, user)
+    }
+
+    cdoTaskList.recordApplicationFee(applicationFeePaid, callback)
+
+    return this.cdoRepository.saveCdoTaskList(cdoTaskList)
   }
 }
 
