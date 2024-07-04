@@ -8,7 +8,6 @@ const { SequenceViolationError } = require('../../../../app/errors/domain/sequen
 const { DuplicateResourceError } = require('../../../../app/errors/duplicate-record')
 const { InvalidDataError } = require('../../../../app/errors/domain/invalidData')
 const { InvalidDateError } = require('../../../../app/errors/domain/invalidDate')
-const { getCdoService } = require('../../../../app/service/config')
 
 describe('CDO endpoint', () => {
   const createServer = require('../../../../app/server')
