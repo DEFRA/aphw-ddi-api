@@ -706,5 +706,67 @@ describe('CDO repo', () => {
 
       expect(callback).toHaveBeenCalled()
     })
+
+    test('should update verificationDateRecorded', async () => {
+      const neuteringConfirmation = new Date()
+      const microchipVerification = new Date()
+
+      const dog = buildCdoDao({
+        registration: buildRegistrationDao({
+          neutering_confirmation: undefined,
+          microchip_verification: undefined
+        })
+      })
+      dog.registration.save = jest.fn()
+      const editedDog = buildCdoDao({
+        registration: buildRegistrationDao({
+          neutering_confirmation: neuteringConfirmation,
+          microchip_verification: microchipVerification
+        })
+      })
+
+      sequelize.models.dog.findAll.mockResolvedValueOnce([dog])
+      sequelize.models.dog.findAll.mockResolvedValueOnce([editedDog])
+
+      const callback = jest.fn()
+
+      const cdoTaskList = new CdoTaskList(buildCdo({
+        exemption: buildExemption({
+          applicationPackSent: new Date(),
+          form2Sent: new Date()
+        })
+      }))
+      expect(cdoTaskList.verificationDateRecorded.completed).toBe(false)
+
+      cdoTaskList.verifyDates(microchipVerification, neuteringConfirmation, callback)
+
+      const taskList = await saveCdoTaskList(cdoTaskList, {})
+
+      expect(dog.registration.save).toHaveBeenCalled()
+      expect(dog.registration.microchip_verification).toEqual(microchipVerification)
+      expect(dog.registration.neutering_confirmation).toEqual(neuteringConfirmation)
+      expect(taskList.cdoSummary.microchipVerification).toEqual(microchipVerification)
+      expect(taskList.cdoSummary.neuteringConfirmation).toEqual(neuteringConfirmation)
+
+      expect(callback).toHaveBeenCalledTimes(1)
+    })
+
+    test('should handle missing model', async () => {
+      sequelize.models.dog.findAll.mockResolvedValueOnce([])
+
+      const callback = jest.fn()
+
+      const cdoTaskList = new CdoTaskList(buildCdo({
+        exemption: buildExemption({
+          applicationPackSent: new Date(),
+          form2Sent: new Date()
+        })
+      }))
+      expect(cdoTaskList.verificationDateRecorded.completed).toBe(false)
+
+      cdoTaskList.verifyDates(new Date(), new Date(), callback)
+
+      await expect(saveCdoTaskList(cdoTaskList, {})).rejects.toThrow()
+    })
   })
 })

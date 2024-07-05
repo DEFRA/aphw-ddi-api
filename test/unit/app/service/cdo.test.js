@@ -80,6 +80,7 @@ describe('CdoService', function () {
         targetPk: 'dog',
         activityLabel: 'Application pack'
       }, devUser)
+      sendActivityToAudit.mockClear()
     })
 
     test('should not send application pack a second time', async () => {
@@ -145,6 +146,7 @@ describe('CdoService', function () {
           insurance_company: "Dog's Trust",
           insurance_renewal_date: '9999-01-01'
         }, devUser)
+      sendUpdateToAudit.mockClear()
     })
   })
 
@@ -191,6 +193,7 @@ describe('CdoService', function () {
           index_number: 'ED300097',
           microchip1: '123456789012345'
         }, devUser)
+      sendUpdateToAudit.mockClear()
     })
   })
 
@@ -237,6 +240,7 @@ describe('CdoService', function () {
           index_number: 'ED300097',
           application_fee_paid: applicationFeePaid
         }, devUser)
+      sendUpdateToAudit.mockClear()
     })
   })
 
@@ -268,6 +272,7 @@ describe('CdoService', function () {
         targetPk: 'dog',
         activityLabel: 'Form 2'
       }, devUser)
+      sendActivityToAudit.mockClear()
     })
 
     test('should not send Form 2 a second time', async () => {
@@ -294,6 +299,64 @@ describe('CdoService', function () {
       mockCdoRepository.saveCdoTaskList.mockRejectedValue(new Error('error whilst saving'))
 
       await expect(cdoService.sendForm2(cdoIndexNumber, devUser)).rejects.toThrow(new Error('error whilst saving'))
+    })
+  })
+
+  describe('verifyDates', () => {
+    test('should verifyDates', async () => {
+      const microchipVerification = new Date('2024-07-03')
+      const neuteringConfirmation = new Date('2024-07-03')
+
+      const cdoIndexNumber = 'ED300097'
+      const cdoTaskList = new CdoTaskList(buildCdo({
+        exemption: buildExemption({ applicationPackSent: new Date(), form2Sent: new Date() })
+      }))
+      mockCdoRepository.getCdoTaskList.mockResolvedValue(cdoTaskList)
+
+      await cdoService.verifyDates(cdoIndexNumber, {
+        microchipVerification,
+        neuteringConfirmation
+      }, devUser)
+      expect(mockCdoRepository.getCdoTaskList).toHaveBeenCalledWith(cdoIndexNumber)
+      expect(mockCdoRepository.saveCdoTaskList).toHaveBeenCalledWith(cdoTaskList)
+      expect(cdoTaskList.getUpdates().exemption).toEqual([{
+        key: 'verificationDateRecorded',
+        value: {
+          microchipVerification,
+          neuteringConfirmation
+        },
+        callback: expect.any(Function)
+      }])
+      await cdoTaskList.getUpdates().exemption[0].callback()
+      expect(sendUpdateToAudit).toHaveBeenCalledWith(
+        'exemption',
+        {
+          index_number: 'ED300097',
+          neutering_confirmation: null,
+          microchip_verification: null
+        },
+        {
+          index_number: 'ED300097',
+          neutering_confirmation: neuteringConfirmation,
+          microchip_verification: microchipVerification
+        }, devUser)
+    })
+
+    test('should handle repo error', async () => {
+      const cdoIndexNumber = 'ED300097'
+      const cdoTaskList = new CdoTaskList(buildCdo({
+        exemption: buildExemption({
+          applicationPackSent: new Date(),
+          form2Sent: new Date()
+        })
+      }))
+      mockCdoRepository.getCdoTaskList.mockResolvedValue(cdoTaskList)
+      mockCdoRepository.saveCdoTaskList.mockRejectedValue(new Error('error whilst saving'))
+
+      await expect(cdoService.verifyDates(cdoIndexNumber, {
+        microchipVerification: new Date(),
+        neuteringConfirmation: new Date()
+      }, devUser)).rejects.toThrow(new Error('error whilst saving'))
     })
   })
 })
