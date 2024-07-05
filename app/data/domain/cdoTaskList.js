@@ -204,6 +204,13 @@ class CdoTaskList {
     this._cdo.exemption.verifyDates(microchipVerification, neuteringConfirmation, callback)
   }
 
+  issueCertificate (certificateIssued, callback) {
+    if (!this._preCertificateStepsComplete) {
+      throw new SequenceViolationError('CDO must be complete in order to issue certificate')
+    }
+    this._cdo.exemption.issueCertificate(certificateIssued, callback)
+  }
+
   getUpdates () {
     return {
       exemption: this._cdo.exemption.getChanges(),
