@@ -567,11 +567,14 @@ describe('CdoTaskList', () => {
       expect(() => cdoTaskList.recordMicrochipNumber('123456789012345', null, transactionCallback)).toThrow(new SequenceViolationError('Application pack must be sent before performing this action'))
       expect(() => cdoTaskList.recordApplicationFee(new Date('2024-07-04'), transactionCallback)).toThrow(new SequenceViolationError('Application pack must be sent before performing this action'))
       expect(() => cdoTaskList.sendForm2(new Date('2024-07-04'), transactionCallback)).toThrow(new SequenceViolationError('Application pack must be sent before performing this action'))
+      expect(() => cdoTaskList.verifyDates(new Date('2024-07-04'), new Date('2024-07-04'), transactionCallback)).toThrow(new SequenceViolationError('Application pack must be sent before performing this action'))
 
       expect(cdoTaskList.insuranceDetailsRecorded.completed).toBe(false)
       expect(cdoTaskList.cdoSummary.insuranceCompany).toBeUndefined()
       expect(cdoTaskList.cdoSummary.insuranceRenewal).not.toBeInstanceOf(Date)
       expect(cdoTaskList.cdoSummary.microchipNumber).toBeUndefined()
+      expect(cdoTaskList.cdoSummary.microchipVerification).toBeUndefined()
+      expect(cdoTaskList.cdoSummary.neuteringConfirmation).toBeUndefined()
     })
 
     describe('sendApplicationPack', () => {
@@ -588,6 +591,7 @@ describe('CdoTaskList', () => {
           value: sentDate,
           callback: expect.any(Function)
         }])
+
         cdoTaskList.getUpdates().exemption[0].callback()
         expect(transactionCallback).toHaveBeenCalledTimes(1)
       })
@@ -653,6 +657,9 @@ describe('CdoTaskList', () => {
       })
     })
 
+    test('should not permit verification of Dates before Form 2 is sent', () => {
+      expect(() => cdoTaskList.verifyDates(new Date('2024-07-04'), new Date('2024-07-04'), transactionCallback)).toThrow(new SequenceViolationError('Form 2 must be sent before performing this action'))
+    })
     describe('sendForm2', () => {
       test('should send application pack given sendForm2 is not complete', () => {
         const sentDate = new Date()
@@ -673,6 +680,24 @@ describe('CdoTaskList', () => {
 
       test('should fail if sendForm2  has already been sent', () => {
         expect(() => cdoTaskList.sendForm2(new Date(), transactionCallback)).toThrow(new ActionAlreadyPerformedError('Form Two can only be sent once'))
+      })
+    })
+
+    describe('verifyDates', () => {
+      test('should start with correct details', () => {
+        expect(cdoTaskList.verificationDateRecorded.completed).toBe(false)
+        expect(cdoTaskList.cdoSummary.microchipVerification).toBeUndefined()
+        expect(cdoTaskList.cdoSummary.neuteringConfirmation).toBeUndefined()
+      })
+
+      test('should record verification dates', () => {
+        const microchipVerification = new Date('2024-07-03')
+        const neuteringConfirmation = new Date('2024-07-03')
+        cdoTaskList.verifyDates(microchipVerification, neuteringConfirmation, transactionCallback)
+        expect(cdoTaskList.cdoSummary.microchipVerification).toEqual(microchipVerification)
+        expect(cdoTaskList.cdoSummary.neuteringConfirmation).toEqual(neuteringConfirmation)
+        cdoTaskList.getUpdates().exemption[0].callback()
+        expect(transactionCallback).toHaveBeenCalledTimes(6)
       })
     })
   })

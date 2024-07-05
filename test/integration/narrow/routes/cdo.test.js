@@ -898,4 +898,135 @@ describe('CDO endpoint', () => {
       expect(response.statusCode).toBe(500)
     })
   })
+
+  describe('POST /cdo/ED123/manage:verifyDates', () => {
+    test('should return 201', async () => {
+      const verifyDatesMock = jest.fn()
+      const microchipVerification = new Date('2024-07-03')
+      const neuteringConfirmation = new Date('2024-07-04')
+      getCdoService.mockReturnValue({
+        verifyDates: verifyDatesMock
+      })
+      verifyDatesMock.mockResolvedValue(new CdoTaskList(buildCdo({
+        exemption: buildExemption({
+          applicationFeePaid: new Date(),
+          microchipVerification,
+          neuteringConfirmation
+        })
+      })))
+
+      const options = {
+        method: 'POST',
+        url: '/cdo/ED123/manage:verifyDates',
+        payload: {
+          microchipVerification: '2024-07-03',
+          neuteringConfirmation: '2024-07-04'
+        }
+      }
+      const response = await server.inject(options)
+      const payload = JSON.parse(response.payload)
+      expect(response.statusCode).toBe(201)
+      expect(payload).toEqual({
+        microchipVerification: microchipVerification.toISOString(),
+        neuteringConfirmation: neuteringConfirmation.toISOString()
+      })
+      expect(verifyDatesMock).toHaveBeenCalledWith('ED123', {
+        microchipVerification,
+        neuteringConfirmation
+      }, devUser)
+    })
+
+    test('should throw a 404 given index does not exist', async () => {
+      getCdoService.mockReturnValue({
+        verifyDates: async () => {
+          throw new NotFoundError('not found')
+        }
+      })
+      const options = {
+        method: 'POST',
+        url: '/cdo/ED123/manage:verifyDates',
+        payload: {
+          microchipVerification: '2024-07-03',
+          neuteringConfirmation: '2024-07-03'
+        }
+      }
+
+      const response = await server.inject(options)
+      expect(response.statusCode).toBe(404)
+    })
+
+    test('should throw a 409 given action performed out of sequence', async () => {
+      getCdoService.mockReturnValue({
+        verifyDates: async () => {
+          throw new SequenceViolationError('Form 2 must be sent before performing this action')
+        }
+      })
+      const options = {
+        method: 'POST',
+        url: '/cdo/ED123/manage:verifyDates',
+        payload: {
+          microchipVerification: '2024-07-03',
+          neuteringConfirmation: '2024-07-03'
+        }
+      }
+
+      const response = await server.inject(options)
+      expect(response.statusCode).toBe(409)
+    })
+
+    test('should return 400 given invalid date', async () => {
+      getCdoService.mockReturnValue({
+        verifyDates: async () => {
+          throw new InvalidDateError('Date must be today or in the past')
+        }
+      })
+      const options = {
+        method: 'POST',
+        url: '/cdo/ED123/manage:verifyDates',
+        payload: {
+          microchipVerification: '2024-07-06',
+          neuteringConfirmation: '9999-07-02'
+        }
+      }
+
+      const response = await server.inject(options)
+      expect(response.statusCode).toBe(400)
+    })
+
+    test('should return 400 given empty payload', async () => {
+      getCdoService.mockReturnValue({
+        verifyDates: async () => {
+          throw new InvalidDateError('Date must be today or in the past')
+        }
+      })
+      const options = {
+        method: 'POST',
+        url: '/cdo/ED123/manage:verifyDates',
+        payload: {}
+      }
+
+      const response = await server.inject(options)
+      expect(response.statusCode).toBe(400)
+    })
+
+    test('should returns 500 given server error thrown', async () => {
+      getCdoService.mockReturnValue({
+        verifyDates: async () => {
+          throw new Error('cdo error')
+        }
+      })
+
+      const options = {
+        method: 'POST',
+        url: '/cdo/ED123/manage:verifyDates',
+        payload: {
+          microchipVerification: '2024-07-03',
+          neuteringConfirmation: '2024-07-03'
+        }
+      }
+
+      const response = await server.inject(options)
+      expect(response.statusCode).toBe(500)
+    })
+  })
 })

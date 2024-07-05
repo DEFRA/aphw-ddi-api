@@ -182,4 +182,43 @@ describe('Exemption', () => {
       expect(callback).toHaveBeenCalled()
     })
   })
+
+  describe('verifyDates', () => {
+    const microchipVerification = new Date('2024-07-03')
+    const neuteringConfirmation = new Date('2024-07-03')
+    const verifyDatesProperties = {
+      ...exemptionProperties,
+      microchipVerification: null,
+      neuteringConfirmation: null
+    }
+
+    const exemption = new Exemption(verifyDatesProperties)
+    const callback = jest.fn()
+
+    test('should start with correct details', () => {
+      expect(exemption.microchipVerification).toBeNull()
+      expect(exemption.neuteringConfirmation).toBeNull()
+    })
+
+    test('should verifyDates', () => {
+      exemption.verifyDates(microchipVerification, neuteringConfirmation, callback)
+      expect(exemption.microchipVerification).toEqual(microchipVerification)
+      expect(exemption.neuteringConfirmation).toEqual(neuteringConfirmation)
+      expect(exemption.getChanges()).toEqual([
+        {
+          key: 'verificationDateRecorded',
+          value: {
+            neuteringConfirmation,
+            microchipVerification
+          },
+          callback
+        }
+      ])
+    })
+
+    test('should throw if either date is in the future', () => {
+      expect(() => exemption.verifyDates(new Date('9999-01-01'), neuteringConfirmation, callback)).toThrow(new InvalidDateError('Date must be today or in the past'))
+      expect(() => exemption.verifyDates(microchipVerification, new Date('9999-01-01'), callback)).toThrow(new InvalidDateError('Date must be today or in the past'))
+    })
+  })
 })
