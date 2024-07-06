@@ -271,5 +271,26 @@ module.exports = [
       }
     }
 
+  },
+  {
+    method: 'POST',
+    path: '/cdo/{indexNumber}/manage:issueCertificate',
+    options: {
+      handler: async (request, h) => {
+        const indexNumber = request.params.indexNumber
+
+        try {
+          const cdoService = ServiceProvider.getCdoService()
+          const certificateId = await cdoService.issueCertificate(indexNumber, new Date(), getCallingUser(request))
+
+          return h.response({
+            certificateIssued: certificateId
+          }).code(201)
+        } catch (e) {
+          return handleErrors(e, 'issueCertificate', indexNumber, h)
+        }
+      }
+    }
+
   }
 ]
