@@ -1,4 +1,4 @@
-const { buildCdo, buildExemption } = require('../../../mocks/cdo/domain')
+const { buildCdo, buildExemption, buildCdoInsurance, buildCdoDog } = require('../../../mocks/cdo/domain')
 const { CdoTaskList } = require('../../../../app/data/domain')
 const { devUser } = require('../../../mocks/auth')
 const { ActionAlreadyPerformedError } = require('../../../../app/errors/domain/actionAlreadyPerformed')
@@ -20,6 +20,9 @@ describe('CdoService', function () {
 
   jest.mock('../../../../app/repos/microchip')
   const { microchipExists } = require('../../../../app/repos/microchip')
+
+  jest.mock('../../../../app/messaging/send-event')
+  const { sendDocumentMessage } = require('../../../../app/messaging/send-event')
 
   beforeEach(function () {
     // Create a mock CdoRepository
@@ -357,6 +360,45 @@ describe('CdoService', function () {
         microchipVerification: new Date(),
         neuteringConfirmation: new Date()
       }, devUser)).rejects.toThrow(new Error('error whilst saving'))
+    })
+  })
+
+  describe('issueCertificate', () => {
+    test('should issue certificate', async () => {
+      const sentDate = new Date()
+      const cdoIndexNumber = 'ED300097'
+      const cdoTaskList = new CdoTaskList(buildCdo({
+        exemption: buildExemption({
+          applicationPackSent: new Date(),
+          form2Sent: new Date(),
+          applicationFeePaid: new Date(),
+          neuteringConfirmation: new Date(),
+          microchipVerification: new Date(),
+          insurance: [buildCdoInsurance({
+            renewalDate: new Date('9999-01-01'),
+            company: 'Dogs Trust'
+          })]
+        }),
+        dog: buildCdoDog({
+          microchipNumber: '123456789012345'
+        })
+      }))
+
+      mockCdoRepository.getCdoTaskList.mockResolvedValue(cdoTaskList)
+      mockCdoRepository.saveCdoTaskList.mockResolvedValue(cdoTaskList)
+
+      await cdoService.issueCertificate(cdoIndexNumber, sentDate, devUser)
+
+      expect(mockCdoRepository.getCdoTaskList).toHaveBeenCalledWith(cdoIndexNumber)
+      expect(mockCdoRepository.saveCdoTaskList).toHaveBeenCalledWith(cdoTaskList)
+
+      expect(cdoTaskList.getUpdates().exemption).toEqual([{
+        key: 'certificateIssued',
+        value: sentDate,
+        callback: expect.any(Function)
+      }])
+      await cdoTaskList.getUpdates().exemption[0].callback()
+      expect(sendDocumentMessage).toHaveBeenCalledWith(expect.any(String), cdoTaskList, devUser)
     })
   })
 })

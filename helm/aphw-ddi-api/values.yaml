@@ -40,6 +40,7 @@ container:
   osPlacesApiKey: os-places-api-key
   policeApiBaseUrl: police-api-base-url
   eventsTopicAddress: aphw-ddi-events
+  certificateRequestQueue: aphw-ddi-certificate-request
   overnightJobCrontab: 5 4 * * *
   paranoidRetentionPeriod: 90
   featureFlagPurgeDelete: false

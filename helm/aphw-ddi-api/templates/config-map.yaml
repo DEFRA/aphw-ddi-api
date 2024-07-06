@@ -19,6 +19,11 @@ data:
   {{ else }}
   EVENTS_TOPIC_ADDRESS: {{ quote .Values.container.eventsTopicAddress }}
   {{- end }}
+  {{- if and (.Values.environmentCode) (not .Values.pr) }}
+  CERTIFICATE_REQUEST_QUEUE: {{ .Values.container.certificateRequestQueue }}-{{ .Values.environmentCode }}
+  {{ else }}
+  CERTIFICATE_REQUEST_QUEUE: {{ quote .Values.container.certificateRequestQueue }}
+  {{- end }}
   OVERNIGHT_JOB_CRONTAB: {{ quote .Values.container.overnightJobCrontab }}
   PARANOID_RETENTION_PERIOD:  {{ quote .Values.container.paranoidRetentionPeriod }}
   FEATURE_FLAG_PURGE_DELETE:  {{ quote .Values.container.featureFlagPurgeDelete }}
