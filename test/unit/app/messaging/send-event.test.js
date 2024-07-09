@@ -1,48 +1,62 @@
+const { devUser } = require('../../../mocks/auth')
+const { buildCdo } = require('../../../mocks/cdo/domain')
+const { CdoTaskList } = require('../../../../app/data/domain')
+const { CERTIFICATE_REQUESTED } = require('../../../../app/constants/event/events')
+const { SOURCE_API } = require('../../../../app/constants/event/source')
+
 describe('SendEvent test', () => {
   jest.mock('../../../../app/messaging/create-message-sender')
   const { createMessageSender } = require('../../../../app/messaging/create-message-sender')
 
-  const { sendEvent } = require('../../../../app/messaging/send-event')
+  const { sendEvent, sendDocumentMessage } = require('../../../../app/messaging/send-event')
 
   afterEach(() => {
     jest.resetAllMocks()
   })
 
-  test('should throw if invalid event', async () => {
-    await expect(sendEvent(null)).rejects.toThrow('Invalid event: unable to send ')
+  describe('sendEvent', () => {
+    test('should throw if invalid event', async () => {
+      await expect(sendEvent(null)).rejects.toThrow('Invalid event: unable to send ')
+    })
   })
 
-  test('should send event', async () => {
-    const sendMessageMock = jest.fn()
-    createMessageSender.mockReturnValue({ sendMessage: sendMessageMock })
+  describe('sendDocumentMessage', () => {
+    test('should send event', async () => {
+      const sendMessageMock = jest.fn()
+      createMessageSender.mockReturnValue({ sendMessage: sendMessageMock })
 
-    const data = {
-      type: 'type',
-      source: 'source',
-      id: 'id',
-      subject: 'subject',
-      partitionKey: 'partitionKey',
-      data: { message: 'messageContent' }
-    }
+      const cdoTaskList = new CdoTaskList(buildCdo())
 
-    await sendEvent(data)
+      await sendDocumentMessage('abcd-123', cdoTaskList, devUser)
 
-    expect(sendMessageMock).toHaveBeenCalledWith({
-      body: {
-        data: {
-          message: 'messageContent'
+      expect(sendMessageMock).toHaveBeenCalledWith({
+        body: {
+          certificateId: 'abcd-123',
+          exemptionOrder: '2015',
+          user: devUser,
+          owner: {
+            name: 'Alex Carter',
+            address: {
+              line1: '300 Anywhere St',
+              line2: 'Anywhere Estate',
+              line3: 'City of London',
+              postcode: 'S1 1AA'
+            },
+            organisationName: null
+          },
+          dog: {
+            indexNumber: 'ED300097',
+            microchipNumber: null,
+            name: 'Rex300',
+            breed: 'XL Bully',
+            sex: null,
+            birthDate: null,
+            colour: null
+          }
         },
-        datacontenttype: 'text/json',
-        id: 'id',
-        partitionKey: 'partitionKey',
-        source: 'source',
-        specversion: '1.0',
-        subject: 'subject',
-        time: expect.anything(),
-        type: 'type'
-      },
-      source: 'source',
-      type: 'type'
+        type: CERTIFICATE_REQUESTED,
+        source: SOURCE_API
+      })
     })
   })
 })
