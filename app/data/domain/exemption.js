@@ -2,6 +2,7 @@ const { dateTodayOrInFuture } = require('../../lib/date-helpers')
 const { InvalidDateError } = require('../../errors/domain/invalidDate')
 const { IncompleteDataError } = require('../../errors/domain/incompleteData')
 const { Changeable } = require('./changeable')
+const { InvalidDataError } = require('../../errors/domain/invalidData')
 
 /**
  * @param exemptionProperties
@@ -31,7 +32,7 @@ class Exemption extends Changeable {
     this.court = exemptionProperties.court
     this.policeForce = exemptionProperties.policeForce
     this.legislationOfficer = exemptionProperties.legislationOfficer
-    this.certificateIssued = exemptionProperties.certificateIssued
+    this._certificateIssued = exemptionProperties.certificateIssued
     this._applicationFeePaid = exemptionProperties.applicationFeePaid
     this._insurance = exemptionProperties.insurance
     this._neuteringConfirmation = exemptionProperties.neuteringConfirmation
@@ -65,6 +66,28 @@ class Exemption extends Changeable {
 
   get microchipVerification () {
     return this._microchipVerification
+  }
+
+  get certificateIssued () {
+    return this._certificateIssued
+  }
+
+  _checkIfInsuranceIsValid () {
+    const today = new Date()
+    today.setUTCHours(0, 0, 0, 0)
+
+    const insuranceRenewalDate = this._insurance[0]?.renewalDate ?? new Date(0)
+
+    return insuranceRenewalDate.getTime() > today.getTime()
+  }
+
+  _exemptionIsComplete () {
+    return this.form2Sent instanceof Date &&
+      this.applicationPackSent instanceof Date &&
+      this.applicationFeePaid instanceof Date &&
+      this.microchipVerification instanceof Date &&
+      this.neuteringConfirmation instanceof Date &&
+      this._checkIfInsuranceIsValid()
   }
 
   /**
@@ -126,6 +149,23 @@ class Exemption extends Changeable {
         neuteringConfirmation
       },
       callback)
+  }
+
+  issueCertificate (certificateIssued, callback) {
+    if (!this._checkIfInsuranceIsValid()) {
+      throw new InvalidDateError('The insurance renewal date cannot be in the past.')
+    }
+
+    if (!this._exemptionIsComplete()) {
+      throw new InvalidDataError('CDO must be complete in order to issue certificate')
+    }
+
+    this._certificateIssued = certificateIssued
+    this._updates.update(
+      'certificateIssued',
+      certificateIssued,
+      callback
+    )
   }
 }
 module.exports = Exemption

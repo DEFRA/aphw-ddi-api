@@ -1029,4 +1029,74 @@ describe('CDO endpoint', () => {
       expect(response.statusCode).toBe(500)
     })
   })
+
+  describe('POST /cdo/ED123/manage:issueCertificate', () => {
+    test('should return 201', async () => {
+      const issueCertificateMock = jest.fn()
+
+      getCdoService.mockReturnValue({
+        issueCertificate: issueCertificateMock
+      })
+
+      issueCertificateMock.mockResolvedValue('abcdefghi')
+
+      const options = {
+        method: 'POST',
+        url: '/cdo/ED123/manage:issueCertificate'
+      }
+      const response = await server.inject(options)
+      const payload = JSON.parse(response.payload)
+      expect(response.statusCode).toBe(201)
+      expect(payload).toEqual({
+        certificateIssued: 'abcdefghi'
+      })
+      expect(issueCertificateMock).toHaveBeenCalledWith('ED123', expect.any(Date), devUser)
+    })
+
+    test('should throw a 404 given index does not exist', async () => {
+      getCdoService.mockReturnValue({
+        issueCertificate: async () => {
+          throw new NotFoundError('not found')
+        }
+      })
+      const options = {
+        method: 'POST',
+        url: '/cdo/ED123/manage:issueCertificate'
+      }
+
+      const response = await server.inject(options)
+      expect(response.statusCode).toBe(404)
+    })
+
+    test('should throw a 409 given action performed out of sequence', async () => {
+      getCdoService.mockReturnValue({
+        issueCertificate: async () => {
+          throw new SequenceViolationError('Form 2 must be sent before performing this action')
+        }
+      })
+      const options = {
+        method: 'POST',
+        url: '/cdo/ED123/manage:issueCertificate'
+      }
+
+      const response = await server.inject(options)
+      expect(response.statusCode).toBe(409)
+    })
+
+    test('should returns 500 given server error thrown', async () => {
+      getCdoService.mockReturnValue({
+        verifyDates: async () => {
+          throw new Error('cdo error')
+        }
+      })
+
+      const options = {
+        method: 'POST',
+        url: '/cdo/ED123/manage:issueCertificate'
+      }
+
+      const response = await server.inject(options)
+      expect(response.statusCode).toBe(500)
+    })
+  })
 })
