@@ -660,6 +660,7 @@ describe('CdoTaskList', () => {
     test('should not permit verification of Dates before Form 2 is sent', () => {
       expect(() => cdoTaskList.verifyDates(new Date('2024-07-04'), new Date('2024-07-04'), transactionCallback)).toThrow(new SequenceViolationError('Form 2 must be sent before performing this action'))
     })
+
     describe('sendForm2', () => {
       test('should send application pack given sendForm2 is not complete', () => {
         const sentDate = new Date()
@@ -683,6 +684,10 @@ describe('CdoTaskList', () => {
       })
     })
 
+    test('should not permit issue of certificate before everything is complete', () => {
+      expect(() => cdoTaskList.issueCertificate(new Date('2024-07-04'), transactionCallback)).toThrow(new SequenceViolationError('CDO must be complete in order to issue certificate'))
+    })
+
     describe('verifyDates', () => {
       test('should start with correct details', () => {
         expect(cdoTaskList.verificationDateRecorded.completed).toBe(false)
@@ -698,6 +703,21 @@ describe('CdoTaskList', () => {
         expect(cdoTaskList.cdoSummary.neuteringConfirmation).toEqual(neuteringConfirmation)
         cdoTaskList.getUpdates().exemption[0].callback()
         expect(transactionCallback).toHaveBeenCalledTimes(6)
+      })
+    })
+
+    describe('issueCertificate', () => {
+      test('should start with correct details', () => {
+        expect(cdoTaskList.certificateIssued.completed).toBe(false)
+        expect(cdoTaskList.cdoSummary.certificateIssued).toBeUndefined()
+      })
+
+      test('should issueCertificate', () => {
+        const certificateIssued = new Date()
+        cdoTaskList.issueCertificate(certificateIssued, transactionCallback)
+        expect(cdoTaskList.cdoSummary.certificateIssued).toEqual(certificateIssued)
+        cdoTaskList.getUpdates().exemption[0].callback()
+        expect(transactionCallback).toHaveBeenCalledTimes(7)
       })
     })
   })

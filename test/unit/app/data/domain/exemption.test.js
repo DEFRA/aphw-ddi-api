@@ -2,7 +2,8 @@ const Exemption = require('../../../../../app/data/domain/exemption')
 const { inXDays } = require('../../../../time-helper')
 const { InvalidDateError } = require('../../../../../app/errors/domain/invalidDate')
 const { IncompleteDataError } = require('../../../../../app/errors/domain/incompleteData')
-const { buildExemption } = require('../../../../mocks/cdo/domain')
+const { buildExemption, buildCdoInsurance } = require('../../../../mocks/cdo/domain')
+const { SequenceViolationError } = require('../../../../../app/errors/domain/sequenceViolation')
 
 describe('Exemption', () => {
   const exemptionProperties = {
@@ -219,6 +220,79 @@ describe('Exemption', () => {
     test('should throw if either date is in the future', () => {
       expect(() => exemption.verifyDates(new Date('9999-01-01'), neuteringConfirmation, callback)).toThrow(new InvalidDateError('Date must be today or in the past'))
       expect(() => exemption.verifyDates(microchipVerification, new Date('9999-01-01'), callback)).toThrow(new InvalidDateError('Date must be today or in the past'))
+    })
+  })
+
+  describe('issueCertificate', () => {
+    const auditDate = new Date()
+
+    test('should issue certificate', () => {
+      const callback = jest.fn()
+      const exemption = new Exemption(buildExemption({
+        form2Sent: new Date(),
+        applicationPackSent: new Date(),
+        applicationFeePaid: new Date(),
+        microchipVerification: new Date(),
+        neuteringConfirmation: new Date(),
+        insurance: [
+          buildCdoInsurance({
+            renewalDate: new Date('9999-01-01'),
+            company: 'Dogs Trust'
+          })
+        ]
+      }))
+      exemption.issueCertificate(auditDate, callback)
+
+      expect(exemption.certificateIssued).toEqual(auditDate)
+      expect(exemption.getChanges()).toEqual([{
+        key: 'certificateIssued',
+        value: auditDate,
+        callback
+      }])
+      expect(() => exemption.getChanges()[0].callback()).not.toThrow()
+      expect(callback).toHaveBeenCalled()
+    })
+
+    test('should not issue certificate given insurance date in past', () => {
+      const callback = jest.fn()
+      const yesterday = inXDays(-1)
+
+      const exemption = new Exemption(buildExemption({
+        form2Sent: new Date(),
+        applicationPackSent: new Date(),
+        applicationFeePaid: new Date(),
+        microchipVerification: new Date(),
+        neuteringConfirmation: new Date(),
+        insurance: [
+          buildCdoInsurance({
+            renewalDate: yesterday,
+            company: 'Dogs Trust'
+          })
+        ]
+      }))
+      expect(() => exemption.issueCertificate(auditDate, callback)).toThrow(new InvalidDateError('The insurance renewal date cannot be in the past.'))
+
+      expect(exemption.certificateIssued).toBeNull()
+    })
+
+    test('should not issue certificate given exemption fields not complete', () => {
+      const callback = jest.fn()
+
+      const exemption = new Exemption(buildExemption({
+        form2Sent: new Date(),
+        applicationPackSent: new Date(),
+        applicationFeePaid: new Date(),
+        neuteringConfirmation: new Date(),
+        insurance: [
+          buildCdoInsurance({
+            renewalDate: new Date('9999-01-01'),
+            company: 'Dogs Trust'
+          })
+        ]
+      }))
+      expect(() => exemption.issueCertificate(auditDate, callback)).toThrow(new SequenceViolationError('CDO must be complete in order to issue certificate'))
+
+      expect(exemption.certificateIssued).toBeNull()
     })
   })
 })

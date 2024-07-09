@@ -15,6 +15,18 @@ class CdoTaskList {
     return stage instanceof Date
   }
 
+  get exemption () {
+    return this._cdo.exemption
+  }
+
+  get person () {
+    return this._cdo.person
+  }
+
+  get dog () {
+    return this._cdo.dog
+  }
+
   get _actionPackStageComplete () {
     return this.applicationPackSent.completed
   }
@@ -202,6 +214,13 @@ class CdoTaskList {
     this._form2CompleteGuard()
 
     this._cdo.exemption.verifyDates(microchipVerification, neuteringConfirmation, callback)
+  }
+
+  issueCertificate (certificateIssued, callback) {
+    if (!this._preCertificateStepsComplete) {
+      throw new SequenceViolationError('CDO must be complete in order to issue certificate')
+    }
+    this._cdo.exemption.issueCertificate(certificateIssued, callback)
   }
 
   getUpdates () {
