@@ -202,7 +202,6 @@ class CdoService {
   async issueCertificate (cdoIndexNumber, sentDate, user) {
     const cdoTaskList = await this.cdoRepository.getCdoTaskList(cdoIndexNumber)
 
-    console.log('issueCert list', cdoTaskList)
     const preAuditExemption = {
       index_number: cdoIndexNumber,
       certificate_issued: cdoTaskList.cdoSummary.certificateIssued
@@ -222,15 +221,10 @@ class CdoService {
     }
 
     const callback = async () => {
-      console.log('issueCert callback')
       await sendUpdateToAudit(EXEMPTION, preAuditExemption, postAuditExemption, user)
       await sendUpdateToAudit(DOG, preAuditDog, postAuditDog, user)
     }
 
-    console.log('issueCert preAuditEx', preAuditExemption)
-    console.log('issueCert postAuditEx', postAuditExemption)
-    console.log('issueCert preAuditEx', preAuditDog)
-    console.log('issueCert postAuditEx', postAuditDog)
     cdoTaskList.issueCertificate(sentDate, callback)
 
     return await this.cdoRepository.saveCdoTaskList(cdoTaskList)

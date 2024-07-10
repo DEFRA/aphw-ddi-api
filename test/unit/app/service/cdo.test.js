@@ -148,7 +148,6 @@ describe('CdoService', function () {
           insurance_company: "Dog's Trust",
           insurance_renewal_date: '9999-01-01'
         }, devUser)
-      sendUpdateToAudit.mockClear()
     })
   })
 
@@ -195,7 +194,6 @@ describe('CdoService', function () {
           index_number: 'ED300097',
           microchip1: '123456789012345'
         }, devUser)
-      sendUpdateToAudit.mockClear()
     })
   })
 
@@ -242,7 +240,6 @@ describe('CdoService', function () {
           index_number: 'ED300097',
           application_fee_paid: applicationFeePaid
         }, devUser)
-      sendUpdateToAudit.mockClear()
     })
   })
 
@@ -274,7 +271,6 @@ describe('CdoService', function () {
         targetPk: 'dog',
         activityLabel: 'Form 2'
       }, devUser)
-      sendActivityToAudit.mockClear()
     })
 
     test('should not send Form 2 a second time', async () => {

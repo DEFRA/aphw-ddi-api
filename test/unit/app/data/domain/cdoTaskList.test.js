@@ -3,6 +3,7 @@ const { buildCdo, buildExemption, buildTask, buildCdoInsurance, buildCdoDog } = 
 const { ActionAlreadyPerformedError } = require('../../../../../app/errors/domain/actionAlreadyPerformed')
 const { SequenceViolationError } = require('../../../../../app/errors/domain/sequenceViolation')
 const { inXDays } = require('../../../../time-helper')
+
 describe('CdoTaskList', () => {
   const dogsTrustCompany = 'Dog\'s Trust'
 
@@ -13,7 +14,10 @@ describe('CdoTaskList', () => {
       applicationPackSent: null
     })
     const cdo = buildCdo({
-      exemption: exemptionProperties
+      exemption: exemptionProperties,
+      dog: buildCdoDog({
+        status: 'Pre-exempt'
+      })
     })
     return new CdoTaskList(cdo)
   }
@@ -27,7 +31,7 @@ describe('CdoTaskList', () => {
   describe('Task List', () => {
     test('should show applicationPackSent in default state', () => {
       const cdoTaskList = buildDefaultTaskList()
-      cdoTaskList._cdo.dog._status = null
+
       expect(cdoTaskList.applicationPackSent).toEqual(expect.objectContaining({
         key: 'applicationPackSent',
         available: true,
@@ -90,7 +94,7 @@ describe('CdoTaskList', () => {
         neuteringConfirmation: undefined,
         microchipVerification: undefined,
         certificateIssued: undefined,
-        status: undefined
+        status: 'Pre-exempt'
       })
     })
 
