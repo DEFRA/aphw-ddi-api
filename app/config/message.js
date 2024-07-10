@@ -28,10 +28,6 @@ const config = {
   },
   eventsTopic: {
     address: process.env.EVENTS_TOPIC_ADDRESS
-  },
-  certificatesQueue: {
-    address: process.env.CERTIFICATE_REQUEST_QUEUE,
-    type: 'queue'
   }
 }
 
@@ -44,9 +40,7 @@ if (result.error) {
 }
 
 const eventsTopic = { ...result.value.messageQueue, ...result.value.eventsTopic }
-const certificateQueue = { ...result.value.messageQueue, ...result.value.certificatesQueue }
 
 module.exports = {
-  eventsTopic,
-  certificateQueue
+  eventsTopic
 }
