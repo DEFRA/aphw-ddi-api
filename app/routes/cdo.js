@@ -27,12 +27,14 @@ const handleErrors = (e, action, indexNumber, h) => {
     return h.response().code(404)
   }
   if (e instanceof SequenceViolationError) {
-    console.error(`CDO action on ${indexNumber} out of sequence on manage:${action}:`, e)
-    return h.response().code(409)
+    const message = `CDO action on ${indexNumber} out of sequence on manage:${action}`
+    console.error(message, e)
+    return h.response({ message }).code(409)
   }
   if (e instanceof ActionAlreadyPerformedError) {
-    console.error(`CDO action on ${indexNumber} action already performed manage:${action}:`, e)
-    return h.response().code(409)
+    const message = `CDO action on ${indexNumber} action already performed manage:${action}`
+    console.error(message, e)
+    return h.response({ message }).code(409)
   }
   if (e instanceof InvalidDataError) {
     console.error(`Invalid data on manage:${action} on ${indexNumber}:`, e)

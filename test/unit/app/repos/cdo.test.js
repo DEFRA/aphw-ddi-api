@@ -31,7 +31,7 @@ describe('CDO repo', () => {
   const { createPeople, getPersonByReference, updatePerson, updatePersonFields } = require('../../../../app/repos/people')
 
   jest.mock('../../../../app/repos/dogs')
-  const { createDogs, getDogByIndexNumber } = require('../../../../app/repos/dogs')
+  const { createDogs, getDogByIndexNumber, updateStatus } = require('../../../../app/repos/dogs')
 
   jest.mock('../../../../app/repos/search')
   const { addToSearchIndex } = require('../../../../app/repos/search')
@@ -749,6 +749,46 @@ describe('CDO repo', () => {
       expect(taskList.cdoSummary.neuteringConfirmation).toEqual(neuteringConfirmation)
 
       expect(callback).toHaveBeenCalledTimes(1)
+    })
+
+    test('should update status', async () => {
+      updateStatus.mockResolvedValue()
+      const dog = buildCdoDao({
+        registration: buildRegistrationDao({
+          neutering_confirmation: new Date(),
+          microchip_verification: new Date()
+        })
+      })
+      dog.registration.save = jest.fn()
+
+      sequelize.models.dog.findAll.mockResolvedValueOnce([dog])
+
+      const callback = jest.fn()
+
+      const cdoTaskList = new CdoTaskList(buildCdo({
+        exemption: buildExemption({
+          applicationPackSent: new Date(),
+          form2Sent: new Date(),
+          neuteringConfirmation: new Date(),
+          microchipVerification: new Date(),
+          applicationFeePaid: new Date(),
+          insurance: [buildInsuranceDao({
+            renewalDate: new Date()
+          })]
+        }),
+        dog: buildCdoDog({
+          microchipNumber: '123456789012345'
+        })
+      }))
+
+      const sentDate = new Date()
+
+      cdoTaskList.issueCertificate(sentDate, callback)
+
+      await saveCdoTaskList(cdoTaskList, {})
+      expect(callback).toHaveBeenCalled()
+      expect(dog.registration.save).toHaveBeenCalled()
+      expect(updateStatus).toHaveBeenCalledWith('ED300097', 'Exempt', {})
     })
 
     test('should handle missing model', async () => {

@@ -21,10 +21,9 @@ describe('CdoService', function () {
   jest.mock('../../../../app/repos/microchip')
   const { microchipExists } = require('../../../../app/repos/microchip')
 
-  jest.mock('../../../../app/messaging/send-event')
-  const { sendDocumentMessage } = require('../../../../app/messaging/send-event')
-
   beforeEach(function () {
+    jest.clearAllMocks()
+
     // Create a mock CdoRepository
     /**
      * @type {CdoRepository}
@@ -149,7 +148,6 @@ describe('CdoService', function () {
           insurance_company: "Dog's Trust",
           insurance_renewal_date: '9999-01-01'
         }, devUser)
-      sendUpdateToAudit.mockClear()
     })
   })
 
@@ -196,7 +194,6 @@ describe('CdoService', function () {
           index_number: 'ED300097',
           microchip1: '123456789012345'
         }, devUser)
-      sendUpdateToAudit.mockClear()
     })
   })
 
@@ -243,7 +240,6 @@ describe('CdoService', function () {
           index_number: 'ED300097',
           application_fee_paid: applicationFeePaid
         }, devUser)
-      sendUpdateToAudit.mockClear()
     })
   })
 
@@ -275,7 +271,6 @@ describe('CdoService', function () {
         targetPk: 'dog',
         activityLabel: 'Form 2'
       }, devUser)
-      sendActivityToAudit.mockClear()
     })
 
     test('should not send Form 2 a second time', async () => {
@@ -380,7 +375,8 @@ describe('CdoService', function () {
           })]
         }),
         dog: buildCdoDog({
-          microchipNumber: '123456789012345'
+          microchipNumber: '123456789012345',
+          status: 'Pre-exempt'
         })
       }))
 
@@ -395,10 +391,33 @@ describe('CdoService', function () {
       expect(cdoTaskList.getUpdates().exemption).toEqual([{
         key: 'certificateIssued',
         value: sentDate,
-        callback: expect.any(Function)
+        callback: undefined
       }])
-      await cdoTaskList.getUpdates().exemption[0].callback()
-      expect(sendDocumentMessage).toHaveBeenCalledWith(expect.any(String), cdoTaskList, devUser)
+
+      await cdoTaskList.getUpdates().dog[0].callback()
+
+      expect(sendUpdateToAudit).toHaveBeenCalledWith(
+        'exemption',
+        {
+          index_number: 'ED300097',
+          certificate_issued: undefined
+        },
+        {
+          index_number: 'ED300097',
+          certificate_issued: sentDate
+        },
+        devUser)
+      expect(sendUpdateToAudit).toHaveBeenCalledWith(
+        'dog',
+        {
+          index_number: 'ED300097',
+          status: 'Pre-exempt'
+        },
+        {
+          index_number: 'ED300097',
+          status: 'Exempt'
+        },
+        devUser)
     })
   })
 })

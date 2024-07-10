@@ -70,7 +70,8 @@ class CdoTaskList {
       form2Sent: this._cdo.exemption.form2Sent ?? undefined,
       neuteringConfirmation: this._cdo.exemption.neuteringConfirmation ?? undefined,
       microchipVerification: this._cdo.exemption.microchipVerification ?? undefined,
-      certificateIssued: this._cdo.exemption.certificateIssued ?? undefined
+      certificateIssued: this._cdo.exemption.certificateIssued ?? undefined,
+      status: this._cdo.dog.status ?? undefined
     }
   }
 
@@ -220,7 +221,8 @@ class CdoTaskList {
     if (!this._preCertificateStepsComplete) {
       throw new SequenceViolationError('CDO must be complete in order to issue certificate')
     }
-    this._cdo.exemption.issueCertificate(certificateIssued, callback)
+    this._cdo.exemption.issueCertificate(certificateIssued)
+    this._cdo.dog.setStatus('Exempt', callback)
   }
 
   getUpdates () {

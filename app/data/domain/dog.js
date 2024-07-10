@@ -10,7 +10,7 @@ class Dog extends Changeable {
     this.indexNumber = dogProperties.indexNumber
     this.name = dogProperties.name
     this.breed = dogProperties.breed
-    this.status = dogProperties.status
+    this._status = dogProperties.status
     this.dateOfBirth = dogProperties.dateOfBirth
     this.dateOfDeath = dogProperties.dateOfDeath
     this.tattoo = dogProperties.tattoo
@@ -46,6 +46,15 @@ class Dog extends Changeable {
 
     this._updates.update('microchip', microchipNumber1, callback)
     this._microchipNumber = microchipNumber1
+  }
+
+  get status () {
+    return this._status
+  }
+
+  setStatus (status, callback) {
+    this._updates.update('status', status, callback)
+    this._status = status
   }
 }
 

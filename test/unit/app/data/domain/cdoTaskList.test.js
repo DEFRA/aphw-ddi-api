@@ -3,6 +3,7 @@ const { buildCdo, buildExemption, buildTask, buildCdoInsurance, buildCdoDog } = 
 const { ActionAlreadyPerformedError } = require('../../../../../app/errors/domain/actionAlreadyPerformed')
 const { SequenceViolationError } = require('../../../../../app/errors/domain/sequenceViolation')
 const { inXDays } = require('../../../../time-helper')
+
 describe('CdoTaskList', () => {
   const dogsTrustCompany = 'Dog\'s Trust'
 
@@ -13,7 +14,10 @@ describe('CdoTaskList', () => {
       applicationPackSent: null
     })
     const cdo = buildCdo({
-      exemption: exemptionProperties
+      exemption: exemptionProperties,
+      dog: buildCdoDog({
+        status: 'Pre-exempt'
+      })
     })
     return new CdoTaskList(cdo)
   }
@@ -27,6 +31,7 @@ describe('CdoTaskList', () => {
   describe('Task List', () => {
     test('should show applicationPackSent in default state', () => {
       const cdoTaskList = buildDefaultTaskList()
+
       expect(cdoTaskList.applicationPackSent).toEqual(expect.objectContaining({
         key: 'applicationPackSent',
         available: true,
@@ -88,7 +93,8 @@ describe('CdoTaskList', () => {
         form2Sent: undefined,
         neuteringConfirmation: undefined,
         microchipVerification: undefined,
-        certificateIssued: undefined
+        certificateIssued: undefined,
+        status: 'Pre-exempt'
       })
     })
 
@@ -139,7 +145,8 @@ describe('CdoTaskList', () => {
         form2Sent: undefined,
         neuteringConfirmation: undefined,
         microchipVerification: undefined,
-        certificateIssued: undefined
+        certificateIssued: undefined,
+        status: 'Interim exempt'
       })
     })
 
@@ -553,7 +560,8 @@ describe('CdoTaskList', () => {
         form2Sent: new Date('2024-05-24'),
         neuteringConfirmation: new Date('2024-02-10'),
         microchipVerification: new Date('2024-03-09'),
-        certificateIssued: new Date('2024-06-27')
+        certificateIssued: new Date('2024-06-27'),
+        status: 'Interim exempt'
       })
     })
   })
@@ -718,6 +726,23 @@ describe('CdoTaskList', () => {
         expect(cdoTaskList.cdoSummary.certificateIssued).toEqual(certificateIssued)
         cdoTaskList.getUpdates().exemption[0].callback()
         expect(transactionCallback).toHaveBeenCalledTimes(7)
+      })
+    })
+
+    describe('getters', () => {
+      test('should get exemption', () => {
+        const cdoTaskList = buildDefaultTaskList()
+        expect(cdoTaskList.exemption.exemptionOrder).toBe('2015')
+      })
+
+      test('should get person', () => {
+        const cdoTaskList = buildDefaultTaskList()
+        expect(cdoTaskList.person.lastName).toBe('Carter')
+      })
+
+      test('should get dog', () => {
+        const cdoTaskList = buildDefaultTaskList()
+        expect(cdoTaskList.dog.indexNumber).toBe('ED300097')
       })
     })
   })
