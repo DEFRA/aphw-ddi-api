@@ -27,6 +27,7 @@ describe('CdoTaskList', () => {
   describe('Task List', () => {
     test('should show applicationPackSent in default state', () => {
       const cdoTaskList = buildDefaultTaskList()
+      cdoTaskList._cdo.dog._status = null
       expect(cdoTaskList.applicationPackSent).toEqual(expect.objectContaining({
         key: 'applicationPackSent',
         available: true,
@@ -89,7 +90,7 @@ describe('CdoTaskList', () => {
         neuteringConfirmation: undefined,
         microchipVerification: undefined,
         certificateIssued: undefined,
-        status: 'Interim exempt'
+        status: undefined
       })
     })
 
