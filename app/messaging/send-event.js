@@ -1,6 +1,6 @@
 const { createMessageSender } = require('./create-message-sender')
-const { eventsTopic, certificateQueue } = require('../config/message')
-const { createMessage, createCertificateMessage } = require('./create-message')
+const { eventsTopic } = require('../config/message')
+const { createMessage } = require('./create-message')
 const { validateEvent } = require('./validate-event')
 
 const sendEvent = async (data) => {
@@ -13,13 +13,6 @@ const sendEvent = async (data) => {
   }
 }
 
-const sendDocumentMessage = async (certificateId, cdoTaskList, user) => {
-  const message = createCertificateMessage(certificateId, cdoTaskList, user)
-  const eventSender = createMessageSender(certificateQueue)
-  await eventSender.sendMessage(message)
-}
-
 module.exports = {
-  sendEvent,
-  sendDocumentMessage
+  sendEvent
 }

@@ -1,6 +1,6 @@
 const sequelize = require('../config/db')
 const { createPeople, getPersonByReference, updatePersonFields } = require('./people')
-const { createDogs } = require('./dogs')
+const { createDogs, updateStatus } = require('./dogs')
 const { addToSearchIndex } = require('./search')
 const { sendCreateToAudit, sendChangeOwnerToAudit } = require('../messaging/send-audit')
 const { CDO } = require('../constants/event/audit-event-object-types')
@@ -452,7 +452,8 @@ const updateKeys = {
   ],
   certificateIssued: ['certificateIssued'],
   insurance: ['insurance'],
-  microchip: ['microchip']
+  microchip: ['microchip'],
+  status: ['status']
 }
 
 const updateMappings = {
@@ -463,7 +464,8 @@ const updateMappings = {
   microchipVerification: 'dog.registration.microchip_verification',
   certificateIssued: 'dog.registration.certificate_issued',
   insurance: 'dog.insurance',
-  microchip: 'dog.microchip'
+  microchip: 'dog.microchip',
+  status: 'dog.status'
 }
 /**
  * @typedef SaveCdoTaskList
@@ -489,6 +491,10 @@ const saveCdoTaskList = async (cdoTaskList, transaction) => {
       }
       case 'insurance': {
         await createOrUpdateInsurance({ insurance: update.value }, cdoDao, transaction)
+        break
+      }
+      case 'status': {
+        await updateStatus(cdoDao.index_number, update.value, transaction)
         break
       }
       default: {
@@ -519,7 +525,9 @@ const saveCdoTaskList = async (cdoTaskList, transaction) => {
     }
 
     // this will publish the event
-    await update.callback()
+    if (update.callback) {
+      await update.callback()
+    }
   }
 
   return getCdoTaskList(cdoTaskList.cdoSummary.indexNumber, transaction)

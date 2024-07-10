@@ -282,9 +282,6 @@ module.exports = [
         const indexNumber = request.params.indexNumber
 
         try {
-          if (indexNumber) {
-            throw new SequenceViolationError()
-          }
           const cdoService = ServiceProvider.getCdoService()
           const certificateId = await cdoService.issueCertificate(indexNumber, new Date(), getCallingUser(request))
 

@@ -3,14 +3,12 @@
  * @param {string} cdoId
  * @return {Promise<CdoTaskList>}
  */
-const { v4: uuidv4 } = require('uuid')
 const { sendActivityToAudit, sendUpdateToAudit } = require('../messaging/send-audit')
 const { getActivityByLabel } = require('../repos/activity')
 const { activities } = require('../constants/event/events')
 const { stripTime } = require('../dto/dto-helper')
 const { EXEMPTION, DOG } = require('../constants/event/audit-event-object-types')
 const { microchipExists } = require('../repos/microchip')
-const { sendDocumentMessage } = require('../messaging/send-event')
 
 /**
  * @param {CdoRepository} cdoRepository
@@ -203,14 +201,39 @@ class CdoService {
 
   async issueCertificate (cdoIndexNumber, sentDate, user) {
     const cdoTaskList = await this.cdoRepository.getCdoTaskList(cdoIndexNumber)
-    const certificateId = uuidv4()
-    const callback = async () => {
-      await sendDocumentMessage(certificateId, cdoTaskList, user)
-    }
-    cdoTaskList.issueCertificate(sentDate, callback)
-    await this.cdoRepository.saveCdoTaskList(cdoTaskList)
 
-    return certificateId//
+    console.log('issueCert list', cdoTaskList)
+    const preAuditExemption = {
+      index_number: cdoIndexNumber,
+      certificate_issued: cdoTaskList.cdoSummary.certificateIssued
+    }
+    const postAuditExemption = {
+      index_number: cdoIndexNumber,
+      certificate_issued: sentDate
+    }
+
+    const preAuditDog = {
+      index_number: cdoIndexNumber,
+      status: cdoTaskList.cdoSummary.status
+    }
+    const postAuditDog = {
+      index_number: cdoIndexNumber,
+      status: 'Exempt'
+    }
+
+    const callback = async () => {
+      console.log('issueCert callback')
+      await sendUpdateToAudit(EXEMPTION, preAuditExemption, postAuditExemption, user)
+      await sendUpdateToAudit(DOG, preAuditDog, postAuditDog, user)
+    }
+
+    console.log('issueCert preAuditEx', preAuditExemption)
+    console.log('issueCert postAuditEx', postAuditExemption)
+    console.log('issueCert preAuditEx', preAuditDog)
+    console.log('issueCert postAuditEx', postAuditDog)
+    cdoTaskList.issueCertificate(sentDate, callback)
+
+    return await this.cdoRepository.saveCdoTaskList(cdoTaskList)
   }
 }
 

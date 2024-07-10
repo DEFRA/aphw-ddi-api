@@ -21,10 +21,9 @@ describe('CdoService', function () {
   jest.mock('../../../../app/repos/microchip')
   const { microchipExists } = require('../../../../app/repos/microchip')
 
-  jest.mock('../../../../app/messaging/send-event')
-  const { sendDocumentMessage } = require('../../../../app/messaging/send-event')
-
   beforeEach(function () {
+    jest.clearAllMocks()
+
     // Create a mock CdoRepository
     /**
      * @type {CdoRepository}
@@ -380,7 +379,8 @@ describe('CdoService', function () {
           })]
         }),
         dog: buildCdoDog({
-          microchipNumber: '123456789012345'
+          microchipNumber: '123456789012345',
+          status: 'Pre-exempt'
         })
       }))
 
@@ -395,10 +395,33 @@ describe('CdoService', function () {
       expect(cdoTaskList.getUpdates().exemption).toEqual([{
         key: 'certificateIssued',
         value: sentDate,
-        callback: expect.any(Function)
+        callback: undefined
       }])
-      await cdoTaskList.getUpdates().exemption[0].callback()
-      expect(sendDocumentMessage).toHaveBeenCalledWith(expect.any(String), cdoTaskList, devUser)
+
+      await cdoTaskList.getUpdates().dog[0].callback()
+
+      expect(sendUpdateToAudit).toHaveBeenCalledWith(
+        'exemption',
+        {
+          index_number: 'ED300097',
+          certificate_issued: undefined
+        },
+        {
+          index_number: 'ED300097',
+          certificate_issued: sentDate
+        },
+        devUser)
+      expect(sendUpdateToAudit).toHaveBeenCalledWith(
+        'dog',
+        {
+          index_number: 'ED300097',
+          status: 'Pre-exempt'
+        },
+        {
+          index_number: 'ED300097',
+          status: 'Exempt'
+        },
+        devUser)
     })
   })
 })
