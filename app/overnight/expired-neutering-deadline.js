@@ -6,7 +6,9 @@ const { dbFindAll } = require('../lib/db-functions')
 
 const setExpiredNeuteringDeadlineToInBreach = async (today, user, t) => {
   try {
-    const isAfterJuneDeadline = today >= new Date('2024-07-27')
+    // Rule-part turned off temporarily
+    // const isAfterJuneDeadline = today >= new Date('2024-07-27')
+    const isAfterJuneDeadline = false
     const isAfterDecDeadline = today >= new Date('2025-01-01')
 
     const setStatusToBreach = await dbFindAll(sequelize.models.registration, {
@@ -18,7 +20,7 @@ const setExpiredNeuteringDeadlineToInBreach = async (today, user, t) => {
                 [Op.eq]: new Date('2024-06-30')
               }
             },
-            isAfterJuneDeadline ? sequelize.literal('1 = 0') : sequelize.literal('1 = 0') // Rule-part turned off temporarily
+            isAfterJuneDeadline ? sequelize.literal('1 = 1') : sequelize.literal('1 = 0')
           ]
         },
         {
