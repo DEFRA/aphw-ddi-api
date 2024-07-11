@@ -18,7 +18,7 @@ const setExpiredNeuteringDeadlineToInBreach = async (today, user, t) => {
                 [Op.eq]: new Date('2024-06-30')
               }
             },
-            isAfterJuneDeadline ? sequelize.literal('1 = 1') : sequelize.literal('1 = 0')
+            isAfterJuneDeadline ? sequelize.literal('1 = 0') : sequelize.literal('1 = 0') // Rule-part turned off temporarily
           ]
         },
         {
