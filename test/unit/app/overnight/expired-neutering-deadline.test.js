@@ -78,7 +78,7 @@ describe('ExpiredNeuteringDeadline test', () => {
                   [Op.eq]: new Date('2024-06-30')
                 }
               },
-              sequelize.literal('1 = 1')
+              sequelize.literal('1 = 0')
             ]
           },
           {
@@ -111,7 +111,7 @@ describe('ExpiredNeuteringDeadline test', () => {
                   [Op.eq]: new Date('2024-06-30')
                 }
               },
-              sequelize.literal('1 = 1')
+              sequelize.literal('1 = 0')
             ]
           },
           {
@@ -144,7 +144,7 @@ describe('ExpiredNeuteringDeadline test', () => {
                   [Op.eq]: new Date('2024-06-30')
                 }
               },
-              sequelize.literal('1 = 1')
+              sequelize.literal('1 = 0')
             ]
           },
           {
