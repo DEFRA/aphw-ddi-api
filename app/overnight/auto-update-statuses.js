@@ -8,8 +8,7 @@ const autoUpdateStatuses = async () => {
   let result = ''
 
   try {
-    // const today = new Date()
-    const today = new Date('2024-07-27')
+    const today = new Date()
 
     await sequelize.transaction(async (t) => {
       result = result + await setExpiredCdosToFailed(today, user, t) + ' | '
