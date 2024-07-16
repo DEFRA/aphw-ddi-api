@@ -1,4 +1,4 @@
-// const sequelize = require('../config/db')
+const sequelize = require('../config/db')
 
 /**
  * @typedef BreachCategory
@@ -11,10 +11,7 @@
  * @return {Promise<BreachCategory[]>}
  */
 const getBreachCategories = async () => {
-  return []
-  // return await sequelize.models.country.findAll({
-  //   attributes: ['country']
-  // })
+  return sequelize.models.breach_category.findAll()
 }
 
 module.exports = {
