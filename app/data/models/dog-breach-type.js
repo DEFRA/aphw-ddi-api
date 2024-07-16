@@ -11,7 +11,7 @@ module.exports = (sequelize, DataTypes) => {
       type: DataTypes.INTEGER,
       allowNull: false
     },
-    breach_type_id: {
+    breach_category_id: {
       type: DataTypes.INTEGER,
       allowNull: false
     },
@@ -43,9 +43,9 @@ module.exports = (sequelize, DataTypes) => {
   })
 
   dogBreaches.associate = models => {
-    dogBreaches.belongsTo(models.breach_type, {
-      as: 'breach_type',
-      foreignKey: 'breach_type_id'
+    dogBreaches.belongsTo(models.breach_category, {
+      as: 'breach_category',
+      foreignKey: 'breach_category_id'
     })
     dogBreaches.belongsTo(models.dog, {
       as: 'dog',

@@ -1,5 +1,5 @@
 module.exports = (sequelize, DataTypes) => {
-  const breachType = sequelize.define('breach_type', {
+  const breachType = sequelize.define('breach_category', {
     id: {
       autoIncrement: true,
       autoIncrementIdentity: true,
@@ -10,34 +10,34 @@ module.exports = (sequelize, DataTypes) => {
     label: {
       type: DataTypes.STRING(80),
       allowNull: false,
-      unique: 'breach_type_label_ukey'
+      unique: 'breach_category_label_ukey'
     },
     short_name: {
       type: DataTypes.STRING(80),
       allowNull: false,
-      unique: 'breach_type_short_name_ukey'
+      unique: 'breach_category_short_name_ukey'
     }
   }, {
     sequelize,
-    tableName: 'breach_type',
+    tableName: 'breach_category',
     timestamps: false,
     indexes: [
       {
-        name: 'breach_type_pkey',
+        name: 'breach_category_pkey',
         unique: true,
         fields: [
           { name: 'id' }
         ]
       },
       {
-        name: 'breach_type_label_ukey',
+        name: 'breach_category_label_ukey',
         unique: true,
         fields: [
           { name: 'label' }
         ]
       },
       {
-        name: 'breach_type_short_name_ukey',
+        name: 'breach_category_short_name_ukey',
         unique: true,
         fields: [
           { name: 'short_name' }
@@ -49,7 +49,7 @@ module.exports = (sequelize, DataTypes) => {
   breachType.associate = models => {
     breachType.hasMany(models.dog_breach, {
       as: 'dog_breaches',
-      foreignKey: 'breach_type_id'
+      foreignKey: 'breach_category_id'
     })
   }
 

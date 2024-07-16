@@ -4,15 +4,15 @@
     <tagDatabase tag="v1.69.0" />
   </changeSet>
   <changeSet author="C Cole" id="2">
-    <createTable tableName="breach_type">
+    <createTable tableName="breach_category">
       <column autoIncrement="true" name="id" type="INTEGER">
-        <constraints nullable="false" primaryKey="true" primaryKeyName="breach_type_pkey" />
+        <constraints nullable="false" primaryKey="true" primaryKeyName="breach_category_pkey" />
       </column>
       <column name="label" type="VARCHAR(80)">
-        <constraints nullable="false" unique="true" uniqueConstraintName="breach_type_label_ukey" />
+        <constraints nullable="false" unique="true" uniqueConstraintName="breach_category_label_ukey" />
       </column>
       <column name="short_name" type="VARCHAR(80)">
-        <constraints nullable="false" unique="true" uniqueConstraintName="breach_type_short_name_ukey" />
+        <constraints nullable="false" unique="true" uniqueConstraintName="breach_category_short_name_ukey" />
       </column>
     </createTable>
   </changeSet>
@@ -24,7 +24,7 @@
       <column name="dog_id" type="INTEGER">
         <constraints nullable="false" />
       </column>
-      <column name="breach_type_id" type="INTEGER">
+      <column name="breach_category_id" type="INTEGER">
         <constraints nullable="false" />
       </column>
       <column name="deleted_at" type="TIMESTAMP WITH TIME ZONE" />
@@ -34,46 +34,46 @@
   </changeSet>
   <changeSet author="C Cole" id="4">
     <addForeignKeyConstraint baseColumnNames="dog_id" baseTableName="dog_breach" constraintName="fk_dog_breach_dog_id" referencedColumnNames="id" referencedTableName="dog" />
-    <addForeignKeyConstraint baseColumnNames="breach_type_id" baseTableName="dog_breach" constraintName="fk_dog_breach_type_id" referencedColumnNames="id" referencedTableName="breach_type" />
+    <addForeignKeyConstraint baseColumnNames="breach_category_id" baseTableName="dog_breach" constraintName="fk_dog_breach_category_id" referencedColumnNames="id" referencedTableName="breach_category" />
   </changeSet>
   <changeSet author="C Cole" id="5">
-    <insert tableName="breach_type">
+    <insert tableName="breach_category">
       <column name="label" value="Dog not covered by third party insurance" />
       <column name="short_name" value="NOT_COVERED_BY_INSURANCE" />
     </insert>
-    <insert tableName="breach_type">
+    <insert tableName="breach_category">
       <column name="label" value="Dog not kept on lead or muzzled" />
       <column name="short_name" value="NOT_ON_LEAD_OR_MUZZLED" />
     </insert>
-    <insert tableName="breach_type">
+    <insert tableName="breach_category">
       <column name="label" value="Dog kept in insecure place" />
       <column name="short_name" value="INSECURE_PLACE" />
     </insert>
-    <insert tableName="breach_type">
+    <insert tableName="breach_category">
       <column name="label" value="Dog away from registered address for over 30 days in one year" />
       <column name="short_name" value="AWAY_FROM_REGISTERED_ADDRESS_30_DAYS_IN_YR" />
     </insert>
-    <insert tableName="breach_type">
+    <insert tableName="breach_category">
       <column name="label" value="Exemption certificate not provided to police" />
       <column name="short_name" value="EXEMPTION_NOT_PROVIDED_TO_POLICE" />
     </insert>
-    <insert tableName="breach_type">
+    <insert tableName="breach_category">
       <column name="label" value="Insurance evidence not provided to police" />
       <column name="short_name" value="INSURANCE_NOT_PROVIDED_TO_POLICE" />
     </insert>
-    <insert tableName="breach_type">
+    <insert tableName="breach_category">
       <column name="label" value="Owner not allowed police to read microchip" />
       <column name="short_name" value="POLICE_PREVENTED_FROM_READING_MICROCHIP" />
     </insert>
-    <insert tableName="breach_type">
+    <insert tableName="breach_category">
       <column name="label" value="Change of registered address not provided to Defra" />
       <column name="short_name" value="CHANGE_OF_REGISTERED_ADDRESS_NOT_PROVIDED" />
     </insert>
-    <insert tableName="breach_type">
+    <insert tableName="breach_category">
       <column name="label" value="Death of dog not reported to Defra" />
       <column name="short_name" value="DOG_DEATH_NOT_REPORTED" />
     </insert>
-    <insert tableName="breach_type">
+    <insert tableName="breach_category">
       <column name="label" value="Dog’s export not reported to Defra" />
       <column name="short_name" value="DOG_EXPORT_NOT_REPORTED" />
     </insert>
