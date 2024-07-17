@@ -11,7 +11,9 @@ const sequelize = require('../config/db')
  * @return {Promise<BreachCategory[]>}
  */
 const getBreachCategories = async () => {
-  return sequelize.models.breach_category.findAll()
+  return sequelize.models.breach_category.findAll({
+    order: [sequelize.col('id')]
+  })
 }
 
 module.exports = {
