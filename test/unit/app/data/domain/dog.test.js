@@ -135,6 +135,22 @@ describe('Dog', () => {
       ])
       expect(dog.getChanges()).toEqual([
         {
+          key: 'dogBreaches',
+          value: [
+            new BreachCategory({
+              id: 2,
+              label: 'dog not kept on lead or muzzled',
+              short_name: 'NOT_ON_LEAD_OR_MUZZLED'
+            }),
+            new BreachCategory({
+              id: 4,
+              label: 'dog away from registered address for over 30 days in one year',
+              short_name: 'AWAY_FROM_REGISTERED_ADDRESS_30_DAYS_IN_YR'
+            })
+          ],
+          callback: expect.any(Function)
+        },
+        {
           key: 'status',
           value: 'In breach',
           callback

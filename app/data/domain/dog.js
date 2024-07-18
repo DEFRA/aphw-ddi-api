@@ -89,7 +89,9 @@ class Dog extends Changeable {
         [breach.short_name]: breach
       }
     }, {})
-    this._breaches = breaches.map(breach => dogBreachDictionary[breach])
+    const dogBreachBreaches = breaches.map(breach => dogBreachDictionary[breach])
+    this._breaches = dogBreachBreaches
+    this._updates.update('dogBreaches', dogBreachBreaches, () => {})
     this.setStatus('In breach', callback)
   }
 }
