@@ -2,6 +2,23 @@ const { Changeable } = require('./changeable')
 const { DuplicateResourceError } = require('../../errors/duplicate-record')
 const { InvalidDataError } = require('../../errors/domain/invalidData')
 
+/**
+ * @property {number} id
+ * @property {string|null} dogReference = dogProperties.dogReference
+ * @property {string|null} indexNumber = dogProperties.indexNumber
+ * @property {string|null} name = dogProperties.name
+ * @property {string|null} breed = dogProperties.breed
+ * @property {Date|null} dateOfBirth = dogProperties.dateOfBirth
+ * @property {Date|null} dateOfDeath = dogProperties.dateOfDeath
+ * @property {string|null} tattoo = dogProperties.tattoo
+ * @property {string|null} colour = dogProperties.colour
+ * @property {string|null} sex = dogProperties.sex
+ * @property {Date|null} dateExported = dogProperties.dateExported
+ * @property {Date|null} dateStolen = dogProperties.dateStolen
+ * @property {Date|null} dateUntraceable = dogProperties.dateUntraceable
+ * @property {string|null} microchipNumber2 = dogProperties.microchipNumber2
+ * @property {BreachCategory[]} breaches = dogProperties.breaches
+ */
 class Dog extends Changeable {
   constructor (dogProperties) {
     super()
@@ -58,6 +75,9 @@ class Dog extends Changeable {
     this._status = status
   }
 
+  /**
+   * @return {BreachCategory[]}
+   */
   get breaches () {
     return this._breaches
   }
@@ -69,13 +89,8 @@ class Dog extends Changeable {
         [breach.short_name]: breach
       }
     }, {})
-    this._status = 'In breach'
-    const matchedBreachCategories = breaches.map(breach => dogBreachDictionary[breach])
-    this._breaches = matchedBreachCategories
-    this._updates.update('breaches', {
-      status: 'In breach',
-      categories: matchedBreachCategories
-    }, callback)
+    this._breaches = breaches.map(breach => dogBreachDictionary[breach])
+    this.setStatus('In breach', callback)
   }
 }
 

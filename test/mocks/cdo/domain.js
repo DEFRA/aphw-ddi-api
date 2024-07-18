@@ -1,6 +1,6 @@
 const { buildPersonAddressDao } = require('./get')
 const { Cdo, Person, Dog, Exemption, CdoTask } = require('../../../app/data/domain')
-const { BreachCategory } = require('../../../app/data/domain/breachCategory')
+const { BreachCategory } = require('../../../app/data/domain')
 
 /**
  * @param {Partial<CdoPerson>} cdoPersonPartial
@@ -20,14 +20,32 @@ const buildCdoPerson = (cdoPersonPartial = {}) => ({
   ...cdoPersonPartial
 })
 /**
- * @typedef {{dateExported: null|Date, dateStolen: null|Date, microchipNumber: string|null, dateOfDeath: null|Date, sex: string|null, dogReference: string, dateOfBirth: string|null, indexNumber: string, breed: string, microchipNumber2: string|null, tattoo: string|null, colour: string|null, name: string|null, id: number, dateUntraceable: null|Date, status: string}} CdoDogParams
+ * @typedef {{
+ *  dateExported: null|Date,
+ *  dateStolen: null|Date,
+ *  microchipNumber: string|null,
+ *  dateOfDeath: null|Date,
+ *  sex: string|null,
+ *  dogReference: string,
+ *  dateOfBirth: string|null,
+ *  indexNumber: string,
+ *  breed: string,
+ *  microchipNumber2: string|null,
+ *  tattoo: string|null,
+ *  colour: string|null,
+ *  name: string|null,
+ *  id: number,
+ *  dateUntraceable: null|Date,
+ *  status: string,
+ *  dogBreaches: BreachCategory[]
+ * }} CdoDogParams
  */
 /**
  *
  * @param {Partial<CdoDogParams>}  cdoDogPartial
  * @return {CdoDogParams}
  */
-const buildCdoDog = (cdoDogPartial) => ({
+const buildCdoDog = (cdoDogPartial = {}) => ({
   id: 300097,
   dogReference: '5270aad5-77d1-47ce-b41d-99a6e8f6e5fe',
   indexNumber: 'ED300097',
@@ -129,58 +147,68 @@ const buildTask = (cdoTask = {}) => {
     cdoTask.timestamp
   )
 }
+const NOT_COVERED_BY_INSURANCE = new BreachCategory({
+  id: 1,
+  label: 'dog not covered by third party insurance',
+  short_name: 'NOT_COVERED_BY_INSURANCE'
+})
+const NOT_ON_LEAD_OR_MUZZLED = new BreachCategory({
+  id: 2,
+  label: 'dog not kept on lead or muzzled',
+  short_name: 'NOT_ON_LEAD_OR_MUZZLED'
+})
+const INSECURE_PLACE = new BreachCategory({
+  id: 3,
+  label: 'dog kept in insecure place',
+  short_name: 'INSECURE_PLACE'
+})
+const AWAY_FROM_REGISTERED_ADDRESS_30_DAYS_IN_YR = new BreachCategory({
+  id: 4,
+  label: 'dog away from registered address for over 30 days in one year',
+  short_name: 'AWAY_FROM_REGISTERED_ADDRESS_30_DAYS_IN_YR'
+})
+const EXEMPTION_NOT_PROVIDED_TO_POLICE = new BreachCategory({
+  id: 5,
+  label: 'exemption certificate not provided to police',
+  short_name: 'EXEMPTION_NOT_PROVIDED_TO_POLICE'
+})
+const INSURANCE_NOT_PROVIDED_TO_POLICE = new BreachCategory({
+  id: 6,
+  label: 'insurance evidence not provided to police',
+  short_name: 'INSURANCE_NOT_PROVIDED_TO_POLICE'
+})
+const POLICE_PREVENTED_FROM_READING_MICROCHIP = new BreachCategory({
+  id: 7,
+  label: 'owner not allowed police to read microchip',
+  short_name: 'POLICE_PREVENTED_FROM_READING_MICROCHIP'
+})
+const CHANGE_OF_REGISTERED_ADDRESS_NOT_PROVIDED = new BreachCategory({
+  id: 8,
+  label: 'change of registered address not provided to Defra',
+  short_name: 'CHANGE_OF_REGISTERED_ADDRESS_NOT_PROVIDED'
+})
+const DOG_DEATH_NOT_REPORTED = new BreachCategory({
+  id: 9,
+  label: 'death of dog not reported to Defra',
+  short_name: 'DOG_DEATH_NOT_REPORTED'
+})
+const DOG_EXPORT_NOT_REPORTED = new BreachCategory({
+  id: 10,
+  label: 'dog’s export not reported to Defra',
+  short_name: 'DOG_EXPORT_NOT_REPORTED'
+})
 
 const allBreaches = [
-  new BreachCategory({
-    id: 1,
-    label: 'dog not covered by third party insurance',
-    short_name: 'NOT_COVERED_BY_INSURANCE'
-  }),
-  new BreachCategory({
-    id: 2,
-    label: 'dog not kept on lead or muzzled',
-    short_name: 'NOT_ON_LEAD_OR_MUZZLED'
-  }),
-  new BreachCategory({
-    id: 3,
-    label: 'dog kept in insecure place',
-    short_name: 'INSECURE_PLACE'
-  }),
-  new BreachCategory({
-    id: 4,
-    label: 'dog away from registered address for over 30 days in one year',
-    short_name: 'AWAY_FROM_REGISTERED_ADDRESS_30_DAYS_IN_YR'
-  }),
-  new BreachCategory({
-    id: 5,
-    label: 'exemption certificate not provided to police',
-    short_name: 'EXEMPTION_NOT_PROVIDED_TO_POLICE'
-  }),
-  new BreachCategory({
-    id: 6,
-    label: 'insurance evidence not provided to police',
-    short_name: 'INSURANCE_NOT_PROVIDED_TO_POLICE'
-  }),
-  new BreachCategory({
-    id: 7,
-    label: 'owner not allowed police to read microchip',
-    short_name: 'POLICE_PREVENTED_FROM_READING_MICROCHIP'
-  }),
-  new BreachCategory({
-    id: 8,
-    label: 'change of registered address not provided to Defra',
-    short_name: 'CHANGE_OF_REGISTERED_ADDRESS_NOT_PROVIDED'
-  }),
-  new BreachCategory({
-    id: 9,
-    label: 'death of dog not reported to Defra',
-    short_name: 'DOG_DEATH_NOT_REPORTED'
-  }),
-  new BreachCategory({
-    id: 10,
-    label: 'dog’s export not reported to Defra',
-    short_name: 'DOG_EXPORT_NOT_REPORTED'
-  })
+  NOT_COVERED_BY_INSURANCE,
+  NOT_ON_LEAD_OR_MUZZLED,
+  INSECURE_PLACE,
+  AWAY_FROM_REGISTERED_ADDRESS_30_DAYS_IN_YR,
+  EXEMPTION_NOT_PROVIDED_TO_POLICE,
+  INSURANCE_NOT_PROVIDED_TO_POLICE,
+  POLICE_PREVENTED_FROM_READING_MICROCHIP,
+  CHANGE_OF_REGISTERED_ADDRESS_NOT_PROVIDED,
+  DOG_DEATH_NOT_REPORTED,
+  DOG_EXPORT_NOT_REPORTED
 ]
 
 module.exports = {
@@ -190,5 +218,15 @@ module.exports = {
   buildExemption,
   buildCdo,
   buildTask,
-  allBreaches
+  allBreaches,
+  NOT_COVERED_BY_INSURANCE,
+  NOT_ON_LEAD_OR_MUZZLED,
+  INSECURE_PLACE,
+  AWAY_FROM_REGISTERED_ADDRESS_30_DAYS_IN_YR,
+  EXEMPTION_NOT_PROVIDED_TO_POLICE,
+  INSURANCE_NOT_PROVIDED_TO_POLICE,
+  POLICE_PREVENTED_FROM_READING_MICROCHIP,
+  CHANGE_OF_REGISTERED_ADDRESS_NOT_PROVIDED,
+  DOG_DEATH_NOT_REPORTED,
+  DOG_EXPORT_NOT_REPORTED
 }

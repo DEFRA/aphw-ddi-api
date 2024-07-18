@@ -41,6 +41,24 @@ const { updateMicrochip } = require('./microchip')
  */
 
 /**
+ * @typedef BreachCategoryDao
+ * @property {number} id
+ * @property {string} label
+ * @property {string} short_name
+ */
+
+/**
+ * @typedef DogBreachDao
+ * @property {number} id
+ * @property {number} dog_id
+ * @property {number} breach_category_id
+ * @property {BreachCategoryDao} breach_category
+ * @property {string} updated_at
+ * @property {string} created_at
+ * @property {null|string} deleted_at
+ */
+
+/**
  * @typedef InsuranceDao
  * @property {number} id
  * @property {null|string} policy_number
@@ -138,6 +156,7 @@ const { updateMicrochip } = require('./microchip')
  * @property {DogBreedDao} dog_breed
  * @property {number} dog_breed_id
  * @property {DogMicrochipDao[]} dog_microchips
+ * @property {DogBreachDao[]} dog_breaches
  * @property {string} dog_reference
  * @property {null|string} exported_date
  * @property {InsuranceDao[]} insurance

@@ -16,6 +16,7 @@ const { removeDogFromSearchIndex } = require('../../../../../app/repos/search')
 
 jest.mock('../../../../../app/messaging/send-audit')
 const { sendDeleteToAudit, sendPermanentDeleteToAudit } = require('../../../../../app/messaging/send-audit')
+const { buildDogDao } = require('../../../../mocks/cdo/get')
 
 const devUser = {
   username: 'dev-user@test.com',
@@ -951,6 +952,17 @@ describe('Dog repo', () => {
     test('should reverse order', () => {
       const res = customSort('mycol', [3, 5, 7], 'ASC')
       expect(res).toBe('mycol=7,mycol=5,mycol=3')
+    })
+  })
+
+  describe('getDogModel', () => {
+    test('should get dog model', async () => {
+      const dog = buildDogDao()
+      sequelize.models.dog.findOne.mockResolvedValue(dog)
+      const res = await getDogModel('ED123', {})
+      expect(sequelize.models.dog.findOne).toHaveBeenCalledTimes(1)
+      expect(res).not.toBe(null)
+      expect(res.id).toBe(123)
     })
   })
 })

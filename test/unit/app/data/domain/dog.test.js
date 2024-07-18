@@ -1,9 +1,8 @@
-const Dog = require('../../../../../app/data/domain/dog')
+const { Dog, BreachCategory } = require('../../../../../app/data/domain')
 const { buildCdoDog } = require('../../../../mocks/cdo/domain')
 const { DuplicateResourceError } = require('../../../../../app/errors/duplicate-record')
 const { InvalidDataError } = require('../../../../../app/errors/domain/invalidData')
 const { allBreaches } = require('../../../../mocks/cdo/domain')
-const { BreachCategory } = require('../../../../../app/data/domain/breachCategory')
 
 describe('Dog', () => {
   test('should create a dog', () => {
@@ -136,22 +135,8 @@ describe('Dog', () => {
       ])
       expect(dog.getChanges()).toEqual([
         {
-          key: 'breaches',
-          value: {
-            status: 'In breach',
-            categories: [
-              {
-                id: 2,
-                label: 'dog not kept on lead or muzzled',
-                short_name: 'NOT_ON_LEAD_OR_MUZZLED'
-              },
-              {
-                id: 4,
-                label: 'dog away from registered address for over 30 days in one year',
-                short_name: 'AWAY_FROM_REGISTERED_ADDRESS_30_DAYS_IN_YR'
-              }
-            ]
-          },
+          key: 'status',
+          value: 'In breach',
           callback
         }
       ])
