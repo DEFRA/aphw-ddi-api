@@ -1,22 +1,23 @@
+const { BreachCategory } = require('../../../../app/data/domain/breachCategory')
 /**
  * @type {BreachCategory[]}
  */
 const mockBreachCategories = [
-  {
+  new BreachCategory({
     id: 1,
-    label: 'Dog not covered by third party insurance',
+    label: 'dog not covered by third party insurance',
     short_name: 'NOT_COVERED_BY_INSURANCE'
-  },
-  {
+  }),
+  new BreachCategory({
     id: 2,
-    label: 'Dog not kept on lead or muzzled',
+    label: 'dog not kept on lead or muzzled',
     short_name: 'NOT_ON_LEAD_OR_MUZZLED'
-  },
-  {
+  }),
+  new BreachCategory({
     id: 3,
-    label: 'Dog kept in insecure place',
+    label: 'dog kept in insecure place',
     short_name: 'INSECURE_PLACE'
-  }
+  })
 ]
 
 describe('Breaches repo', () => {
@@ -36,7 +37,7 @@ describe('Breaches repo', () => {
     jest.clearAllMocks()
   })
 
-  test('getCountries should return countries', async () => {
+  test('getBreachCategories should return breaches', async () => {
     sequelize.models.breach_category.findAll.mockResolvedValue(mockBreachCategories)
 
     const res = await getBreachCategories()
