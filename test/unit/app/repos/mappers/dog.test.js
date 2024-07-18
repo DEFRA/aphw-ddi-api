@@ -1,6 +1,7 @@
 const { buildDogBreachDao, buildBreachCategoryDao } = require('../../../../mocks/cdo/get')
 const { BreachCategory } = require('../../../../../app/data/domain')
 const { mapDogBreachDaoToBreachCategory } = require('../../../../../app/repos/mappers/dog')
+
 describe('mapDogBreachDaoToBreachCategory', () => {
   test('should map a DogBreachDao to a DogBreach', () => {
     const dogBreachDao = buildDogBreachDao({

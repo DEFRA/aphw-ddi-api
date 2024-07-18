@@ -303,13 +303,14 @@ const buildCdoDao = (cdoPartial = {}) => ({
   registration: buildRegistrationDao(),
   insurance: [],
   dog_microchips: [],
+  dog_breaches: [],
   ...cdoPartial
 })
 
 const cdo = buildCdoDao()
 
 /**
- * @param {Partial<BreachCategoryDao>} dogBreachCategory
+ * @param {Partial<BreachCategoryDao>} breachCategory
  * @return {BreachCategoryDao}
  */
 const buildBreachCategoryDao = (breachCategory = {}) => ({
@@ -323,6 +324,10 @@ const NOT_COVERED_BY_INSURANCE = buildBreachCategoryDao({ id: 1, label: 'dog not
 const INSECURE_PLACE = buildBreachCategoryDao({ id: 3, label: 'dog kept in insecure place', short_name: 'INSECURE_PLACE' })
 const AWAY_FROM_REGISTERED_ADDRESS_30_DAYS_IN_YR = buildBreachCategoryDao({ id: 4, label: 'dog away from registered address for over 30 days in one year', short_name: 'AWAY_FROM_REGISTERED_ADDRESS_30_DAYS_IN_YR' })
 
+/**
+ * @param {Partial<DogBreachDao>} dogBreach
+ * @return {DogBreachDao}
+ */
 const buildDogBreachDao = (dogBreach) => ({
   id: 2,
   dog_id: 300097,
@@ -472,5 +477,9 @@ module.exports = {
   buildDogDao,
   dogBreachDAOs,
   allBreachDAOs,
-  buildDogBreachDao
+  buildDogBreachDao,
+  buildBreachCategoryDao,
+  NOT_COVERED_BY_INSURANCE,
+  INSECURE_PLACE,
+  AWAY_FROM_REGISTERED_ADDRESS_30_DAYS_IN_YR
 }
