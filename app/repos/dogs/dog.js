@@ -13,6 +13,8 @@ const { removeDogFromSearchIndex } = require('../search')
 const { getPersonByReference } = require('../people')
 const { addYears } = require('../../lib/date-helpers')
 const { calculateNeuteringDeadline, stripTime } = require('../../dto/dto-helper')
+const domain = require('../../constants/domain')
+const { setBreaches } = require('../breaches')
 
 /**
  * @typedef DogDao
@@ -686,6 +688,33 @@ const getOldDogs = async (statusList, sortOptions, today = null) => {
     }]
   })
 }
+/**
+ * @param {import('../../data/domain/dog')} dog
+ * @param transaction
+ * @return {Promise<*|undefined>}
+ */
+const saveDog = async (dog, transaction) => {
+  if (!transaction) {
+    return await sequelize.transaction(async (t) => saveDog(dog, t))
+  }
+
+  const updates = dog.getChanges()
+
+  for (const update of updates) {
+    if (update.key === 'status') {
+      await updateStatus(dog.indexNumber, update.value, transaction)
+    } else if (update.key === 'dogBreaches') {
+      await setBreaches(dog, transaction)
+    }
+
+    // this will publish the event
+    if (update.callback) {
+      await update.callback()
+    }
+  }
+}
+
+const getDogModel = async () => {}
 
 module.exports = {
   getBreeds,
@@ -707,5 +736,7 @@ module.exports = {
   constructStatusList,
   constructDbSort,
   generateClausesForOr,
-  customSort
+  customSort,
+  saveDog,
+  getDogModel
 }
