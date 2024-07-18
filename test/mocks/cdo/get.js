@@ -308,6 +308,135 @@ const buildCdoDao = (cdoPartial = {}) => ({
 
 const cdo = buildCdoDao()
 
+/**
+ * @param {Partial<BreachCategory>} dogBreachCategory
+ * @return {BreachCategory}
+ */
+const buildBreachCategory = (breachCategory = {}) => ({
+  id: 4,
+  label: 'dog away from registered address for over 30 days in one year',
+  short_name: 'AWAY_FROM_REGISTERED_ADDRESS_30_DAYS_IN_YR',
+  ...breachCategory
+})
+
+const NOT_COVERED_BY_INSURANCE = buildBreachCategory({ id: 1, label: 'dog not covered by third party insurance', short_name: 'NOT_COVERED_BY_INSURANCE' })
+const INSECURE_PLACE = buildBreachCategory({ id: 3, label: 'dog kept in insecure place', short_name: 'INSECURE_PLACE' })
+const AWAY_FROM_REGISTERED_ADDRESS_30_DAYS_IN_YR = buildBreachCategory({ id: 4, label: 'dog away from registered address for over 30 days in one year', short_name: 'AWAY_FROM_REGISTERED_ADDRESS_30_DAYS_IN_YR' })
+
+const buildDogBreach = (dogBreach) => ({
+  id: 2,
+  dog_id: 300097,
+  breach_category_id: 4,
+  created_at: '2024-07-17T18:04:29.075Z',
+  deleted_at: null,
+  updated_at: null,
+  breach_category: buildBreachCategory(),
+  ...dogBreach
+})
+
+const dogBreaches = [
+  buildDogBreach({
+    id: 1,
+    breach_category_id: 1,
+    breach_category: NOT_COVERED_BY_INSURANCE
+  }),
+  buildDogBreach({
+    id: 2,
+    breach_category_id: 3,
+    breach_category: INSECURE_PLACE
+  }),
+  buildDogBreach({
+    id: 3,
+    breach_category_id: 4,
+    breach_category: AWAY_FROM_REGISTERED_ADDRESS_30_DAYS_IN_YR
+  })
+]
+
+const allBreaches = [
+  buildBreachCategory({
+    id: 1,
+    label: 'dog not covered by third party insurance',
+    short_name: 'NOT_COVERED_BY_INSURANCE'
+  }),
+  buildBreachCategory({
+    id: 2,
+    label: 'dog not kept on lead or muzzled',
+    short_name: 'NOT_ON_LEAD_OR_MUZZLED'
+  }),
+  buildBreachCategory({
+    id: 3,
+    label: 'dog kept in insecure place',
+    short_name: 'INSECURE_PLACE'
+  }),
+  buildBreachCategory({
+    id: 4,
+    label: 'dog away from registered address for over 30 days in one year',
+    short_name: 'AWAY_FROM_REGISTERED_ADDRESS_30_DAYS_IN_YR'
+  }),
+  buildBreachCategory({
+    id: 5,
+    label: 'exemption certificate not provided to police',
+    short_name: 'EXEMPTION_NOT_PROVIDED_TO_POLICE'
+  }),
+  buildBreachCategory({
+    id: 6,
+    label: 'insurance evidence not provided to police',
+    short_name: 'INSURANCE_NOT_PROVIDED_TO_POLICE'
+  }),
+  buildBreachCategory({
+    id: 7,
+    label: 'owner not allowed police to read microchip',
+    short_name: 'POLICE_PREVENTED_FROM_READING_MICROCHIP'
+  }),
+  buildBreachCategory({
+    id: 8,
+    label: 'change of registered address not provided to Defra',
+    short_name: 'CHANGE_OF_REGISTERED_ADDRESS_NOT_PROVIDED'
+  }),
+  buildBreachCategory({
+    id: 9,
+    label: 'death of dog not reported to Defra',
+    short_name: 'DOG_DEATH_NOT_REPORTED'
+  }),
+  buildBreachCategory({
+    id: 10,
+    label: 'dog’s export not reported to Defra',
+    short_name: 'DOG_EXPORT_NOT_REPORTED'
+  })
+]
+
+/**
+ * @param {Partial<DogDao>} dogDao
+ * @return {DogDao}
+ */
+const buildDogDao = (dogDao = {}) => ({
+  id: 300097,
+  dog_reference: '5270aad5-77d1-47ce-b41d-99a6e8f6e5fe',
+  index_number: 'ED300097',
+  dog_breed_id: 1,
+  status_id: 4,
+  name: 'Rex300',
+  birth_date: null,
+  death_date: null,
+  tattoo: null,
+  colour: null,
+  sex: null,
+  exported_date: null,
+  stolen_date: null,
+  untraceable_date: null,
+  created_at: '2024-06-24T09:12:07.814Z',
+  deleted_at: null,
+  updated_at: '2024-06-24T09:12:07.885Z',
+  registered_person: [
+    buildRegisteredPersonDao()
+  ],
+  dog_breed: buildDogBreedDao(),
+  status: buildStatusDao(),
+  dog_microchips: [],
+  dog_breaches: [],
+  ...dogDao
+})
+
 module.exports = {
   buildCountryDao,
   country,
@@ -339,5 +468,8 @@ module.exports = {
   buildInsuranceDao,
   insurance,
   buildCdoDao,
-  cdo
+  cdo,
+  buildDogDao,
+  dogBreaches,
+  allBreaches
 }

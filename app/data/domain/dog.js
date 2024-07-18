@@ -21,6 +21,7 @@ class Dog extends Changeable {
     this.dateUntraceable = dogProperties.dateUntraceable
     this._microchipNumber = dogProperties.microchipNumber
     this.microchipNumber2 = dogProperties.microchipNumber2
+    this._breaches = dogProperties.dogBreaches
   }
 
   get microchipNumber () {
@@ -55,6 +56,26 @@ class Dog extends Changeable {
   setStatus (status, callback) {
     this._updates.update('status', status, callback)
     this._status = status
+  }
+
+  get breaches () {
+    return this._breaches
+  }
+
+  setBreaches (breaches, allDogBreaches, callback) {
+    const dogBreachDictionary = allDogBreaches.reduce((dogBreachDict, breach) => {
+      return {
+        ...dogBreachDict,
+        [breach.short_name]: breach
+      }
+    }, {})
+    this._status = 'In breach'
+    const matchedBreachCategories = breaches.map(breach => dogBreachDictionary[breach])
+    this._breaches = matchedBreachCategories
+    this._updates.update('breaches', {
+      status: 'In breach',
+      categories: matchedBreachCategories
+    }, callback)
   }
 }
 
