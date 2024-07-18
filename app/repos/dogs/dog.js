@@ -13,8 +13,8 @@ const { removeDogFromSearchIndex } = require('../search')
 const { getPersonByReference } = require('../people')
 const { addYears } = require('../../lib/date-helpers')
 const { calculateNeuteringDeadline, stripTime } = require('../../dto/dto-helper')
-const domain = require('../../constants/domain')
 const { setBreaches } = require('../breaches')
+const { mapDogDaoToDog } = require('../mappers/cdo')
 
 /**
  * @typedef DogDao
@@ -714,7 +714,10 @@ const saveDog = async (dog, transaction) => {
   }
 }
 
-const getDogModel = async () => {}
+const getDogModel = async (indexNumber, t) => {
+  const dogDao = await getDogByIndexNumber(indexNumber, t)
+  return mapDogDaoToDog(dogDao)
+}
 
 module.exports = {
   getBreeds,

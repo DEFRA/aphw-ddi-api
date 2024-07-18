@@ -54,7 +54,7 @@ const domain = require('../constants/domain')
  * @property {number} dog_id
  * @property {number} breach_category_id
  * @property {BreachCategoryDao} breach_category
- * @property {string} updated_at
+ * @property {string|null} updated_at
  * @property {string} created_at
  * @property {null|string} deleted_at
  */

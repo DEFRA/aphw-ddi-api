@@ -60,6 +60,14 @@ const cdoRelationship = sequelize => [
       model: sequelize.models.microchip,
       as: 'microchip'
     }]
+  },
+  {
+    model: sequelize.models.dog_breach,
+    as: 'dog_breaches',
+    include: [{
+      model: sequelize.models.breach_category,
+      as: 'breach_category'
+    }]
   }
 ]
 

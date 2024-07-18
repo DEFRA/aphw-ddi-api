@@ -991,8 +991,12 @@ describe('Dog repo', () => {
   })
 
   describe('getDogModel', () => {
-    test('should instantiate', () => {
-      expect(getDogModel).toBeInstanceOf(Function)
+    test('should get dog model', async () => {
+      const dog = buildDogDao()
+      sequelize.models.dog.findOne.mockResolvedValue(dog)
+      const res = await getDogModel('ED123', {})
+      expect(sequelize.models.dog.findOne).toHaveBeenCalledTimes(1)
+      expect(res).toEqual(new Dog(buildCdoDog()))
     })
   })
 })
