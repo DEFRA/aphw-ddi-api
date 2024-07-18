@@ -2,7 +2,6 @@ const { BreachCategory } = require('../../../../app/data/domain')
 const { buildCdoDog, allBreaches, NOT_ON_LEAD_OR_MUZZLED, INSECURE_PLACE, AWAY_FROM_REGISTERED_ADDRESS_30_DAYS_IN_YR } = require('../../../mocks/cdo/domain')
 const { Dog } = require('../../../../app/data/domain')
 const { buildDogDao, buildDogBreachDao } = require('../../../mocks/cdo/get')
-const sequelize = require('../../../../app/config/db')
 /**
  * @type {BreachCategory[]}
  */
