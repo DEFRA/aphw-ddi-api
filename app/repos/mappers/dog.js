@@ -12,6 +12,12 @@ const mapDogBreachDaoToBreachCategory = (dogBreachDao) => {
 }
 
 /**
+ * @param {DogBreachDao} dogBreachDao
+ * @return {BreachDto}
+ */
+const mapDogBreachDaoToBreachDto = (dogBreachDao) => dogBreachDao.breach_category.label
+
+/**
  * @param {BreachCategory} breachCategory
  * @return {BreachDto}
  */
@@ -41,4 +47,4 @@ const mapDogToDogDto = (dog) => {
   }
 }
 
-module.exports = { mapDogBreachDaoToBreachCategory, mapDogToDogDto }
+module.exports = { mapDogBreachDaoToBreachCategory, mapDogToDogDto, mapDogBreachDaoToBreachDto }

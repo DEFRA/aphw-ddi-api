@@ -309,6 +309,8 @@ const updateDog = async (payload, user, transaction) => {
 
   updateDogFields(dogFromDB, payload, breeds, statuses)
 
+  await updateBreaches(dogFromDB, statuses, transaction)
+
   await updateMicrochips(dogFromDB, payload, transaction)
 
   await dogFromDB.save({ transaction })
@@ -322,6 +324,18 @@ const updateDog = async (payload, user, transaction) => {
   return dogFromDB
 }
 
+const updateBreaches = async (dog, statuses, transaction) => {
+  if (!transaction) {
+    return await sequelize.transaction(async (t) => updateBreaches(dog, t))
+  }
+  if (dog.status_id !== statuses.find(x => x.status === constants.statuses.InBreach).id) {
+    for (const dogBreach of dog.dog_breaches) {
+      await dogBreach.destroy({ force: true, transaction })
+    }
+  }
+  dog.dog_breaches = []
+}
+
 const updateStatus = async (indexNumber, newStatus, transaction) => {
   if (!transaction) {
     return await sequelize.transaction(async (t) => updateStatus(indexNumber, newStatus, t))
@@ -332,6 +346,8 @@ const updateStatus = async (indexNumber, newStatus, transaction) => {
   const dogFromDB = await getDogByIndexNumber(indexNumber, transaction)
 
   dogFromDB.status_id = statuses.filter(x => x.status === newStatus)[0].id
+
+  await updateBreaches(dogFromDB, statuses, transaction)
 
   await dogFromDB.save({ transaction })
 
@@ -732,6 +748,7 @@ module.exports = {
   getDogByIndexNumber,
   updateDogFields,
   updateMicrochips,
+  updateBreaches,
   updateStatus,
   deleteDogByIndexNumber,
   purgeDogByIndexNumber,

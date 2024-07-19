@@ -16,7 +16,7 @@ const { removeDogFromSearchIndex } = require('../../../../../app/repos/search')
 
 jest.mock('../../../../../app/messaging/send-audit')
 const { sendDeleteToAudit, sendPermanentDeleteToAudit } = require('../../../../../app/messaging/send-audit')
-const { buildDogDao } = require('../../../../mocks/cdo/get')
+const { buildDogDao, buildDogBreachDao } = require('../../../../mocks/cdo/get')
 const { Dog } = require('../../../../../app/data/domain')
 const { buildCdoDog, allBreaches } = require('../../../../mocks/cdo/domain')
 
@@ -84,7 +84,7 @@ describe('Dog repo', () => {
 
   const sequelize = require('../../../../../app/config/db')
 
-  const { getBreeds, getStatuses, createDogs, addImportedDog, getDogByIndexNumber, getAllDogIds, updateDog, updateStatus, updateDogFields, deleteDogByIndexNumber, switchOwnerIfNecessary, buildSwitchedOwner, recalcDeadlines, constructStatusList, constructDbSort, getOldDogs, generateClausesForOr, customSort, purgeDogByIndexNumber, saveDog, getDogModel } = require('../../../../../app/repos/dogs')
+  const { getBreeds, getStatuses, createDogs, addImportedDog, getDogByIndexNumber, getAllDogIds, updateDog, updateStatus, updateDogFields, deleteDogByIndexNumber, switchOwnerIfNecessary, buildSwitchedOwner, recalcDeadlines, constructStatusList, constructDbSort, getOldDogs, generateClausesForOr, customSort, purgeDogByIndexNumber, saveDog, getDogModel, updateBreaches } = require('../../../../../app/repos/dogs')
 
   beforeEach(async () => {
     jest.clearAllMocks()
@@ -543,7 +543,7 @@ describe('Dog repo', () => {
 
     test('updateDog should not create new transaction if one is passed', async () => {
       const mockSave = jest.fn()
-      sequelize.models.dog.findOne.mockResolvedValue({ id: 123, breed: 'Breed 1', name: 'Bruno', status: 'Failed', save: mockSave })
+      sequelize.models.dog.findOne.mockResolvedValue({ id: 123, breed: 'Breed 1', name: 'Bruno', status: 'Failed', save: mockSave, dog_breaches: [] })
       sequelize.models.microchip.findAll.mockResolvedValue([])
       sequelize.models.microchip.create.mockResolvedValue({ id: 101 })
       sequelize.models.search_index.findAll.mockResolvedValue([])
@@ -559,6 +559,47 @@ describe('Dog repo', () => {
     })
   })
 
+  describe('updateBreaches', () => {
+    test('updateBreaches should create new transaction if not passed', async () => {
+      const dog = {
+        id: 123,
+        breed: 'Breed 1',
+        name: 'Bruno',
+        status: 8,
+        dog_breaches: []
+      }
+
+      await updateBreaches(dog)
+
+      expect(sequelize.transaction).toHaveBeenCalledTimes(1)
+    })
+
+    test('updateBreaches should destroy dog breaches if status is not In breach', async () => {
+      const mockDestroy = jest.fn()
+      const dog = {
+        id: 123,
+        breed: 'Breed 1',
+        name: 'Bruno',
+        status_id: 4,
+        dog_breaches: [
+          buildDogBreachDao({
+            destroy: mockDestroy
+          }),
+          buildDogBreachDao({
+            destroy: mockDestroy
+          }),
+          buildDogBreachDao({
+            destroy: mockDestroy
+          })
+        ]
+      }
+
+      await updateBreaches(dog, [{ id: 8, status: 'In breach' }], {})
+
+      expect(mockDestroy).toHaveBeenCalledTimes(3)
+    })
+  })
+
   describe('updateStatus', () => {
     test('updateStatus should create new transaction if not passed', async () => {
       const mockSave = jest.fn()
@@ -571,7 +612,7 @@ describe('Dog repo', () => {
 
     test('updateStatus should not create new transaction if one is passed', async () => {
       const mockSave = jest.fn()
-      sequelize.models.dog.findOne.mockResolvedValue({ id: 123, breed: 'Breed 1', name: 'Bruno', save: mockSave })
+      sequelize.models.dog.findOne.mockResolvedValue({ id: 123, breed: 'Breed 1', name: 'Bruno', save: mockSave, dog_breaches: [] })
 
       await updateStatus('ED123', 'Failed', {})
 
