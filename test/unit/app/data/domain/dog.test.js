@@ -148,7 +148,7 @@ describe('Dog', () => {
               short_name: 'AWAY_FROM_REGISTERED_ADDRESS_30_DAYS_IN_YR'
             })
           ],
-          callback: expect.any(Function)
+          callback: undefined
         },
         {
           key: 'status',

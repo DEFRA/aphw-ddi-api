@@ -706,6 +706,8 @@ const saveDog = async (dog, transaction) => {
     } else if (update.key === 'dogBreaches') {
       const dogDao = await getDogByIndexNumber(dog.indexNumber, transaction)
       await setBreaches(dog, dogDao, transaction)
+    } else {
+      throw new Error('Not implemented')
     }
 
     // this will publish the event

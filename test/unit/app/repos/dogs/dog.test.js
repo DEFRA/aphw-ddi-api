@@ -989,6 +989,27 @@ describe('Dog repo', () => {
       expect(saveDogMock).toHaveBeenCalled()
       expect(callback).toHaveBeenCalled()
     })
+
+    test('should reject with not implemented error with an unhandled change request', async () => {
+      const dogDao = buildDogDao({
+        save: jest.fn()
+      })
+      sequelize.models.dog.findOne.mockResolvedValue(dogDao)
+      const dog = new Dog(buildCdoDog({}))
+      const breaches = [
+        'NOT_ON_LEAD_OR_MUZZLED',
+        'AWAY_FROM_REGISTERED_ADDRESS_30_DAYS_IN_YR'
+      ]
+      const callback = jest.fn()
+      dog.setBreaches(breaches, allBreaches, callback)
+      dog._updates._changes.push({
+        key: 'unknown',
+        value: {},
+        callback: undefined
+      })
+
+      await expect(saveDog(dog, {})).rejects.toThrow(new Error('Not implemented'))
+    })
   })
 
   describe('getDogModel', () => {

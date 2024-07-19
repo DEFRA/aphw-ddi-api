@@ -82,7 +82,7 @@ describe('DogService', function () {
         {
           key: 'dogBreaches',
           value: expectedBreaches,
-          callback: expect.any(Function)
+          callback: undefined
         },
         {
           key: 'status',
@@ -156,7 +156,7 @@ describe('DogService', function () {
         {
           key: 'dogBreaches',
           value: expectedBreaches,
-          callback: expect.any(Function)
+          callback: undefined
         },
         {
           key: 'status',
