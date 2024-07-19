@@ -162,10 +162,10 @@ const INSECURE_PLACE = new BreachCategory({
   label: 'dog kept in insecure place',
   short_name: 'INSECURE_PLACE'
 })
-const AWAY_FROM_REGISTERED_ADDRESS_30_DAYS_IN_YR = new BreachCategory({
+const AWAY_FROM_ADDR_30_DAYS_IN_YR = new BreachCategory({
   id: 4,
   label: 'dog away from registered address for over 30 days in one year',
-  short_name: 'AWAY_FROM_REGISTERED_ADDRESS_30_DAYS_IN_YR'
+  short_name: 'AWAY_FROM_ADDR_30_DAYS_IN_YR'
 })
 const EXEMPTION_NOT_PROVIDED_TO_POLICE = new BreachCategory({
   id: 5,
@@ -177,15 +177,15 @@ const INSURANCE_NOT_PROVIDED_TO_POLICE = new BreachCategory({
   label: 'insurance evidence not provided to police',
   short_name: 'INSURANCE_NOT_PROVIDED_TO_POLICE'
 })
-const POLICE_PREVENTED_FROM_READING_MICROCHIP = new BreachCategory({
+const MICROCHIP_NOT_READ_BY_POLICE = new BreachCategory({
   id: 7,
   label: 'owner not allowed police to read microchip',
-  short_name: 'POLICE_PREVENTED_FROM_READING_MICROCHIP'
+  short_name: 'MICROCHIP_NOT_READ_BY_POLICE'
 })
-const CHANGE_OF_REGISTERED_ADDRESS_NOT_PROVIDED = new BreachCategory({
+const NO_CHANGE_OF_REG_ADDRESS = new BreachCategory({
   id: 8,
   label: 'change of registered address not provided to Defra',
-  short_name: 'CHANGE_OF_REGISTERED_ADDRESS_NOT_PROVIDED'
+  short_name: 'NO_CHANGE_OF_REG_ADDRESS'
 })
 const DOG_DEATH_NOT_REPORTED = new BreachCategory({
   id: 9,
@@ -202,11 +202,11 @@ const allBreaches = [
   NOT_COVERED_BY_INSURANCE,
   NOT_ON_LEAD_OR_MUZZLED,
   INSECURE_PLACE,
-  AWAY_FROM_REGISTERED_ADDRESS_30_DAYS_IN_YR,
+  AWAY_FROM_ADDR_30_DAYS_IN_YR,
   EXEMPTION_NOT_PROVIDED_TO_POLICE,
   INSURANCE_NOT_PROVIDED_TO_POLICE,
-  POLICE_PREVENTED_FROM_READING_MICROCHIP,
-  CHANGE_OF_REGISTERED_ADDRESS_NOT_PROVIDED,
+  MICROCHIP_NOT_READ_BY_POLICE,
+  NO_CHANGE_OF_REG_ADDRESS,
   DOG_DEATH_NOT_REPORTED,
   DOG_EXPORT_NOT_REPORTED
 ]
@@ -222,11 +222,11 @@ module.exports = {
   NOT_COVERED_BY_INSURANCE,
   NOT_ON_LEAD_OR_MUZZLED,
   INSECURE_PLACE,
-  AWAY_FROM_REGISTERED_ADDRESS_30_DAYS_IN_YR,
+  AWAY_FROM_ADDR_30_DAYS_IN_YR,
   EXEMPTION_NOT_PROVIDED_TO_POLICE,
   INSURANCE_NOT_PROVIDED_TO_POLICE,
-  POLICE_PREVENTED_FROM_READING_MICROCHIP,
-  CHANGE_OF_REGISTERED_ADDRESS_NOT_PROVIDED,
+  MICROCHIP_NOT_READ_BY_POLICE,
+  NO_CHANGE_OF_REG_ADDRESS,
   DOG_DEATH_NOT_REPORTED,
   DOG_EXPORT_NOT_REPORTED
 }

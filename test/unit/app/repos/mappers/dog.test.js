@@ -2,7 +2,7 @@ const { buildDogBreachDao, buildBreachCategoryDao } = require('../../../../mocks
 const { BreachCategory, Dog } = require('../../../../../app/data/domain')
 const { mapDogBreachDaoToBreachCategory, mapDogToDogDto } = require('../../../../../app/repos/mappers/dog')
 const { buildDogDto } = require('../../../../mocks/cdo/dto')
-const { buildCdoDog, NOT_COVERED_BY_INSURANCE, INSECURE_PLACE, AWAY_FROM_REGISTERED_ADDRESS_30_DAYS_IN_YR } = require('../../../../mocks/cdo/domain')
+const { buildCdoDog, NOT_COVERED_BY_INSURANCE, INSECURE_PLACE, AWAY_FROM_ADDR_30_DAYS_IN_YR } = require('../../../../mocks/cdo/domain')
 
 describe('dog mappers', () => {
   describe('mapDogBreachDaoToBreachCategory', () => {
@@ -30,7 +30,7 @@ describe('dog mappers', () => {
         dogBreaches: [
           NOT_COVERED_BY_INSURANCE,
           INSECURE_PLACE,
-          AWAY_FROM_REGISTERED_ADDRESS_30_DAYS_IN_YR
+          AWAY_FROM_ADDR_30_DAYS_IN_YR
         ]
       }))
 

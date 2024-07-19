@@ -3,7 +3,7 @@ const { buildDogDto, buildBreachDto } = require('../../../../mocks/cdo/dto')
 const {
   NOT_COVERED_BY_INSURANCE,
   INSECURE_PLACE,
-  AWAY_FROM_REGISTERED_ADDRESS_30_DAYS_IN_YR
+  AWAY_FROM_ADDR_30_DAYS_IN_YR
 } = require('../../../../mocks/cdo/domain')
 
 describe('breaches schema', () => {
@@ -71,7 +71,7 @@ describe('breaches schema', () => {
         breaches: [
           buildBreachDto(NOT_COVERED_BY_INSURANCE),
           buildBreachDto(INSECURE_PLACE),
-          buildBreachDto(AWAY_FROM_REGISTERED_ADDRESS_30_DAYS_IN_YR)
+          buildBreachDto(AWAY_FROM_ADDR_30_DAYS_IN_YR)
         ]
       })
       const { value, error } = setBreachResponseSchema.validate(payload)
@@ -85,7 +85,7 @@ describe('breaches schema', () => {
           breaches: [
             buildBreachDto(NOT_COVERED_BY_INSURANCE),
             buildBreachDto(INSECURE_PLACE),
-            buildBreachDto(AWAY_FROM_REGISTERED_ADDRESS_30_DAYS_IN_YR)
+            buildBreachDto(AWAY_FROM_ADDR_30_DAYS_IN_YR)
           ]
         }),
         extraField: true

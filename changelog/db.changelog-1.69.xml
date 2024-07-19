@@ -11,7 +11,7 @@
       <column name="label" type="VARCHAR(80)">
         <constraints nullable="false" unique="true" uniqueConstraintName="breach_category_label_ukey" />
       </column>
-      <column name="short_name" type="VARCHAR(80)">
+      <column name="short_name" type="VARCHAR(35)">
         <constraints nullable="false" unique="true" uniqueConstraintName="breach_category_short_name_ukey" />
       </column>
     </createTable>
@@ -51,7 +51,7 @@
     </insert>
     <insert tableName="breach_category">
       <column name="label" value="dog away from registered address for over 30 days in one year" />
-      <column name="short_name" value="AWAY_FROM_REGISTERED_ADDRESS_30_DAYS_IN_YR" />
+      <column name="short_name" value="AWAY_FROM_ADDR_30_DAYS_IN_YR" />
     </insert>
     <insert tableName="breach_category">
       <column name="label" value="exemption certificate not provided to police" />
@@ -63,11 +63,11 @@
     </insert>
     <insert tableName="breach_category">
       <column name="label" value="owner not allowed police to read microchip" />
-      <column name="short_name" value="POLICE_PREVENTED_FROM_READING_MICROCHIP" />
+      <column name="short_name" value="MICROCHIP_NOT_READ_BY_POLICE" />
     </insert>
     <insert tableName="breach_category">
       <column name="label" value="change of registered address not provided to Defra" />
-      <column name="short_name" value="CHANGE_OF_REGISTERED_ADDRESS_NOT_PROVIDED" />
+      <column name="short_name" value="NO_CHANGE_OF_REG_ADDRESS" />
     </insert>
     <insert tableName="breach_category">
       <column name="label" value="death of dog not reported to Defra" />

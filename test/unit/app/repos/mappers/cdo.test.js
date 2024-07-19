@@ -8,7 +8,7 @@ const {
 } = require('../../../../mocks/cdo/get')
 const {
   buildCdo, buildExemption, buildCdoInsurance, NOT_COVERED_BY_INSURANCE, INSECURE_PLACE,
-  AWAY_FROM_REGISTERED_ADDRESS_30_DAYS_IN_YR
+  AWAY_FROM_ADDR_30_DAYS_IN_YR
 } = require('../../../../mocks/cdo/domain')
 const { Exemption } = require('../../../../../app/data/domain')
 
@@ -227,7 +227,7 @@ describe('cdo mappers', () => {
       const expectedBreachCategories = [
         NOT_COVERED_BY_INSURANCE,
         INSECURE_PLACE,
-        AWAY_FROM_REGISTERED_ADDRESS_30_DAYS_IN_YR
+        AWAY_FROM_ADDR_30_DAYS_IN_YR
       ]
       const dog = mapDogDaoToDog(dogDao)
       expect(dog.breaches).toEqual(expectedBreachCategories)

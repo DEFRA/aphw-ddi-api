@@ -1,7 +1,7 @@
 const { Changeable } = require('./changeable')
 const { DuplicateResourceError } = require('../../errors/duplicate-record')
 const { InvalidDataError } = require('../../errors/domain/invalidData')
-
+const { statuses } = require('../../constants/statuses')
 /**
  * @property {number} id
  * @property {string|null} dogReference = dogProperties.dogReference
@@ -95,7 +95,7 @@ class Dog extends Changeable {
     const dogBreachBreaches = breaches.map(breach => dogBreachDictionary[breach])
     this._breaches = dogBreachBreaches
     this._updates.update('dogBreaches', dogBreachBreaches, undefined)
-    this.setStatus('In breach', callback)
+    this.setStatus(statuses.InBreach, callback)
   }
 }
 

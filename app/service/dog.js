@@ -1,5 +1,6 @@
 const { sendUpdateToAudit } = require('../messaging/send-audit')
 const { DOG } = require('../constants/event/audit-event-object-types')
+const { statuses } = require('../constants/statuses')
 
 class DogService {
   constructor (dogRepository, breachesRepository) {
@@ -22,14 +23,14 @@ class DogService {
 
     const preAuditDog = {
       index_number: dogIndex,
-      status: dog.status === 'In breach' ? '' : dog.status,
+      status: dog.status === statuses.InBreach ? '' : dog.status,
       dog_breaches: []
     }
 
     const callback = async () => {
       const postAuditDog = {
         index_number: dogIndex,
-        status: 'In breach',
+        status: statuses.InBreach,
         dog_breaches: dog.breaches.map(mapBreach)
       }
       await sendUpdateToAudit(DOG, preAuditDog, postAuditDog, user)

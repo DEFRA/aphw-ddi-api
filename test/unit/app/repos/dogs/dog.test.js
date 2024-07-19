@@ -976,7 +976,7 @@ describe('Dog repo', () => {
       const dog = new Dog(buildCdoDog({}))
       const breaches = [
         'NOT_ON_LEAD_OR_MUZZLED',
-        'AWAY_FROM_REGISTERED_ADDRESS_30_DAYS_IN_YR'
+        'AWAY_FROM_ADDR_30_DAYS_IN_YR'
       ]
       const callback = jest.fn()
       dog.setBreaches(breaches, allBreaches, callback)
@@ -998,7 +998,7 @@ describe('Dog repo', () => {
       const dog = new Dog(buildCdoDog({}))
       const breaches = [
         'NOT_ON_LEAD_OR_MUZZLED',
-        'AWAY_FROM_REGISTERED_ADDRESS_30_DAYS_IN_YR'
+        'AWAY_FROM_ADDR_30_DAYS_IN_YR'
       ]
       const callback = jest.fn()
       dog.setBreaches(breaches, allBreaches, callback)

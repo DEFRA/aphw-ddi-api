@@ -316,13 +316,13 @@ const cdo = buildCdoDao()
 const buildBreachCategoryDao = (breachCategory = {}) => ({
   id: 4,
   label: 'dog away from registered address for over 30 days in one year',
-  short_name: 'AWAY_FROM_REGISTERED_ADDRESS_30_DAYS_IN_YR',
+  short_name: 'AWAY_FROM_ADDR_30_DAYS_IN_YR',
   ...breachCategory
 })
 
 const NOT_COVERED_BY_INSURANCE = buildBreachCategoryDao({ id: 1, label: 'dog not covered by third party insurance', short_name: 'NOT_COVERED_BY_INSURANCE' })
 const INSECURE_PLACE = buildBreachCategoryDao({ id: 3, label: 'dog kept in insecure place', short_name: 'INSECURE_PLACE' })
-const AWAY_FROM_REGISTERED_ADDRESS_30_DAYS_IN_YR = buildBreachCategoryDao({ id: 4, label: 'dog away from registered address for over 30 days in one year', short_name: 'AWAY_FROM_REGISTERED_ADDRESS_30_DAYS_IN_YR' })
+const AWAY_FROM_ADDR_30_DAYS_IN_YR = buildBreachCategoryDao({ id: 4, label: 'dog away from registered address for over 30 days in one year', short_name: 'AWAY_FROM_ADDR_30_DAYS_IN_YR' })
 
 /**
  * @param {Partial<DogBreachDao>} dogBreach
@@ -353,7 +353,7 @@ const dogBreachDAOs = [
   buildDogBreachDao({
     id: 3,
     breach_category_id: 4,
-    breach_category: AWAY_FROM_REGISTERED_ADDRESS_30_DAYS_IN_YR
+    breach_category: AWAY_FROM_ADDR_30_DAYS_IN_YR
   })
 ]
 
@@ -376,7 +376,7 @@ const allBreachDAOs = [
   buildBreachCategoryDao({
     id: 4,
     label: 'dog away from registered address for over 30 days in one year',
-    short_name: 'AWAY_FROM_REGISTERED_ADDRESS_30_DAYS_IN_YR'
+    short_name: 'AWAY_FROM_ADDR_30_DAYS_IN_YR'
   }),
   buildBreachCategoryDao({
     id: 5,
@@ -391,12 +391,12 @@ const allBreachDAOs = [
   buildBreachCategoryDao({
     id: 7,
     label: 'owner not allowed police to read microchip',
-    short_name: 'POLICE_PREVENTED_FROM_READING_MICROCHIP'
+    short_name: 'MICROCHIP_NOT_READ_BY_POLICE'
   }),
   buildBreachCategoryDao({
     id: 8,
     label: 'change of registered address not provided to Defra',
-    short_name: 'CHANGE_OF_REGISTERED_ADDRESS_NOT_PROVIDED'
+    short_name: 'NO_CHANGE_OF_REG_ADDRESS'
   }),
   buildBreachCategoryDao({
     id: 9,
@@ -481,5 +481,5 @@ module.exports = {
   buildBreachCategoryDao,
   NOT_COVERED_BY_INSURANCE,
   INSECURE_PLACE,
-  AWAY_FROM_REGISTERED_ADDRESS_30_DAYS_IN_YR
+  AWAY_FROM_ADDR_30_DAYS_IN_YR
 }

@@ -3,7 +3,7 @@ const { buildDogDto, buildBreachDto } = require('../../../mocks/cdo/dto')
 const {
   NOT_COVERED_BY_INSURANCE,
   INSECURE_PLACE,
-  AWAY_FROM_REGISTERED_ADDRESS_30_DAYS_IN_YR, buildCdoDog
+  AWAY_FROM_ADDR_30_DAYS_IN_YR, buildCdoDog
 } = require('../../../mocks/cdo/domain')
 const { Dog } = require('../../../../app/data/domain')
 describe('Breaches endpoint', () => {
@@ -65,7 +65,7 @@ describe('Breaches endpoint', () => {
         dogBreaches: [
           NOT_COVERED_BY_INSURANCE,
           INSECURE_PLACE,
-          AWAY_FROM_REGISTERED_ADDRESS_30_DAYS_IN_YR
+          AWAY_FROM_ADDR_30_DAYS_IN_YR
         ]
       }))
       const setBreachesMock = jest.fn(async () => dog)
@@ -92,7 +92,7 @@ describe('Breaches endpoint', () => {
         breaches: [
           buildBreachDto(NOT_COVERED_BY_INSURANCE),
           buildBreachDto(INSECURE_PLACE),
-          buildBreachDto(AWAY_FROM_REGISTERED_ADDRESS_30_DAYS_IN_YR)
+          buildBreachDto(AWAY_FROM_ADDR_30_DAYS_IN_YR)
         ]
       }))
 
