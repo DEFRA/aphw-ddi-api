@@ -22,8 +22,8 @@ class DogService {
 
     const preAuditDog = {
       index_number: dogIndex,
-      status: dog.status,
-      dog_breaches: dog.breaches.map(mapBreach)
+      status: dog.status === 'In breach' ? '' : dog.status,
+      dog_breaches: []
     }
 
     const callback = async () => {
