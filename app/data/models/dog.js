@@ -120,6 +120,11 @@ module.exports = (sequelize, DataTypes) => {
       foreignKey: 'dog_id'
     })
 
+    dog.hasMany(models.dog_breach, {
+      as: 'dog_breaches',
+      foreignKey: 'dog_id'
+    })
+
     dog.belongsTo(models.status, {
       as: 'status',
       foreignKey: 'status_id'

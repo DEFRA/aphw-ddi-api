@@ -1,3 +1,5 @@
+const { buildBreachCategoryDao } = require('./get')
+const { BreachCategory } = require('../../../app/data/domain')
 const buildCdoTaskDto = (partialTaskDto) => ({
   key: 'insuranceDetailsRecorded',
   available: false,
@@ -38,7 +40,41 @@ const buildCdoTaskListDto = (partialCdoTaskListDto = {}) => ({
   tasks: buildCdoTaskListDtoTasks(partialCdoTaskListDto.tasks)
 })
 
+/**
+ * @param {Partial<BreachCategory>} partialBreachCategory
+ * @return {BreachDto}
+ */
+const buildBreachDto = (partialBreachCategory) => {
+  const breachCategory = new BreachCategory(buildBreachCategoryDao(partialBreachCategory))
+  return breachCategory.label ?? 'dog not covered by third party insurance'
+}
+
+/**
+ * @param {Partial<DogDto>} partialDogDto
+ * @return {DogDto}
+ */
+const buildDogDto = (partialDogDto) => ({
+  id: 300097,
+  indexNumber: 'ED300097',
+  name: 'Rex300',
+  breed: 'XL Bully',
+  colour: null,
+  sex: null,
+  dateOfBirth: null,
+  dateOfDeath: null,
+  tattoo: null,
+  microchipNumber: null,
+  microchipNumber2: null,
+  dateExported: null,
+  dateStolen: null,
+  dateUntraceable: null,
+  breaches: [],
+  ...partialDogDto
+})
+
 module.exports = {
   buildCdoTaskListDto,
-  buildCdoTaskListDtoTasks
+  buildCdoTaskListDtoTasks,
+  buildBreachDto,
+  buildDogDto
 }

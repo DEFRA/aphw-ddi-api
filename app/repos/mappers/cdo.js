@@ -27,6 +27,7 @@
 
 const { Person, Cdo, Dog, Exemption } = require('../../data/domain')
 const { getMicrochip } = require('../../dto/dto-helper')
+const { mapDogBreachDaoToBreachCategory } = require('./dog')
 /**
  * @param {SummaryCdo} summaryCdo
  * @return {SummaryCdoDto}
@@ -89,7 +90,8 @@ const mapDogDaoToDog = (dogDao) => {
     dateStolen: dogDao.stolen_date,
     dateUntraceable: dogDao.untraceable_date,
     microchipNumber: getMicrochip(dogDao, 1),
-    microchipNumber2: getMicrochip(dogDao, 2)
+    microchipNumber2: getMicrochip(dogDao, 2),
+    dogBreaches: dogDao.dog_breaches.map(mapDogBreachDaoToBreachCategory)
   }
   return new Dog(dogProperties)
 }
@@ -131,5 +133,6 @@ const mapCdoDaoToCdo = (cdoDao) => {
 module.exports = {
   mapSummaryCdoDaoToDto,
   mapCdoDaoToCdo,
-  mapCdoDaoToExemption
+  mapCdoDaoToExemption,
+  mapDogDaoToDog
 }

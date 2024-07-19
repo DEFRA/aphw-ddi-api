@@ -3,6 +3,11 @@
  */
 let cdoService
 
+/**
+ * @type {DogService}
+ */
+let dogService
+
 const getCdoService = () => {
   if (cdoService === undefined) {
     const cdoRepository = require('../repos/cdo')
@@ -13,6 +18,18 @@ const getCdoService = () => {
   return cdoService
 }
 
+const getDogService = () => {
+  if (dogService === undefined) {
+    const dogRepository = require('../repos/dogs')
+    const breachesRepository = require('../repos/breaches')
+    const { DogService } = require('./dog')
+
+    dogService = new DogService(dogRepository, breachesRepository)
+  }
+  return dogService
+}
+
 module.exports = {
-  getCdoService
+  getCdoService,
+  getDogService
 }

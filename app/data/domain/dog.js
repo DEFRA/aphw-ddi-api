@@ -1,7 +1,24 @@
 const { Changeable } = require('./changeable')
 const { DuplicateResourceError } = require('../../errors/duplicate-record')
 const { InvalidDataError } = require('../../errors/domain/invalidData')
-
+const { statuses } = require('../../constants/statuses')
+/**
+ * @property {number} id
+ * @property {string|null} dogReference = dogProperties.dogReference
+ * @property {string|null} indexNumber = dogProperties.indexNumber
+ * @property {string|null} name = dogProperties.name
+ * @property {string|null} breed = dogProperties.breed
+ * @property {Date|null} dateOfBirth = dogProperties.dateOfBirth
+ * @property {Date|null} dateOfDeath = dogProperties.dateOfDeath
+ * @property {string|null} tattoo = dogProperties.tattoo
+ * @property {string|null} colour = dogProperties.colour
+ * @property {string|null} sex = dogProperties.sex
+ * @property {Date|null} dateExported = dogProperties.dateExported
+ * @property {Date|null} dateStolen = dogProperties.dateStolen
+ * @property {Date|null} dateUntraceable = dogProperties.dateUntraceable
+ * @property {string|null} microchipNumber2 = dogProperties.microchipNumber2
+ * @property {BreachCategory[]} breaches = dogProperties.breaches
+ */
 class Dog extends Changeable {
   constructor (dogProperties) {
     super()
@@ -21,8 +38,12 @@ class Dog extends Changeable {
     this.dateUntraceable = dogProperties.dateUntraceable
     this._microchipNumber = dogProperties.microchipNumber
     this.microchipNumber2 = dogProperties.microchipNumber2
+    this._breaches = dogProperties.dogBreaches
   }
 
+  /**
+   * @return {string|null}
+   */
   get microchipNumber () {
     return this._microchipNumber
   }
@@ -55,6 +76,26 @@ class Dog extends Changeable {
   setStatus (status, callback) {
     this._updates.update('status', status, callback)
     this._status = status
+  }
+
+  /**
+   * @return {BreachCategory[]}
+   */
+  get breaches () {
+    return this._breaches
+  }
+
+  setBreaches (breaches, allDogBreaches, callback) {
+    const dogBreachDictionary = allDogBreaches.reduce((dogBreachDict, breach) => {
+      return {
+        ...dogBreachDict,
+        [breach.short_name]: breach
+      }
+    }, {})
+    const dogBreachBreaches = breaches.map(breach => dogBreachDictionary[breach])
+    this._breaches = dogBreachBreaches
+    this._updates.update('dogBreaches', dogBreachBreaches, undefined)
+    this.setStatus(statuses.InBreach, callback)
   }
 }
 

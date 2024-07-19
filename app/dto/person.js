@@ -94,19 +94,22 @@ const personDto = (person, onlyLatestContacts) => ({
  * @property {string} addressLine2
  */
 /**
- * @typedef DogDto
+ * @typedef {string} BreachDto
+ */
+/**
+ * @typedef PersonDogDto
  * @property {number} id
  * @property {string} indexNumber
- * @property {string} dogReference
+ * @property {string} name
+ * @property {string} breed
  * @property {string} microchipNumber
  * @property {string} microchipNumber2
- * @property {string} breed
- * @property {string} name
+ * @property {string} colour
+ * @property {string} sex
  * @property {string} status
  * @property {Date} birthDate
  * @property {string} tattoo
- * @property {string} colour
- * @property {string} sex
+ * @property {BreachDto[]} breaches
  */
 /**
  * @typedef PersonAndDogsDto
@@ -116,7 +119,7 @@ const personDto = (person, onlyLatestContacts) => ({
  * @property {string} personReference
  * @property {string} organisationName
  * @property {AddressDto} address
- * @property {DogDto[]} dogs
+ * @property {PersonDogDto[]} dogs
  * @property {PersonContact[]} contacts
  */
 /**
@@ -158,7 +161,7 @@ const personAndDogsDto = (personAndDogs) => ({
 
 /**
  * @param {RegisteredPerson} registeredPerson
- * @return {DogDto}
+ * @return {PersonDogDto}
  */
 const mapRegisteredPersonToDog = (registeredPerson) => {
   const { dog } = registeredPerson

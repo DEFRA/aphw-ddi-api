@@ -16,6 +16,12 @@ const { removeDogFromSearchIndex } = require('../../../../../app/repos/search')
 
 jest.mock('../../../../../app/messaging/send-audit')
 const { sendDeleteToAudit, sendPermanentDeleteToAudit } = require('../../../../../app/messaging/send-audit')
+const { buildDogDao } = require('../../../../mocks/cdo/get')
+const { Dog } = require('../../../../../app/data/domain')
+const { buildCdoDog, allBreaches } = require('../../../../mocks/cdo/domain')
+
+jest.mock('../../../../../app/repos/breaches')
+const { setBreaches } = require('../../../../../app/repos/breaches')
 
 const devUser = {
   username: 'dev-user@test.com',
@@ -78,7 +84,7 @@ describe('Dog repo', () => {
 
   const sequelize = require('../../../../../app/config/db')
 
-  const { getBreeds, getStatuses, createDogs, addImportedDog, getDogByIndexNumber, getAllDogIds, updateDog, updateStatus, updateDogFields, deleteDogByIndexNumber, switchOwnerIfNecessary, buildSwitchedOwner, recalcDeadlines, constructStatusList, constructDbSort, getOldDogs, generateClausesForOr, customSort, purgeDogByIndexNumber } = require('../../../../../app/repos/dogs')
+  const { getBreeds, getStatuses, createDogs, addImportedDog, getDogByIndexNumber, getAllDogIds, updateDog, updateStatus, updateDogFields, deleteDogByIndexNumber, switchOwnerIfNecessary, buildSwitchedOwner, recalcDeadlines, constructStatusList, constructDbSort, getOldDogs, generateClausesForOr, customSort, purgeDogByIndexNumber, saveDog, getDogModel } = require('../../../../../app/repos/dogs')
 
   beforeEach(async () => {
     jest.clearAllMocks()
@@ -951,6 +957,68 @@ describe('Dog repo', () => {
     test('should reverse order', () => {
       const res = customSort('mycol', [3, 5, 7], 'ASC')
       expect(res).toBe('mycol=7,mycol=5,mycol=3')
+    })
+  })
+
+  describe('saveDog', () => {
+    test('should create a new transaction if not passed', async () => {
+      await saveDog(new Dog(buildCdoDog({})))
+      expect(sequelize.transaction).toHaveBeenCalledTimes(1)
+    })
+
+    test('should save a Dog aggregate with in breach categories', async () => {
+      const indexNumber = 'ED300097'
+      const saveDogMock = jest.fn()
+      const dogDao = buildDogDao({
+        save: saveDogMock
+      })
+      sequelize.models.dog.findOne.mockResolvedValue(dogDao)
+      const dog = new Dog(buildCdoDog({}))
+      const breaches = [
+        'NOT_ON_LEAD_OR_MUZZLED',
+        'AWAY_FROM_ADDR_30_DAYS_IN_YR'
+      ]
+      const callback = jest.fn()
+      dog.setBreaches(breaches, allBreaches, callback)
+
+      await saveDog(dog, {})
+      expect(sequelize.models.dog.findOne).toHaveBeenCalledWith(expect.objectContaining({
+        where: { index_number: indexNumber }
+      }))
+      expect(setBreaches).toHaveBeenCalledWith(dog, dogDao, {})
+      expect(saveDogMock).toHaveBeenCalled()
+      expect(callback).toHaveBeenCalled()
+    })
+
+    test('should reject with not implemented error with an unhandled change request', async () => {
+      const dogDao = buildDogDao({
+        save: jest.fn()
+      })
+      sequelize.models.dog.findOne.mockResolvedValue(dogDao)
+      const dog = new Dog(buildCdoDog({}))
+      const breaches = [
+        'NOT_ON_LEAD_OR_MUZZLED',
+        'AWAY_FROM_ADDR_30_DAYS_IN_YR'
+      ]
+      const callback = jest.fn()
+      dog.setBreaches(breaches, allBreaches, callback)
+      dog._updates._changes.push({
+        key: 'unknown',
+        value: {},
+        callback: undefined
+      })
+
+      await expect(saveDog(dog, {})).rejects.toThrow(new Error('Not implemented'))
+    })
+  })
+
+  describe('getDogModel', () => {
+    test('should get dog model', async () => {
+      const dog = buildDogDao()
+      sequelize.models.dog.findOne.mockResolvedValue(dog)
+      const res = await getDogModel('ED123', {})
+      expect(sequelize.models.dog.findOne).toHaveBeenCalledTimes(1)
+      expect(res).toEqual(new Dog(buildCdoDog()))
     })
   })
 })

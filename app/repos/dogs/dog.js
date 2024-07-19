@@ -13,6 +13,8 @@ const { removeDogFromSearchIndex } = require('../search')
 const { getPersonByReference } = require('../people')
 const { addYears } = require('../../lib/date-helpers')
 const { calculateNeuteringDeadline, stripTime } = require('../../dto/dto-helper')
+const { setBreaches } = require('../breaches')
+const { mapDogDaoToDog } = require('../mappers/cdo')
 
 /**
  * @typedef DogDao
@@ -33,6 +35,7 @@ const { calculateNeuteringDeadline, stripTime } = require('../../dto/dto-helper'
  * @property {Date|null} stolen_date
  * @property {Date|null} untraceable_date
  * @property {DogMicrochipDao[]} dog_microchips
+ * @property {DogBreachDao[]} dog_breaches
  */
 
 const getBreeds = async () => {
@@ -393,62 +396,77 @@ const autoChangeStatus = (dbDog, payload, statuses) => {
   }
 }
 
+/**
+ * @param {string} indexNumber
+ * @param t
+ * @return {Promise<DogDao>}
+ */
 const getDogByIndexNumber = async (indexNumber, t) => {
   const dog = await sequelize.models.dog.findOne({
     where: { index_number: indexNumber },
-    include: [{
-      model: sequelize.models.registered_person,
-      as: 'registered_person',
-      include: [{
-        model: sequelize.models.person,
-        as: 'person',
+    include: [
+      {
+        model: sequelize.models.registered_person,
+        as: 'registered_person',
         include: [{
-          model: sequelize.models.person_address,
-          as: 'addresses',
+          model: sequelize.models.person,
+          as: 'person',
           include: [{
-            model: sequelize.models.address,
-            as: 'address',
+            model: sequelize.models.person_address,
+            as: 'addresses',
             include: [{
-              attribute: ['country'],
-              model: sequelize.models.country,
-              as: 'country'
+              model: sequelize.models.address,
+              as: 'address',
+              include: [{
+                attribute: ['country'],
+                model: sequelize.models.country,
+                as: 'country'
+              }]
+            }]
+          },
+          {
+            model: sequelize.models.person_contact,
+            as: 'person_contacts',
+            include: [{
+              model: sequelize.models.contact,
+              as: 'contact',
+              include: [{
+                model: sequelize.models.contact_type,
+                as: 'contact_type'
+              }]
             }]
           }]
         },
         {
-          model: sequelize.models.person_contact,
-          as: 'person_contacts',
-          include: [{
-            model: sequelize.models.contact,
-            as: 'contact',
-            include: [{
-              model: sequelize.models.contact_type,
-              as: 'contact_type'
-            }]
-          }]
+          model: sequelize.models.person_type,
+          as: 'person_type'
         }]
       },
       {
-        model: sequelize.models.person_type,
-        as: 'person_type'
-      }]
-    },
-    {
-      model: sequelize.models.dog_breed,
-      as: 'dog_breed'
-    },
-    {
-      model: sequelize.models.dog_microchip,
-      as: 'dog_microchips',
-      include: [{
-        model: sequelize.models.microchip,
-        as: 'microchip'
-      }]
-    },
-    {
-      model: sequelize.models.status,
-      as: 'status'
-    }],
+        model: sequelize.models.dog_breed,
+        as: 'dog_breed'
+      },
+      {
+        model: sequelize.models.dog_microchip,
+        as: 'dog_microchips',
+        include: [{
+          model: sequelize.models.microchip,
+          as: 'microchip'
+        }]
+      },
+      {
+        model: sequelize.models.status,
+        as: 'status'
+      },
+      {
+        model: sequelize.models.dog_breach,
+        as: 'dog_breaches',
+        include: [{
+          model: sequelize.models.breach_category,
+          as: 'breach_category'
+        }]
+      }
+    ],
     transaction: t
   })
 
@@ -670,6 +688,39 @@ const getOldDogs = async (statusList, sortOptions, today = null) => {
     }]
   })
 }
+/**
+ * @param {import('../../data/domain/dog')} dog
+ * @param transaction
+ * @return {Promise<*|undefined>}
+ */
+const saveDog = async (dog, transaction) => {
+  if (!transaction) {
+    return await sequelize.transaction(async (t) => saveDog(dog, t))
+  }
+
+  const updates = dog.getChanges()
+
+  for (const update of updates) {
+    if (update.key === 'status') {
+      await updateStatus(dog.indexNumber, update.value, transaction)
+    } else if (update.key === 'dogBreaches') {
+      const dogDao = await getDogByIndexNumber(dog.indexNumber, transaction)
+      await setBreaches(dog, dogDao, transaction)
+    } else {
+      throw new Error('Not implemented')
+    }
+
+    // this will publish the event
+    if (update.callback) {
+      await update.callback()
+    }
+  }
+}
+
+const getDogModel = async (indexNumber, t) => {
+  const dogDao = await getDogByIndexNumber(indexNumber, t)
+  return mapDogDaoToDog(dogDao)
+}
 
 module.exports = {
   getBreeds,
@@ -691,5 +742,7 @@ module.exports = {
   constructStatusList,
   constructDbSort,
   generateClausesForOr,
-  customSort
+  customSort,
+  saveDog,
+  getDogModel
 }

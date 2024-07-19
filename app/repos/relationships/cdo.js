@@ -15,6 +15,14 @@ const cdoRelationship = sequelize => [
     as: 'dog_breed'
   },
   {
+    model: sequelize.models.dog_breach,
+    as: 'dog_breaches',
+    include: [{
+      model: sequelize.models.breach_category,
+      as: 'breach_category'
+    }]
+  },
+  {
     model: sequelize.models.status,
     as: 'status'
   },
