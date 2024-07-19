@@ -41,6 +41,9 @@ class Dog extends Changeable {
     this._breaches = dogProperties.dogBreaches
   }
 
+  /**
+   * @return {string|null}
+   */
   get microchipNumber () {
     return this._microchipNumber
   }
