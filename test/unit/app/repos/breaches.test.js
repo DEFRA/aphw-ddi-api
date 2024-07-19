@@ -80,7 +80,7 @@ describe('Breaches repo', () => {
       expect(sequelize.transaction).toHaveBeenCalledTimes(1)
     })
     test('should set breaches given none exist', async () => {
-      getDogByIndexNumber.mockResolvedValue(buildDogDao())
+      const dogDao = buildDogDao()
       const callback = jest.fn()
       const dog = new Dog(buildCdoDog())
       dog.setBreaches([
@@ -88,9 +88,8 @@ describe('Breaches repo', () => {
         'AWAY_FROM_REGISTERED_ADDRESS_30_DAYS_IN_YR'
       ], allBreaches, callback)
 
-      await setBreaches(dog, {})
+      await setBreaches(dog, dogDao, {})
 
-      expect(getDogByIndexNumber).toHaveBeenCalledWith('ED300097', {})
       expect(sequelize.models.dog_breach.bulkCreate).toHaveBeenCalledWith([
         {
           dog_id: 300097,
@@ -127,7 +126,6 @@ describe('Breaches repo', () => {
           })
         ]
       })
-      getDogByIndexNumber.mockResolvedValue(dogDao)
 
       const callback = jest.fn()
       const dog = new Dog(buildCdoDog({
@@ -142,7 +140,7 @@ describe('Breaches repo', () => {
         'AWAY_FROM_REGISTERED_ADDRESS_30_DAYS_IN_YR'
       ], allBreaches, callback)
 
-      await setBreaches(dog, {})
+      await setBreaches(dog, dogDao, {})
       expect(destroyMock).toHaveBeenCalledTimes(3)
       expect(sequelize.models.dog_breach.bulkCreate).toHaveBeenCalledWith([
         {

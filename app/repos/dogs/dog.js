@@ -704,7 +704,8 @@ const saveDog = async (dog, transaction) => {
     if (update.key === 'status') {
       await updateStatus(dog.indexNumber, update.value, transaction)
     } else if (update.key === 'dogBreaches') {
-      await setBreaches(dog, transaction)
+      const dogDao = await getDogByIndexNumber(dog.indexNumber, transaction)
+      await setBreaches(dog, dogDao, transaction)
     }
 
     // this will publish the event

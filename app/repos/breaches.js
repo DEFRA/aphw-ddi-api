@@ -1,6 +1,5 @@
 const sequelize = require('../config/db')
 const { BreachCategory } = require('../data/domain')
-const { getDogByIndexNumber } = require('./dogs')
 
 /**
  * @typedef BreachCategoryDao
@@ -24,18 +23,15 @@ const getBreachCategories = async () => {
 }
 /**
  * @param {import('../data/domain/dog')} dog
+ * @param dogDao
  * @param [transaction]
  * @return {Promise<void>}
  */
-const setBreaches = async (dog, transaction) => {
+const setBreaches = async (dog, dogDao, transaction) => {
   if (!transaction) {
     return await sequelize.transaction(async (t) => setBreaches(dog, t))
   }
   const dogId = dog.id
-  /**
-   * @type {import('./dogs').DogDao}
-   */
-  const dogDao = await getDogByIndexNumber(dog.indexNumber, transaction)
 
   for (const dogBreach of dogDao.dog_breaches) {
     await dogBreach.destroy({ force: true, transaction })

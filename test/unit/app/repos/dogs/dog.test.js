@@ -969,9 +969,10 @@ describe('Dog repo', () => {
     test('should save a Dog aggregate with in breach categories', async () => {
       const indexNumber = 'ED300097'
       const saveDogMock = jest.fn()
-      sequelize.models.dog.findOne.mockResolvedValue(buildDogDao({
+      const dogDao = buildDogDao({
         save: saveDogMock
-      }))
+      })
+      sequelize.models.dog.findOne.mockResolvedValue(dogDao)
       const dog = new Dog(buildCdoDog({}))
       const breaches = [
         'NOT_ON_LEAD_OR_MUZZLED',
@@ -984,7 +985,7 @@ describe('Dog repo', () => {
       expect(sequelize.models.dog.findOne).toHaveBeenCalledWith(expect.objectContaining({
         where: { index_number: indexNumber }
       }))
-      expect(setBreaches).toHaveBeenCalledWith(dog, {})
+      expect(setBreaches).toHaveBeenCalledWith(dog, dogDao, {})
       expect(saveDogMock).toHaveBeenCalled()
       expect(callback).toHaveBeenCalled()
     })
