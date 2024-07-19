@@ -60,7 +60,7 @@ describe('Breaches endpoint', () => {
   })
 
   describe('POST /breaches/dog:setBreaches', () => {
-    test('returns 200', async () => {
+    test('should return 200 given valid payload', async () => {
       const dog = new Dog(buildCdoDog({
         dogBreaches: [
           NOT_COVERED_BY_INSURANCE,
@@ -104,6 +104,19 @@ describe('Breaches endpoint', () => {
           'INSECURE_PLACE'
         ],
         devUser)
+    })
+
+    test('should return 400 given invalid payload', async () => {
+      const options = {
+        method: 'POST',
+        url: '/breaches/dog:setBreaches',
+        payload: {
+          indexNumber: 'ED12345'
+        }
+      }
+
+      const response = await server.inject(options)
+      expect(response.statusCode).toBe(400)
     })
   })
 

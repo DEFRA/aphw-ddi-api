@@ -2,6 +2,7 @@ const { getBreachCategories } = require('../repos/breaches')
 const ServiceProvider = require('../service/config')
 const { getCallingUser } = require('../auth/get-user')
 const { mapDogToDogDto } = require('../repos/mappers/dog')
+const { setBreachRequestSchema, setBreachResponseSchema } = require('../schema/breaches')
 
 module.exports = [
   {
@@ -18,13 +19,21 @@ module.exports = [
   {
     method: 'POST',
     path: '/breaches/dog:setBreaches',
-    handler: async (request, h) => {
-      const payload = request.payload
-      const dogService = ServiceProvider.getDogService()
-      const dog = await dogService.setBreaches(payload.indexNumber, payload.dogBreaches, getCallingUser(request))
+    options: {
+      validate: {
+        payload: setBreachRequestSchema
+      },
+      response: {
+        schema: setBreachResponseSchema
+      },
+      handler: async (request, h) => {
+        const payload = request.payload
+        const dogService = ServiceProvider.getDogService()
+        const dog = await dogService.setBreaches(payload.indexNumber, payload.dogBreaches, getCallingUser(request))
 
-      const results = mapDogToDogDto(dog)
-      return h.response(results).code(200)
+        const results = mapDogToDogDto(dog)
+        return h.response(results).code(200)
+      }
     }
   }
 ]
