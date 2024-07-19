@@ -1,6 +1,15 @@
-const { mapSummaryCdoDaoToDto, mapCdoDaoToCdo, mapCdoDaoToExemption } = require('../../../../../app/repos/mappers/cdo')
-const { buildCdoDao, buildInsuranceDao, buildRegistrationDao } = require('../../../../mocks/cdo/get')
-const { buildCdo, buildExemption, buildCdoInsurance } = require('../../../../mocks/cdo/domain')
+const { mapSummaryCdoDaoToDto, mapCdoDaoToCdo, mapCdoDaoToExemption, mapDogDaoToDog } = require('../../../../../app/repos/mappers/cdo')
+const {
+  buildCdoDao,
+  buildInsuranceDao,
+  buildRegistrationDao,
+  buildDogDao,
+  dogBreachDAOs
+} = require('../../../../mocks/cdo/get')
+const {
+  buildCdo, buildExemption, buildCdoInsurance, NOT_COVERED_BY_INSURANCE, INSECURE_PLACE,
+  AWAY_FROM_ADDR_30_DAYS_IN_YR
+} = require('../../../../mocks/cdo/domain')
 const { Exemption } = require('../../../../../app/data/domain')
 
 describe('cdo mappers', () => {
@@ -207,6 +216,21 @@ describe('cdo mappers', () => {
         })
       })
       expect(mapCdoDaoToCdo(cdoDao)).toEqual(expectedCdo)
+    })
+  })
+
+  describe('mapDogDaoToDog', () => {
+    test('should map dog breaches', () => {
+      const dogDao = buildDogDao({
+        dog_breaches: dogBreachDAOs
+      })
+      const expectedBreachCategories = [
+        NOT_COVERED_BY_INSURANCE,
+        INSECURE_PLACE,
+        AWAY_FROM_ADDR_30_DAYS_IN_YR
+      ]
+      const dog = mapDogDaoToDog(dogDao)
+      expect(dog.breaches).toEqual(expectedBreachCategories)
     })
   })
 })

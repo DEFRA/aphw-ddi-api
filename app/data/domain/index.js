@@ -4,6 +4,7 @@ const CdoTaskList = require('./cdoTaskList')
 const Dog = require('./dog')
 const Exemption = require('./exemption')
 const Person = require('./person')
+const BreachCategory = require('./breachCategory')
 
 module.exports = {
   Cdo,
@@ -11,5 +12,6 @@ module.exports = {
   CdoTaskList,
   Dog,
   Exemption,
-  Person
+  Person,
+  BreachCategory
 }

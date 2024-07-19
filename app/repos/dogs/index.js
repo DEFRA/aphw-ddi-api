@@ -19,7 +19,9 @@ const {
   generateClausesForOr,
   customSort,
   recalcDeadlines,
-  purgeDogByIndexNumber
+  purgeDogByIndexNumber,
+  saveDog,
+  getDogModel
 } = require('./dog')
 
 const {
@@ -47,5 +49,7 @@ module.exports = {
   generateClausesForOr,
   customSort,
   deleteDogs,
-  purgeDogByIndexNumber
+  purgeDogByIndexNumber,
+  saveDog,
+  getDogModel
 }

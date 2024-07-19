@@ -26,7 +26,7 @@ describe('Dog endpoint', () => {
 
   describe('GET /dog/ED123', () => {
     test('GET /dog/ED123 route returns 200', async () => {
-      getDogByIndexNumber.mockResolvedValue({ id: 123, indexNumber: 'ED123' })
+      getDogByIndexNumber.mockResolvedValue({ id: 123, indexNumber: 'ED123', dog_breaches: [] })
 
       const options = {
         method: 'GET',

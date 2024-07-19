@@ -13,6 +13,7 @@ const { mapCdoDaoToCdo } = require('./mappers/cdo')
 const { CdoTaskList } = require('../data/domain')
 const { createOrUpdateInsurance } = require('./insurance')
 const { updateMicrochip } = require('./microchip')
+const domain = require('../constants/domain')
 
 /**
  * @typedef DogBreedDao
@@ -36,6 +37,24 @@ const { updateMicrochip } = require('./microchip')
  * @property {number} microchip_id
  * @property {MicrochipDao} microchip
  * @property {string} updated_at
+ * @property {string} created_at
+ * @property {null|string} deleted_at
+ */
+
+/**
+ * @typedef BreachCategoryDao
+ * @property {number} id
+ * @property {string} label
+ * @property {string} short_name
+ */
+
+/**
+ * @typedef DogBreachDao
+ * @property {number} id
+ * @property {number} dog_id
+ * @property {number} breach_category_id
+ * @property {BreachCategoryDao} breach_category
+ * @property {string|null} updated_at
  * @property {string} created_at
  * @property {null|string} deleted_at
  */
@@ -138,6 +157,7 @@ const { updateMicrochip } = require('./microchip')
  * @property {DogBreedDao} dog_breed
  * @property {number} dog_breed_id
  * @property {DogMicrochipDao[]} dog_microchips
+ * @property {DogBreachDao[]} dog_breaches
  * @property {string} dog_reference
  * @property {null|string} exported_date
  * @property {InsuranceDao[]} insurance
@@ -440,33 +460,6 @@ const getCdoTaskList = async (indexNumber, transaction) => {
   return new CdoTaskList(cdo)
 }
 
-const updateKeys = {
-  applicationPackSent: ['applicationPackSent'],
-  applicationFeePaid: ['applicationFeePaid'],
-  form2Sent: ['form2Sent'],
-  neuteringConfirmation: ['neuteringConfirmation'],
-  microchipVerification: ['microchipVerification'],
-  verificationDateRecorded: [
-    'neuteringConfirmation',
-    'microchipVerification'
-  ],
-  certificateIssued: ['certificateIssued'],
-  insurance: ['insurance'],
-  microchip: ['microchip'],
-  status: ['status']
-}
-
-const updateMappings = {
-  applicationPackSent: 'dog.registration.application_pack_sent',
-  applicationFeePaid: 'dog.registration.application_fee_paid',
-  form2Sent: 'dog.registration.form_two_sent',
-  neuteringConfirmation: 'dog.registration.neutering_confirmation',
-  microchipVerification: 'dog.registration.microchip_verification',
-  certificateIssued: 'dog.registration.certificate_issued',
-  insurance: 'dog.insurance',
-  microchip: 'dog.microchip',
-  status: 'dog.status'
-}
 /**
  * @typedef SaveCdoTaskList
  * @param {import('../data/domain/cdoTaskList').CdoTaskList} cdoTaskList
@@ -498,11 +491,11 @@ const saveCdoTaskList = async (cdoTaskList, transaction) => {
         break
       }
       default: {
-        const keys = updateKeys[update.key]
+        const keys = domain.updateKeys[update.key]
         let model
 
         for (const key of keys) {
-          const mappingArray = updateMappings[key].split('.')
+          const mappingArray = domain.updateMappings[key].split('.')
           const [, relationship, field] = mappingArray
 
           if (!model) {
