@@ -1,3 +1,5 @@
+const { buildBreachCategoryDao } = require('./get')
+const { BreachCategory } = require('../../../app/data/domain')
 const buildCdoTaskDto = (partialTaskDto) => ({
   key: 'insuranceDetailsRecorded',
   available: false,
@@ -39,10 +41,13 @@ const buildCdoTaskListDto = (partialCdoTaskListDto = {}) => ({
 })
 
 /**
- * @param {BreachDto} partialBreachDto
+ * @param {Partial<BreachCategory>} partialBreachCategory
  * @return {BreachDto}
  */
-const buildBreachDto = (partialBreachDto) => partialBreachDto ?? 'dog not covered by third party insurance'
+const buildBreachDto = (partialBreachCategory) => {
+  const breachCategory = new BreachCategory(buildBreachCategoryDao(partialBreachCategory))
+  return breachCategory.label ?? 'dog not covered by third party insurance'
+}
 
 /**
  * @param {Partial<DogDto>} partialDogDto

@@ -1,6 +1,7 @@
 const { getBreachCategories } = require('../repos/breaches')
 const ServiceProvider = require('../service/config')
 const { getCallingUser } = require('../auth/get-user')
+const { mapDogToDogDto } = require('../repos/mappers/dog')
 
 module.exports = [
   {
@@ -20,7 +21,9 @@ module.exports = [
     handler: async (request, h) => {
       const payload = request.payload
       const dogService = ServiceProvider.getDogService()
-      const results = await dogService.setBreaches(payload.indexNumber, payload.dogBreaches, getCallingUser(request))
+      const dog = await dogService.setBreaches(payload.indexNumber, payload.dogBreaches, getCallingUser(request))
+
+      const results = mapDogToDogDto(dog)
       return h.response(results).code(200)
     }
   }

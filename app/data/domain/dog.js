@@ -38,7 +38,7 @@ class Dog extends Changeable {
     this.dateUntraceable = dogProperties.dateUntraceable
     this._microchipNumber = dogProperties.microchipNumber
     this.microchipNumber2 = dogProperties.microchipNumber2
-    this._breaches = dogProperties.dogBreaches
+    this._breaches = dogProperties.dogBreaches ?? []
   }
 
   /**

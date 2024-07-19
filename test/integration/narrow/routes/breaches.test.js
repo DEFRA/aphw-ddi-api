@@ -1,4 +1,11 @@
 const { devUser } = require('../../../mocks/auth')
+const { buildDogDto, buildBreachDto } = require('../../../mocks/cdo/dto')
+const {
+  NOT_COVERED_BY_INSURANCE,
+  INSECURE_PLACE,
+  AWAY_FROM_REGISTERED_ADDRESS_30_DAYS_IN_YR, buildCdoDog
+} = require('../../../mocks/cdo/domain')
+const { Dog } = require('../../../../app/data/domain')
 describe('Breaches endpoint', () => {
   const createServer = require('../../../../app/server')
   let server
@@ -54,7 +61,14 @@ describe('Breaches endpoint', () => {
 
   describe('POST /breaches/dog:setBreaches', () => {
     test('returns 200', async () => {
-      const setBreachesMock = jest.fn()
+      const dog = new Dog(buildCdoDog({
+        dogBreaches: [
+          NOT_COVERED_BY_INSURANCE,
+          INSECURE_PLACE,
+          AWAY_FROM_REGISTERED_ADDRESS_30_DAYS_IN_YR
+        ]
+      }))
+      const setBreachesMock = jest.fn(async () => dog)
       getDogService.mockReturnValue({
         setBreaches: setBreachesMock
       })
@@ -72,7 +86,16 @@ describe('Breaches endpoint', () => {
       }
 
       const response = await server.inject(options)
+      const payload = JSON.parse(response.payload)
       expect(response.statusCode).toBe(200)
+      expect(payload).toEqual(buildDogDto({
+        breaches: [
+          buildBreachDto(NOT_COVERED_BY_INSURANCE),
+          buildBreachDto(INSECURE_PLACE),
+          buildBreachDto(AWAY_FROM_REGISTERED_ADDRESS_30_DAYS_IN_YR)
+        ]
+      }))
+
       expect(setBreachesMock).toHaveBeenCalledWith(
         'ED12345',
         [

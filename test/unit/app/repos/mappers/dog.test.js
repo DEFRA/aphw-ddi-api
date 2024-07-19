@@ -36,9 +36,9 @@ describe('dog mappers', () => {
 
       const expectedDogDto = buildDogDto({
         breaches: [
-          buildBreachDto('dog not covered by third party insurance'),
-          buildBreachDto('dog kept in insecure place'),
-          buildBreachDto('dog away from registered address for over 30 days in one year')
+          'dog not covered by third party insurance',
+          'dog kept in insecure place',
+          'dog away from registered address for over 30 days in one year'
         ]
       })
 
