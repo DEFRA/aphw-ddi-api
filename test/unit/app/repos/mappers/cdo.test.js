@@ -1,6 +1,9 @@
 const { mapSummaryCdoDaoToDto, mapCdoDaoToCdo, mapCdoDaoToExemption, mapDogDaoToDog } = require('../../../../../app/repos/mappers/cdo')
 const {
-  buildCdoDao, buildInsuranceDao, buildRegistrationDao, buildDogDao, buildDogBreachDao, buildBreachCategoryDao,
+  buildCdoDao,
+  buildInsuranceDao,
+  buildRegistrationDao,
+  buildDogDao,
   dogBreachDAOs
 } = require('../../../../mocks/cdo/get')
 const {

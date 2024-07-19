@@ -1,6 +1,4 @@
 const ServiceProvider = require('../../../../app/service/config')
-const dogRepository = require('../../../../app/repos/dogs')
-const breachRepository = require('../../../../app/repos/breaches')
 const { devUser } = require('../../../mocks/auth')
 const { buildCdoDog, NOT_COVERED_BY_INSURANCE, NOT_ON_LEAD_OR_MUZZLED, INSECURE_PLACE } = require('../../../mocks/cdo/domain')
 const { Dog } = require('../../../../app/data/domain')
