@@ -1,17 +1,29 @@
 const overnightRows = [
   {
     dog: {
-      index_number: 'ED123'
+      index_number: 'ED123',
+      status: {
+        status: 'Exempt'
+      },
+      dog_breaches: []
     }
   },
   {
     dog: {
-      index_number: 'ED124'
+      index_number: 'ED124',
+      status: {
+        status: 'Exempt'
+      },
+      dog_breaches: []
     }
   },
   {
     dog: {
-      index_number: 'ED125'
+      index_number: 'ED125',
+      status: {
+        status: 'Exempt'
+      },
+      dog_breaches: []
     }
   }
 ]
