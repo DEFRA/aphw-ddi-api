@@ -1,5 +1,6 @@
 const sequelize = require('../config/db')
 const { BreachCategory } = require('../data/domain')
+const { Op } = require('sequelize')
 
 /**
  * @typedef BreachCategoryDao
@@ -11,14 +12,23 @@ const { BreachCategory } = require('../data/domain')
  *
  * @return {Promise<BreachCategoryDao[]>}
  */
-const getBreachCategoryDAOs = async () => {
+const getBreachCategoryDAOs = async (userSelectableOnly = false) => {
+  const where = userSelectableOnly
+    ? {
+        user_selectable: {
+          [Op.is]: true
+        }
+      }
+    : {}
+
   return sequelize.models.breach_category.findAll({
-    order: [sequelize.col('id')]
+    order: [sequelize.col('id')],
+    where
   })
 }
 
-const getBreachCategories = async () => {
-  const breachCategoryDaos = await getBreachCategoryDAOs()
+const getBreachCategories = async (userSelectableOnly = false) => {
+  const breachCategoryDaos = await getBreachCategoryDAOs(userSelectableOnly)
   return breachCategoryDaos.map(breachCategory => new BreachCategory(breachCategory))
 }
 /**
