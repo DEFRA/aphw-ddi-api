@@ -7,6 +7,9 @@ describe('Jobs endpoint', () => {
   jest.mock('../../../../app/overnight/purge-soft-deleted-records')
   const { purgeSoftDeletedRecords } = require('../../../../app/overnight/purge-soft-deleted-records')
 
+  jest.mock('../../../../app/overnight/expired-insurance')
+  const { setExpiredInsuranceToBreach } = require('../../../../app/overnight/expired-insurance')
+
   beforeEach(async () => {
     jest.clearAllMocks()
     server = await createServer()
@@ -112,6 +115,49 @@ describe('Jobs endpoint', () => {
 
       const response = await server.inject(options)
       expect(response.statusCode).toBe(500)
+    })
+  })
+
+  describe('POST /jobs/expired-insurance', () => {
+    test('POST /jobs/expired-insurance should return 200', async () => {
+      const expectedDto = {
+        response: 'Success Insurance Expiry - updated 5 rows'
+      }
+      setExpiredInsuranceToBreach.mockResolvedValue('Success Insurance Expiry - updated 5 rows')
+
+      const options = {
+        method: 'POST',
+        url: '/jobs/expired-insurance'
+      }
+
+      const response = await server.inject(options)
+      const responseData = JSON.parse(response.payload)
+      expect(response.statusCode).toBe(200)
+      expectDate(setExpiredInsuranceToBreach.mock.calls[0][0]).toBeNow()
+      expect(responseData).toEqual(expectedDto)
+    })
+
+    test('should POST /jobs/expired-insurance?today=2024-03-16', async () => {
+      setExpiredInsuranceToBreach.mockResolvedValue('Success Insurance Expiry - updated 5 rows')
+
+      const options = {
+        method: 'POST',
+        url: '/jobs/expired-insurance?today=2024-03-16'
+      }
+
+      const response = await server.inject(options)
+      expect(response.statusCode).toBe(200)
+      expect(setExpiredInsuranceToBreach.mock.calls[0][0]).toEqual(new Date('2024-03-16'))
+    })
+
+    test('should 400 with invalid query props', async () => {
+      const options = {
+        method: 'POST',
+        url: '/jobs/expired-insurance?unknown=true'
+      }
+
+      const response = await server.inject(options)
+      expect(response.statusCode).toBe(400)
     })
   })
 
