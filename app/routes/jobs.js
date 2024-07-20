@@ -3,6 +3,7 @@ const { jobsQuerySchema, purgeSoftDeleteResponseSchema } = require('../schema/jo
 const { purgeSoftDeletedDto } = require('../dto/overnight')
 const { setExpiredInsuranceToBreach } = require('../overnight/expired-insurance')
 const { getCallingUser } = require('../auth/get-user')
+const { setExpiredNeuteringDeadlineToInBreach } = require('../overnight/expired-neutering-deadline')
 
 module.exports = [
   {
@@ -43,6 +44,25 @@ module.exports = [
         const expiredInsuranceResponse = await setExpiredInsuranceToBreach(now, getCallingUser(request))
 
         return h.response({ response: expiredInsuranceResponse }).code(200)
+      }
+    }
+  },
+  {
+    method: 'POST',
+    path: '/jobs/neutering-deadline',
+    options: {
+      validate: {
+        query: jobsQuerySchema,
+        failAction: (request, h, error) => {
+          console.log(error)
+          return h.response().code(400).takeover()
+        }
+      },
+      handler: async (request, h) => {
+        const now = request.query.today
+        const expiredNeuteringDeadlineResponse = await setExpiredNeuteringDeadlineToInBreach(now, getCallingUser(request))
+
+        return h.response({ response: expiredNeuteringDeadlineResponse }).code(200)
       }
     }
   }
