@@ -9,7 +9,7 @@ module.exports = [
     method: 'GET',
     path: '/breaches/categories',
     handler: async (request, h) => {
-      const breachCategories = await getBreachCategories()
+      const breachCategories = await getBreachCategories(true)
 
       return h.response({
         breachCategories

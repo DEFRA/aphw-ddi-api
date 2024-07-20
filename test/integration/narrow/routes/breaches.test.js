@@ -56,6 +56,7 @@ describe('Breaches endpoint', () => {
       const payload = JSON.parse(response.payload)
       expect(response.statusCode).toBe(200)
       expect(payload.breachCategories).toEqual(expectedBreachCategories)
+      expect(getBreachCategories).toHaveBeenCalledWith(true)
     })
   })
 
