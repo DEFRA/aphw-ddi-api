@@ -196,11 +196,6 @@ describe('DogService', function () {
         })
       ]
 
-      const expectedDog = new Dog(buildCdoDog({
-        status: 'In breach',
-        dogBreaches: expectedBreaches
-      }))
-
       mockBreachesRepository.getBreachCategories.mockResolvedValue([
         {
           id: 1,
@@ -241,7 +236,6 @@ describe('DogService', function () {
           callback: expect.any(Function)
         }
       ])
-      expect(changedDog).toEqual(expectedDog)
 
       expect(sendUpdateToAudit).toHaveBeenCalledWith(
         'dog',

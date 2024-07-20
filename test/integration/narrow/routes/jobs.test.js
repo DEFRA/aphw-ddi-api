@@ -1,5 +1,4 @@
 const { expectDate } = require('../../../time-helper')
-const { setExpiredNeuteringDeadlineToInBreach } = require('../../../../app/overnight/expired-neutering-deadline')
 
 describe('Jobs endpoint', () => {
   const createServer = require('../../../../app/server')
