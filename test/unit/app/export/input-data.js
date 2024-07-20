@@ -76,6 +76,13 @@ const validRow = {
       name: 'Test police force'
     }
   },
+  dog_breaches: [
+    {
+      breach_category: {
+        label: 'owner not allowed police to read microchip'
+      }
+    }
+  ],
   insurance: [{
     id: 1,
     company: {

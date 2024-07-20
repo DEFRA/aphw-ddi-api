@@ -1,4 +1,4 @@
-const { getMicrochip, extractLatestAddress, extractLatestInsurance, extractEmail, extractLatestPrimaryTelephoneNumber, extractLatestSecondaryTelephoneNumber, truncDate } = require('../dto/dto-helper')
+const { getMicrochip, extractLatestAddress, extractLatestInsurance, extractBreachCategories, extractEmail, extractLatestPrimaryTelephoneNumber, extractLatestSecondaryTelephoneNumber, truncDate } = require('../dto/dto-helper')
 
 const headerRow = [
   'IndexNumber',
@@ -45,7 +45,8 @@ const headerRow = [
   'Withdrawn',
   'ExaminedByDlo',
   'MicrochipDeadline',
-  'NeuteringDeadline'
+  'NeuteringDeadline',
+  'InBreachReasons'
 ]
 
 const convertToCsv = (rows, removeHeader = false) => {
@@ -67,6 +68,7 @@ const convertRow = (row) => {
   const latestAddress = extractLatestAddress(owner.addresses)
   const exemption = row.registration
   const latestInsurance = extractLatestInsurance(row.insurance)
+  const breachCategories = extractBreachCategories(row.dog_breaches)
 
   return [
     row.index_number,
@@ -113,7 +115,8 @@ const convertRow = (row) => {
     exemption.withdrawn,
     exemption.typed_by_dlo,
     exemption.microchip_deadline,
-    exemption.neutering_deadline
+    exemption.neutering_deadline,
+    breachCategories
   ]
 }
 
