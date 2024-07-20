@@ -39,7 +39,7 @@ const getBreachCategories = async (userSelectableOnly = false) => {
  */
 const setBreaches = async (dog, dogDao, transaction) => {
   if (!transaction) {
-    return await sequelize.transaction(async (t) => setBreaches(dog, t))
+    return await sequelize.transaction(async (t) => setBreaches(dog, dogDao, t))
   }
   const dogId = dog.id
 
