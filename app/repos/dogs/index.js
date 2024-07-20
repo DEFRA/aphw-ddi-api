@@ -3,6 +3,7 @@ const { updateMicrochips } = require('../microchip')
 const {
   getBreeds,
   getStatuses,
+  getCachedStatuses,
   createDogs,
   addImportedDog,
   updateDog,
@@ -22,6 +23,7 @@ const {
   recalcDeadlines,
   purgeDogByIndexNumber,
   saveDog,
+  saveDogFields,
   getDogModel
 } = require('./dog')
 
@@ -32,6 +34,7 @@ const {
 module.exports = {
   getBreeds,
   getStatuses,
+  getCachedStatuses,
   createDogs,
   addImportedDog,
   updateDog,
@@ -53,5 +56,6 @@ module.exports = {
   deleteDogs,
   purgeDogByIndexNumber,
   saveDog,
+  saveDogFields,
   getDogModel
 }
