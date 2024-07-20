@@ -754,10 +754,8 @@ const getOldDogs = async (statusList, sortOptions, today = null) => {
 
 const saveDogFields = async (dog, dogDao, transaction) => {
   const updates = dog.getChanges()
-  console.log('~~~~~~ Chris Debug ~~~~~~ saveDogFields', 'Updates', updates)
 
   for (const update of updates) {
-    console.log('~~~~~~ Chris Debug ~~~~~~ saveDogFields', 'Update', update)
     if (update.key === 'status') {
       await updateDogStatus(dogDao, update.value, transaction)
     } else if (update.key === 'dogBreaches') {
