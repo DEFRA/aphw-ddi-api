@@ -199,7 +199,7 @@ describe('Jobs endpoint', () => {
     test('should 400 with invalid query props', async () => {
       const options = {
         method: 'POST',
-        url: '/jobs/expired-insurance?unknown=true'
+        url: '/jobs/neutering-deadline?unknown=true'
       }
 
       const response = await server.inject(options)
