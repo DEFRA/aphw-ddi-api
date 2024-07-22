@@ -1,4 +1,5 @@
 const { cdoCreateDto, cdoViewDto } = require('../../../../app/dto/cdo')
+const { buildDogBreachDao } = require('../../../mocks/cdo/get')
 
 describe('CDO DTO', () => {
   test('cdoCreateDto should map cdo to cdoDto', () => {
@@ -140,6 +141,11 @@ describe('CDO DTO', () => {
       exported_date: '2024-04-04',
       stolen_date: '2024-05-05',
       untraceable_date: '2024-06-06',
+      dog_breaches: [
+        buildDogBreachDao({
+          dog_id: 300723
+        })
+      ],
       registration: {
         exemption_order: {
           exemption_order: '2023'
@@ -231,7 +237,8 @@ describe('CDO DTO', () => {
         sex: 'Male',
         dateExported: '2024-04-04',
         dateStolen: '2024-05-05',
-        dateUntraceable: '2024-06-06'
+        dateUntraceable: '2024-06-06',
+        breaches: ['dog away from registered address for over 30 days in one year']
       }
     }
 

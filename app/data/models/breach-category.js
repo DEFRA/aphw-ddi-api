@@ -16,6 +16,10 @@ module.exports = (sequelize, DataTypes) => {
       type: DataTypes.STRING(35),
       allowNull: false,
       unique: 'breach_category_short_name_ukey'
+    },
+    user_selectable: {
+      type: DataTypes.BOOLEAN,
+      defaultValue: true
     }
   }, {
     sequelize,

@@ -80,6 +80,10 @@ const extractLatestAddress = (addresses) => {
   }
 }
 
+const extractBreachCategories = (dogBreaches) => {
+  return (dogBreaches ?? []).map(dogBreach => dogBreach.breach_category.label).join(',\n')
+}
+
 const extractLatestInsurance = (insurances) => {
   if (insurances == null || insurances.length === 0) {
     return {}
@@ -131,6 +135,7 @@ module.exports = {
   getMicrochips,
   calculateNeuteringDeadline,
   extractLatestInsurance,
+  extractBreachCategories,
   extractEmail,
   extractLatestAddress,
   extractLatestPrimaryTelephoneNumber,

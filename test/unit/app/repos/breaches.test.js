@@ -2,6 +2,7 @@ const { BreachCategory } = require('../../../../app/data/domain')
 const { buildCdoDog, allBreaches, NOT_ON_LEAD_OR_MUZZLED, INSECURE_PLACE, AWAY_FROM_ADDR_30_DAYS_IN_YR } = require('../../../mocks/cdo/domain')
 const { Dog } = require('../../../../app/data/domain')
 const { buildDogDao, buildDogBreachDao } = require('../../../mocks/cdo/get')
+const { Op } = require('sequelize')
 /**
  * @type {BreachCategory[]}
  */
@@ -48,12 +49,73 @@ describe('Breaches repo', () => {
 
   const sequelize = require('../../../../app/config/db')
 
-  const { getBreachCategories, setBreaches } = require('../../../../app/repos/breaches')
+  const { getBreachCategories, setBreaches, getBreachCategoryDAOs } = require('../../../../app/repos/breaches')
 
   beforeEach(async () => {
     jest.clearAllMocks()
   })
 
+  describe('getBreachCategoryDAOs', () => {
+    test('should get all breach categories by default', async () => {
+      const expectedBreachCategoryDaos = [
+        {
+          id: 1,
+          label: 'dog not covered by third party insurance',
+          short_name: 'NOT_COVERED_BY_INSURANCE',
+          user_selectable: true
+        },
+        {
+          id: 2,
+          label: 'dog not kept on lead or muzzled',
+          short_name: 'NOT_ON_LEAD_OR_MUZZLED',
+          user_selectable: true
+        },
+        {
+          id: 11,
+          label: 'dog insurance expired',
+          short_name: 'INSURANCE_EXPIRED',
+          user_selectable: false
+        }
+      ]
+      sequelize.models.breach_category.findAll.mockResolvedValue(expectedBreachCategoryDaos)
+      const breachCategoryDaos = await getBreachCategoryDAOs()
+      expect(breachCategoryDaos).toEqual(expectedBreachCategoryDaos)
+      expect(sequelize.models.breach_category.findAll).not.toHaveBeenCalledWith(expect.objectContaining({
+        where: {
+          user_selectable: {
+            [Op.is]: true
+          }
+        }
+      }))
+    })
+
+    test('should not get all breach categories given userSelectableOnly=true', async () => {
+      const expectedBreachCategoryDaos = [
+        {
+          id: 1,
+          label: 'dog not covered by third party insurance',
+          short_name: 'NOT_COVERED_BY_INSURANCE',
+          user_selectable: true
+        },
+        {
+          id: 2,
+          label: 'dog not kept on lead or muzzled',
+          short_name: 'NOT_ON_LEAD_OR_MUZZLED',
+          user_selectable: true
+        }
+      ]
+      sequelize.models.breach_category.findAll.mockResolvedValue(expectedBreachCategoryDaos)
+      const breachCategoryDaos = await getBreachCategoryDAOs(true)
+      expect(breachCategoryDaos).toEqual(expectedBreachCategoryDaos)
+      expect(sequelize.models.breach_category.findAll).toHaveBeenCalledWith(expect.objectContaining({
+        where: {
+          user_selectable: {
+            [Op.is]: true
+          }
+        }
+      }))
+    })
+  })
   describe('getBreachCategories', () => {
     test('getBreachCategories should return breaches', async () => {
       sequelize.models.breach_category.findAll.mockResolvedValue(mockBreachCategories)
@@ -61,6 +123,23 @@ describe('Breaches repo', () => {
       const res = await getBreachCategories()
 
       expect(res).toEqual(mockBreachCategories)
+      expect(sequelize.models.breach_category.findAll).toHaveBeenCalledWith(expect.objectContaining({
+        where: {}
+      }))
+    })
+
+    test('getBreachCategories should return only userSelectable breaches given userSelectableOnly=true', async () => {
+      sequelize.models.breach_category.findAll.mockResolvedValue(mockBreachCategories)
+
+      await getBreachCategories(true)
+
+      expect(sequelize.models.breach_category.findAll).toHaveBeenCalledWith(expect.objectContaining({
+        where: {
+          user_selectable: {
+            [Op.is]: true
+          }
+        }
+      }))
     })
   })
 

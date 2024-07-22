@@ -36,6 +36,8 @@ const { mapDogDaoToDog } = require('../mappers/cdo')
  * @property {Date|null} untraceable_date
  * @property {DogMicrochipDao[]} dog_microchips
  * @property {DogBreachDao[]} dog_breaches
+ * @property {Function} save
+ * @property {Function} destroy
  */
 
 const getBreeds = async () => {
@@ -70,6 +72,24 @@ const getStatuses = async () => {
     throw err
   }
 }
+
+/**
+ * @return {(function(): Promise<*|Model<any, TModelAttributes>[]>)|*}
+ */
+const cachedStatuses = () => {
+  let _statuses
+
+  return async () => {
+    if (_statuses !== undefined) {
+      return _statuses
+    }
+    _statuses = await getStatuses()
+
+    return _statuses
+  }
+}
+
+const getCachedStatuses = cachedStatuses()
 
 const isExistingDog = (dog) => {
   const dogIndexNumber = `${dog.indexNumber}`
@@ -309,6 +329,8 @@ const updateDog = async (payload, user, transaction) => {
 
   updateDogFields(dogFromDB, payload, breeds, statuses)
 
+  await updateBreaches(dogFromDB, statuses, transaction)
+
   await updateMicrochips(dogFromDB, payload, transaction)
 
   await dogFromDB.save({ transaction })
@@ -322,24 +344,49 @@ const updateDog = async (payload, user, transaction) => {
   return dogFromDB
 }
 
-const updateStatus = async (indexNumber, newStatus, transaction) => {
+const updateBreaches = async (dog, statuses, transaction) => {
   if (!transaction) {
-    return await sequelize.transaction(async (t) => updateStatus(indexNumber, newStatus, t))
+    return await sequelize.transaction(async (t) => updateBreaches(dog, statuses, t))
   }
 
-  const statuses = await getStatuses()
+  if (dog.status_id !== statuses.find(x => x.status === constants.statuses.InBreach).id) {
+    for (const dogBreach of dog.dog_breaches) {
+      await dogBreach.destroy({ force: true, transaction })
+    }
+  }
 
-  const dogFromDB = await getDogByIndexNumber(indexNumber, transaction)
+  dog.dog_breaches = []
+}
 
+/**
+ * @param {DogDao} dogFromDB
+ * @param newStatus
+ * @param transaction
+ * @return {Promise<void>}s
+ */
+const updateDogStatus = async (dogFromDB, newStatus, transaction) => {
+  const statuses = await getCachedStatuses()
   dogFromDB.status_id = statuses.filter(x => x.status === newStatus)[0].id
+
+  await updateBreaches(dogFromDB, statuses, transaction)
 
   await dogFromDB.save({ transaction })
 
   await recalcDeadlines(dogFromDB, transaction)
 
-  const refreshedDog = await getDogByIndexNumber(indexNumber, transaction)
+  const refreshedDog = await getDogByIndexNumber(dogFromDB.index_number, transaction)
 
   await updateSearchIndexDog(refreshedDog, statuses, transaction)
+}
+
+const updateStatus = async (indexNumber, newStatus, transaction) => {
+  if (!transaction) {
+    return await sequelize.transaction(async (t) => updateStatus(indexNumber, newStatus, t))
+  }
+
+  const dogFromDB = await getDogByIndexNumber(indexNumber, transaction)
+
+  await updateDogStatus(dogFromDB, newStatus, transaction)
 
   return newStatus
 }
@@ -506,6 +553,10 @@ const deleteDogByIndexNumber = async (indexNumber, user, transaction) => {
       {
         model: sequelize.models.insurance,
         as: 'insurance'
+      },
+      {
+        model: sequelize.models.dog_breach,
+        as: 'dog_breaches'
       }
     ],
     transaction
@@ -524,6 +575,10 @@ const deleteDogByIndexNumber = async (indexNumber, user, transaction) => {
 
   for (const registeredPerson of dogAggregate.registered_person) {
     await registeredPerson.destroy()
+  }
+
+  for (const dogBreach of dogAggregate.dog_breaches) {
+    await dogBreach.destroy()
   }
 
   await dogAggregate.registration.destroy()
@@ -567,6 +622,10 @@ const purgeDogByIndexNumber = async (indexNumber, user, transaction) => {
         model: sequelize.models.insurance,
         as: 'insurance',
         paranoid: false
+      },
+      {
+        model: sequelize.models.dog_breach,
+        as: 'dog_breaches'
       }
     ],
     transaction,
@@ -588,6 +647,10 @@ const purgeDogByIndexNumber = async (indexNumber, user, transaction) => {
 
   for (const registration of dogAggregate.registrations) {
     await registration.destroy({ force: true, transaction })
+  }
+
+  for (const dogBreach of dogAggregate.dog_breaches) {
+    await dogBreach.destroy({ force: true, transaction })
   }
 
   await dogAggregate.destroy({ force: true, transaction })
@@ -688,23 +751,14 @@ const getOldDogs = async (statusList, sortOptions, today = null) => {
     }]
   })
 }
-/**
- * @param {import('../../data/domain/dog')} dog
- * @param transaction
- * @return {Promise<*|undefined>}
- */
-const saveDog = async (dog, transaction) => {
-  if (!transaction) {
-    return await sequelize.transaction(async (t) => saveDog(dog, t))
-  }
 
+const saveDogFields = async (dog, dogDao, transaction) => {
   const updates = dog.getChanges()
 
   for (const update of updates) {
     if (update.key === 'status') {
-      await updateStatus(dog.indexNumber, update.value, transaction)
+      await updateDogStatus(dogDao, update.value, transaction)
     } else if (update.key === 'dogBreaches') {
-      const dogDao = await getDogByIndexNumber(dog.indexNumber, transaction)
       await setBreaches(dog, dogDao, transaction)
     } else {
       throw new Error('Not implemented')
@@ -717,6 +771,21 @@ const saveDog = async (dog, transaction) => {
   }
 }
 
+/**
+ * @param {import('../../data/domain/dog')} dog
+ * @param transaction
+ * @return {Promise<*|undefined>}
+ */
+const saveDog = async (dog, transaction) => {
+  if (!transaction) {
+    return await sequelize.transaction(async (t) => saveDog(dog, t))
+  }
+
+  const dogDao = await getDogByIndexNumber(dog.indexNumber, transaction)
+
+  await saveDogFields(dog, dogDao, transaction)
+}
+
 const getDogModel = async (indexNumber, t) => {
   const dogDao = await getDogByIndexNumber(indexNumber, t)
   return mapDogDaoToDog(dogDao)
@@ -725,6 +794,7 @@ const getDogModel = async (indexNumber, t) => {
 module.exports = {
   getBreeds,
   getStatuses,
+  getCachedStatuses,
   createDogs,
   addImportedDog,
   updateDog,
@@ -732,6 +802,7 @@ module.exports = {
   getDogByIndexNumber,
   updateDogFields,
   updateMicrochips,
+  updateBreaches,
   updateStatus,
   deleteDogByIndexNumber,
   purgeDogByIndexNumber,
@@ -744,5 +815,6 @@ module.exports = {
   generateClausesForOr,
   customSort,
   saveDog,
+  saveDogFields,
   getDogModel
 }

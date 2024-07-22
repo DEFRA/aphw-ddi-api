@@ -1,7 +1,7 @@
 const { devUser } = require('../../../mocks/auth')
 const { Dog, BreachCategory } = require('../../../../app/data/domain')
 const { buildCdoDog } = require('../../../mocks/cdo/domain')
-const { allBreachDAOs } = require('../../../mocks/cdo/get')
+const { allBreachDAOs, buildDogDao } = require('../../../mocks/cdo/get')
 
 describe('DogService', function () {
   let mockDogRepository
@@ -20,6 +20,7 @@ describe('DogService', function () {
     mockDogRepository = {
       getDogByIndexNumber: jest.fn(),
       getDogModel: jest.fn(),
+      saveDogFields: jest.fn(),
       saveDog: jest.fn()
     }
 
@@ -177,6 +178,77 @@ describe('DogService', function () {
           dog_breaches: [
             'dog not kept on lead or muzzled',
             'dog kept in insecure place'
+          ]
+        },
+        devUser)
+    })
+  })
+
+  describe('setBreach', () => {
+    test('should set a breach', async () => {
+      const dogDao = buildDogDao()
+
+      const expectedBreaches = [
+        new BreachCategory({
+          id: 1,
+          label: 'dog not covered by third party insurance',
+          short_name: 'NOT_COVERED_BY_INSURANCE'
+        })
+      ]
+
+      mockBreachesRepository.getBreachCategories.mockResolvedValue([
+        {
+          id: 1,
+          label: 'dog not covered by third party insurance',
+          short_name: 'NOT_COVERED_BY_INSURANCE'
+        },
+        {
+          id: 2,
+          label: 'dog not kept on lead or muzzled',
+          short_name: 'NOT_ON_LEAD_OR_MUZZLED'
+        },
+        {
+          id: 3,
+          label: 'dog kept in insecure place',
+          short_name: 'INSECURE_PLACE'
+        }
+      ])
+
+      const changedDog = await dogService.setBreach(
+        dogDao,
+        'NOT_COVERED_BY_INSURANCE',
+        devUser,
+        {}
+      )
+      await changedDog.getChanges()[1].callback()
+
+      expect(mockDogRepository.saveDogFields).toHaveBeenCalledWith(changedDog, dogDao, {})
+
+      expect(changedDog.getChanges()).toEqual([
+        {
+          key: 'dogBreaches',
+          value: expectedBreaches,
+          callback: undefined
+        },
+        {
+          key: 'status',
+          value: 'In breach',
+          callback: expect.any(Function)
+        }
+      ])
+
+      expect(sendUpdateToAudit).toHaveBeenCalledWith(
+        'dog',
+        {
+          index_number: 'ED300097',
+          status: 'Interim exempt',
+          dog_breaches: []
+        },
+        {
+          index_number: 'ED300097',
+          status: 'In breach',
+          dog_breaches: [
+            'dog not covered by third party insurance'
           ]
         },
         devUser)
