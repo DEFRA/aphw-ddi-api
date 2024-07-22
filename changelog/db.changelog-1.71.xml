@@ -4,17 +4,9 @@
     <tagDatabase tag="v1.71.0" />
   </changeSet>
   <changeSet author="C Cole" id="2">
-      <sql dbms="postgresql">
-        UPDATE breach_category
-        SET label = 'dog''s export not reported to Defra'
-        WHERE short_name = 'DOG_EXPORT_NOT_REPORTED';
-      </sql>
-      <rollback>
-        <sql dbms="postgresql">
-          UPDATE breach_category
-          SET label = 'dog’s export not reported to Defra'
-          WHERE short_name = 'DOG_EXPORT_NOT_REPORTED';
-        </sql>
-      </rollback>
+      <update tableName="breach_category">
+          <column name="label" value="dog's export not reported to Defra" />
+          <where>short_name = 'DOG_EXPORT_NOT_REPORTED'</where>
+      </update>
   </changeSet>
 </databaseChangeLog>
