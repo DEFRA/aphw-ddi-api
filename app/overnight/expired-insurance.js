@@ -47,7 +47,8 @@ const setExpiredInsuranceToBreach = async (today, user, t) => {
     const dogService = ServiceProvider.getDogService()
 
     for (const toUpdate of setToBreach) {
-      await dogService.setBreach(toUpdate.dog, [breachReasons.NOT_COVERED_BY_INSURANCE], user, t)
+      console.log(`Updating dog ${toUpdate.dog.index_number} to In breach`)
+      await dogService.setBreach(toUpdate.dog, [breachReasons.INSURANCE_EXPIRED], user, t)
     }
     return `Success Insurance Expiry - updated ${setToBreach.length} rows`
   } catch (e) {

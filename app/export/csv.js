@@ -28,6 +28,7 @@ const headerRow = [
   'Telephone1',
   'Telephone2',
   'ExemptionStatus',
+  'InBreachReasons',
   'CertificateIssued',
   'CdoIssued',
   'CdoExpiry',
@@ -45,8 +46,7 @@ const headerRow = [
   'Withdrawn',
   'ExaminedByDlo',
   'MicrochipDeadline',
-  'NeuteringDeadline',
-  'InBreachReasons'
+  'NeuteringDeadline'
 ]
 
 const convertToCsv = (rows, removeHeader = false) => {
@@ -98,6 +98,7 @@ const convertRow = (row) => {
     extractLatestPrimaryTelephoneNumber(owner.person_contacts),
     extractLatestSecondaryTelephoneNumber(owner.person_contacts),
     row.status.status,
+    breachCategories,
     exemption.certificate_issued,
     exemption.cdo_issued,
     exemption.cdo_expiry,
@@ -115,8 +116,7 @@ const convertRow = (row) => {
     exemption.withdrawn,
     exemption.typed_by_dlo,
     exemption.microchip_deadline,
-    exemption.neutering_deadline,
-    breachCategories
+    exemption.neutering_deadline
   ]
 }
 
