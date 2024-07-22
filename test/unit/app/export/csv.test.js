@@ -21,6 +21,7 @@ describe('CSV test', () => {
     expect(csvDataArray[21]).toBe('"new postcode"')
     expect(csvDataArray[22]).toBe('"new country"')
     expect(csvDataArray[23]).toBe('"me@here.com"')
+    expect(csvDataArray[27]).toEqual('"owner not allowed police to read microchip"')
   })
 
   test('convertToCsv should handle valid input row with some missing data', async () => {
@@ -56,4 +57,4 @@ describe('CSV test', () => {
   })
 })
 
-const validHeader = '"IndexNumber","DogBreed","DogName","DogDateOfBirth","DogDateOfDeath","DogTattoo","DogColour","DogSex","DogMicrochip1","DogMicrochip2","DogExportedDate","DogStolenDate","DogUntraceableDate","OwnerOrganisation","OwnerFirstName","OwnerLastName","OwnerDateOfBirth","AddressLine1","AddressLine2","Town","County","Postcode","Country","Email","Telephone1","Telephone2","ExemptionStatus","CertificateIssued","CdoIssued","CdoExpiry","Court","PoliceForce","DogLegislationOfficer","ApplicationFeePaid","InsuranceCompany","InsuranceRenewalDate","NeuteringConfirmationDate","MicrochipVerificationDate","JoinedInterimSchemeDate","NonComplianceLetterSent","ExemptionOrder","Withdrawn","ExaminedByDlo","MicrochipDeadline","NeuteringDeadline"'
+const validHeader = '"IndexNumber","DogBreed","DogName","DogDateOfBirth","DogDateOfDeath","DogTattoo","DogColour","DogSex","DogMicrochip1","DogMicrochip2","DogExportedDate","DogStolenDate","DogUntraceableDate","OwnerOrganisation","OwnerFirstName","OwnerLastName","OwnerDateOfBirth","AddressLine1","AddressLine2","Town","County","Postcode","Country","Email","Telephone1","Telephone2","ExemptionStatus","InBreachReasons","CertificateIssued","CdoIssued","CdoExpiry","Court","PoliceForce","DogLegislationOfficer","ApplicationFeePaid","InsuranceCompany","InsuranceRenewalDate","NeuteringConfirmationDate","MicrochipVerificationDate","JoinedInterimSchemeDate","NonComplianceLetterSent","ExemptionOrder","Withdrawn","ExaminedByDlo","MicrochipDeadline","NeuteringDeadline"'

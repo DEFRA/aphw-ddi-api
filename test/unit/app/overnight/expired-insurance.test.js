@@ -7,6 +7,14 @@ jest.mock('../../../../app/lib/db-functions')
 const { updateStatusOnly } = require('../../../../app/repos/status')
 jest.mock('../../../../app/repos/status')
 
+jest.mock('../../../../app/repos/dogs')
+const { getCachedStatuses } = require('../../../../app/repos/dogs')
+const { statuses: mockStatuses } = require('../../../mocks/statuses')
+
+jest.mock('../../../../app/repos/breaches')
+const { getBreachCategories } = require('../../../../app/repos/breaches')
+const { BreachCategory } = require('../../../../app/data/domain')
+
 describe('ExpiredInsurance test', () => {
   jest.mock('../../../../app/config/db', () => ({
     transaction: jest.fn()
@@ -15,6 +23,14 @@ describe('ExpiredInsurance test', () => {
   beforeEach(async () => {
     jest.clearAllMocks()
     updateStatusOnly.mockResolvedValue()
+    getCachedStatuses.mockResolvedValue(mockStatuses)
+    getBreachCategories.mockResolvedValue([
+      new BreachCategory({
+        id: 11,
+        label: 'dog insurance expired',
+        short_name: 'INSURANCE_EXPIRED'
+      })
+    ])
   })
 
   test('setExpiredInsuranceToBreach should handle zero rows', async () => {

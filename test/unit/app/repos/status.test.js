@@ -8,15 +8,15 @@ describe('Status repo', () => {
   const { sendUpdateToAudit } = require('../../../../app/messaging/send-audit')
 
   jest.mock('../../../../app/repos/dogs')
-  const { getStatuses, getDogByIndexNumber } = require('../../../../app/repos/dogs')
+  const { getDogByIndexNumber, getCachedStatuses } = require('../../../../app/repos/dogs')
 
   const { updateStatusOnly } = require('../../../../app/repos/status')
 
   beforeEach(async () => {
     jest.clearAllMocks()
+    getCachedStatuses.mockResolvedValue(mockStatuses)
     updateSearchIndexDog.mockResolvedValue()
     sendUpdateToAudit.mockResolvedValue()
-    getStatuses.mockResolvedValue(mockStatuses)
     getDogByIndexNumber.mockResolvedValue({ id: 123, index_number: 'ED123' })
   })
 

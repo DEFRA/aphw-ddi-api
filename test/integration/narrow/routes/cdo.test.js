@@ -38,6 +38,7 @@ describe('CDO endpoint', () => {
         dog_breed: {
           breed: 'breed1'
         },
+        dog_breaches: [],
         status: {
           status: 'NEW'
         },

@@ -16,7 +16,7 @@ const { removeDogFromSearchIndex } = require('../../../../../app/repos/search')
 
 jest.mock('../../../../../app/messaging/send-audit')
 const { sendDeleteToAudit, sendPermanentDeleteToAudit } = require('../../../../../app/messaging/send-audit')
-const { buildDogDao } = require('../../../../mocks/cdo/get')
+const { buildDogDao, buildDogBreachDao } = require('../../../../mocks/cdo/get')
 const { Dog } = require('../../../../../app/data/domain')
 const { buildCdoDog, allBreaches } = require('../../../../mocks/cdo/domain')
 
@@ -84,7 +84,7 @@ describe('Dog repo', () => {
 
   const sequelize = require('../../../../../app/config/db')
 
-  const { getBreeds, getStatuses, createDogs, addImportedDog, getDogByIndexNumber, getAllDogIds, updateDog, updateStatus, updateDogFields, deleteDogByIndexNumber, switchOwnerIfNecessary, buildSwitchedOwner, recalcDeadlines, constructStatusList, constructDbSort, getOldDogs, generateClausesForOr, customSort, purgeDogByIndexNumber, saveDog, getDogModel } = require('../../../../../app/repos/dogs')
+  const { getBreeds, getStatuses, getCachedStatuses, createDogs, addImportedDog, getDogByIndexNumber, getAllDogIds, updateDog, updateStatus, updateDogFields, deleteDogByIndexNumber, switchOwnerIfNecessary, buildSwitchedOwner, recalcDeadlines, constructStatusList, constructDbSort, getOldDogs, generateClausesForOr, customSort, purgeDogByIndexNumber, saveDog, getDogModel, updateBreaches } = require('../../../../../app/repos/dogs')
 
   beforeEach(async () => {
     jest.clearAllMocks()
@@ -133,6 +133,23 @@ describe('Dog repo', () => {
       sequelize.models.status.findAll.mockRejectedValue(new Error('Test error'))
 
       await expect(getStatuses()).rejects.toThrow('Test error')
+    })
+  })
+
+  describe('getCachedStatuses', () => {
+    test('should only get statuses once', async () => {
+      const statuses = await getCachedStatuses()
+      const statuses2 = await getCachedStatuses()
+      const statuses3 = await getCachedStatuses()
+      const statuses4 = await getCachedStatuses()
+      expect(statuses).toEqual(statuses2)
+      expect(statuses2).toEqual(statuses3)
+      expect(statuses3).toEqual(statuses4)
+      expect(sequelize.models.status.findAll).toHaveBeenCalledTimes(1)
+      expect(statuses).toContainEqual({ id: 1, status: 'Interim exempt' })
+      expect(statuses).toContainEqual({ id: 2, status: 'Pre-exempt' })
+      expect(statuses).toContainEqual({ id: 3, status: 'Exempt' })
+      expect(statuses).toContainEqual({ id: 7, status: 'Inactive' })
     })
   })
 
@@ -543,7 +560,7 @@ describe('Dog repo', () => {
 
     test('updateDog should not create new transaction if one is passed', async () => {
       const mockSave = jest.fn()
-      sequelize.models.dog.findOne.mockResolvedValue({ id: 123, breed: 'Breed 1', name: 'Bruno', status: 'Failed', save: mockSave })
+      sequelize.models.dog.findOne.mockResolvedValue({ id: 123, breed: 'Breed 1', name: 'Bruno', status: 'Failed', save: mockSave, dog_breaches: [] })
       sequelize.models.microchip.findAll.mockResolvedValue([])
       sequelize.models.microchip.create.mockResolvedValue({ id: 101 })
       sequelize.models.search_index.findAll.mockResolvedValue([])
@@ -559,6 +576,47 @@ describe('Dog repo', () => {
     })
   })
 
+  describe('updateBreaches', () => {
+    test('updateBreaches should create new transaction if not passed', async () => {
+      const dog = {
+        id: 123,
+        breed: 'Breed 1',
+        name: 'Bruno',
+        status: 8,
+        dog_breaches: []
+      }
+
+      await updateBreaches(dog)
+
+      expect(sequelize.transaction).toHaveBeenCalledTimes(1)
+    })
+
+    test('updateBreaches should destroy dog breaches if status is not In breach', async () => {
+      const mockDestroy = jest.fn()
+      const dog = {
+        id: 123,
+        breed: 'Breed 1',
+        name: 'Bruno',
+        status_id: 4,
+        dog_breaches: [
+          buildDogBreachDao({
+            destroy: mockDestroy
+          }),
+          buildDogBreachDao({
+            destroy: mockDestroy
+          }),
+          buildDogBreachDao({
+            destroy: mockDestroy
+          })
+        ]
+      }
+
+      await updateBreaches(dog, [{ id: 8, status: 'In breach' }], {})
+
+      expect(mockDestroy).toHaveBeenCalledTimes(3)
+    })
+  })
+
   describe('updateStatus', () => {
     test('updateStatus should create new transaction if not passed', async () => {
       const mockSave = jest.fn()
@@ -571,7 +629,7 @@ describe('Dog repo', () => {
 
     test('updateStatus should not create new transaction if one is passed', async () => {
       const mockSave = jest.fn()
-      sequelize.models.dog.findOne.mockResolvedValue({ id: 123, breed: 'Breed 1', name: 'Bruno', save: mockSave })
+      sequelize.models.dog.findOne.mockResolvedValue({ id: 123, breed: 'Breed 1', name: 'Bruno', save: mockSave, dog_breaches: [] })
 
       await updateStatus('ED123', 'Failed', {})
 
@@ -592,6 +650,7 @@ describe('Dog repo', () => {
       const mockRegistrationDestroy = jest.fn()
       const mockRegisteredPersonDestroy = jest.fn()
       const mockInsuranceDestroy = jest.fn()
+      const mockDogBreachDestroy = jest.fn()
 
       const mockDogAggregrate = {
         id: 123,
@@ -610,6 +669,11 @@ describe('Dog repo', () => {
           { microchip: { microchip_number: 123456789012345, destroy: mockMicrochipDestroy }, destroy: mockDogMicrochipDestroy },
           { microchip: { microchip_number: 112345678901234, destroy: mockMicrochipDestroy }, destroy: mockDogMicrochipDestroy }
         ],
+        dog_breaches: [
+          buildDogBreachDao({
+            destroy: mockDogBreachDestroy
+          })
+        ],
         insurance: [{ id: 6, policy_number: null, company_id: 1, renewal_date: '2020-06-01T00:00:00.000Z', dog_id: 300088, destroy: mockInsuranceDestroy }],
         destroy: mockDogDestroy
       }
@@ -626,6 +690,7 @@ describe('Dog repo', () => {
       expect(mockInsuranceDestroy).toHaveBeenCalledTimes(1)
       expect(mockMicrochipDestroy).toHaveBeenCalledTimes(2)
       expect(mockDogMicrochipDestroy).toHaveBeenCalledTimes(2)
+      expect(mockDogBreachDestroy).toHaveBeenCalledTimes(1)
       expect(mockDogDestroy).toHaveBeenCalled()
       expect(sendDeleteToAudit).toHaveBeenCalledWith('dog', mockDogAggregrate, devUser)
     })
@@ -644,6 +709,7 @@ describe('Dog repo', () => {
       const mockRegistrationDestroy = jest.fn()
       const mockRegisteredPersonDestroy = jest.fn()
       const mockInsuranceDestroy = jest.fn()
+      const mockDogBreachDestroy = jest.fn()
 
       const mockDogAggregrate = {
         id: 123,
@@ -658,6 +724,11 @@ describe('Dog repo', () => {
         registered_person: [{
           destroy: mockRegisteredPersonDestroy
         }],
+        dog_breaches: [
+          buildDogBreachDao({
+            destroy: mockDogBreachDestroy
+          })
+        ],
         dog_microchips: [
           { microchip: { microchip_number: 123456789012345, destroy: mockMicrochipDestroy }, destroy: mockDogMicrochipDestroy },
           { microchip: { microchip_number: 112345678901234, destroy: mockMicrochipDestroy }, destroy: mockDogMicrochipDestroy }
@@ -678,6 +749,7 @@ describe('Dog repo', () => {
       expect(mockMicrochipDestroy).toHaveBeenCalledWith({ force: true, transaction: {} })
       expect(mockDogMicrochipDestroy).toHaveBeenCalledWith({ force: true, transaction: {} })
       expect(mockInsuranceDestroy).toHaveBeenCalledWith({ force: true, transaction: {} })
+      expect(mockDogBreachDestroy).toHaveBeenCalledWith({ force: true, transaction: {} })
       expect(mockDogDestroy).toHaveBeenCalledWith({ force: true, transaction: {} })
       expect(sendPermanentDeleteToAudit).toHaveBeenCalledWith('dog', mockDogAggregrate, devUser)
     })
