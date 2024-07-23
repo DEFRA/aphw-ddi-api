@@ -75,6 +75,9 @@ describe('Dog repo', () => {
       search_index: {
         findAll: jest.fn(),
         save: jest.fn()
+      },
+      dog_breach: {
+        destroy: jest.fn()
       }
     },
     col: jest.fn(),
@@ -432,6 +435,12 @@ describe('Dog repo', () => {
       expect(sequelize.models.dog.create).not.toHaveBeenCalled()
       expect(dogSave).toHaveBeenCalledTimes(1)
       expect(sequelize.models.registration.destroy).toHaveBeenCalledTimes(1)
+      expect(sequelize.models.dog_breach.destroy).toHaveBeenCalledTimes(1)
+      expect(sequelize.models.dog_breach.destroy).toHaveBeenCalledWith({
+        where: { dog_id: 1 },
+        transaction: {},
+        force: true
+      })
       expect(sequelize.models.registration.create).toHaveBeenCalledTimes(1)
 
       delete result[0].save

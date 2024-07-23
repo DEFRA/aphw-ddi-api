@@ -252,6 +252,11 @@ const createRegistration = async (dogEntity, dog, enforcement, exemptionOrder, t
       where: { dog_id: dogEntity.id },
       transaction
     })
+    await sequelize.models.dog_breach.destroy({
+      where: { dog_id: dogEntity.id },
+      transaction,
+      force: true
+    })
   }
 
   return await sequelize.models.registration.create({
