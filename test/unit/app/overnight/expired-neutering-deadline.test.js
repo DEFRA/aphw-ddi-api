@@ -23,6 +23,9 @@ describe('ExpiredNeuteringDeadline test', () => {
     transaction: jest.fn()
   }))
 
+  const juneDeadlineSwitchedOn = true
+  const juneLiteral = juneDeadlineSwitchedOn ? '1 = 1' : '1 = 0'
+
   beforeEach(async () => {
     jest.clearAllMocks()
     updateStatusOnly.mockResolvedValue()
@@ -95,7 +98,7 @@ describe('ExpiredNeuteringDeadline test', () => {
                   [Op.eq]: new Date('2024-06-30')
                 }
               },
-              sequelize.literal('1 = 0')
+              sequelize.literal(juneLiteral)
             ]
           },
           {
@@ -128,7 +131,7 @@ describe('ExpiredNeuteringDeadline test', () => {
                   [Op.eq]: new Date('2024-06-30')
                 }
               },
-              sequelize.literal('1 = 0')
+              sequelize.literal(juneLiteral)
             ]
           },
           {
@@ -161,7 +164,7 @@ describe('ExpiredNeuteringDeadline test', () => {
                   [Op.eq]: new Date('2024-06-30')
                 }
               },
-              sequelize.literal('1 = 0')
+              sequelize.literal(juneLiteral)
             ]
           },
           {
