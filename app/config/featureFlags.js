@@ -3,12 +3,12 @@ const { getEnvironmentVariable } = require('../lib/environment-helpers')
 
 // Define config schema
 const schema = Joi.object({
-  runPurgeDelete: Joi.boolean().default(false)
+  example: Joi.boolean().default(false)
 })
 
 // Build config
 const config = {
-  runPurgeDelete: getEnvironmentVariable('FEATURE_FLAG_PURGE_DELETE')
+  example: getEnvironmentVariable('FEATURE_FLAG_EXAMPLE')
 }
 
 // Validate config
