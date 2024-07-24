@@ -5,7 +5,6 @@ jest.mock('../../../../app/config/featureFlags', () => ({
   ...defaultFlags,
   runPurgeDelete: true
 }))
-const featureFlags = require('../../../../app/config/featureFlags')
 
 const { runOvernightJobs, runExportNow } = require('../../../../app/overnight/run-jobs')
 
@@ -36,7 +35,6 @@ describe('RunJobs test', () => {
   })
 
   test('runOvernightJobs should call jobs', async () => {
-    featureFlags.runPurgeDelete = true
     updateRunningJobProgress.mockResolvedValue()
     tryStartJob.mockResolvedValue(123)
     endJob.mockResolvedValue()
@@ -46,17 +44,6 @@ describe('RunJobs test', () => {
     expect(purgeSoftDeletedRecords).toHaveBeenCalledTimes(1)
     expect(autoUpdateStatuses).toHaveBeenCalledTimes(1)
     expect(res).toBe('ok - insurance 2 rows | ok - deleted 2 rows')
-  })
-
-  test('runOvernightJobs should not call purgeSoftDeletedRecords given feature flag disabled', async () => {
-    featureFlags.runPurgeDelete = false
-    updateRunningJobProgress.mockResolvedValue()
-    tryStartJob.mockResolvedValue(123)
-    endJob.mockResolvedValue()
-    autoUpdateStatuses.mockResolvedValue('ok - insurance 2 rows')
-    await runOvernightJobs(server)
-    expect(purgeSoftDeletedRecords).toHaveBeenCalledTimes(0)
-    featureFlags.runPurgeDelete = true
   })
 
   test('runExportNow should call createExportFile', async () => {

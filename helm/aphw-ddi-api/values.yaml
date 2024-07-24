@@ -43,7 +43,6 @@ container:
   certificateRequestQueue: aphw-ddi-certificate-request
   overnightJobCrontab: 5 4 * * *
   paranoidRetentionPeriod: 90
-  featureFlagPurgeDelete: false
 
 postgresService:
   postgresDb: dangerous_dogs_index
