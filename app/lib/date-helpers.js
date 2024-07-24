@@ -14,8 +14,18 @@ const addYears = (date, years) => {
   return newDate
 }
 
+const dateTodayOrInFuture = (date) => {
+  const today = new Date()
+  today.setHours(0, 0, 0, 0)
+
+  const checkedDate = new Date(date)
+  checkedDate.setHours(0, 0, 0, 0)
+  return checkedDate.getTime() >= today.getTime()
+}
+
 module.exports = {
   formatDate,
   formatDateAsUTCNoTime,
-  addYears
+  addYears,
+  dateTodayOrInFuture
 }

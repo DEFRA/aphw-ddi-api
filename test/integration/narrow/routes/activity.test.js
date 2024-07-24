@@ -14,6 +14,9 @@ describe('Activity endpoint', () => {
   jest.mock('../../../../app/messaging/send-audit')
   const { sendActivityToAudit } = require('../../../../app/messaging/send-audit')
 
+  jest.mock('../../../../app/service/config')
+  const { getCdoService } = require('../../../../app/service/config')
+
   beforeEach(async () => {
     jest.clearAllMocks()
     getCallingUser.mockReturnValue(devUser)
@@ -109,6 +112,110 @@ describe('Activity endpoint', () => {
       const response = await server.inject(options)
 
       expect(response.statusCode).toBe(200)
+    })
+
+    test('returns 200 with Application Pack sent', async () => {
+      const sendApplicationPackMock = jest.fn()
+      getCdoService.mockReturnValue({
+        sendApplicationPack: sendApplicationPackMock
+      })
+      sendApplicationPackMock.mockResolvedValue(undefined)
+
+      getActivityById.mockResolvedValue({ id: 9, name: 'act 1', label: 'Application pack' })
+
+      const activityDate = new Date()
+      const options = {
+        method: 'POST',
+        url: '/activity',
+        payload: {
+          activity: '9',
+          activityType: 'sent',
+          pk: 'ED300000',
+          source: 'dog',
+          activityDate
+        }
+      }
+
+      const response = await server.inject(options)
+
+      expect(response.statusCode).toBe(200)
+      expect(sendActivityToAudit).not.toHaveBeenCalled()
+      expect(sendApplicationPackMock).toHaveBeenCalledWith('ED300000', activityDate, devUser)
+    })
+
+    test('returns 200 with Application Pack received', async () => {
+      sendActivityToAudit.mockResolvedValue()
+
+      getActivityById.mockResolvedValue({ id: 9, name: 'act 1', label: 'Application pack' })
+
+      const options = {
+        method: 'POST',
+        url: '/activity',
+        payload: {
+          activity: '9',
+          activityType: 'received',
+          pk: 'ED300000',
+          source: 'dog',
+          activityDate: new Date()
+        }
+      }
+
+      const response = await server.inject(options)
+
+      expect(response.statusCode).toBe(200)
+      expect(sendActivityToAudit).toHaveBeenCalled()
+    })
+
+    test('returns 200 with Form 2 sent', async () => {
+      const sendForm2Mock = jest.fn()
+      getCdoService.mockReturnValue({
+        sendForm2: sendForm2Mock
+      })
+      sendForm2Mock.mockResolvedValue(undefined)
+
+      getActivityById.mockResolvedValue({ id: 10, name: 'act 1', label: 'Form 2' })
+
+      const activityDate = new Date()
+      const options = {
+        method: 'POST',
+        url: '/activity',
+        payload: {
+          activity: '10',
+          activityType: 'sent',
+          pk: 'ED300000',
+          source: 'dog',
+          activityDate
+        }
+      }
+
+      const response = await server.inject(options)
+
+      expect(response.statusCode).toBe(200)
+      expect(sendActivityToAudit).not.toHaveBeenCalled()
+      expect(sendForm2Mock).toHaveBeenCalledWith('ED300000', activityDate, devUser)
+    })
+
+    test('returns 200 with Form 2 received', async () => {
+      sendActivityToAudit.mockResolvedValue()
+
+      getActivityById.mockResolvedValue({ id: 10, name: 'act 1', label: 'Form 2' })
+
+      const options = {
+        method: 'POST',
+        url: '/activity',
+        payload: {
+          activity: '10',
+          activityType: 'received',
+          pk: 'ED300000',
+          source: 'dog',
+          activityDate: new Date()
+        }
+      }
+
+      const response = await server.inject(options)
+
+      expect(response.statusCode).toBe(200)
+      expect(sendActivityToAudit).toHaveBeenCalled()
     })
 
     test('returns 400 with invalid payload', async () => {

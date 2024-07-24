@@ -103,6 +103,14 @@ module.exports = (sequelize, DataTypes) => {
       type: DataTypes.DATE,
       allowNull: true
     },
+    application_pack_sent: {
+      type: DataTypes.DATE,
+      allowNull: true
+    },
+    form_two_sent: {
+      type: DataTypes.DATE,
+      allowNull: true
+    },
     deleted_at: {
       type: DataTypes.DATE,
       allowNull: true

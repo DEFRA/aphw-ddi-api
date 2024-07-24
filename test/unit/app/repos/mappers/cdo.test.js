@@ -1,4 +1,17 @@
-const { mapSummaryCdoDaoToDto } = require('../../../../../app/repos/mappers/cdo')
+const { mapSummaryCdoDaoToDto, mapCdoDaoToCdo, mapCdoDaoToExemption, mapDogDaoToDog } = require('../../../../../app/repos/mappers/cdo')
+const {
+  buildCdoDao,
+  buildInsuranceDao,
+  buildRegistrationDao,
+  buildDogDao,
+  dogBreachDAOs
+} = require('../../../../mocks/cdo/get')
+const {
+  buildCdo, buildExemption, buildCdoInsurance, NOT_COVERED_BY_INSURANCE, INSECURE_PLACE,
+  AWAY_FROM_ADDR_30_DAYS_IN_YR
+} = require('../../../../mocks/cdo/domain')
+const { Exemption } = require('../../../../../app/data/domain')
+
 describe('cdo mappers', () => {
   describe('mapSummaryCdoDaoToDto', () => {
     test('should map a summary cdo to a dto', () => {
@@ -119,6 +132,105 @@ describe('cdo mappers', () => {
 
       const mappedValues = mapSummaryCdoDaoToDto(summaryCdoDao)
       expect(mappedValues).toEqual(expectedSummaryCdoDto)
+    })
+  })
+
+  describe('mapCdoDaoToExemption', () => {
+    test('should map a CdoDao to an Exemption', () => {
+      const exemption = buildRegistrationDao()
+      const insurance = [
+        buildInsuranceDao({
+          id: 1
+        }),
+        buildInsuranceDao({
+          id: 0
+        })
+      ]
+      expect(mapCdoDaoToExemption(exemption, insurance)).toEqual(new Exemption(buildExemption({
+        insurance: [
+          buildCdoInsurance(),
+          buildCdoInsurance()
+        ]
+      })))
+    })
+
+    test('should map a CdoDao to an Exemption given insurance is undefined', () => {
+      const exemption = buildRegistrationDao()
+      const insurance = undefined
+      expect(mapCdoDaoToExemption(exemption, insurance)).toEqual(new Exemption(buildExemption({
+        insurance: undefined
+      })))
+    })
+
+    test('should deserialise dates', () => {
+      const registrationDao = buildRegistrationDao({
+        application_pack_sent: '2024-05-01',
+        cdo_expiry: '2024-05-02',
+        cdo_issued: '2024-05-03',
+        application_fee_paid: '2024-05-05',
+        form_two_sent: '2024-05-07',
+        microchip_verification: '2024-05-06',
+        neutering_confirmation: '2024-05-08',
+        certificate_issued: '2024-05-04'
+      })
+      const insurance = [buildInsuranceDao({
+        id: 1,
+        renewal_date: '2024-05-04'
+      })]
+      const mappedRegistration = mapCdoDaoToExemption(registrationDao, insurance)
+      expect(mappedRegistration.applicationPackSent).toEqual(new Date('2024-05-01'))
+      expect(mappedRegistration.cdoExpiry).toEqual(new Date('2024-05-02'))
+      expect(mappedRegistration.cdoIssued).toEqual(new Date('2024-05-03'))
+      expect(mappedRegistration.applicationFeePaid).toEqual(new Date('2024-05-05'))
+      expect(mappedRegistration.form2Sent).toEqual(new Date('2024-05-07'))
+      expect(mappedRegistration.microchipVerification).toEqual(new Date('2024-05-06'))
+      expect(mappedRegistration.neuteringConfirmation).toEqual(new Date('2024-05-08'))
+      expect(mappedRegistration.certificateIssued).toEqual(new Date('2024-05-04'))
+      expect(mappedRegistration.insurance[0].renewalDate).toEqual(new Date('2024-05-04'))
+    })
+  })
+
+  describe('mapCdoDaoToCdo', () => {
+    test('should map a CdoDao to a model', () => {
+      const cdoDao = buildCdoDao()
+      const expectedCdo = buildCdo()
+      expect(mapCdoDaoToCdo(cdoDao)).toEqual(expectedCdo)
+    })
+    test('should map a CdoDao to a model with insurance', () => {
+      const cdoDao = buildCdoDao({
+        insurance: [
+          buildInsuranceDao({
+            id: 1
+          }),
+          buildInsuranceDao({
+            id: 0
+          })
+        ]
+      })
+      const expectedCdo = buildCdo({
+        exemption: buildExemption({
+          insurance: [
+            buildCdoInsurance(),
+            buildCdoInsurance()
+          ]
+        })
+      })
+      expect(mapCdoDaoToCdo(cdoDao)).toEqual(expectedCdo)
+    })
+  })
+
+  describe('mapDogDaoToDog', () => {
+    test('should map dog breaches', () => {
+      const dogDao = buildDogDao({
+        dog_breaches: dogBreachDAOs
+      })
+      const expectedBreachCategories = [
+        NOT_COVERED_BY_INSURANCE,
+        INSECURE_PLACE,
+        AWAY_FROM_ADDR_30_DAYS_IN_YR
+      ]
+      const dog = mapDogDaoToDog(dogDao)
+      expect(dog.breaches).toEqual(expectedBreachCategories)
     })
   })
 })

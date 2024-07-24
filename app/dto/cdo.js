@@ -1,4 +1,5 @@
 const { getMicrochip, calculateNeuteringDeadline } = require('./dto-helper')
+const { mapDogBreachDaoToBreachDto } = require('../repos/mappers/dog')
 
 const generateOrderSpecificData = (data) => {
   if (data.registration.exemption_order.exemption_order === '2023') {
@@ -72,7 +73,8 @@ const cdoViewDto = (data) => {
       dateStolen: data.stolen_date,
       dateUntraceable: data.untraceable_date,
       microchipNumber: getMicrochip(data, 1),
-      microchipNumber2: getMicrochip(data, 2)
+      microchipNumber2: getMicrochip(data, 2),
+      breaches: data.dog_breaches.map(mapDogBreachDaoToBreachDto)
     },
     exemption: {
       exemptionOrder: data.registration.exemption_order.exemption_order,

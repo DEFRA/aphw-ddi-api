@@ -7,5 +7,10 @@ module.exports = {
   PURGE: 'uk.gov.defra.ddi.event.delete.permanent',
   EXPORT: 'uk.gov.defra.ddi.event.export',
   UPDATE: 'uk.gov.defra.ddi.event.update',
-  CHANGE_OWNER: 'uk.gov.defra.ddi.event.change.owner'
+  CHANGE_OWNER: 'uk.gov.defra.ddi.event.change.owner',
+  CERTIFICATE_REQUESTED: 'uk.gov.defra.aphw.ddi.certificate.requested',
+  activities: {
+    applicationPackSent: 'Application pack',
+    form2Sent: 'Form 2'
+  }
 }

@@ -6,9 +6,9 @@ cd "${projectRoot}"
 
 . "${projectRoot}/.env"
 
-docker-compose down
-docker-compose -f docker-compose.api-tests.yaml down
+docker compose down
+docker compose -f docker-compose.api-tests.yaml down
 
-docker-compose \
+docker compose \
   -f docker-compose.api-tests.yaml \
   up $args $@

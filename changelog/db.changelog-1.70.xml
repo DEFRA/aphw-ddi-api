@@ -1,0 +1,25 @@
+<?xml version="1.1" encoding="utf-8" standalone="no"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog" xmlns:ext="http://www.liquibase.org/xml/ns/dbchangelog-ext" xmlns:pro="http://www.liquibase.org/xml/ns/pro" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog-ext http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-ext.xsd http://www.liquibase.org/xml/ns/pro http://www.liquibase.org/xml/ns/pro/liquibase-pro-3.9.xsd http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.9.xsd">
+  <changeSet author="C Cole" id="1">
+    <tagDatabase tag="v1.70.0" />
+  </changeSet>
+  <changeSet author="C Cole" id="2">
+    <addColumn tableName="breach_category">
+      <column name="user_selectable" type="boolean" defaultValueBoolean="true">
+        <constraints nullable="true" />
+      </column>
+    </addColumn>
+  </changeSet>
+  <changeSet author="C Cole" id="3">
+    <insert tableName="breach_category">
+      <column name="label" value="dog insurance expired" />
+      <column name="short_name" value="INSURANCE_EXPIRED" />
+      <column name="user_selectable" value="false" />
+    </insert>
+    <insert tableName="breach_category">
+      <column name="label" value="neutering deadline exceeded" />
+      <column name="short_name" value="NEUTERING_DEADLINE_EXCEEDED" />
+      <column name="user_selectable" value="false" />
+    </insert>
+  </changeSet>
+</databaseChangeLog>

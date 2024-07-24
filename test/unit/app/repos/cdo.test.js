@@ -2,6 +2,12 @@ const { payload: mockCdoPayload, payloadWithPersonReference: mockCdoPayloadWithR
 const { NotFoundError } = require('../../../../app/errors/not-found')
 const { personDao: mockPersonPayload, createdPersonDao: mockCreatedPersonPayload } = require('../../../mocks/person')
 const { devUser } = require('../../../mocks/auth')
+const {
+  buildCdoDao, buildRegistrationDao, buildInsuranceDao, buildInsuranceCompanyDao, buildDogMicrochipDao,
+  buildMicrochipDao
+} = require('../../../mocks/cdo/get')
+const { Cdo, CdoTaskList } = require('../../../../app/data/domain')
+const { buildCdo, buildExemption, buildCdoDog } = require('../../../mocks/cdo/domain')
 
 describe('CDO repo', () => {
   jest.mock('../../../../app/config/db', () => ({
@@ -10,7 +16,8 @@ describe('CDO repo', () => {
     models: {
       dog: {
         findOne: jest.fn(),
-        findAll: jest.fn()
+        findAll: jest.fn(),
+        reload: jest.fn()
       }
     },
     fn: jest.fn(),
@@ -24,15 +31,21 @@ describe('CDO repo', () => {
   const { createPeople, getPersonByReference, updatePerson, updatePersonFields } = require('../../../../app/repos/people')
 
   jest.mock('../../../../app/repos/dogs')
-  const { createDogs, getDogByIndexNumber } = require('../../../../app/repos/dogs')
+  const { createDogs, getDogByIndexNumber, updateStatus } = require('../../../../app/repos/dogs')
 
   jest.mock('../../../../app/repos/search')
   const { addToSearchIndex } = require('../../../../app/repos/search')
 
+  jest.mock('../../../../app/repos/insurance')
+  const { createOrUpdateInsurance } = require('../../../../app/repos/insurance')
+
   jest.mock('../../../../app/messaging/send-event')
   const { sendEvent } = require('../../../../app/messaging/send-event')
 
-  const { createCdo, getCdo, getAllCdos, getSummaryCdos } = require('../../../../app/repos/cdo')
+  jest.mock('../../../../app/repos/microchip')
+  const { updateMicrochip } = require('../../../../app/repos/microchip')
+
+  const { createCdo, getCdo, getAllCdos, getSummaryCdos, getCdoModel, getCdoTaskList, saveCdoTaskList } = require('../../../../app/repos/cdo')
 
   beforeEach(async () => {
     jest.clearAllMocks()
@@ -553,6 +566,247 @@ describe('CDO repo', () => {
           }
         }
       })
+    })
+  })
+
+  describe('getCdoModel', () => {
+    test('should return getCdo but as a domain model', async () => {
+      sequelize.models.dog.findAll.mockResolvedValue([buildCdoDao()])
+      const res = await getCdoModel('ED300097')
+      expect(res).toBeInstanceOf(Cdo)
+    })
+
+    test('should return throw a NotFoundError if index does not exist', async () => {
+      sequelize.models.dog.findAll.mockResolvedValue([])
+      await expect(getCdoModel('ED300097')).rejects.toThrow(NotFoundError)
+    })
+  })
+
+  describe('getTaskList', () => {
+    test('should return getCdoTaskList', async () => {
+      sequelize.models.dog.findAll.mockResolvedValue([buildCdoDao()])
+      const res = await getCdoTaskList('ED300097')
+      expect(res).toEqual(new CdoTaskList(buildCdo()))
+    })
+
+    test('should throw a NotFound error given cdo does not exist', async () => {
+      sequelize.models.dog.findAll.mockResolvedValue([])
+      await expect(getCdoTaskList('ED300097')).rejects.toThrow(NotFoundError)
+    })
+  })
+
+  describe('saveCdoTaskList', () => {
+    test('should create start new transaction if none passed', async () => {
+      await saveCdoTaskList({})
+
+      expect(sequelize.transaction).toHaveBeenCalledTimes(1)
+    })
+
+    test('should update applicationPackSent', async () => {
+      const dog = buildCdoDao({
+        registration: buildRegistrationDao({
+          save: jest.fn()
+        })
+      })
+
+      sequelize.models.dog.findAll.mockResolvedValue([dog])
+
+      const callback = jest.fn()
+      const cdoTaskList = new CdoTaskList(buildCdo())
+      expect(dog.registration.application_pack_sent).toBeNull()
+      cdoTaskList.sendApplicationPack(new Date(), callback)
+      const taskList = await saveCdoTaskList(cdoTaskList, {})
+      expect(sequelize.models.dog.findAll).toHaveBeenCalledWith(expect.objectContaining({
+        where: { index_number: 'ED300097' }
+      }))
+      expect(dog.registration.save).toHaveBeenCalled()
+      expect(callback).toHaveBeenCalled()
+      expect(taskList.applicationPackSent.completed).toBe(true)
+    })
+
+    test('should update insurance details', async () => {
+      const renewalDate = new Date()
+
+      const dog = buildCdoDao({
+        registration: buildRegistrationDao({
+          save: jest.fn()
+        })
+      })
+      const editedDog = buildCdoDao({
+        registration: buildRegistrationDao({
+          save: jest.fn()
+        }),
+        insurance: [buildInsuranceDao({
+          company: buildInsuranceCompanyDao({
+            company_name: 'Allianz'
+          }),
+          renewal_date: renewalDate
+        })]
+      })
+
+      createOrUpdateInsurance.mockResolvedValue({
+        company_id: 9,
+        renewal_data: renewalDate
+      })
+
+      sequelize.models.dog.findAll.mockResolvedValueOnce([dog])
+      sequelize.models.dog.findAll.mockResolvedValueOnce([editedDog])
+
+      const callback = jest.fn()
+
+      const cdoTaskList = new CdoTaskList(buildCdo({
+        exemption: buildExemption({
+          applicationPackSent: new Date()
+        })
+      }))
+      expect(cdoTaskList.insuranceDetailsRecorded.completed).toBe(false)
+
+      cdoTaskList.recordInsuranceDetails('Allianz', renewalDate, callback)
+
+      const taskList = await saveCdoTaskList(cdoTaskList, {})
+
+      expect(createOrUpdateInsurance).toHaveBeenCalledWith({ insurance: { company: 'Allianz', renewalDate } }, dog, {})
+      expect(taskList.insuranceDetailsRecorded.completed).toBe(true)
+      expect(callback).toHaveBeenCalled()
+    })
+
+    test('should update microchip number', async () => {
+      const dog = buildCdoDao({
+        dog_microchips: []
+      })
+      const editedDog = buildCdoDao({
+        dog_microchips: [buildDogMicrochipDao({
+          microchip: buildMicrochipDao({
+            microchip_number: '123456789012345'
+          })
+        })]
+      })
+
+      sequelize.models.dog.findAll.mockResolvedValueOnce([dog])
+      sequelize.models.dog.findAll.mockResolvedValueOnce([editedDog])
+
+      const callback = jest.fn()
+
+      const cdoTaskList = new CdoTaskList(buildCdo({
+        exemption: buildExemption({
+          applicationPackSent: new Date()
+        }),
+        dog: buildCdoDog({
+          microchipNumber: null
+        })
+      }))
+      expect(cdoTaskList.microchipNumberRecorded.completed).toBe(false)
+
+      cdoTaskList.recordMicrochipNumber('123456789012345', null, callback)
+
+      const taskList = await saveCdoTaskList(cdoTaskList, {})
+
+      expect(updateMicrochip).toHaveBeenCalledWith(dog, '123456789012345', 1, {})
+      expect(taskList.cdoSummary.microchipNumber).toEqual('123456789012345')
+
+      expect(callback).toHaveBeenCalled()
+    })
+
+    test('should update verificationDateRecorded', async () => {
+      const neuteringConfirmation = new Date()
+      const microchipVerification = new Date()
+
+      const dog = buildCdoDao({
+        registration: buildRegistrationDao({
+          neutering_confirmation: undefined,
+          microchip_verification: undefined
+        })
+      })
+      dog.registration.save = jest.fn()
+      const editedDog = buildCdoDao({
+        registration: buildRegistrationDao({
+          neutering_confirmation: neuteringConfirmation,
+          microchip_verification: microchipVerification
+        })
+      })
+
+      sequelize.models.dog.findAll.mockResolvedValueOnce([dog])
+      sequelize.models.dog.findAll.mockResolvedValueOnce([editedDog])
+
+      const callback = jest.fn()
+
+      const cdoTaskList = new CdoTaskList(buildCdo({
+        exemption: buildExemption({
+          applicationPackSent: new Date(),
+          form2Sent: new Date()
+        })
+      }))
+      expect(cdoTaskList.verificationDateRecorded.completed).toBe(false)
+
+      cdoTaskList.verifyDates(microchipVerification, neuteringConfirmation, callback)
+
+      const taskList = await saveCdoTaskList(cdoTaskList, {})
+
+      expect(dog.registration.save).toHaveBeenCalled()
+      expect(dog.registration.microchip_verification).toEqual(microchipVerification)
+      expect(dog.registration.neutering_confirmation).toEqual(neuteringConfirmation)
+      expect(taskList.cdoSummary.microchipVerification).toEqual(microchipVerification)
+      expect(taskList.cdoSummary.neuteringConfirmation).toEqual(neuteringConfirmation)
+
+      expect(callback).toHaveBeenCalledTimes(1)
+    })
+
+    test('should update status', async () => {
+      updateStatus.mockResolvedValue()
+      const dog = buildCdoDao({
+        registration: buildRegistrationDao({
+          neutering_confirmation: new Date(),
+          microchip_verification: new Date()
+        })
+      })
+      dog.registration.save = jest.fn()
+
+      sequelize.models.dog.findAll.mockResolvedValueOnce([dog])
+
+      const callback = jest.fn()
+
+      const cdoTaskList = new CdoTaskList(buildCdo({
+        exemption: buildExemption({
+          applicationPackSent: new Date(),
+          form2Sent: new Date(),
+          neuteringConfirmation: new Date(),
+          microchipVerification: new Date(),
+          applicationFeePaid: new Date(),
+          insurance: [buildInsuranceDao({
+            renewalDate: new Date()
+          })]
+        }),
+        dog: buildCdoDog({
+          microchipNumber: '123456789012345'
+        })
+      }))
+
+      const sentDate = new Date()
+
+      cdoTaskList.issueCertificate(sentDate, callback)
+
+      await saveCdoTaskList(cdoTaskList, {})
+      expect(callback).toHaveBeenCalled()
+      expect(dog.registration.save).toHaveBeenCalled()
+      expect(updateStatus).toHaveBeenCalledWith('ED300097', 'Exempt', {})
+    })
+
+    test('should handle missing model', async () => {
+      sequelize.models.dog.findAll.mockResolvedValueOnce([])
+
+      const callback = jest.fn()
+
+      const cdoTaskList = new CdoTaskList(buildCdo({
+        exemption: buildExemption({
+          applicationPackSent: new Date(),
+          form2Sent: new Date()
+        })
+      }))
+      expect(cdoTaskList.verificationDateRecorded.completed).toBe(false)
+
+      cdoTaskList.verifyDates(new Date(), new Date(), callback)
+
+      await expect(saveCdoTaskList(cdoTaskList, {})).rejects.toThrow()
     })
   })
 })

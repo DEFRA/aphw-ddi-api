@@ -3,6 +3,8 @@ const { getCallingUser } = require('../auth/get-user')
 const { sendActivityToAudit } = require('../messaging/send-audit')
 const schema = require('../schema/activity/event')
 const { createActivitySchema } = require('../schema/activity/create')
+const ServiceProvider = require('../service/config')
+const { activities } = require('../constants/event/events')
 
 module.exports = [{
   method: 'GET',
@@ -49,7 +51,13 @@ module.exports = [{
         activityLabel: (await getActivityById(request.payload.activity)).label
       }
 
-      await sendActivityToAudit(payload, getCallingUser(request))
+      if (payload.activityLabel === activities.applicationPackSent && payload.activityType === 'sent') {
+        await ServiceProvider.getCdoService().sendApplicationPack(payload.pk, payload.activityDate, getCallingUser(request))
+      } else if (payload.activityLabel === activities.form2Sent && payload.activityType === 'sent') {
+        await ServiceProvider.getCdoService().sendForm2(payload.pk, payload.activityDate, getCallingUser(request))
+      } else {
+        await sendActivityToAudit(payload, getCallingUser(request))
+      }
 
       return h.response({ result: 'ok' }).code(200)
     }

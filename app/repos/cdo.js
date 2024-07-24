@@ -1,6 +1,6 @@
 const sequelize = require('../config/db')
 const { createPeople, getPersonByReference, updatePersonFields } = require('./people')
-const { createDogs } = require('./dogs')
+const { createDogs, updateStatus } = require('./dogs')
 const { addToSearchIndex } = require('./search')
 const { sendCreateToAudit, sendChangeOwnerToAudit } = require('../messaging/send-audit')
 const { CDO } = require('../constants/event/audit-event-object-types')
@@ -9,6 +9,11 @@ const { mapPersonDaoToCreatedPersonDao } = require('./mappers/person')
 const { cdoRelationship } = require('./relationships/cdo')
 const { statuses } = require('../constants/statuses')
 const { Op } = require('sequelize')
+const { mapCdoDaoToCdo } = require('./mappers/cdo')
+const { CdoTaskList } = require('../data/domain')
+const { createOrUpdateInsurance } = require('./insurance')
+const { updateMicrochip } = require('./microchip')
+const domain = require('../constants/domain')
 
 /**
  * @typedef DogBreedDao
@@ -37,6 +42,24 @@ const { Op } = require('sequelize')
  */
 
 /**
+ * @typedef BreachCategoryDao
+ * @property {number} id
+ * @property {string} label
+ * @property {string} short_name
+ */
+
+/**
+ * @typedef DogBreachDao
+ * @property {number} id
+ * @property {number} dog_id
+ * @property {number} breach_category_id
+ * @property {BreachCategoryDao} breach_category
+ * @property {string|null} updated_at
+ * @property {string} created_at
+ * @property {null|string} deleted_at
+ */
+
+/**
  * @typedef InsuranceDao
  * @property {number} id
  * @property {null|string} policy_number
@@ -44,6 +67,7 @@ const { Op } = require('sequelize')
  * @property {string} renewal_date
  * @property {number} dog_id
  * @property  {{id: number; company_name: string}} company
+ * @property update
  */
 
 /**
@@ -85,23 +109,26 @@ const { Op } = require('sequelize')
  * @property {string} cdo_issued
  * @property {string} cdo_expiry
  * @property {null|string} time_limit
- * @property {string} certificate_issued
- * @property {string} legislation_officer
- * @property {string} application_fee_paid
- * @property {string} neutering_confirmation
- * @property {string} microchip_verification
- * @property {string} joined_exemption_scheme
- * @property {null|string} withdrawn
+ * @property {null|string} legislation_officer
+ * @property {null|Date} certificate_issued
+ * @property {null|Date} application_fee_paid
+ * @property {null|Date} neutering_confirmation
+ * @property {null|Date} microchip_verification
+ * @property {null|Date} joined_exemption_scheme
+ * @property {null|Date} withdrawn
  * @property {null|string} typed_by_dlo
- * @property {null|string} microchip_deadline
- * @property {null|string} neutering_deadline
- * @property {null|string} non_compliance_letter_sent
+ * @property {null|Date} microchip_deadline
+ * @property {null|Date} neutering_deadline
+ * @property {null|Date} non_compliance_letter_sent
+ * @property {null|Date} application_pack_sent
+ * @property {null|Date} form_two_sent
  * @property {null|string} deleted_at
  * @property {string} created_at
  * @property {string} updated_at
  * @property {PoliceForceDao} police_force
  * @property {CourtDao} court
  * @property {ExemptionOrderDao} exemption_order
+ * @property {() => void} [save]
  */
 /**
  * @typedef SummaryRegistrationDao
@@ -130,6 +157,7 @@ const { Op } = require('sequelize')
  * @property {DogBreedDao} dog_breed
  * @property {number} dog_breed_id
  * @property {DogMicrochipDao[]} dog_microchips
+ * @property {DogBreachDao[]} dog_breaches
  * @property {string} dog_reference
  * @property {null|string} exported_date
  * @property {InsuranceDao[]} insurance
@@ -139,9 +167,9 @@ const { Op } = require('sequelize')
  * @property {null|string} sex
  * @property {StatusDao} status
  * @property {number} status_id
- * @property {null|string} stolen_date
- * @property {null|string} tattoo
- * @property {null|string} untraceable_date
+ * @property {null|Date} stolen_date
+ * @property {null|Date} tattoo
+ * @property {null|Date} untraceable_date
  * @property {string} updated_at
  * @property {string} created_at
  * @property {null|string} deleted_at
@@ -157,10 +185,14 @@ const { Op } = require('sequelize')
  * @property {StatusDao} status
  */
 /**
+ * @typedef CreateCdo
  * @param data
  * @param user
  * @param transaction
  * @return {Promise<*|{owner: CreatedPersonDao, dogs: (Promise<*>|[])}|undefined|{owner: CreatedPersonDao, dogs: (*|[])}>}
+ */
+/**
+ * @type CreateCdo
  */
 const createCdo = async (data, user, transaction) => {
   if (!transaction) {
@@ -210,22 +242,35 @@ const createCdo = async (data, user, transaction) => {
 }
 
 /**
+ * @typedef GetCdo
  * @param indexNumber
+ * @param {*} [transaction]
  * @return {Promise<CdoDao>}
  */
-const getCdo = async (indexNumber) => {
+
+/**
+ * @type {GetCdo}
+ **/
+const getCdo = async (indexNumber, transaction) => {
   const cdo = await sequelize.models.dog.findAll({
     where: { index_number: indexNumber },
     order: [[sequelize.col('registered_person.person.addresses.address.id'), 'DESC'],
       [sequelize.col('dog_microchips.microchip.id'), 'ASC']],
-    include: cdoRelationship(sequelize)
+    include: cdoRelationship(sequelize),
+    transaction
   })
 
   return cdo?.length > 0 ? cdo[0] : null
 }
 
 /**
+ * @typedef GetAllCdos
+ * @param idStart
+ * @param rowLimit
  * @return {Promise<CdoDao[]>}
+ */
+/**
+ * @type {GetAllCdos}
  */
 const getAllCdos = async (idStart, rowLimit) => {
   const query = {
@@ -242,7 +287,7 @@ const getAllCdos = async (idStart, rowLimit) => {
     query.subQuery = false
   }
 
-  return await sequelize.models.dog.findAll(query)
+  return sequelize.models.dog.findAll(query)
 }
 
 /**
@@ -269,8 +314,13 @@ const policeForceCol = 'registration.police_force.name'
  */
 
 /**
+ * @typedef GetSortOrder
  * @param {CdoSort} sort
  * @return {*[]}
+ */
+
+/**
+ * @type {GetSortOrder}
  */
 const getSortOrder = (sort) => {
   const order = []
@@ -294,10 +344,14 @@ const getSortOrder = (sort) => {
 }
 
 /**
- *
+ * @typedef GetSummaryCdos
  * @param {{ status?: CdoStatus[]; withinDays?: number; nonComplianceLetterSent?: boolean }} [filter]
  * @param {CdoSort} [sort]
  * @return {Promise<SummaryCdo[]>}
+ */
+
+/**
+ * @type {GetSummaryCdos}
  */
 const getSummaryCdos = async (filter, sort) => {
   const where = {}
@@ -368,10 +422,129 @@ const getSummaryCdos = async (filter, sort) => {
 
   return cdos
 }
+/**
+ *
+ */
 
+/**
+ * @typedef GetCdoModel
+ * @param {string} indexNumber
+ * @param {*} [transaction]
+ * @return {Promise<Cdo>}
+ */
+/**
+ * @type {GetCdoModel}
+ */
+const getCdoModel = async (indexNumber, transaction) => {
+  const cdoDao = await getCdo(indexNumber, transaction)
+
+  if (cdoDao === null) {
+    throw new NotFoundError(`CDO does not exist with indexNumber: ${indexNumber}`)
+  }
+
+  return mapCdoDaoToCdo(cdoDao)
+}
+
+/**
+ * @typedef GetCdoTaskList
+ * @param {string} indexNumber
+ * @param {*} [transaction]
+ * @return {Promise<import('../data/domain/cdoTaskList').CdoTaskList>}
+ */
+
+/**
+ * @type {GetCdoTaskList}
+ */
+const getCdoTaskList = async (indexNumber, transaction) => {
+  const cdo = await getCdoModel(indexNumber, transaction)
+  return new CdoTaskList(cdo)
+}
+
+/**
+ * @typedef SaveCdoTaskList
+ * @param {import('../data/domain/cdoTaskList').CdoTaskList} cdoTaskList
+ * @param transaction
+ * @return {Promise<import('../data/domain/cdoTaskList').CdoTaskList>}
+ */
+/**
+ * @type {SaveCdoTaskList}
+ */
+const saveCdoTaskList = async (cdoTaskList, transaction) => {
+  if (!transaction) {
+    return await sequelize.transaction(async (t) => saveCdoTaskList(cdoTaskList, t))
+  }
+  const updates = Object.values(cdoTaskList.getUpdates()).flat()
+  const cdoDao = await getCdo(cdoTaskList.cdoSummary.indexNumber)
+
+  for (const update of updates) {
+    switch (update.key) {
+      case 'microchip': {
+        await updateMicrochip(cdoDao, update.value, 1, transaction)
+        break
+      }
+      case 'insurance': {
+        await createOrUpdateInsurance({ insurance: update.value }, cdoDao, transaction)
+        break
+      }
+      case 'status': {
+        await updateStatus(cdoDao.index_number, update.value, transaction)
+        break
+      }
+      default: {
+        const keys = domain.updateKeys[update.key]
+        let model
+
+        for (const key of keys) {
+          const mappingArray = domain.updateMappings[key].split('.')
+          const [, relationship, field] = mappingArray
+
+          if (!model) {
+            model = cdoDao[relationship ?? field]
+          }
+
+          if (Object.prototype.hasOwnProperty.call(update.value, key)) {
+            model[field] = update.value[key]
+          } else {
+            model[field] = update.value
+          }
+        }
+
+        if (model) {
+          await model.save({ transaction })
+        } else {
+          throw new Error(`Missing model when updating ${update.key}`)
+        }
+      }
+    }
+
+    // this will publish the event
+    if (update.callback) {
+      await update.callback()
+    }
+  }
+
+  return getCdoTaskList(cdoTaskList.cdoSummary.indexNumber, transaction)
+}
+/**
+ * @typedef {{
+ *    getCdo: GetCdo,
+ *    getSummaryCdos: GetSummaryCdos,
+ *    getAllCdos: GetAllCdos,
+ *    createCdo: CreateCdo,
+ *    getCdoModel: GetCdoModel,
+ *    getCdoTaskList: GetCdoTaskList,
+ *    saveCdoTaskList: SaveCdoTaskList
+ * }} CdoRepository
+ */
+/**
+ * @type {CdoRepository}
+ */
 module.exports = {
   createCdo,
   getCdo,
   getSummaryCdos,
-  getAllCdos
+  getAllCdos,
+  getCdoModel,
+  getCdoTaskList,
+  saveCdoTaskList
 }

@@ -57,6 +57,47 @@ const getActivityById = async (id) => {
 }
 
 /**
+ * @typedef Activity
+ * @property {number} activity - e.g. '9'
+ * @property {'sent'|'received'} activityType - e.g. 'sent'
+ * @property {string} pk - e.g. 'ED300100'
+ * @property {string} source - e.g. 'dog'
+ * @property {string} activityDate - e.g. 2024-07-02T00:00:00.000Z
+ * @property {string} targetPk - e.g. 'dog'
+ * @property {string} label - e.g. 'Application pack'
+ */
+/**
+ * @param {string} label
+ * @return {Promise<{
+
+ * }>}
+ */
+const getActivityByLabel = async (label) => {
+  try {
+    const activities = await sequelize.models.activity.findOne({
+      where: { label },
+      include: [{
+        model: sequelize.models.activity_type,
+        as: 'activity_type'
+      },
+      {
+        model: sequelize.models.activity_source,
+        as: 'activity_source'
+      },
+      {
+        model: sequelize.models.activity_event,
+        as: 'activity_event'
+      }]
+    })
+
+    return activities
+  } catch (e) {
+    console.log(`Error retrieving activity for label ${label}:`, e)
+    throw e
+  }
+}
+
+/**
  * @typedef ActivityCreatePayload
  * @property {string} label
  * @property {string} activityType
@@ -143,5 +184,6 @@ module.exports = {
   getActivityList,
   getActivityById,
   createActivity,
-  deleteActivity
+  deleteActivity,
+  getActivityByLabel
 }

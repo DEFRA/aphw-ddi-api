@@ -1,4 +1,4 @@
-const { getMicrochip, extractLatestAddress, extractLatestInsurance, extractEmail, extractLatestPrimaryTelephoneNumber, extractLatestSecondaryTelephoneNumber, truncDate } = require('../dto/dto-helper')
+const { getMicrochip, extractLatestAddress, extractLatestInsurance, extractBreachCategories, extractEmail, extractLatestPrimaryTelephoneNumber, extractLatestSecondaryTelephoneNumber, truncDate } = require('../dto/dto-helper')
 
 const headerRow = [
   'IndexNumber',
@@ -28,6 +28,7 @@ const headerRow = [
   'Telephone1',
   'Telephone2',
   'ExemptionStatus',
+  'InBreachReasons',
   'CertificateIssued',
   'CdoIssued',
   'CdoExpiry',
@@ -67,6 +68,7 @@ const convertRow = (row) => {
   const latestAddress = extractLatestAddress(owner.addresses)
   const exemption = row.registration
   const latestInsurance = extractLatestInsurance(row.insurance)
+  const breachCategories = extractBreachCategories(row.dog_breaches)
 
   return [
     row.index_number,
@@ -96,6 +98,7 @@ const convertRow = (row) => {
     extractLatestPrimaryTelephoneNumber(owner.person_contacts),
     extractLatestSecondaryTelephoneNumber(owner.person_contacts),
     row.status.status,
+    breachCategories,
     exemption.certificate_issued,
     exemption.cdo_issued,
     exemption.cdo_expiry,

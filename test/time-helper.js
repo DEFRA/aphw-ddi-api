@@ -60,10 +60,17 @@ const expectDate = (date1) => {
   }
 }
 
+const inXDays = (days) => {
+  const date = new Date()
+  date.setDate(date.getDate() + days)
+  return date
+}
+
 module.exports = {
   compareDates,
   expectDate,
   getTimestampLowerRange,
   getTimestampUpperRange,
-  dateIsNow
+  dateIsNow,
+  inXDays
 }

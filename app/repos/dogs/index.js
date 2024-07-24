@@ -3,12 +3,14 @@ const { updateMicrochips } = require('../microchip')
 const {
   getBreeds,
   getStatuses,
+  getCachedStatuses,
   createDogs,
   addImportedDog,
   updateDog,
   getAllDogIds,
   getDogByIndexNumber,
   updateDogFields,
+  updateBreaches,
   updateStatus,
   deleteDogByIndexNumber,
   switchOwnerIfNecessary,
@@ -19,7 +21,10 @@ const {
   generateClausesForOr,
   customSort,
   recalcDeadlines,
-  purgeDogByIndexNumber
+  purgeDogByIndexNumber,
+  saveDog,
+  saveDogFields,
+  getDogModel
 } = require('./dog')
 
 const {
@@ -29,6 +34,7 @@ const {
 module.exports = {
   getBreeds,
   getStatuses,
+  getCachedStatuses,
   createDogs,
   addImportedDog,
   updateDog,
@@ -36,6 +42,7 @@ module.exports = {
   getDogByIndexNumber,
   updateDogFields,
   updateMicrochips,
+  updateBreaches,
   updateStatus,
   deleteDogByIndexNumber,
   switchOwnerIfNecessary,
@@ -47,5 +54,8 @@ module.exports = {
   generateClausesForOr,
   customSort,
   deleteDogs,
-  purgeDogByIndexNumber
+  purgeDogByIndexNumber,
+  saveDog,
+  saveDogFields,
+  getDogModel
 }

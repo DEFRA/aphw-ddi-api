@@ -1,6 +1,6 @@
 const Joi = require('joi')
 
-const purgeSoftDeleteQuerySchema = Joi.object({
+const jobsQuerySchema = Joi.object({
   today: Joi.date().optional().default(new Date())
 })
 
@@ -26,7 +26,12 @@ const purgeSoftDeleteResponseSchema = Joi.object({
   }).required()
 }).unknown(true)
 
+const expiredInsuranceResponseSchema = Joi.object({
+  response: Joi.string()
+}).unknown(true)
+
 module.exports = {
-  purgeSoftDeleteQuerySchema,
-  purgeSoftDeleteResponseSchema
+  jobsQuerySchema,
+  purgeSoftDeleteResponseSchema,
+  expiredInsuranceResponseSchema
 }
