@@ -52,7 +52,9 @@ describe('ExpiredNeuteringDeadline test', () => {
 
   test('setExpiredNeuteringDeadlineToInBreach should handle some rows given date is before 2024-07-27', async () => {
     dbFindAll.mockResolvedValue(mockOvernightRows)
-    const today = new Date('2024-07-26')
+    // const today = new Date('2024-07-26')
+    // fake June deadline
+    const today = new Date('2024-07-24')
     await setExpiredNeuteringDeadlineToInBreach(today)
 
     expect(dbFindAll).toHaveBeenCalledWith(undefined, expect.objectContaining({
