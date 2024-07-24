@@ -24,7 +24,6 @@ services:
       PACT_BROKER_URL: ${PACT_BROKER_URL:-notset}
       PACT_BROKER_USERNAME: ${PACT_BROKER_USERNAME:-notset}
       PACT_BROKER_PASSWORD: ${PACT_BROKER_PASSWORD:-notset}
-      FEATURE_FLAG_PURGE_DELETE: ${FEATURE_FLAG_PURGE_DELETE:-true}
 
   aphw-ddi-api-azurite:
     image: mcr.microsoft.com/azure-storage/azurite:3.23.0
