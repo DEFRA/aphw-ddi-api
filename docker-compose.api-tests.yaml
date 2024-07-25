@@ -1,0 +1,87 @@
+version: '3.8'
+
+x-common-migration: &common-migration
+  POSTGRES_HOST: ${POSTGRES_HOST:-aphw-ddi-api-postgres-api-tests}
+  SCHEMA_ROLE: ${POSTGRES_SCHEMA_ROLE:-postgres}
+  SCHEMA_USERNAME: ${POSTGRES_SCHEMA_USERNAME:-postgres}
+  SCHEMA_PASSWORD: ${POSTGRES_SCHEMA_PASSWORD:-ppp}
+  SCHEMA_NAME: ${POSTGRES_SCHEMA_NAME:-public}
+
+x-common-postgres: &common-postgres
+  POSTGRES_PORT: 5432
+  POSTGRES_DB: ${POSTGRES_DB:-aphw-ddi}
+  POSTGRES_USERNAME: ${POSTGRES_ADMIN_USERNAME:-postgres}
+  POSTGRES_PASSWORD: ${POSTGRES_ADMIN_PASSWORD:-ppp}
+
+services:
+  database-up:
+    image: liquibase/liquibase:3.10.x
+    environment:
+      <<: [ *common-migration, *common-postgres ]
+    entrypoint: >
+      sh -c "/scripts/migration/database-up"
+    depends_on:
+      - aphw-ddi-api-postgres-api-tests
+    volumes:
+      - ./changelog:/liquibase/changelog
+      - ./scripts:/scripts
+  aphw-ddi-api:
+    build:
+      target: development
+    image: aphw-ddi-api-development
+    container_name: aphw-ddi-api-api-tests
+    ports:
+      - "3001:3000"
+      - "9230:9229"
+    volumes:
+      - ./app:/home/node/app
+      - ./package.json:/home/node/package.json
+    depends_on:
+      - aphw-ddi-api-postgres-api-tests
+      - aphw-ddi-api-azurite
+    environment:
+      APPINSIGHTS_CLOUDROLE: aphw-ddi-api-local
+      APPINSIGHTS_CONNECTIONSTRING: ${APPINSIGHTS_CONNECTIONSTRING}
+      MESSAGE_QUEUE_HOST: ${MESSAGE_QUEUE_HOST}
+      MESSAGE_QUEUE_PASSWORD: ${MESSAGE_QUEUE_PASSWORD}
+      MESSAGE_QUEUE_USER: ${MESSAGE_QUEUE_USER}
+      EVENTS_TOPIC_ADDRESS: ${EVENTS_TOPIC_ADDRESS:-aphw-ddi-events}${MESSAGE_QUEUE_SUFFIX}
+      AZURE_STORAGE_ACCOUNT_NAME: ${AZURE_STORAGE_ACCOUNT_NAME:-devstoreaccount1}
+      AZURE_STORAGE_CREATE_CONTAINERS: "true"
+      AZURE_STORAGE_CONNECTION_STRING: ${AZURE_STORAGE_CONNECTION_STRING:-DefaultEndpointsProtocol=http;AccountName=devstoreaccount1;AccountKey=Eby8vdM02xNOcqFlqUwJPLlmEtlCDXJ1OUzFT50uSRZ6IFsuFq2UVErCz4I6tq/K1SZFPTOtr/KBHBeksoGMGw==;BlobEndpoint=http://aphw-ddi-api-azurite:10000/devstoreaccount1;}
+      AZURE_STORAGE_USE_CONNECTION_STRING: "true"
+      ROBOT_SHEET_NAME: ${ROBOT_SHEET_NAME:-Passed}
+      OS_PLACES_API_KEY: ${OS_PLACES_API_KEY:-test}
+      OS_PLACES_API_BASE_URL: ${OS_PLACES_API_BASE_URL:-test}
+      POLICE_API_BASE_URL: ${POLICE_API_BASE_URL:-test}
+      POSTGRES_DB: aphw-ddi
+      POSTGRES_HOST: ${POSTGRES_HOST:-aphw-ddi-api-postgres-api-tests}
+      POSTGRES_PORT: 5432
+      POSTGRES_SCHEMA_NAME: ${POSTGRES_SCHEMA_NAME:-public}
+      POSTGRES_USERNAME: ${POSTGRES_SCHEMA_USERNAME:-postgres}
+      POSTGRES_PASSWORD: ${POSTGRES_SCHEMA_PASSWORD:-ppp}
+      OVERNIGHT_JOB_CRONTAB: ${OVERNIGHT_JOB_CRONTAB:-5 4 * * *}
+      OVERNIGHT_EXPORT_BATCH_SIZE: ${OVERNIGHT_EXPORT_BATCH_SIZE:-10000}
+      PARANOID_RETENTION_PERIOD: ${PARANOID_RETENTION_PERIOD:-90}
+
+  aphw-ddi-api-postgres-api-tests:
+    image: postgres:11.22-alpine
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_DB: aphw-ddi
+      POSTGRES_USERNAME: postgres
+      POSTGRES_PASSWORD: ppp
+
+  aphw-ddi-api-azurite:
+    image: mcr.microsoft.com/azure-storage/azurite:3.23.0
+    command: "azurite-blob --skipApiVersionCheck --loose --blobHost 0.0.0.0 -l data"
+    volumes:
+      - azurite_data:/opt/azurite/data
+    ports:
+      - "10000:10000"
+    labels:
+      com.docker.compose.pay.role: aphw-ddi-api-azurite
+
+volumes:
+  azurite_data:

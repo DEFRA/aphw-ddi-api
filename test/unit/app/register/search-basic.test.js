@@ -1,4 +1,4 @@
-const { uniqueResults: mockUniqueResults, resultsForGrouping: mockResultsForGrouping } = require('../../../mocks/search-results')
+const { uniqueResults: mockUniqueResults, resultsForGrouping: mockResultsForGrouping, resultsForSorting: mockResultsForSorting } = require('../../../mocks/search-results')
 
 describe('SearchBasic repo', () => {
   jest.mock('../../../../app/config/db', () => ({
@@ -14,6 +14,7 @@ describe('SearchBasic repo', () => {
   const sequelize = require('../../../../app/config/db')
 
   const { search } = require('../../../../app/register/search-basic')
+  const { sortOwnerSearch } = require('../../../../app/register/search/sorting-and-grouping')
 
   beforeEach(async () => {
     jest.clearAllMocks()
@@ -62,5 +63,17 @@ describe('SearchBasic repo', () => {
 
     const results = await search('owner', 'term1')
     expect(results.length).toBe(0)
+  })
+
+  test('sorting should handle', async () => {
+    const testList = JSON.parse(JSON.stringify(mockResultsForSorting))
+    testList.sort(sortOwnerSearch)
+
+    expect(testList[0].firstName).toBe('Peter')
+    expect(testList[0].lastName).toBe('White')
+    expect(testList[1].firstName).toBe('John')
+    expect(testList[1].lastName).toBe('Smith')
+    expect(testList[2].firstName).toBe('John')
+    expect(testList[2].lastName).toBe('Smith')
   })
 })

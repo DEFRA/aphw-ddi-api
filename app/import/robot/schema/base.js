@@ -2,17 +2,17 @@ const Joi = require('joi')
 
 const schema = Joi.object({
   owner: Joi.object({
-    firstName: Joi.any().required(),
-    lastName: Joi.any().required(),
-    address: {
-      addressLine1: Joi.any().required(),
-      addressLine2: Joi.any().optional(),
-      town: Joi.any().required(),
-      county: Joi.any().optional(),
-      country: Joi.any().required(),
-      postcode: Joi.any().required()
-    },
-    birthDate: Joi.date().iso().required(),
+    firstName: Joi.string().trim().required(),
+    lastName: Joi.string().trim().required(),
+    address: Joi.object({
+      addressLine1: Joi.string().trim().required(),
+      addressLine2: Joi.string().trim().optional(),
+      town: Joi.string().trim().required(),
+      county: Joi.string().trim().optional(),
+      country: Joi.string().trim().required(),
+      postcode: Joi.string().trim().required()
+    }).required(),
+    birthDate: Joi.date().required(),
     phoneNumber: Joi.alternatives().try(
       Joi.number(),
       Joi.string().trim()
@@ -20,18 +20,17 @@ const schema = Joi.object({
     email: Joi.string().email().trim().required()
   }).required(),
   dog: Joi.object({
-    name: Joi.any().required(),
-    birthDate: Joi.date().iso().required(),
-    colour: Joi.any().required(),
-    gender: Joi.any().required(),
-    insuranceStartDate: Joi.date().iso().required(),
-    neutered: Joi.any().required(),
+    name: Joi.string().trim().required(),
+    birthDate: Joi.date().required(),
+    colour: Joi.string().trim().required(),
+    gender: Joi.string().trim().required(),
+    insuranceStartDate: Joi.any().required(),
     microchipNumber: Joi.alternatives().try(
       Joi.string().trim(),
-      Joi.number()
+      Joi.number().unsafe()
     ).optional().allow('').allow(null),
     indexNumber: Joi.number().required(),
-    certificateIssued: Joi.date().iso().optional().allow('').allow(null)
+    certificateIssued: Joi.any().optional().allow('').allow(null)
   }).required()
 })
 

@@ -1,12 +1,13 @@
+
 const Joi = require('joi')
 const { getCallingUser } = require('../auth/get-user')
-const { getPersonByReference, getPersonAndDogsByReference, updatePerson } = require('../repos/people')
+const { getPersonByReference, getPersonAndDogsByReference, updatePerson, deletePerson } = require('../repos/people')
 const { personDto, personAndDogsDto } = require('../dto/person')
 const { schema: updateSchema } = require('../schema/person/update')
 
 module.exports = [{
   method: 'GET',
-  path: '/person/{reference}',
+  path: '/person/{reference?}',
   options: {
     tags: ['api'],
     validate: {
@@ -50,7 +51,7 @@ module.exports = [{
 
         return h.response(personDto(updated)).code(200)
       } catch (err) {
-        console.error(`Error updating person: ${err}`)
+        console.error('Error updating person:', err)
 
         if (err.type === 'NOT_FOUND') {
           return h.response().code(400)
@@ -58,6 +59,30 @@ module.exports = [{
 
         throw err
       }
+    }
+  }
+},
+{
+  method: 'DELETE',
+  path: '/person/{reference?}',
+  options: {
+    validate: {
+      params: Joi.object({
+        reference: Joi.string().required()
+      }),
+      failAction: (request, h, error) => {
+        return h.response().code(400).takeover()
+      }
+    },
+    handler: async (request, h) => {
+      const personAndDogs = await getPersonAndDogsByReference(request.params.reference)
+      if (personAndDogs?.length && personAndDogs[0].dog) {
+        return h.response().code(400)
+      }
+
+      await deletePerson(request.params.reference, getCallingUser(request))
+
+      return h.response().code(200)
     }
   }
 }]

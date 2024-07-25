@@ -26,9 +26,10 @@ describe('register import', () => {
     expect(add).toHaveLength(3)
   })
 
-  test('should error when no xlsx file', async () => {
+  test('should return error when no xlsx file', async () => {
     mockReadXlsxFile.mockImplementation(() => { throw new Error('dummy error') })
-    await expect(importRegister([])).rejects.toThrow('dummy error')
+    const res = await importRegister([])
+    expect(res.errors).toEqual(['Error reading xlsx file: Error: dummy error'])
   })
 
   test('should group approved dogs under owner', async () => {
@@ -45,11 +46,11 @@ describe('register import', () => {
     expect(owner.dogs[1].colour).toEqual('grey')
   })
 
-  test('should find police force', async () => {
+  test('should leave police force blank if not provided', async () => {
     const { add } = await importRegister([])
 
     expect(add).toHaveLength(3)
-    expect(add[0].owner.policeForceId).toBe(1)
+    expect(add[0].owner.policeForceId).toBe(undefined)
   })
 
   test('should handle failed schema rows', async () => {
@@ -59,7 +60,6 @@ describe('register import', () => {
     const { errors } = await importRegister([])
 
     expect(errors).toHaveLength(1)
-    expect(errors[0].errors[0].message).toBe('"owner.address.addressLine1" is required')
-    expect(errors[0].errors[1].message).toBe('"owner.address.postcode" is required')
+    expect(errors[0]).toBe('Row 1 IndexNumber 1234 "owner.address.addressLine1" is required,"owner.address.postcode" is required')
   })
 })

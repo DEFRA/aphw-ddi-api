@@ -66,11 +66,23 @@ module.exports = (sequelize, DataTypes) => {
     untraceable_date: {
       type: DataTypes.DATEONLY,
       allowNull: true
+    },
+    created_at: {
+      type: DataTypes.DATE,
+      allowNull: false,
+      defaultValue: sequelize.fn('now')
+    },
+    deleted_at: {
+      type: DataTypes.DATE,
+      allowNull: true
     }
   }, {
     sequelize,
     tableName: 'dog',
-    timestamps: false,
+    paranoid: true,
+    createdAt: 'created_at',
+    deletedAt: 'deleted_at',
+    updatedAt: 'updated_at',
     indexes: [
       {
         name: 'dog_pkey',
@@ -93,6 +105,11 @@ module.exports = (sequelize, DataTypes) => {
       foreignKey: 'dog_id'
     })
 
+    dog.hasMany(models.registration, {
+      as: 'registrations',
+      foreignKey: 'dog_id'
+    })
+
     dog.belongsTo(models.dog_breed, {
       as: 'dog_breed',
       foreignKey: 'dog_breed_id'
@@ -100,6 +117,11 @@ module.exports = (sequelize, DataTypes) => {
 
     dog.hasMany(models.insurance, {
       as: 'insurance',
+      foreignKey: 'dog_id'
+    })
+
+    dog.hasMany(models.dog_breach, {
+      as: 'dog_breaches',
       foreignKey: 'dog_id'
     })
 

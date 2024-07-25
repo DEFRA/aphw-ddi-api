@@ -1,0 +1,68 @@
+/**
+ * Usage:
+ * select * from restore_dog('<index_number>')
+ *
+ * e.g.
+ * select * from restore_dog('ED12345')
+ */
+CREATE OR REPLACE FUNCTION restore_dog(p_index_number varchar) RETURNS varchar AS $$
+DECLARE
+	v_dog_id integer;
+	v_person_id integer;
+	v_person_reference varchar;
+	v_status varchar := '';
+BEGIN
+	SELECT dog_id, person_id
+	INTO v_dog_id, v_person_id
+	FROM registered_person
+	WHERE dog_id IN
+		(SELECT id 
+		FROM dog 
+		WHERE index_number = restore_dog.p_index_number
+		AND deleted_at IS NOT NULL);
+
+  IF v_dog_id IS NULL THEN
+	  RETURN 'Dog is already active or doesnt exist';
+	END IF;
+
+  SELECT person_reference
+	INTO v_person_reference
+	FROM person
+	WHERE id = v_person_id
+	AND deleted_at IS NOT NULL;
+
+  IF v_person_reference IS NOT NULL THEN
+		v_status := restore_owner(v_person_reference) || ' : ';
+	END IF;
+
+	UPDATE dog
+	SET    deleted_at = null
+	WHERE  id = v_dog_id;
+
+	UPDATE microchip
+	SET    deleted_at = null
+	WHERE  id IN
+		(SELECT id
+		FROM dog_microchip
+		WHERE dog_id = v_dog_id);
+
+	UPDATE dog_microchip
+	SET    deleted_at = null
+	WHERE  dog_id = v_dog_id;
+
+	UPDATE registered_person
+	SET    deleted_at = null
+	WHERE  dog_id = v_dog_id;
+
+	UPDATE registration
+	SET    deleted_at = null
+	WHERE  dog_id = v_dog_id
+	AND    deleted_at = (SELECT max(r2.deleted_at) from registration r2 where r2.dog_id = v_dog_id);
+
+  IF generate_search_index(v_person_id, v_dog_id) = 'OK' THEN
+  	RETURN v_status || 'Dog successfully restored';
+  ELSE
+    RETURN v_status ||'Failed';
+  END IF;
+END;
+$$ LANGUAGE plpgsql;

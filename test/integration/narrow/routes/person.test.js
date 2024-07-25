@@ -3,7 +3,7 @@ describe('CDO endpoint', () => {
   let server
 
   jest.mock('../../../../app/repos/people')
-  const { getPersonByReference, getPersonAndDogsByReference, updatePerson } = require('../../../../app/repos/people')
+  const { getPersonByReference, getPersonAndDogsByReference, updatePerson, deletePerson } = require('../../../../app/repos/people')
 
   beforeEach(async () => {
     jest.clearAllMocks()
@@ -82,6 +82,19 @@ describe('CDO endpoint', () => {
     const response = await server.inject(options)
 
     expect(response.statusCode).toBe(204)
+  })
+
+  test('GET /person route returns 400 with missing param', async () => {
+    const options = {
+      method: 'GET',
+      url: '/person/'
+    }
+
+    getPersonByReference.mockResolvedValue(null)
+
+    const response = await server.inject(options)
+
+    expect(response.statusCode).toBe(400)
   })
 
   test('GET /person route with param includeDogs returns 200 with valid payload', async () => {
@@ -268,6 +281,102 @@ describe('CDO endpoint', () => {
     updatePerson.mockRejectedValue({
       type: 'NOT_FOUND'
     })
+
+    const response = await server.inject(options)
+
+    expect(response.statusCode).toBe(400)
+  })
+
+  test('PUT /person route throws if error other than NOT_FOUND', async () => {
+    const options = {
+      method: 'PUT',
+      url: '/person',
+      payload: {
+        personReference: 'ABC123',
+        firstName: 'John',
+        lastName: 'Doe',
+        dateOfBirth: '1990-01-01',
+        address: {
+          addressLine1: '1 Test Street',
+          addressLine2: 'Test',
+          town: 'Test',
+          postcode: 'TE1 1ST',
+          country: 'England'
+        }
+      }
+    }
+
+    updatePerson.mockImplementation(() => { throw new Error('DB error') })
+
+    const response = await server.inject(options)
+
+    expect(response.statusCode).toBe(500)
+  })
+
+  test('DELETE /person route returns 200 with valid payload', async () => {
+    const options = {
+      method: 'DELETE',
+      url: '/person/P-12345'
+    }
+
+    getPersonAndDogsByReference.mockResolvedValue()
+    deletePerson.mockResolvedValue()
+
+    const response = await server.inject(options)
+
+    expect(response.statusCode).toBe(200)
+  })
+
+  test('DELETE /person route returns 400 with missing param', async () => {
+    const options = {
+      method: 'DELETE',
+      url: '/person/'
+    }
+
+    getPersonAndDogsByReference.mockResolvedValue()
+    deletePerson.mockResolvedValue()
+
+    const response = await server.inject(options)
+
+    expect(response.statusCode).toBe(400)
+  })
+
+  test('DELETE /person route returns 400 when owner has dogs', async () => {
+    const options = {
+      method: 'DELETE',
+      url: '/person/P-123'
+    }
+
+    deletePerson.mockResolvedValue()
+
+    getPersonAndDogsByReference.mockResolvedValue([
+      {
+        id: 1,
+        person_id: 1,
+        dog_id: 100,
+        person: {
+          first_name: 'John',
+          last_name: 'Doe',
+          birth_date: '1990-01-01',
+          person_reference: 'ABC123',
+          addresses: [{
+            address: {
+              address_line_1: '1 Test Street',
+              address_line_2: 'Test2',
+              town: 'Test town',
+              postcode: 'TS1 1TS',
+              country: { country: 'England' }
+            }
+          }],
+          person_contacts: [
+            { contact: { id: 1, contact: 'phone' } }
+          ]
+        },
+        dog: {
+          id: 1, name: 'dog1', dog_breed: { breed: 'breed1' }, status: { status: 'NEW' }
+        }
+      }
+    ])
 
     const response = await server.inject(options)
 

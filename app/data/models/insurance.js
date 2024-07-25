@@ -23,11 +23,23 @@ module.exports = (sequelize, DataTypes) => {
     renewal_date: {
       type: DataTypes.DATE,
       allowNull: false
+    },
+    created_at: {
+      type: DataTypes.DATE,
+      allowNull: false,
+      defaultValue: sequelize.fn('now')
+    },
+    deleted_at: {
+      type: DataTypes.DATE,
+      allowNull: true
     }
   }, {
     sequelize,
+    paranoid: true,
     tableName: 'insurance',
-    timestamps: false,
+    createdAt: 'created_at',
+    deletedAt: 'deleted_at',
+    updatedAt: 'updated_at',
     indexes: [
       {
         name: 'insurance_pkey',

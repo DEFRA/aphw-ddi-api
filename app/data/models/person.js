@@ -22,11 +22,27 @@ module.exports = (sequelize, DataTypes) => {
     birth_date: {
       type: DataTypes.DATEONLY,
       allowNull: true
+    },
+    organisation_id: {
+      type: DataTypes.INTEGER,
+      allowNull: true
+    },
+    created_at: {
+      type: DataTypes.DATE,
+      allowNull: false,
+      defaultValue: sequelize.fn('now')
+    },
+    deleted_at: {
+      type: DataTypes.DATE,
+      allowNull: true
     }
   }, {
     sequelize,
     tableName: 'person',
-    timestamps: false,
+    paranoid: true,
+    createdAt: 'created_at',
+    deletedAt: 'deleted_at',
+    updatedAt: 'updated_at',
     indexes: [
       {
         name: 'person_pkey',
@@ -52,6 +68,11 @@ module.exports = (sequelize, DataTypes) => {
     person.hasMany(models.registered_person, {
       as: 'registered_people',
       foreignKey: 'person_id'
+    })
+
+    person.belongsTo(models.organisation, {
+      as: 'organisation',
+      foreignKey: 'organisation_id'
     })
   }
 

@@ -6,12 +6,13 @@ const { createOrUpdateInsurance } = require('./insurance')
 const { sendUpdateToAudit } = require('../messaging/send-audit')
 const { EXEMPTION } = require('../constants/event/audit-event-object-types')
 const constants = require('../constants/statuses')
-const { updateStatus } = require('../repos/dogs')
+const { updateStatus } = require('./dogs')
 const { preChangedExemptionAudit, postChangedExemptionAudit } = require('../dto/auditing/exemption')
+const { deepClone } = require('../lib/deep-clone')
 
 const updateExemption = async (data, user, transaction) => {
   if (!transaction) {
-    return sequelize.transaction((t) => updateExemption(data, user, t))
+    return await sequelize.transaction(async (t) => updateExemption(data, user, t))
   }
 
   try {
@@ -24,14 +25,17 @@ const updateExemption = async (data, user, transaction) => {
     const changedStatus = await autoChangeStatus(cdo, data, transaction)
 
     const registration = cdo.registration
+    const previousRegistration = deepClone(registration)
 
     updateRegistration(registration, data, policeForce)
 
     handleOrder2023(registration, data)
 
-    await handleOrder2015(registration, data, cdo)
+    await handleCourt(registration, data, cdo)
 
     await createOrUpdateInsurance(data, cdo, transaction)
+
+    setDefaults(registration, data, previousRegistration)
 
     const res = registration.save({ transaction })
 
@@ -42,7 +46,7 @@ const updateExemption = async (data, user, transaction) => {
 
     return res
   } catch (err) {
-    console.error(`Error updating CDO: ${err}`)
+    console.error('Error updating CDO:', err)
     throw err
   }
 }
@@ -51,9 +55,9 @@ const autoChangeStatus = async (cdo, data, transaction) => {
   const currentStatus = cdo?.status?.status
 
   if (currentStatus === constants.statuses.PreExempt) {
-    if (!cdo.registration.removed_from_cdo_process && data.removedFromCdoProcess) {
+    if (!cdo.registration.non_compliance_letter_sent && data.nonComplianceLetterSent) {
       return await updateStatus(cdo.index_number, constants.statuses.Failed, transaction)
-    } else if (data.insurance?.renewalDate && isFuture(data.insurance?.renewalDate) && !cdo.registration.certificate_issued && data.certificateIssued) {
+    } else if (data.insurance?.renewalDate && isFuture(data.insurance?.renewalDate) && data.certificateIssued) {
       return await updateStatus(cdo.index_number, constants.statuses.Exempt, transaction)
     }
   } else if (currentStatus === constants.statuses.InterimExempt) {
@@ -103,7 +107,7 @@ const updateRegistration = (registration, data, policeForce) => {
   registration.neutering_confirmation = data.neuteringConfirmation ?? null
   registration.microchip_verification = data.microchipVerification ?? null
   registration.joined_exemption_scheme = data.joinedExemptionScheme ?? null
-  registration.removed_from_cdo_process = data.removedFromCdoProcess ?? null
+  registration.non_compliance_letter_sent = data.nonComplianceLetterSent ?? null
 }
 
 const handleOrder2023 = (registration, data) => {
@@ -114,8 +118,25 @@ const handleOrder2023 = (registration, data) => {
   }
 }
 
-const handleOrder2015 = async (registration, data, cdo) => {
-  if (registration.exemption_order.exemption_order === '2015' && cdo?.status?.status !== constants.statuses.InterimExempt) {
+/**
+ * @param registration
+ * @param data
+ * @param previousRegistration
+ */
+const setDefaults = (registration, data, previousRegistration) => {
+  if (
+    (data.cdoExpiry === null || data.cdoExpiry === undefined) &&
+    (data.cdoIssued !== null && data.cdoIssued !== undefined) &&
+    (previousRegistration.cdo_issued === null || previousRegistration.cdo_issued === undefined)
+  ) {
+    const cdoExpiryDate = new Date(data.cdoIssued)
+    cdoExpiryDate.setMonth(cdoExpiryDate.getMonth() + 2)
+    registration.cdo_expiry = cdoExpiryDate.toISOString()
+  }
+}
+
+const handleCourt = async (registration, data, cdo) => {
+  if (data.court && data.court !== '') {
     const court = await getCourt(data.court)
 
     if (!court) {
@@ -128,5 +149,6 @@ const handleOrder2015 = async (registration, data, cdo) => {
 
 module.exports = {
   updateExemption,
+  setDefaults,
   autoChangeStatus
 }

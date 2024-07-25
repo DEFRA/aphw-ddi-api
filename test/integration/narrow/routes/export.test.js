@@ -2,14 +2,11 @@ describe('Export endpoint', () => {
   const createServer = require('../../../../app/server')
   let server
 
-  jest.mock('../../../../app/export/read-export-file')
-  const { readExportFile } = require('../../../../app/export/read-export-file')
+  jest.mock('../../../../app/overnight/run-jobs')
+  const { runExportNow } = require('../../../../app/overnight/run-jobs')
 
   jest.mock('../../../../app/messaging/send-audit')
   const { sendEventToAudit } = require('../../../../app/messaging/send-audit')
-
-  jest.mock('../../../../app/repos/regular-jobs')
-  const { runOvernightJobs } = require('../../../../app/repos/regular-jobs')
 
   beforeEach(async () => {
     jest.clearAllMocks()
@@ -17,33 +14,32 @@ describe('Export endpoint', () => {
     await server.initialize()
   })
 
-  test('GET /export route returns 200 and calls readExportFile', async () => {
+  test('GET /export-audit route returns 200 and calls sendEventToAudit', async () => {
     const options = {
       method: 'GET',
-      url: '/export'
+      url: '/export-audit'
     }
 
-    readExportFile.mockResolvedValue([])
     sendEventToAudit.mockResolvedValue()
 
     const response = await server.inject(options)
 
     expect(response.statusCode).toBe(200)
-    expect(readExportFile).toHaveBeenCalled()
+    expect(sendEventToAudit).toHaveBeenCalled()
   })
 
-  test('GET /export-trigger-overnight route returns 200 and calls runOvernightJobs', async () => {
+  test('GET /export-create-file route returns 200 and calls createExportFile', async () => {
     const options = {
       method: 'GET',
-      url: '/export-trigger-overnight'
+      url: '/export-create-file'
     }
 
-    runOvernightJobs.mockResolvedValue()
+    runExportNow.mockResolvedValue('Success')
 
     const response = await server.inject(options)
 
     expect(response.statusCode).toBe(200)
-    expect(runOvernightJobs).toHaveBeenCalled()
+    expect(runExportNow).toHaveBeenCalled()
   })
 
   afterEach(async () => {

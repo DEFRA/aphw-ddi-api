@@ -33,29 +33,29 @@ const initialiseContainers = async () => {
 const initialiseFolders = async () => {
   console.log('Making sure folders exist')
   const placeHolderText = 'Placeholder'
-  const inboundClient = container.getBlockBlobClient(`${config.inboundFolder}/default.txt`)
+  const inboundClient = container.getBlockBlobClient('default.txt')
   await inboundClient.upload(placeHolderText, placeHolderText.length)
   foldersInitialised = true
   console.log('Folders ready')
 }
 
-const downloadBlob = async (folder, filename) => {
+const downloadBlob = async (filename) => {
   containersInitialised ?? await initialiseContainers()
-  return await container.getBlockBlobClient(`${folder}/${filename}`).downloadToBuffer()
+  return await container.getBlockBlobClient(filename).downloadToBuffer()
 }
 
-const getBlob = async (folder, filename) => {
+const getBlob = async (filename) => {
   containersInitialised ?? await initialiseContainers()
-  return container.getBlockBlobClient(`${folder}/${filename}`)
+  return container.getBlockBlobClient(filename)
 }
 
 const getInboundFileList = async () => {
   containersInitialised ?? await initialiseContainers()
 
   const fileList = []
-  for await (const file of container.listBlobsFlat({ prefix: config.inboundFolder })) {
-    if (!file.name.endsWith('/default.txt') && !file.name.endsWith('/')) {
-      fileList.push(file.name.replace(`${config.inboundFolder}/`, ''))
+  for await (const file of container.listBlobsFlat()) {
+    if (!file.name.endsWith('/default.txt')) {
+      fileList.push(file.name)
     }
   }
 
@@ -63,13 +63,13 @@ const getInboundFileList = async () => {
 }
 
 const getInboundFileDetails = async (filename) => {
-  const blob = await getBlob(config.inboundFolder, filename)
+  const blob = await getBlob(filename)
   return blob.getProperties()
 }
 
 const uploadInboundFile = async (stream, filename) => {
   containersInitialised ?? await initialiseContainers()
-  const blockBlobClient = await getBlob(config.inboundFolder, filename)
+  const blockBlobClient = await getBlob(filename)
   await blockBlobClient.uploadStream(stream,
     uploadOptions.bufferSize, uploadOptions.maxBuffers)
 

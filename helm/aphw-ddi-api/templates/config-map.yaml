@@ -12,11 +12,18 @@ data:
   AZURE_STORAGE_USE_CONNECTION_STRING: {{ quote .Values.container.azureStorageUseConnectionString }}
   AZURE_STORAGE_CREATE_CONTAINERS: {{ quote .Values.container.azureStorageCreateContainers }}
   ROBOT_SHEET_NAME: {{ quote .Values.container.robotSheetName }}
-  ROBOT_IMPORT_POLICE_API_URL: {{ quote .Values.container.robotImportPoliceApiUrl }}
+  OS_PLACES_API_BASE_URL: {{ quote .Values.container.osPlacesBaseUrl }}
+  POLICE_API_BASE_URL: {{ quote .Values.container.policeApiBaseUrl }}
   {{- if and (.Values.environmentCode) (not .Values.pr) }}
   EVENTS_TOPIC_ADDRESS: {{ .Values.container.eventsTopicAddress }}-{{ .Values.environmentCode }}
   {{ else }}
   EVENTS_TOPIC_ADDRESS: {{ quote .Values.container.eventsTopicAddress }}
   {{- end }}
+  {{- if and (.Values.environmentCode) (not .Values.pr) }}
+  CERTIFICATE_REQUEST_QUEUE: {{ .Values.container.certificateRequestQueue }}-{{ .Values.environmentCode }}
+  {{ else }}
+  CERTIFICATE_REQUEST_QUEUE: {{ quote .Values.container.certificateRequestQueue }}
+  {{- end }}
   OVERNIGHT_JOB_CRONTAB: {{ quote .Values.container.overnightJobCrontab }}
+  PARANOID_RETENTION_PERIOD:  {{ quote .Values.container.paranoidRetentionPeriod }}
 {{- end -}}

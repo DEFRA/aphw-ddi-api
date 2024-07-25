@@ -27,8 +27,8 @@ deployment: {}
 container:
   requestMemory: 100Mi
   requestCpu: 100m
-  limitMemory: 500Mi
-  limitCpu: 200m
+  limitMemory: 2500Mi
+  limitCpu: 500m
   port: 3000
   messageQueueHost: namespace.servicebus.windows.net
   azureStorageConnectionString: dummy
@@ -36,9 +36,13 @@ container:
   azureStorageAccountName: dummy
   azureStorageCreateContainers: false
   robotSheetName: Passed
-  robotImportPoliceApiUrl: dummy
+  osPlacesBaseUrl: os-places-api-base-url
+  osPlacesApiKey: os-places-api-key
+  policeApiBaseUrl: police-api-base-url
   eventsTopicAddress: aphw-ddi-events
+  certificateRequestQueue: aphw-ddi-certificate-request
   overnightJobCrontab: 5 4 * * *
+  paranoidRetentionPeriod: 90
 
 postgresService:
   postgresDb: dangerous_dogs_index
@@ -51,17 +55,17 @@ livenessProbe:
   path: /healthz
   port: 3000
   initialDelaySeconds: 20
-  periodSeconds: 10
+  periodSeconds: 30
   failureThreshold: 3
-  timeoutSeconds: 5
+  timeoutSeconds: 120
 
 readinessProbe:
   path: /healthy
   port: 3000
   initialDelaySeconds: 30
-  periodSeconds: 10
+  periodSeconds: 30
   failureThreshold: 3
-  timeoutSeconds: 5
+  timeoutSeconds: 120
 
 ingress:
   class: nginx

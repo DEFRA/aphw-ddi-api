@@ -11,6 +11,10 @@ const schema = Joi.object({
   },
   eventsTopic: {
     address: Joi.string()
+  },
+  certificatesQueue: {
+    address: Joi.string(),
+    type: Joi.string().valid('queue')
   }
 })
 

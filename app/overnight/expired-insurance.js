@@ -1,8 +1,8 @@
 const sequelize = require('../config/db')
 const { Op } = require('sequelize')
-const { statuses } = require('../constants/statuses')
-const { updateStatusOnly } = require('../repos/status')
+const { statuses, breachReasons } = require('../constants/statuses')
 const { dbFindAll } = require('../lib/db-functions')
+const ServiceProvider = require('../service/config')
 
 const setExpiredInsuranceToBreach = async (today, user, t) => {
   try {
@@ -16,28 +16,43 @@ const setExpiredInsuranceToBreach = async (today, user, t) => {
           [Op.lt]: today
         }
       },
-      include: [{
-        model: sequelize.models.dog,
-        as: 'dog',
-        include: [{
-          model: sequelize.models.status,
-          as: 'status'
-        },
+      include: [
         {
-          model: sequelize.models.insurance,
-          as: 'insurance'
-        }]
-      }],
+          model: sequelize.models.dog,
+          as: 'dog',
+          include: [
+            {
+              model: sequelize.models.status,
+              as: 'status'
+            },
+            {
+              model: sequelize.models.insurance,
+              as: 'insurance'
+            },
+            {
+              model: sequelize.models.dog_breach,
+              as: 'dog_breaches',
+              include: [
+                {
+                  model: sequelize.models.breach_category,
+                  as: 'breach_category'
+                }
+              ]
+            }
+          ]
+        }
+      ],
       transaction: t
     })
+    const dogService = ServiceProvider.getDogService()
 
     for (const toUpdate of setToBreach) {
       console.log(`Updating dog ${toUpdate.dog.index_number} to In breach`)
-      await updateStatusOnly(toUpdate.dog, statuses.InBreach, user, t)
+      await dogService.setBreach(toUpdate.dog, [breachReasons.INSURANCE_EXPIRED], user, t)
     }
     return `Success Insurance Expiry - updated ${setToBreach.length} rows`
   } catch (e) {
-    console.log(`Error auto-updating statuses when Insurance Expiry: ${e} ${e.stack}`)
+    console.log('Error auto-updating statuses when Insurance Expiry:', e)
     throw new Error(`Error auto-updating statuses when Insurance Expiry: ${e}`)
   }
 }

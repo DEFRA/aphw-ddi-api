@@ -1,5 +1,5 @@
 # aphw-ddi-api
- 
+
 API to manage CRUD / query functions for dangerous dogs register.
 
 ## Prerequisites
@@ -88,6 +88,13 @@ process.env.OS_PLACES_API_KEY = 'some-api-key'
 process.env.POLICE_API_BASE_URL = 'http://localhost/police'
 process.env.ROBOT_SHEET_NAME = 'Passed'
 process.env.ROBOT_IMPORT_POLICE_API_URL = 'http://localhost/force'
+process.env.PACT_BROKER_URL = 'http://host.docker.internal:9292'
+```
+
+alternatively add `--setupFilesAfterEnv=<rootDir>/jest.setup.single.js` to your jest run script:
+
+```
+npm run test <path>/<filename> -- --setupFilesAfterEnv=<rootDir>/jest.setup.single.js
 ```
 
 ## Swagger 

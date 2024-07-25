@@ -52,6 +52,31 @@ describe('Robot import endpoint', () => {
     expect(response.statusCode).toBe(400)
   })
 
+  test('POST /robot-import returns 200 when validating', async () => {
+    downloadBlob.mockResolvedValue([])
+
+    importRegister.mockResolvedValue({
+      add: []
+    })
+
+    processRegister.mockResolvedValue()
+
+    const options = {
+      method: 'POST',
+      url: '/robot-import',
+      headers: {
+        'content-type': 'application/json'
+      },
+      payload: {
+        filename: 'register.xlsx',
+        stage: 'spreadsheet-validation'
+      }
+    }
+
+    const response = await server.inject(options)
+    expect(response.statusCode).toBe(200)
+  })
+
   test('POST /robot-import returns 200', async () => {
     downloadBlob.mockResolvedValue([])
 
@@ -68,7 +93,8 @@ describe('Robot import endpoint', () => {
         'content-type': 'application/json'
       },
       payload: {
-        filename: 'register.xlsx'
+        filename: 'register.xlsx',
+        stage: 'saveToDB'
       }
     }
 

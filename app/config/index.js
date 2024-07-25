@@ -1,4 +1,5 @@
 const Joi = require('joi')
+const { getEnvironmentVariable } = require('../lib/environment-helpers')
 
 // Define config schema
 const schema = Joi.object({
@@ -6,16 +7,32 @@ const schema = Joi.object({
   port: Joi.number().default(3001),
   env: Joi.string().valid('development', 'test', 'production').default('development'),
   robotSheetName: Joi.string().required(),
-  robotImportPoliceApiUrl: Joi.string().required()
+  osPlacesApi: {
+    baseUrl: Joi.string().default('https://api.os.uk/search/places/v1'),
+    token: Joi.string().required()
+  },
+  policeApi: {
+    baseUrl: Joi.string().default('https://data.police.uk/api')
+  },
+  overnightExportBatchSize: Joi.number(),
+  paranoidRetentionPeriod: Joi.number()
 })
 
 // Build config
 const config = {
-  serviceName: process.env.SERVICE_NAME,
-  port: process.env.PORT,
-  env: process.env.NODE_ENV,
-  robotSheetName: process.env.ROBOT_SHEET_NAME,
-  robotImportPoliceApiUrl: process.env.ROBOT_IMPORT_POLICE_API_URL
+  serviceName: getEnvironmentVariable('SERVICE_NAME'),
+  port: getEnvironmentVariable('PORT'),
+  env: getEnvironmentVariable('NODE_ENV'),
+  robotSheetName: getEnvironmentVariable('ROBOT_SHEET_NAME'),
+  osPlacesApi: {
+    baseUrl: getEnvironmentVariable('OS_PLACES_API_BASE_URL'),
+    token: getEnvironmentVariable('OS_PLACES_API_KEY')
+  },
+  policeApi: {
+    baseUrl: getEnvironmentVariable('POLICE_API_BASE_URL')
+  },
+  overnightExportBatchSize: getEnvironmentVariable('OVERNIGHT_EXPORT_BATCH_SIZE'),
+  paranoidRetentionPeriod: getEnvironmentVariable('PARANOID_RETENTION_PERIOD') ?? 90
 }
 
 // Validate config

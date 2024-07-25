@@ -6,7 +6,8 @@ const payload = {
     address: {
       addressLine1: '14 Fake Street',
       town: 'Fake Town',
-      postcode: 'FA1 2KE'
+      postcode: 'FA1 2KE',
+      country: 'England'
     }
   },
   enforcementDetails: {
@@ -34,4 +35,23 @@ const payload = {
   ]
 }
 
-module.exports = payload
+const payloadWithPersonReference = {
+  ...payload,
+  owner: {
+    ...payload.owner,
+    personReference: 'P-6076-A37C'
+  }
+}
+
+const payloadWithPersonReferenceNoDob = {
+  ...payload,
+  owner: {
+    ...payload.owner,
+    personReference: 'P-6076-A37C',
+    dateOfBirth: null
+  }
+}
+
+const owner = payload.owner
+
+module.exports = { payload, payloadWithPersonReference, owner, payloadWithPersonReferenceNoDob }
