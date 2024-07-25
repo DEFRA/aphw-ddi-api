@@ -630,7 +630,8 @@ const purgeDogByIndexNumber = async (indexNumber, user, transaction) => {
       },
       {
         model: sequelize.models.dog_breach,
-        as: 'dog_breaches'
+        as: 'dog_breaches',
+        paranoid: false
       }
     ],
     transaction,
