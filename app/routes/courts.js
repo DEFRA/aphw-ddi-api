@@ -19,7 +19,7 @@ module.exports = [
     method: 'POST',
     path: '/courts',
     options: {
-      tags: ['api'] ,
+      tags: ['api'],
       validate: {
         payload: createAdminItem,
         failAction: (request, h, err) => {
