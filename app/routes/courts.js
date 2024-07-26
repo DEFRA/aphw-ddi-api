@@ -6,6 +6,7 @@ module.exports = [
   {
     method: 'GET',
     path: '/courts',
+    options: { tags: ['api'] },
     handler: async (request, h) => {
       const courts = await getCourts()
 
@@ -18,6 +19,7 @@ module.exports = [
     method: 'POST',
     path: '/courts',
     options: {
+      tags: ['api'],
       validate: {
         payload: createAdminItem,
         failAction: (request, h, err) => {
@@ -39,6 +41,7 @@ module.exports = [
   {
     method: 'DELETE',
     path: '/courts/{courtId}',
+    options: { tags: ['api'] },
     handler: async (request, h) => {
       const courtId = request.params.courtId
       await deleteCourt(courtId, getCallingUser(request))

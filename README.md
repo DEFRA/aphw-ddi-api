@@ -97,6 +97,10 @@ alternatively add `--setupFilesAfterEnv=<rootDir>/jest.setup.single.js` to your 
 npm run test <path>/<filename> -- --setupFilesAfterEnv=<rootDir>/jest.setup.single.js
 ```
 
+## Swagger 
+
+When running locally, you can view swagger documentation on http://localhost:3001/documentation this is built automatically from the joi schema and Hapi endpoints using Swagger Hapi.
+
 ## Licence 
 
 THIS INFORMATION IS LICENSED UNDER THE CONDITIONS OF THE OPEN GOVERNMENT LICENCE found at:

@@ -3,6 +3,7 @@ const { getCounties } = require('../repos/counties')
 module.exports = {
   method: 'GET',
   path: '/counties',
+  options: { tags: ['api'] },
   handler: async (request, h) => {
     const counties = await getCounties()
 

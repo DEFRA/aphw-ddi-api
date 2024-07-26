@@ -9,6 +9,7 @@ const { activities } = require('../constants/event/events')
 module.exports = [{
   method: 'GET',
   path: '/activities/{activityType}/{activitySource}',
+  options: { tags: ['api'] },
   handler: async (request, h) => {
     const activityType = request.params.activityType
     const activitySource = request.params.activitySource
@@ -23,6 +24,7 @@ module.exports = [{
 {
   method: 'GET',
   path: '/activity/{activityId}',
+  options: { tags: ['api'] },
   handler: async (request, h) => {
     const activityId = request.params.activityId
 
@@ -37,6 +39,7 @@ module.exports = [{
   method: 'POST',
   path: '/activity',
   options: {
+    tags: ['api'],
     validate: {
       payload: schema,
       failAction: (request, h, err) => {

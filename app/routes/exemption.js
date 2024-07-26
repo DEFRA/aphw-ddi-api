@@ -6,6 +6,7 @@ module.exports = [{
   method: 'PUT',
   path: '/exemption',
   options: {
+    tags: ['api'],
     handler: async (request, h) => {
       try {
         await validatePayload(request.payload)

@@ -52,6 +52,7 @@ module.exports = [
   {
     method: 'GET',
     path: '/cdo/{indexNumber}',
+    options: { tags: ['api'] },
     handler: async (request, h) => {
       const indexNumber = request.params.indexNumber
       try {
@@ -72,6 +73,7 @@ module.exports = [
     method: 'POST',
     path: '/cdo',
     options: {
+      tags: ['api'],
       validate: {
         payload: cdoCreateSchema,
         failAction: (request, h, err) => {
