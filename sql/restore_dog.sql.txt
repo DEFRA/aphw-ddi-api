@@ -50,6 +50,10 @@ BEGIN
 	SET    deleted_at = null
 	WHERE  dog_id = v_dog_id;
 
+	UPDATE dog_breach
+	SET    deleted_at = null
+	WHERE  dog_id = v_dog_id;
+
 	UPDATE registered_person
 	SET    deleted_at = null
 	WHERE  dog_id = v_dog_id;
