@@ -4,8 +4,8 @@ const HapiSwagger = require('hapi-swagger')
 
 const swaggerOptions = {
   info: {
-    title: 'Test API Documentation',
-    description: 'This is a sample example of API documentation.'
+    title: 'DDI API Documentation',
+    description: 'This is the interface for **aphw-ddi-api**.'
   }
 }
 
