@@ -16,10 +16,22 @@ const setExpiredCdosToFailed = async (today, user, t) => {
       include: [{
         model: sequelize.models.dog,
         as: 'dog',
-        include: [{
-          model: sequelize.models.status,
-          as: 'status'
-        }]
+        include: [
+          {
+            model: sequelize.models.status,
+            as: 'status'
+          },
+          {
+            model: sequelize.models.dog_breach,
+            as: 'dog_breaches',
+            include: [
+              {
+                model: sequelize.models.breach_category,
+                as: 'breach_category'
+              }
+            ]
+          }
+        ]
       }],
       transaction: t
     })
