@@ -10,6 +10,7 @@ module.exports = [
     method: 'POST',
     path: '/jobs/purge-soft-delete',
     options: {
+      tags: ['api'],
       validate: {
         query: jobsQuerySchema,
         failAction: (request, h, error) => {
@@ -32,6 +33,7 @@ module.exports = [
     method: 'POST',
     path: '/jobs/expired-insurance',
     options: {
+      tags: ['api'],
       validate: {
         query: jobsQuerySchema,
         failAction: (request, h, error) => {
@@ -51,6 +53,7 @@ module.exports = [
     method: 'POST',
     path: '/jobs/neutering-deadline',
     options: {
+      tags: ['api'],
       validate: {
         query: jobsQuerySchema,
         failAction: (request, h, error) => {

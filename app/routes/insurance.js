@@ -13,6 +13,7 @@ module.exports = [
     method: 'GET',
     path: '/insurance/companies',
     options: {
+      tags: ['api'],
       validate: {
         query: insuranceQuerySchema,
         failAction: (request, h, err) => {
@@ -37,6 +38,7 @@ module.exports = [
     method: 'POST',
     path: '/insurance/companies',
     options: {
+      tags: ['api'],
       validate: {
         payload: createAdminItem,
         failAction: (request, h, err) => {
@@ -58,6 +60,7 @@ module.exports = [
   {
     method: 'DELETE',
     path: '/insurance/companies/{insuranceCompanyId}',
+    options: { tags: ['api'] },
     handler: async (request, h) => {
       const insuranceCompanyId = request.params.insuranceCompanyId
       await deleteCompany(insuranceCompanyId, getCallingUser(request))

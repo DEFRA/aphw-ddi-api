@@ -6,6 +6,7 @@ module.exports = [
   {
     method: 'GET',
     path: '/police-forces',
+    options: { tags: ['api'] },
     handler: async (request, h) => {
       const policeForces = await getPoliceForces()
 
@@ -18,6 +19,7 @@ module.exports = [
     method: 'POST',
     path: '/police-forces',
     options: {
+      tags: ['api'],
       validate: {
         payload: createAdminItem,
         failAction: (request, h, err) => {
@@ -39,6 +41,7 @@ module.exports = [
   {
     method: 'DELETE',
     path: '/police-forces/{policeForceId}',
+    options: { tags: ['api'] },
     handler: async (request, h) => {
       const policeForceId = request.params.policeForceId
       await deleteForce(policeForceId, getCallingUser(request))
