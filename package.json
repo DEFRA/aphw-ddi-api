@@ -22,7 +22,6 @@
   "license": "OGL-UK-3.0",
   "dependencies": {
     "@azure/identity": "4.2.1",
-    "@azure/msal-node": "2.9.2",
     "@azure/storage-blob": "12.13.0",
     "@hapi/hapi": "20.2.2",
     "@hapi/inert": "^7.1.0",
