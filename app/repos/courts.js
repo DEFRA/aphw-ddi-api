@@ -38,7 +38,7 @@ const createCourt = async (courtData, user, transaction) => {
   const foundCourt = await sequelize.models.court.findOne(findQuery)
 
   if (foundCourt !== null) {
-    throw new DuplicateResourceError(`Court with name ${courtData.name} already exists`)
+    throw new DuplicateResourceError(`Court with name ${courtData.name} is already listed`)
   }
 
   let court

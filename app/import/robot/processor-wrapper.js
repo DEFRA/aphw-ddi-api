@@ -15,7 +15,9 @@ const processRegister = async (register, rollback, user, transaction) => {
 
 const processRegisterInTransaction = async (register, rollback, user, transaction) => {
   if (!transaction) {
-    return await sequelize.transaction(async (t) => processRegisterInTransaction(register, rollback, user, t))
+    return await sequelize.transaction(async (t) => {
+      return processRegisterInTransaction(register, rollback, user, t)
+    })
   }
 
   await processRegisterRows(register, transaction)

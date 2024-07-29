@@ -120,7 +120,7 @@ describe('Police force repo', () => {
       const mockPoliceForcePayload = {
         name: 'Rohan Police Constabulary'
       }
-      await expect(addForce(mockPoliceForcePayload, devUser, {})).rejects.toThrow(new DuplicateResourceError('Police Force with name Rohan Police Constabulary already exists'))
+      await expect(addForce(mockPoliceForcePayload, devUser, {})).rejects.toThrow(new DuplicateResourceError('Police Force with name Rohan Police Constabulary is already listed'))
     })
 
     test('should correctly reject if transaction fails', async () => {

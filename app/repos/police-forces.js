@@ -29,7 +29,7 @@ const addForce = async (policeForce, user, transaction) => {
   const foundPoliceForce = await sequelize.models.police_force.findOne(findQuery)
 
   if (foundPoliceForce !== null) {
-    throw new DuplicateResourceError(`Police Force with name ${policeForce.name} already exists`)
+    throw new DuplicateResourceError(`Police Force with name ${policeForce.name} is already listed`)
   }
 
   let createdPoliceForce

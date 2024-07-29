@@ -1,12 +1,19 @@
 const { devUser } = require('../../../../mocks/auth')
 
 describe('Processor wrapper tests', () => {
+  const mockTransaction = jest.fn()
   jest.mock('../../../../../app/config/db', () => ({
-    transaction: jest.fn()
+    transaction: jest.fn().mockImplementation(async (fn) => {
+      return await fn(mockTransaction)
+    })
   }))
 
   jest.mock('../../../../../app/import/robot/processor')
   const { processRegisterRows, populatePoliceForce } = require('../../../../../app/import/robot/processor')
+
+  jest.mock('../../../../../app/import/robot/audit')
+  const { generateAuditEvents } = require('../../../../../app/import/robot/audit')
+  generateAuditEvents.mockResolvedValue()
 
   const sequelize = require('../../../../../app/config/db')
 
@@ -14,7 +21,6 @@ describe('Processor wrapper tests', () => {
 
   beforeEach(async () => {
     jest.clearAllMocks()
-    jest.resetAllMocks()
   })
 
   test('processRegister should call processRegisterInTransaction', async () => {
