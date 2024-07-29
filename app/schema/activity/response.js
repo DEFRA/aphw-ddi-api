@@ -21,10 +21,16 @@ const activityItemSchema = Joi.object({
   })
 }).unknown()
 
-const getActivitySchema = Joi.object({
+const getActivitiesSchema = Joi.object({
   activities: Joi.array().items(activityItemSchema)
 })
 
+const getActivitySchema = Joi.object({
+  activity: activityItemSchema
+})
+
 module.exports = {
+  getActivitiesSchema,
+  activityItemSchema,
   getActivitySchema
 }
