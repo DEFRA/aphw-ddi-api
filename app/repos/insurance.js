@@ -123,7 +123,7 @@ const addCompany = async (insuranceCompany, user, transaction) => {
   const foundInsuranceCompany = await sequelize.models.insurance_company.findOne(findQuery)
 
   if (foundInsuranceCompany !== null) {
-    throw new DuplicateResourceError(`Insurance company with name ${insuranceCompany.name} already exists`)
+    throw new DuplicateResourceError(`Insurance company with name ${insuranceCompany.name} is already listed`)
   }
   let createdInsuranceCompany
 

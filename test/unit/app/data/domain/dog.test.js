@@ -89,25 +89,25 @@ describe('Dog', () => {
       const callback = jest.fn()
       const dog = new Dog(buildCdoDog({ microchipNumber: null }))
       expect(dog.microchipNumber).toBeNull()
-      expect(() => dog.setMicrochipNumber('123456789012345', '123456789012345', callback)).toThrow(new DuplicateResourceError('The microchip number already exists', { microchipNumbers: ['123456789012345'] }))
+      expect(() => dog.setMicrochipNumber('123456789012345', '123456789012345', callback)).toThrow(new DuplicateResourceError('Microchip number already exists', { microchipNumbers: ['123456789012345'] }))
     })
 
     test('should throw InvalidDataError error given microchip number contains a letter', () => {
       const callback = jest.fn()
       const dog = new Dog(buildCdoDog({ microchipNumber: null }))
-      expect(() => dog.setMicrochipNumber('123a56789012345', null, callback)).toThrow(new InvalidDataError('Invalid Microchip number - contains a non-numeric character'))
+      expect(() => dog.setMicrochipNumber('123a56789012345', null, callback)).toThrow(new InvalidDataError('Microchip number must be digits only'))
     })
 
     test('should throw InvalidDataError error when updating microchip number that is shorter than 15 characters', () => {
       const callback = jest.fn()
       const dog = new Dog(buildCdoDog({ microchipNumber: null }))
-      expect(() => dog.setMicrochipNumber('12345678901234', null, callback)).toThrow(new InvalidDataError('Invalid Microchip number - must be 15 characters long'))
+      expect(() => dog.setMicrochipNumber('12345678901234', null, callback)).toThrow(new InvalidDataError('Microchip number must be 15 digits in length'))
     })
 
     test('should throw InvalidDataError error when updating microchip number that is longer than 15 characters', () => {
       const callback = jest.fn()
       const dog = new Dog(buildCdoDog({ microchipNumber: null }))
-      expect(() => dog.setMicrochipNumber('1234567890123456', null, callback)).toThrow(new InvalidDataError('Invalid Microchip number - must be 15 characters long'))
+      expect(() => dog.setMicrochipNumber('1234567890123456', null, callback)).toThrow(new InvalidDataError('Microchip number must be 15 digits in length'))
     })
   })
 

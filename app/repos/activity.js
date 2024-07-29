@@ -120,7 +120,7 @@ const createActivity = async (activityData, user, transaction) => {
   const foundActivity = foundActivities?.length > 0 ? foundActivities[0] : null
 
   if (foundActivity !== null) {
-    throw new DuplicateResourceError(`Activity with name ${activityData.label} already exists for type ${activityData.activityType} and source ${activityData.activitySource}`)
+    throw new DuplicateResourceError(`Activity with name ${activityData.label} is already listed for type ${activityData.activityType} and source ${activityData.activitySource}`)
   }
 
   const activitySource = await sequelize.models.activity_source.findOne({

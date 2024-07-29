@@ -54,15 +54,15 @@ class Dog extends Changeable {
     }
 
     if (!microchipNumber1.match(/^[0-9]*$/)) {
-      throw new InvalidDataError('Invalid Microchip number - contains a non-numeric character')
+      throw new InvalidDataError('Microchip number must be digits only')
     }
 
     if (microchipNumber1.length !== 15) {
-      throw new InvalidDataError('Invalid Microchip number - must be 15 characters long')
+      throw new InvalidDataError('Microchip number must be 15 digits in length')
     }
 
     if (microchipNumber1 === duplicateMicrochip) {
-      throw new DuplicateResourceError('The microchip number already exists', { microchipNumbers: [microchipNumber1] })
+      throw new DuplicateResourceError('Microchip number already exists', { microchipNumbers: [microchipNumber1] })
     }
 
     this._updates.update('microchip', microchipNumber1, callback)

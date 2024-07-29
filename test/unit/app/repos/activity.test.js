@@ -138,7 +138,7 @@ describe('Activity repo', () => {
           label: 'existing',
           activitySource: 'dog',
           activityType: 'sent'
-        }, devUser, {})).rejects.toThrow('Activity with name existing already exists for type sent and source dog')
+        }, devUser, {})).rejects.toThrow('Activity with name existing is already listed for type sent and source dog')
 
       expect(sequelize.models.activity.create).not.toHaveBeenCalled()
       expect(sendCreateToAudit).not.toHaveBeenCalled()
