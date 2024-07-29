@@ -46,6 +46,16 @@ describe('RunJobs test', () => {
     expect(res).toBe('ok - insurance 2 rows | ok - deleted 2 rows')
   })
 
+  test('runOvernightJobs should ignore if already run today', async () => {
+    updateRunningJobProgress.mockResolvedValue()
+    tryStartJob.mockResolvedValue()
+    endJob.mockResolvedValue()
+    autoUpdateStatuses.mockResolvedValue('ok - insurance 2 rows')
+    purgeSoftDeletedRecords.mockResolvedValue('ok - deleted 2 rows')
+    const res = await runOvernightJobs(server)
+    expect(res).toBe('Job for today already running or run')
+  })
+
   test('runExportNow should call createExportFile', async () => {
     createNewJob.mockResolvedValue({ id: 123 })
     endJob.mockResolvedValue()

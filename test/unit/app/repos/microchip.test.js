@@ -133,7 +133,7 @@ describe('microchip', () => {
         microchipNumber: '277890823930477',
         microchipNumber2: '759628280825931'
       }
-      await expect(updateMicrochips(300550, payload, {})).rejects.toThrow(new DuplicateResourceError('The microchip number already exists', { microchipNumbers: ['277890823930477'] }))
+      await expect(updateMicrochips(300550, payload, {})).rejects.toThrow(new DuplicateResourceError('Microchip number already exists', { microchipNumbers: ['277890823930477'] }))
     })
 
     test('should throw DuplicateResourceError is one microchip is a duplicates ', async () => {
@@ -159,7 +159,7 @@ describe('microchip', () => {
         microchipNumber: '277890823930477',
         microchipNumber2: '759628280825931'
       }
-      await expect(updateMicrochips(300550, payload, {})).rejects.toThrow(new DuplicateResourceError('The microchip number already exists', { microchipNumbers: ['277890823930477', '759628280825931'] }))
+      await expect(updateMicrochips(300550, payload, {})).rejects.toThrow(new DuplicateResourceError('Microchip number already exists', { microchipNumbers: ['277890823930477', '759628280825931'] }))
     })
   })
 

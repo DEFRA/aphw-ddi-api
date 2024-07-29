@@ -1,4 +1,4 @@
-const { mapPersonAndDogsByIndexDao } = require('../../../../app/dto/person')
+const { mapPersonAndDogsByIndexDao, personDto } = require('../../../../app/dto/person')
 describe('mapPersonAndDogsByIndexDao', () => {
   test('should map PersonAndDogsByIndexDao to a PersonAndDogsDto', () => {
     /**
@@ -12,7 +12,17 @@ describe('mapPersonAndDogsByIndexDao', () => {
         first_name: 'Ralph',
         id: 2,
         last_name: 'Wreck it',
-        person_contacts: [],
+        person_contacts: [
+          { id: 2, contact: { id: 2, contact_type: { contact_type: 'Email' }, contact: 'email2@here.com' } },
+          { id: 3, contact: { id: 3, contact_type: { contact_type: 'Email' }, contact: 'email3@here.com' } },
+          { id: 1, contact: { id: 1, contact_type: { contact_type: 'Email' }, contact: 'email1@here.com' } },
+          { id: 5, contact: { id: 5, contact_type: { contact_type: 'Phone' }, contact: '01915555555' } },
+          { id: 6, contact: { id: 6, contact_type: { contact_type: 'Phone' }, contact: '01916666666' } },
+          { id: 4, contact: { id: 4, contact_type: { contact_type: 'Phone' }, contact: '01914444444' } },
+          { id: 8, contact: { id: 8, contact_type: { contact_type: 'SecondaryPhone' }, contact: '01918888888' } },
+          { id: 9, contact: { id: 9, contact_type: { contact_type: 'SecondaryPhone' }, contact: '01919999999' } },
+          { id: 7, contact: { id: 7, contact_type: { contact_type: 'SecondaryPhone' }, contact: '01917777777' } }
+        ],
         person_reference: 'P-1234-567',
         registered_people: [
           {
@@ -113,7 +123,17 @@ describe('mapPersonAndDogsByIndexDao', () => {
      */
     const expectedPersonAndDogs = {
       birthDate: '1998-05-10',
-      contacts: [],
+      contacts: [
+        { id: 2, contact: { id: 2, contact_type: { contact_type: 'Email' }, contact: 'email2@here.com' } },
+        { id: 3, contact: { id: 3, contact_type: { contact_type: 'Email' }, contact: 'email3@here.com' } },
+        { id: 1, contact: { id: 1, contact_type: { contact_type: 'Email' }, contact: 'email1@here.com' } },
+        { id: 5, contact: { id: 5, contact_type: { contact_type: 'Phone' }, contact: '01915555555' } },
+        { id: 6, contact: { id: 6, contact_type: { contact_type: 'Phone' }, contact: '01916666666' } },
+        { id: 4, contact: { id: 4, contact_type: { contact_type: 'Phone' }, contact: '01914444444' } },
+        { id: 8, contact: { id: 8, contact_type: { contact_type: 'SecondaryPhone' }, contact: '01918888888' } },
+        { id: 9, contact: { id: 9, contact_type: { contact_type: 'SecondaryPhone' }, contact: '01919999999' } },
+        { id: 7, contact: { id: 7, contact_type: { contact_type: 'SecondaryPhone' }, contact: '01917777777' } }
+      ],
       dogs: [
         {
           id: 300723,
@@ -158,5 +178,139 @@ describe('mapPersonAndDogsByIndexDao', () => {
     }
 
     expect(personAndDogsDto).toEqual(expectedPersonAndDogs)
+  })
+
+  test('should map Person to a PersonDto returning multiple contacts', () => {
+    const person = {
+      birth_date: '1998-05-10',
+      first_name: 'Ralph',
+      last_name: 'Wreck it',
+      person_contacts: [
+        { id: 2, contact: { id: 2, contact_type: { contact_type: 'Email' }, contact: 'email2@here.com' } },
+        { id: 3, contact: { id: 3, contact_type: { contact_type: 'Email' }, contact: 'email3@here.com' } },
+        { id: 1, contact: { id: 1, contact_type: { contact_type: 'Email' }, contact: 'email1@here.com' } },
+        { id: 5, contact: { id: 5, contact_type: { contact_type: 'Phone' }, contact: '01915555555' } },
+        { id: 6, contact: { id: 6, contact_type: { contact_type: 'Phone' }, contact: '01916666666' } },
+        { id: 4, contact: { id: 4, contact_type: { contact_type: 'Phone' }, contact: '01914444444' } },
+        { id: 8, contact: { id: 8, contact_type: { contact_type: 'SecondaryPhone' }, contact: '01918888888' } },
+        { id: 9, contact: { id: 9, contact_type: { contact_type: 'SecondaryPhone' }, contact: '01919999999' } },
+        { id: 7, contact: { id: 7, contact_type: { contact_type: 'SecondaryPhone' }, contact: '01917777777' } }
+      ],
+      person_reference: 'P-1234-567',
+      addresses: [
+        {
+          address_id: 0,
+          id: 0,
+          person_id: 0,
+          address: {
+            address_line_1: 'Flat 3, 4, Johnsons Court',
+            address_line_2: null,
+            country: { id: 1, country: 'England' },
+            country_id: 0,
+            county: 'Greater London',
+            id: 0,
+            postcode: 'EC4A 3EA',
+            town: 'London'
+          }
+        }
+      ]
+    }
+
+    const personRes = personDto(person, false)
+
+    const expectedPerson = {
+      birthDate: '1998-05-10',
+      contacts: {
+        emails: [
+          'email3@here.com',
+          'email2@here.com',
+          'email1@here.com'
+        ],
+        primaryTelephones: [
+          '01916666666',
+          '01915555555',
+          '01914444444'
+        ],
+        secondaryTelephones: [
+          '01919999999',
+          '01918888888',
+          '01917777777'
+        ]
+      },
+      firstName: 'Ralph',
+      lastName: 'Wreck it',
+      organisationName: undefined,
+      personReference: 'P-1234-567',
+      address: {
+        addressLine1: 'Flat 3, 4, Johnsons Court',
+        addressLine2: null,
+        country: 'England',
+        postcode: 'EC4A 3EA',
+        town: 'London'
+      }
+    }
+
+    expect(personRes).toEqual(expectedPerson)
+  })
+
+  test('should map Person to a PersonDto returning latest contacts', () => {
+    const person = {
+      birth_date: '1998-05-10',
+      first_name: 'Ralph',
+      last_name: 'Wreck it',
+      person_contacts: [
+        { id: 2, contact: { id: 2, contact_type: { contact_type: 'Email' }, contact: 'email2@here.com' } },
+        { id: 3, contact: { id: 3, contact_type: { contact_type: 'Email' }, contact: 'email3@here.com' } },
+        { id: 1, contact: { id: 1, contact_type: { contact_type: 'Email' }, contact: 'email1@here.com' } },
+        { id: 5, contact: { id: 5, contact_type: { contact_type: 'Phone' }, contact: '01915555555' } },
+        { id: 6, contact: { id: 6, contact_type: { contact_type: 'Phone' }, contact: '01916666666' } },
+        { id: 4, contact: { id: 4, contact_type: { contact_type: 'Phone' }, contact: '01914444444' } },
+        { id: 8, contact: { id: 8, contact_type: { contact_type: 'SecondaryPhone' }, contact: '01918888888' } },
+        { id: 9, contact: { id: 9, contact_type: { contact_type: 'SecondaryPhone' }, contact: '01919999999' } },
+        { id: 7, contact: { id: 7, contact_type: { contact_type: 'SecondaryPhone' }, contact: '01917777777' } }
+      ],
+      person_reference: 'P-1234-567',
+      addresses: [
+        {
+          address_id: 0,
+          id: 0,
+          person_id: 0,
+          address: {
+            address_line_1: 'Flat 3, 4, Johnsons Court',
+            address_line_2: null,
+            country: { id: 1, country: 'England' },
+            country_id: 0,
+            county: 'Greater London',
+            id: 0,
+            postcode: 'EC4A 3EA',
+            town: 'London'
+          }
+        }
+      ]
+    }
+
+    const personRes = personDto(person, true)
+
+    const expectedPerson = {
+      birthDate: '1998-05-10',
+      contacts: {
+        email: 'email3@here.com',
+        primaryTelephone: '01916666666',
+        secondaryTelephone: '01919999999'
+      },
+      firstName: 'Ralph',
+      lastName: 'Wreck it',
+      organisationName: undefined,
+      personReference: 'P-1234-567',
+      address: {
+        addressLine1: 'Flat 3, 4, Johnsons Court',
+        addressLine2: null,
+        country: 'England',
+        postcode: 'EC4A 3EA',
+        town: 'London'
+      }
+    }
+
+    expect(personRes).toEqual(expectedPerson)
   })
 })

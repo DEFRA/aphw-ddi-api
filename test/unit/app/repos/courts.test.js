@@ -121,7 +121,7 @@ describe('Courts repo', () => {
       const mockCourtPayload = {
         name: 'The Shire County Court'
       }
-      await expect(createCourt(mockCourtPayload, devUser, {})).rejects.toThrow(new DuplicateResourceError('Court with name The Shire County Court already exists'))
+      await expect(createCourt(mockCourtPayload, devUser, {})).rejects.toThrow(new DuplicateResourceError('Court with name The Shire County Court is already listed'))
     })
 
     test('should correctly reject if transaction fails', async () => {

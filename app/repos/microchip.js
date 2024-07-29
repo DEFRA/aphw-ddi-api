@@ -40,7 +40,7 @@ const throwForDuplicates = async (payload, dogId, transaction) => {
   }
 
   if (duplicateMicrochips.length) {
-    throw new DuplicateResourceError('The microchip number already exists', { microchipNumbers: duplicateMicrochips })
+    throw new DuplicateResourceError('Microchip number already exists', { microchipNumbers: duplicateMicrochips })
   }
 }
 

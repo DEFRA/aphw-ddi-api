@@ -348,7 +348,7 @@ describe('Insurance repo', () => {
       const mockInsuranceCompanyPayload = {
         name: 'Rohan Pets R Us'
       }
-      await expect(addCompany(mockInsuranceCompanyPayload, devUser, {})).rejects.toThrow(new DuplicateResourceError('Insurance company with name Rohan Pets R Us already exists'))
+      await expect(addCompany(mockInsuranceCompanyPayload, devUser, {})).rejects.toThrow(new DuplicateResourceError('Insurance company with name Rohan Pets R Us is already listed'))
     })
 
     test('should correctly reject if transaction fails', async () => {

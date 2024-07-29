@@ -668,7 +668,7 @@ describe('CDO endpoint', () => {
     test('should throw a 409 given duplicate microchip', async () => {
       getCdoService.mockReturnValue({
         recordMicrochipNumber: async () => {
-          throw new DuplicateResourceError('The microchip number already exists', { microchipNumbers: ['123456789012345'] })
+          throw new DuplicateResourceError('Microchip number already exists', { microchipNumbers: ['123456789012345'] })
         }
       })
       const options = {

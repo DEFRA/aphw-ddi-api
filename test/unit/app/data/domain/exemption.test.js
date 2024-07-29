@@ -270,7 +270,7 @@ describe('Exemption', () => {
           })
         ]
       }))
-      expect(() => exemption.issueCertificate(auditDate, callback)).toThrow(new InvalidDateError('The insurance renewal date cannot be in the past.'))
+      expect(() => exemption.issueCertificate(auditDate, callback)).toThrow(new InvalidDateError('The insurance renewal date must be today or in the future'))
 
       expect(exemption.certificateIssued).toBeNull()
     })

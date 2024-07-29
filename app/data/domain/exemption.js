@@ -153,7 +153,7 @@ class Exemption extends Changeable {
 
   issueCertificate (certificateIssued, callback) {
     if (!this._checkIfInsuranceIsValid()) {
-      throw new InvalidDateError('The insurance renewal date cannot be in the past.')
+      throw new InvalidDateError('The insurance renewal date must be today or in the future')
     }
 
     if (!this._exemptionIsComplete()) {
