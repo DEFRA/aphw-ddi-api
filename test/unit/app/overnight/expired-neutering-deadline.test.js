@@ -23,7 +23,7 @@ describe('ExpiredNeuteringDeadline test', () => {
     transaction: jest.fn()
   }))
 
-  const juneDeadlineSwitchedOn = true
+  const juneDeadlineSwitchedOn = false
   const juneLiteral = juneDeadlineSwitchedOn ? '1 = 1' : '1 = 0'
 
   beforeEach(async () => {
