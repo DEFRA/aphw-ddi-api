@@ -29,6 +29,7 @@ const devUser = {
 }
 
 describe('Dog repo', () => {
+  const mockTransaction = jest.fn()
   jest.mock('../../../../../app/config/db', () => ({
     models: {
       dog_breed: {
@@ -81,7 +82,9 @@ describe('Dog repo', () => {
       }
     },
     col: jest.fn(),
-    transaction: jest.fn(),
+    transaction: jest.fn().mockImplementation(async (fn) => {
+      return await fn(mockTransaction)
+    }),
     literal: jest.fn()
   }))
 
@@ -163,8 +166,26 @@ describe('Dog repo', () => {
         court: '1'
       }
 
+      const mockDog = {
+        id: 1,
+        breed: 'Breed 1',
+        name: 'Dog 1'
+      }
+
+      const mockRegistration = {
+        id: 1,
+        cdoIssued: '2020-01-01',
+        cdoExpiry: '2020-02-01'
+      }
+
       const owners = [{ id: 1, ...mockCdoPayload.owner }]
       const dogs = mockCdoPayload.dogs
+
+      sequelize.models.dog.create.mockResolvedValue({ ...mockDog })
+      sequelize.models.dog.findByPk.mockResolvedValue({ ...mockDog })
+
+      sequelize.models.registration.create.mockResolvedValue({ ...mockRegistration })
+      sequelize.models.registration.findByPk.mockResolvedValue({ ...mockRegistration })
 
       await createDogs(dogs, owners, enforcement)
 
@@ -485,12 +506,15 @@ describe('Dog repo', () => {
       const dog = {
         id: 123,
         name: 'Bruno',
-        owner: { firstName: 'John', lastName: 'Smith' }
+        owner: { firstName: 'John', lastName: 'Smith' },
+        microchip_number: '123451234512345'
       }
 
       await addImportedDog(dog, devUser, {})
       expect(sequelize.models.dog.create).toHaveBeenCalledTimes(1)
       expect(sequelize.models.registered_person.create).toHaveBeenCalledTimes(1)
+      expect(sequelize.models.dog_microchip.create).toHaveBeenCalledTimes(1)
+      expect(sequelize.models.microchip.create).toHaveBeenCalledTimes(1)
       expect(sequelize.transaction).toHaveBeenCalledTimes(0)
     })
   })
@@ -520,7 +544,7 @@ describe('Dog repo', () => {
   })
 
   describe('updateDogFields', () => {
-    test('updateDogFields should update fields', async () => {
+    test('updateDogFields should update fields including inactive', async () => {
       const dbDog = {}
       const breeds = [
         { breed: 'breed1', id: 123 }
@@ -547,12 +571,36 @@ describe('Dog repo', () => {
       expect(dbDog.exported_date).toEqual(new Date(2018, 3, 3))
       expect(dbDog.stolen_date).toEqual(new Date(2019, 4, 4))
     })
+
+    test('updateDogFields should update fields', async () => {
+      const dbDog = {}
+      const breeds = [
+        { breed: 'breed1', id: 123 }
+      ]
+      const payload = {
+        breed: 'breed1',
+        name: 'dog name',
+        dateOfBirth: new Date(2000, 1, 1),
+        tattoo: 'tattoo',
+        colour: 'colour',
+        sex: 'Male',
+        status: 'Exempt'
+      }
+      updateDogFields(dbDog, payload, breeds, await getStatuses())
+      expect(dbDog.dog_breed_id).toBe(123)
+      expect(dbDog.name).toBe('dog name')
+      expect(dbDog.birth_date).toEqual(new Date(2000, 1, 1))
+      expect(dbDog.tattoo).toBe('tattoo')
+      expect(dbDog.colour).toBe('colour')
+      expect(dbDog.sex).toBe('Male')
+      expect(dbDog.status_id).toBe(3)
+    })
   })
 
   describe('updateDog', () => {
     test('updateDog should create new transaction if not passed', async () => {
       const mockSave = jest.fn()
-      sequelize.models.dog.findOne.mockResolvedValue({ id: 123, breed: 'Breed 1', name: 'Bruno', save: mockSave })
+      sequelize.models.dog.findOne.mockResolvedValue({ id: 123, breed: 'Breed 1', name: 'Bruno', dog_breaches: [], save: mockSave })
       sequelize.models.microchip.findAll.mockResolvedValue([])
       sequelize.models.microchip.create.mockResolvedValue({ id: 101 })
       sequelize.models.search_index.findAll.mockResolvedValue([])
@@ -595,7 +643,10 @@ describe('Dog repo', () => {
         dog_breaches: []
       }
 
-      await updateBreaches(dog)
+      const statuses = [
+        { id: 1, status: 'In breach' }
+      ]
+      await updateBreaches(dog, statuses)
 
       expect(sequelize.transaction).toHaveBeenCalledTimes(1)
     })
@@ -629,7 +680,7 @@ describe('Dog repo', () => {
   describe('updateStatus', () => {
     test('updateStatus should create new transaction if not passed', async () => {
       const mockSave = jest.fn()
-      sequelize.models.dog.findOne.mockResolvedValue({ id: 123, breed: 'Breed 1', name: 'Bruno', save: mockSave })
+      sequelize.models.dog.findOne.mockResolvedValue({ id: 123, breed: 'Breed 1', name: 'Bruno', dog_breaches: [], save: mockSave })
 
       await updateStatus('ED123', 'Failed')
 
@@ -648,6 +699,21 @@ describe('Dog repo', () => {
 
   describe('deleteDogByIndexNumber', () => {
     test('should create a new transaction if not passed', async () => {
+      const mockSave = jest.fn()
+      const mockDogDestroy = jest.fn()
+      const mockRegDestroy = jest.fn()
+      sequelize.models.dog.findOne.mockResolvedValue({
+        id: 123,
+        breed: 'Breed 1',
+        name: 'Bruno',
+        save: mockSave,
+        destroy: mockDogDestroy,
+        dog_breaches: [],
+        dog_microchips: [],
+        insurance: [],
+        registration: { destroy: mockRegDestroy },
+        registered_person: []
+      })
       await deleteDogByIndexNumber('ED123', devUser)
       expect(sequelize.transaction).toHaveBeenCalledTimes(1)
     })
@@ -707,6 +773,20 @@ describe('Dog repo', () => {
 
   describe('purgeDogByIndexNumber', () => {
     test('should create a new transaction if not passed', async () => {
+      const mockSave = jest.fn()
+      const mockDestroy = jest.fn()
+      sequelize.models.dog.findOne.mockResolvedValue({
+        id: 123,
+        breed: 'Breed 1',
+        name: 'Bruno',
+        save: mockSave,
+        destroy: mockDestroy,
+        dog_breaches: [],
+        dog_microchips: [],
+        insurance: [],
+        registrations: [],
+        registered_person: []
+      })
       await purgeDogByIndexNumber('ED123', devUser)
       expect(sequelize.transaction).toHaveBeenCalledTimes(1)
     })

@@ -502,10 +502,12 @@ const saveCdoTaskList = async (cdoTaskList, transaction) => {
             model = cdoDao[relationship ?? field]
           }
 
-          if (Object.prototype.hasOwnProperty.call(update.value, key)) {
-            model[field] = update.value[key]
-          } else {
-            model[field] = update.value
+          if (model) {
+            if (Object.prototype.hasOwnProperty.call(update.value, key)) {
+              model[field] = update.value[key]
+            } else {
+              model[field] = update.value
+            }
           }
         }
 

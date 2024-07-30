@@ -1,6 +1,7 @@
 const { jobs: mockJobs } = require('../../../mocks/jobs')
 
 describe('RegularJobs repo', () => {
+  const mockTransaction = jest.fn()
   jest.mock('../../../../app/config/db', () => ({
     models: {
       regular_job: {
@@ -12,7 +13,9 @@ describe('RegularJobs repo', () => {
       }
     },
     col: jest.fn(),
-    transaction: jest.fn()
+    transaction: jest.fn().mockImplementation(async (fn) => {
+      return await fn(mockTransaction)
+    })
   }))
 
   const sequelize = require('../../../../app/config/db')
@@ -29,7 +32,6 @@ describe('RegularJobs repo', () => {
     jest.clearAllMocks()
     autoUpdateStatuses.mockResolvedValue('autoUpdate ok')
     createExportFile.mockResolvedValue('export file ok')
-    sequelize.transaction.mockImplementation()
   })
 
   test('tryStartJob should not start new transaction if passed', async () => {
@@ -41,7 +43,6 @@ describe('RegularJobs repo', () => {
 
   test('tryStartJob should start new transaction if none passed', async () => {
     sequelize.models.regular_job.findOne.mockResolvedValue({ id: 1, run_date: new Date() })
-    sequelize.transaction.mockImplementation((callbackFn) => callbackFn({}))
 
     await tryStartJob()
 
@@ -67,7 +68,6 @@ describe('RegularJobs repo', () => {
   })
 
   test('tryStartJob should throw when error', async () => {
-    sequelize.transaction.mockImplementation(() => tryStartJob({}))
     sequelize.models.regular_job.findOne.mockResolvedValue(null)
     sequelize.models.regular_job.create.mockImplementation(() => { throw new Error('dummy error') })
 
@@ -77,7 +77,6 @@ describe('RegularJobs repo', () => {
   test('endJob should start new transaction if none passed', async () => {
     const mockSave = jest.fn()
     sequelize.models.regular_job.findByPk.mockResolvedValue({ id: 3, run_date: new Date(), save: mockSave })
-    sequelize.transaction.mockImplementation(() => endJob(123, 'text', {}))
 
     await endJob(123, 'text')
 

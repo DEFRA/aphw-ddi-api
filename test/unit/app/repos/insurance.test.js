@@ -4,6 +4,7 @@ const { DuplicateResourceError } = require('../../../../app/errors/duplicate-rec
 const { NotFoundError } = require('../../../../app/errors/not-found')
 
 describe('Insurance repo', () => {
+  const mockTransaction = jest.fn()
   jest.mock('../../../../app/config/db', () => ({
     models: {
       insurance: {
@@ -22,7 +23,9 @@ describe('Insurance repo', () => {
       }
     },
     where: jest.fn(),
-    transaction: jest.fn(),
+    transaction: jest.fn().mockImplementation(async (fn) => {
+      return await fn(mockTransaction)
+    }),
     col: jest.fn().mockReturnValue(''),
     fn: jest.fn().mockReturnValue('')
   }))
@@ -91,6 +94,8 @@ describe('Insurance repo', () => {
         company: 'test',
         renewalDate: '2020-01-01'
       }
+
+      getInsuranceCompany.mockResolvedValue({ id: 1 })
 
       await createInsurance(1, insurance)
 
@@ -283,6 +288,13 @@ describe('Insurance repo', () => {
       name: 'Rohan Pets R Us'
     }
     test('should create start new transaction if none passed', async () => {
+      sequelize.models.insurance_company.findOne.mockResolvedValue(null)
+
+      sequelize.models.insurance_company.create.mockResolvedValue({
+        id: 2,
+        company_name: 'Rohan Pets R Us'
+      })
+
       await addCompany(mockInsuranceCompany, devUser)
 
       expect(sequelize.transaction).toHaveBeenCalledTimes(1)
