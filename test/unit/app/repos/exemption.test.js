@@ -5,8 +5,11 @@ const dummyUser = {
 }
 
 describe('Exemption repo', () => {
+  const mockTransaction = jest.fn()
   jest.mock('../../../../app/config/db', () => ({
-    transaction: jest.fn()
+    transaction: jest.fn().mockImplementation(async (fn) => {
+      return await fn(mockTransaction)
+    })
   }))
 
   const sequelize = require('../../../../app/config/db')
@@ -36,7 +39,43 @@ describe('Exemption repo', () => {
 
   describe('updateExemption', () => {
     test('updateExemption should start a transaction if one is not provided', async () => {
-      await updateExemption({ indexNumber: '123' }, 'dummy-username')
+      const data = {
+        exemptionOrder: '2015',
+        indexNumber: 'ED123',
+        cdoIssued: '2020-01-01',
+        cdoExpiry: '2020-02-01',
+        court: 'Test Court',
+        policeForce: 'Test Police Force',
+        legislationOfficer: 'Test Officer',
+        certificateIssued: '2020-03-01',
+        applicationFeePaid: '2020-03-01',
+        neuteringConfirmation: '2020-04-01',
+        microchipVerification: '2020-04-01',
+        exemptionSchemeJoin: '2020-05-01'
+      }
+
+      const registration = {
+        cdo_issued: '2020-01-01',
+        cdo_expiry: '2020-02-01',
+        court_id: 1,
+        police_force_id: 1,
+        legislation_officer: 'Test Officer',
+        certificate_issued: '2020-03-01',
+        application_fee_paid: '2020-03-01',
+        neutering_confirmation_date: '2020-04-01',
+        microchip_verification_date: '2020-04-01',
+        exemption_scheme_join_date: '2020-05-01',
+        exemption_order: {
+          exemption_order: '2015'
+        },
+        save: jest.fn()
+      }
+
+      getCdo.mockResolvedValue({ registration, insurance: [] })
+      getCourt.mockResolvedValue({ id: 1, name: 'Test Court' })
+      getPoliceForce.mockResolvedValue({ id: 1, name: 'Test Police Force' })
+
+      await updateExemption(data, dummyUser)
 
       expect(sequelize.transaction).toHaveBeenCalled()
     })

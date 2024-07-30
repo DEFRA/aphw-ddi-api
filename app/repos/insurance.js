@@ -8,7 +8,7 @@ const { getFindQuery, updateParanoid, findQueryV2 } = require('./shared')
 
 const createInsurance = async (id, data, transaction) => {
   if (!transaction) {
-    return await sequelize.transaction(async (t) => createInsurance(data, t))
+    return await sequelize.transaction(async (t) => createInsurance(id, data, t))
   }
 
   try {
