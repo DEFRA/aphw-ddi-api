@@ -1,7 +1,5 @@
 const { getMicrochip, calculateNeuteringDeadline } = require('./dto-helper')
 const { mapDogBreachDaoToBreachDto } = require('../repos/mappers/dog')
-const Joi = require('joi')
-const { personAddress } = require('../../test/mocks/cdo/get')
 
 const generateOrderSpecificData = (data) => {
   if (data.registration.exemption_order.exemption_order === '2023') {
