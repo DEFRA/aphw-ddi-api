@@ -2,6 +2,7 @@ const { activities: mockActivities } = require('../../../mocks/activities')
 const { devUser } = require('../../../mocks/auth')
 
 describe('Activity repo', () => {
+  const mockTransaction = jest.fn()
   jest.mock('../../../../app/config/db', () => ({
     models: {
       activity: {
@@ -19,7 +20,9 @@ describe('Activity repo', () => {
     },
     col: jest.fn(),
     fn: jest.fn(),
-    transaction: jest.fn()
+    transaction: jest.fn().mockImplementation(async (fn) => {
+      return await fn(mockTransaction)
+    })
   }))
 
   const sequelize = require('../../../../app/config/db')
@@ -31,6 +34,7 @@ describe('Activity repo', () => {
 
   beforeEach(async () => {
     jest.clearAllMocks()
+    sequelize.models.activity.findAll.mockRejectedValue()
   })
 
   describe('getActivityList', () => {
@@ -88,6 +92,16 @@ describe('Activity repo', () => {
 
   describe('createActivity', () => {
     test('should create new transaction if none passed', async () => {
+      sequelize.models.activity_type.findOne.mockResolvedValue({ id: 5 })
+      sequelize.models.activity_source.findOne.mockResolvedValue({ id: 7 })
+      sequelize.models.activity.findAll.mockResolvedValue([])
+      sequelize.models.activity.create.mockResolvedValue({
+        id: 22,
+        label: 'New activity 1',
+        activity_source_id: 7,
+        activity_type_id: 5
+      })
+
       await createActivity({
         label: 'New activity 1',
         activitySource: 'dog',
@@ -147,6 +161,9 @@ describe('Activity repo', () => {
 
   describe('deleteActivity', () => {
     test('should create new transaction if none passed', async () => {
+      sequelize.models.activity.findOne.mockResolvedValue({ label: 'found' })
+      sequelize.models.activity.destroy.mockResolvedValue()
+
       await deleteActivity(123, devUser)
 
       expect(sequelize.transaction).toHaveBeenCalledTimes(1)

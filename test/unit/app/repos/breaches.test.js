@@ -25,9 +25,12 @@ const mockBreachCategories = [
 ]
 
 describe('Breaches repo', () => {
+  const mockTransaction = jest.fn()
   jest.mock('../../../../app/config/db', () => ({
     col: jest.fn(),
-    transaction: jest.fn(),
+    transaction: jest.fn().mockImplementation(async (fn) => {
+      return await fn(mockTransaction)
+    }),
     models: {
       breach_category: {
         findAll: jest.fn()
@@ -43,9 +46,6 @@ describe('Breaches repo', () => {
       }
     }
   }))
-
-  jest.mock('../../../../app/repos/dogs')
-  const { getDogByIndexNumber } = require('../../../../app/repos/dogs')
 
   const sequelize = require('../../../../app/config/db')
 
@@ -145,8 +145,7 @@ describe('Breaches repo', () => {
 
   describe('setBreaches', () => {
     test('should start a transaction if none exists', async () => {
-      sequelize.models.dog_breach.findAll.mockResolvedValue([])
-      getDogByIndexNumber.mockResolvedValue(buildDogDao())
+      const dogDao = buildDogDao()
       const callback = jest.fn()
       const dog = new Dog(buildCdoDog())
       dog.setBreaches([
@@ -154,7 +153,7 @@ describe('Breaches repo', () => {
         'AWAY_FROM_ADDR_30_DAYS_IN_YR'
       ], allBreaches, callback)
 
-      await setBreaches(dog)
+      await setBreaches(dog, dogDao)
 
       expect(sequelize.transaction).toHaveBeenCalledTimes(1)
     })

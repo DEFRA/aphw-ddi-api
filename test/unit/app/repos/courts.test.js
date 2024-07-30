@@ -5,8 +5,11 @@ const { COURT } = require('../../../../app/constants/event/audit-event-object-ty
 const { NotFoundError } = require('../../../../app/errors/not-found')
 
 describe('Courts repo', () => {
+  const mockTransaction = jest.fn()
   jest.mock('../../../../app/config/db', () => ({
-    transaction: jest.fn(),
+    transaction: jest.fn().mockImplementation(async (fn) => {
+      return await fn(mockTransaction)
+    }),
     col: jest.fn(),
     fn: jest.fn(),
     where: jest.fn(),
@@ -30,7 +33,6 @@ describe('Courts repo', () => {
 
   beforeEach(async () => {
     jest.clearAllMocks()
-    jest.resetAllMocks()
   })
 
   describe('getCourts', () => {
@@ -58,6 +60,13 @@ describe('Courts repo', () => {
       name: 'The Shire County Court'
     }
     test('should create start new transaction if none passed', async () => {
+      sequelize.models.court.findOne.mockResolvedValue(null)
+
+      sequelize.models.court.create.mockResolvedValue({
+        id: 2,
+        name: 'The Shire County Court'
+      })
+
       await createCourt(mockCourtPayload, devUser)
 
       expect(sequelize.transaction).toHaveBeenCalledTimes(1)
@@ -146,6 +155,12 @@ describe('Courts repo', () => {
 
   describe('deleteCourt', () => {
     test('should create start new transaction if none passed', async () => {
+      sequelize.models.court.findOne.mockResolvedValue({
+        id: 5,
+        name: 'The Shire County Court'
+      })
+      sequelize.models.court.destroy.mockResolvedValue(5)
+
       await deleteCourt(2, devUser)
 
       expect(sequelize.transaction).toHaveBeenCalledTimes(1)
