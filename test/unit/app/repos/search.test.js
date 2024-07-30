@@ -2,6 +2,7 @@ jest.mock('../../../../app/repos/dogs')
 const { getDogByIndexNumber } = require('../../../../app/repos/dogs')
 
 describe('Search repo', () => {
+  const mockTransaction = jest.fn()
   jest.mock('../../../../app/config/db', () => ({
     models: {
       search_index: {
@@ -16,7 +17,9 @@ describe('Search repo', () => {
       }
     },
     col: jest.fn(),
-    transaction: jest.fn(),
+    transaction: jest.fn().mockImplementation(async (fn) => {
+      return await fn(mockTransaction)
+    }),
     fn: jest.fn()
   }))
 
@@ -300,6 +303,11 @@ describe('Search repo', () => {
 
   describe('removeDogFromSearchIndex', () => {
     test('should create new transaction if none passed', async () => {
+      const mockDestroy = jest.fn()
+      sequelize.models.search_index.findAll.mockResolvedValue([
+        { dog_id: 456, person_id: 1, search: '12345', json: { dogName: 'Bruno' }, destroy: mockDestroy }
+      ])
+      sequelize.models.search_index.findOne.mockResolvedValue({})
       const dogFromDb = {
         id: 456,
         index_number: 123,
@@ -309,6 +317,7 @@ describe('Search repo', () => {
           { microchip: { microchip_number: 112345678901234 } }
         ]
       }
+
       await removeDogFromSearchIndex(dogFromDb)
 
       expect(sequelize.transaction).toHaveBeenCalledTimes(1)

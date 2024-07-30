@@ -10,8 +10,11 @@ const { Cdo, CdoTaskList } = require('../../../../app/data/domain')
 const { buildCdo, buildExemption, buildCdoDog } = require('../../../mocks/cdo/domain')
 
 describe('CDO repo', () => {
+  const mockTransaction = jest.fn()
   jest.mock('../../../../app/config/db', () => ({
-    transaction: jest.fn(),
+    transaction: jest.fn().mockImplementation(async (fn) => {
+      return await fn(mockTransaction)
+    }),
     col: jest.fn(),
     models: {
       dog: {
@@ -54,12 +57,20 @@ describe('CDO repo', () => {
 
   describe('createCdo', () => {
     test('createCdo should create start new transaction if none passed', async () => {
+      const owners = [{ id: 1, ...mockCdoPayload.owner }]
+      const dogs = [{ id: 1, ...mockCdoPayload.dogs[0] }]
+
+      createPeople.mockResolvedValue(owners)
+      createDogs.mockResolvedValue(dogs)
+      addToSearchIndex.mockResolvedValue()
+      getDogByIndexNumber.mockResolvedValue({ id: 1, index_number: 'ED1' })
+
       await createCdo(mockCdoPayload, devUser)
 
       expect(sequelize.transaction).toHaveBeenCalledTimes(1)
     })
 
-    test('createCdo should create start new transaction if passed', async () => {
+    test('createCdo should create use new transaction if passed', async () => {
       const owners = [{ id: 1, ...mockCdoPayload.owner }]
       const dogs = [{ id: 1, ...mockCdoPayload.dogs[0] }]
 
@@ -597,7 +608,19 @@ describe('CDO repo', () => {
 
   describe('saveCdoTaskList', () => {
     test('should create start new transaction if none passed', async () => {
-      await saveCdoTaskList({})
+      const dog = buildCdoDao({
+        registration: buildRegistrationDao({
+          save: jest.fn()
+        })
+      })
+
+      sequelize.models.dog.findAll.mockResolvedValue([dog])
+
+      const callback = jest.fn()
+      const cdoTaskList = new CdoTaskList(buildCdo())
+      cdoTaskList.sendApplicationPack(new Date(), callback)
+
+      await saveCdoTaskList(cdoTaskList)
 
       expect(sequelize.transaction).toHaveBeenCalledTimes(1)
     })
@@ -792,7 +815,7 @@ describe('CDO repo', () => {
     })
 
     test('should handle missing model', async () => {
-      sequelize.models.dog.findAll.mockResolvedValueOnce([])
+      sequelize.models.dog.findAll.mockResolvedValueOnce([{ registration: null }])
 
       const callback = jest.fn()
 
@@ -806,7 +829,7 @@ describe('CDO repo', () => {
 
       cdoTaskList.verifyDates(new Date(), new Date(), callback)
 
-      await expect(saveCdoTaskList(cdoTaskList, {})).rejects.toThrow()
+      await expect(saveCdoTaskList(cdoTaskList, {})).rejects.toThrow('Missing model')
     })
   })
 })

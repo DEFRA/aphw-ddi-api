@@ -11,6 +11,7 @@ const dummyUser = {
 }
 
 describe('People repo', () => {
+  const mockTransaction = jest.fn()
   jest.mock('../../../../app/config/db', () => ({
     models: {
       person: {
@@ -50,10 +51,13 @@ describe('People repo', () => {
       }
     },
     col: jest.fn(),
-    transaction: jest.fn(() => ({
-      commit: jest.fn(),
-      rollback: jest.fn()
-    })),
+    transaction: jest.fn().mockImplementation(async (fn) => {
+      await fn(mockTransaction)
+      return {
+        commit: jest.fn(),
+        rollback: jest.fn()
+      }
+    }),
     literal: jest.fn()
   }))
 
@@ -81,8 +85,34 @@ describe('People repo', () => {
   })
 
   describe('createPeople', () => {
-    test('createPeople should start two new transactions if none passed', async () => {
+    test('createPeople should start new transactions if none passed', async () => {
       const people = [mockOwner]
+
+      const mockAddress = {
+        id: 1,
+        address_line_1: 'Address 1',
+        address_line_2: 'Address 2',
+        town: 'Town',
+        postcode: 'Postcode'
+      }
+
+      sequelize.models.person.count.mockResolvedValue(0)
+
+      sequelize.models.person.create.mockResolvedValue({
+        dataValues: {
+          id: 1,
+          first_name: 'First',
+          last_name: 'Last'
+        }
+      })
+
+      sequelize.models.address.create.mockResolvedValue({ ...mockAddress })
+
+      sequelize.models.address.findByPk.mockResolvedValue({ ...mockAddress })
+
+      sequelize.models.contact.create.mockResolvedValue({
+        id: 555
+      })
 
       await createPeople(people)
 
@@ -415,6 +445,50 @@ describe('People repo', () => {
       }])
     })
 
+    test('getPersonAndDogsByReference handles owner with no dogs', async () => {
+      sequelize.models.registered_person.findAll.mockResolvedValue([])
+      sequelize.models.person.findAll.mockResolvedValue([
+        {
+          id: 1,
+          first_name: 'First',
+          last_name: 'Last',
+          person_reference: '1234',
+          addresses: [
+            {
+              id: 1,
+              address_line_1: 'Address 1',
+              address_line_2: 'Address 2',
+              town: 'Town',
+              postcode: 'Postcode'
+            }
+          ]
+        }
+      ])
+
+      const personAndDogs = await getPersonAndDogsByReference('P-1234')
+
+      expect(personAndDogs).toEqual(
+        [
+          {
+            person: {
+              id: 1,
+              first_name: 'First',
+              last_name: 'Last',
+              person_reference: '1234',
+              addresses: [
+                {
+                  id: 1,
+                  address_line_1: 'Address 1',
+                  address_line_2: 'Address 2',
+                  town: 'Town',
+                  postcode: 'Postcode'
+                }
+              ]
+            },
+            dog: null
+          }])
+    })
+
     test('getPersonAndDogsByReference should throw if error', async () => {
       sequelize.models.registered_person.findAll.mockRejectedValue(new Error('Test error'))
 
@@ -581,11 +655,30 @@ describe('People repo', () => {
           town: 'Town',
           postcode: 'Postcode',
           country: 'England'
-        },
-        email: 'test@example.com'
+        }
       }
 
-      await updatePerson(person)
+      sequelize.models.person.findAll.mockResolvedValue([{
+        id: 1,
+        first_name: 'First',
+        last_name: 'Last',
+        person_reference: '1234',
+        addresses: [
+          {
+            address: {
+              id: 1,
+              address_line_1: 'Address 1',
+              address_line_2: 'Address 2',
+              town: 'Town',
+              postcode: 'Postcode',
+              country: { country: 'England' }
+            }
+          }
+        ],
+        person_contacts: []
+      }])
+
+      await updatePerson(person, dummyUser)
 
       expect(sequelize.transaction).toHaveBeenCalledTimes(1)
     })
@@ -781,9 +874,16 @@ describe('People repo', () => {
         person_contacts: [
           {
             contact: {
+              id: 2,
+              contact: 'test2@example.com',
+              contact_type: { id: 2, contact_type: 'Email' }
+            }
+          },
+          {
+            contact: {
               id: 1,
               contact: 'test@example.com',
-              contact_type: { id: 2, contact_type: 'Email' }
+              contact_type: { id: 1, contact_type: 'Email' }
             }
           }
         ]
@@ -869,9 +969,42 @@ describe('People repo', () => {
     test('updatePersonFields should start new transaction if none passed', async () => {
       updateSearchIndexPerson.mockResolvedValue()
 
+      const updateMock = jest.fn()
+      const saveMock = jest.fn()
+      const reloadMock = jest.fn()
+
+      const personMock = {
+        id: 1,
+        first_name: 'First',
+        last_name: 'Last',
+        person_reference: '1234',
+        addresses: [
+          {
+            address: {
+              id: 1,
+              address_line_1: 'Address 1',
+              address_line_2: 'Address 2',
+              town: 'Town',
+              postcode: 'Postcode',
+              country: { id: 1, country: 'England' }
+            }
+          }
+        ],
+        person_contacts: []
+      }
+
+      const personModelMock = {
+        update: updateMock,
+        save: saveMock,
+        reload: reloadMock,
+        dateValues: personMock
+      }
+
+      sequelize.models.person.findByPk.mockResolvedValue(personModelMock)
+
       await updatePersonFields(1, {
         dateOfBirth: new Date('1990-01-01')
-      })
+      }, dummyUser)
 
       expect(sequelize.transaction).toHaveBeenCalledTimes(1)
     })
@@ -1023,6 +1156,32 @@ describe('People repo', () => {
 
   describe('deletePerson', () => {
     test('deletePerson should start new transaction if no transaction passed', async () => {
+      const destroyFnPerson = jest.fn()
+      const destroyFnPersonAddress = jest.fn()
+      const destroyFnAddress = jest.fn()
+      const destroyFnPersonContact = jest.fn()
+      const destroyFnContact = jest.fn()
+
+      const combinedPerson = {
+        person_reference: 'P-123',
+        first_name: 'John',
+        last_name: 'Smith',
+        addresses: [
+          { destroy: destroyFnPersonAddress, address_id: 1, address: { destroy: destroyFnAddress } },
+          { destroy: destroyFnPersonAddress, address_id: 2, address: { destroy: destroyFnAddress } },
+          { destroy: destroyFnPersonAddress, address_id: 3, address: { destroy: destroyFnAddress } }
+        ],
+        person_contacts: [
+          { destroy: destroyFnPersonContact, contact_id: 1, contact: { destroy: destroyFnContact } },
+          { destroy: destroyFnPersonContact, contact_id: 2, contact: { destroy: destroyFnContact } },
+          { destroy: destroyFnPersonContact, contact_id: 3, contact: { destroy: destroyFnContact } },
+          { destroy: destroyFnPersonContact, contact_id: 4, contact: { destroy: destroyFnContact } }
+        ]
+      }
+
+      sequelize.models.person.findAll.mockResolvedValue([combinedPerson])
+      sequelize.models.person.findOne.mockResolvedValue({ destroy: destroyFnPerson })
+
       await deletePerson('P-12345', dummyUser)
 
       expect(sequelize.transaction).toHaveBeenCalled()
@@ -1126,6 +1285,7 @@ describe('People repo', () => {
     })
 
     test('purgePersonByReferenceNumber should start new transaction if no transaction passed', async () => {
+      sequelize.models.person.findAll.mockResolvedValue([combinedPerson])
       await purgePersonByReferenceNumber('P-12345', dummyUser)
 
       expect(sequelize.transaction).toHaveBeenCalled()
