@@ -1,7 +1,7 @@
 const { cdoCreateDto, cdoViewDto } = require('../dto/cdo')
 const { createCdo, getCdo } = require('../repos/cdo')
 const { getCallingUser } = require('../auth/get-user')
-const cdoCreateSchema = require('../schema/cdo/create')
+const { createCdoRequestSchema, createCdoResponseSchema } = require('../schema/cdo/create')
 const { NotFoundError } = require('../errors/not-found')
 const ServiceProvider = require('../service/config')
 const { mapCdoTaskListToDto } = require('../dto/cdoTaskList')
@@ -13,6 +13,7 @@ const {
 const { SequenceViolationError } = require('../errors/domain/sequenceViolation')
 const { InvalidDataError } = require('../errors/domain/invalidData')
 const { InvalidDateError } = require('../errors/domain/invalidDate')
+const { getCdoByIndexNumberSchema } = require('../schema/cdo/response')
 
 /**
  * @param e
@@ -52,7 +53,16 @@ module.exports = [
   {
     method: 'GET',
     path: '/cdo/{indexNumber}',
-    options: { tags: ['api'] },
+    options: {
+      tags: ['api'],
+      notes: ['Returns the full CDO with dog, person and exemption details'],
+      response: {
+        status: {
+          404: undefined,
+          200: getCdoByIndexNumberSchema
+        }
+      }
+    },
     handler: async (request, h) => {
       const indexNumber = request.params.indexNumber
       try {
@@ -62,7 +72,9 @@ module.exports = [
           return h.response().code(404)
         }
 
-        return h.response({ cdo: cdoViewDto(cdo) }).code(200)
+        const cdoDto = cdoViewDto(cdo)
+
+        return h.response({ cdo: cdoDto }).code(200)
       } catch (e) {
         console.log('Error retrieving cdo record:', e)
         throw e
@@ -74,8 +86,15 @@ module.exports = [
     path: '/cdo',
     options: {
       tags: ['api'],
+      notes: ['Creates a new CDO'],
+      response: {
+        status: {
+          200: createCdoResponseSchema,
+          422: undefined
+        }
+      },
       validate: {
-        payload: cdoCreateSchema,
+        payload: createCdoRequestSchema,
         failAction: (request, h, err) => {
           console.error(err)
 
@@ -86,6 +105,7 @@ module.exports = [
         try {
           const created = await createCdo(request.payload, getCallingUser(request))
           const res = cdoCreateDto(created)
+
           return h.response(res).code(200)
         } catch (e) {
           if (e instanceof NotFoundError) {
@@ -99,6 +119,9 @@ module.exports = [
   {
     method: 'GET',
     path: '/cdo/{indexNumber}/manage',
+    options: {
+      tags: ['api']
+    },
     handler: async (request, h) => {
       const indexNumber = request.params.indexNumber
       try {
@@ -120,6 +143,9 @@ module.exports = [
   {
     method: 'POST',
     path: '/cdo/{indexNumber}/manage:sendApplicationPack',
+    options: {
+      tags: ['api']
+    },
     handler: async (request, h) => {
       const indexNumber = request.params.indexNumber
 
@@ -137,6 +163,7 @@ module.exports = [
     method: 'POST',
     path: '/cdo/{indexNumber}/manage:recordInsuranceDetails',
     options: {
+      tags: ['api'],
       validate: {
         payload: recordInsuranceDetailsSchema,
         failAction: (request, h, err) => {
@@ -169,6 +196,7 @@ module.exports = [
     method: 'POST',
     path: '/cdo/{indexNumber}/manage:recordMicrochipNumber',
     options: {
+      tags: ['api'],
       validate: {
         payload: recordMicrochipNumberSchema,
         failAction: (request, h, err) => {
@@ -200,6 +228,7 @@ module.exports = [
     method: 'POST',
     path: '/cdo/{indexNumber}/manage:recordApplicationFee',
     options: {
+      tags: ['api'],
       validate: {
         payload: recordApplicationFeeSchema,
         failAction: (request, h, err) => {
@@ -230,6 +259,9 @@ module.exports = [
   {
     method: 'POST',
     path: '/cdo/{indexNumber}/manage:sendForm2',
+    options: {
+      tags: ['api']
+    },
     handler: async (request, h) => {
       const indexNumber = request.params.indexNumber
 
@@ -247,6 +279,7 @@ module.exports = [
     method: 'POST',
     path: '/cdo/{indexNumber}/manage:verifyDates',
     options: {
+      tags: ['api'],
       validate: {
         payload: verifyDatesSchema,
         failAction: (request, h, err) => {
@@ -280,6 +313,7 @@ module.exports = [
     method: 'POST',
     path: '/cdo/{indexNumber}/manage:issueCertificate',
     options: {
+      tags: ['api'],
       handler: async (request, h) => {
         const indexNumber = request.params.indexNumber
 
@@ -295,6 +329,5 @@ module.exports = [
         }
       }
     }
-
   }
 ]

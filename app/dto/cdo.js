@@ -1,5 +1,7 @@
 const { getMicrochip, calculateNeuteringDeadline } = require('./dto-helper')
 const { mapDogBreachDaoToBreachDto } = require('../repos/mappers/dog')
+const Joi = require('joi')
+const { personAddress } = require('../../test/mocks/cdo/get')
 
 const generateOrderSpecificData = (data) => {
   if (data.registration.exemption_order.exemption_order === '2023') {
@@ -43,6 +45,48 @@ const cdoCreateDto = (data) => ({
   }))
 })
 
+const countryMapper = (country) => ({
+  id: country.id,
+  country: country.country
+})
+
+const addressMapper = (address) => ({
+  id: address.id,
+  address_line_1: address.address_line_1,
+  address_line_2: address.address_line_2,
+  town: address.town,
+  postcode: address.postcode,
+  county: address.county,
+  country_id: address.country_id,
+  country: countryMapper(address.country)
+})
+
+const personAddressMapper = (personAddress) => ({
+  id: personAddress.id,
+  person_id: personAddress.person_id,
+  address_id: personAddress.address_id,
+  address: addressMapper(personAddress.address)
+})
+
+const contactTypeMapper = (contactType) => ({
+  id: contactType.id,
+  contact_type: contactType.contact_type
+})
+
+const contactMapper = (contact) => ({
+  id: contact.id,
+  contact: contact.contact,
+  contact_type_id: contact.contact_type_id,
+  contact_type: contactTypeMapper(contact.contact_type)
+})
+
+const personContactMapper = (personContact) => ({
+  id: personContact.id,
+  person_id: personContact.person_id,
+  contact_id: personContact.contact_id,
+  contact: contactMapper(personContact.contact)
+})
+
 const cdoViewDto = (data) => {
   const person = data.registered_person[0].person
 
@@ -53,8 +97,8 @@ const cdoViewDto = (data) => {
       firstName: person.first_name,
       lastName: person.last_name,
       dateOfBirth: person.birth_date,
-      addresses: person.addresses,
-      person_contacts: person.person_contacts,
+      addresses: person.addresses.map(personAddressMapper),
+      person_contacts: person.person_contacts.map(personContactMapper),
       organisationName: person.organisation?.organisation_name ?? null
     },
     dog: {
