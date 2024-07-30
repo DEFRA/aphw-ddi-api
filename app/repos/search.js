@@ -52,7 +52,7 @@ const buildIndexColumn = (person, dog) => {
   const address = person?.addresses?.address ? person.addresses.address : person.address
   return sequelize.fn(
     'to_tsvector',
-    `${person.person_reference} ${person.first_name} ${person.last_name} \
+    `${person.person_reference} ${person.first_name} ${person.last_name} ${person.email} \
 ${person.organisation_name ? person.organisation_name : ''} \
 ${buildAddressString(address, true)} \
 ${dog.index_number ? dog.index_number : ''} \
@@ -65,6 +65,7 @@ const buildJsonColumn = (person, dog) => {
   return {
     firstName: person.first_name,
     lastName: person.last_name,
+    email: person.email,
     organisationName: person.organisation_name,
     address: buildAddressObject(person),
     dogIndex: dog.index_number,
@@ -133,6 +134,7 @@ const addPeopleOnlyIfNoDogsLeft = async (persons, transaction) => {
       const partialPerson = {
         first_name: person.firstName,
         last_name: person.lastName,
+        email: person.email,
         organisation_name: person.organisationName,
         address: person.address,
         person_reference: person.personReference
@@ -159,6 +161,7 @@ const updateSearchIndexDog = async (dogFromDb, statuses, transaction) => {
       person_reference: indexRow.json.personReference,
       first_name: indexRow.json.firstName,
       last_name: indexRow.json.lastName,
+      email: indexRow.email,
       address: indexRow.json.address,
       organisation_name: indexRow.json.organisationName
     }
@@ -184,6 +187,7 @@ const updateSearchIndexPerson = async (person, transaction) => {
   for (const indexRow of indexRows) {
     if (indexRow.json.firstName !== person.firstName ||
         indexRow.json.lastName !== person.lastName ||
+        indexRow.json.email !== person.email ||
         indexRow.json.address.address_line_1 !== person.address.addressLine1 ||
         indexRow.json.address.address_line_2 !== person.address.addressLine2 ||
         indexRow.json.address.town !== person.address.town ||
@@ -193,6 +197,7 @@ const updateSearchIndexPerson = async (person, transaction) => {
         person_reference: person.personReference,
         first_name: person.firstName,
         last_name: person.lastName,
+        email: person.email,
         organisation_name: person.organisationName,
         address: {
           address_line_1: person.address.address_line_1 ?? person.address.addressLine1,
