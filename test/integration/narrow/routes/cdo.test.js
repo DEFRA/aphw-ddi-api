@@ -1039,7 +1039,7 @@ describe('CDO endpoint', () => {
         issueCertificate: issueCertificateMock
       })
 
-      issueCertificateMock.mockResolvedValue('abcdefghi')
+      issueCertificateMock.mockResolvedValue(new Date('2024-07-30'))
 
       const options = {
         method: 'POST',
@@ -1049,7 +1049,7 @@ describe('CDO endpoint', () => {
       const payload = JSON.parse(response.payload)
       expect(response.statusCode).toBe(201)
       expect(payload).toEqual({
-        certificateIssued: 'abcdefghi'
+        certificateIssued: new Date('2024-07-30').toISOString()
       })
       expect(issueCertificateMock).toHaveBeenCalledWith('ED123', expect.any(Date), devUser)
     })

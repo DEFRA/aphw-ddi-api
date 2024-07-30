@@ -8,12 +8,15 @@ const { mapCdoTaskListToDto } = require('../dto/cdoTaskList')
 const { ActionAlreadyPerformedError } = require('../errors/domain/actionAlreadyPerformed')
 const {
   recordInsuranceDetailsSchema, recordInsuranceDetailsResponseSchema, recordMicrochipNumberSchema,
-  recordMicrochipNumberResponseSchema, recordApplicationFeeSchema, verifyDatesSchema
+  recordMicrochipNumberResponseSchema, recordApplicationFeeSchema, verifyDatesSchema, manageCdoResponseSchema,
+  recordMicrochipNumberConflictSchema,
+  simpleConflictSchema, issueCertificateResponseSchema
 } = require('../schema/cdo/manage')
 const { SequenceViolationError } = require('../errors/domain/sequenceViolation')
 const { InvalidDataError } = require('../errors/domain/invalidData')
 const { InvalidDateError } = require('../errors/domain/invalidDate')
 const { getCdoByIndexNumberSchema } = require('../schema/cdo/response')
+const { notFoundSchema } = require('../schema/common/response/not-found')
 
 /**
  * @param e
@@ -120,7 +123,14 @@ module.exports = [
     method: 'GET',
     path: '/cdo/{indexNumber}/manage',
     options: {
-      tags: ['api']
+      tags: ['api'],
+      notes: ['Returns current progress of the CDO application'],
+      response: {
+        status: {
+          200: manageCdoResponseSchema,
+          404: notFoundSchema
+        }
+      }
     },
     handler: async (request, h) => {
       const indexNumber = request.params.indexNumber
@@ -144,7 +154,14 @@ module.exports = [
     method: 'POST',
     path: '/cdo/{indexNumber}/manage:sendApplicationPack',
     options: {
-      tags: ['api']
+      tags: ['api'],
+      notes: ['Send Application Pack Manage CDO domain action.  Publishes application pack sent event & updates the status of the sendApplicationPack stage of the CDO tasklist.  Completion of this is necessary in order to perform subsequent tasks.'],
+      response: {
+        status: {
+          204: undefined,
+          409: simpleConflictSchema
+        }
+      }
     },
     handler: async (request, h) => {
       const indexNumber = request.params.indexNumber
@@ -164,6 +181,7 @@ module.exports = [
     path: '/cdo/{indexNumber}/manage:recordInsuranceDetails',
     options: {
       tags: ['api'],
+      notes: ['Record Insurance Details Manage CDO domain action. Records latest insurance details on CDO application'],
       validate: {
         payload: recordInsuranceDetailsSchema,
         failAction: (request, h, err) => {
@@ -173,7 +191,9 @@ module.exports = [
         }
       },
       response: {
-        schema: recordInsuranceDetailsResponseSchema
+        status: {
+          201: recordInsuranceDetailsResponseSchema
+        }
       },
       handler: async (request, h) => {
         const indexNumber = request.params.indexNumber
@@ -197,6 +217,7 @@ module.exports = [
     path: '/cdo/{indexNumber}/manage:recordMicrochipNumber',
     options: {
       tags: ['api'],
+      notes: ['Record Microchip number Manage CDO domain action.  Record microchip number update as part of CDO application'],
       validate: {
         payload: recordMicrochipNumberSchema,
         failAction: (request, h, err) => {
@@ -206,7 +227,10 @@ module.exports = [
         }
       },
       response: {
-        schema: recordMicrochipNumberResponseSchema
+        status: {
+          201: recordMicrochipNumberResponseSchema,
+          409: recordMicrochipNumberConflictSchema
+        }
       },
       handler: async (request, h) => {
         const indexNumber = request.params.indexNumber
@@ -229,6 +253,7 @@ module.exports = [
     path: '/cdo/{indexNumber}/manage:recordApplicationFee',
     options: {
       tags: ['api'],
+      notes: ['Record application Fee Manage CDO domain action.  Record application fee payment as part of CDO Tasklist'],
       validate: {
         payload: recordApplicationFeeSchema,
         failAction: (request, h, err) => {
@@ -238,7 +263,9 @@ module.exports = [
         }
       },
       response: {
-        schema: recordApplicationFeeSchema
+        status: {
+          201: recordApplicationFeeSchema
+        }
       },
       handler: async (request, h) => {
         const indexNumber = request.params.indexNumber
@@ -260,7 +287,14 @@ module.exports = [
     method: 'POST',
     path: '/cdo/{indexNumber}/manage:sendForm2',
     options: {
-      tags: ['api']
+      tags: ['api'],
+      notes: ['Send Form2 Manage CDO domain action.  Publishes a send Form2 event and updates status on CDO tasklist.  Task is required in order to Record verification dates'],
+      response: {
+        status: {
+          204: undefined,
+          409: simpleConflictSchema
+        }
+      }
     },
     handler: async (request, h) => {
       const indexNumber = request.params.indexNumber
@@ -280,6 +314,7 @@ module.exports = [
     path: '/cdo/{indexNumber}/manage:verifyDates',
     options: {
       tags: ['api'],
+      notes: ['Verify Dates Manage CDO domain action.'],
       validate: {
         payload: verifyDatesSchema,
         failAction: (request, h, err) => {
@@ -289,7 +324,9 @@ module.exports = [
         }
       },
       response: {
-        schema: verifyDatesSchema
+        status: {
+          201: verifyDatesSchema
+        }
       },
       handler: async (request, h) => {
         const indexNumber = request.params.indexNumber
@@ -314,6 +351,12 @@ module.exports = [
     path: '/cdo/{indexNumber}/manage:issueCertificate',
     options: {
       tags: ['api'],
+      notes: ['Issue Certificate domain action on Manage CDO.  All other actions need to be complete in order to perform.'],
+      response: {
+        status: {
+          201: issueCertificateResponseSchema
+        }
+      },
       handler: async (request, h) => {
         const indexNumber = request.params.indexNumber
 
