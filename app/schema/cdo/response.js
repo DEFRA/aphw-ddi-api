@@ -39,7 +39,7 @@ const cdoPersonResponseSchema = Joi.object({
   personReference: Joi.string().required(),
   firstName: Joi.string().required(),
   lastName: Joi.string().required(),
-  dateOfBirth: Joi.string().allow('').allow(null),
+  dateOfBirth: Joi.date().allow(null),
   addresses: Joi.array().items(cdoPersonAddressResponseSchema),
   person_contacts: Joi.array().items(personContacts),
   organisationName: Joi.string().allow('').allow(null)

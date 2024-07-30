@@ -103,7 +103,11 @@ describe('CDO DTO', () => {
                 address_line_1: '1 Test Street',
                 address_line_2: 'Testarea',
                 town: 'Testington',
-                postcode: 'TS1 1TS'
+                postcode: 'TS1 1TS',
+                country: {
+                  id: 1,
+                  country: 'England'
+                }
               }
             }],
             person_contacts: [{

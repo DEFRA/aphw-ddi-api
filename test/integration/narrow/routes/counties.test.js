@@ -13,7 +13,9 @@ describe('Counties endpoint', () => {
 
   test('GET /counties route returns 200', async () => {
     getCounties.mockResolvedValue([
-      'County1', 'County2', 'County3'
+      { id: 1, county: 'County1' },
+      { id: 2, county: 'County2' },
+      { id: 3, county: 'County3' }
     ])
 
     const options = {

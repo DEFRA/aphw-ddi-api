@@ -4,6 +4,7 @@ const { createAdminItem } = require('../schema/admin/create')
 const { courtsResponseSchema, createCourtResponseSchema } = require('../schema/courts')
 const { conflictSchema } = require('../schema/common/response/conflict')
 const { notFoundSchema } = require('../schema/common/response/not-found')
+const { mapCourtToDto } = require('../dto/courts')
 
 module.exports = [
   {
@@ -17,8 +18,9 @@ module.exports = [
       }
     },
     handler: async (request, h) => {
-      const courts = await getCourts()
+      const courtDaos = await getCourts()
 
+      const courts = courtDaos.map(mapCourtToDto)
       return h.response({
         courts
       }).code(200)

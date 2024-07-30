@@ -8,6 +8,7 @@ const { SequenceViolationError } = require('../../../../app/errors/domain/sequen
 const { DuplicateResourceError } = require('../../../../app/errors/duplicate-record')
 const { InvalidDataError } = require('../../../../app/errors/domain/invalidData')
 const { InvalidDateError } = require('../../../../app/errors/domain/invalidDate')
+const { buildCdoDao } = require('../../../mocks/cdo/get')
 
 describe('CDO endpoint', () => {
   const createServer = require('../../../../app/server')
@@ -32,32 +33,10 @@ describe('CDO endpoint', () => {
 
   describe('GET /cdo/ED123', () => {
     test('GET /cdo/ED123 route returns 200', async () => {
-      getCdo.mockResolvedValue({
+      getCdo.mockResolvedValue(buildCdoDao({
         id: 123,
-        indexNumber: 'ED123',
-        dog_breed: {
-          breed: 'breed1'
-        },
-        dog_breaches: [],
-        status: {
-          status: 'NEW'
-        },
-        registration: {
-          court: {
-            name: 'court1'
-          },
-          police_force: {
-            name: 'force1'
-          },
-          exemption_order: {
-            exemption_order: 2015
-          }
-        },
-        registered_person: [{
-          person: {
-          }
-        }]
-      })
+        index_number: 'ED123'
+      }))
 
       const options = {
         method: 'GET',
