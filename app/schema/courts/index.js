@@ -14,8 +14,6 @@ const createCourtResponseSchema = Joi.object({
   name: Joi.string()
 })
 
-const deleteCourtResponseSchema = Joi.object({})
-
 module.exports = {
   courtsResponseSchema,
   createCourtResponseSchema
