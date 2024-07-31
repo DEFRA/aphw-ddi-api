@@ -7,6 +7,7 @@ module.exports = {
   path: '/dog-breeds',
   options: {
     tags: ['api'],
+    notes: ['Returns the full list of dog breeds covered by the DDI'],
     response: {
       schema: dogBreedResponseSchema
     }

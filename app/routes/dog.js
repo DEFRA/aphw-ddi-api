@@ -43,6 +43,7 @@ module.exports = [
     path: '/dog-owner/{indexNumber}',
     options: {
       tags: ['api'],
+      notes: ['Gets owner details of a dog by dog index number'],
       validate: {
         query: dogOwnerQuerySchema
       },
@@ -142,6 +143,7 @@ module.exports = [
     path: '/dog/{indexNumber}',
     options: {
       tags: ['api'],
+      notes: ['Soft Delete a dog by index number'],
       response: {
         status: {
           204: undefined,
@@ -173,6 +175,7 @@ module.exports = [
     path: '/dogs',
     options: {
       tags: ['api'],
+      notes: ['Returns a filtered list of dogs on the index, with summary details'],
       response: {
         status: {
           400: undefined,
@@ -209,6 +212,7 @@ module.exports = [
     path: '/dogs:batch-delete',
     options: {
       tags: ['api'],
+      notes: ['Soft deletes a batch of dogs by dog index number'],
       validate: {
         payload: deleteDogsPayloadSchema,
         failAction: (request, h, error) => {
