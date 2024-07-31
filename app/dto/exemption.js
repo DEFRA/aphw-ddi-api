@@ -22,12 +22,12 @@ const mapExemptionDaoToDto = (exemption) => ({
   application_pack_sent: exemption.application_pack_sent,
   form_two_sent: exemption.form_two_sent,
   police_force: {
-    id: exemption.police_force.id,
-    name: exemption.police_force.name
+    id: exemption.police_force?.id ?? null,
+    name: exemption.police_force?.name ?? null
   },
   court: {
-    id: exemption.court.id,
-    name: exemption.court.name
+    id: exemption.court?.id ?? null,
+    name: exemption.court?.name ?? null
   },
   exemption_order: {
     id: exemption.exemption_order.id,

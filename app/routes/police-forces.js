@@ -1,14 +1,23 @@
 const { getPoliceForces, addForce, deleteForce } = require('../repos/police-forces')
 const { createAdminItem } = require('../schema/admin/create')
 const { getCallingUser } = require('../auth/get-user')
+const { getPoliceForcesResponseSchema } = require('../schema/police-forces')
+const { mapPoliceForceDaoToDto } = require('../dto/police-force')
 
 module.exports = [
   {
     method: 'GET',
     path: '/police-forces',
-    options: { tags: ['api'] },
+    options: {
+      notes: ['Gets full list of Police Forces that can be assigned to a CDO'],
+      tags: ['api'],
+      response: {
+        schema: getPoliceForcesResponseSchema
+      }
+    },
     handler: async (request, h) => {
-      const policeForces = await getPoliceForces()
+      const policeForceDaos = await getPoliceForces()
+      const policeForces = policeForceDaos.map(mapPoliceForceDaoToDto)
 
       return h.response({
         policeForces

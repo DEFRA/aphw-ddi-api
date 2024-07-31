@@ -73,11 +73,11 @@ const exemptionResponseSchema = Joi.object({
   application_pack_sent: Joi.date().allow(null),
   form_two_sent: Joi.date().allow(null),
   police_force: Joi.object({
-    id: Joi.number(),
+    id: Joi.number().allow(null),
     name: Joi.string().allow(null).allow('')
   }),
   court: Joi.object({
-    id: Joi.number(),
+    id: Joi.number().allow(null),
     name: Joi.string().allow(null).allow('')
   }),
   exemption_order: Joi.object({

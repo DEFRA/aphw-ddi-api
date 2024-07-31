@@ -60,7 +60,7 @@ module.exports = [
       let owner
 
       try {
-        if (request.query.includeDogs === 'true') {
+        if (request.query.includeDogs) {
           ownerDao = await getPersonAndDogsByIndex(indexNumber)
         } else {
           ownerDao = await getOwnerOfDog(indexNumber)
@@ -70,7 +70,7 @@ module.exports = [
           return h.response().code(404)
         }
 
-        if (request.query.includeDogs === 'true') {
+        if (request.query.includeDogs) {
           owner = mapPersonAndDogsByIndexDao(ownerDao)
         } else {
           owner = personDto(ownerDao.person, true)
