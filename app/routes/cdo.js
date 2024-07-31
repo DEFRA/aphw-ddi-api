@@ -77,12 +77,6 @@ module.exports = [
 
         const cdoDto = cdoViewDto(cdo)
 
-        const { error } = getCdoByIndexNumberSchema.validate({ cdo: cdoDto })
-
-        console.log('~~~~~~ Chris Debug ~~~~~~ ', 'Error', error)
-
-        console.log('~~~~~~ Chris Debug ~~~~~~ ', 'CdoDto', cdoDto)
-
         return h.response({ cdo: cdoDto }).code(200)
       } catch (e) {
         console.log('Error retrieving cdo record:', e)

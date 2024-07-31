@@ -1,5 +1,6 @@
 const { getMicrochip, calculateNeuteringDeadline } = require('./dto-helper')
 const { mapDogBreachDaoToBreachDto } = require('../repos/mappers/dog')
+const { personAddressMapper, personContactMapper } = require('./mappers/person')
 
 const generateOrderSpecificData = (data) => {
   if (data.registration.exemption_order.exemption_order === '2023') {
@@ -41,48 +42,6 @@ const cdoCreateDto = (data) => ({
     cdoExpiry: d.registration.cdo_expiry,
     interimExemption: d.registration.joined_exemption_scheme
   }))
-})
-
-const countryMapper = (country) => ({
-  id: country.id,
-  country: country.country
-})
-
-const addressMapper = (address) => ({
-  id: address.id,
-  address_line_1: address.address_line_1,
-  address_line_2: address.address_line_2,
-  town: address.town,
-  postcode: address.postcode,
-  county: address.county,
-  country_id: address.country_id,
-  country: countryMapper(address.country)
-})
-
-const personAddressMapper = (personAddress) => ({
-  id: personAddress.id,
-  person_id: personAddress.person_id,
-  address_id: personAddress.address_id,
-  address: addressMapper(personAddress.address)
-})
-
-const contactTypeMapper = (contactType) => ({
-  id: contactType.id,
-  contact_type: contactType.contact_type
-})
-
-const contactMapper = (contact) => ({
-  id: contact.id,
-  contact: contact.contact,
-  contact_type_id: contact.contact_type_id,
-  contact_type: contactTypeMapper(contact.contact_type)
-})
-
-const personContactMapper = (personContact) => ({
-  id: personContact.id,
-  person_id: personContact.person_id,
-  contact_id: personContact.contact_id,
-  contact: contactMapper(personContact.contact)
 })
 
 const cdoViewDto = (data) => {
@@ -142,5 +101,6 @@ const cdoViewDto = (data) => {
 
 module.exports = {
   cdoCreateDto,
-  cdoViewDto
+  cdoViewDto,
+  personContactMapper
 }

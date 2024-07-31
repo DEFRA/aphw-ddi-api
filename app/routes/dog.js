@@ -1,17 +1,25 @@
 const { getCallingUser } = require('../auth/get-user')
-const { dogsQueryParamsSchema } = require('../schema/dogs/get')
+const { dogsQueryParamsSchema, getDogResponseSchema } = require('../schema/dogs/get')
 const { addImportedDog, updateDog, getDogByIndexNumber, deleteDogByIndexNumber, getOldDogs, deleteDogs } = require('../repos/dogs')
-const { dogDto, oldDogDto } = require('../dto/dog')
+const { dogDto, oldDogDto, putDogDto } = require('../dto/dog')
 const { personDto, mapPersonAndDogsByIndexDao } = require('../dto/person')
 const { getOwnerOfDog, getPersonAndDogsByIndex } = require('../repos/people')
 const { deleteDogsPayloadSchema } = require('../schema/dogs/delete')
 const { deleteResponseSchema } = require('../schema/shared/delete')
+const { importDogSchema, updateDogSchema } = require('../schema/dogs/response')
+const { putDogPayloadSchema } = require('../schema/dogs/put')
 
 module.exports = [
   {
     method: 'GET',
     path: '/dog/{indexNumber}',
-    options: { tags: ['api'] },
+    options: {
+      tags: ['api'],
+      notes: ['Get dog by index number'],
+      response: {
+        schema: getDogResponseSchema
+      }
+    },
     handler: async (request, h) => {
       const indexNumber = request.params.indexNumber
       try {
@@ -20,8 +28,9 @@ module.exports = [
         if (dog === null) {
           return h.response().code(404)
         }
+        const dogDto1 = dogDto(dog)
 
-        return h.response({ dog: dogDto(dog) }).code(200)
+        return h.response({ dog: dogDto1 }).code(200)
       } catch (e) {
         console.log('Error in GET /dog', e)
         throw e
@@ -64,7 +73,13 @@ module.exports = [
   {
     method: 'POST',
     path: '/dog',
-    options: { tags: ['api'] },
+    options: {
+      tags: ['api'],
+      notes: ['Imports a dog'],
+      response: {
+        schema: importDogSchema
+      }
+    },
     handler: async (request, h) => {
       if (!request.payload?.dog) {
         return h.response().code(400)
@@ -78,14 +93,30 @@ module.exports = [
   {
     method: 'PUT',
     path: '/dog',
-    options: { tags: ['api'] },
+    options: {
+      tags: ['api'],
+      notes: ['Update details on an individual dog'],
+      response: {
+        schema: updateDogSchema
+      },
+      validate: {
+        payload: putDogPayloadSchema,
+        failAction: (request, h, err) => {
+          console.error(err)
+
+          return h.response({ errors: err.details.map(e => e.message) }).code(400).takeover()
+        }
+      }
+    },
     handler: async (request, h) => {
       if (!request.payload?.indexNumber) {
         return h.response().code(400)
       }
 
       try {
-        const updatedDog = await updateDog(request.payload, getCallingUser(request))
+        const updatedDogDao = await updateDog(request.payload, getCallingUser(request))
+
+        const updatedDog = putDogDto(updatedDogDao)
 
         return h.response(updatedDog).code(200)
       } catch (e) {
@@ -97,7 +128,15 @@ module.exports = [
   {
     method: 'DELETE',
     path: '/dog/{indexNumber}',
-    options: { tags: ['api'] },
+    options: {
+      tags: ['api'],
+      response: {
+        status: {
+          204: undefined,
+          404: undefined
+        }
+      }
+    },
     handler: async (request, h) => {
       const indexNumber = request.params.indexNumber
 
