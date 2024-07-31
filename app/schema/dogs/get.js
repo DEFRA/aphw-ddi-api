@@ -28,7 +28,20 @@ const getDogResponseSchema = Joi.object({
   })
 })
 
+const simpleDogSchema = Joi.object({
+  id: Joi.number(),
+  indexNumber: Joi.string(),
+  dateOfBirth: Joi.date().allow(null),
+  cdoIssued: Joi.date().allow(null),
+  status: Joi.object({
+    status: Joi.string()
+  })
+})
+
+const dogsResponseSchema = Joi.array().items(simpleDogSchema)
+
 module.exports = {
   dogsQueryParamsSchema,
-  getDogResponseSchema
+  getDogResponseSchema,
+  dogsResponseSchema
 }

@@ -201,7 +201,7 @@ const mapPersonAndDogsByIndexDao = (personAndDogsByIndexDao) => {
       postcode: person.addresses[0].address.postcode,
       town: person.addresses[0].address.town
     },
-    contacts: person.person_contacts,
+    contacts: person.person_contacts ? addContacts(person.person_contacts, true) : [],
     dogs: person.registered_people.map(mapRegisteredPersonToDog),
     organisationName: person.organisation?.organisation_name
   }

@@ -1,5 +1,5 @@
 const { getCallingUser } = require('../auth/get-user')
-const { dogsQueryParamsSchema, getDogResponseSchema } = require('../schema/dogs/get')
+const { dogsQueryParamsSchema, getDogResponseSchema, dogsResponseSchema } = require('../schema/dogs/get')
 const { addImportedDog, updateDog, getDogByIndexNumber, deleteDogByIndexNumber, getOldDogs, deleteDogs } = require('../repos/dogs')
 const { dogDto, oldDogDto, putDogDto } = require('../dto/dog')
 const { personDto, mapPersonAndDogsByIndexDao } = require('../dto/person')
@@ -8,6 +8,7 @@ const { deleteDogsPayloadSchema } = require('../schema/dogs/delete')
 const { deleteResponseSchema } = require('../schema/shared/delete')
 const { importDogSchema, updateDogSchema } = require('../schema/dogs/response')
 const { putDogPayloadSchema } = require('../schema/dogs/put')
+const { dogOwnerResponseSchema, dogOwnerQuerySchema } = require('../schema/person/dog-owner')
 
 module.exports = [
   {
@@ -40,7 +41,18 @@ module.exports = [
   {
     method: 'GET',
     path: '/dog-owner/{indexNumber}',
-    options: { tags: ['api'] },
+    options: {
+      tags: ['api'],
+      validate: {
+        query: dogOwnerQuerySchema
+      },
+      response: {
+        status: {
+          404: undefined,
+          200: dogOwnerResponseSchema
+        }
+      }
+    },
     handler: async (request, h) => {
       const indexNumber = request.params.indexNumber
       let ownerDao
@@ -161,6 +173,12 @@ module.exports = [
     path: '/dogs',
     options: {
       tags: ['api'],
+      response: {
+        status: {
+          400: undefined,
+          200: dogsResponseSchema
+        }
+      },
       validate: {
         query: dogsQueryParamsSchema,
         failAction: (request, h, error) => {

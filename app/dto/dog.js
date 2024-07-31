@@ -52,7 +52,9 @@ const oldDogDto = (data) => ({
   indexNumber: data.dog.index_number,
   dateOfBirth: data.dog.birth_date,
   cdoIssued: data.cdo_issued,
-  status: data.dog.status
+  status: {
+    status: data.dog.status.status
+  }
 })
 
 const dogMicrochips = (dogMicrochip) => ({
