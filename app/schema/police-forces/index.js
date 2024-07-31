@@ -9,5 +9,6 @@ const getPoliceForcesResponseSchema = Joi.object({
 })
 
 module.exports = {
-  getPoliceForcesResponseSchema
+  getPoliceForcesResponseSchema,
+  policeForceSchema
 }
