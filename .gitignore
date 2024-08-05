@@ -6,3 +6,4 @@ helm/**/*.lock
 .env
 .idea
 .run
+.DS_Store
