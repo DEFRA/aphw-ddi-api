@@ -1,4 +1,4 @@
-const { statisticsQuerySchema } = require('../schema/admin/statistics')
+const { statisticsQuerySchema, statisticsResponseSchema } = require('../schema/admin/statistics')
 const { getCountsPerStatus, getCountsPerCountry } = require('../repos/statistics')
 const { countsPerStatusDto, countsPerCountryDto } = require('../dto/statistics')
 
@@ -9,6 +9,11 @@ module.exports = {
   method: 'GET',
   path: '/statistics',
   options: {
+    tags: ['api'],
+    notes: ['Gets the statistics for the DDI - Counts by status and counts by country'],
+    response: {
+      schema: statisticsResponseSchema
+    },
     validate: {
       query: statisticsQuerySchema,
       failAction: (request, h, err) => {

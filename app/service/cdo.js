@@ -227,7 +227,9 @@ class CdoService {
 
     cdoTaskList.issueCertificate(sentDate, callback)
 
-    return await this.cdoRepository.saveCdoTaskList(cdoTaskList)
+    await this.cdoRepository.saveCdoTaskList(cdoTaskList)
+
+    return sentDate
   }
 }
 

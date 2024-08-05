@@ -1,17 +1,26 @@
 const { getCallingUser } = require('../auth/get-user')
-const { dogsQueryParamsSchema } = require('../schema/dogs/get')
+const { dogsQueryParamsSchema, getDogResponseSchema, dogsResponseSchema } = require('../schema/dogs/get')
 const { addImportedDog, updateDog, getDogByIndexNumber, deleteDogByIndexNumber, getOldDogs, deleteDogs } = require('../repos/dogs')
-const { dogDto, oldDogDto } = require('../dto/dog')
+const { dogDto, oldDogDto, putDogDto } = require('../dto/dog')
 const { personDto, mapPersonAndDogsByIndexDao } = require('../dto/person')
 const { getOwnerOfDog, getPersonAndDogsByIndex } = require('../repos/people')
 const { deleteDogsPayloadSchema } = require('../schema/dogs/delete')
 const { deleteResponseSchema } = require('../schema/shared/delete')
+const { importDogSchema, updateDogSchema } = require('../schema/dogs/response')
+const { putDogPayloadSchema } = require('../schema/dogs/put')
+const { dogOwnerResponseSchema, dogOwnerQuerySchema } = require('../schema/person/dog-owner')
 
 module.exports = [
   {
     method: 'GET',
     path: '/dog/{indexNumber}',
-    options: { tags: ['api'] },
+    options: {
+      tags: ['api'],
+      notes: ['Get dog by index number'],
+      response: {
+        schema: getDogResponseSchema
+      }
+    },
     handler: async (request, h) => {
       const indexNumber = request.params.indexNumber
       try {
@@ -20,8 +29,9 @@ module.exports = [
         if (dog === null) {
           return h.response().code(404)
         }
+        const dogDto1 = dogDto(dog)
 
-        return h.response({ dog: dogDto(dog) }).code(200)
+        return h.response({ dog: dogDto1 }).code(200)
       } catch (e) {
         console.log('Error in GET /dog', e)
         throw e
@@ -31,14 +41,26 @@ module.exports = [
   {
     method: 'GET',
     path: '/dog-owner/{indexNumber}',
-    options: { tags: ['api'] },
+    options: {
+      tags: ['api'],
+      notes: ['Gets owner details of a dog by dog index number'],
+      validate: {
+        query: dogOwnerQuerySchema
+      },
+      response: {
+        status: {
+          404: undefined,
+          200: dogOwnerResponseSchema
+        }
+      }
+    },
     handler: async (request, h) => {
       const indexNumber = request.params.indexNumber
       let ownerDao
       let owner
 
       try {
-        if (request.query.includeDogs === 'true') {
+        if (request.query.includeDogs) {
           ownerDao = await getPersonAndDogsByIndex(indexNumber)
         } else {
           ownerDao = await getOwnerOfDog(indexNumber)
@@ -48,7 +70,7 @@ module.exports = [
           return h.response().code(404)
         }
 
-        if (request.query.includeDogs === 'true') {
+        if (request.query.includeDogs) {
           owner = mapPersonAndDogsByIndexDao(ownerDao)
         } else {
           owner = personDto(ownerDao.person, true)
@@ -64,7 +86,13 @@ module.exports = [
   {
     method: 'POST',
     path: '/dog',
-    options: { tags: ['api'] },
+    options: {
+      tags: ['api'],
+      notes: ['Imports a dog'],
+      response: {
+        schema: importDogSchema
+      }
+    },
     handler: async (request, h) => {
       if (!request.payload?.dog) {
         return h.response().code(400)
@@ -78,14 +106,26 @@ module.exports = [
   {
     method: 'PUT',
     path: '/dog',
-    options: { tags: ['api'] },
-    handler: async (request, h) => {
-      if (!request.payload?.indexNumber) {
-        return h.response().code(400)
-      }
+    options: {
+      tags: ['api'],
+      notes: ['Update details on an individual dog'],
+      response: {
+        schema: updateDogSchema
+      },
+      validate: {
+        payload: putDogPayloadSchema,
+        failAction: (request, h, err) => {
+          console.error(err)
 
+          return h.response({ errors: err.details.map(e => e.message) }).code(400).takeover()
+        }
+      }
+    },
+    handler: async (request, h) => {
       try {
-        const updatedDog = await updateDog(request.payload, getCallingUser(request))
+        const updatedDogDao = await updateDog(request.payload, getCallingUser(request))
+
+        const updatedDog = putDogDto(updatedDogDao)
 
         return h.response(updatedDog).code(200)
       } catch (e) {
@@ -97,7 +137,16 @@ module.exports = [
   {
     method: 'DELETE',
     path: '/dog/{indexNumber}',
-    options: { tags: ['api'] },
+    options: {
+      tags: ['api'],
+      notes: ['Soft Delete a dog by index number'],
+      response: {
+        status: {
+          204: undefined,
+          404: undefined
+        }
+      }
+    },
     handler: async (request, h) => {
       const indexNumber = request.params.indexNumber
 
@@ -122,6 +171,13 @@ module.exports = [
     path: '/dogs',
     options: {
       tags: ['api'],
+      notes: ['Returns a filtered list of dogs on the index, with summary details'],
+      response: {
+        status: {
+          400: undefined,
+          200: dogsResponseSchema
+        }
+      },
       validate: {
         query: dogsQueryParamsSchema,
         failAction: (request, h, error) => {
@@ -152,6 +208,7 @@ module.exports = [
     path: '/dogs:batch-delete',
     options: {
       tags: ['api'],
+      notes: ['Soft deletes a batch of dogs by dog index number'],
       validate: {
         payload: deleteDogsPayloadSchema,
         failAction: (request, h, error) => {

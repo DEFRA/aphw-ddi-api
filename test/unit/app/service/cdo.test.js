@@ -383,11 +383,11 @@ describe('CdoService', function () {
       mockCdoRepository.getCdoTaskList.mockResolvedValue(cdoTaskList)
       mockCdoRepository.saveCdoTaskList.mockResolvedValue(cdoTaskList)
 
-      await cdoService.issueCertificate(cdoIndexNumber, sentDate, devUser)
+      const result = await cdoService.issueCertificate(cdoIndexNumber, sentDate, devUser)
 
       expect(mockCdoRepository.getCdoTaskList).toHaveBeenCalledWith(cdoIndexNumber)
       expect(mockCdoRepository.saveCdoTaskList).toHaveBeenCalledWith(cdoTaskList)
-
+      expect(result).toBe(sentDate)
       expect(cdoTaskList.getUpdates().exemption).toEqual([{
         key: 'certificateIssued',
         value: sentDate,

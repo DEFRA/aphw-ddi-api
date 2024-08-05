@@ -13,7 +13,9 @@ describe('Countries endpoint', () => {
 
   test('GET /countries route returns 200', async () => {
     getCountries.mockResolvedValue([
-      'Country1', 'Country2', 'Country3'
+      { id: 1, country: 'Country1' },
+      { id: 2, country: 'Country2' },
+      { id: 3, country: 'Country3' }
     ])
 
     const options = {

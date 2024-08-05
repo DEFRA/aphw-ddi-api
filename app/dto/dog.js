@@ -1,4 +1,5 @@
 const { getMicrochip } = require('./dto-helper')
+const { registeredPersonMapper } = require('./mappers/person')
 
 /**
  *
@@ -51,10 +52,46 @@ const oldDogDto = (data) => ({
   indexNumber: data.dog.index_number,
   dateOfBirth: data.dog.birth_date,
   cdoIssued: data.cdo_issued,
-  status: data.dog.status
+  status: {
+    status: data.dog.status.status
+  }
+})
+
+const dogMicrochips = (dogMicrochip) => ({
+  id: dogMicrochip.id,
+  dog_id: dogMicrochip.dog_id,
+  microchip_id: dogMicrochip.microchip_id,
+  microchip: {
+    id: dogMicrochip.microchip.id,
+    microchip_number: dogMicrochip.microchip.microchip_number
+  }
+})
+
+const putDogDto = (dogDao) => ({
+  id: dogDao.id,
+  dog_reference: dogDao.dog_reference,
+  index_number: dogDao.index_number,
+  dog_breed_id: dogDao.dog_breed_id,
+  status_id: dogDao.status_id,
+  name: dogDao.name,
+  registered_person: dogDao.registered_person.map(registeredPersonMapper),
+  dog_breed: {
+    id: dogDao.id,
+    breed: dogDao.breed,
+    active: dogDao.active,
+    display_order: dogDao.display_order
+  },
+  dog_microchips: dogDao.dog_microchips.map(dogMicrochips),
+  status: {
+    id: dogDao.status.id,
+    status: dogDao.status.status,
+    status_type: dogDao.status.status_type
+  },
+  dog_breaches: dogDao.dog_breaches.map(dogBreachDaoToBreachDto)
 })
 
 module.exports = {
   dogDto,
-  oldDogDto
+  oldDogDto,
+  putDogDto
 }

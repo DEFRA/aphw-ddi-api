@@ -1,15 +1,26 @@
 const { getCourts, createCourt, deleteCourt } = require('../repos/courts')
 const { getCallingUser } = require('../auth/get-user')
 const { createAdminItem } = require('../schema/admin/create')
+const { courtsResponseSchema, createCourtResponseSchema } = require('../schema/courts')
+const { conflictSchema } = require('../schema/common/response/conflict')
+const { notFoundSchema } = require('../schema/common/response/not-found')
+const { mapCourtToDto } = require('../dto/courts')
 
 module.exports = [
   {
     method: 'GET',
     path: '/courts',
-    options: { tags: ['api'] },
+    options: {
+      tags: ['api'],
+      notes: ['Returns the full list of courts on the DB with their ids'],
+      response: {
+        schema: courtsResponseSchema
+      }
+    },
     handler: async (request, h) => {
-      const courts = await getCourts()
+      const courtDaos = await getCourts()
 
+      const courts = courtDaos.map(mapCourtToDto)
       return h.response({
         courts
       }).code(200)
@@ -20,6 +31,13 @@ module.exports = [
     path: '/courts',
     options: {
       tags: ['api'],
+      notes: ['Creates a new court'],
+      response: {
+        status: {
+          201: createCourtResponseSchema,
+          409: conflictSchema
+        }
+      },
       validate: {
         payload: createAdminItem,
         failAction: (request, h, err) => {
@@ -41,7 +59,16 @@ module.exports = [
   {
     method: 'DELETE',
     path: '/courts/{courtId}',
-    options: { tags: ['api'] },
+    options: {
+      tags: ['api'],
+      notes: ['Soft deletes a court from the DB'],
+      response: {
+        status: {
+          204: undefined,
+          404: notFoundSchema
+        }
+      }
+    },
     handler: async (request, h) => {
       const courtId = request.params.courtId
       await deleteCourt(courtId, getCallingUser(request))

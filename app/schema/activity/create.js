@@ -6,6 +6,14 @@ const createActivitySchema = Joi.object({
   activitySource: Joi.string().required()
 }).required()
 
+const createActivityResponseSchema = Joi.object({
+  id: Joi.number(),
+  label: Joi.string(),
+  activityType: Joi.string(),
+  activitySource: Joi.string()
+})
+
 module.exports = {
-  createActivitySchema
+  createActivitySchema,
+  createActivityResponseSchema
 }
