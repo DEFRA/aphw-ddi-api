@@ -8,6 +8,7 @@ const { SequenceViolationError } = require('../../../../app/errors/domain/sequen
 const { DuplicateResourceError } = require('../../../../app/errors/duplicate-record')
 const { InvalidDataError } = require('../../../../app/errors/domain/invalidData')
 const { InvalidDateError } = require('../../../../app/errors/domain/invalidDate')
+const { buildCdoDao } = require('../../../mocks/cdo/get')
 
 describe('CDO endpoint', () => {
   const createServer = require('../../../../app/server')
@@ -32,32 +33,10 @@ describe('CDO endpoint', () => {
 
   describe('GET /cdo/ED123', () => {
     test('GET /cdo/ED123 route returns 200', async () => {
-      getCdo.mockResolvedValue({
+      getCdo.mockResolvedValue(buildCdoDao({
         id: 123,
-        indexNumber: 'ED123',
-        dog_breed: {
-          breed: 'breed1'
-        },
-        dog_breaches: [],
-        status: {
-          status: 'NEW'
-        },
-        registration: {
-          court: {
-            name: 'court1'
-          },
-          police_force: {
-            name: 'force1'
-          },
-          exemption_order: {
-            exemption_order: 2015
-          }
-        },
-        registered_person: [{
-          person: {
-          }
-        }]
-      })
+        index_number: 'ED123'
+      }))
 
       const options = {
         method: 'GET',
@@ -124,6 +103,9 @@ describe('CDO endpoint', () => {
             dog_breed: {
               breed: 'Test Breed'
             },
+            status: {
+              status: 'Interim exempt'
+            },
             registration: {
               police_force: {
                 name: 'Test Police Force'
@@ -164,6 +146,7 @@ describe('CDO endpoint', () => {
           {
             indexNumber: 'ED10000',
             name: 'Test Dog',
+            status: 'Interim exempt',
             breed: 'Test Breed',
             cdoIssued: '2020-01-01',
             cdoExpiry: '2020-02-01'
@@ -202,6 +185,7 @@ describe('CDO endpoint', () => {
             dog_breed: {
               breed: 'Test Breed'
             },
+            status: { status: 'Interim exempt' },
             registration: {
               police_force: {
                 name: 'Test Police Force'
@@ -244,6 +228,7 @@ describe('CDO endpoint', () => {
             name: 'Test Dog',
             breed: 'Test Breed',
             cdoIssued: '2020-01-01',
+            status: 'Interim exempt',
             cdoExpiry: '2020-02-01'
           }
         ]
@@ -1039,7 +1024,7 @@ describe('CDO endpoint', () => {
         issueCertificate: issueCertificateMock
       })
 
-      issueCertificateMock.mockResolvedValue('abcdefghi')
+      issueCertificateMock.mockResolvedValue(new Date('2024-07-30'))
 
       const options = {
         method: 'POST',
@@ -1049,7 +1034,7 @@ describe('CDO endpoint', () => {
       const payload = JSON.parse(response.payload)
       expect(response.statusCode).toBe(201)
       expect(payload).toEqual({
-        certificateIssued: 'abcdefghi'
+        certificateIssued: new Date('2024-07-30').toISOString()
       })
       expect(issueCertificateMock).toHaveBeenCalledWith('ED123', expect.any(Date), devUser)
     })

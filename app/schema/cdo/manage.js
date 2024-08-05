@@ -27,11 +27,55 @@ const verifyDatesSchema = Joi.object({
   neuteringConfirmation: Joi.date().required()
 }).required()
 
+const taskSchemaBuilder = (key) => Joi.object({
+  key: Joi.string().allow(key),
+  available: Joi.boolean(),
+  completed: Joi.boolean(),
+  readonly: Joi.boolean()
+}).required().unknown()
+
+const manageCdoResponseSchema = Joi.object({
+  tasks: Joi.object({
+    applicationPackSent: taskSchemaBuilder('applicationPackSent'),
+    insuranceDetailsRecorded: taskSchemaBuilder('insuranceDetailsRecorded'),
+    microchipNumberRecorded: taskSchemaBuilder('microchipNumberRecorded'),
+    applicationFeePaid: taskSchemaBuilder('applicationFeePaid'),
+    form2Sent: taskSchemaBuilder('form2Sent'),
+    verificationDateRecorded: taskSchemaBuilder('verificationDateRecorded'),
+    certificateIssued: taskSchemaBuilder('certificateIssued')
+  }).unknown(),
+  applicationPackSent: Joi.date().optional(),
+  insuranceCompany: Joi.string().optional(),
+  insuranceRenewal: Joi.date().optional(),
+  microchipNumber: Joi.string().optional(),
+  applicationFeePaid: Joi.date().optional(),
+  form2Sent: Joi.date().optional()
+}).unknown()
+
+const simpleConflictSchema = Joi.object({
+  message: Joi.string()
+})
+
+const recordMicrochipNumberConflictSchema = Joi.object({
+  statusCode: Joi.number().allow(409),
+  error: Joi.string().allow('Conflict'),
+  message: Joi.string(),
+  microchipNumbers: Joi.array().items(Joi.string())
+})
+
+const issueCertificateResponseSchema = Joi.object({
+  certificateIssued: Joi.date()
+})
+
 module.exports = {
   recordInsuranceDetailsSchema,
   recordInsuranceDetailsResponseSchema,
   recordMicrochipNumberSchema,
   recordMicrochipNumberResponseSchema,
   recordApplicationFeeSchema,
-  verifyDatesSchema
+  verifyDatesSchema,
+  manageCdoResponseSchema,
+  simpleConflictSchema,
+  recordMicrochipNumberConflictSchema,
+  issueCertificateResponseSchema
 }

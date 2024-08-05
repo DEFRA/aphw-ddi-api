@@ -1,5 +1,6 @@
 const { getMicrochip, calculateNeuteringDeadline } = require('./dto-helper')
 const { mapDogBreachDaoToBreachDto } = require('../repos/mappers/dog')
+const { personAddressMapper, personContactMapper } = require('./mappers/person')
 
 const generateOrderSpecificData = (data) => {
   if (data.registration.exemption_order.exemption_order === '2023') {
@@ -53,8 +54,8 @@ const cdoViewDto = (data) => {
       firstName: person.first_name,
       lastName: person.last_name,
       dateOfBirth: person.birth_date,
-      addresses: person.addresses,
-      person_contacts: person.person_contacts,
+      addresses: person.addresses.map(personAddressMapper),
+      person_contacts: person.person_contacts.map(personContactMapper),
       organisationName: person.organisation?.organisation_name ?? null
     },
     dog: {
@@ -100,5 +101,6 @@ const cdoViewDto = (data) => {
 
 module.exports = {
   cdoCreateDto,
-  cdoViewDto
+  cdoViewDto,
+  personContactMapper
 }

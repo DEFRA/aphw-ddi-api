@@ -103,13 +103,20 @@ describe('CDO DTO', () => {
                 address_line_1: '1 Test Street',
                 address_line_2: 'Testarea',
                 town: 'Testington',
-                postcode: 'TS1 1TS'
+                postcode: 'TS1 1TS',
+                country: {
+                  id: 1,
+                  country: 'England'
+                }
               }
             }],
             person_contacts: [{
               contact: {
                 id: 123,
-                contact: 'my-email@here.com'
+                contact: 'my-email@here.com',
+                contact_type: {
+                  contact_type: 'email'
+                }
               }
             }],
             organisation: {
@@ -188,14 +195,21 @@ describe('CDO DTO', () => {
             address_line_1: '1 Test Street',
             address_line_2: 'Testarea',
             town: 'Testington',
-            postcode: 'TS1 1TS'
+            postcode: 'TS1 1TS',
+            country: {
+              country: 'England',
+              id: 1
+            }
           }
         }],
         organisationName: 'Test Org Name',
         person_contacts: [{
           contact: {
             id: 123,
-            contact: 'my-email@here.com'
+            contact: 'my-email@here.com',
+            contact_type: {
+              contact_type: 'email'
+            }
           }
         }]
       },

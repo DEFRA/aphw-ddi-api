@@ -30,8 +30,13 @@ const expiredInsuranceResponseSchema = Joi.object({
   response: Joi.string()
 }).unknown(true)
 
+const defaultJobsResponse = Joi.object({
+  response: Joi.string()
+})
+
 module.exports = {
   jobsQuerySchema,
   purgeSoftDeleteResponseSchema,
-  expiredInsuranceResponseSchema
+  expiredInsuranceResponseSchema,
+  defaultJobsResponse
 }

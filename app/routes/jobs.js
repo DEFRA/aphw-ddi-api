@@ -1,5 +1,5 @@
 const { purgeSoftDeletedRecords } = require('../overnight/purge-soft-deleted-records')
-const { jobsQuerySchema, purgeSoftDeleteResponseSchema } = require('../schema/jobs')
+const { jobsQuerySchema, purgeSoftDeleteResponseSchema, defaultJobsResponse } = require('../schema/jobs')
 const { purgeSoftDeletedDto } = require('../dto/overnight')
 const { setExpiredInsuranceToBreach } = require('../overnight/expired-insurance')
 const { getCallingUser } = require('../auth/get-user')
@@ -10,6 +10,7 @@ module.exports = [
     method: 'POST',
     path: '/jobs/purge-soft-delete',
     options: {
+      notes: ['Hard deletes/purges all the dog & owner records that we soft deleted more than x days ago (90)'],
       tags: ['api'],
       validate: {
         query: jobsQuerySchema,
@@ -34,6 +35,12 @@ module.exports = [
     path: '/jobs/expired-insurance',
     options: {
       tags: ['api'],
+      notes: ['Sets all the dog with expired insurance to In Breach'],
+      response: {
+        status: {
+          200: defaultJobsResponse
+        }
+      },
       validate: {
         query: jobsQuerySchema,
         failAction: (request, h, error) => {
@@ -54,6 +61,12 @@ module.exports = [
     path: '/jobs/neutering-deadline',
     options: {
       tags: ['api'],
+      notes: ['Sets dogs who have not neutered their dogs before the deadline to In Breach'],
+      response: {
+        status: {
+          200: defaultJobsResponse
+        }
+      },
       validate: {
         query: jobsQuerySchema,
         failAction: (request, h, error) => {

@@ -177,7 +177,8 @@ const getOwnerOfDog = async (indexNumber) => {
     return await sequelize.models.registered_person.findOne({
       include: [{
         model: sequelize.models.person,
-        as: 'person'
+        as: 'person',
+        include: personRelationship(sequelize)
       },
       {
         model: sequelize.models.dog,
