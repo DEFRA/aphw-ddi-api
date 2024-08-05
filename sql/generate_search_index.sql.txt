@@ -8,6 +8,8 @@ DECLARE
 	v_microchips RECORD;
 	v_microchip1 varchar := '';
 	v_microchip2 varchar := '';
+	v_org_name varchar := '';
+	v_email varchar := '';
 	v_microchip_loop_count integer := 1;
 	v_status varchar := '';
 BEGIN
@@ -27,6 +29,25 @@ BEGIN
 		AND   pa.id = (SELECT max(pa2.id)
 						FROM person_address pa2
 						WHERE pa2.person_id = p_person_id);
+
+		v_org_name := '';
+		IF v_person_rec.organisation_id IS NOT NULL THEN
+			SELECT organisation_name
+			INTO STRICT v_org_name
+			FROM organisation
+			WHERE id = v_person_rec.organisation_id;
+		END IF;
+
+		SELECT contact
+		INTO v_email
+		FROM contact
+		WHERE id =
+		(SELECT MAX(c.id)
+		FROM person_contact pc,
+			   contact c
+		WHERE pc.person_id = p_person_id
+		AND pc.contact_id = c.id
+		AND c.contact_type_id = 2);
 	END IF;
 
 	IF p_dog_id IS NOT NULL THEN
@@ -56,11 +77,12 @@ BEGIN
 		END LOOP;
 	END IF;
 
-	--TODO - add organisation if applicable
-	v_search_string := concat(
+	v_search_string := REPLACE(concat(
 		v_person_rec.person_reference || ' ',
 		v_person_rec.first_name || ' ',
 		v_person_rec.last_name || ' ',
+		v_email || ' ',
+		v_org_name || ' ',
 		v_address_rec.address_line_1 || ' ',
 		v_address_rec.address_line_2 || ' ',
 		v_address_rec.town || ' ',
@@ -68,26 +90,28 @@ BEGIN
 		v_dog_rec.index_number || ' ',
 		v_dog_rec.name || ' ',
 		v_microchip1 || ' ',
-		v_microchip2);
+		v_microchip2), '"', '');
 
 	v_search_json := '{' ||
 		concat(
 		'"personReference": "' || v_person_rec.person_reference || '", ',
-		'"firstName": "' || v_person_rec.first_name || '", ',
-		'"lastName": "' || v_person_rec.last_name || '", ',
+		'"firstName": "' || REPLACE(v_person_rec.first_name, '"', '') || '", ',
+		'"lastName": "' || REPLACE(v_person_rec.last_name, '"', '') || '", ',
+		'"email": "' || v_email || '", ',
+		'"organisationName": "' || v_org_name || '", ',
 		'"address": { ',
-		concat('"address_line_1": "' || v_address_rec.address_line_1 || '", ',
-				'"address_line_2": "' || v_address_rec.address_line_2 || '", ',
-				'"town": "' || v_address_rec.town || '", ',
-				'"postcode": "' || v_address_rec.postcode || '"'),
+		concat('"address_line_1": "' || REPLACE(v_address_rec.address_line_1, '"', '') || '", ',
+				'"address_line_2": "' || REPLACE(v_address_rec.address_line_2, '"', '') || '", ',
+				'"town": "' || REPLACE(v_address_rec.town, '"', '') || '", ',
+				'"postcode": "' || REPLACE(v_address_rec.postcode, '"', '') || '"'),
 		'}');
 		IF p_dog_id IS NOT NULL THEN
 			v_search_json := v_search_json || ',' ||
 			concat(
 			'"dogIndex": "' || v_dog_rec.index_number || '", ',
-			'"dogName": "' || v_dog_rec.name || '", ',
-			'"microchipNumber": "' || v_microchip1 || '", ',
-			'"microchipNumber2": "' || v_microchip2 || '", ',
+			'"dogName": "' || REPLACE(v_dog_rec.name, '"', '') || '", ',
+			'"microchipNumber": "' || REPLACE(v_microchip1, '"', '') || '", ',
+			'"microchipNumber2": "' || REPLACE(v_microchip2, '"', '') || '", ',
       '"dogStatus": "' || v_status || '"');
 		END IF;	
 	v_search_json := v_search_json || '}';

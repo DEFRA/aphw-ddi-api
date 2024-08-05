@@ -388,7 +388,7 @@ describe('Search repo', () => {
 
       expect(sequelize.transaction).not.toHaveBeenCalled()
       expect(sequelize.models.search_index.create).toHaveBeenCalledWith({
-        search: 'P-123 John Smith org name addr1, addr2, town, postcode',
+        search: 'P-123 John Smith  org name addr1, addr2, town, postcode',
         person_id: 1,
         dog_id: null,
         json: {
