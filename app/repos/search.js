@@ -52,7 +52,7 @@ const buildIndexColumn = (person, dog) => {
   const address = person?.addresses?.address ? person.addresses.address : person.address
   return sequelize.fn(
     'to_tsvector',
-    `${person.person_reference} ${person.first_name} ${person.last_name} ${person.email} \
+    `${person.person_reference} ${person.first_name} ${person.last_name} ${person.email ? person.email : ''} \
 ${person.organisation_name ? person.organisation_name : ''} \
 ${buildAddressString(address, true)} \
 ${dog.index_number ? dog.index_number : ''} \
