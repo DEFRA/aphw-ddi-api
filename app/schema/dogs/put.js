@@ -2,7 +2,7 @@ const Joi = require('joi')
 
 const putDogPayloadSchema = Joi.object({
   dogId: Joi.number(),
-  indexNumber: Joi.string(),
+  indexNumber: Joi.string().required(),
   breed: Joi.string(),
   name: Joi.string().allow(null).allow(''),
   applicationType: Joi.string(),

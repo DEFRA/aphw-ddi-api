@@ -30,6 +30,11 @@ const personDao = {
   person_contacts: []
 }
 
+const personDaoBuilder = (personDaoPartial) => ({
+  ...personDao,
+  ...personDaoPartial
+})
+
 /**
  * @type {CreatedPersonDao}
  */
@@ -56,5 +61,6 @@ const createdPersonDao = {
 
 module.exports = {
   personDao,
-  createdPersonDao
+  createdPersonDao,
+  personDaoBuilder
 }

@@ -21,13 +21,11 @@ const exemption = Joi.object({
   }).optional()
 })
 
-const orderSpecific = Joi.object({
+const fullExemptionPayloadSchema = exemption.append({
   microchipDeadline: Joi.date().iso().optional(),
   typedByDlo: Joi.date().iso().optional(),
   withdrawn: Joi.date().iso().optional()
 })
-
-const fullExemptionPayloadSchema = exemption.concat(orderSpecific)
 
 const validatePayload = async (payload) => {
   let schema = exemption
@@ -37,7 +35,7 @@ const validatePayload = async (payload) => {
   const order = cdo?.registration.exemption_order.exemption_order
 
   if (order === '2023') {
-    schema = schema.concat(orderSpecific)
+    schema = fullExemptionPayloadSchema
   }
 
   const { value, error } = schema.validate(payload)

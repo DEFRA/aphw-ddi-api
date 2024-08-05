@@ -10,7 +10,7 @@ const dogOwnerDogSchema = Joi.object({
   microchipNumber2: Joi.string().allow('').allow(null),
   name: Joi.string().allow('').allow(null),
   sex: Joi.string().allow('').allow(null),
-  status: 'Interim exempt',
+  status: Joi.string(),
   tattoo: Joi.string().allow('').allow(null),
   birthDate: Joi.string().allow('').allow(null)
 })

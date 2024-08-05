@@ -122,10 +122,6 @@ module.exports = [
       }
     },
     handler: async (request, h) => {
-      if (!request.payload?.indexNumber) {
-        return h.response().code(400)
-      }
-
       try {
         const updatedDogDao = await updateDog(request.payload, getCallingUser(request))
 

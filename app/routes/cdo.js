@@ -16,7 +16,6 @@ const { SequenceViolationError } = require('../errors/domain/sequenceViolation')
 const { InvalidDataError } = require('../errors/domain/invalidData')
 const { InvalidDateError } = require('../errors/domain/invalidDate')
 const { getCdoByIndexNumberSchema } = require('../schema/cdo/response')
-const { notFoundSchema } = require('../schema/common/response/not-found')
 
 /**
  * @param e
@@ -128,7 +127,7 @@ module.exports = [
       response: {
         status: {
           200: manageCdoResponseSchema,
-          404: notFoundSchema
+          404: undefined
         }
       }
     },

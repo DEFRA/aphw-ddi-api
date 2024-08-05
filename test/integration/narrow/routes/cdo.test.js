@@ -103,6 +103,9 @@ describe('CDO endpoint', () => {
             dog_breed: {
               breed: 'Test Breed'
             },
+            status: {
+              status: 'Interim exempt'
+            },
             registration: {
               police_force: {
                 name: 'Test Police Force'
@@ -143,6 +146,7 @@ describe('CDO endpoint', () => {
           {
             indexNumber: 'ED10000',
             name: 'Test Dog',
+            status: 'Interim exempt',
             breed: 'Test Breed',
             cdoIssued: '2020-01-01',
             cdoExpiry: '2020-02-01'
@@ -181,6 +185,7 @@ describe('CDO endpoint', () => {
             dog_breed: {
               breed: 'Test Breed'
             },
+            status: { status: 'Interim exempt' },
             registration: {
               police_force: {
                 name: 'Test Police Force'
@@ -223,6 +228,7 @@ describe('CDO endpoint', () => {
             name: 'Test Dog',
             breed: 'Test Breed',
             cdoIssued: '2020-01-01',
+            status: 'Interim exempt',
             cdoExpiry: '2020-02-01'
           }
         ]

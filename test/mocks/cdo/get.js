@@ -73,6 +73,11 @@ const buildPersonDao = (personPartial = {}) => ({
 
 const person = buildPersonDao()
 
+const buildPersonTypeDao = (personType = {}) => ({
+  id: 1,
+  person_type: 'Owner',
+  ...personType
+})
 /**
  * @param {Partial<RegisteredPersonDao>} registeredPersonPartial
  * @return {RegisteredPersonDao}
@@ -86,6 +91,7 @@ const buildRegisteredPersonDao = (registeredPersonPartial = {}) => ({
   deleted_at: null,
   updated_at: '2024-06-24T09:12:07.904Z',
   person: buildPersonDao(),
+  person_type: buildPersonTypeDao(),
   ...registeredPersonPartial
 })
 
@@ -169,6 +175,10 @@ const exemptionOrder2015 = {
   active: true
 }
 
+const buildExemptionOrderDao = (exemptionOrderPartial = {}) => ({
+  ...exemptionOrder2015,
+  ...exemptionOrderPartial
+})
 /**
  * @param {RegistrationDao} registrationPartial
  * @return {RegistrationDao}
@@ -201,7 +211,7 @@ const buildRegistrationDao = (registrationPartial = {}) => ({
   updated_at: '2024-06-24T09:12:07.897Z',
   police_force: buildPoliceForceDao(),
   court: buildCourtDao(),
-  exemption_order: exemptionOrder2015,
+  exemption_order: buildExemptionOrderDao(),
   ...registrationPartial
 })
 
@@ -462,6 +472,7 @@ module.exports = {
   buildCourtDao,
   court,
   exemptionOrder2015,
+  buildExemptionOrderDao,
   buildRegistrationDao,
   registration,
   buildMicrochipDao,

@@ -27,8 +27,8 @@ module.exports = [{
       }
 
       const res = await updateExemption(request.payload, getCallingUser(request))
+
       const dto = mapExemptionDaoToDto(res)
-      console.log('~~~~~~ Chris Debug ~~~~~~ ', 'Dto', dto)
 
       return h.response(dto).code(200)
     }

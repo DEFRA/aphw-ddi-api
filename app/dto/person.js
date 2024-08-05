@@ -182,6 +182,21 @@ const mapRegisteredPersonToDog = (registeredPerson) => {
   }
 }
 
+const mapPersonContactDaoToDto = (personContactDao) => ({
+  id: personContactDao.id,
+  person_id: personContactDao.person_id,
+  contact_id: personContactDao.contact_id,
+  contact: {
+    id: personContactDao.contact.id,
+    contact: personContactDao.contact.contact,
+    contact_type_id: personContactDao.contact.contact_type_id,
+    contact_type: {
+      id: personContactDao.contact.contact_type.id,
+      contact_type: personContactDao.contact.contact_type.contact_type
+    }
+  }
+})
+
 /**
  * @param {PersonAndDogsByIndexDao} personAndDogsByIndexDao
  * @return {PersonAndDogsDto}
@@ -201,7 +216,8 @@ const mapPersonAndDogsByIndexDao = (personAndDogsByIndexDao) => {
       postcode: person.addresses[0].address.postcode,
       town: person.addresses[0].address.town
     },
-    contacts: person.person_contacts ? addContacts(person.person_contacts, true) : [],
+    // contacts: person.person_contacts ? addContacts(person.person_contacts, true) : [],
+    contacts: person.person_contacts.map(mapPersonContactDaoToDto),
     dogs: person.registered_people.map(mapRegisteredPersonToDog),
     organisationName: person.organisation?.organisation_name
   }

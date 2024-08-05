@@ -1,3 +1,8 @@
+const {
+  buildDogBreedDao, buildStatusDao, buildRegistrationDao, buildRegisteredPersonDao, buildCourtDao,
+  buildPoliceForceDao, buildExemptionOrderDao, buildCdoDao
+} = require('../../../mocks/cdo/get')
+
 describe('Exemption endpoint', () => {
   const createServer = require('../../../../app/server')
   let server
@@ -34,8 +39,29 @@ describe('Exemption endpoint', () => {
       }
     }
 
-    getCdo.mockResolvedValue({
+    getCdo.mockResolvedValue(buildCdoDao({
       id: 123,
+      index_number: 'ED123',
+      dog_breed: buildDogBreedDao({
+        breed: 'breed1'
+      }),
+      status: buildStatusDao({
+        status: 'NEW'
+      }),
+      registration: buildRegistrationDao({
+        court: buildCourtDao({
+          name: 'court1'
+        }),
+        police_force: buildPoliceForceDao({
+          name: 'force1'
+        })
+      }),
+      registered_person: [buildRegisteredPersonDao()]
+    }))
+
+    updateExemption.mockResolvedValue({
+      id: 123,
+      dog_id: 300095,
       index_number: 'ED123',
       dog_breed: {
         breed: 'breed1'
@@ -43,16 +69,14 @@ describe('Exemption endpoint', () => {
       status: {
         status: 'NEW'
       },
-      registration: {
-        court: {
-          name: 'court1'
-        },
-        police_force: {
-          name: 'force1'
-        },
-        exemption_order: {
-          exemption_order: '2015'
-        }
+      court: {
+        name: 'court1'
+      },
+      police_force: {
+        name: 'force1'
+      },
+      exemption_order: {
+        exemption_order: '2015'
       },
       registered_person: [{
         person: {
@@ -94,8 +118,9 @@ describe('Exemption endpoint', () => {
       withdrawn: '2020-08-01'
     }
 
-    getCdo.mockResolvedValue({
+    updateExemption.mockResolvedValue({
       id: 123,
+      dog_id: 300095,
       index_number: 'ED123',
       dog_breed: {
         breed: 'breed1'
@@ -103,22 +128,43 @@ describe('Exemption endpoint', () => {
       status: {
         status: 'NEW'
       },
-      registration: {
-        court: {
-          name: 'court1'
-        },
-        police_force: {
-          name: 'force1'
-        },
-        exemption_order: {
-          exemption_order: '2023'
-        }
+      court: {
+        name: 'court1'
+      },
+      police_force: {
+        name: 'force1'
+      },
+      exemption_order: {
+        exemption_order: '2023'
       },
       registered_person: [{
         person: {
         }
       }]
     })
+
+    getCdo.mockResolvedValue(buildCdoDao({
+      id: 123,
+      index_number: 'ED123',
+      dog_breed: buildDogBreedDao({
+        breed: 'breed1'
+      }),
+      status: buildStatusDao({
+        status: 'NEW'
+      }),
+      registration: buildRegistrationDao({
+        court: buildCourtDao({
+          name: 'court1'
+        }),
+        police_force: buildPoliceForceDao({
+          name: 'force1'
+        }),
+        exemption_order: buildExemptionOrderDao({
+          exemption_order: '2023'
+        })
+      }),
+      registered_person: [buildRegisteredPersonDao()]
+    }))
 
     const options = {
       method: 'PUT',
