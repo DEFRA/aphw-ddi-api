@@ -51,9 +51,16 @@ const updateExemption = async (data, user, transaction) => {
   }
 }
 
+const canSetExemptDueToInsuranceRenewal = (data, cdo) => {
+  console.log('breaches', cdo)
+  // if (data.insurance?.renewalDate > new Date() && cdo.dog_breaches)
+  return false
+}
+
 const autoChangeStatus = async (cdo, data, transaction) => {
   const currentStatus = cdo?.status?.status
 
+  console.log('cdo', cdo)
   if (currentStatus === constants.statuses.PreExempt) {
     if (!cdo.registration.non_compliance_letter_sent && data.nonComplianceLetterSent) {
       return await updateStatus(cdo.index_number, constants.statuses.Failed, transaction)
@@ -63,6 +70,10 @@ const autoChangeStatus = async (cdo, data, transaction) => {
   } else if (currentStatus === constants.statuses.InterimExempt) {
     if (!cdo.registration.cdo_issued && data.cdoIssued) {
       return await updateStatus(cdo.index_number, constants.statuses.PreExempt, transaction)
+    }
+  } else if (currentStatus === constants.statuses.InBreach) {
+    if (canSetExemptDueToInsuranceRenewal(data, cdo)) {
+      return await updateStatus(cdo.index_number, constants.statuses.Exempt, transaction)
     }
   }
 
