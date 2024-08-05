@@ -3,12 +3,17 @@ const { downloadBlob } = require('../storage')
 const { stages } = require('../constants/import')
 const { importRegister, processRegister } = require('../import/robot')
 const { getCallingUser } = require('../auth/get-user')
+const { robotImportResponseSchema } = require('../schema/robot-import')
 
 module.exports = [{
   method: 'POST',
   path: '/robot-import',
   options: {
     tags: ['api'],
+    notes: ['Performs the import of data from the robot'],
+    response: {
+      schema: robotImportResponseSchema
+    },
     validate: {
       headers: Joi.object({
         'content-type': Joi.string().valid('application/json').required()
