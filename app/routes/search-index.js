@@ -13,11 +13,7 @@ module.exports = [{
       }
     },
     response: {
-      schema: searchResponseSchema,
-      failAction: (request, h, error) => {
-        console.log('err', error)
-        return h.response().code(400).takeover()
-      }
+      schema: searchResponseSchema
     },
     handler: async (request, h) => {
       const results = await search(request.params.type, request.params.terms)
