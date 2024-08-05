@@ -7,10 +7,7 @@ module.exports = [{
   options: {
     tags: ['api'],
     validate: {
-      params: searchQueryParamsSchema,
-      failAction: (request, h, error) => {
-        return h.response().code(400).takeover()
-      }
+      params: searchQueryParamsSchema
     },
     response: {
       schema: searchResponseSchema
