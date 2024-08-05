@@ -12,7 +12,7 @@ const dogOwnerDogSchema = Joi.object({
   sex: Joi.string().allow('').allow(null),
   status: Joi.string(),
   tattoo: Joi.string().allow('').allow(null),
-  birthDate: Joi.string().allow('').allow(null)
+  birthDate: Joi.date().allow(null)
 })
 
 const dogOwnerResponseSchema = Joi.object({
