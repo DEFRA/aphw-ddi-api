@@ -13,7 +13,7 @@ describe('SearchResults', () => {
       }
     ]
     const results = mapResults(searchResults, 'dog', 'bruno')
-    expect(results).toEqual([{ distance: 1, dogId: 123, dogName: 'Bruno', personId: 456, rank: 9 }])
+    expect(results).toEqual([{ distance: 1, dogId: 123, dogName: 'Bruno', personId: 456, rank: 9, searchType: 'dog' }])
   })
 
   test('should map results when a dog search and dog name is null', () => {
@@ -28,7 +28,7 @@ describe('SearchResults', () => {
       }
     ]
     const results = mapResults(searchResults, 'dog', 'something')
-    expect(results).toEqual([{ distance: 9, dogId: 123, dogName: null, personId: 456, rank: 9 }])
+    expect(results).toEqual([{ distance: 9, dogId: 123, dogName: null, personId: 456, rank: 9, searchType: 'dog' }])
   })
 
   test('should map results when an owner search', () => {
@@ -45,6 +45,6 @@ describe('SearchResults', () => {
       }
     ]
     const results = mapResults(searchResults, 'owner', 'smith')
-    expect(results).toEqual([{ distance: 6, dogId: 123, dogName: 'Bruno', firstName: 'John', lastName: 'Smith', personId: 456, rank: 9 }])
+    expect(results).toEqual([{ distance: 6, dogId: 123, dogName: 'Bruno', firstName: 'John', lastName: 'Smith', personId: 456, rank: 9, searchType: 'owner' }])
   })
 })

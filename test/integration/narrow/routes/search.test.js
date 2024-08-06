@@ -36,6 +36,18 @@ describe('SearchBasic endpoint', () => {
     expect(response.statusCode).toBe(500)
   })
 
+  test('GET /search route returns 400 when bad response result', async () => {
+    search.mockResolvedValue([{ searchTypeBad: 'dog' }])
+
+    const options = {
+      method: 'GET',
+      url: '/search/dog/term'
+    }
+
+    const response = await server.inject(options)
+    expect(response.statusCode).toBe(400)
+  })
+
   afterEach(async () => {
     await server.stop()
   })

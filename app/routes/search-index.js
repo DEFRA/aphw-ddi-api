@@ -10,7 +10,11 @@ module.exports = [{
       params: searchQueryParamsSchema
     },
     response: {
-      schema: searchResponseSchema
+      schema: searchResponseSchema,
+      failAction: (request, h, error) => {
+        console.error('search response schema error', error)
+        return h.response().code(400).takeover()
+      }
     },
     handler: async (request, h) => {
       const results = await search(request.params.type, request.params.terms)
