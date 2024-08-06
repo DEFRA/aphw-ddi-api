@@ -7,6 +7,7 @@ const mapResults = (results, type, termsQuery) => {
     res.personId = x.person_id
     res.distance = type === 'dog' ? levenshtein(res.dogName || '', termsQuery) : levenshtein(`${res.firstName} ${res.lastName}`, termsQuery)
     res.rank = x.rank ?? x.dataValues.rank
+    res.searchType = type
     return res
   })
 }
