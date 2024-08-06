@@ -241,6 +241,27 @@ describe('Dog endpoint', () => {
 
       expect(response.statusCode).toBe(200)
     })
+
+    test('PUT /dog route returns 200 with valid payload including microchips', async () => {
+      updateDog.mockResolvedValue(buildDogDao(
+        {
+          id: 123,
+          index_number: 'ABC123',
+          dog_microchips: [
+            { dog_id: 123, microchip_id: 1, microchip: { id: 111, microchip_number: '123451234512345' } }
+          ]
+        }))
+
+      const options = {
+        method: 'PUT',
+        url: '/dog',
+        payload: { indexNumber: 'ABC123' }
+      }
+
+      const response = await server.inject(options)
+
+      expect(response.statusCode).toBe(200)
+    })
   })
 
   describe('DELETE /dog/ED123', () => {

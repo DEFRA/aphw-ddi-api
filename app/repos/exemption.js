@@ -51,6 +51,12 @@ const updateExemption = async (data, user, transaction) => {
   }
 }
 
+const canSetExemptDueToInsuranceRenewal = (data, cdo, today = new Date()) => {
+  return data.insurance?.renewalDate > today &&
+    cdo.dog_breaches?.length === 1 &&
+    cdo.dog_breaches[0].breach_category?.short_name === 'INSURANCE_EXPIRED'
+}
+
 const autoChangeStatus = async (cdo, data, transaction) => {
   const currentStatus = cdo?.status?.status
 
@@ -64,12 +70,14 @@ const autoChangeStatus = async (cdo, data, transaction) => {
     if (!cdo.registration.cdo_issued && data.cdoIssued) {
       return await updateStatus(cdo.index_number, constants.statuses.PreExempt, transaction)
     }
+  } else if (currentStatus === constants.statuses.InBreach && canSetExemptDueToInsuranceRenewal(data, cdo)) {
+    return await updateStatus(cdo.index_number, constants.statuses.Exempt, transaction)
   }
 
-  if (cdo.registration.exemption_order?.exemption_order === '2023') {
-    if (!cdo.registration.withdrawn && data.withdrawn) {
-      return await updateStatus(cdo.index_number, constants.statuses.Withdrawn, transaction)
-    }
+  if (cdo.registration.exemption_order?.exemption_order === '2023' &&
+      !cdo.registration.withdrawn &&
+      data.withdrawn) {
+    return await updateStatus(cdo.index_number, constants.statuses.Withdrawn, transaction)
   }
 
   return currentStatus
@@ -150,5 +158,6 @@ const handleCourt = async (registration, data, cdo) => {
 module.exports = {
   updateExemption,
   setDefaults,
-  autoChangeStatus
+  autoChangeStatus,
+  canSetExemptDueToInsuranceRenewal
 }
