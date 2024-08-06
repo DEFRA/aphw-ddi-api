@@ -70,10 +70,8 @@ const autoChangeStatus = async (cdo, data, transaction) => {
     if (!cdo.registration.cdo_issued && data.cdoIssued) {
       return await updateStatus(cdo.index_number, constants.statuses.PreExempt, transaction)
     }
-  } else if (currentStatus === constants.statuses.InBreach) {
-    if (canSetExemptDueToInsuranceRenewal(data, cdo)) {
-      return await updateStatus(cdo.index_number, constants.statuses.Exempt, transaction)
-    }
+  } else if (currentStatus === constants.statuses.InBreach && canSetExemptDueToInsuranceRenewal(data, cdo)) {
+    return await updateStatus(cdo.index_number, constants.statuses.Exempt, transaction)
   }
 
   if (cdo.registration.exemption_order?.exemption_order === '2023') {

@@ -581,6 +581,32 @@ describe('Exemption repo', () => {
 
       expect(updateStatus).toHaveBeenCalledWith('ED123', 'Exempt', {})
     })
+
+    test('autoChangeStatus should handle In-breach but not change if insurance not in future', async () => {
+      updateStatus.mockResolvedValue()
+
+      const cdo = {
+        index_number: 'ED123',
+        status: {
+          status: 'In breach'
+        },
+        dog_breaches: [
+          { id: 1, breach_category: { id: 11, short_name: 'INSURANCE_EXPIRED' } }
+        ],
+        registration: {}
+      }
+
+      const payload = {
+        certificateIssued: new Date().toISOString(),
+        insurance: {
+          renewalDate: new Date(2020, 1, 1)
+        }
+      }
+
+      await autoChangeStatus(cdo, payload, {})
+
+      expect(updateStatus).not.toHaveBeenCalled()
+    })
   })
 
   describe('setDefaults', () => {
