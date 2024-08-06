@@ -51,16 +51,15 @@ const updateExemption = async (data, user, transaction) => {
   }
 }
 
-const canSetExemptDueToInsuranceRenewal = (data, cdo) => {
-  console.log('breaches', cdo)
-  // if (data.insurance?.renewalDate > new Date() && cdo.dog_breaches)
-  return false
+const canSetExemptDueToInsuranceRenewal = (data, cdo, today = new Date()) => {
+  return data.insurance?.renewalDate > today &&
+    cdo.dog_breaches?.length === 1 &&
+    cdo.dog_breaches[0].breach_category?.short_name === 'INSURANCE_EXPIRED'
 }
 
 const autoChangeStatus = async (cdo, data, transaction) => {
   const currentStatus = cdo?.status?.status
 
-  console.log('cdo', cdo)
   if (currentStatus === constants.statuses.PreExempt) {
     if (!cdo.registration.non_compliance_letter_sent && data.nonComplianceLetterSent) {
       return await updateStatus(cdo.index_number, constants.statuses.Failed, transaction)
@@ -161,5 +160,6 @@ const handleCourt = async (registration, data, cdo) => {
 module.exports = {
   updateExemption,
   setDefaults,
-  autoChangeStatus
+  autoChangeStatus,
+  canSetExemptDueToInsuranceRenewal
 }

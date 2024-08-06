@@ -29,7 +29,7 @@ describe('Exemption repo', () => {
   jest.mock('../../../../app/messaging/send-event')
   const { sendEvent } = require('../../../../app/messaging/send-event')
 
-  const { updateExemption, autoChangeStatus, setDefaults } = require('../../../../app/repos/exemption')
+  const { updateExemption, autoChangeStatus, setDefaults, canSetExemptDueToInsuranceRenewal } = require('../../../../app/repos/exemption')
 
   beforeEach(async () => {
     jest.clearAllMocks()
@@ -555,6 +555,32 @@ describe('Exemption repo', () => {
 
       expect(updateStatus).toHaveBeenCalledWith('ED123', 'Withdrawn', {})
     })
+
+    test('autoChangeStatus should handle In-breach to Exempt', async () => {
+      updateStatus.mockResolvedValue()
+
+      const cdo = {
+        index_number: 'ED123',
+        status: {
+          status: 'In breach'
+        },
+        dog_breaches: [
+          { id: 1, breach_category: { id: 11, short_name: 'INSURANCE_EXPIRED' } }
+        ],
+        registration: {}
+      }
+
+      const payload = {
+        certificateIssued: new Date().toISOString(),
+        insurance: {
+          renewalDate: new Date(2040, 1, 1)
+        }
+      }
+
+      await autoChangeStatus(cdo, payload, {})
+
+      expect(updateStatus).toHaveBeenCalledWith('ED123', 'Exempt', {})
+    })
   })
 
   describe('setDefaults', () => {
@@ -672,6 +698,70 @@ describe('Exemption repo', () => {
         ...registration,
         cdo_expiry: '2024-07-01T00:00:00.000Z'
       })
+    })
+  })
+
+  describe('canSetExemptDueToInsuranceRenewal', () => {
+    test('handles no breach categories', () => {
+      const data = { insurance: { renewalDate: new Date(2099, 1, 1) } }
+      const cdo = {
+        dogIndex: 12345
+      }
+      expect(canSetExemptDueToInsuranceRenewal(data, cdo)).toBeFalsy()
+    })
+
+    test('handles no breach categories 2', () => {
+      const data = { insurance: { renewalDate: new Date(2099, 1, 1) } }
+      const cdo = {
+        dogIndex: 12345,
+        dog_breaches: []
+      }
+      expect(canSetExemptDueToInsuranceRenewal(data, cdo)).toBeFalsy()
+    })
+
+    test('handles multiple breach categories', () => {
+      const data = { insurance: { renewalDate: new Date(2099, 1, 1) } }
+      const cdo = {
+        dogIndex: 12345,
+        dog_breaches: [
+          { id: 1, breach_category: { id: 11, short_name: 'INSURANCE_EXPIRED' } },
+          { id: 2, breach_category: { id: 3, short_name: 'NOT_ON_LEAD_OR_MUZZLED' } }
+        ]
+      }
+      expect(canSetExemptDueToInsuranceRenewal(data, cdo)).toBeFalsy()
+    })
+
+    test('handles breach of wrong category', () => {
+      const data = { insurance: { renewalDate: new Date(2099, 1, 1) } }
+      const cdo = {
+        dogIndex: 12345,
+        dog_breaches: [
+          { id: 1, breach_category: { id: 12, short_name: 'NEUTERING_DEADLINE_EXCEEDED' } }
+        ]
+      }
+      expect(canSetExemptDueToInsuranceRenewal(data, cdo)).toBeFalsy()
+    })
+
+    test('handles single insurance expired breach category', () => {
+      const data = { insurance: { renewalDate: new Date(2099, 1, 1) } }
+      const cdo = {
+        dogIndex: 12345,
+        dog_breaches: [
+          { id: 1, breach_category: { id: 11, short_name: 'INSURANCE_EXPIRED' } }
+        ]
+      }
+      expect(canSetExemptDueToInsuranceRenewal(data, cdo)).toBeTruthy()
+    })
+
+    test('handles changing comparison date', () => {
+      const data = { insurance: { renewalDate: new Date(2099, 1, 1) } }
+      const cdo = {
+        dogIndex: 12345,
+        dog_breaches: [
+          { id: 1, breach_category: { id: 11, short_name: 'INSURANCE_EXPIRED' } }
+        ]
+      }
+      expect(canSetExemptDueToInsuranceRenewal(data, cdo, new Date(2099, 1, 2))).toBeFalsy()
     })
   })
 })
