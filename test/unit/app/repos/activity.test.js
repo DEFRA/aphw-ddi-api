@@ -44,10 +44,67 @@ describe('Activity repo', () => {
       const activities = await getActivityList('sent', 'dog')
 
       expect(activities).toHaveLength(3)
-      expect(activities).toStrictEqual([
-        { id: 1, label: 'act 1', display_order: 1 },
-        { id: 2, label: 'act 2', display_order: 2 },
-        { id: 3, label: 'act 3', display_order: 3 }
+      expect(activities).toEqual([
+        {
+          id: 1,
+          label: 'act 1',
+          display_order: 1,
+          activity_type_id: 1,
+          activity_source_id: 1,
+          activity_event_id: 1,
+          activity_type: {
+            id: 1,
+            name: 'sent'
+          },
+          activity_source: {
+            id: 1,
+            name: 'dog'
+          },
+          activity_event: {
+            id: 1,
+            target_primary_key: 'dog'
+          }
+        },
+        {
+          id: 2,
+          label: 'act 2',
+          display_order: 2,
+          activity_type_id: 1,
+          activity_source_id: 1,
+          activity_event_id: 1,
+          activity_type: {
+            id: 1,
+            name: 'sent'
+          },
+          activity_source: {
+            id: 1,
+            name: 'dog'
+          },
+          activity_event: {
+            id: 1,
+            target_primary_key: 'dog'
+          }
+        },
+        {
+          id: 3,
+          label: 'act 3',
+          display_order: 3,
+          activity_type_id: 1,
+          activity_source_id: 1,
+          activity_event_id: 1,
+          activity_type: {
+            id: 1,
+            name: 'sent'
+          },
+          activity_source: {
+            id: 1,
+            name: 'dog'
+          },
+          activity_event: {
+            id: 1,
+            target_primary_key: 'dog'
+          }
+        }
       ])
     })
 
@@ -64,7 +121,26 @@ describe('Activity repo', () => {
 
       const activity = await getActivityById(2)
 
-      expect(activity).toEqual({ id: 2, label: 'act 2', display_order: 2 })
+      expect(activity).toEqual({
+        id: 2,
+        label: 'act 2',
+        display_order: 2,
+        activity_type_id: 1,
+        activity_source_id: 1,
+        activity_event_id: 1,
+        activity_type: {
+          id: 1,
+          name: 'sent'
+        },
+        activity_source: {
+          id: 1,
+          name: 'dog'
+        },
+        activity_event: {
+          id: 1,
+          target_primary_key: 'dog'
+        }
+      })
     })
 
     test('should throw if error', async () => {
@@ -80,7 +156,26 @@ describe('Activity repo', () => {
 
       const activity = await getActivityByLabel('act 2')
 
-      expect(activity).toEqual({ id: 2, label: 'act 2', display_order: 2 })
+      expect(activity).toEqual({
+        id: 2,
+        label: 'act 2',
+        display_order: 2,
+        activity_type_id: 1,
+        activity_source_id: 1,
+        activity_event_id: 1,
+        activity_type: {
+          id: 1,
+          name: 'sent'
+        },
+        activity_source: {
+          id: 1,
+          name: 'dog'
+        },
+        activity_event: {
+          id: 1,
+          target_primary_key: 'dog'
+        }
+      })
     })
 
     test('should throw if error', async () => {

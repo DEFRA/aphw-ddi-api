@@ -14,7 +14,7 @@ describe('Export endpoint', () => {
     await server.initialize()
   })
 
-  test('GET /export-audit route returns 200 and calls sendEventToAudit', async () => {
+  test('GET /export-audit route returns 204 and calls sendEventToAudit', async () => {
     const options = {
       method: 'GET',
       url: '/export-audit'
@@ -24,11 +24,11 @@ describe('Export endpoint', () => {
 
     const response = await server.inject(options)
 
-    expect(response.statusCode).toBe(200)
+    expect(response.statusCode).toBe(204)
     expect(sendEventToAudit).toHaveBeenCalled()
   })
 
-  test('GET /export-create-file route returns 200 and calls createExportFile', async () => {
+  test('GET /export-create-file route returns 204 and calls createExportFile', async () => {
     const options = {
       method: 'GET',
       url: '/export-create-file'
@@ -38,7 +38,7 @@ describe('Export endpoint', () => {
 
     const response = await server.inject(options)
 
-    expect(response.statusCode).toBe(200)
+    expect(response.statusCode).toBe(204)
     expect(runExportNow).toHaveBeenCalled()
   })
 

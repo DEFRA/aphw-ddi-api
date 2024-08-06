@@ -1,3 +1,6 @@
+const { personDaoBuilder } = require('../../../mocks/person')
+const { buildDogDao, buildRegistrationDao } = require('../../../mocks/cdo/get')
+
 describe('Dog endpoint', () => {
   const createServer = require('../../../../app/server')
   let server
@@ -65,7 +68,7 @@ describe('Dog endpoint', () => {
 
   describe('GET /dog-owner/ED123', () => {
     test('GET /dog-owner/ED123 route returns 200', async () => {
-      getOwnerOfDog.mockResolvedValue({ person: { id: 123, personReference: 'P-123' } })
+      getOwnerOfDog.mockResolvedValue({ person: personDaoBuilder({ id: 123, personReference: 'P-123' }) })
 
       const options = {
         method: 'GET',
@@ -78,17 +81,10 @@ describe('Dog endpoint', () => {
 
     test('GET /dog-owner/ED123?includeDogs=true route returns 200', async () => {
       getPersonAndDogsByIndex.mockResolvedValue({
-        person: {
+        person: personDaoBuilder({
           id: 123,
           personReference: 'P-123',
-          addresses: [
-            {
-              address: {
-                address_line_1: 'address line 1',
-                country: { id: 1, country: 'England' }
-              }
-            }
-          ],
+          person_contacts: [],
           registered_people: [
             {
               firstName: 'Ralph',
@@ -100,7 +96,25 @@ describe('Dog endpoint', () => {
               }
             }
           ]
-        }
+        }),
+        dogs: [
+          {
+            breed: 'XL Bully',
+            colour: null,
+            dogReference: '225c332e-ba51-4e17-becf-fe3880252cd6',
+            id: 300095,
+            indexNumber: 'ED300095',
+            microchipNumber: null,
+            microchipNumber2: null,
+            name: 'Rex329',
+            sex: null,
+            status: {
+              status: 'Interim exempt'
+            },
+            tattoo: null,
+            birthDate: null
+          }
+        ]
       })
 
       const options = {
@@ -194,8 +208,10 @@ describe('Dog endpoint', () => {
       }
 
       const response = await server.inject(options)
+      const payload = JSON.parse(response.payload)
 
       expect(response.statusCode).toBe(400)
+      expect(payload.errors.length).toBeGreaterThan(0)
     })
 
     test('PUT /dog route returns 500 with db error', async () => {
@@ -213,7 +229,7 @@ describe('Dog endpoint', () => {
     })
 
     test('PUT /dog route returns 200 with valid payload', async () => {
-      updateDog.mockResolvedValue()
+      updateDog.mockResolvedValue(buildDogDao({ id: 123, index_number: 'ABC123' }))
 
       const options = {
         method: 'PUT',
@@ -294,7 +310,10 @@ describe('Dog endpoint', () => {
 
   describe('GET /dogs', () => {
     test('/dogs?forPurging=true returns 200 for step 1', async () => {
-      getOldDogs.mockResolvedValue([{ dog_id: 123, dog: { id: 123, index_number: 'ED123' } }])
+      getOldDogs.mockResolvedValue([{
+        ...buildRegistrationDao({ dog_id: 123 }),
+        dog: buildDogDao({ id: 123, index_number: 'ED123' })
+      }])
 
       const options = {
         method: 'GET',
@@ -307,7 +326,10 @@ describe('Dog endpoint', () => {
     })
 
     test('/dogs?forPurging=true returns 200 for step 2', async () => {
-      getOldDogs.mockResolvedValue([{ dog_id: 123, dog: { id: 123, index_number: 'ED123' } }])
+      getOldDogs.mockResolvedValue([{
+        ...buildRegistrationDao({ dog_id: 123 }),
+        dog: buildDogDao({ id: 123, index_number: 'ED123' })
+      }])
 
       const options = {
         method: 'GET',
@@ -320,7 +342,10 @@ describe('Dog endpoint', () => {
     })
 
     test('/dogs?forPurging=true returns 200 when sort params', async () => {
-      getOldDogs.mockResolvedValue([{ dog_id: 123, dog: { id: 123, index_number: 'ED123' } }])
+      getOldDogs.mockResolvedValue([{
+        ...buildRegistrationDao({ dog_id: 123 }),
+        dog: buildDogDao({ id: 123, index_number: 'ED123' })
+      }])
 
       const options = {
         method: 'GET',
@@ -333,7 +358,10 @@ describe('Dog endpoint', () => {
     })
 
     test('/dogs?forPurging=true returns 200 and handle date override', async () => {
-      getOldDogs.mockResolvedValue([{ dog_id: 123, dog: { id: 123, index_number: 'ED123' } }])
+      getOldDogs.mockResolvedValue([{
+        ...buildRegistrationDao({ dog_id: 123 }),
+        dog: buildDogDao({ id: 123, index_number: 'ED123' })
+      }])
 
       const options = {
         method: 'GET',
@@ -346,7 +374,10 @@ describe('Dog endpoint', () => {
     })
 
     test('/dogs returns 200 but doesnt call getOldDogs', async () => {
-      getOldDogs.mockResolvedValue([{ dog_id: 123, dog: { id: 123, index_number: 'ED123' } }])
+      getOldDogs.mockResolvedValue([{
+        ...buildRegistrationDao({ dog_id: 123 }),
+        dog: buildDogDao({ id: 123, index_number: 'ED123' })
+      }])
 
       const options = {
         method: 'GET',
@@ -359,7 +390,10 @@ describe('Dog endpoint', () => {
     })
 
     test('/dogs returns 400 when bad param', async () => {
-      getOldDogs.mockResolvedValue([{ dog_id: 123, dog: { id: 123, index_number: 'ED123' } }])
+      getOldDogs.mockResolvedValue([{
+        ...buildRegistrationDao({ dog_id: 123 }),
+        dog: buildDogDao({ id: 123, index_number: 'ED123' })
+      }])
 
       const options = {
         method: 'GET',

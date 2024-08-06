@@ -1,6 +1,6 @@
 const Joi = require('joi')
 
-const schema = Joi.object({
+const createCdoRequestSchema = Joi.object({
   owner: Joi.object({
     firstName: Joi.string().required(),
     lastName: Joi.string().required(),
@@ -32,4 +32,35 @@ const schema = Joi.object({
   })).min(1).required()
 })
 
-module.exports = schema
+const createCdoResponseSchema = Joi.object({
+  owner: {
+    firstName: Joi.string().required(),
+    lastName: Joi.string().required(),
+    birthDate: Joi.string().optional().allow('').allow(null),
+    personReference: Joi.string().required(),
+    address: Joi.object({
+      addressLine1: Joi.string(),
+      addressLine2: Joi.string().allow(null).allow(''),
+      town: Joi.string().required(),
+      postcode: Joi.string().required(),
+      country: Joi.string().required()
+    })
+  },
+  enforcementDetails: Joi.object({
+    policeForce: Joi.string().allow(null).allow(''),
+    court: Joi.string().allow(null).allow(''),
+    legislationOfficer: Joi.string().allow(null).allow('')
+  }),
+  dogs: Joi.array().items(Joi.object({
+    indexNumber: Joi.string(),
+    name: Joi.string().optional().allow('').allow(null),
+    status: Joi.string().required(),
+    breed: Joi.string().required(),
+    cdoIssued: Joi.date().allow(null),
+    cdoExpiry: Joi.date().allow(null),
+    microchipNumber: Joi.string().optional().allow('').allow(null),
+    interimExemption: Joi.date().allow(null)
+  }))
+})
+
+module.exports = { createCdoRequestSchema, createCdoResponseSchema }

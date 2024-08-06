@@ -1,7 +1,8 @@
 const { getCompanies, addCompany, deleteCompany } = require('../repos/insurance')
 const { createAdminItem } = require('../schema/admin/create')
 const { getCallingUser } = require('../auth/get-user')
-const { insuranceQuerySchema } = require('../schema/admin/insurance')
+const { insuranceQuerySchema, getInsuranceCompaniesResponseSchema, insuranceCompanySchema } = require('../schema/admin/insurance')
+const { conflictSchema } = require('../schema/common/response/conflict')
 
 const sortKeys = {
   updatedAt: 'updated_at',
@@ -14,6 +15,12 @@ module.exports = [
     path: '/insurance/companies',
     options: {
       tags: ['api'],
+      notes: ['Gets all the active insurance companies on DDI'],
+      response: {
+        status: {
+          200: getInsuranceCompaniesResponseSchema
+        }
+      },
       validate: {
         query: insuranceQuerySchema,
         failAction: (request, h, err) => {
@@ -39,6 +46,13 @@ module.exports = [
     path: '/insurance/companies',
     options: {
       tags: ['api'],
+      notes: ['Add a new insurance company'],
+      response: {
+        status: {
+          200: insuranceCompanySchema,
+          409: conflictSchema
+        }
+      },
       validate: {
         payload: createAdminItem,
         failAction: (request, h, err) => {
@@ -60,7 +74,16 @@ module.exports = [
   {
     method: 'DELETE',
     path: '/insurance/companies/{insuranceCompanyId}',
-    options: { tags: ['api'] },
+    options: {
+      tags: ['api'],
+      notes: ['Deletes insurance company with insurance Company Id'],
+      response: {
+        status: {
+          204: undefined,
+          404: undefined
+        }
+      }
+    },
     handler: async (request, h) => {
       const insuranceCompanyId = request.params.insuranceCompanyId
       await deleteCompany(insuranceCompanyId, getCallingUser(request))
