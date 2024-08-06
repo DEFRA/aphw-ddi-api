@@ -74,10 +74,10 @@ const autoChangeStatus = async (cdo, data, transaction) => {
     return await updateStatus(cdo.index_number, constants.statuses.Exempt, transaction)
   }
 
-  if (cdo.registration.exemption_order?.exemption_order === '2023') {
-    if (!cdo.registration.withdrawn && data.withdrawn) {
-      return await updateStatus(cdo.index_number, constants.statuses.Withdrawn, transaction)
-    }
+  if (cdo.registration.exemption_order?.exemption_order === '2023' &&
+      !cdo.registration.withdrawn &&
+      data.withdrawn) {
+    return await updateStatus(cdo.index_number, constants.statuses.Withdrawn, transaction)
   }
 
   return currentStatus
