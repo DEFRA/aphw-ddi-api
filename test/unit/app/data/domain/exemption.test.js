@@ -27,10 +27,10 @@ describe('Exemption', () => {
     nonComplianceLetterSent: null,
     applicationPackSent: null,
     form2Sent: null,
-    insurance_details_recorded: null,
-    microchip_number_recorded: null,
-    application_fee_payment_recorded: null,
-    verification_dates_recorded: null
+    insuranceDetailsRecorded: null,
+    microchipNumberRecorded: null,
+    applicationFeePaymentRecorded: null,
+    verificationDatesRecorded: null
   }
 
   test('should create an exemption', () => {
@@ -57,10 +57,10 @@ describe('Exemption', () => {
       nonComplianceLetterSent: null,
       applicationPackSent: null,
       form2Sent: null,
-      insurance_details_recorded: null,
-      microchip_number_recorded: null,
-      application_fee_payment_recorded: null,
-      verification_dates_recorded: null
+      insuranceDetailsRecorded: null,
+      microchipNumberRecorded: null,
+      applicationFeePaymentRecorded: null,
+      verificationDatesRecorded: null
     }))
     expect(exemption).toBeInstanceOf(Exemption)
   })
@@ -99,7 +99,12 @@ describe('Exemption', () => {
         company: dogsTrustCompany,
         renewalDate: validRenewalDate
       }])
+      expect(exemption.insuranceDetailsRecorded).toEqual(expect.any(Date))
       expect(exemption.getChanges()).toEqual([
+        {
+          key: 'insuranceDetailsRecorded',
+          value: expect.any(Date)
+        },
         {
           key: 'insurance',
           value: {

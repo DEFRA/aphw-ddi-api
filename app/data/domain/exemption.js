@@ -45,10 +45,10 @@ class Exemption extends Changeable {
     this.nonComplianceLetterSent = exemptionProperties.nonComplianceLetterSent
     this.applicationPackSent = exemptionProperties.applicationPackSent
     this._form2Sent = exemptionProperties.form2Sent
-    this._insurance_details_recorded = exemptionProperties.insurance_details_recorded
-    this._microchip_number_recorded = exemptionProperties.microchip_number_recorded
-    this._application_fee_payment_recorded = exemptionProperties.application_fee_payment_recorded
-    this._verification_dates_recorded = exemptionProperties.verification_dates_recorded
+    this._insuranceDetailsRecorded = exemptionProperties.insuranceDetailsRecorded
+    this._microchipNumberRecorded = exemptionProperties.microchipNumberRecorded
+    this._applicationFeePaymentRecorded = exemptionProperties.applicationFeePaymentRecorded
+    this._verificationDatesRecorded = exemptionProperties.verificationDatesRecorded
   }
 
   sendApplicationPack (auditDate, callback) {
@@ -80,20 +80,20 @@ class Exemption extends Changeable {
     return this._certificateIssued
   }
 
-  get insurance_details_recorded () {
-    return this._insurance_details_recorded
+  get insuranceDetailsRecorded () {
+    return this._insuranceDetailsRecorded
   }
 
-  get microchip_number_recorded () {
-    return this._microchip_number_recorded
+  get microchipNumberRecorded () {
+    return this._microchipNumberRecorded
   }
 
-  get application_fee_payment_recorded () {
-    return this._application_fee_payment_recorded
+  get applicationFeePaymentRecorded () {
+    return this._applicationFeePaymentRecorded
   }
 
-  get verification_dates_recorded () {
-    return this._verification_dates_recorded
+  get verificationDatesRecorded () {
+    return this._verificationDatesRecorded
   }
 
   _checkIfInsuranceIsValid () {
@@ -140,7 +140,10 @@ class Exemption extends Changeable {
     } else {
       this._insurance = [insurance]
     }
+    const timestamp = new Date()
+    this._insuranceDetailsRecorded = timestamp
 
+    this._updates.update('insuranceDetailsRecorded', timestamp)
     this._updates.update('insurance', insurance, callback)
   }
 
