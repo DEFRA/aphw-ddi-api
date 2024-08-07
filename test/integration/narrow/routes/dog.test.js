@@ -214,6 +214,23 @@ describe('Dog endpoint', () => {
       expect(payload.errors.length).toBeGreaterThan(0)
     })
 
+    test('PUT /dog route returns 400 with invalid response', async () => {
+      updateDog.mockResolvedValue({ id2: 123 })
+
+      const options = {
+        method: 'PUT',
+        url: '/dog',
+        payload: {}
+      }
+
+      const response = await server.inject(options)
+      const payload = JSON.parse(response.payload)
+
+      expect(response.statusCode).toBe(400)
+      expect(payload.errors.length).toBeGreaterThan(0)
+      expect(payload.errors[0]).toBe('"indexNumber" is required')
+    })
+
     test('PUT /dog route returns 500 with db error', async () => {
       updateDog.mockImplementation(() => { throw new Error('dog error') })
 
