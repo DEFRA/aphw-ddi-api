@@ -308,4 +308,18 @@ describe('Exemption', () => {
       expect(exemption.certificateIssued).toBeNull()
     })
   })
+
+  describe('recordMicrochipNumber', () => {
+    test('should update microchip number recorded date', () => {
+      const exemption = new Exemption(buildExemption())
+      expect(exemption.microchipNumberRecorded).toBeNull()
+
+      exemption.recordMicrochipNumber()
+      expect(exemption.microchipNumberRecorded).toEqual(expect.any(Date))
+      expect(exemption.getChanges()).toEqual([{
+        key: 'microchipNumberRecorded',
+        value: expect.any(Date)
+      }])
+    })
+  })
 })

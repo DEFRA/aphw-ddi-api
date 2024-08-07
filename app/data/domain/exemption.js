@@ -194,5 +194,11 @@ class Exemption extends Changeable {
       callback
     )
   }
+
+  recordMicrochipNumber () {
+    const timestamp = new Date()
+    this._microchipNumberRecorded = timestamp
+    this._updates.update('microchipNumberRecorded', timestamp)
+  }
 }
 module.exports = Exemption
