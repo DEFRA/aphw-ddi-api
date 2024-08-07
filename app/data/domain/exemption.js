@@ -170,13 +170,16 @@ class Exemption extends Changeable {
     if (microchipVerification.getTime() > Date.now() || neuteringConfirmation.getTime() > Date.now()) {
       throw new InvalidDateError('Date must be today or in the past')
     }
+    const verificationDatesRecorded = new Date()
     this._microchipVerification = microchipVerification
     this._neuteringConfirmation = neuteringConfirmation
+    this._verificationDatesRecorded = verificationDatesRecorded
     this._updates.update(
       'verificationDateRecorded',
       {
         microchipVerification,
-        neuteringConfirmation
+        neuteringConfirmation,
+        verificationDatesRecorded
       },
       callback)
   }

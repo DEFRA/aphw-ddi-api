@@ -218,18 +218,21 @@ describe('Exemption', () => {
     test('should start with correct details', () => {
       expect(exemption.microchipVerification).toBeNull()
       expect(exemption.neuteringConfirmation).toBeNull()
+      expect(exemption.verificationDatesRecorded).toBeNull()
     })
 
     test('should verifyDates', () => {
       exemption.verifyDates(microchipVerification, neuteringConfirmation, callback)
       expect(exemption.microchipVerification).toEqual(microchipVerification)
       expect(exemption.neuteringConfirmation).toEqual(neuteringConfirmation)
+      expect(exemption.verificationDatesRecorded).toEqual(expect.any(Date))
       expect(exemption.getChanges()).toEqual([
         {
           key: 'verificationDateRecorded',
           value: {
             neuteringConfirmation,
-            microchipVerification
+            microchipVerification,
+            verificationDatesRecorded: expect.any(Date)
           },
           callback
         }
