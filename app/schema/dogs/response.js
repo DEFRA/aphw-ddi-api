@@ -6,7 +6,7 @@ const dogMicrochip = Joi.object({
   microchip_id: Joi.number(),
   microchip: Joi.object({
     id: Joi.number(),
-    microchip_number: Joi.string()
+    microchip_number: Joi.string().allow('').allow(null)
   })
 })
 

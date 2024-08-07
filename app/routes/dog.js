@@ -110,7 +110,12 @@ module.exports = [
       tags: ['api'],
       notes: ['Update details on an individual dog'],
       response: {
-        schema: updateDogSchema
+        schema: updateDogSchema,
+        failAction: (request, h, err) => {
+          console.error('dog put response schema error', err)
+
+          return h.response({ errors: err.details.map(e => e.message) }).code(400).takeover()
+        }
       },
       validate: {
         payload: putDogPayloadSchema,
