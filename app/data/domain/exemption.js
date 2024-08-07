@@ -22,6 +22,10 @@ const { InvalidDataError } = require('../../errors/domain/invalidData')
  * @property {Date|null} nonComplianceLetterSent
  * @property {Date|null} applicationPackSent
  * @property {Date|null} form2Sent
+ * @property {Date|null} insurance_details_recorded
+ * @property {Date|null} microchip_number_recorded
+ * @property {Date|null} application_fee_payment_recorded
+ * @property {Date|null} verification_dates_recorded
  */
 class Exemption extends Changeable {
   constructor (exemptionProperties) {
@@ -41,6 +45,10 @@ class Exemption extends Changeable {
     this.nonComplianceLetterSent = exemptionProperties.nonComplianceLetterSent
     this.applicationPackSent = exemptionProperties.applicationPackSent
     this._form2Sent = exemptionProperties.form2Sent
+    this._insurance_details_recorded = exemptionProperties.insurance_details_recorded
+    this._microchip_number_recorded = exemptionProperties.microchip_number_recorded
+    this._application_fee_payment_recorded = exemptionProperties.application_fee_payment_recorded
+    this._verification_dates_recorded = exemptionProperties.verification_dates_recorded
   }
 
   sendApplicationPack (auditDate, callback) {
@@ -70,6 +78,22 @@ class Exemption extends Changeable {
 
   get certificateIssued () {
     return this._certificateIssued
+  }
+
+  get insurance_details_recorded () {
+    return this._insurance_details_recorded
+  }
+
+  get microchip_number_recorded () {
+    return this._microchip_number_recorded
+  }
+
+  get application_fee_payment_recorded () {
+    return this._application_fee_payment_recorded
+  }
+
+  get verification_dates_recorded () {
+    return this._verification_dates_recorded
   }
 
   _checkIfInsuranceIsValid () {

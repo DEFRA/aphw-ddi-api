@@ -26,7 +26,11 @@ describe('Exemption', () => {
     joinedExemptionScheme: '2023-12-10',
     nonComplianceLetterSent: null,
     applicationPackSent: null,
-    form2Sent: null
+    form2Sent: null,
+    insurance_details_recorded: null,
+    microchip_number_recorded: null,
+    application_fee_payment_recorded: null,
+    verification_dates_recorded: null
   }
 
   test('should create an exemption', () => {
@@ -52,7 +56,11 @@ describe('Exemption', () => {
       joinedExemptionScheme: '2023-12-10',
       nonComplianceLetterSent: null,
       applicationPackSent: null,
-      form2Sent: null
+      form2Sent: null,
+      insurance_details_recorded: null,
+      microchip_number_recorded: null,
+      application_fee_payment_recorded: null,
+      verification_dates_recorded: null
     }))
     expect(exemption).toBeInstanceOf(Exemption)
   })
