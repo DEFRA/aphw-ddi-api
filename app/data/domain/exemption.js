@@ -154,7 +154,10 @@ class Exemption extends Changeable {
     if (applicationFeePaid.getTime() > Date.now()) {
       throw new InvalidDateError('Date must be today or in the past')
     }
+    const timestamp = new Date()
     this._applicationFeePaid = applicationFeePaidDate
+    this._applicationFeePaymentRecorded = timestamp
+    this._updates.update('applicationFeePaymentRecorded', timestamp)
     this._updates.update('applicationFeePaid', applicationFeePaid, callback)
   }
 

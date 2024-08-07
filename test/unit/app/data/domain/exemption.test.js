@@ -158,6 +158,7 @@ describe('Exemption', () => {
 
     test('should start with correct details', () => {
       expect(exemption.applicationFeePaid).toBeNull()
+      expect(exemption.applicationFeePaymentRecorded).toBeNull()
     })
 
     test('should not allow a date in the future', () => {
@@ -169,7 +170,12 @@ describe('Exemption', () => {
       const validApplicationFeePaid = new Date('2024-07-04')
       exemption.setApplicationFee(validApplicationFeePaid, callback)
       expect(exemption.applicationFeePaid).toEqual(validApplicationFeePaid)
+      expect(exemption.applicationFeePaymentRecorded).toEqual(expect.any(Date))
       expect(exemption.getChanges()).toEqual([
+        {
+          key: 'applicationFeePaymentRecorded',
+          value: expect.any(Date)
+        },
         {
           key: 'applicationFeePaid',
           value: validApplicationFeePaid,

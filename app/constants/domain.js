@@ -2,6 +2,7 @@ const domain = {
   updateKeys: {
     applicationPackSent: ['applicationPackSent'],
     applicationFeePaid: ['applicationFeePaid'],
+    applicationFeePaymentRecorded: ['applicationFeePaymentRecorded'],
     form2Sent: ['form2Sent'],
     neuteringConfirmation: ['neuteringConfirmation'],
     microchipVerification: ['microchipVerification'],
@@ -15,8 +16,7 @@ const domain = {
     microchip: ['microchip'],
     status: ['status'],
     insuranceDetailsRecorded: ['insuranceDetailsRecorded'],
-    microchipNumberRecorded: ['microchipNumberRecorded'],
-    applicationFeePaymentRecorded: ['applicationFeePaymentRecorded']
+    microchipNumberRecorded: ['microchipNumberRecorded']
   },
   updateMappings: {
     applicationPackSent: 'dog.registration.application_pack_sent',
