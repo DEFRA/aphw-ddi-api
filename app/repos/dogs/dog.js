@@ -12,7 +12,7 @@ const { preChangedDogAudit, postChangedDogAudit } = require('../../dto/auditing/
 const { removeDogFromSearchIndex } = require('../search')
 const { getPersonByReference } = require('../people')
 const { addYears } = require('../../lib/date-helpers')
-const { calculateNeuteringDeadline, stripTime } = require('../../dto/dto-helper')
+const { calculateNeuteringDeadline, stripTime, extractEmail } = require('../../dto/dto-helper')
 const { setBreaches } = require('../breaches')
 const { mapDogDaoToDog } = require('../mappers/cdo')
 
@@ -142,7 +142,8 @@ const buildSwitchedOwner = async (owner) => {
     firstName: owner.first_name,
     lastName: owner.last_name,
     address: owner.addresses ? owner.addresses[0].address : owner.address,
-    organisationName: ownerInfo?.organisation?.organisation_name
+    organisationName: ownerInfo?.organisation?.organisation_name,
+    email: extractEmail(ownerInfo?.person_contacts)
   }
 }
 
