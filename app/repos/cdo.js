@@ -122,6 +122,10 @@ const domain = require('../constants/domain')
  * @property {null|Date} non_compliance_letter_sent
  * @property {null|Date} application_pack_sent
  * @property {null|Date} form_two_sent
+ * @property {null|Date} insurance_details_recorded
+ * @property {null|Date} microchip_number_recorded
+ * @property {null|Date} application_fee_payment_recorded
+ * @property {null|Date} verification_dates_recorded
  * @property {null|string} deleted_at
  * @property {string} created_at
  * @property {string} updated_at

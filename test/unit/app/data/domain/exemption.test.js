@@ -26,7 +26,11 @@ describe('Exemption', () => {
     joinedExemptionScheme: '2023-12-10',
     nonComplianceLetterSent: null,
     applicationPackSent: null,
-    form2Sent: null
+    form2Sent: null,
+    insuranceDetailsRecorded: null,
+    microchipNumberRecorded: null,
+    applicationFeePaymentRecorded: null,
+    verificationDatesRecorded: null
   }
 
   test('should create an exemption', () => {
@@ -52,7 +56,11 @@ describe('Exemption', () => {
       joinedExemptionScheme: '2023-12-10',
       nonComplianceLetterSent: null,
       applicationPackSent: null,
-      form2Sent: null
+      form2Sent: null,
+      insuranceDetailsRecorded: null,
+      microchipNumberRecorded: null,
+      applicationFeePaymentRecorded: null,
+      verificationDatesRecorded: null
     }))
     expect(exemption).toBeInstanceOf(Exemption)
   })
@@ -91,7 +99,12 @@ describe('Exemption', () => {
         company: dogsTrustCompany,
         renewalDate: validRenewalDate
       }])
+      expect(exemption.insuranceDetailsRecorded).toEqual(expect.any(Date))
       expect(exemption.getChanges()).toEqual([
+        {
+          key: 'insuranceDetailsRecorded',
+          value: expect.any(Date)
+        },
         {
           key: 'insurance',
           value: {
@@ -145,6 +158,7 @@ describe('Exemption', () => {
 
     test('should start with correct details', () => {
       expect(exemption.applicationFeePaid).toBeNull()
+      expect(exemption.applicationFeePaymentRecorded).toBeNull()
     })
 
     test('should not allow a date in the future', () => {
@@ -156,7 +170,12 @@ describe('Exemption', () => {
       const validApplicationFeePaid = new Date('2024-07-04')
       exemption.setApplicationFee(validApplicationFeePaid, callback)
       expect(exemption.applicationFeePaid).toEqual(validApplicationFeePaid)
+      expect(exemption.applicationFeePaymentRecorded).toEqual(expect.any(Date))
       expect(exemption.getChanges()).toEqual([
+        {
+          key: 'applicationFeePaymentRecorded',
+          value: expect.any(Date)
+        },
         {
           key: 'applicationFeePaid',
           value: validApplicationFeePaid,
@@ -199,18 +218,21 @@ describe('Exemption', () => {
     test('should start with correct details', () => {
       expect(exemption.microchipVerification).toBeNull()
       expect(exemption.neuteringConfirmation).toBeNull()
+      expect(exemption.verificationDatesRecorded).toBeNull()
     })
 
     test('should verifyDates', () => {
       exemption.verifyDates(microchipVerification, neuteringConfirmation, callback)
       expect(exemption.microchipVerification).toEqual(microchipVerification)
       expect(exemption.neuteringConfirmation).toEqual(neuteringConfirmation)
+      expect(exemption.verificationDatesRecorded).toEqual(expect.any(Date))
       expect(exemption.getChanges()).toEqual([
         {
           key: 'verificationDateRecorded',
           value: {
             neuteringConfirmation,
-            microchipVerification
+            microchipVerification,
+            verificationDatesRecorded: expect.any(Date)
           },
           callback
         }
@@ -293,6 +315,20 @@ describe('Exemption', () => {
       expect(() => exemption.issueCertificate(auditDate, callback)).toThrow(new SequenceViolationError('CDO must be complete in order to issue certificate'))
 
       expect(exemption.certificateIssued).toBeNull()
+    })
+  })
+
+  describe('recordMicrochipNumber', () => {
+    test('should update microchip number recorded date', () => {
+      const exemption = new Exemption(buildExemption())
+      expect(exemption.microchipNumberRecorded).toBeNull()
+
+      exemption.recordMicrochipNumber()
+      expect(exemption.microchipNumberRecorded).toEqual(expect.any(Date))
+      expect(exemption.getChanges()).toEqual([{
+        key: 'microchipNumberRecorded',
+        value: expect.any(Date)
+      }])
     })
   })
 })
