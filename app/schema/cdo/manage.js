@@ -29,10 +29,11 @@ const verifyDatesSchema = Joi.object({
 
 const taskSchemaBuilder = (key) => Joi.object({
   key: Joi.string().allow(key),
-  available: Joi.boolean(),
-  completed: Joi.boolean(),
-  readonly: Joi.boolean()
-}).required().unknown()
+  available: Joi.boolean().required(),
+  completed: Joi.boolean().required(),
+  readonly: Joi.boolean().required(),
+  timestamp: Joi.date().optional().allow(null)
+}).unknown()
 
 const manageCdoResponseSchema = Joi.object({
   tasks: Joi.object({

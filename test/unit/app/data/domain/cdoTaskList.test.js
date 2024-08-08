@@ -332,6 +332,47 @@ describe('CdoTaskList', () => {
       }))
     })
 
+    test('should not be completable given insurance renewal date is in the past', () => {
+      const tomorrow = new Date()
+      tomorrow.setDate(tomorrow.getDate() + 100)
+
+      const exemptionProperties = buildExemption({
+        applicationPackSent: new Date('2024-06-25'),
+        form2Sent: new Date('2024-05-24'),
+        applicationFeePaid: new Date('2024-06-24'),
+        neuteringConfirmation: new Date('2024-02-10'),
+        microchipVerification: new Date('2024-03-09'),
+        insuranceDetailsRecorded: null,
+        insurance: [buildCdoInsurance({
+          company: 'Dogs R Us',
+          insuranceRenewal: tomorrow
+        })]
+      })
+      const dogProperties = buildCdoDog({
+        microchipNumber: '123456789012345'
+      })
+      const cdo = buildCdo({
+        dog: dogProperties,
+        exemption: exemptionProperties
+      })
+      const cdoTaskList = new CdoTaskList(cdo)
+      expect(cdoTaskList.insuranceDetailsRecorded).toEqual(expect.objectContaining({
+        key: 'insuranceDetailsRecorded',
+        available: true,
+        completed: false,
+        readonly: false,
+        timestamp: undefined
+      }))
+
+      expect(cdoTaskList.certificateIssued).toEqual(expect.objectContaining({
+        key: 'certificateIssued',
+        available: false,
+        completed: false,
+        readonly: false,
+        timestamp: undefined
+      }))
+    })
+
     test('should be completable given insurance renewal date is today', () => {
       const today = new Date()
       today.setHours(0)
@@ -344,6 +385,8 @@ describe('CdoTaskList', () => {
         applicationFeePaid: new Date('2024-06-24'),
         neuteringConfirmation: new Date('2024-02-10'),
         microchipVerification: new Date('2024-03-09'),
+        insuranceDetailsRecorded: new Date('2024-08-07'),
+        microchipNumberRecorded: new Date('2024-08-07'),
         insurance: [buildCdoInsurance({
           company: 'Dogs R Us',
           renewalDate: today
@@ -454,6 +497,8 @@ describe('CdoTaskList', () => {
         applicationFeePaid: new Date('2024-06-24'),
         neuteringConfirmation: new Date('2024-02-10'),
         microchipVerification: new Date('2024-03-09'),
+        insuranceDetailsRecorded: new Date('2024-08-07'),
+        microchipNumberRecorded: new Date('2024-08-07'),
         insurance: [buildCdoInsurance({
           company: 'Dogs R Us',
           renewalDate: new Date('2025-06-25')
@@ -484,6 +529,8 @@ describe('CdoTaskList', () => {
         applicationFeePaid: new Date('2024-06-24'),
         neuteringConfirmation: new Date('2024-02-10'),
         microchipVerification: new Date('2024-03-09'),
+        insuranceDetailsRecorded: new Date('2024-08-07'),
+        microchipNumberRecorded: new Date('2024-08-07'),
         insurance: [buildCdoInsurance({
           company: 'Dogs R Us',
           renewalDate: in60Days
@@ -508,7 +555,7 @@ describe('CdoTaskList', () => {
         available: true,
         completed: true,
         readonly: false,
-        timestamp: in60Days
+        timestamp: new Date('2024-08-07')
       }))
       expect(cdoTaskList.microchipNumberRecorded).toEqual(expect.objectContaining({
         key: 'microchipNumberRecorded',
@@ -621,9 +668,14 @@ describe('CdoTaskList', () => {
 
         cdoTaskList.recordInsuranceDetails(dogsTrustCompany, renewalDate, transactionCallback)
         expect(cdoTaskList.insuranceDetailsRecorded.completed).toBe(true)
+        expect(cdoTaskList.insuranceDetailsRecorded.timestamp).toEqual(expect.any(Date))
         expect(cdoTaskList.cdoSummary.insuranceCompany).toBe(dogsTrustCompany)
         expect(cdoTaskList.cdoSummary.insuranceRenewal).toBeInstanceOf(Date)
         expect(cdoTaskList.getUpdates().exemption[1]).toEqual({
+          key: 'insuranceDetailsRecorded',
+          value: expect.any(Date)
+        })
+        expect(cdoTaskList.getUpdates().exemption[2]).toEqual({
           key: 'insurance',
           value: {
             company: dogsTrustCompany,
@@ -631,7 +683,7 @@ describe('CdoTaskList', () => {
           },
           callback: expect.any(Function)
         })
-        cdoTaskList.getUpdates().exemption[1].callback()
+        cdoTaskList.getUpdates().exemption[2].callback()
         expect(transactionCallback).toHaveBeenCalledTimes(2)
       })
     })
@@ -640,12 +692,18 @@ describe('CdoTaskList', () => {
       test('should start with correct details', () => {
         expect(cdoTaskList.microchipNumberRecorded.completed).toBe(false)
         expect(cdoTaskList.cdoSummary.microchipNumber).toBeUndefined()
+        expect(cdoTaskList.microchipNumberRecorded.timestamp).toBeUndefined()
       })
 
       test('should record microchip number', () => {
         cdoTaskList.recordMicrochipNumber('123456789012345', null, transactionCallback)
         expect(cdoTaskList.cdoSummary.microchipNumber).toEqual('123456789012345')
+        expect(cdoTaskList.microchipNumberRecorded.timestamp).toEqual(expect.any(Date))
         cdoTaskList.getUpdates().dog[0].callback()
+        expect(cdoTaskList.getUpdates().exemption[3]).toEqual({
+          key: 'microchipNumberRecorded',
+          value: expect.any(Date)
+        })
         expect(transactionCallback).toHaveBeenCalledTimes(3)
       })
     })
@@ -660,7 +718,7 @@ describe('CdoTaskList', () => {
         const applicationFeePaid = new Date('2024-07-03')
         cdoTaskList.recordApplicationFee(applicationFeePaid, transactionCallback)
         expect(cdoTaskList.cdoSummary.applicationFeePaid).toEqual(applicationFeePaid)
-        cdoTaskList.getUpdates().exemption[0].callback()
+        cdoTaskList.getUpdates().exemption[5].callback()
         expect(transactionCallback).toHaveBeenCalledTimes(4)
       })
     })
@@ -678,12 +736,12 @@ describe('CdoTaskList', () => {
         cdoTaskList.sendForm2(sentDate, transactionCallback)
         expect(cdoTaskList.form2Sent.completed).toBe(true)
         expect(cdoTaskList.cdoSummary.form2Sent).toEqual(sentDate)
-        expect(cdoTaskList.getUpdates().exemption[3]).toEqual({
+        expect(cdoTaskList.getUpdates().exemption[6]).toEqual({
           key: 'form2Sent',
           value: sentDate,
           callback: transactionCallback
         })
-        cdoTaskList.getUpdates().exemption[3].callback()
+        cdoTaskList.getUpdates().exemption[6].callback()
         expect(transactionCallback).toHaveBeenCalledTimes(5)
       })
 

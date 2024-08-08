@@ -22,10 +22,10 @@ const { InvalidDataError } = require('../../errors/domain/invalidData')
  * @property {Date|null} nonComplianceLetterSent
  * @property {Date|null} applicationPackSent
  * @property {Date|null} form2Sent
- * @property {Date|null} insurance_details_recorded
- * @property {Date|null} microchip_number_recorded
- * @property {Date|null} application_fee_payment_recorded
- * @property {Date|null} verification_dates_recorded
+ * @property {Date|null} insuranceDetailsRecorded
+ * @property {Date|null} microchipNumberRecorded
+ * @property {Date|null} applicationFeePaymentRecorded
+ * @property {Date|null} verificationDatesRecorded
  */
 class Exemption extends Changeable {
   constructor (exemptionProperties) {

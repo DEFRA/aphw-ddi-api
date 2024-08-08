@@ -91,13 +91,16 @@ class CdoTaskList {
   }
 
   get insuranceDetailsRecorded () {
-    const [insurance] = this._cdo.exemption.insurance
+    const completed =
+      this.cdoSummary.insuranceCompany !== undefined &&
+      CdoTaskList.dateStageComplete(this.cdoSummary.insuranceRenewal) &&
+      dateTodayOrInFuture(this.cdoSummary.insuranceRenewal) &&
+      this._cdo.exemption.insuranceDetailsRecorded !== null
 
-    const completed = this.cdoSummary.insuranceCompany !== undefined && CdoTaskList.dateStageComplete(this.cdoSummary.insuranceRenewal) && dateTodayOrInFuture(this.cdoSummary.insuranceRenewal)
     let timestamp
 
     if (completed) {
-      timestamp = insurance?.renewalDate
+      timestamp = this._cdo.exemption.insuranceDetailsRecorded
     }
 
     return new CdoTask(
@@ -111,12 +114,21 @@ class CdoTaskList {
   }
 
   get microchipNumberRecorded () {
+    let timestamp
+
+    const completed = this.cdoSummary.microchipNumber !== undefined && this._cdo.exemption.microchipNumberRecorded instanceof Date
+
+    if (completed) {
+      timestamp = this._cdo.exemption.microchipNumberRecorded
+    }
+
     return new CdoTask(
       'microchipNumberRecorded',
       {
         available: this._actionPackStageComplete,
-        completed: this.cdoSummary.microchipNumber !== undefined
-      }
+        completed
+      },
+      timestamp
     )
   }
 
@@ -192,6 +204,7 @@ class CdoTaskList {
 
   recordMicrochipNumber (microchipNumber1, duplicateMicrochipNumber, callback) {
     this._actionPackCompleteGuard()
+    this._cdo.exemption.recordMicrochipNumber()
     this._cdo.dog.setMicrochipNumber(microchipNumber1, duplicateMicrochipNumber, callback)
   }
 
