@@ -133,13 +133,19 @@ class CdoTaskList {
   }
 
   get applicationFeePaid () {
+    let timestamp
+    const completed = CdoTaskList.dateStageComplete(this.cdoSummary.applicationFeePaid) && this._cdo.exemption.applicationFeePaymentRecorded
+
+    if (completed) {
+      timestamp = this._cdo.exemption.applicationFeePaymentRecorded
+    }
     return new CdoTask(
       'applicationFeePaid',
       {
         available: this._actionPackStageComplete,
         completed: CdoTaskList.dateStageComplete(this.cdoSummary.applicationFeePaid)
       },
-      this.cdoSummary.applicationFeePaid
+      timestamp
     )
   }
 

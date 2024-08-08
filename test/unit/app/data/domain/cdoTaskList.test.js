@@ -531,6 +531,7 @@ describe('CdoTaskList', () => {
         microchipVerification: new Date('2024-03-09'),
         insuranceDetailsRecorded: new Date('2024-08-07'),
         microchipNumberRecorded: new Date('2024-08-07'),
+        applicationFeePaymentRecorded: new Date('2024-08-07'),
         insurance: [buildCdoInsurance({
           company: 'Dogs R Us',
           renewalDate: in60Days
@@ -562,14 +563,14 @@ describe('CdoTaskList', () => {
         available: true,
         completed: true,
         readonly: false,
-        timestamp: undefined
+        timestamp: expect.any(Date)
       }))
       expect(cdoTaskList.applicationFeePaid).toEqual(expect.objectContaining({
         key: 'applicationFeePaid',
         available: true,
         completed: true,
         readonly: false,
-        timestamp: new Date('2024-06-24')
+        timestamp: new Date('2024-08-07')
       }))
 
       expect(cdoTaskList.form2Sent).toEqual(expect.objectContaining({
@@ -718,6 +719,8 @@ describe('CdoTaskList', () => {
         const applicationFeePaid = new Date('2024-07-03')
         cdoTaskList.recordApplicationFee(applicationFeePaid, transactionCallback)
         expect(cdoTaskList.cdoSummary.applicationFeePaid).toEqual(applicationFeePaid)
+        expect(cdoTaskList.applicationFeePaid.completed).toBe(true)
+        expect(cdoTaskList.applicationFeePaid.timestamp).toEqual(expect.any(Date))
         cdoTaskList.getUpdates().exemption[5].callback()
         expect(transactionCallback).toHaveBeenCalledTimes(4)
       })
