@@ -127,15 +127,20 @@ describe('CdoService', function () {
       expect(mockCdoRepository.getCdoTaskList).toHaveBeenCalledWith(cdoIndexNumber)
       expect(mockCdoRepository.saveCdoTaskList).toHaveBeenCalledWith(cdoTaskList)
       expect(result).toEqual(cdoTaskList)
-      expect(cdoTaskList.getUpdates().exemption).toEqual([{
-        key: 'insurance',
-        value: {
-          company: 'Dog\'s Trust',
-          renewalDate: inTheFuture
+      expect(cdoTaskList.getUpdates().exemption).toEqual([
+        {
+          key: 'insuranceDetailsRecorded',
+          value: expect.any(Date)
         },
-        callback: expect.any(Function)
-      }])
-      await cdoTaskList.getUpdates().exemption[0].callback()
+        {
+          key: 'insurance',
+          value: {
+            company: 'Dog\'s Trust',
+            renewalDate: inTheFuture
+          },
+          callback: expect.any(Function)
+        }])
+      await cdoTaskList.getUpdates().exemption[1].callback()
       expect(sendUpdateToAudit).toHaveBeenCalledWith(
         'exemption',
         {
@@ -221,15 +226,20 @@ describe('CdoService', function () {
 
       expect(mockCdoRepository.getCdoTaskList).toHaveBeenCalledWith(cdoIndexNumber)
       expect(cdoTaskList.applicationFeePaid.completed).toBe(true)
-      expect(cdoTaskList.getUpdates().exemption).toEqual([{
-        key: 'applicationFeePaid',
-        value: applicationFeePaid,
-        callback: expect.any(Function)
-      }])
+      expect(cdoTaskList.getUpdates().exemption).toEqual([
+        {
+          key: 'applicationFeePaymentRecorded',
+          value: expect.any(Date)
+        },
+        {
+          key: 'applicationFeePaid',
+          value: applicationFeePaid,
+          callback: expect.any(Function)
+        }])
 
       expect(mockCdoRepository.saveCdoTaskList).toHaveBeenCalledWith(cdoTaskList)
       expect(result).toEqual(cdoTaskList)
-      await cdoTaskList.getUpdates().exemption[0].callback()
+      await cdoTaskList.getUpdates().exemption[1].callback()
       expect(sendUpdateToAudit).toHaveBeenCalledWith(
         'exemption',
         {
@@ -321,7 +331,8 @@ describe('CdoService', function () {
         key: 'verificationDateRecorded',
         value: {
           microchipVerification,
-          neuteringConfirmation
+          neuteringConfirmation,
+          verificationDatesRecorded: expect.any(Date)
         },
         callback: expect.any(Function)
       }])
@@ -369,6 +380,9 @@ describe('CdoService', function () {
           applicationFeePaid: new Date(),
           neuteringConfirmation: new Date(),
           microchipVerification: new Date(),
+          insuranceDetailsRecorded: new Date(),
+          microchipNumberRecorded: new Date(),
+          verificationDatesRecorded: new Date(),
           insurance: [buildCdoInsurance({
             renewalDate: new Date('9999-01-01'),
             company: 'Dogs Trust'

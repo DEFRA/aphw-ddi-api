@@ -657,7 +657,8 @@ describe('CDO repo', () => {
       })
       const editedDog = buildCdoDao({
         registration: buildRegistrationDao({
-          save: jest.fn()
+          save: jest.fn(),
+          insurance_details_recorded: new Date()
         }),
         insurance: [buildInsuranceDao({
           company: buildInsuranceCompanyDao({
@@ -695,9 +696,16 @@ describe('CDO repo', () => {
 
     test('should update microchip number', async () => {
       const dog = buildCdoDao({
-        dog_microchips: []
+        dog_microchips: [],
+        registration: buildRegistrationDao({
+          save: jest.fn()
+        })
       })
       const editedDog = buildCdoDao({
+        registration: buildRegistrationDao({
+          microchip_number_recorded: new Date(),
+          save: jest.fn()
+        }),
         dog_microchips: [buildDogMicrochipDao({
           microchip: buildMicrochipDao({
             microchip_number: '123456789012345'
@@ -795,6 +803,10 @@ describe('CDO repo', () => {
           neuteringConfirmation: new Date(),
           microchipVerification: new Date(),
           applicationFeePaid: new Date(),
+          insuranceDetailsRecorded: new Date(),
+          microchipNumberRecorded: new Date(),
+          applicationFeePaymentRecorded: new Date(),
+          verificationDatesRecorded: new Date(),
           insurance: [buildInsuranceDao({
             renewalDate: new Date()
           })]
