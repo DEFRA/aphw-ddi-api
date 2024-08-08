@@ -161,7 +161,7 @@ const updateSearchIndexDog = async (dogFromDb, statuses, transaction) => {
       person_reference: indexRow.json.personReference,
       first_name: indexRow.json.firstName,
       last_name: indexRow.json.lastName,
-      email: indexRow.email,
+      email: indexRow.json.email,
       address: indexRow.json.address,
       organisation_name: indexRow.json.organisationName
     }
