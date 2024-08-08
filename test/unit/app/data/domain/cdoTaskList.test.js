@@ -387,6 +387,7 @@ describe('CdoTaskList', () => {
         microchipVerification: new Date('2024-03-09'),
         insuranceDetailsRecorded: new Date('2024-08-07'),
         microchipNumberRecorded: new Date('2024-08-07'),
+        verificationDatesRecorded: new Date('2024-08-07'),
         insurance: [buildCdoInsurance({
           company: 'Dogs R Us',
           renewalDate: today
@@ -499,6 +500,7 @@ describe('CdoTaskList', () => {
         microchipVerification: new Date('2024-03-09'),
         insuranceDetailsRecorded: new Date('2024-08-07'),
         microchipNumberRecorded: new Date('2024-08-07'),
+        verificationDatesRecorded: new Date('2024-08-07'),
         insurance: [buildCdoInsurance({
           company: 'Dogs R Us',
           renewalDate: new Date('2025-06-25')
@@ -532,6 +534,7 @@ describe('CdoTaskList', () => {
         insuranceDetailsRecorded: new Date('2024-08-07'),
         microchipNumberRecorded: new Date('2024-08-07'),
         applicationFeePaymentRecorded: new Date('2024-08-07'),
+        verificationDatesRecorded: new Date('2024-08-07'),
         insurance: [buildCdoInsurance({
           company: 'Dogs R Us',
           renewalDate: in60Days
@@ -586,7 +589,7 @@ describe('CdoTaskList', () => {
         available: true,
         completed: true,
         readonly: false,
-        timestamp: new Date('2024-03-09')
+        timestamp: new Date('2024-08-07')
       }))
 
       expect(cdoTaskList.certificateIssued).toEqual(expect.objectContaining({
@@ -770,6 +773,8 @@ describe('CdoTaskList', () => {
         cdoTaskList.verifyDates(microchipVerification, neuteringConfirmation, transactionCallback)
         expect(cdoTaskList.cdoSummary.microchipVerification).toEqual(microchipVerification)
         expect(cdoTaskList.cdoSummary.neuteringConfirmation).toEqual(neuteringConfirmation)
+        expect(cdoTaskList.verificationDateRecorded.completed).toBe(true)
+        expect(cdoTaskList.verificationDateRecorded.timestamp).toEqual(expect.any(Date))
         cdoTaskList.getUpdates().exemption[0].callback()
         expect(transactionCallback).toHaveBeenCalledTimes(6)
       })

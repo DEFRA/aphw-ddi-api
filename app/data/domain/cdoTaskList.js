@@ -168,10 +168,11 @@ class CdoTaskList {
 
     if (
       CdoTaskList.dateStageComplete(this.cdoSummary.microchipVerification) &&
-      CdoTaskList.dateStageComplete(this.cdoSummary.neuteringConfirmation)
+      CdoTaskList.dateStageComplete(this.cdoSummary.neuteringConfirmation) &&
+      this._cdo.exemption.verificationDatesRecorded
     ) {
       completed = true
-      timestamp = new Date(Math.max(this.cdoSummary.microchipVerification.getTime(), this.cdoSummary.neuteringConfirmation.getTime()))
+      timestamp = this._cdo.exemption.verificationDatesRecorded
     }
 
     return new CdoTask(
