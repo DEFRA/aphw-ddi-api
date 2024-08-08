@@ -171,6 +171,10 @@ describe('cdo mappers', () => {
         form_two_sent: '2024-05-07',
         microchip_verification: '2024-05-06',
         neutering_confirmation: '2024-05-08',
+        insurance_details_recorded: '2024-05-08',
+        microchip_number_recorded: '2024-05-08',
+        application_fee_payment_recorded: '2024-05-08',
+        verification_dates_recorded: '2024-05-08',
         certificate_issued: '2024-05-04'
       })
       const insurance = [buildInsuranceDao({
@@ -187,6 +191,10 @@ describe('cdo mappers', () => {
       expect(mappedRegistration.neuteringConfirmation).toEqual(new Date('2024-05-08'))
       expect(mappedRegistration.certificateIssued).toEqual(new Date('2024-05-04'))
       expect(mappedRegistration.insurance[0].renewalDate).toEqual(new Date('2024-05-04'))
+      expect(mappedRegistration.insuranceDetailsRecorded).toEqual(new Date('2024-05-08'))
+      expect(mappedRegistration.microchipNumberRecorded).toEqual(new Date('2024-05-08'))
+      expect(mappedRegistration.applicationFeePaymentRecorded).toEqual(new Date('2024-05-08'))
+      expect(mappedRegistration.verificationDatesRecorded).toEqual(new Date('2024-05-08'))
     })
   })
 

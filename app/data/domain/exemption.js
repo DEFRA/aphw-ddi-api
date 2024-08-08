@@ -22,6 +22,10 @@ const { InvalidDataError } = require('../../errors/domain/invalidData')
  * @property {Date|null} nonComplianceLetterSent
  * @property {Date|null} applicationPackSent
  * @property {Date|null} form2Sent
+ * @property {Date|null} insuranceDetailsRecorded
+ * @property {Date|null} microchipNumberRecorded
+ * @property {Date|null} applicationFeePaymentRecorded
+ * @property {Date|null} verificationDatesRecorded
  */
 class Exemption extends Changeable {
   constructor (exemptionProperties) {
@@ -41,6 +45,10 @@ class Exemption extends Changeable {
     this.nonComplianceLetterSent = exemptionProperties.nonComplianceLetterSent
     this.applicationPackSent = exemptionProperties.applicationPackSent
     this._form2Sent = exemptionProperties.form2Sent
+    this._insuranceDetailsRecorded = exemptionProperties.insuranceDetailsRecorded
+    this._microchipNumberRecorded = exemptionProperties.microchipNumberRecorded
+    this._applicationFeePaymentRecorded = exemptionProperties.applicationFeePaymentRecorded
+    this._verificationDatesRecorded = exemptionProperties.verificationDatesRecorded
   }
 
   sendApplicationPack (auditDate, callback) {
@@ -70,6 +78,22 @@ class Exemption extends Changeable {
 
   get certificateIssued () {
     return this._certificateIssued
+  }
+
+  get insuranceDetailsRecorded () {
+    return this._insuranceDetailsRecorded
+  }
+
+  get microchipNumberRecorded () {
+    return this._microchipNumberRecorded
+  }
+
+  get applicationFeePaymentRecorded () {
+    return this._applicationFeePaymentRecorded
+  }
+
+  get verificationDatesRecorded () {
+    return this._verificationDatesRecorded
   }
 
   _checkIfInsuranceIsValid () {
@@ -116,7 +140,10 @@ class Exemption extends Changeable {
     } else {
       this._insurance = [insurance]
     }
+    const timestamp = new Date()
+    this._insuranceDetailsRecorded = timestamp
 
+    this._updates.update('insuranceDetailsRecorded', timestamp)
     this._updates.update('insurance', insurance, callback)
   }
 
@@ -127,7 +154,10 @@ class Exemption extends Changeable {
     if (applicationFeePaid.getTime() > Date.now()) {
       throw new InvalidDateError('Date must be today or in the past')
     }
+    const timestamp = new Date()
     this._applicationFeePaid = applicationFeePaidDate
+    this._applicationFeePaymentRecorded = timestamp
+    this._updates.update('applicationFeePaymentRecorded', timestamp)
     this._updates.update('applicationFeePaid', applicationFeePaid, callback)
   }
 
@@ -140,13 +170,16 @@ class Exemption extends Changeable {
     if (microchipVerification.getTime() > Date.now() || neuteringConfirmation.getTime() > Date.now()) {
       throw new InvalidDateError('Date must be today or in the past')
     }
+    const verificationDatesRecorded = new Date()
     this._microchipVerification = microchipVerification
     this._neuteringConfirmation = neuteringConfirmation
+    this._verificationDatesRecorded = verificationDatesRecorded
     this._updates.update(
       'verificationDateRecorded',
       {
         microchipVerification,
-        neuteringConfirmation
+        neuteringConfirmation,
+        verificationDatesRecorded
       },
       callback)
   }
@@ -166,6 +199,12 @@ class Exemption extends Changeable {
       certificateIssued,
       callback
     )
+  }
+
+  recordMicrochipNumber () {
+    const timestamp = new Date()
+    this._microchipNumberRecorded = timestamp
+    this._updates.update('microchipNumberRecorded', timestamp)
   }
 }
 module.exports = Exemption

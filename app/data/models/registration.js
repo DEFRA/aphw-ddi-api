@@ -111,6 +111,22 @@ module.exports = (sequelize, DataTypes) => {
       type: DataTypes.DATE,
       allowNull: true
     },
+    insurance_details_recorded: {
+      type: DataTypes.DATE,
+      allowNull: true
+    },
+    microchip_number_recorded: {
+      type: DataTypes.DATE,
+      allowNull: true
+    },
+    application_fee_payment_recorded: {
+      type: DataTypes.DATE,
+      allowNull: true
+    },
+    verification_dates_recorded: {
+      type: DataTypes.DATE,
+      allowNull: true
+    },
     deleted_at: {
       type: DataTypes.DATE,
       allowNull: true

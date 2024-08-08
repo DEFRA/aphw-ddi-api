@@ -91,13 +91,16 @@ class CdoTaskList {
   }
 
   get insuranceDetailsRecorded () {
-    const [insurance] = this._cdo.exemption.insurance
+    const completed =
+      this.cdoSummary.insuranceCompany !== undefined &&
+      CdoTaskList.dateStageComplete(this.cdoSummary.insuranceRenewal) &&
+      dateTodayOrInFuture(this.cdoSummary.insuranceRenewal) &&
+      !!this._cdo.exemption.insuranceDetailsRecorded
 
-    const completed = this.cdoSummary.insuranceCompany !== undefined && CdoTaskList.dateStageComplete(this.cdoSummary.insuranceRenewal) && dateTodayOrInFuture(this.cdoSummary.insuranceRenewal)
     let timestamp
 
     if (completed) {
-      timestamp = insurance?.renewalDate
+      timestamp = this._cdo.exemption.insuranceDetailsRecorded
     }
 
     return new CdoTask(
@@ -111,23 +114,38 @@ class CdoTaskList {
   }
 
   get microchipNumberRecorded () {
+    let timestamp
+
+    const completed = this.cdoSummary.microchipNumber !== undefined && !!this._cdo.exemption.microchipNumberRecorded
+
+    if (completed) {
+      timestamp = this._cdo.exemption.microchipNumberRecorded
+    }
+
     return new CdoTask(
       'microchipNumberRecorded',
       {
         available: this._actionPackStageComplete,
-        completed: this.cdoSummary.microchipNumber !== undefined
-      }
+        completed
+      },
+      timestamp
     )
   }
 
   get applicationFeePaid () {
+    let timestamp
+    const completed = CdoTaskList.dateStageComplete(this.cdoSummary.applicationFeePaid) && !!this._cdo.exemption.applicationFeePaymentRecorded
+
+    if (completed) {
+      timestamp = this._cdo.exemption.applicationFeePaymentRecorded
+    }
     return new CdoTask(
       'applicationFeePaid',
       {
         available: this._actionPackStageComplete,
         completed: CdoTaskList.dateStageComplete(this.cdoSummary.applicationFeePaid)
       },
-      this.cdoSummary.applicationFeePaid
+      timestamp
     )
   }
 
@@ -150,10 +168,11 @@ class CdoTaskList {
 
     if (
       CdoTaskList.dateStageComplete(this.cdoSummary.microchipVerification) &&
-      CdoTaskList.dateStageComplete(this.cdoSummary.neuteringConfirmation)
+      CdoTaskList.dateStageComplete(this.cdoSummary.neuteringConfirmation) &&
+      !!this._cdo.exemption.verificationDatesRecorded
     ) {
       completed = true
-      timestamp = new Date(Math.max(this.cdoSummary.microchipVerification.getTime(), this.cdoSummary.neuteringConfirmation.getTime()))
+      timestamp = this._cdo.exemption.verificationDatesRecorded
     }
 
     return new CdoTask(
@@ -192,6 +211,7 @@ class CdoTaskList {
 
   recordMicrochipNumber (microchipNumber1, duplicateMicrochipNumber, callback) {
     this._actionPackCompleteGuard()
+    this._cdo.exemption.recordMicrochipNumber()
     this._cdo.dog.setMicrochipNumber(microchipNumber1, duplicateMicrochipNumber, callback)
   }
 
