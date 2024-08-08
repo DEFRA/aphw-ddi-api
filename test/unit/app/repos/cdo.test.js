@@ -103,7 +103,7 @@ describe('CDO repo', () => {
 
     test('createCdo should use existing owner record if valid owner personReference is supplied', async () => {
       const owner = { id: 1, ...mockPersonPayload }
-      const expectedOwner = { id: 1, ...mockCreatedPersonPayload }
+      const expectedOwner = { id: 1, ...mockCreatedPersonPayload, email: '', organisation_name: undefined }
       const dogs = [{ id: 1, ...mockCdoPayloadWithRef.dogs[0] }]
 
       getPersonByReference.mockResolvedValue(owner)
@@ -126,7 +126,7 @@ describe('CDO repo', () => {
         owner.birth_date = '1951-09-25'
       })
       owner.reload = reloadMock
-      const expectedOwner = { id: 1, ...mockCreatedPersonPayload }
+      const expectedOwner = { id: 1, ...mockCreatedPersonPayload, email: '', organisation_name: undefined }
       const dogs = [{ id: 1, ...mockCdoPayloadWithRef.dogs[0] }]
 
       getPersonByReference.mockResolvedValue(owner)
@@ -155,7 +155,7 @@ describe('CDO repo', () => {
 
     test('createCdo should handle change of owner', async () => {
       const owner = { id: 1, ...mockPersonPayload, person_reference: 'P-6076-A37C' }
-      const expectedOwner = { id: 1, ...mockCreatedPersonPayload, person_reference: 'P-6076-A37C' }
+      const expectedOwner = { id: 1, ...mockCreatedPersonPayload, person_reference: 'P-6076-A37C', email: '', organisation_name: undefined }
       const changedOwner = {
         oldOwner: {
           firstName: 'John',
@@ -189,7 +189,7 @@ describe('CDO repo', () => {
         id: expect.any(String),
         subject: 'DDI Create cdo',
         data: {
-          message: '{"actioningUser":{"username":"dev-user@test.com","displayname":"Dev User"},"operation":"created cdo","created":{"owner":{"id":1,"first_name":"Luke","last_name":"Skywalker","birth_date":"1951-09-25","person_reference":"P-6076-A37C","address":{"address_line_1":"Moisture Farm","address_line_2":null,"country":{"id":22,"country":"Tatooine"},"country_id":22,"county":"Mos Eisley State","id":1,"postcode":"ME1 2FF","town":"Eisley Dunes"}},"dog":{"id":1,"index_number":"ED100","breed":"Pit Bull Terrier","name":"Buster","cdoIssued":"2023-10-10","cdoExpiry":"2023-12-10","status":"Status 1","applicationType":"cdo","changedOwner":{"oldOwner":{"firstName":"John","lastName":"Smith","personReference":"P-6076-A37C"},"newOwner":{"firstName":"Peter","lastName":"Snow","personReference":"P-1010-23BA"}}}}}'
+          message: '{"actioningUser":{"username":"dev-user@test.com","displayname":"Dev User"},"operation":"created cdo","created":{"owner":{"id":1,"first_name":"Luke","last_name":"Skywalker","birth_date":"1951-09-25","person_reference":"P-6076-A37C","address":{"address_line_1":"Moisture Farm","address_line_2":null,"country":{"id":22,"country":"Tatooine"},"country_id":22,"county":"Mos Eisley State","id":1,"postcode":"ME1 2FF","town":"Eisley Dunes"},"email":""},"dog":{"id":1,"index_number":"ED100","breed":"Pit Bull Terrier","name":"Buster","cdoIssued":"2023-10-10","cdoExpiry":"2023-12-10","status":"Status 1","applicationType":"cdo","changedOwner":{"oldOwner":{"firstName":"John","lastName":"Smith","personReference":"P-6076-A37C"},"newOwner":{"firstName":"Peter","lastName":"Snow","personReference":"P-1010-23BA"}}}}}'
         }
       }])
       expect(sendEvent.mock.calls[1]).toEqual([{

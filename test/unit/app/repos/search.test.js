@@ -362,7 +362,8 @@ describe('Search repo', () => {
             lastName: 'Smith',
             personReference: 'P-123',
             address: { address_line_1: 'addr1', address_line_2: 'addr2', town: 'town', postcode: 'postcode' },
-            organisationName: 'org name'
+            organisationName: 'org name',
+            email: 'myemail@here.com'
           },
           destroy: mockDestroy
         }
@@ -388,7 +389,7 @@ describe('Search repo', () => {
 
       expect(sequelize.transaction).not.toHaveBeenCalled()
       expect(sequelize.models.search_index.create).toHaveBeenCalledWith({
-        search: 'P-123 John Smith  org name addr1, addr2, town, postcode',
+        search: 'P-123 John Smith myemail@here.com org name addr1, addr2, town, postcode',
         person_id: 1,
         dog_id: null,
         json: {
@@ -401,7 +402,8 @@ describe('Search repo', () => {
           dogIndex: undefined,
           dogStatus: undefined,
           microchipNumber: undefined,
-          microchipNumber2: undefined
+          microchipNumber2: undefined,
+          email: 'myemail@here.com'
         }
       },
       expect.anything())

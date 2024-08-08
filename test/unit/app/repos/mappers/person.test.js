@@ -34,7 +34,11 @@ describe('person', () => {
             }
           }
         ],
-        person_contacts: []
+        person_contacts: [
+          { contact: { id: 123, contact_type_id: 1, contact: '01912222222', contact_type: { id: 1, contact_type: 'Phone' } } },
+          { contact: { id: 124, contact_type_id: 2, contact: 'myemail@here.com', contact_type: { id: 2, contact_type: 'Email' } } },
+          { contact: { id: 125, contact_type_id: 3, contact: '01913333333', contact_type: { id: 3, contact_type: 'SecondaryPhone' } } }
+        ]
       }
       /**
        * @type {CreatedPersonDao}
@@ -57,7 +61,8 @@ describe('person', () => {
             id: 1,
             country: 'England'
           }
-        }
+        },
+        email: 'myemail@here.com'
       }
       const createdPersonDao = mapPersonDaoToCreatedPersonDao(personDao)
       expect(createdPersonDao).toEqual(expectedCreatedPersonDao)
