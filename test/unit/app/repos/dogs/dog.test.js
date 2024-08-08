@@ -894,7 +894,13 @@ describe('Dog repo', () => {
     })
 
     test('buildSwitchedOwner should handle address format 1', async () => {
-      sequelize.models.person.findAll.mockResolvedValue([{ organisation: { organisation_name: 'my org' } }])
+      sequelize.models.person.findAll.mockResolvedValue([{
+        organisation: { organisation_name: 'my org' },
+        person_contacts: [
+          { id: 1, contact: { contact: '01912222222', contact_type_id: 1, contact_type: { id: 1, contact_type: 'Phone' } } },
+          { id: 2, contact: { contact: 'myemail@here.com', contact_type_id: 2, contact_type: { id: 2, contact_type: 'Email' } } }
+        ]
+      }])
 
       const owner = {
         id: 10,
@@ -920,12 +926,18 @@ describe('Dog repo', () => {
           address_line_2: 'addr2',
           postcode: 'PS1 1PS'
         },
-        organisationName: 'my org'
+        organisationName: 'my org',
+        email: 'myemail@here.com'
       })
     })
 
     test('buildSwitchedOwner should handle address format 2', async () => {
-      sequelize.models.person.findAll.mockResolvedValue({ })
+      sequelize.models.person.findAll.mockResolvedValue([{
+        person_contacts: [
+          { id: 1, contact: { contact: '01912222222', contact_type_id: 1, contact_type: { id: 1, contact_type: 'Phone' } } },
+          { id: 2, contact: { contact: 'myemail@here.com', contact_type_id: 2, contact_type: { id: 2, contact_type: 'Email' } } }
+        ]
+      }])
 
       const owner = {
         id: 10,
@@ -953,7 +965,8 @@ describe('Dog repo', () => {
           address_line_2: 'addr2',
           postcode: 'PS1 1PS'
         },
-        organisationName: undefined
+        organisationName: undefined,
+        email: 'myemail@here.com'
       })
     })
   })
