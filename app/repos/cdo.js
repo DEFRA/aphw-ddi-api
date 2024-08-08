@@ -504,7 +504,6 @@ const saveCdoTaskList = async (cdoTaskList, transaction) => {
 
           if (!model) {
             model = cdoDao[relationship ?? field]
-            console.log('~~~~~~ Chris Debug ~~~~~~ ', 'Relationship', relationship)
           }
 
           if (model) {

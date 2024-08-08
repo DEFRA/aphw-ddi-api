@@ -95,7 +95,7 @@ class CdoTaskList {
       this.cdoSummary.insuranceCompany !== undefined &&
       CdoTaskList.dateStageComplete(this.cdoSummary.insuranceRenewal) &&
       dateTodayOrInFuture(this.cdoSummary.insuranceRenewal) &&
-      this._cdo.exemption.insuranceDetailsRecorded !== null
+      !!this._cdo.exemption.insuranceDetailsRecorded
 
     let timestamp
 
@@ -116,7 +116,7 @@ class CdoTaskList {
   get microchipNumberRecorded () {
     let timestamp
 
-    const completed = this.cdoSummary.microchipNumber !== undefined && this._cdo.exemption.microchipNumberRecorded instanceof Date
+    const completed = this.cdoSummary.microchipNumber !== undefined && !!this._cdo.exemption.microchipNumberRecorded
 
     if (completed) {
       timestamp = this._cdo.exemption.microchipNumberRecorded
@@ -134,7 +134,7 @@ class CdoTaskList {
 
   get applicationFeePaid () {
     let timestamp
-    const completed = CdoTaskList.dateStageComplete(this.cdoSummary.applicationFeePaid) && this._cdo.exemption.applicationFeePaymentRecorded
+    const completed = CdoTaskList.dateStageComplete(this.cdoSummary.applicationFeePaid) && !!this._cdo.exemption.applicationFeePaymentRecorded
 
     if (completed) {
       timestamp = this._cdo.exemption.applicationFeePaymentRecorded
@@ -169,7 +169,7 @@ class CdoTaskList {
     if (
       CdoTaskList.dateStageComplete(this.cdoSummary.microchipVerification) &&
       CdoTaskList.dateStageComplete(this.cdoSummary.neuteringConfirmation) &&
-      this._cdo.exemption.verificationDatesRecorded
+      !!this._cdo.exemption.verificationDatesRecorded
     ) {
       completed = true
       timestamp = this._cdo.exemption.verificationDatesRecorded
