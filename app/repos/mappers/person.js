@@ -1,3 +1,5 @@
+const { extractEmail } = require('../../dto/dto-helper')
+
 /**
  * @param {PersonDao} personDao
  * @returns {CreatedPersonDao}
@@ -25,7 +27,8 @@ const mapPersonDaoToCreatedPersonDao = (personDao) => {
       postcode: personDaoAddress.postcode,
       town: personDaoAddress.town
     },
-    organisation_name: personDao.organisation?.organisation_name
+    organisation_name: personDao.organisation?.organisation_name,
+    email: extractEmail(personDao.person_contacts)
   }
 }
 
