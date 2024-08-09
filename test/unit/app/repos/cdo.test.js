@@ -46,7 +46,7 @@ describe('CDO repo', () => {
   const { sendEvent } = require('../../../../app/messaging/send-event')
 
   jest.mock('../../../../app/repos/microchip')
-  const { updateMicrochip } = require('../../../../app/repos/microchip')
+  const { updateMicrochipKey } = require('../../../../app/repos/microchip')
 
   const { createCdo, getCdo, getAllCdos, getSummaryCdos, getCdoModel, getCdoTaskList, saveCdoTaskList } = require('../../../../app/repos/cdo')
 
@@ -732,7 +732,7 @@ describe('CDO repo', () => {
 
       const taskList = await saveCdoTaskList(cdoTaskList, {})
 
-      expect(updateMicrochip).toHaveBeenCalledWith(dog, '123456789012345', 1, {})
+      expect(updateMicrochipKey).toHaveBeenCalledWith(dog, '123456789012345', 1, {})
       expect(taskList.cdoSummary.microchipNumber).toEqual('123456789012345')
 
       expect(callback).toHaveBeenCalled()
