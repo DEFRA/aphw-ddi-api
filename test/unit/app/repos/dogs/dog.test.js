@@ -22,7 +22,6 @@ const { buildCdoDog, allBreaches } = require('../../../../mocks/cdo/domain')
 
 jest.mock('../../../../../app/repos/breaches')
 const { setBreaches } = require('../../../../../app/repos/breaches')
-const sequelize = require('../../../../../app/config/db')
 
 const devUser = {
   username: 'dev-user@test.com',
