@@ -459,6 +459,10 @@ const getDogByIndexNumber = async (indexNumber, t) => {
     where: { index_number: indexNumber },
     include: [
       {
+        model: sequelize.models.registration,
+        as: 'registration'
+      },
+      {
         model: sequelize.models.registered_person,
         as: 'registered_person',
         include: [{

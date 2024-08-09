@@ -88,19 +88,30 @@ const getCompanies = async (sort = { key: 'company_name', order: 'ASC' }) => {
 }
 
 const createOrUpdateInsurance = async (data, cdo, transaction) => {
+  const updateInsuranceDetailsRecorded = async (cdo, insurance, transaction) => {
+    cdo.registration.insurance_details_recorded = insurance.updated_at ?? new Date()
+    await cdo.registration.save({ transaction })
+  }
+
+  await (createOrUpdateInsuranceWithCommand(data, cdo, updateInsuranceDetailsRecorded, transaction))
+}
+
+const createOrUpdateInsuranceWithCommand = async (data, cdo, callback, transaction) => {
   const insurance = cdo.insurance.sort((a, b) => b.id - a.id)[0]
 
   if (data.insurance) {
     if (!insurance) {
-      await createInsurance(cdo.id, {
+      const insuranceDao = await createInsurance(cdo.id, {
         company: data.insurance.company,
         renewalDate: data.insurance.renewalDate
       }, transaction)
+      await callback(cdo, insuranceDao, transaction)
     } else {
-      await updateInsurance(insurance, {
+      const insuranceDao = await updateInsurance(insurance, {
         company: data.insurance.company,
         renewalDate: data.insurance.renewalDate
       }, transaction)
+      await callback(cdo, insuranceDao, transaction)
     }
   }
 }
@@ -183,6 +194,7 @@ module.exports = {
   createInsurance,
   updateInsurance,
   createOrUpdateInsurance,
+  createOrUpdateInsuranceWithCommand,
   getCompanies,
   addCompany,
   deleteCompany
