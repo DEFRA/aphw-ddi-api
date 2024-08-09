@@ -271,9 +271,13 @@ describe('Dog repo', () => {
           cdoExpiry: '2020-02-01'
         }
       })
+      expect(sequelize.models.registration.create).toHaveBeenCalledWith(expect.objectContaining({
+        microchip_number_recorded: null,
+        application_fee_payment_recorded: null
+      }), { transaction: {} })
     })
 
-    test('createDogs should handle microchip and source and insurance', async () => {
+    test('createDogs should handle microchip and source and insurance and applicationFeePaid', async () => {
       const mockDog = {
         id: 1,
         breed: 'Breed 1',
@@ -312,7 +316,8 @@ describe('Dog repo', () => {
         source: 'ROBOT',
         insurance: {
           company_name: 'Dog Insurers'
-        }
+        },
+        applicationFeePaid: '2020-01-01'
       }]
 
       const result = await createDogs(dogs, owners, enforcement, {})
@@ -331,6 +336,10 @@ describe('Dog repo', () => {
         },
         source: 'ROBOT'
       })
+      expect(sequelize.models.registration.create).toHaveBeenCalledWith(expect.objectContaining({
+        microchip_number_recorded: expect.any(Date),
+        application_fee_payment_recorded: expect.any(Date)
+      }), { transaction: {} })
     })
 
     test('createDogs should handle no microchip and source and insurance', async () => {
