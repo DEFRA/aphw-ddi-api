@@ -277,7 +277,7 @@ describe('Dog repo', () => {
       }), { transaction: {} })
     })
 
-    test('createDogs should handle microchip and source and insurance', async () => {
+    test('createDogs should handle microchip and source and insurance and applicationFeePaid', async () => {
       const mockDog = {
         id: 1,
         breed: 'Breed 1',
