@@ -52,6 +52,22 @@ const updateMicrochips = async (dogFromDb, payload, transaction) => {
 }
 
 const updateMicrochip = async (dogFromDb, newMicrochipNumber, position, transaction) => {
+  const existingMicrochip = await updateMicrochipKey(dogFromDb, newMicrochipNumber, position, transaction)
+
+  if (newMicrochipNumber) {
+    if ((
+      existingMicrochip?.microchip_number !== newMicrochipNumber
+    ) && position === 1) {
+      dogFromDb.registration.microchip_number_recorded = new Date()
+      dogFromDb.registration.save({ transaction })
+    } else if (dogFromDb.registration.microchip_number_recorded === null && position === 1) {
+      dogFromDb.registration.microchip_number_recorded = existingMicrochip.updated_at ?? new Date()
+      dogFromDb.registration.save({ transaction })
+    }
+  }
+}
+
+const updateMicrochipKey = async (dogFromDb, newMicrochipNumber, position, transaction) => {
   const existingMicrochip = await getMicrochipDetails(dogFromDb.id, position)
   if (existingMicrochip?.microchip_number !== newMicrochipNumber) {
     if (existingMicrochip) {
@@ -61,6 +77,7 @@ const updateMicrochip = async (dogFromDb, newMicrochipNumber, position, transact
       await createMicrochip(newMicrochipNumber, dogFromDb.id, transaction)
     }
   }
+  return existingMicrochip
 }
 
 const getMicrochipDetails = async (dogId, position, transaction) => {
@@ -91,6 +108,7 @@ const createMicrochip = async (microchipNumber, dogId, transaction) => {
 
 module.exports = {
   updateMicrochip,
+  updateMicrochipKey,
   updateMicrochips,
   createMicrochip,
   microchipExists

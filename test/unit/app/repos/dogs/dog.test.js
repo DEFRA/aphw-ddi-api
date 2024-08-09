@@ -600,7 +600,11 @@ describe('Dog repo', () => {
   describe('updateDog', () => {
     test('updateDog should create new transaction if not passed', async () => {
       const mockSave = jest.fn()
-      sequelize.models.dog.findOne.mockResolvedValue({ id: 123, breed: 'Breed 1', name: 'Bruno', dog_breaches: [], save: mockSave })
+      const registration = {
+        id: 123,
+        save: jest.fn()
+      }
+      sequelize.models.dog.findOne.mockResolvedValue({ id: 123, registration, breed: 'Breed 1', name: 'Bruno', dog_breaches: [], save: mockSave })
       sequelize.models.microchip.findAll.mockResolvedValue([])
       sequelize.models.microchip.create.mockResolvedValue({ id: 101 })
       sequelize.models.search_index.findAll.mockResolvedValue([])
@@ -617,7 +621,11 @@ describe('Dog repo', () => {
 
     test('updateDog should not create new transaction if one is passed', async () => {
       const mockSave = jest.fn()
-      sequelize.models.dog.findOne.mockResolvedValue({ id: 123, breed: 'Breed 1', name: 'Bruno', status: 'Failed', save: mockSave, dog_breaches: [] })
+      const registration = {
+        id: 123,
+        save: jest.fn()
+      }
+      sequelize.models.dog.findOne.mockResolvedValue({ id: 123, registration, breed: 'Breed 1', name: 'Bruno', status: 'Failed', save: mockSave, dog_breaches: [] })
       sequelize.models.microchip.findAll.mockResolvedValue([])
       sequelize.models.microchip.create.mockResolvedValue({ id: 101 })
       sequelize.models.search_index.findAll.mockResolvedValue([])
