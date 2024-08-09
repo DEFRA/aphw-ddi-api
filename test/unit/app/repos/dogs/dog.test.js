@@ -22,6 +22,7 @@ const { buildCdoDog, allBreaches } = require('../../../../mocks/cdo/domain')
 
 jest.mock('../../../../../app/repos/breaches')
 const { setBreaches } = require('../../../../../app/repos/breaches')
+const sequelize = require('../../../../../app/config/db')
 
 const devUser = {
   username: 'dev-user@test.com',
@@ -271,6 +272,10 @@ describe('Dog repo', () => {
           cdoExpiry: '2020-02-01'
         }
       })
+      expect(sequelize.models.registration.create).toHaveBeenCalledWith(expect.objectContaining({
+        microchip_number_recorded: null,
+        application_fee_payment_recorded: null
+      }), { transaction: {} })
     })
 
     test('createDogs should handle microchip and source and insurance', async () => {
@@ -312,7 +317,8 @@ describe('Dog repo', () => {
         source: 'ROBOT',
         insurance: {
           company_name: 'Dog Insurers'
-        }
+        },
+        applicationFeePaid: '2020-01-01'
       }]
 
       const result = await createDogs(dogs, owners, enforcement, {})
@@ -331,6 +337,10 @@ describe('Dog repo', () => {
         },
         source: 'ROBOT'
       })
+      expect(sequelize.models.registration.create).toHaveBeenCalledWith(expect.objectContaining({
+        microchip_number_recorded: expect.any(Date),
+        application_fee_payment_recorded: expect.any(Date)
+      }), { transaction: {} })
     })
 
     test('createDogs should handle no microchip and source and insurance', async () => {
