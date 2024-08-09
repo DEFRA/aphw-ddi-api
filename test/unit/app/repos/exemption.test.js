@@ -29,7 +29,7 @@ describe('Exemption repo', () => {
   jest.mock('../../../../app/messaging/send-event')
   const { sendEvent } = require('../../../../app/messaging/send-event')
 
-  const { updateExemption, autoChangeStatus, setDefaults, canSetExemptDueToInsuranceRenewal } = require('../../../../app/repos/exemption')
+  const { updateExemption, autoChangeStatus, setDefaults, canSetExemptDueToInsuranceRenewal, updateRegistration } = require('../../../../app/repos/exemption')
 
   beforeEach(async () => {
     jest.clearAllMocks()
@@ -385,6 +385,284 @@ describe('Exemption repo', () => {
       getPoliceForce.mockResolvedValue({ id: 1, name: 'Test Police Force' })
 
       await expect(updateExemption(data, '', {})).rejects.toThrow('Username and displayname are required for auditing')
+    })
+  })
+
+  describe('updateRegistration', () => {
+    test('should update a registration', () => {
+      const data = {
+        exemptionOrder: '2015',
+        indexNumber: 'ED123',
+        cdoIssued: '2020-01-01',
+        cdoExpiry: '2020-02-01',
+        court: 'Test Court',
+        policeForce: 'Test Police Force',
+        legislationOfficer: 'Test Officer',
+        certificateIssued: '2020-03-01',
+        applicationFeePaid: '2020-03-01',
+        neuteringConfirmation: '2020-04-01',
+        microchipVerification: '2020-04-01',
+        exemptionSchemeJoin: '2020-05-01'
+      }
+      const registration = {
+        cdo_issued: '2020-01-01',
+        cdo_expiry: '2020-02-01',
+        court_id: 1,
+        police_force_id: 1,
+        legislation_officer: 'Test Officer',
+        certificate_issued: '2020-03-01',
+        application_fee_paid: '2020-03-01',
+        neutering_confirmation: '2020-04-01',
+        microchip_verification: '2020-04-01',
+        exemption_scheme_join_date: '2020-05-01',
+        application_fee_payment_recorded: '2024-07-01',
+        verification_dates_recorded: '2024-07-01',
+        non_compliance_letter_sent: null,
+        joined_exemption_scheme: null,
+        exemption_order: {
+          exemption_order: '2015'
+        }
+      }
+      const previousRegistration = deepClone(registration)
+      updateRegistration(registration, data, { id: 1 })
+      expect(registration).toEqual(previousRegistration)
+    })
+
+    test('should update a registration and back-fill missing application_fee_payment_recorded and verification_dates_recorded', () => {
+      const data = {
+        exemptionOrder: '2015',
+        indexNumber: 'ED123',
+        cdoIssued: '2020-01-01',
+        cdoExpiry: '2020-02-01',
+        court: 'Test Court',
+        policeForce: 'Test Police Force',
+        legislationOfficer: 'Test Officer',
+        certificateIssued: '2020-03-01',
+        applicationFeePaid: '2020-03-01',
+        neuteringConfirmation: '2020-04-01',
+        microchipVerification: '2020-04-01',
+        exemptionSchemeJoin: '2020-05-01'
+      }
+      const registration = {
+        cdo_issued: '2020-01-01',
+        cdo_expiry: '2020-02-01',
+        court_id: 1,
+        police_force_id: 1,
+        legislation_officer: 'Test Officer',
+        certificate_issued: '2020-03-01',
+        application_fee_paid: '2020-03-01',
+        neutering_confirmation: '2020-04-01',
+        microchip_verification: '2020-04-01',
+        exemption_scheme_join_date: '2020-05-01',
+        application_fee_payment_recorded: null,
+        verification_dates_recorded: null,
+        non_compliance_letter_sent: null,
+        joined_exemption_scheme: null,
+        exemption_order: {
+          exemption_order: '2015'
+        }
+      }
+      updateRegistration(registration, data, { id: 1 })
+      expect(registration.application_fee_payment_recorded).toEqual(expect.any(Date))
+      expect(registration.verification_dates_recorded).toEqual(expect.any(Date))
+    })
+
+    test('should update a registration with application fee paid', () => {
+      const data = {
+        exemptionOrder: '2015',
+        indexNumber: 'ED123',
+        cdoIssued: '2020-01-01',
+        cdoExpiry: '2020-02-01',
+        court: 'Test Court',
+        policeForce: 'Test Police Force',
+        legislationOfficer: 'Test Officer',
+        certificateIssued: '2020-03-01',
+        applicationFeePaid: '2020-03-01',
+        neuteringConfirmation: '2020-04-01',
+        microchipVerification: '2020-04-01',
+        exemptionSchemeJoin: '2020-05-01'
+      }
+      const registration = {
+        cdo_issued: '2020-01-01',
+        cdo_expiry: '2020-02-01',
+        court_id: 1,
+        police_force_id: 1,
+        legislation_officer: 'Test Officer',
+        certificate_issued: '2020-03-01',
+        application_fee_paid: null,
+        neutering_confirmation: '2020-04-01',
+        microchip_verification: '2020-04-01',
+        exemption_scheme_join_date: '2020-05-01',
+        application_fee_payment_recorded: null,
+        verification_dates_recorded: '2024-07-01',
+        non_compliance_letter_sent: null,
+        joined_exemption_scheme: null,
+        exemption_order: {
+          exemption_order: '2015'
+        }
+      }
+      updateRegistration(registration, data, { id: 1 })
+      expect(registration.application_fee_paid).toEqual('2020-03-01')
+      expect(registration.application_fee_payment_recorded).toEqual(expect.any(Date))
+    })
+
+    test('should update a registration without application fee paid', () => {
+      const data = {
+        exemptionOrder: '2015',
+        indexNumber: 'ED123',
+        cdoIssued: '2020-01-01',
+        cdoExpiry: '2020-02-01',
+        court: 'Test Court',
+        policeForce: 'Test Police Force',
+        legislationOfficer: 'Test Officer',
+        certificateIssued: '2020-03-01',
+        applicationFeePaid: null,
+        neuteringConfirmation: '2020-04-01',
+        microchipVerification: '2020-04-01',
+        exemptionSchemeJoin: '2020-05-01'
+      }
+      const registration = {
+        cdo_issued: '2020-01-01',
+        cdo_expiry: '2020-02-01',
+        court_id: 1,
+        police_force_id: 1,
+        legislation_officer: 'Test Officer',
+        certificate_issued: '2020-03-01',
+        application_fee_paid: '2020-03-01',
+        neutering_confirmation: '2020-04-01',
+        microchip_verification: '2020-04-01',
+        exemption_scheme_join_date: '2020-05-01',
+        application_fee_payment_recorded: '2020-03-01',
+        verification_dates_recorded: '2024-07-01',
+        non_compliance_letter_sent: null,
+        joined_exemption_scheme: null,
+        exemption_order: {
+          exemption_order: '2015'
+        }
+      }
+      updateRegistration(registration, data, { id: 1 })
+      expect(registration.application_fee_paid).toBeNull()
+      expect(registration.application_fee_payment_recorded).toBeNull()
+    })
+
+    test('should update a registration with verification_dates_recorded', () => {
+      const data = {
+        exemptionOrder: '2015',
+        indexNumber: 'ED123',
+        cdoIssued: '2020-01-01',
+        cdoExpiry: '2020-02-01',
+        court: 'Test Court',
+        policeForce: 'Test Police Force',
+        legislationOfficer: 'Test Officer',
+        certificateIssued: '2020-03-01',
+        applicationFeePaid: '2020-03-01',
+        neuteringConfirmation: '2020-04-01',
+        microchipVerification: '2020-04-01',
+        exemptionSchemeJoin: '2020-05-01'
+      }
+      const registration = {
+        cdo_issued: '2020-01-01',
+        cdo_expiry: '2020-02-01',
+        court_id: 1,
+        police_force_id: 1,
+        legislation_officer: 'Test Officer',
+        certificate_issued: '2020-03-01',
+        application_fee_paid: null,
+        neutering_confirmation: null,
+        microchip_verification: null,
+        exemption_scheme_join_date: '2020-05-01',
+        application_fee_payment_recorded: null,
+        verification_dates_recorded: null,
+        non_compliance_letter_sent: null,
+        joined_exemption_scheme: null,
+        exemption_order: {
+          exemption_order: '2015'
+        }
+      }
+      updateRegistration(registration, data, { id: 1 })
+      expect(registration.microchip_verification).toEqual('2020-04-01')
+      expect(registration.neutering_confirmation).toEqual('2020-04-01')
+      expect(registration.verification_dates_recorded).toEqual(expect.any(Date))
+    })
+
+    test('should not update a registration with verification_dates_recorded given microchip verification is missing', () => {
+      const data = {
+        exemptionOrder: '2015',
+        indexNumber: 'ED123',
+        cdoIssued: '2020-01-01',
+        cdoExpiry: '2020-02-01',
+        court: 'Test Court',
+        policeForce: 'Test Police Force',
+        legislationOfficer: 'Test Officer',
+        certificateIssued: '2020-03-01',
+        applicationFeePaid: '2020-03-01',
+        neuteringConfirmation: '2020-04-01',
+        microchipVerification: null,
+        exemptionSchemeJoin: '2020-05-01'
+      }
+      const registration = {
+        cdo_issued: '2020-01-01',
+        cdo_expiry: '2020-02-01',
+        court_id: 1,
+        police_force_id: 1,
+        legislation_officer: 'Test Officer',
+        certificate_issued: '2020-03-01',
+        application_fee_paid: null,
+        neutering_confirmation: null,
+        microchip_verification: null,
+        exemption_scheme_join_date: '2020-05-01',
+        application_fee_payment_recorded: null,
+        verification_dates_recorded: null,
+        non_compliance_letter_sent: null,
+        joined_exemption_scheme: null,
+        exemption_order: {
+          exemption_order: '2015'
+        }
+      }
+      updateRegistration(registration, data, { id: 1 })
+      expect(registration.microchip_verification).toBeNull()
+      expect(registration.neutering_confirmation).toEqual('2020-04-01')
+      expect(registration.verification_dates_recorded).toBeNull()
+    })
+
+    test('should not update a registration with verification_dates_recorded given neuteringConfirmation is missing', () => {
+      const data = {
+        exemptionOrder: '2015',
+        indexNumber: 'ED123',
+        cdoIssued: '2020-01-01',
+        cdoExpiry: '2020-02-01',
+        court: 'Test Court',
+        policeForce: 'Test Police Force',
+        legislationOfficer: 'Test Officer',
+        certificateIssued: '2020-03-01',
+        applicationFeePaid: '2020-03-01',
+        neuteringConfirmation: null,
+        microchipVerification: '2020-04-01',
+        exemptionSchemeJoin: '2020-05-01'
+      }
+      const registration = {
+        cdo_issued: '2020-01-01',
+        cdo_expiry: '2020-02-01',
+        court_id: 1,
+        police_force_id: 1,
+        legislation_officer: 'Test Officer',
+        certificate_issued: '2020-03-01',
+        application_fee_paid: null,
+        neutering_confirmation: null,
+        microchip_verification: null,
+        exemption_scheme_join_date: '2020-05-01',
+        application_fee_payment_recorded: null,
+        verification_dates_recorded: '2020-05-01',
+        non_compliance_letter_sent: null,
+        joined_exemption_scheme: null,
+        exemption_order: {
+          exemption_order: '2015'
+        }
+      }
+      updateRegistration(registration, data, { id: 1 })
+      expect(registration.neutering_confirmation).toBeNull()
+      expect(registration.microchip_verification).toEqual('2020-04-01')
+      expect(registration.verification_dates_recorded).toBeNull()
     })
   })
 

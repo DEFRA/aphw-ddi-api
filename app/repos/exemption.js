@@ -116,6 +116,18 @@ const updateRegistration = (registration, data, policeForce) => {
   registration.microchip_verification = data.microchipVerification ?? null
   registration.joined_exemption_scheme = data.joinedExemptionScheme ?? null
   registration.non_compliance_letter_sent = data.nonComplianceLetterSent ?? null
+
+  if (data.applicationFeePaid && !registration.application_fee_payment_recorded) {
+    registration.application_fee_payment_recorded = new Date()
+  } else if (!data.applicationFeePaid) {
+    registration.application_fee_payment_recorded = null
+  }
+
+  if (data.neuteringConfirmation && data.microchipVerification && !registration.verification_dates_recorded) {
+    registration.verification_dates_recorded = new Date()
+  } else if (!data.neuteringConfirmation || !data.microchipVerification) {
+    registration.verification_dates_recorded = null
+  }
 }
 
 const handleOrder2023 = (registration, data) => {
@@ -159,5 +171,6 @@ module.exports = {
   updateExemption,
   setDefaults,
   autoChangeStatus,
-  canSetExemptDueToInsuranceRenewal
+  canSetExemptDueToInsuranceRenewal,
+  updateRegistration
 }
