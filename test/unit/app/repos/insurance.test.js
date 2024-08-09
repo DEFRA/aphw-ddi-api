@@ -224,7 +224,9 @@ describe('Insurance repo', () => {
   describe('createOrUpdateInsurance', () => {
     test('createOrUpdateInsurance should create if not exists', async () => {
       const mockCreate = sequelize.models.insurance.create
-      mockCreate.mockResolvedValue()
+      mockCreate.mockResolvedValue({
+        updated_at: new Date('2024-07-01')
+      })
       const mockUpdate = jest.fn()
 
       const data = {
@@ -236,7 +238,10 @@ describe('Insurance repo', () => {
 
       const cdo = {
         id: 123,
-        insurance: []
+        insurance: [],
+        registration: {
+          save: jest.fn()
+        }
       }
 
       getInsuranceCompany.mockResolvedValue({ id: 1 })
@@ -249,6 +254,8 @@ describe('Insurance repo', () => {
         dog_id: 123
       }, { transaction: expect.any(Object) })
       expect(mockUpdate).toHaveBeenCalledTimes(0)
+      expect(cdo.registration.save).toHaveBeenCalled()
+      expect(cdo.registration.insurance_details_recorded).toEqual(new Date('2024-07-01'))
     })
 
     test('createOrUpdateInsurance should update if exists', async () => {
@@ -268,7 +275,10 @@ describe('Insurance repo', () => {
         insurance: [
           { id: 1, name: 'ins 1', update: mockUpdate },
           { id: 2, name: 'ins 2', update: mockUpdate }
-        ]
+        ],
+        registration: {
+          save: jest.fn()
+        }
       }
 
       getInsuranceCompany.mockResolvedValue({ id: 1 })
@@ -280,6 +290,8 @@ describe('Insurance repo', () => {
         company_id: 1,
         renewal_date: '2020-01-01'
       }, { transaction: expect.any(Object) })
+      expect(cdo.registration.save).toHaveBeenCalled()
+      expect(cdo.registration.insurance_details_recorded).toEqual(expect.any(Date))
     })
   })
 

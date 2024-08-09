@@ -11,7 +11,7 @@ const { statuses } = require('../constants/statuses')
 const { Op } = require('sequelize')
 const { mapCdoDaoToCdo } = require('./mappers/cdo')
 const { CdoTaskList } = require('../data/domain')
-const { createOrUpdateInsurance } = require('./insurance')
+const { createOrUpdateInsurance, createOrUpdateInsuranceWithCommand } = require('./insurance')
 const { updateMicrochipKey } = require('./microchip')
 const domain = require('../constants/domain')
 
@@ -487,7 +487,7 @@ const saveCdoTaskList = async (cdoTaskList, transaction) => {
         break
       }
       case 'insurance': {
-        await createOrUpdateInsurance({ insurance: update.value }, cdoDao, transaction)
+        await createOrUpdateInsuranceWithCommand({ insurance: update.value }, cdoDao, async () => {}, transaction)
         break
       }
       case 'status': {

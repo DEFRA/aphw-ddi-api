@@ -40,7 +40,7 @@ describe('CDO repo', () => {
   const { addToSearchIndex } = require('../../../../app/repos/search')
 
   jest.mock('../../../../app/repos/insurance')
-  const { createOrUpdateInsurance } = require('../../../../app/repos/insurance')
+  const { createOrUpdateInsuranceWithCommand } = require('../../../../app/repos/insurance')
 
   jest.mock('../../../../app/messaging/send-event')
   const { sendEvent } = require('../../../../app/messaging/send-event')
@@ -668,7 +668,7 @@ describe('CDO repo', () => {
         })]
       })
 
-      createOrUpdateInsurance.mockResolvedValue({
+      createOrUpdateInsuranceWithCommand.mockResolvedValue({
         company_id: 9,
         renewal_data: renewalDate
       })
@@ -689,7 +689,7 @@ describe('CDO repo', () => {
 
       const taskList = await saveCdoTaskList(cdoTaskList, {})
 
-      expect(createOrUpdateInsurance).toHaveBeenCalledWith({ insurance: { company: 'Allianz', renewalDate } }, dog, {})
+      expect(createOrUpdateInsuranceWithCommand).toHaveBeenCalledWith({ insurance: { company: 'Allianz', renewalDate } }, dog, expect.any(Function), {})
       expect(taskList.insuranceDetailsRecorded.completed).toBe(true)
       expect(callback).toHaveBeenCalled()
     })
