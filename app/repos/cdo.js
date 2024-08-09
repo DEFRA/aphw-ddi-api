@@ -11,7 +11,7 @@ const { statuses } = require('../constants/statuses')
 const { Op } = require('sequelize')
 const { mapCdoDaoToCdo } = require('./mappers/cdo')
 const { CdoTaskList } = require('../data/domain')
-const { createOrUpdateInsurance, createOrUpdateInsuranceWithCommand } = require('./insurance')
+const { createOrUpdateInsuranceWithCommand } = require('./insurance')
 const { updateMicrochipKey } = require('./microchip')
 const domain = require('../constants/domain')
 
