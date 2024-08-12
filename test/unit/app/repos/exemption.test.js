@@ -1057,15 +1057,41 @@ describe('Exemption repo', () => {
       expect(canSetExemptDueToInsuranceRenewal(data, cdo)).toBeTruthy()
     })
 
-    test('handles changing comparison date', () => {
-      const data = { insurance: { renewalDate: new Date(2099, 1, 1) } }
+    test('handles today', () => {
+      const data = { insurance: { renewalDate: new Date() } }
       const cdo = {
         dogIndex: 12345,
         dog_breaches: [
           { id: 1, breach_category: { id: 11, short_name: 'INSURANCE_EXPIRED' } }
         ]
       }
-      expect(canSetExemptDueToInsuranceRenewal(data, cdo, new Date(2099, 1, 2))).toBeFalsy()
+      expect(canSetExemptDueToInsuranceRenewal(data, cdo)).toBeTruthy()
+    })
+
+    test('handles yesterday', () => {
+      const d = new Date()
+      d.setDate(d.getDate() - 1)
+      const data = { insurance: { renewalDate: d } }
+      const cdo = {
+        dogIndex: 12345,
+        dog_breaches: [
+          { id: 1, breach_category: { id: 11, short_name: 'INSURANCE_EXPIRED' } }
+        ]
+      }
+      expect(canSetExemptDueToInsuranceRenewal(data, cdo)).toBeFalsy()
+    })
+
+    test('handles tomorrow', () => {
+      const d = new Date()
+      d.setDate(d.getDate() + 1)
+      const data = { insurance: { renewalDate: d } }
+      const cdo = {
+        dogIndex: 12345,
+        dog_breaches: [
+          { id: 1, breach_category: { id: 11, short_name: 'INSURANCE_EXPIRED' } }
+        ]
+      }
+      expect(canSetExemptDueToInsuranceRenewal(data, cdo)).toBeTruthy()
     })
   })
 })
