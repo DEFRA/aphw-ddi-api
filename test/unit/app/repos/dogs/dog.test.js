@@ -432,7 +432,8 @@ describe('Dog repo', () => {
       const mockRegistration = {
         id: 1,
         cdoIssued: '2020-01-01',
-        cdoExpiry: '2020-02-01'
+        cdoExpiry: '2020-02-01',
+        insurance_details_recorded: '2024-01-01'
       }
 
       sequelize.models.dog.findOne.mockResolvedValue(mockExistingDog)
@@ -488,7 +489,8 @@ describe('Dog repo', () => {
         registration: {
           id: 1,
           cdoIssued: '2020-01-01',
-          cdoExpiry: '2020-02-01'
+          cdoExpiry: '2020-02-01',
+          insurance_details_recorded: '2024-01-01'
         },
         status_id: 2
       })
