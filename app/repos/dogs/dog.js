@@ -262,6 +262,8 @@ const createRegistration = async (dogEntity, dog, enforcement, exemptionOrder, t
 
   const timestamp = new Date()
 
+  const insuranceDetailsRecorded = dogEntity?.registration?.insurance_details_recorded
+
   return await sequelize.models.registration.create({
     dog_id: dogEntity.id,
     cdo_issued: dog.cdoIssued,
@@ -277,6 +279,7 @@ const createRegistration = async (dogEntity, dog, enforcement, exemptionOrder, t
     microchip_deadline: dog.microchipDeadline,
     neutering_deadline: dog.neuteringDeadline,
     microchip_number_recorded: dog.microchipNumber ? timestamp : null,
+    insurance_details_recorded: insuranceDetailsRecorded || null,
     application_fee_payment_recorded: dog.applicationFeePaid ? timestamp : null
   }, { transaction })
 }
