@@ -9,6 +9,7 @@ const constants = require('../constants/statuses')
 const { updateStatus } = require('./dogs')
 const { preChangedExemptionAudit, postChangedExemptionAudit } = require('../dto/auditing/exemption')
 const { deepClone } = require('../lib/deep-clone')
+const { dateTodayOrInFuture } = require('../lib/date-helpers')
 
 const updateExemption = async (data, user, transaction) => {
   if (!transaction) {
@@ -51,8 +52,8 @@ const updateExemption = async (data, user, transaction) => {
   }
 }
 
-const canSetExemptDueToInsuranceRenewal = (data, cdo, today = new Date()) => {
-  return data.insurance?.renewalDate > today &&
+const canSetExemptDueToInsuranceRenewal = (data, cdo) => {
+  return dateTodayOrInFuture(data.insurance?.renewalDate) &&
     cdo.dog_breaches?.length === 1 &&
     cdo.dog_breaches[0].breach_category?.short_name === 'INSURANCE_EXPIRED'
 }
