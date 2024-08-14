@@ -1,8 +1,7 @@
 const sequelize = require('../config/db')
+const { Op } = require('sequelize')
 const fuzzyAlgo1 = require('talisman/phonetics/daitch-mokotoff')
 const levenshtein = require('talisman/metrics/levenshtein')
-// const nysiis = require('talisman/phonetics/nysiis')
-// const fuzzyAlgo2 = nysiis.refined
 
 const matchCodesForTerm = (term) => {
   return fuzzyAlgo1(term.toLowerCase())
@@ -22,11 +21,13 @@ const matchingResultFields = [
   { fieldName: 'address.address_line_1', exactMatchWeighting: 2, closeMatchWeighting: 1 },
   { fieldName: 'address.address_line_2', exactMatchWeighting: 2, closeMatchWeighting: 1 },
   { fieldName: 'address.town', exactMatchWeighting: 2, closeMatchWeighting: 2 },
-  { fieldName: 'address.postcode', exactMatchWeighting: 4, closeMatchWeighting: 3 },
+  { fieldName: 'address.postcode', exactMatchWeighting: 1, closeMatchWeighting: 0.5 },
   { fieldName: 'dogName', exactMatchWeighting: 2, closeMatchWeighting: 1 },
   { fieldName: 'microchipNumber', exactMatchWeighting: 6, closeMatchWeighting: 3 },
   { fieldName: 'microchipNumber2', exactMatchWeighting: 6, closeMatchWeighting: 3 }
 ]
+
+const importantDogFields = ['dogName', 'microchipNumber', 'microchipNumebr2']
 
 const getFieldValue = (dataRow, fieldName) => {
   if (fieldName.indexOf('.') > -1) {
@@ -43,7 +44,7 @@ const populateMatchCodes = async () => {
     for (let fieldNum = 0; fieldNum < searchFields.length; fieldNum++) {
       const fieldName = searchFields[fieldNum].fieldName
       const fieldValue = getFieldValue(searchRow.json, fieldName)
-      if (fieldValue) {
+      if (fieldValue && fieldValue !== '') {
         const codes = matchCodesForTerm(fieldValue)
         for (let c = 0; c < codes.length; c++) {
           await sequelize.models.match_code.create({
@@ -53,6 +54,39 @@ const populateMatchCodes = async () => {
         }
       }
     }
+  }
+}
+
+const populateTrigrams = async () => {
+  const searchRows = await sequelize.models.search_index.findAll()
+
+  try {
+    for (let rowNum = 0; rowNum < searchRows.length; rowNum++) {
+      const searchRow = searchRows[rowNum]
+      const microchipFieldValue1 = getFieldValue(searchRow.json, 'microchipNumber')
+      const microchipFieldValue2 = getFieldValue(searchRow.json, 'microchipNumber2')
+      const postcodeFieldValue = getFieldValue(searchRow.json, 'address.postcode')
+      if (microchipFieldValue1 && microchipFieldValue1 !== '') {
+        await sequelize.models.search_index_tgram.create({
+          dog_id: searchRow.dog_id,
+          match_text: microchipFieldValue1
+        })
+      }
+      if (microchipFieldValue2 && microchipFieldValue2 !== '') {
+        await sequelize.models.search_index_tgram.create({
+          dog_id: searchRow.dog_id,
+          match_text: microchipFieldValue2
+        })
+      }
+      if (postcodeFieldValue && postcodeFieldValue !== '') {
+        await sequelize.models.search_index_tgram.create({
+          person_id: searchRow.person_id,
+          match_text: postcodeFieldValue
+        })
+      }
+    }
+  } catch (err) {
+    console.log('populateTrigrams error', err)
   }
 }
 
@@ -66,14 +100,14 @@ const buildFuzzyCodes = (terms) => {
 }
 
 const exactMatch = (word) => {
-  return word.searchType === 'dog' && word.fieldName === 'dogName'
+  return word.searchType === 'dog' && importantDogFields.includes(word.fieldName)
     ? word.exactMatchWeighting * 2
     : word.exactMatchWeighting
 }
 
 const closeMatch = (word, dist) => {
   const weight = ((word.value.length - dist) / word.value.length) * word.closeMatchWeighting
-  return word.searchType === 'dog' && word.fieldName === 'dogName'
+  return word.searchType === 'dog' && importantDogFields.includes(word.fieldName)
     ? weight * 2
     : weight
 }
@@ -82,8 +116,6 @@ const rankWord = (term, word) => {
   if (word?.value && word.value !== '') {
     const termDist = levenshtein(term.toLowerCase(), word.value.toLowerCase())
     if (termDist < term.length / 3) {
-      // console.log(`termDist****Match <${fieldName}> <${fieldValue}> ${foundRow.json.firstName} ${foundRow.json.lastName}`)
-      // console.log('termDist', termDist)
       if (termDist === 0) {
         return exactMatch(word)
       } else {
@@ -99,10 +131,15 @@ const rankResult = (terms, foundRow, searchType) => {
   terms.forEach(term => {
     for (let fieldNum = 0; fieldNum < matchingResultFields.length; fieldNum++) {
       const { fieldName, exactMatchWeighting, closeMatchWeighting } = matchingResultFields[fieldNum]
-      let fieldValue = getFieldValue(foundRow.json, fieldName)
+      const fieldValue = getFieldValue(foundRow.json, fieldName)
       if (fieldValue) {
         if (fieldName.indexOf('postcode') > -1) {
-          fieldValue = fieldValue.replace(' ', '')
+          const joinedFieldValue = fieldValue.replace(' ', '')
+          const joinedRank = rankWord(term, { value: joinedFieldValue, exactMatchWeighting, closeMatchWeighting, searchType, fieldName })
+          if (joinedRank > 0) {
+            rank += joinedRank
+            break
+          }
         }
         // Tokenise field value in case multiple words
         const words = fieldValue.split(' ')
@@ -132,9 +169,46 @@ const fuzzySearch = async (terms) => {
   return uniquePersons
 }
 
+const trigramTermQuery = async (term, threshold) => {
+  return await sequelize.models.search_index_tgram.findAll({
+    attributes: { include: [[sequelize.fn('similarity', sequelize.col('match_text'), term), 'similarity_score']] },
+    where: [sequelize.where(sequelize.fn('similarity', sequelize.col('match_text'), term),
+      { [Op.gt]: threshold }
+    ),
+    {}
+    ]
+  })
+}
+
+const trigramSearch = async (terms, threshold) => {
+  const uniquePersons = []
+  const uniqueDogs = []
+
+  // Add an extra term as all search criteria in one (to cater for space-cplit postcode, for example)
+  terms.push(terms.join(' '))
+
+  for (let termNum = 0; termNum < terms.length; termNum++) {
+    const term = terms[termNum]
+
+    const results = await trigramTermQuery(term, threshold)
+
+    results.forEach(res => {
+      if (res.person_id && !uniquePersons.includes(res.person_id)) {
+        uniquePersons.push(res.person_id)
+      }
+      if (res.dog_id && !uniqueDogs.includes(res.dog_id)) {
+        uniqueDogs.push(res.dog_id)
+      }
+    })
+  }
+  return { uniquePersons, uniqueDogs }
+}
+
 module.exports = {
   populateMatchCodes,
+  populateTrigrams,
   matchCodesForTerm,
   fuzzySearch,
+  trigramSearch,
   rankResult
 }
