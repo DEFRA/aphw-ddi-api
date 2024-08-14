@@ -23,7 +23,9 @@ const matchingResultFields = [
   { fieldName: 'address.address_line_2', exactMatchWeighting: 2, closeMatchWeighting: 1 },
   { fieldName: 'address.town', exactMatchWeighting: 2, closeMatchWeighting: 2 },
   { fieldName: 'address.postcode', exactMatchWeighting: 4, closeMatchWeighting: 3 },
-  { fieldName: 'dogName', exactMatchWeighting: 2, closeMatchWeighting: 1 }
+  { fieldName: 'dogName', exactMatchWeighting: 2, closeMatchWeighting: 1 },
+  { fieldName: 'microchipNumber', exactMatchWeighting: 6, closeMatchWeighting: 3 },
+  { fieldName: 'microchipNumber2', exactMatchWeighting: 6, closeMatchWeighting: 3 }
 ]
 
 const getFieldValue = (dataRow, fieldName) => {
