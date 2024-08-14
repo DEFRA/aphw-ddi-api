@@ -97,8 +97,11 @@ const rankResult = (terms, foundRow, searchType) => {
   terms.forEach(term => {
     for (let fieldNum = 0; fieldNum < matchingResultFields.length; fieldNum++) {
       const { fieldName, exactMatchWeighting, closeMatchWeighting } = matchingResultFields[fieldNum]
-      const fieldValue = getFieldValue(foundRow.json, fieldName)
+      let fieldValue = getFieldValue(foundRow.json, fieldName)
       if (fieldValue) {
+        if (fieldName.indexOf('postcode') > -1) {
+          fieldValue = fieldValue.replace(' ', '')
+        }
         // Tokenise field value in case multiple words
         const words = fieldValue.split(' ')
         for (let wordNum = 0; wordNum < words.length; wordNum++) {
