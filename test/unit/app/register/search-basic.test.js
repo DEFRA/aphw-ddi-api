@@ -13,7 +13,7 @@ describe('SearchBasic repo', () => {
 
   const sequelize = require('../../../../app/config/db')
 
-  const { search } = require('../../../../app/register/search-basic')
+  const { search } = require('../../../../app/register/search')
   const { sortOwnerSearch } = require('../../../../app/register/search/sorting-and-grouping')
 
   beforeEach(async () => {

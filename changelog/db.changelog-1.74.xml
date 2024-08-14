@@ -1,0 +1,27 @@
+<?xml version="1.1" encoding="utf-8" standalone="no"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog" xmlns:ext="http://www.liquibase.org/xml/ns/dbchangelog-ext" xmlns:pro="http://www.liquibase.org/xml/ns/pro" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog-ext http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-ext.xsd http://www.liquibase.org/xml/ns/pro http://www.liquibase.org/xml/ns/pro/liquibase-pro-3.9.xsd http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.9.xsd">
+  <changeSet author="J Barnsley" id="1">
+    <tagDatabase tag="v1.74.0" />
+  </changeSet>
+  <changeSet author="J Barnsley" id="2">
+    <createTable tableName="match_code">
+      <column autoIncrement="true" name="id" type="INTEGER">
+        <constraints nullable="false" primaryKey="true" primaryKeyName="match_code_pkey" />
+      </column>
+      <column name="person_id" type="INTEGER">
+        <constraints nullable="false" unique="false" />
+      </column>
+      <column name="match_code" type="VARCHAR(30)">
+        <constraints nullable="false" unique="false" />
+      </column>
+    </createTable>
+  </changeSet>
+  <changeSet author="J Barnsley" id="4">
+    <addForeignKeyConstraint baseColumnNames="person_id" baseTableName="match_code" constraintName="fk_match_code_person_id" referencedColumnNames="id" referencedTableName="person" />
+  </changeSet>
+  <changeSet author="J Barnsley" id="5">
+    <createIndex indexName="match_code_idx" tableName="match_code">
+      <column name="match_code" />
+    </createIndex>
+  </changeSet>
+</databaseChangeLog>

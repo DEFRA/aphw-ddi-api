@@ -40,11 +40,11 @@ const groupOwners = results => {
 }
 
 const sortDogSearch = (a, b) => {
-  return a.distance - b.distance || b.rank - a.rank || a.dogId - b.dogId
+  return b.rank - a.rank || a.dogId - b.dogId
 }
 
 const sortOwnerSearch = (a, b) => {
-  return a.distance - b.distance || b.rank - a.rank || alphaSort(`${a.lastName} ${a.firstName}`, `${b.lastName} ${b.firstName}`)
+  return b.rank - a.rank || alphaSort(`${a.lastName} ${a.firstName}`, `${b.lastName} ${b.firstName}`)
 }
 
 const alphaSort = (a, b) => {
