@@ -9,7 +9,7 @@ const { buildTsVectorQuery } = require('./search/search-builder')
 const trigramQueryThreshold = 0.4
 const trigramRankThreshold = 1.001
 const fuzzyRankThreshold = 1.001
-const fullTextRankThreshold = 1.0
+const fullTextRankThreshold = 1.01
 
 const rankAndKeep = (results, terms, threshold, type) => {
   const toKeep = []
