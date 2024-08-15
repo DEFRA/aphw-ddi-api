@@ -6,7 +6,7 @@ const { mapResults } = require('./search/search-results')
 const { fuzzySearch, rankResult, trigramSearch } = require('../repos/match-codes')
 const { buildTsVectorQuery } = require('./search/search-builder')
 
-const trigramQueryThreshold = 0.6
+const trigramQueryThreshold = 0.4
 const trigramRankThreshold = 1.001
 const fuzzyRankThreshold = 1.001
 const fullTextRankThreshold = 1.0
@@ -71,12 +71,29 @@ const doTrigramSearch = async (terms, type) => {
   return rankAndKeep(results, terms, trigramRankThreshold, type)
 }
 
+const combineQueryResults = (res1, res2, res3) => {
+  const uniqueResults = []
+  const uniqueResultIds = []
+
+  const results = res1.concat(res2).concat(res3)
+
+  results.forEach(res => {
+    if (res.id && !uniqueResultIds.includes(res.id)) {
+      uniqueResultIds.push(res.id)
+      uniqueResults.push(res)
+    }
+  })
+
+  return uniqueResults
+}
+
 const search = async (type, terms, fuzzy = false) => {
   if (terms === null || terms === undefined) {
     return []
   }
 
   const termsArray = cleanupSearchTerms(terms)
+  console.log('termsArray', termsArray)
 
   const fullTextToKeep = await doFullTextSearch(termsArray, type, fuzzy)
 
@@ -88,7 +105,7 @@ const search = async (type, terms, fuzzy = false) => {
   console.log('fuzzyToKeep', fuzzyToKeep.length)
   console.log('trigramToKeep', trigramToKeep.length)
 
-  const results = fullTextToKeep.concat(fuzzyToKeep).concat(trigramToKeep)
+  const results = combineQueryResults(fullTextToKeep, fuzzyToKeep, trigramToKeep)
   const mappedResults = mapResults(results, type)
 
   return sortAndGroupResults(mappedResults, type)

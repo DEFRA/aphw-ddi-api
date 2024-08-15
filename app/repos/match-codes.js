@@ -1,7 +1,7 @@
 const sequelize = require('../config/db')
 const { Op } = require('sequelize')
 const fuzzyAlgo1 = require('talisman/phonetics/daitch-mokotoff')
-const levenshtein = require('talisman/metrics/levenshtein')
+const damerauLevenshtein = require('talisman/metrics/damerau-levenshtein')
 
 const matchCodesForTerm = (term) => {
   return fuzzyAlgo1(term.toLowerCase())
@@ -81,7 +81,7 @@ const populateTrigrams = async () => {
       if (postcodeFieldValue && postcodeFieldValue !== '') {
         await sequelize.models.search_index_tgram.create({
           person_id: searchRow.person_id,
-          match_text: postcodeFieldValue
+          match_text: postcodeFieldValue.replace(' ', '').toLowerCase()
         })
       }
     }
@@ -114,7 +114,7 @@ const closeMatch = (word, dist) => {
 
 const rankWord = (term, word) => {
   if (word?.value && word.value !== '') {
-    const termDist = levenshtein(term.toLowerCase(), word.value.toLowerCase())
+    const termDist = damerauLevenshtein(term.toLowerCase(), word.value.toLowerCase())
     if (termDist < term.length / 3) {
       if (termDist === 0) {
         return exactMatch(word)
@@ -183,9 +183,6 @@ const trigramTermQuery = async (term, threshold) => {
 const trigramSearch = async (terms, threshold) => {
   const uniquePersons = []
   const uniqueDogs = []
-
-  // Add an extra term as all search criteria in one (to cater for space-cplit postcode, for example)
-  terms.push(terms.join(' '))
 
   for (let termNum = 0; termNum < terms.length; termNum++) {
     const term = terms[termNum]
