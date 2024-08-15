@@ -21,7 +21,7 @@ const matchingResultFields = [
   { fieldName: 'address.address_line_1', exactMatchWeighting: 2, closeMatchWeighting: 1 },
   { fieldName: 'address.address_line_2', exactMatchWeighting: 2, closeMatchWeighting: 1 },
   { fieldName: 'address.town', exactMatchWeighting: 2, closeMatchWeighting: 2 },
-  { fieldName: 'address.postcode', exactMatchWeighting: 1, closeMatchWeighting: 0.5 },
+  { fieldName: 'address.postcode', exactMatchWeighting: 2, closeMatchWeighting: 1 },
   { fieldName: 'dogName', exactMatchWeighting: 2, closeMatchWeighting: 1 },
   { fieldName: 'microchipNumber', exactMatchWeighting: 6, closeMatchWeighting: 3 },
   { fieldName: 'microchipNumber2', exactMatchWeighting: 6, closeMatchWeighting: 3 }
