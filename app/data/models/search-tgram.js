@@ -1,5 +1,5 @@
 module.exports = (sequelize, DataTypes) => {
-  const searchIndexTgram = sequelize.define('search_index_tgram', {
+  const searchTgram = sequelize.define('search_tgram', {
     id: {
       autoIncrement: true,
       autoIncrementIdentity: true,
@@ -26,12 +26,12 @@ module.exports = (sequelize, DataTypes) => {
     }
   }, {
     sequelize,
-    tableName: 'search_index_tgram',
+    tableName: 'search_tgram',
     createdAt: 'created_at',
     updatedAt: 'updated_at',
     indexes: [
       {
-        name: 'search_index_tgram_pkey',
+        name: 'search_tgram_pkey',
         unique: true,
         fields: [
           { name: 'id' }
@@ -40,5 +40,5 @@ module.exports = (sequelize, DataTypes) => {
     ]
   })
 
-  return searchIndexTgram
+  return searchTgram
 }

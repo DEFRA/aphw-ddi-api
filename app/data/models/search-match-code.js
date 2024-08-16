@@ -1,5 +1,5 @@
 module.exports = (sequelize, DataTypes) => {
-  const matchCode = sequelize.define('match_code', {
+  const searchMatchCode = sequelize.define('search_match_code', {
     id: {
       autoIncrement: true,
       autoIncrementIdentity: true,
@@ -17,18 +17,18 @@ module.exports = (sequelize, DataTypes) => {
     }
   }, {
     sequelize,
-    tableName: 'match_code',
+    tableName: 'search_match_code',
     timestamps: false,
     indexes: [
       {
-        name: 'match_code_key',
+        name: 'search_match_code_key',
         unique: false,
         fields: [
           { name: 'match_code' }
         ]
       },
       {
-        name: 'match_code_pkey',
+        name: 'search_match_code_pkey',
         unique: true,
         fields: [
           { name: 'id' }
@@ -37,12 +37,12 @@ module.exports = (sequelize, DataTypes) => {
     ]
   })
 
-  matchCode.associate = models => {
-    matchCode.belongsTo(sequelize.models.person, {
+  searchMatchCode.associate = models => {
+    searchMatchCode.belongsTo(sequelize.models.person, {
       as: 'person',
       foreignKey: 'person_id'
     })
   }
 
-  return matchCode
+  return searchMatchCode
 }

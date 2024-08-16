@@ -3,7 +3,7 @@ const { Op } = require('sequelize')
 const { sortAndGroupResults } = require('./search/sorting-and-grouping')
 const { cleanupSearchTerms } = require('./search/search-terms')
 const { mapResults } = require('./search/search-results')
-const { fuzzySearch, rankResult, trigramSearch } = require('../repos/match-codes')
+const { fuzzySearch, rankResult, trigramSearch } = require('../repos/search-match-codes')
 const { buildTsVectorQuery } = require('./search/search-builder')
 
 const trigramQueryThreshold = 0.4

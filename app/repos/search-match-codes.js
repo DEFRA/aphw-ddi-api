@@ -21,23 +21,25 @@ const matchingResultFields = [
   { fieldName: 'address.address_line_1', exactMatchWeighting: 2, closeMatchWeighting: 1 },
   { fieldName: 'address.address_line_2', exactMatchWeighting: 2, closeMatchWeighting: 1 },
   { fieldName: 'address.town', exactMatchWeighting: 2, closeMatchWeighting: 2 },
-  { fieldName: 'address.postcode', exactMatchWeighting: 2, closeMatchWeighting: 1 },
+  { fieldName: 'address.postcode', exactMatchWeighting: 2, closeMatchWeighting: 1.5 },
   { fieldName: 'dogName', exactMatchWeighting: 2, closeMatchWeighting: 1 },
   { fieldName: 'microchipNumber', exactMatchWeighting: 6, closeMatchWeighting: 3 },
   { fieldName: 'microchipNumber2', exactMatchWeighting: 6, closeMatchWeighting: 3 }
 ]
 
-const importantDogFields = ['dogName', 'microchipNumber', 'microchipNumebr2']
+const importantDogFields = ['dogName', 'microchipNumber', 'microchipNumber2']
 
 const getFieldValue = (dataRow, fieldName) => {
   if (fieldName.indexOf('.') > -1) {
-    return dataRow[fieldName.substr(0, fieldName.indexOf('.'))][fieldName.substr(fieldName.indexOf('.') + 1)]
+    return dataRow[fieldName.substr(0, fieldName.indexOf('.'))]?.[fieldName.substr(fieldName.indexOf('.') + 1)]
   }
   return dataRow[fieldName]
 }
 
 const populateMatchCodes = async () => {
   const searchRows = await sequelize.models.search_index.findAll()
+
+  await sequelize.models.search_match_code.truncate()
 
   for (let rowNum = 0; rowNum < searchRows.length; rowNum++) {
     const searchRow = searchRows[rowNum]
@@ -47,7 +49,7 @@ const populateMatchCodes = async () => {
       if (fieldValue && fieldValue !== '') {
         const codes = matchCodesForTerm(fieldValue)
         for (let c = 0; c < codes.length; c++) {
-          await sequelize.models.match_code.create({
+          await sequelize.models.search_match_code.create({
             person_id: searchRow.person_id,
             match_code: codes[c]
           })
@@ -60,33 +62,31 @@ const populateMatchCodes = async () => {
 const populateTrigrams = async () => {
   const searchRows = await sequelize.models.search_index.findAll()
 
-  try {
-    for (let rowNum = 0; rowNum < searchRows.length; rowNum++) {
-      const searchRow = searchRows[rowNum]
-      const microchipFieldValue1 = getFieldValue(searchRow.json, 'microchipNumber')
-      const microchipFieldValue2 = getFieldValue(searchRow.json, 'microchipNumber2')
-      const postcodeFieldValue = getFieldValue(searchRow.json, 'address.postcode')
-      if (microchipFieldValue1 && microchipFieldValue1 !== '') {
-        await sequelize.models.search_index_tgram.create({
-          dog_id: searchRow.dog_id,
-          match_text: microchipFieldValue1
-        })
-      }
-      if (microchipFieldValue2 && microchipFieldValue2 !== '') {
-        await sequelize.models.search_index_tgram.create({
-          dog_id: searchRow.dog_id,
-          match_text: microchipFieldValue2
-        })
-      }
-      if (postcodeFieldValue && postcodeFieldValue !== '') {
-        await sequelize.models.search_index_tgram.create({
-          person_id: searchRow.person_id,
-          match_text: postcodeFieldValue.replace(' ', '').toLowerCase()
-        })
-      }
+  await sequelize.models.search_tgram.truncate()
+
+  for (let rowNum = 0; rowNum < searchRows.length; rowNum++) {
+    const searchRow = searchRows[rowNum]
+    const microchipFieldValue1 = getFieldValue(searchRow.json, 'microchipNumber')
+    const microchipFieldValue2 = getFieldValue(searchRow.json, 'microchipNumber2')
+    const postcodeFieldValue = getFieldValue(searchRow.json, 'address.postcode')
+    if (microchipFieldValue1 && microchipFieldValue1 !== '') {
+      await sequelize.models.search_tgram.create({
+        dog_id: searchRow.dog_id,
+        match_text: `${microchipFieldValue1}`
+      })
     }
-  } catch (err) {
-    console.log('populateTrigrams error', err)
+    if (microchipFieldValue2 && microchipFieldValue2 !== '') {
+      await sequelize.models.search_tgram.create({
+        dog_id: searchRow.dog_id,
+        match_text: `${microchipFieldValue2}`
+      })
+    }
+    if (postcodeFieldValue && postcodeFieldValue !== '') {
+      await sequelize.models.search_tgram.create({
+        person_id: searchRow.person_id,
+        match_text: postcodeFieldValue.replace(' ', '').toLowerCase()
+      })
+    }
   }
 }
 
@@ -128,24 +128,30 @@ const rankWord = (term, word) => {
 
 const rankResult = (terms, foundRow, searchType) => {
   let rank = 0
+  let exactPostcodeMatch = false
   terms.forEach(term => {
     for (let fieldNum = 0; fieldNum < matchingResultFields.length; fieldNum++) {
       const { fieldName, exactMatchWeighting, closeMatchWeighting } = matchingResultFields[fieldNum]
       const fieldValue = getFieldValue(foundRow.json, fieldName)
       if (fieldValue) {
         if (fieldName.indexOf('postcode') > -1) {
+          if (exactPostcodeMatch) {
+            break
+          }
           const joinedFieldValue = fieldValue.replace(' ', '')
           const joinedRank = rankWord(term, { value: joinedFieldValue, exactMatchWeighting, closeMatchWeighting, searchType, fieldName })
           if (joinedRank > 0) {
             rank += joinedRank
+            exactPostcodeMatch = true
             break
           }
         }
         // Tokenise field value in case multiple words
-        const words = fieldValue.split(' ')
+        const words = `${fieldValue}`.split(' ')
         for (let wordNum = 0; wordNum < words.length; wordNum++) {
           const wordVal = words[wordNum]
-          rank += rankWord(term, { value: wordVal, exactMatchWeighting, closeMatchWeighting, searchType, fieldName })
+          const wordRank = rankWord(term, { value: wordVal, exactMatchWeighting, closeMatchWeighting, searchType, fieldName })
+          rank += wordRank
         }
       }
     }
@@ -155,7 +161,7 @@ const rankResult = (terms, foundRow, searchType) => {
 
 const fuzzySearch = async (terms) => {
   const fuzzyCodes = buildFuzzyCodes(terms)
-  const fuzzyResults = await sequelize.models.match_code.findAll({
+  const fuzzyResults = await sequelize.models.search_match_code.findAll({
     where: {
       match_code: fuzzyCodes
     }
@@ -170,7 +176,7 @@ const fuzzySearch = async (terms) => {
 }
 
 const trigramTermQuery = async (term, threshold) => {
-  return await sequelize.models.search_index_tgram.findAll({
+  return await sequelize.models.search_tgram.findAll({
     attributes: { include: [[sequelize.fn('similarity', sequelize.col('match_text'), term), 'similarity_score']] },
     where: [sequelize.where(sequelize.fn('similarity', sequelize.col('match_text'), term),
       { [Op.gt]: threshold }
@@ -204,7 +210,6 @@ const trigramSearch = async (terms, threshold) => {
 module.exports = {
   populateMatchCodes,
   populateTrigrams,
-  matchCodesForTerm,
   fuzzySearch,
   trigramSearch,
   rankResult

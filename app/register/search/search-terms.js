@@ -26,7 +26,7 @@ const addJoinedPostcode = terms => {
       }
     }
     if (found1pos > -1 && found2pos > -1 && (found2pos - found1pos === 1)) {
-      return terms.concat([`${terms[found1pos]}${terms[found2pos]}`])
+      return [`${terms[found1pos]}${terms[found2pos]}`].concat(terms)
     }
   }
   return terms

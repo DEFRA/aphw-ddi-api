@@ -1,9 +1,15 @@
 const { uniqueResults: mockUniqueResults, resultsForGrouping: mockResultsForGrouping, resultsForSorting: mockResultsForSorting } = require('../../../mocks/search-results')
 
-describe('SearchBasic repo', () => {
+describe('Search repo', () => {
   jest.mock('../../../../app/config/db', () => ({
     models: {
       search_index: {
+        findAll: jest.fn()
+      },
+      search_match_code: {
+        findAll: jest.fn()
+      },
+      search_tgram: {
         findAll: jest.fn()
       }
     },
@@ -27,10 +33,10 @@ describe('SearchBasic repo', () => {
     expect(results.length).toBe(0)
   })
 
-  test('search for dogs should return array of unique results', async () => {
+  test('search for dogs should return array of unique results for standard search', async () => {
     sequelize.models.search_index.findAll.mockResolvedValue(mockUniqueResults)
 
-    const results = await search('dog', 'term1')
+    const results = await search('dog', 'john peter mark')
     expect(results.length).toBe(3)
     expect(results[0].firstName).toBe('John')
     expect(results[0].dogId).toBe(1)
@@ -43,19 +49,22 @@ describe('SearchBasic repo', () => {
   test('search for owners with many dogs should return many dogs under owner', async () => {
     sequelize.models.search_index.findAll.mockResolvedValue(mockResultsForGrouping)
 
-    const results = await search('owner', 'john term2')
+    const results = await search('owner', 'john peter mark')
     expect(results.length).toBe(2)
-    expect(results[0].firstName).toBe('John')
-    expect(results[0].dogs.length).toBe(2)
-    expect(results[0].personId).toBe(11)
-    expect(results[0].dogs[0].dogName).toBe('Bruno')
-    expect(results[0].dogs[0].dogId).toBe(1)
-    expect(results[0].dogs[1].dogName).toBe('Fido')
-    expect(results[0].dogs[1].dogId).toBe(3)
+    expect(results[0].firstName).toBe('Peter')
+    expect(results[0].dogs.length).toBe(1)
+    expect(results[0].personId).toBe(22)
+    expect(results[0].dogs[0].dogName).toBe('Butch')
+    expect(results[0].dogs[0].dogId).toBe(2)
 
-    expect(results[1].firstName).toBe('Peter')
-    expect(results[1].dogs[0].dogId).toBe(2)
-    expect(results[1].personId).toBe(22)
+    expect(results[1].firstName).toBe('John')
+    expect(results[1].dogs.length).toBe(2)
+    expect(results[1].dogs[0].dogId).toBe(1)
+    expect(results[1].personId).toBe(11)
+    expect(results[1].dogs[0].dogName).toBe('Bruno')
+    expect(results[1].dogs[0].dogId).toBe(1)
+    expect(results[1].dogs[1].dogName).toBe('Fido')
+    expect(results[1].dogs[1].dogId).toBe(3)
   })
 
   test('search for owner should return empty array when no owners', async () => {
