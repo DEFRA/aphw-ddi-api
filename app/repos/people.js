@@ -495,6 +495,8 @@ const deletePerson = async (reference, user, transaction) => {
   }
 
   await sequelize.models.search_index.destroy({ where: { person_id: person.id } })
+  await sequelize.models.search_match_code.destroy({ where: { person_id: person.id } })
+  await sequelize.models.search_tgram.destroy({ where: { person_id: person.id } })
 
   await sendDeleteToAudit(PERSON, personWithRelationships, user)
 }
@@ -549,6 +551,9 @@ const purgePersonByReferenceNumber = async (reference, user, transaction) => {
   }
 
   await person.destroy({ force: true, transaction })
+
+  await sequelize.models.search_match_code.destroy({ where: { person_id: person.id }, force: true, transaction })
+  await sequelize.models.search_tgram.destroy({ where: { person_id: person.id }, force: true, transaction })
 
   await sendPermanentDeleteToAudit(PERSON, person, user)
 }
