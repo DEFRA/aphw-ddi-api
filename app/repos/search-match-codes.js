@@ -1,10 +1,13 @@
 const sequelize = require('../config/db')
 const fuzzyAlgo1 = require('talisman/phonetics/daitch-mokotoff')
+const nysiis = require('talisman/phonetics/nysiis')
+const fuzzyAlgo2 = nysiis.refined
 const { matchCodeSearchFields } = require('../constants/search')
 const { getFieldValue } = require('../lib/field-helpers')
 
-const matchCodesForTerm = (term) => {
-  return fuzzyAlgo1(term.toLowerCase())
+const matchCodesForTerm = (term, simple = false) => {
+  const lowerTerm = term.toLowerCase()
+  return simple ? fuzzyAlgo1(lowerTerm) : fuzzyAlgo1(lowerTerm).concat([fuzzyAlgo2(lowerTerm)])
 }
 
 const populateMatchCodes = async () => {
@@ -21,13 +24,13 @@ const insertPersonMatchCodes = async (searchRow) => {
   for (let fieldNum = 0; fieldNum < matchCodeSearchFields.length; fieldNum++) {
     const field = matchCodeSearchFields[fieldNum]
     const fieldValue = getFieldValue(searchRow.json, field.fieldName)
-    await insertMatchCode(searchRow.person_id, field.fieldTypeId, fieldValue)
+    await insertMatchCode(searchRow.person_id, fieldValue, field.simple)
   }
 }
 
-const insertMatchCode = async (personId, fieldTypeId, fieldValue) => {
+const insertMatchCode = async (personId, fieldValue, simple = false) => {
   if (fieldValue && fieldValue !== '') {
-    const codes = matchCodesForTerm(fieldValue)
+    const codes = matchCodesForTerm(fieldValue, simple)
     for (let c = 0; c < codes.length; c++) {
       await sequelize.models.search_match_code.create({
         person_id: personId,
@@ -38,7 +41,7 @@ const insertMatchCode = async (personId, fieldTypeId, fieldValue) => {
 }
 
 const updateMatchCodesPerPerson = async (personId, row, transaction) => {
-  await sequelize.models.search_match_code.destroy({ where: { person_id: personId } }, { transaction })
+  await sequelize.models.search_match_code.destroy({ where: { person_id: personId }, force: true }, { transaction })
   await insertPersonMatchCodes(row)
 }
 

@@ -3,7 +3,7 @@ const { Op } = require('sequelize')
 const { trigramSearchFields } = require('../constants/search')
 const { fieldNotNullOrEmpty, getFieldValue } = require('../lib/field-helpers')
 
-const insertTrigram = async (dogId, personId, fieldTypeId, fieldValue) => {
+const insertTrigram = async (dogId, personId, fieldValue) => {
   if (fieldValue && fieldValue !== '') {
     await sequelize.models.search_tgram.create({
       dog_id: dogId,
@@ -19,7 +19,7 @@ const insertTrigramsPerDog = async (row) => {
     if (field.source === 'dog') {
       const fieldValue = getFieldValue(row.json, field.fieldName)
       if (fieldNotNullOrEmpty(fieldValue)) {
-        await insertTrigram(row.dog_id, null, field.fieldTypeId, fieldValue)
+        await insertTrigram(row.dog_id, null, fieldValue)
       }
     }
   }
@@ -31,7 +31,7 @@ const insertTrigramsPerPerson = async (row) => {
     if (field.source === 'person') {
       const fieldValue = getFieldValue(row.json, field.fieldName)
       if (fieldNotNullOrEmpty(fieldValue)) {
-        await insertTrigram(null, row.person_id, field.fieldTypeId, fieldValue)
+        await insertTrigram(null, row.person_id, fieldValue)
       }
     }
   }
@@ -39,10 +39,10 @@ const insertTrigramsPerPerson = async (row) => {
 
 const updateTrigramsPerDogOrPerson = async (id, type, row, transaction) => {
   if (type === 'dog') {
-    await sequelize.models.search_tgram.destroy({ where: { dog_id: id } }, { transaction })
+    await sequelize.models.search_tgram.destroy({ where: { dog_id: id }, force: true }, { transaction })
     await insertTrigramsPerDog(row)
   } else if (type === 'person') {
-    await sequelize.models.search_tgram.destroy({ where: { person_id: id } }, { transaction })
+    await sequelize.models.search_tgram.destroy({ where: { person_id: id }, force: true }, { transaction })
     await insertTrigramsPerPerson(row)
   }
 }

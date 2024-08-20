@@ -158,8 +158,8 @@ const addPeopleOnlyIfNoDogsLeft = async (persons, transaction) => {
         json: jsonValues
       }, { transaction })
 
-      await insertPersonMatchCodes({ person_id: personId, json: partialPerson })
-      await insertTrigramsPerPerson({ person_id: personId, json: partialPerson })
+      await updateMatchCodesPerPerson(personId, { json: partialPerson }, transaction)
+      await updateTrigramsPerDogOrPerson(personId, 'person', { json: partialPerson }, transaction)
     }
   }
 }

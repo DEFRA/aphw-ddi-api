@@ -1,14 +1,14 @@
 const matchCodeSearchFields = [
-  { fieldName: 'firstName', fieldTypeId: 3 },
-  { fieldName: 'lastName', fieldTypeId: 4 },
-  { fieldName: 'email', fieldTypeId: 5 },
-  { fieldName: 'address.town', fieldTypeId: 8 }
+  { fieldName: 'firstName' },
+  { fieldName: 'lastName' },
+  { fieldName: 'email', simple: true },
+  { fieldName: 'address.town', simple: true }
 ]
 
 const trigramSearchFields = [
-  { fieldName: 'microchipNumber', source: 'dog', fieldTypeId: 1 },
-  { fieldName: 'microchipNumber2', source: 'dog', fieldTypeId: 2 },
-  { fieldName: 'address.postcode', source: 'person', fieldTypeId: 9 }
+  { fieldName: 'microchipNumber', source: 'dog' },
+  { fieldName: 'microchipNumber2', source: 'dog' },
+  { fieldName: 'address.postcode', source: 'person' }
 ]
 
 const matchingResultFields = [

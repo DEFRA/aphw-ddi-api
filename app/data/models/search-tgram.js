@@ -23,11 +23,17 @@ module.exports = (sequelize, DataTypes) => {
       type: DataTypes.DATE,
       allowNull: false,
       defaultValue: sequelize.fn('now')
+    },
+    deleted_at: {
+      type: DataTypes.DATE,
+      allowNull: true
     }
   }, {
     sequelize,
     tableName: 'search_tgram',
+    paranoid: true,
     createdAt: 'created_at',
+    deletedAt: 'deleted_at',
     updatedAt: 'updated_at',
     indexes: [
       {

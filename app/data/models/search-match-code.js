@@ -14,11 +14,23 @@ module.exports = (sequelize, DataTypes) => {
     match_code: {
       type: DataTypes.STRING(30),
       allowNull: false
+    },
+    created_at: {
+      type: DataTypes.DATE,
+      allowNull: false,
+      defaultValue: sequelize.fn('now')
+    },
+    deleted_at: {
+      type: DataTypes.DATE,
+      allowNull: true
     }
   }, {
     sequelize,
     tableName: 'search_match_code',
-    timestamps: false,
+    paranoid: true,
+    createdAt: 'created_at',
+    deletedAt: 'deleted_at',
+    updatedAt: 'updated_at',
     indexes: [
       {
         name: 'search_match_code_key',

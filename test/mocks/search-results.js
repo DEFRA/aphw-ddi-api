@@ -246,6 +246,7 @@ const matchCodeSeeding = [
       dogName: 'Bruno',
       address: {
         address_line_1: '1 test address',
+        town: 'Testington',
         postcode: 'TS1 1TS'
       },
       microchipNumber: 123456789011111
@@ -261,6 +262,7 @@ const matchCodeSeeding = [
       dogName: 'Butch',
       address: {
         address_line_1: '2 test address',
+        town: 'Faketown',
         postcode: 'TS2 2TS'
       },
       microchipNumber: 123456789022222

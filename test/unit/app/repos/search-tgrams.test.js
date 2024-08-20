@@ -70,7 +70,7 @@ describe('Search tgrams repo', () => {
 
       await updateTrigramsPerDogOrPerson(123, 'dog', row, {})
 
-      expect(sequelize.models.search_tgram.destroy).toHaveBeenCalledWith({ where: { dog_id: 123 } }, { transaction: {} })
+      expect(sequelize.models.search_tgram.destroy).toHaveBeenCalledWith({ where: { dog_id: 123 }, force: true }, { transaction: {} })
       expect(sequelize.models.search_tgram.create).toHaveBeenCalledTimes(2)
       expect(sequelize.models.search_tgram.create.mock.calls[0][0]).toEqual({ dog_id: 123, match_text: '123451234512345', person_id: null })
       expect(sequelize.models.search_tgram.create.mock.calls[1][0]).toEqual({ dog_id: 123, match_text: '123451234511111', person_id: null })
@@ -87,7 +87,7 @@ describe('Search tgrams repo', () => {
 
       await updateTrigramsPerDogOrPerson(123, 'dog', row, {})
 
-      expect(sequelize.models.search_tgram.destroy).toHaveBeenCalledWith({ where: { dog_id: 123 } }, { transaction: {} })
+      expect(sequelize.models.search_tgram.destroy).toHaveBeenCalledWith({ where: { dog_id: 123 }, force: true }, { transaction: {} })
       expect(sequelize.models.search_tgram.create).toHaveBeenCalledTimes(0)
     })
 
@@ -103,7 +103,7 @@ describe('Search tgrams repo', () => {
 
       await updateTrigramsPerDogOrPerson(456, 'person', row, {})
 
-      expect(sequelize.models.search_tgram.destroy).toHaveBeenCalledWith({ where: { person_id: 456 } }, { transaction: {} })
+      expect(sequelize.models.search_tgram.destroy).toHaveBeenCalledWith({ where: { person_id: 456 }, force: true }, { transaction: {} })
       expect(sequelize.models.search_tgram.create).toHaveBeenCalledTimes(1)
       expect(sequelize.models.search_tgram.create.mock.calls[0][0]).toEqual({ dog_id: null, match_text: 'ts11ts', person_id: 456 })
     })
@@ -119,7 +119,7 @@ describe('Search tgrams repo', () => {
 
       await updateTrigramsPerDogOrPerson(456, 'person', row, {})
 
-      expect(sequelize.models.search_tgram.destroy).toHaveBeenCalledWith({ where: { person_id: 456 } }, { transaction: {} })
+      expect(sequelize.models.search_tgram.destroy).toHaveBeenCalledWith({ where: { person_id: 456 }, force: true }, { transaction: {} })
       expect(sequelize.models.search_tgram.create).toHaveBeenCalledTimes(0)
     })
   })
