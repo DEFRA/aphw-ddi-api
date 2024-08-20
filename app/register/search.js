@@ -3,7 +3,9 @@ const { Op } = require('sequelize')
 const { sortAndGroupResults } = require('./search/sorting-and-grouping')
 const { cleanupSearchTerms } = require('./search/search-terms')
 const { mapResults } = require('./search/search-results')
-const { fuzzySearch, rankResult, trigramSearch } = require('../repos/search-match-codes')
+const { fuzzySearch } = require('../repos/search-match-codes')
+const { trigramSearch } = require('../repos/search-tgrams')
+const { rankResult } = require('../repos/search-rank')
 const { buildTsVectorQuery } = require('./search/search-builder')
 
 const trigramQueryThreshold = 0.4
@@ -93,7 +95,6 @@ const search = async (type, terms, fuzzy = false) => {
   }
 
   const termsArray = cleanupSearchTerms(terms)
-  console.log('termsArray', termsArray)
 
   const fullTextToKeep = await doFullTextSearch(termsArray, type, fuzzy)
 

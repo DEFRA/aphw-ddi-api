@@ -3,7 +3,10 @@ describe('Prepop codes endpoint', () => {
   let server
 
   jest.mock('../../../../app/repos/search-match-codes')
-  const { populateMatchCodes, populateTrigrams } = require('../../../../app/repos/search-match-codes')
+  const { populateMatchCodes } = require('../../../../app/repos/search-match-codes')
+
+  jest.mock('../../../../app/repos/search-tgrams')
+  const { populateTrigrams } = require('../../../../app/repos/search-tgrams')
 
   beforeEach(async () => {
     jest.clearAllMocks()

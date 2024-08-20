@@ -11,8 +11,8 @@ const { getBreed, getExemptionOrder } = require('../../../../../app/lookups')
 jest.mock('../../../../../app/messaging/send-event')
 const { sendEvent } = require('../../../../../app/messaging/send-event')
 
-jest.mock('../../../../../app/repos/search')
-const { removeDogFromSearchIndex } = require('../../../../../app/repos/search')
+jest.mock('../../../../../app/repos/search-index')
+const { removeDogFromSearchIndex } = require('../../../../../app/repos/search-index')
 
 jest.mock('../../../../../app/messaging/send-audit')
 const { sendDeleteToAudit, sendPermanentDeleteToAudit } = require('../../../../../app/messaging/send-audit')

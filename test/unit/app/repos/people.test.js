@@ -66,8 +66,8 @@ describe('People repo', () => {
   jest.mock('../../../../app/lookups')
   const { getContactType, getCountry } = require('../../../../app/lookups')
 
-  jest.mock('../../../../app/repos/search')
-  const { updateSearchIndexPerson } = require('../../../../app/repos/search')
+  jest.mock('../../../../app/repos/search-index')
+  const { updateSearchIndexPerson } = require('../../../../app/repos/search-index')
 
   const { createPeople, getPersonByReference, getPersonAndDogsByReference, getPersonAndDogsByIndex, updatePerson, getOwnerOfDog, updatePersonFields, deletePerson, purgePersonByReferenceNumber } = require('../../../../app/repos/people')
 

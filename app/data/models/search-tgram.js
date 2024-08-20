@@ -40,5 +40,16 @@ module.exports = (sequelize, DataTypes) => {
     ]
   })
 
+  searchTgram.associate = models => {
+    searchTgram.belongsTo(sequelize.models.person, {
+      as: 'person',
+      foreignKey: 'person_id'
+    })
+    searchTgram.belongsTo(sequelize.models.dog, {
+      as: 'dog',
+      foreignKey: 'dog_id'
+    })
+  }
+
   return searchTgram
 }

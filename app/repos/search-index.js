@@ -2,6 +2,8 @@ const sequelize = require('../config/db')
 const { dbFindByPk } = require('../lib/db-functions')
 const { buildAddressString } = require('../lib/address-helper')
 const { getMicrochip } = require('../dto/dto-helper')
+const { insertTrigramsPerDog, insertTrigramsPerPerson, updateTrigramsPerDogOrPerson } = require('./search-tgrams')
+const { insertPersonMatchCodes, updateMatchCodesPerPerson } = require('./search-match-codes')
 
 const addToSearchIndex = async (person, dog, transaction) => {
   if (!transaction) {
@@ -10,6 +12,7 @@ const addToSearchIndex = async (person, dog, transaction) => {
 
   if (dog.existingDog) {
     await sequelize.models.search_index.destroy({ where: { dog_id: dog.id } }, { transaction })
+    await sequelize.models.search_tgram.destroy({ where: { dog_id: dog.id } }, { transaction })
 
     if (dog.changedOwner) {
       const persons = new Map()
@@ -38,12 +41,17 @@ const addToSearchIndex = async (person, dog, transaction) => {
 
   applyMicrochips(refreshedDogEntity)
 
+  const jsonValues = buildJsonColumn(person, refreshedDogEntity)
   await sequelize.models.search_index.create({
     search: buildIndexColumn(person, refreshedDogEntity),
     person_id: person.id,
     dog_id: dog.id,
-    json: buildJsonColumn(person, refreshedDogEntity)
+    json: jsonValues
   }, { transaction })
+
+  await insertTrigramsPerDog({ dog_id: dog.id, json: jsonValues })
+  await insertTrigramsPerPerson({ person_id: person.id, json: jsonValues })
+  await insertPersonMatchCodes({ person_id: person.id, json: jsonValues })
 
   await cleanupPossibleOwnerWithNoDogs(person.id, transaction)
 }
@@ -115,6 +123,7 @@ const removeDogFromSearchIndex = async (dogFromDb, transaction) => {
 
     await indexRow.destroy()
   }
+  await sequelize.models.search_tgram.destroy({ where: { dog_id: dogFromDb.id } }, { transaction })
 
   await addPeopleOnlyIfNoDogsLeft(uniquePersons, transaction)
 }
@@ -140,17 +149,22 @@ const addPeopleOnlyIfNoDogsLeft = async (persons, transaction) => {
         person_reference: person.personReference
       }
 
+      const jsonValues = buildJsonColumn(partialPerson, {})
+
       await sequelize.models.search_index.create({
         search: buildIndexColumn(partialPerson, {}),
         person_id: personId,
         dog_id: null,
-        json: buildJsonColumn(partialPerson, {})
+        json: jsonValues
       }, { transaction })
+
+      await insertPersonMatchCodes({ person_id: personId, json: partialPerson })
+      await insertTrigramsPerPerson({ person_id: personId, json: partialPerson })
     }
   }
 }
 
-const updateSearchIndexDog = async (dogFromDb, statuses, transaction) => {
+const updateSearchIndexDog = async (dogFromDb, transaction) => {
   const indexRows = await sequelize.models.search_index.findAll({
     where: { dog_id: dogFromDb.id },
     transaction
@@ -175,6 +189,8 @@ const updateSearchIndexDog = async (dogFromDb, statuses, transaction) => {
     indexRow.search = buildIndexColumn(partialPerson, partialDog)
     indexRow.json = buildJsonColumn(partialPerson, partialDog)
     await indexRow.save({ transaction })
+
+    await updateTrigramsPerDogOrPerson(dogFromDb.id, 'dog', indexRow, transaction)
   }
 }
 
@@ -216,6 +232,9 @@ const updateSearchIndexPerson = async (person, transaction) => {
       indexRow.search = buildIndexColumn(partialPerson, partialDog)
       indexRow.json = buildJsonColumn(partialPerson, partialDog)
       await indexRow.save({ transaction })
+
+      await updateMatchCodesPerPerson(person.id, indexRow, transaction)
+      await updateTrigramsPerDogOrPerson(person.id, 'person', indexRow, transaction)
     }
   }
 }
@@ -229,10 +248,17 @@ const cleanupPossibleOwnerWithNoDogs = async (personId, transaction) => {
     transaction
   })
 
+  const uniquePersonIds = []
   if (personsNoDogs) {
     for (const personNoDogs of personsNoDogs) {
+      uniquePersonIds.push(personNoDogs.person_id)
       await personNoDogs.destroy({ transaction })
     }
+  }
+
+  for (const personId of uniquePersonIds) {
+    await sequelize.models.search_tgram.destroy({ where: { person_id: personId } }, { transaction })
+    await sequelize.models.search_match_code.destroy({ where: { person_id: personId } }, { transaction })
   }
 }
 

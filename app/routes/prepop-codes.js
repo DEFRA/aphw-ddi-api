@@ -1,4 +1,5 @@
-const { populateTrigrams, populateMatchCodes } = require('../repos/search-match-codes')
+const { populateMatchCodes } = require('../repos/search-match-codes')
+const { populateTrigrams } = require('../repos/search-tgrams')
 
 module.exports = {
   method: 'GET',

@@ -20,14 +20,11 @@
     </createTable>
   </changeSet>
   <changeSet author="J Barnsley" id="4">
-    <addForeignKeyConstraint baseColumnNames="person_id" baseTableName="search_match_code" constraintName="fk_search_match_code_person_id" referencedColumnNames="id" referencedTableName="person" />
-  </changeSet>
-  <changeSet author="J Barnsley" id="5">
     <createIndex indexName="match_code_idx" tableName="search_match_code">
       <column name="match_code" />
     </createIndex>
   </changeSet>
-  <changeSet author="J Barnsley" id="6">
+  <changeSet author="J Barnsley" id="5">
     <createTable tableName="search_tgram">
       <column autoIncrement="true" name="id" type="INTEGER">
         <constraints nullable="false" primaryKey="true" primaryKeyName="search_tgram_pkey" />
@@ -45,11 +42,12 @@
       <column name="updated_at" type="TIMESTAMP WITH TIME ZONE" />
     </createTable>
   </changeSet>
-  <changeSet author="J Barnsley" id="7">
+  <changeSet author="J Barnsley" id="6">
     <addForeignKeyConstraint baseColumnNames="person_id" baseTableName="search_tgram" constraintName="fk_search_tgram_person_id" referencedColumnNames="id" referencedTableName="person" />
     <addForeignKeyConstraint baseColumnNames="dog_id" baseTableName="search_tgram" constraintName="fk_search_tgram_dog_id" referencedColumnNames="id" referencedTableName="dog" />
+    <addForeignKeyConstraint baseColumnNames="person_id" baseTableName="search_match_code" constraintName="fk_search_match_code_person_id" referencedColumnNames="id" referencedTableName="person" />
   </changeSet>
-  <changeSet author="J Barnsley" id="8">
+  <changeSet author="J Barnsley" id="7">
     <sql>CREATE INDEX search_tgram_idx ON search_tgram USING GIN(match_text gin_trgm_ops)</sql>
   </changeSet>
 </databaseChangeLog>
