@@ -56,6 +56,28 @@ const buildFuzzyCodes = (terms) => {
 
 const fuzzySearch = async (terms) => {
   const fuzzyCodes = buildFuzzyCodes(terms)
+  /*
+  const fuzzyResults = await sequelize.models.search_match_code.findAll({
+    attributes: ['person_id', [sequelize.fn('count', sequelize.col('search_match_code.person_id')), 'matchcount']],
+    where: {
+      match_code: fuzzyCodes
+    },
+    group: ['person_id'],
+    order: [['matchcount', 'DESC']],
+    raw: true
+  })
+  const numResults = fuzzyResults.length
+  const uniquePersons = []
+  if (numResults > 0) {
+    const highestMatch = parseInt(fuzzyResults[0].matchcount)
+    console.log('high', highestMatch)
+    const matchThreshold = 1 // highestMatch / 4
+    fuzzyResults.forEach(res => {
+      if (parseInt(res.matchcount) >= matchThreshold && !uniquePersons.includes(res.person_id)) {
+        uniquePersons.push(res.person_id)
+      }
+    })
+  */
   const fuzzyResults = await sequelize.models.search_match_code.findAll({
     where: {
       match_code: fuzzyCodes
