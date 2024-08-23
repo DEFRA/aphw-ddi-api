@@ -6,7 +6,7 @@ const isAccountEnabled = async (username) => {
   })
 
   console.log('account', account?.activated_date)
-  return account?.activated_date
+  return !!account?.activated_date
 }
 
 module.exports = {
