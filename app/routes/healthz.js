@@ -3,6 +3,7 @@ module.exports = {
   method: 'GET',
   path: '/healthz',
   options: {
+    auth: false,
     tags: ['api'],
     response: {
       schema: okSchema

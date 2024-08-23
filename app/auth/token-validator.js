@@ -2,6 +2,9 @@ const wreck = require('@hapi/wreck')
 const crypto = require('crypto')
 const config = require('../config/index')
 const { addMinutes } = require('../lib/date-helpers')
+const { isAccountEnabled } = require('../repos/user-accounts')
+
+const expiryPeriodInMins = 65
 
 const hashCache = new Map()
 
@@ -9,14 +12,24 @@ const returnVal = (isValid, username = null) => {
   return { isValid, credentials: { id: username, user: username } }
 }
 
-const checkTokenOnline = async (token) => {
-  const { payload } = await wreck.get(`https://${config.authServerHostname}/userinfo`, options)
-  return payload
+const addBearerHeader = (token) => {
+  return {
+    Authorization: `Bearer ${token}`
+  }
+}
+const checkTokenOnline = async (username, token) => {
+  const options = { json: true, headers: addBearerHeader(token) }
+  const endpoint = `https://${config.authServerHostname}/userinfo`
+  console.log('token', token ? `${token.substr(0, 3)}...${token.substr(token.length - 3)}` : '')
+  console.log('username', username)
+  const { payload } = await wreck.get(endpoint, options)
+  return payload && payload.email === username
 }
 
 const validate = async (request, username, token) => {
+  console.log(' ')
   console.log('username', username)
-  console.log('token', token ? `${token.substr(0, 2)}...${token.substr(token.length - 2)}` : '')
+  console.log('token', token ? `${token.substr(0, 3)}...${token.substr(token.length - 3)}` : '')
   const now = new Date()
 
   if (!token || !username) {
@@ -30,25 +43,26 @@ const validate = async (request, username, token) => {
   if (cached) {
     if (cached.expiry > now && cached.hash === hash) {
       // Valid non-expired token
-      console.log('Got from cache')
+      console.log(`Got from cache - expiry in ${Math.trunc((cached.expiry - now) / 1000 / 60)} mins`)
       return returnVal(true, username)
     }
   }
 
   // Validate token contents and store in cache
-  // validate with OneLogin
-  const validToken = true
+  const validToken = await checkTokenOnline(username, token)
   if (validToken) {
-    hashCache.set(username, { hash, expiry: addMinutes(now, 60) })
-    console.log('set in cache')
-    return returnVal(true, username)
+    const enabled = await isAccountEnabled(username)
+    if (enabled) {
+      hashCache.set(username, { hash, expiry: addMinutes(now, expiryPeriodInMins) })
+      console.log('set in cache')
+      return returnVal(true, username)
+    }
   }
 
   return returnVal(false)
 }
 
 // TODO - clean up expired cache entries from time to time
-// Make internet call to OneLogin to validate token
 
 module.exports = {
   validate
