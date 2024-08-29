@@ -1,9 +1,14 @@
+const { authHeaders, mockValidate } = require('../../../mocks/auth')
 describe('Countries endpoint', () => {
   const createServer = require('../../../../app/server')
   let server
 
   jest.mock('../../../../app/repos/countries')
   const { getCountries } = require('../../../../app/repos/countries')
+
+  jest.mock('../../../../app/auth/token-validator')
+  const { validate } = require('../../../../app/auth/token-validator')
+  validate.mockResolvedValue(mockValidate)
 
   beforeEach(async () => {
     jest.clearAllMocks()
@@ -20,7 +25,8 @@ describe('Countries endpoint', () => {
 
     const options = {
       method: 'GET',
-      url: '/countries'
+      url: '/countries',
+      ...authHeaders
     }
 
     const response = await server.inject(options)

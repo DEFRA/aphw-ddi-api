@@ -1,5 +1,6 @@
 const { countsPerStatus: mockCountsPerStatus, countsPerCountry: mockCountsPerCountry } = require('../../../mocks/statistics')
 const { breeds: mockBreeds } = require('../../../mocks/dog-breeds')
+const { mockValidate, authHeaders } = require('../../../mocks/auth')
 
 describe('Statistics endpoint', () => {
   const createServer = require('../../../../app/server')
@@ -7,6 +8,10 @@ describe('Statistics endpoint', () => {
 
   jest.mock('../../../../app/repos/statistics')
   const { getCountsPerStatus, getCountsPerCountry } = require('../../../../app/repos/statistics')
+
+  jest.mock('../../../../app/auth/token-validator')
+  const { validate } = require('../../../../app/auth/token-validator')
+  validate.mockResolvedValue(mockValidate)
 
   beforeEach(async () => {
     jest.clearAllMocks()
@@ -20,7 +25,8 @@ describe('Statistics endpoint', () => {
 
       const options = {
         method: 'GET',
-        url: '/statistics?queryName=countsPerStatus'
+        url: '/statistics?queryName=countsPerStatus',
+        ...authHeaders
       }
 
       const response = await server.inject(options)
@@ -46,7 +52,8 @@ describe('Statistics endpoint', () => {
 
       const options = {
         method: 'GET',
-        url: '/statistics?queryNameInvalid=countsPerStatus'
+        url: '/statistics?queryNameInvalid=countsPerStatus',
+        ...authHeaders
       }
 
       const response = await server.inject(options)
@@ -58,7 +65,8 @@ describe('Statistics endpoint', () => {
 
       const options = {
         method: 'GET',
-        url: '/statistics?queryName=invalidQuery'
+        url: '/statistics?queryName=invalidQuery',
+        ...authHeaders
       }
 
       const response = await server.inject(options)
@@ -70,7 +78,8 @@ describe('Statistics endpoint', () => {
 
       const options = {
         method: 'GET',
-        url: '/statistics?queryName=countsPerStatus'
+        url: '/statistics?queryName=countsPerStatus',
+        ...authHeaders
       }
 
       const response = await server.inject(options)
@@ -84,7 +93,8 @@ describe('Statistics endpoint', () => {
 
         const options = {
           method: 'GET',
-          url: '/statistics?queryName=countsPerCountry'
+          url: '/statistics?queryName=countsPerCountry',
+          ...authHeaders
         }
 
         const response = await server.inject(options)
@@ -123,7 +133,8 @@ describe('Statistics endpoint', () => {
 
         const options = {
           method: 'GET',
-          url: '/statistics?queryName=countsPerCountry'
+          url: '/statistics?queryName=countsPerCountry',
+          ...authHeaders
         }
 
         const response = await server.inject(options)

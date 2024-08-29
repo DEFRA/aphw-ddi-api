@@ -1,8 +1,7 @@
-const wreck = require('@hapi/wreck')
 const crypto = require('crypto')
-const config = require('../config/index')
 const { addMinutes } = require('../lib/date-helpers')
 const { isAccountEnabled } = require('../repos/user-accounts')
+const { getUserInfo } = require('../proxy/auth-server')
 
 const expiryPeriodInMins = 65
 
@@ -12,17 +11,12 @@ const returnVal = (isValid, username = null) => {
   return { isValid, credentials: { id: username, user: username } }
 }
 
-const addBearerHeader = (token) => {
-  return {
-    Authorization: `Bearer ${token}`
-  }
-}
 const checkTokenOnline = async (username, token) => {
-  const options = { json: true, headers: addBearerHeader(token) }
-  const endpoint = `https://${config.authServerHostname}/userinfo`
   console.log('token', token ? `${token.substr(0, 3)}...${token.substr(token.length - 3)}` : '')
   console.log('username', username)
-  const { payload } = await wreck.get(endpoint, options)
+
+  const payload = getUserInfo(token)
+
   return payload && payload.email === username
 }
 

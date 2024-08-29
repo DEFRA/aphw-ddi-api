@@ -1,4 +1,5 @@
 const { breeds: mockBreeds } = require('../../../mocks/dog-breeds')
+const { mockValidate, authHeaders } = require('../../../mocks/auth')
 
 describe('Dog breeds endpoint', () => {
   const createServer = require('../../../../app/server')
@@ -7,7 +8,11 @@ describe('Dog breeds endpoint', () => {
   jest.mock('../../../../app/repos/dogs')
   const { getBreeds } = require('../../../../app/repos/dogs')
 
+  jest.mock('../../../../app/auth/token-validator')
+  const { validate } = require('../../../../app/auth/token-validator')
+
   beforeEach(async () => {
+    validate.mockResolvedValue(mockValidate)
     jest.clearAllMocks()
     server = await createServer()
     await server.initialize()
@@ -18,7 +23,8 @@ describe('Dog breeds endpoint', () => {
 
     const options = {
       method: 'GET',
-      url: '/dog-breeds'
+      url: '/dog-breeds',
+      ...authHeaders
     }
 
     const response = await server.inject(options)
@@ -30,7 +36,8 @@ describe('Dog breeds endpoint', () => {
 
     const options = {
       method: 'GET',
-      url: '/dog-breeds'
+      url: '/dog-breeds',
+      ...authHeaders
     }
 
     const response = await server.inject(options)
@@ -47,7 +54,8 @@ describe('Dog breeds endpoint', () => {
 
     const options = {
       method: 'GET',
-      url: '/dog-breeds'
+      url: '/dog-breeds',
+      ...authHeaders
     }
 
     const response = await server.inject(options)

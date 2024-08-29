@@ -1,5 +1,6 @@
 const { DuplicateResourceError } = require('../../../../app/errors/duplicate-record')
 const { NotFoundError } = require('../../../../app/errors/not-found')
+const { mockValidate, authHeaders } = require('../../../mocks/auth')
 
 describe('Police force endpoint', () => {
   const { forces: mockForces } = require('../../../mocks/police-forces')
@@ -10,11 +11,15 @@ describe('Police force endpoint', () => {
   jest.mock('../../../../app/auth/get-user')
   const { getCallingUser } = require('../../../../app/auth/get-user')
 
+  jest.mock('../../../../app/auth/token-validator')
+  const { validate } = require('../../../../app/auth/token-validator')
+
   jest.mock('../../../../app/repos/police-forces')
   const { getPoliceForces, addForce, deleteForce } = require('../../../../app/repos/police-forces')
 
   beforeEach(async () => {
     jest.clearAllMocks()
+    validate.mockResolvedValue(mockValidate)
     server = await createServer()
     await server.initialize()
   })
@@ -25,7 +30,8 @@ describe('Police force endpoint', () => {
 
       const options = {
         method: 'GET',
-        url: '/police-forces'
+        url: '/police-forces',
+        ...authHeaders
       }
 
       const response = await server.inject(options)
@@ -37,7 +43,8 @@ describe('Police force endpoint', () => {
 
       const options = {
         method: 'GET',
-        url: '/police-forces'
+        url: '/police-forces',
+        ...authHeaders
       }
 
       const response = await server.inject(options)
@@ -54,7 +61,8 @@ describe('Police force endpoint', () => {
 
       const options = {
         method: 'GET',
-        url: '/police-forces'
+        url: '/police-forces',
+        ...authHeaders
       }
 
       const response = await server.inject(options)
@@ -83,7 +91,8 @@ describe('Police force endpoint', () => {
         url: '/police-forces',
         payload: {
           name: 'Gondor Constabulary'
-        }
+        },
+        ...authHeaders
       }
 
       const response = await server.inject(options)
@@ -100,7 +109,8 @@ describe('Police force endpoint', () => {
       const options = {
         method: 'POST',
         url: '/police-forces',
-        payload: {}
+        payload: {},
+        ...authHeaders
       }
 
       const response = await server.inject(options)
@@ -115,7 +125,8 @@ describe('Police force endpoint', () => {
         url: '/police-forces',
         payload: {
           name: 'Gondor Constabulary'
-        }
+        },
+        ...authHeaders
       }
 
       const response = await server.inject(options)
@@ -130,7 +141,8 @@ describe('Police force endpoint', () => {
         url: '/police-forces',
         payload: {
           name: 'Gondor Constabulary'
-        }
+        },
+        ...authHeaders
       }
 
       const response = await server.inject(options)
@@ -156,7 +168,8 @@ describe('Police force endpoint', () => {
       })
       const options = {
         method: 'DELETE',
-        url: '/police-forces/1'
+        url: '/police-forces/1',
+        ...authHeaders
       }
 
       const response = await server.inject(options)
@@ -171,7 +184,8 @@ describe('Police force endpoint', () => {
 
       const options = {
         method: 'DELETE',
-        url: '/police-forces/1'
+        url: '/police-forces/1',
+        ...authHeaders
       }
 
       const response = await server.inject(options)
@@ -183,7 +197,8 @@ describe('Police force endpoint', () => {
 
       const options = {
         method: 'DELETE',
-        url: '/police-forces/1'
+        url: '/police-forces/1',
+        ...authHeaders
       }
 
       const response = await server.inject(options)

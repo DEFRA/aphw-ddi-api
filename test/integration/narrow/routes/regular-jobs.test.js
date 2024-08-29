@@ -1,4 +1,5 @@
 const { jobs: mockJobs } = require('../../../mocks/jobs')
+const { mockValidate, authHeaders } = require('../../../mocks/auth')
 
 describe('Regular jobs endpoint', () => {
   const createServer = require('../../../../app/server')
@@ -6,6 +7,10 @@ describe('Regular jobs endpoint', () => {
 
   jest.mock('../../../../app/repos/regular-jobs')
   const { getRegularJobs } = require('../../../../app/repos/regular-jobs')
+
+  jest.mock('../../../../app/auth/token-validator')
+  const { validate } = require('../../../../app/auth/token-validator')
+  validate.mockResolvedValue(mockValidate)
 
   beforeEach(async () => {
     jest.clearAllMocks()
@@ -18,7 +23,8 @@ describe('Regular jobs endpoint', () => {
 
     const options = {
       method: 'GET',
-      url: '/regular-jobs'
+      url: '/regular-jobs',
+      ...authHeaders
     }
 
     const response = await server.inject(options)
@@ -30,7 +36,8 @@ describe('Regular jobs endpoint', () => {
 
     const options = {
       method: 'GET',
-      url: '/regular-jobs'
+      url: '/regular-jobs',
+      ...authHeaders
     }
 
     const response = await server.inject(options)

@@ -2,6 +2,7 @@ const {
   buildDogBreedDao, buildStatusDao, buildRegistrationDao, buildRegisteredPersonDao, buildCourtDao,
   buildPoliceForceDao, buildExemptionOrderDao, buildCdoDao
 } = require('../../../mocks/cdo/get')
+const { mockValidate, authHeaders } = require('../../../mocks/auth')
 
 describe('Exemption endpoint', () => {
   const createServer = require('../../../../app/server')
@@ -12,6 +13,10 @@ describe('Exemption endpoint', () => {
 
   jest.mock('../../../../app/repos/cdo')
   const { getCdo } = require('../../../../app/repos/cdo')
+
+  jest.mock('../../../../app/auth/token-validator')
+  const { validate } = require('../../../../app/auth/token-validator')
+  validate.mockResolvedValue(mockValidate)
 
   beforeEach(async () => {
     jest.clearAllMocks()
@@ -87,7 +92,8 @@ describe('Exemption endpoint', () => {
     const options = {
       method: 'PUT',
       url: '/exemption',
-      payload
+      payload,
+      ...authHeaders
     }
 
     const response = await server.inject(options)
@@ -169,7 +175,8 @@ describe('Exemption endpoint', () => {
     const options = {
       method: 'PUT',
       url: '/exemption',
-      payload
+      payload,
+      ...authHeaders
     }
 
     const response = await server.inject(options)
@@ -182,7 +189,8 @@ describe('Exemption endpoint', () => {
     const options = {
       method: 'PUT',
       url: '/exemption',
-      payload: {}
+      payload: {},
+      ...authHeaders
     }
 
     getCdo.mockResolvedValue({
@@ -268,7 +276,8 @@ describe('Exemption endpoint', () => {
     const options = {
       method: 'PUT',
       url: '/exemption',
-      payload
+      payload,
+      ...authHeaders
     }
 
     const response = await server.inject(options)

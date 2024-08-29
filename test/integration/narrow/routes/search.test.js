@@ -1,9 +1,14 @@
+const { mockValidate, authHeaders } = require('../../../mocks/auth')
 describe('SearchBasic endpoint', () => {
   const createServer = require('../../../../app/server')
   let server
 
   jest.mock('../../../../app/register/search-basic')
   const { search } = require('../../../../app/register/search-basic')
+
+  jest.mock('../../../../app/auth/token-validator')
+  const { validate } = require('../../../../app/auth/token-validator')
+  validate.mockResolvedValue(mockValidate)
 
   beforeEach(async () => {
     jest.clearAllMocks()
@@ -16,7 +21,8 @@ describe('SearchBasic endpoint', () => {
 
     const options = {
       method: 'GET',
-      url: '/search/dog/term'
+      url: '/search/dog/term',
+      ...authHeaders
     }
 
     const response = await server.inject(options)
@@ -28,7 +34,8 @@ describe('SearchBasic endpoint', () => {
 
     const options = {
       method: 'GET',
-      url: '/search/dog/term'
+      url: '/search/dog/term',
+      ...authHeaders
     }
 
     const response = await server.inject(options)
@@ -41,7 +48,8 @@ describe('SearchBasic endpoint', () => {
 
     const options = {
       method: 'GET',
-      url: '/search/dog/term'
+      url: '/search/dog/term',
+      ...authHeaders
     }
 
     const response = await server.inject(options)

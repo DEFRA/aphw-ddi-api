@@ -1,9 +1,14 @@
+const { mockValidate, authHeaders } = require('../../../mocks/auth')
 describe('Robot import endpoint', () => {
   jest.mock('../../../../app/storage')
   const { downloadBlob } = require('../../../../app/storage')
 
   jest.mock('../../../../app/import/robot')
   const { importRegister, processRegister } = require('../../../../app/import/robot')
+
+  jest.mock('../../../../app/auth/token-validator')
+  const { validate } = require('../../../../app/auth/token-validator')
+  validate.mockResolvedValue(mockValidate)
 
   const createServer = require('../../../../app/server')
   let server
@@ -20,7 +25,8 @@ describe('Robot import endpoint', () => {
       url: '/robot-import',
       headers: {
         'content-type': 'text/plain'
-      }
+      },
+      ...authHeaders
     }
 
     const response = await server.inject(options)
@@ -45,7 +51,8 @@ describe('Robot import endpoint', () => {
       },
       payload: {
         filename: 'register.xlsx'
-      }
+      },
+      ...authHeaders
     }
 
     const response = await server.inject(options)
@@ -70,7 +77,8 @@ describe('Robot import endpoint', () => {
       payload: {
         filename: 'register.xlsx',
         stage: 'spreadsheet-validation'
-      }
+      },
+      ...authHeaders
     }
 
     const response = await server.inject(options)
@@ -95,7 +103,8 @@ describe('Robot import endpoint', () => {
       payload: {
         filename: 'register.xlsx',
         stage: 'saveToDB'
-      }
+      },
+      ...authHeaders
     }
 
     const response = await server.inject(options)

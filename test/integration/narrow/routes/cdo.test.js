@@ -3,7 +3,7 @@ const { NotFoundError } = require('../../../../app/errors/not-found')
 const { CdoTaskList } = require('../../../../app/data/domain')
 const { buildCdo, buildCdoDog, buildExemption, buildCdoInsurance } = require('../../../mocks/cdo/domain')
 const { ActionAlreadyPerformedError } = require('../../../../app/errors/domain/actionAlreadyPerformed')
-const { devUser } = require('../../../mocks/auth')
+const { devUser, authHeaders, mockValidate } = require('../../../mocks/auth')
 const { SequenceViolationError } = require('../../../../app/errors/domain/sequenceViolation')
 const { DuplicateResourceError } = require('../../../../app/errors/duplicate-record')
 const { InvalidDataError } = require('../../../../app/errors/domain/invalidData')
@@ -17,6 +17,10 @@ describe('CDO endpoint', () => {
   jest.mock('../../../../app/repos/cdo')
   const cdoRepository = require('../../../../app/repos/cdo')
   const { createCdo, getCdo } = cdoRepository
+
+  jest.mock('../../../../app/auth/token-validator')
+  const { validate } = require('../../../../app/auth/token-validator')
+  validate.mockResolvedValue(mockValidate)
 
   jest.mock('../../../../app/auth/get-user')
   const { getCallingUser } = require('../../../../app/auth/get-user')
@@ -40,7 +44,8 @@ describe('CDO endpoint', () => {
 
       const options = {
         method: 'GET',
-        url: '/cdo/ED123'
+        url: '/cdo/ED123',
+        ...authHeaders
       }
 
       const response = await server.inject(options)
@@ -52,7 +57,8 @@ describe('CDO endpoint', () => {
 
       const options = {
         method: 'GET',
-        url: '/cdo/ED123'
+        url: '/cdo/ED123',
+        ...authHeaders
       }
 
       const response = await server.inject(options)
@@ -64,7 +70,8 @@ describe('CDO endpoint', () => {
 
       const options = {
         method: 'GET',
-        url: '/cdo/ED123'
+        url: '/cdo/ED123',
+        ...authHeaders
       }
 
       const response = await server.inject(options)
@@ -77,7 +84,8 @@ describe('CDO endpoint', () => {
       const options = {
         method: 'POST',
         url: '/cdo',
-        payload: mockCreatePayload
+        payload: mockCreatePayload,
+        ...authHeaders
       }
 
       createCdo.mockResolvedValue({
@@ -159,7 +167,8 @@ describe('CDO endpoint', () => {
       const options = {
         method: 'POST',
         url: '/cdo',
-        payload: mockCreateWithRefPayload
+        payload: mockCreateWithRefPayload,
+        ...authHeaders
       }
 
       createCdo.mockResolvedValue({
@@ -239,7 +248,8 @@ describe('CDO endpoint', () => {
       const options = {
         method: 'POST',
         url: '/cdo',
-        payload: mockCreateWithRefPayload
+        payload: mockCreateWithRefPayload,
+        ...authHeaders
       }
 
       createCdo.mockRejectedValue(new NotFoundError('Owner not found'))
@@ -253,7 +263,8 @@ describe('CDO endpoint', () => {
       const options = {
         method: 'POST',
         url: '/cdo',
-        payload: {}
+        payload: {},
+        ...authHeaders
       }
 
       const response = await server.inject(options)
@@ -266,7 +277,8 @@ describe('CDO endpoint', () => {
       const options = {
         method: 'POST',
         url: '/cdo',
-        payload: mockCreatePayload
+        payload: mockCreatePayload,
+        ...authHeaders
       }
 
       const response = await server.inject(options)
@@ -285,7 +297,8 @@ describe('CDO endpoint', () => {
       })
       const options = {
         method: 'GET',
-        url: '/cdo/ED123/manage'
+        url: '/cdo/ED123/manage',
+        ...authHeaders
       }
 
       const response = await server.inject(options)
@@ -355,7 +368,8 @@ describe('CDO endpoint', () => {
       })
       const options = {
         method: 'GET',
-        url: '/cdo/ED123/manage'
+        url: '/cdo/ED123/manage',
+        ...authHeaders
       }
 
       const response = await server.inject(options)
@@ -371,7 +385,8 @@ describe('CDO endpoint', () => {
 
       const options = {
         method: 'GET',
-        url: '/cdo/ED123/manage'
+        url: '/cdo/ED123/manage',
+        ...authHeaders
       }
 
       const response = await server.inject(options)
@@ -389,7 +404,8 @@ describe('CDO endpoint', () => {
 
       const options = {
         method: 'POST',
-        url: '/cdo/ED123/manage:sendApplicationPack'
+        url: '/cdo/ED123/manage:sendApplicationPack',
+        ...authHeaders
       }
       const response = await server.inject(options)
       expect(response.statusCode).toBe(204)
@@ -404,7 +420,8 @@ describe('CDO endpoint', () => {
       })
       const options = {
         method: 'POST',
-        url: '/cdo/ED123/manage:sendApplicationPack'
+        url: '/cdo/ED123/manage:sendApplicationPack',
+        ...authHeaders
       }
 
       const response = await server.inject(options)
@@ -419,7 +436,8 @@ describe('CDO endpoint', () => {
       })
       const options = {
         method: 'POST',
-        url: '/cdo/ED123/manage:sendApplicationPack'
+        url: '/cdo/ED123/manage:sendApplicationPack',
+        ...authHeaders
       }
 
       const response = await server.inject(options)
@@ -435,7 +453,8 @@ describe('CDO endpoint', () => {
 
       const options = {
         method: 'POST',
-        url: '/cdo/ED123/manage:sendApplicationPack'
+        url: '/cdo/ED123/manage:sendApplicationPack',
+        ...authHeaders
       }
 
       const response = await server.inject(options)
@@ -465,7 +484,8 @@ describe('CDO endpoint', () => {
         payload: {
           insuranceCompany: 'Dog\'s Trust',
           insuranceRenewal: '9999-01-01'
-        }
+        },
+        ...authHeaders
       }
       const response = await server.inject(options)
       const payload = JSON.parse(response.payload)
@@ -487,7 +507,8 @@ describe('CDO endpoint', () => {
       const options = {
         method: 'POST',
         url: '/cdo/ED123/manage:recordInsuranceDetails',
-        payload: {}
+        payload: {},
+        ...authHeaders
       }
 
       const response = await server.inject(options)
@@ -506,7 +527,8 @@ describe('CDO endpoint', () => {
         payload: {
           insuranceCompany: 'Dog\'s Trust',
           insuranceRenewal: '2024-01-01'
-        }
+        },
+        ...authHeaders
       }
 
       const response = await server.inject(options)
@@ -525,7 +547,8 @@ describe('CDO endpoint', () => {
         payload: {
           insuranceCompany: 'Dog\'s Trust',
           insuranceRenewal: '2024-01-01'
-        }
+        },
+        ...authHeaders
       }
 
       const response = await server.inject(options)
@@ -545,7 +568,8 @@ describe('CDO endpoint', () => {
         payload: {
           insuranceCompany: 'Dog\'s Trust',
           insuranceRenewal: '2024-01-01'
-        }
+        },
+        ...authHeaders
       }
 
       const response = await server.inject(options)
@@ -570,7 +594,8 @@ describe('CDO endpoint', () => {
         url: '/cdo/ED123/manage:recordMicrochipNumber',
         payload: {
           microchipNumber: '123456789012345'
-        }
+        },
+        ...authHeaders
       }
       const response = await server.inject(options)
       const payload = JSON.parse(response.payload)
@@ -590,7 +615,8 @@ describe('CDO endpoint', () => {
       const options = {
         method: 'POST',
         url: '/cdo/ED123/manage:recordMicrochipNumber',
-        payload: {}
+        payload: {},
+        ...authHeaders
       }
 
       const response = await server.inject(options)
@@ -607,7 +633,8 @@ describe('CDO endpoint', () => {
         url: '/cdo/ED123/manage:recordMicrochipNumber',
         payload: {
           microchipNumber: '1234567890123a5'
-        }
+        },
+        ...authHeaders
       }
 
       const response = await server.inject(options)
@@ -625,7 +652,8 @@ describe('CDO endpoint', () => {
         url: '/cdo/ED123/manage:recordMicrochipNumber',
         payload: {
           microchipNumber: '123456789012345'
-        }
+        },
+        ...authHeaders
       }
 
       const response = await server.inject(options)
@@ -643,7 +671,8 @@ describe('CDO endpoint', () => {
         url: '/cdo/ED123/manage:recordMicrochipNumber',
         payload: {
           microchipNumber: '123456789012345'
-        }
+        },
+        ...authHeaders
       }
 
       const response = await server.inject(options)
@@ -661,7 +690,8 @@ describe('CDO endpoint', () => {
         url: '/cdo/ED123/manage:recordMicrochipNumber',
         payload: {
           microchipNumber: '123456789012345'
-        }
+        },
+        ...authHeaders
       }
 
       const response = await server.inject(options)
@@ -680,7 +710,8 @@ describe('CDO endpoint', () => {
         url: '/cdo/ED123/manage:recordMicrochipNumber',
         payload: {
           microchipNumber: '123456789012345'
-        }
+        },
+        ...authHeaders
       }
 
       const response = await server.inject(options)
@@ -706,7 +737,8 @@ describe('CDO endpoint', () => {
         url: '/cdo/ED123/manage:recordApplicationFee',
         payload: {
           applicationFeePaid: '2024-07-02'
-        }
+        },
+        ...authHeaders
       }
       const response = await server.inject(options)
       const payload = JSON.parse(response.payload)
@@ -726,7 +758,8 @@ describe('CDO endpoint', () => {
       const options = {
         method: 'POST',
         url: '/cdo/ED123/manage:recordApplicationFee',
-        payload: {}
+        payload: {},
+        ...authHeaders
       }
 
       const response = await server.inject(options)
@@ -743,7 +776,8 @@ describe('CDO endpoint', () => {
         url: '/cdo/ED123/manage:recordApplicationFee',
         payload: {
           applicationFeePaid: '9999-07-02'
-        }
+        },
+        ...authHeaders
       }
 
       const response = await server.inject(options)
@@ -761,7 +795,8 @@ describe('CDO endpoint', () => {
         url: '/cdo/ED123/manage:recordApplicationFee',
         payload: {
           applicationFeePaid: '2024-07-02'
-        }
+        },
+        ...authHeaders
       }
 
       const response = await server.inject(options)
@@ -779,7 +814,8 @@ describe('CDO endpoint', () => {
         url: '/cdo/ED123/manage:recordApplicationFee',
         payload: {
           applicationFeePaid: '2024-07-02'
-        }
+        },
+        ...authHeaders
       }
 
       const response = await server.inject(options)
@@ -798,7 +834,8 @@ describe('CDO endpoint', () => {
         url: '/cdo/ED123/manage:recordApplicationFee',
         payload: {
           applicationFeePaid: '2024-07-02'
-        }
+        },
+        ...authHeaders
       }
 
       const response = await server.inject(options)
@@ -816,7 +853,8 @@ describe('CDO endpoint', () => {
 
       const options = {
         method: 'POST',
-        url: '/cdo/ED123/manage:sendForm2'
+        url: '/cdo/ED123/manage:sendForm2',
+        ...authHeaders
       }
       const response = await server.inject(options)
       expect(response.statusCode).toBe(204)
@@ -831,7 +869,8 @@ describe('CDO endpoint', () => {
       })
       const options = {
         method: 'POST',
-        url: '/cdo/ED123/manage:sendForm2'
+        url: '/cdo/ED123/manage:sendForm2',
+        ...authHeaders
       }
 
       const response = await server.inject(options)
@@ -846,7 +885,8 @@ describe('CDO endpoint', () => {
       })
       const options = {
         method: 'POST',
-        url: '/cdo/ED123/manage:sendForm2'
+        url: '/cdo/ED123/manage:sendForm2',
+        ...authHeaders
       }
 
       const response = await server.inject(options)
@@ -861,7 +901,8 @@ describe('CDO endpoint', () => {
       })
       const options = {
         method: 'POST',
-        url: '/cdo/ED123/manage:sendForm2'
+        url: '/cdo/ED123/manage:sendForm2',
+        ...authHeaders
       }
 
       const response = await server.inject(options)
@@ -877,7 +918,8 @@ describe('CDO endpoint', () => {
 
       const options = {
         method: 'POST',
-        url: '/cdo/ED123/manage:sendForm2'
+        url: '/cdo/ED123/manage:sendForm2',
+        ...authHeaders
       }
 
       const response = await server.inject(options)
@@ -907,7 +949,8 @@ describe('CDO endpoint', () => {
         payload: {
           microchipVerification: '2024-07-03',
           neuteringConfirmation: '2024-07-04'
-        }
+        },
+        ...authHeaders
       }
       const response = await server.inject(options)
       const payload = JSON.parse(response.payload)
@@ -934,7 +977,8 @@ describe('CDO endpoint', () => {
         payload: {
           microchipVerification: '2024-07-03',
           neuteringConfirmation: '2024-07-03'
-        }
+        },
+        ...authHeaders
       }
 
       const response = await server.inject(options)
@@ -953,7 +997,8 @@ describe('CDO endpoint', () => {
         payload: {
           microchipVerification: '2024-07-03',
           neuteringConfirmation: '2024-07-03'
-        }
+        },
+        ...authHeaders
       }
 
       const response = await server.inject(options)
@@ -972,7 +1017,8 @@ describe('CDO endpoint', () => {
         payload: {
           microchipVerification: '2024-07-06',
           neuteringConfirmation: '9999-07-02'
-        }
+        },
+        ...authHeaders
       }
 
       const response = await server.inject(options)
@@ -988,7 +1034,8 @@ describe('CDO endpoint', () => {
       const options = {
         method: 'POST',
         url: '/cdo/ED123/manage:verifyDates',
-        payload: {}
+        payload: {},
+        ...authHeaders
       }
 
       const response = await server.inject(options)
@@ -1008,7 +1055,8 @@ describe('CDO endpoint', () => {
         payload: {
           microchipVerification: '2024-07-03',
           neuteringConfirmation: '2024-07-03'
-        }
+        },
+        ...authHeaders
       }
 
       const response = await server.inject(options)
@@ -1028,7 +1076,8 @@ describe('CDO endpoint', () => {
 
       const options = {
         method: 'POST',
-        url: '/cdo/ED123/manage:issueCertificate'
+        url: '/cdo/ED123/manage:issueCertificate',
+        ...authHeaders
       }
       const response = await server.inject(options)
       const payload = JSON.parse(response.payload)
@@ -1047,7 +1096,8 @@ describe('CDO endpoint', () => {
       })
       const options = {
         method: 'POST',
-        url: '/cdo/ED123/manage:issueCertificate'
+        url: '/cdo/ED123/manage:issueCertificate',
+        ...authHeaders
       }
 
       const response = await server.inject(options)
@@ -1062,7 +1112,8 @@ describe('CDO endpoint', () => {
       })
       const options = {
         method: 'POST',
-        url: '/cdo/ED123/manage:issueCertificate'
+        url: '/cdo/ED123/manage:issueCertificate',
+        ...authHeaders
       }
 
       const response = await server.inject(options)
@@ -1078,7 +1129,8 @@ describe('CDO endpoint', () => {
 
       const options = {
         method: 'POST',
-        url: '/cdo/ED123/manage:issueCertificate'
+        url: '/cdo/ED123/manage:issueCertificate',
+        ...authHeaders
       }
 
       const response = await server.inject(options)

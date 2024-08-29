@@ -1,9 +1,14 @@
+const { mockValidate, authHeaders } = require('../../../mocks/auth')
 describe('Get persons endpoint', () => {
   const createServer = require('../../../../app/server')
   let server
 
   jest.mock('../../../../app/auth/get-user')
   const { getCallingUser } = require('../../../../app/auth/get-user')
+
+  jest.mock('../../../../app/auth/token-validator')
+  const { validate } = require('../../../../app/auth/token-validator')
+  validate.mockResolvedValue(mockValidate)
 
   jest.mock('../../../../app/repos/persons')
   const { getPersons, deletePersons } = require('../../../../app/repos/persons')
@@ -18,7 +23,8 @@ describe('Get persons endpoint', () => {
     test('GET /persons route returns 200 with valid payload', async () => {
       const options = {
         method: 'GET',
-        url: '/persons'
+        url: '/persons',
+        ...authHeaders
       }
 
       const expectedPersons = [{
@@ -94,7 +100,8 @@ describe('Get persons endpoint', () => {
     test('GET /persons with orphaned true route returns 200 with valid payload', async () => {
       const options = {
         method: 'GET',
-        url: '/persons?orphaned=true'
+        url: '/persons?orphaned=true',
+        ...authHeaders
       }
 
       getPersons.mockResolvedValue([])
@@ -108,7 +115,8 @@ describe('Get persons endpoint', () => {
     test('GET /persons with orphaned true route with limit -1 returns 200 with valid payload', async () => {
       const options = {
         method: 'GET',
-        url: '/persons?orphaned=true&limit=-1'
+        url: '/persons?orphaned=true&limit=-1',
+        ...authHeaders
       }
 
       getPersons.mockResolvedValue([])
@@ -122,7 +130,8 @@ describe('Get persons endpoint', () => {
     test('GET /persons with orphaned true, sortKey and sortOrder DESC returns 200 with valid payload', async () => {
       const options = {
         method: 'GET',
-        url: '/persons?orphaned=true&limit=-1&sortKey=owner&sortOrder=DESC'
+        url: '/persons?orphaned=true&limit=-1&sortKey=owner&sortOrder=DESC',
+        ...authHeaders
       }
 
       getPersons.mockResolvedValue([])
@@ -136,7 +145,8 @@ describe('Get persons endpoint', () => {
     test('GET /persons with orphaned true, sortKey and sortOrder ASC returns 200 with valid payload', async () => {
       const options = {
         method: 'GET',
-        url: '/persons?orphaned=true&limit=-1&sortKey=owner&sortOrder=ASC'
+        url: '/persons?orphaned=true&limit=-1&sortKey=owner&sortOrder=ASC',
+        ...authHeaders
       }
 
       getPersons.mockResolvedValue([])
@@ -150,7 +160,8 @@ describe('Get persons endpoint', () => {
     test('GET /persons with orphaned true, sortKey returns 200 with valid payload', async () => {
       const options = {
         method: 'GET',
-        url: '/persons?orphaned=true&limit=-1&sortKey=owner'
+        url: '/persons?orphaned=true&limit=-1&sortKey=owner',
+        ...authHeaders
       }
 
       getPersons.mockResolvedValue([])
@@ -164,7 +175,8 @@ describe('Get persons endpoint', () => {
     test('GET /persons with orphaned true, sortKey and sortOrder DESC returns 200 with valid payload', async () => {
       const options = {
         method: 'GET',
-        url: '/persons?orphaned=true&limit=-1&sortKey=owner&sortOrder=DESC'
+        url: '/persons?orphaned=true&limit=-1&sortKey=owner&sortOrder=DESC',
+        ...authHeaders
       }
 
       getPersons.mockResolvedValue([])
@@ -178,7 +190,8 @@ describe('Get persons endpoint', () => {
     test('GET /persons with orphaned true, sortKey and sortOrder ASC returns 200 with valid payload', async () => {
       const options = {
         method: 'GET',
-        url: '/persons?orphaned=true&limit=-1&sortKey=owner&sortOrder=ASC'
+        url: '/persons?orphaned=true&limit=-1&sortKey=owner&sortOrder=ASC',
+        ...authHeaders
       }
 
       getPersons.mockResolvedValue([])
@@ -192,7 +205,8 @@ describe('Get persons endpoint', () => {
     test('GET /persons with orphaned true, sortKey returns 200 with valid payload', async () => {
       const options = {
         method: 'GET',
-        url: '/persons?orphaned=true&limit=-1&sortKey=owner'
+        url: '/persons?orphaned=true&limit=-1&sortKey=owner',
+        ...authHeaders
       }
 
       getPersons.mockResolvedValue([])
@@ -206,7 +220,8 @@ describe('Get persons endpoint', () => {
     test('GET /persons route with search params returns 200 with valid payload', async () => {
       const options = {
         method: 'GET',
-        url: '/persons?firstName=Frodo&lastName=Baggins&dateOfBirth=2968-09-22'
+        url: '/persons?firstName=Frodo&lastName=Baggins&dateOfBirth=2968-09-22',
+        ...authHeaders
       }
 
       getPersons.mockResolvedValue([])
@@ -220,7 +235,8 @@ describe('Get persons endpoint', () => {
     test('GET /persons route returns 400 given invalid params', async () => {
       const options = {
         method: 'GET',
-        url: '/persons?unknownParam=test'
+        url: '/persons?unknownParam=test',
+        ...authHeaders
       }
 
       const response = await server.inject(options)
@@ -252,7 +268,8 @@ describe('Get persons endpoint', () => {
         url: '/persons:batch-delete',
         payload: {
           personReferences: expectedPersons
-        }
+        },
+        ...authHeaders
       }
 
       const response = await server.inject(options)
@@ -266,7 +283,8 @@ describe('Get persons endpoint', () => {
       const options = {
         method: 'POST',
         url: '/persons:batch-delete',
-        payload: {}
+        payload: {},
+        ...authHeaders
       }
 
       const response = await server.inject(options)
@@ -296,7 +314,8 @@ describe('Get persons endpoint', () => {
         url: '/persons:batch-delete',
         payload: {
           personReferences: expectedPersons
-        }
+        },
+        ...authHeaders
       }
 
       const response = await server.inject(options)
