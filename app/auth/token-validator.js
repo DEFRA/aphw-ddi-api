@@ -2,10 +2,9 @@ const crypto = require('crypto')
 const { addMinutes } = require('../lib/date-helpers')
 const { isAccountEnabled } = require('../repos/user-accounts')
 const { getUserInfo } = require('../proxy/auth-server')
+const { hashCache } = require('../session/hashCache')
 
 const expiryPeriodInMins = 65
-
-const hashCache = new Map()
 
 const returnVal = (isValid, username = null) => {
   return { isValid, credentials: { id: username, user: username } }
