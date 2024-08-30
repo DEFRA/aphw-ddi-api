@@ -14,7 +14,7 @@ const checkTokenOnline = async (username, token) => {
   console.log('token', token ? `${token.substr(0, 3)}...${token.substr(token.length - 3)}` : '')
   console.log('username', username)
 
-  const payload = getUserInfo(token)
+  const payload = await getUserInfo(token)
 
   return payload && payload.email === username
 }
