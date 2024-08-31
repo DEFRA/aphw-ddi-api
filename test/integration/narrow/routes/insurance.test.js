@@ -1,7 +1,6 @@
 const { DuplicateResourceError } = require('../../../../app/errors/duplicate-record')
 const { NotFoundError } = require('../../../../app/errors/not-found')
 const { mockValidate, authHeaders } = require('../../../mocks/auth')
-const { validate } = require('../../../../app/auth/token-validator')
 
 describe('Insurance endpoint', () => {
   const { insuranceCompanies } = require('../../../mocks/insurance-companies')

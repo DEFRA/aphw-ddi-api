@@ -1,5 +1,5 @@
 const { mockValidate, authHeaders } = require('../../../mocks/auth')
-const { validate } = require('../../../../app/auth/token-validator')
+
 describe('Export endpoint', () => {
   const createServer = require('../../../../app/server')
   let server
