@@ -9,7 +9,6 @@ const isAccountEnabled = async (username) => {
     where: { username }
   })
 
-  console.log('account', account?.activated_date)
   return !!account?.activated_date
 }
 
