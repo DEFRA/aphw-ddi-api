@@ -1,18 +1,21 @@
+const { hashCache } = require('../session/hashCache')
+
 /**
  * @param {Map<string, { expiry: Date, [string]: any }>} map
- * @return {Map<string, { expiry: Date, [string]: any }>}
+ * @return string
  */
-const purgeExpiredCache = (map) => {
-  const updatedMap = new Map(map)
+const purgeExpiredCache = () => {
   const expiryTime = Date.now()
+  let count = 0
 
-  for (const [key, value] of updatedMap) {
+  for (const [key, value] of hashCache) {
     if (value.expiry.getTime() < expiryTime) {
-      updatedMap.delete(key)
+      hashCache.delete(key)
+      count++
     }
   }
 
-  return updatedMap
+  return `${count} users cleared from cache.\n`
 }
 
 module.exports = {

@@ -55,8 +55,6 @@ const validate = async (request, username, token) => {
   return returnVal(false)
 }
 
-// TODO - clean up expired cache entries from time to time
-
 module.exports = {
   validate
 }

@@ -1,11 +1,13 @@
 const Joi = require('joi')
 
 const schema = Joi.object({
-  overnightJobCrontab: Joi.string()
+  overnightJobCrontab: Joi.string(),
+  purgeExpiredCacheCrontab: Joi.string()
 })
 
 const config = {
-  overnightJobCrontab: process.env.OVERNIGHT_JOB_CRONTAB
+  overnightJobCrontab: process.env.OVERNIGHT_JOB_CRONTAB,
+  purgeExpiredCacheCrontab: process.env.PURGE_EXPIRED_CACHE_CRONTAB
 }
 
 const result = schema.validate(config, {
@@ -17,5 +19,6 @@ if (result.error) {
 }
 
 console.log('Crontab entry is ', result.value.overnightJobCrontab)
+console.log('Purge Expired Cache Crontab entry is ', result.value.purgeExpiredCacheCrontab)
 
 module.exports = result.value
