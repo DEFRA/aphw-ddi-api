@@ -34,7 +34,7 @@ describe('token-validator', () => {
         phone_number: '01406946277',
         phone_number_verified: true
       })
-      const validation = await validate(request, 'registered@example.com', token)
+      const validation = await validate(request, username, token)
       expect(validation).toEqual({
         isValid: true,
         credentials: {
@@ -114,6 +114,27 @@ describe('token-validator', () => {
       isAccountEnabled.mockResolvedValue(false)
       getUserInfo.mockRejectedValue(false)
 
+      const validation = await validate(request, username, token)
+      expect(validation).toEqual({
+        isValid: false,
+        credentials: {
+          id: null,
+          user: null
+        }
+      })
+    })
+
+    test('should not validate if user has not activated their email on external provider', async () => {
+      const username = 'unactivated.user@example.com'
+      isAccountEnabled.mockResolvedValue(true)
+
+      getUserInfo.mockResolvedValue({
+        sub: 'blablablablablabla',
+        email: username,
+        email_verified: false,
+        phone_number: '01406946277',
+        phone_number_verified: true
+      })
       const validation = await validate(request, username, token)
       expect(validation).toEqual({
         isValid: false,

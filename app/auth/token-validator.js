@@ -16,7 +16,7 @@ const checkTokenOnline = async (username, token) => {
   try {
     const payload = await getUserInfo(token)
 
-    return payload && payload.email === username
+    return payload && payload.email === username && payload.email_verified === true
   } catch (e) {
     return false
   }
