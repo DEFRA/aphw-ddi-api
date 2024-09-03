@@ -11,8 +11,6 @@ const returnVal = (isValid, username = null) => {
 }
 
 const checkTokenOnline = async (username, token) => {
-  // console.log('token', token ? `${token.substr(0, 3)}...${token.substr(token.length - 3)}` : '')
-  // console.log('username', username)
   try {
     const payload = await getUserInfo(token)
 
@@ -23,8 +21,6 @@ const checkTokenOnline = async (username, token) => {
 }
 
 const validate = async (_request, username, token) => {
-  // console.log('username', username)
-  // console.log('token', token ? `${token.substr(0, 3)}...${token.substr(token.length - 3)}` : '')
   const now = new Date()
 
   if (!token || !username) {
@@ -32,7 +28,6 @@ const validate = async (_request, username, token) => {
   }
 
   const hash = crypto.createHash('md5').update(token).digest('hex')
-  // console.log('hash', hash)
 
   const cached = hashCache.get(username)
   if (cached) {
