@@ -1,4 +1,4 @@
-const { addYears, dateTodayOrInFuture } = require('../../../../app/lib/date-helpers')
+const { addYears, addMinutes, dateTodayOrInFuture } = require('../../../../app/lib/date-helpers')
 
 describe('DateHelpers test', () => {
   describe('addYears', () => {
@@ -10,6 +10,15 @@ describe('DateHelpers test', () => {
     })
     test('should remove 7 years', async () => {
       expect(addYears(new Date(2025, 7, 14), -7)).toEqual(new Date(2018, 7, 14))
+    })
+  })
+
+  describe('addMinutess', () => {
+    test('should add 10 minutes', async () => {
+      expect(addMinutes(new Date(2000, 1, 1, 12, 0, 5), 10)).toEqual(new Date(2000, 1, 1, 12, 10, 5))
+    })
+    test('should add 220 minutes', async () => {
+      expect(addMinutes(new Date(2000, 1, 1, 12, 0, 5), 220)).toEqual(new Date(2000, 1, 1, 15, 40, 5))
     })
   })
 

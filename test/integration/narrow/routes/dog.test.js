@@ -231,12 +231,12 @@ describe('Dog endpoint', () => {
     })
 
     test('PUT /dog route returns 400 with invalid response', async () => {
-      updateDog.mockResolvedValue({ id2: 123 })
+      updateDog.mockResolvedValue({ id: 123, registered_person: [], dog_microchips: [], dog_breaches: [], status: { id: null } })
 
       const options = {
         method: 'PUT',
         url: '/dog',
-        payload: {},
+        payload: { indexNumber: 'ABC123' },
         ...authHeaders
       }
 
@@ -245,7 +245,7 @@ describe('Dog endpoint', () => {
 
       expect(response.statusCode).toBe(400)
       expect(payload.errors.length).toBeGreaterThan(0)
-      expect(payload.errors[0]).toBe('"indexNumber" is required')
+      expect(payload.errors[0]).toBe('"status.id" must be a number')
     })
 
     test('PUT /dog route returns 500 with db error', async () => {
