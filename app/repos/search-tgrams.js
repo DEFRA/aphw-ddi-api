@@ -3,35 +3,36 @@ const { Op } = require('sequelize')
 const { trigramSearchFields } = require('../constants/search')
 const { fieldNotNullOrEmpty, getFieldValue } = require('../lib/field-helpers')
 
-const insertTrigram = async (dogId, personId, fieldValue) => {
+const insertTrigram = async (dogId, personId, fieldValue, transaction) => {
   if (fieldValue && fieldValue !== '') {
     await sequelize.models.search_tgram.create({
       dog_id: dogId,
       person_id: personId,
       match_text: `${fieldValue}`.replace(' ', '').toLowerCase()
-    })
+    },
+    { transaction })
   }
 }
 
-const insertTrigramsPerDog = async (row) => {
+const insertTrigramsPerDog = async (row, transaction) => {
   for (let fieldNum = 0; fieldNum < trigramSearchFields.length; fieldNum++) {
     const field = trigramSearchFields[fieldNum]
     if (field.source === 'dog') {
       const fieldValue = getFieldValue(row.json, field.fieldName)
       if (fieldNotNullOrEmpty(fieldValue)) {
-        await insertTrigram(row.dog_id, null, fieldValue)
+        await insertTrigram(row.dog_id, null, fieldValue, transaction)
       }
     }
   }
 }
 
-const insertTrigramsPerPerson = async (row) => {
+const insertTrigramsPerPerson = async (row, transaction) => {
   for (let fieldNum = 0; fieldNum < trigramSearchFields.length; fieldNum++) {
     const field = trigramSearchFields[fieldNum]
     if (field.source === 'person') {
       const fieldValue = getFieldValue(row.json, field.fieldName)
       if (fieldNotNullOrEmpty(fieldValue)) {
-        await insertTrigram(null, row.person_id, fieldValue)
+        await insertTrigram(null, row.person_id, fieldValue, transaction)
       }
     }
   }

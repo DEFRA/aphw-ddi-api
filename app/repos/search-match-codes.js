@@ -20,22 +20,23 @@ const populateMatchCodes = async () => {
   }
 }
 
-const insertPersonMatchCodes = async (searchRow) => {
+const insertPersonMatchCodes = async (searchRow, transaction) => {
   for (let fieldNum = 0; fieldNum < matchCodeSearchFields.length; fieldNum++) {
     const field = matchCodeSearchFields[fieldNum]
     const fieldValue = getFieldValue(searchRow.json, field.fieldName)
-    await insertMatchCode(searchRow.person_id, fieldValue, field.simple)
+    await insertMatchCode(searchRow.person_id, fieldValue, field.simple, transaction)
   }
 }
 
-const insertMatchCode = async (personId, fieldValue, simple = false) => {
+const insertMatchCode = async (personId, fieldValue, simple, transaction) => {
   if (fieldValue && fieldValue !== '') {
     const codes = matchCodesForTerm(fieldValue, simple)
     for (let c = 0; c < codes.length; c++) {
       await sequelize.models.search_match_code.create({
         person_id: personId,
         match_code: codes[c]
-      })
+      },
+      { transaction })
     }
   }
 }
