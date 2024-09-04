@@ -51,7 +51,7 @@ const addToSearchIndex = async (person, dog, transaction) => {
 
   await insertTrigramsPerDog({ dog_id: dog.id, json: jsonValues }, transaction)
   await insertTrigramsPerPerson({ person_id: person.id, json: jsonValues }, transaction)
-  await insertPersonMatchCodes({ person_id: person.id, json: jsonValues }, transaction)
+  await insertPersonMatchCodes(person.id, { person_id: person.id, json: jsonValues }, transaction)
 
   await cleanupPossibleOwnerWithNoDogs(person.id, transaction)
 }

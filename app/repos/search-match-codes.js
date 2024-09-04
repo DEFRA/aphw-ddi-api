@@ -16,15 +16,16 @@ const populateMatchCodes = async () => {
   await sequelize.models.search_match_code.truncate()
 
   for (let rowNum = 0; rowNum < searchRows.length; rowNum++) {
-    await insertPersonMatchCodes(searchRows[rowNum])
+    const row = searchRows[rowNum]
+    await insertPersonMatchCodes(row.person_id, row)
   }
 }
 
-const insertPersonMatchCodes = async (searchRow, transaction) => {
+const insertPersonMatchCodes = async (personId, searchRow, transaction) => {
   for (let fieldNum = 0; fieldNum < matchCodeSearchFields.length; fieldNum++) {
     const field = matchCodeSearchFields[fieldNum]
     const fieldValue = getFieldValue(searchRow.json, field.fieldName)
-    await insertMatchCode(searchRow.person_id, fieldValue, field.simple, transaction)
+    await insertMatchCode(personId, fieldValue, field.simple, transaction)
   }
 }
 
@@ -42,10 +43,8 @@ const insertMatchCode = async (personId, fieldValue, simple, transaction) => {
 }
 
 const updateMatchCodesPerPerson = async (personId, row, transaction) => {
-  if (personId) {
-    await sequelize.models.search_match_code.destroy({ where: { person_id: personId }, force: true }, { transaction })
-    await insertPersonMatchCodes(row, transaction)
-  }
+  await sequelize.models.search_match_code.destroy({ where: { person_id: personId }, force: true }, { transaction })
+  await insertPersonMatchCodes(personId, row, transaction)
 }
 
 const buildFuzzyCodes = (terms) => {
