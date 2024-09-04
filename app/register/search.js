@@ -16,9 +16,11 @@ const fullTextRankThreshold = 1.01
 const rankAndKeep = (results, terms, threshold, type) => {
   const toKeep = []
 
+  const numRecords = results.length
+
   results.forEach(res => {
     res.rank = rankResult(terms, res, type)
-    if (res.rank >= threshold) {
+    if (res.rank >= threshold || numRecords < 11) {
       toKeep.push(res)
     }
   })
