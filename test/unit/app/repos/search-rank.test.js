@@ -81,7 +81,7 @@ describe('rankResult', () => {
     expect(rank).toBe(4)
   })
 
-  test('should return 4 for exact postcode match where terms postcode is separated by a space', () => {
+  test('should return 8 for exact postcode match where terms postcode is separated by a space', () => {
     const row = {
       id: 124,
       dog_id: 2,
@@ -98,7 +98,7 @@ describe('rankResult', () => {
       }
     }
     const rank = rankResult(['ts22ts', 'ts2', '2ts'], row, 'dog')
-    expect(rank).toBe(4)
+    expect(rank).toBe(8)
   })
 
   test('should return 1.6666666666666667 for joined postcode PARTIAL match', () => {
@@ -121,7 +121,7 @@ describe('rankResult', () => {
     expect(rank).toBe(1.6666666666666667)
   })
 
-  test('should return 1.6666666666666667 for PARTIAL postcode match where terms postcode is separated by a space', () => {
+  test('should return 4.666666666666667 for PARTIAL postcode match where terms postcode is separated by a space', () => {
     const row = {
       id: 124,
       dog_id: 2,
@@ -138,6 +138,6 @@ describe('rankResult', () => {
       }
     }
     const rank = rankResult(['ts22ts', 'ts2', '2ts'], row, 'dog')
-    expect(rank).toBe(1.6666666666666667)
+    expect(rank).toBe(4.666666666666667)
   })
 })

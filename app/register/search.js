@@ -1,5 +1,6 @@
 const sequelize = require('../config/db')
 const { Op } = require('sequelize')
+const { thresholds, maxResults } = require('../constants/search')
 const { sortAndGroupResults } = require('./search/sorting-and-grouping')
 const { cleanupSearchTerms } = require('./search/search-terms')
 const { mapResults } = require('./search/search-results')
@@ -8,24 +9,16 @@ const { trigramSearch } = require('../repos/search-tgrams')
 const { rankResult } = require('../repos/search-rank')
 const { buildTsVectorQuery } = require('./search/search-builder')
 
-const trigramQueryThreshold = 0.4
-const trigramRankThreshold = 1.001
-const fuzzyRankThreshold = 1.001
-const fullTextRankThreshold = 1.01
-
 const rankAndKeep = (results, terms, threshold, type) => {
-  const toKeep = []
-
   const numRecords = results.length
 
-  results.forEach(res => {
-    res.rank = rankResult(terms, res, type)
-    if (res.rank >= threshold || numRecords < 11) {
-      toKeep.push(res)
-    }
-  })
+  const adjustedThreshold = (numRecords < 11 ? threshold / 2 : threshold)
 
-  return toKeep
+  const mappedResults = results
+    .map(res => ({ ...res, rank: rankResult(terms, res, type) }))
+    .filter(res => res.rank >= adjustedThreshold)
+
+  return mappedResults
 }
 
 const doFullTextSearch = async (terms, type, fuzzy) => {
@@ -36,10 +29,11 @@ const doFullTextSearch = async (terms, type, fuzzy) => {
       search: {
         [Op.match]: sequelize.fn('to_tsquery', termsQuery)
       }
-    }
+    },
+    raw: true
   })
 
-  return rankAndKeep(results, terms, fullTextRankThreshold, type)
+  return rankAndKeep(results, terms, thresholds.fullTextRankThreshold, type)
 }
 
 const doFuzzySearch = async (terms, type) => {
@@ -48,16 +42,17 @@ const doFuzzySearch = async (terms, type) => {
   const results = await sequelize.models.search_index.findAll({
     where: {
       person_id: fuzzyPersonIds
-    }
+    },
+    raw: true
   })
 
-  console.log('fuzzyFirstPass', results.length)
+  // console.log('fuzzyFirstPass', results.length)
 
-  return rankAndKeep(results, terms, fuzzyRankThreshold, type)
+  return rankAndKeep(results, terms, thresholds.fuzzyRankThreshold, type)
 }
 
 const doTrigramSearch = async (terms, type) => {
-  const { uniquePersons, uniqueDogs } = await trigramSearch(terms, trigramQueryThreshold)
+  const { uniquePersons, uniqueDogs } = await trigramSearch(terms, thresholds.trigramQueryThreshold)
 
   const results = await sequelize.models.search_index.findAll({
     where: {
@@ -65,12 +60,13 @@ const doTrigramSearch = async (terms, type) => {
         { person_id: uniquePersons },
         { dog_id: uniqueDogs }
       ]
-    }
+    },
+    raw: true
   })
 
-  console.log('trigramFirstPass', results.length)
+  // console.log('trigramFirstPass', results.length)
 
-  return rankAndKeep(results, terms, trigramRankThreshold, type)
+  return rankAndKeep(results, terms, thresholds.trigramRankThreshold, type)
 }
 
 const combineQueryResults = (res1, res2, res3) => {
@@ -102,14 +98,15 @@ const search = async (type, terms, fuzzy = false) => {
 
   const trigramToKeep = fuzzy ? await doTrigramSearch(termsArray, type) : []
 
-  console.log('fullTextToKeep', fullTextToKeep.length)
-  console.log('fuzzyToKeep', fuzzyToKeep.length)
-  console.log('trigramToKeep', trigramToKeep.length)
+  // console.log('fullTextToKeep', fullTextToKeep.length)
+  // console.log('fuzzyToKeep', fuzzyToKeep.length)
+  // console.log('trigramToKeep', trigramToKeep.length)
 
   const results = combineQueryResults(fullTextToKeep, fuzzyToKeep, trigramToKeep)
   const mappedResults = mapResults(results, type)
+  const sortedResults = sortAndGroupResults(mappedResults, type)
 
-  return sortAndGroupResults(mappedResults, type)
+  return sortedResults.length > maxResults ? sortedResults.slice(0, maxResults) : sortedResults
 }
 
 module.exports = {

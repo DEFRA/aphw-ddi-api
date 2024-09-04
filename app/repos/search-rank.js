@@ -1,5 +1,5 @@
 const damerauLevenshtein = require('talisman/metrics/damerau-levenshtein')
-const { matchingResultFields, importantDogFields } = require('../constants/search')
+const { matchingResultFields, importantDogFields, dogFieldsRequiringCloseMatch } = require('../constants/search')
 const { getFieldValue } = require('../lib/field-helpers')
 
 const exactMatch = (word) => {
@@ -10,9 +10,15 @@ const exactMatch = (word) => {
 
 const closeMatch = (word, dist) => {
   const weight = ((word.value.length - dist) / word.value.length) * word.closeMatchWeighting
-  return word.searchType === 'dog' && importantDogFields.includes(word.fieldName)
-    ? weight * 2
-    : weight
+  if (word.searchType === 'dog') {
+    if (importantDogFields.includes(word.fieldName)) {
+      return weight * 2
+    }
+    if (dogFieldsRequiringCloseMatch.includes(word.fieldName)) {
+      return dist < 4 ? weight * 2 : 0
+    }
+  }
+  return weight
 }
 
 const rankWord = (term, word) => {
@@ -29,9 +35,9 @@ const rankWord = (term, word) => {
     }
 
     // Check for sub-string
-    // if (termLower.indexOf(wordLower) > -1 || wordLower.indexOf(termLower) > -1) {
-    //  return 1
-    // }
+    if (termLower.indexOf(wordLower) > -1 || wordLower.indexOf(termLower) > -1) {
+      return termDist < 4 ? 1 : 0
+    }
   }
   return 0
 }

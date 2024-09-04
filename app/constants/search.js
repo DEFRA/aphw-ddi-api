@@ -25,11 +25,25 @@ const matchingResultFields = [
   { fieldName: 'microchipNumber2', exactMatchWeighting: 6, closeMatchWeighting: 2 }
 ]
 
-const importantDogFields = ['dogName', 'microchipNumber', 'microchipNumber2']
+const importantDogFields = ['dogName']
+
+const dogFieldsRequiringCloseMatch = ['microchipNumber', 'microchipNumber2']
+
+const thresholds = {
+  trigramQueryThreshold: 0.4,
+  trigramRankThreshold: 1.001,
+  fuzzyRankThreshold: 1.001,
+  fullTextRankThreshold: 1.01
+}
+
+const maxResults = 50
 
 module.exports = {
   matchCodeSearchFields,
   trigramSearchFields,
   matchingResultFields,
-  importantDogFields
+  importantDogFields,
+  dogFieldsRequiringCloseMatch,
+  thresholds,
+  maxResults
 }
