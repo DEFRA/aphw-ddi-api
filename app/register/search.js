@@ -20,6 +20,8 @@ const rankAndKeep = (results, terms, threshold, type) => {
 
   results.forEach(res => {
     res.rank = rankResult(terms, res, type)
+    console.log('res.search', res.search)
+    console.log('res.rank', res.rank)
     if (res.rank >= threshold || numRecords < 11) {
       toKeep.push(res)
     }

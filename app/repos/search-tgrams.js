@@ -15,8 +15,7 @@ const insertTrigram = async (dogId, personId, fieldValue, transaction) => {
 }
 
 const insertTrigramsPerDog = async (row, transaction) => {
-  for (let fieldNum = 0; fieldNum < trigramSearchFields.length; fieldNum++) {
-    const field = trigramSearchFields[fieldNum]
+  for (const field of trigramSearchFields) {
     if (field.source === 'dog') {
       const fieldValue = getFieldValue(row.json, field.fieldName)
       if (fieldNotNullOrEmpty(fieldValue)) {
@@ -27,8 +26,7 @@ const insertTrigramsPerDog = async (row, transaction) => {
 }
 
 const insertTrigramsPerPerson = async (row, transaction) => {
-  for (let fieldNum = 0; fieldNum < trigramSearchFields.length; fieldNum++) {
-    const field = trigramSearchFields[fieldNum]
+  for (const field of trigramSearchFields) {
     if (field.source === 'person') {
       const fieldValue = getFieldValue(row.json, field.fieldName)
       if (fieldNotNullOrEmpty(fieldValue)) {
@@ -53,8 +51,7 @@ const populateTrigrams = async () => {
 
   await sequelize.models.search_tgram.truncate()
 
-  for (let rowNum = 0; rowNum < searchRows.length; rowNum++) {
-    const searchRow = searchRows[rowNum]
+  for (const searchRow of searchRows) {
     await insertTrigramsPerDog(searchRow)
     await insertTrigramsPerPerson(searchRow)
   }
@@ -75,9 +72,7 @@ const trigramSearch = async (terms, threshold) => {
   const uniquePersons = []
   const uniqueDogs = []
 
-  for (let termNum = 0; termNum < terms.length; termNum++) {
-    const term = terms[termNum]
-
+  for (const term of terms) {
     const results = await trigramTermQuery(term, threshold)
 
     results.forEach(res => {
