@@ -50,7 +50,7 @@ const rankResult = (terms, foundRow, searchType) => {
         const words = `${fieldValue}`.split(' ')
         for (const wordVal of words) {
           const wordRank = rankWord(term, { value: wordVal, exactMatchWeighting, closeMatchWeighting, searchType, fieldName })
-          console.log(`word rank word=${wordVal} term=${term}`, wordRank)
+          // console.log(`word rank word=${wordVal} term=${term}`, wordRank)
           rank += wordRank
         }
       }
