@@ -48,6 +48,12 @@ describe('People repo', () => {
       },
       search_index: {
         destroy: jest.fn()
+      },
+      search_match_code: {
+        destroy: jest.fn()
+      },
+      search_tgram: {
+        destroy: jest.fn()
       }
     },
     col: jest.fn(),
@@ -66,8 +72,8 @@ describe('People repo', () => {
   jest.mock('../../../../app/lookups')
   const { getContactType, getCountry } = require('../../../../app/lookups')
 
-  jest.mock('../../../../app/repos/search')
-  const { updateSearchIndexPerson } = require('../../../../app/repos/search')
+  jest.mock('../../../../app/repos/search-index')
+  const { updateSearchIndexPerson } = require('../../../../app/repos/search-index')
 
   const { createPeople, getPersonByReference, getPersonAndDogsByReference, getPersonAndDogsByIndex, updatePerson, getOwnerOfDog, updatePersonFields, deletePerson, purgePersonByReferenceNumber } = require('../../../../app/repos/people')
 
@@ -1252,6 +1258,8 @@ describe('People repo', () => {
       expect(destroyFnPersonContact).toHaveBeenCalledTimes(4)
       expect(destroyFnContact).toHaveBeenCalledTimes(4)
       expect(sequelize.models.search_index.destroy).toHaveBeenCalledTimes(1)
+      expect(sequelize.models.search_match_code.destroy).toHaveBeenCalledTimes(1)
+      expect(sequelize.models.search_tgram.destroy).toHaveBeenCalledTimes(1)
     })
   })
 

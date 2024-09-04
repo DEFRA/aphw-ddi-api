@@ -1,5 +1,5 @@
 const { getDogByIndexNumber, updateBreaches, getCachedStatuses } = require('./dogs')
-const { updateSearchIndexDog } = require('./search')
+const { updateSearchIndexDog } = require('./search-index')
 const { sendUpdateToAudit } = require('../messaging/send-audit')
 const { DOG } = require('../constants/event/audit-event-object-types')
 

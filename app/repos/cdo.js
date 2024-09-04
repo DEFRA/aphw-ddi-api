@@ -1,7 +1,7 @@
 const sequelize = require('../config/db')
 const { createPeople, getPersonByReference, updatePersonFields } = require('./people')
 const { createDogs, updateStatus } = require('./dogs')
-const { addToSearchIndex } = require('./search')
+const { addToSearchIndex } = require('./search-index')
 const { sendCreateToAudit, sendChangeOwnerToAudit } = require('../messaging/send-audit')
 const { CDO } = require('../constants/event/audit-event-object-types')
 const { NotFoundError } = require('../errors/not-found')
