@@ -1,8 +1,8 @@
 const { statuses: mockStatuses } = require('../../../mocks/statuses')
 
 describe('Status repo', () => {
-  jest.mock('../../../../app/repos/search')
-  const { updateSearchIndexDog } = require('../../../../app/repos/search')
+  jest.mock('../../../../app/repos/search-index')
+  const { updateSearchIndexDog } = require('../../../../app/repos/search-index')
 
   jest.mock('../../../../app/messaging/send-audit')
   const { sendUpdateToAudit } = require('../../../../app/messaging/send-audit')

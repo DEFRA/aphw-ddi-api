@@ -1,12 +1,9 @@
-const levenshtein = require('js-levenshtein')
-
-const mapResults = (results, type, termsQuery) => {
+const mapResults = (results, type) => {
   return results.map(x => {
     const res = x.json
     res.dogId = x.dog_id
     res.personId = x.person_id
-    res.distance = type === 'dog' ? levenshtein(res.dogName || '', termsQuery) : levenshtein(`${res.firstName} ${res.lastName}`, termsQuery)
-    res.rank = x.rank ?? x.dataValues.rank
+    res.rank = x.rank
     res.searchType = type
     return res
   })

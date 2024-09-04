@@ -1,0 +1,57 @@
+<?xml version="1.1" encoding="utf-8" standalone="no"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog" xmlns:ext="http://www.liquibase.org/xml/ns/dbchangelog-ext" xmlns:pro="http://www.liquibase.org/xml/ns/pro" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog-ext http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-ext.xsd http://www.liquibase.org/xml/ns/pro http://www.liquibase.org/xml/ns/pro/liquibase-pro-3.9.xsd http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.9.xsd">
+  <changeSet author="J Barnsley" id="1">
+    <tagDatabase tag="v1.74.0" />
+  </changeSet>
+  <changeSet author="J Barnsley" id="2">
+    <sql>CREATE extension IF NOT EXISTS pg_trgm</sql>
+  </changeSet>
+  <changeSet author="J Barnsley" id="3">
+    <createTable tableName="search_match_code">
+      <column autoIncrement="true" name="id" type="INTEGER">
+        <constraints nullable="false" primaryKey="true" primaryKeyName="match_code_pkey" />
+      </column>
+      <column name="person_id" type="INTEGER">
+        <constraints nullable="false" unique="false" />
+      </column>
+      <column name="match_code" type="VARCHAR(30)">
+        <constraints nullable="false" unique="false" />
+      </column>
+      <column name="created_at" type="TIMESTAMP WITH TIME ZONE" />
+      <column name="updated_at" type="TIMESTAMP WITH TIME ZONE" />
+      <column name="deleted_at" type="TIMESTAMP WITH TIME ZONE" />
+    </createTable>
+  </changeSet>
+  <changeSet author="J Barnsley" id="4">
+    <createIndex indexName="match_code_idx" tableName="search_match_code">
+      <column name="match_code" />
+    </createIndex>
+  </changeSet>
+  <changeSet author="J Barnsley" id="5">
+    <createTable tableName="search_tgram">
+      <column autoIncrement="true" name="id" type="INTEGER">
+        <constraints nullable="false" primaryKey="true" primaryKeyName="search_tgram_pkey" />
+      </column>
+      <column name="person_id" type="INTEGER">
+        <constraints nullable="true" unique="false" />
+      </column>
+      <column name="dog_id" type="INTEGER">
+        <constraints nullable="true" unique="false" />
+      </column>
+      <column name="match_text" type="TEXT">
+        <constraints nullable="false" unique="false" />
+      </column>
+      <column name="created_at" type="TIMESTAMP WITH TIME ZONE" />
+      <column name="updated_at" type="TIMESTAMP WITH TIME ZONE" />
+      <column name="deleted_at" type="TIMESTAMP WITH TIME ZONE" />
+    </createTable>
+  </changeSet>
+  <changeSet author="J Barnsley" id="6">
+    <addForeignKeyConstraint baseColumnNames="person_id" baseTableName="search_tgram" constraintName="fk_search_tgram_person_id" referencedColumnNames="id" referencedTableName="person" />
+    <addForeignKeyConstraint baseColumnNames="dog_id" baseTableName="search_tgram" constraintName="fk_search_tgram_dog_id" referencedColumnNames="id" referencedTableName="dog" />
+    <addForeignKeyConstraint baseColumnNames="person_id" baseTableName="search_match_code" constraintName="fk_search_match_code_person_id" referencedColumnNames="id" referencedTableName="person" />
+  </changeSet>
+  <changeSet author="J Barnsley" id="7">
+    <sql>CREATE INDEX search_tgram_idx ON search_tgram USING GIN(match_text gin_trgm_ops)</sql>
+  </changeSet>
+</databaseChangeLog>

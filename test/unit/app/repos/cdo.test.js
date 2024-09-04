@@ -36,8 +36,8 @@ describe('CDO repo', () => {
   jest.mock('../../../../app/repos/dogs')
   const { createDogs, getDogByIndexNumber, updateStatus } = require('../../../../app/repos/dogs')
 
-  jest.mock('../../../../app/repos/search')
-  const { addToSearchIndex } = require('../../../../app/repos/search')
+  jest.mock('../../../../app/repos/search-index')
+  const { addToSearchIndex } = require('../../../../app/repos/search-index')
 
   jest.mock('../../../../app/repos/insurance')
   const { createOrUpdateInsuranceWithCommand } = require('../../../../app/repos/insurance')
