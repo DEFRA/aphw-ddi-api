@@ -39,12 +39,12 @@ const insertTrigramsPerPerson = async (row, transaction) => {
 }
 
 const updateTrigramsPerDogOrPerson = async (id, type, row, transaction) => {
-  if (type === 'dog') {
+  if (type === 'dog' && id) {
     await sequelize.models.search_tgram.destroy({ where: { dog_id: id }, force: true }, { transaction })
-    await insertTrigramsPerDog(row)
-  } else if (type === 'person') {
+    await insertTrigramsPerDog(row, transaction)
+  } else if (type === 'person' && id) {
     await sequelize.models.search_tgram.destroy({ where: { person_id: id }, force: true }, { transaction })
-    await insertTrigramsPerPerson(row)
+    await insertTrigramsPerPerson(row, transaction)
   }
 }
 
