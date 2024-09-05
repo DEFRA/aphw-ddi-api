@@ -33,6 +33,8 @@ const doFullTextSearch = async (terms, type, fuzzy) => {
     raw: true
   })
 
+  // console.log('textFirstPass', results.length)
+
   return rankAndKeep(results, terms, thresholds.fullTextRankThreshold, type)
 }
 

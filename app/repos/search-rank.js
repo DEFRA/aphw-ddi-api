@@ -30,7 +30,7 @@ const rankWord = (term, word) => {
     const termLower = term.toLowerCase()
     const wordLower = word.value.toLowerCase()
     const termDist = damerauLevenshtein(termLower, wordLower)
-    if (termDist < term.length / 3) {
+    if (termDist <= term.length / 3) {
       if (termDist === 0) {
         return exactMatch(word)
       } else {

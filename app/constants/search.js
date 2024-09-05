@@ -13,7 +13,7 @@ const trigramSearchFields = [
 
 const matchingResultFields = [
   { fieldName: 'dogIndex', exactMatchWeighting: 10, closeMatchWeighting: 1 },
-  { fieldName: 'firstName', exactMatchWeighting: 3, closeMatchWeighting: 1 },
+  { fieldName: 'firstName', exactMatchWeighting: 3, closeMatchWeighting: 1.8 },
   { fieldName: 'lastName', exactMatchWeighting: 4, closeMatchWeighting: 2 },
   { fieldName: 'email', exactMatchWeighting: 4, closeMatchWeighting: 3 },
   { fieldName: 'address.address_line_1', exactMatchWeighting: 2, closeMatchWeighting: 1 },
