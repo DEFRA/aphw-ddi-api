@@ -3,6 +3,8 @@ const { addMinutes } = require('../lib/date-helpers')
 const { isAccountEnabled } = require('../repos/user-accounts')
 const { getUserInfo } = require('../proxy/auth-server')
 const { hashCache } = require('../session/hashCache')
+const jwt = require('jsonwebtoken')
+const config = require('../config')
 
 const expiryPeriodInMins = 65
 
@@ -20,13 +22,12 @@ const checkTokenOnline = async (username, token) => {
   }
 }
 
-const validate = async (_request, username, token) => {
+const validatePortal = (username, _decoded) => {
+  return returnVal(true, username)
+}
+const validateEnforcement = async (username, decoded) => {
   const now = new Date()
-
-  if (!token || !username) {
-    return returnVal(false)
-  }
-
+  const token = decoded.token
   const hash = crypto.createHash('md5').update(token).digest('hex')
 
   const cached = hashCache.get(username)
@@ -45,6 +46,27 @@ const validate = async (_request, username, token) => {
     if (enabled) {
       hashCache.set(username, { hash, expiry: addMinutes(now, expiryPeriodInMins) })
       return returnVal(true, username)
+    }
+  }
+
+  return returnVal(false)
+}
+
+const validate = async (artifacts, _request, _h) => {
+  const decoded = artifacts.decoded
+  const payload = decoded.payload
+  const username = payload.username
+
+  if (!username) {
+    return returnVal(false)
+  }
+
+  switch (payload.iss) {
+    case 'aphw-ddi-portal': {
+      return validatePortal(username, decoded)
+    }
+    case 'aphw-ddi-enforcement': {
+      return validateEnforcement(username, decoded)
     }
   }
 

@@ -3,6 +3,12 @@ const overnightJobUser = {
   displayname: 'Overnight Job System User'
 }
 
+const issuers = {
+  enforcement: 'aphw-ddi-enforcement',
+  portal: 'aphw-ddi-portal'
+}
+
 module.exports = {
-  overnightJobUser
+  overnightJobUser,
+  issuers
 }
