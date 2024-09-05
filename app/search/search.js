@@ -1,13 +1,13 @@
 const sequelize = require('../config/db')
 const { Op } = require('sequelize')
 const { thresholds, maxResults } = require('../constants/search')
-const { sortAndGroupResults } = require('./search/sorting-and-grouping')
-const { cleanupSearchTerms } = require('./search/search-terms')
-const { mapResults } = require('./search/search-results')
+const { sortAndGroupResults } = require('./search-processors/sorting-and-grouping')
+const { cleanupSearchTerms } = require('./search-processors/search-terms')
+const { mapResults } = require('./search-processors/search-results')
 const { fuzzySearch } = require('../repos/search-match-codes')
 const { trigramSearch } = require('../repos/search-tgrams')
 const { rankResult } = require('../repos/search-rank')
-const { buildTsVectorQuery } = require('./search/search-builder')
+const { buildTsVectorQuery } = require('./search-processors/search-builder')
 
 const rankAndKeep = (results, terms, threshold, type) => {
   const numRecords = results.length

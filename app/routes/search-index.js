@@ -1,4 +1,4 @@
-const { search } = require('../register/search')
+const { search } = require('../search/search')
 const { searchQueryParamsSchema, searchResponseSchema } = require('../schema/search')
 
 module.exports = [{

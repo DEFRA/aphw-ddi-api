@@ -3,7 +3,7 @@ describe('SearchBasic endpoint', () => {
   let server
 
   jest.mock('../../../../app/register/search')
-  const { search } = require('../../../../app/register/search')
+  const { search } = require('../../../../app/search/search')
 
   beforeEach(async () => {
     jest.clearAllMocks()
