@@ -1,4 +1,4 @@
-const { search } = require('../register/search-basic')
+const { search } = require('../register/search')
 const { searchQueryParamsSchema, searchResponseSchema } = require('../schema/search')
 
 module.exports = [{
@@ -17,7 +17,7 @@ module.exports = [{
       }
     },
     handler: async (request, h) => {
-      const results = await search(request.params.type, request.params.terms)
+      const results = await search(request.params.type, request.params.terms, !!request.query.fuzzy)
       return h.response({ results }).code(200)
     }
   }

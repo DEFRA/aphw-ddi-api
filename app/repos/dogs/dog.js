@@ -3,13 +3,13 @@ const { Op } = require('sequelize')
 const { v4: uuidv4 } = require('uuid')
 const constants = require('../../constants/statuses')
 const { getBreed, getExemptionOrder } = require('../../lookups')
-const { updateSearchIndexDog } = require('../search')
+const { updateSearchIndexDog } = require('../search-index')
 const { updateMicrochips, createMicrochip } = require('../microchip')
 const { createInsurance } = require('../insurance')
 const { sendCreateToAudit, sendUpdateToAudit, sendDeleteToAudit, sendPermanentDeleteToAudit } = require('../../messaging/send-audit')
 const { DOG } = require('../../constants/event/audit-event-object-types')
 const { preChangedDogAudit, postChangedDogAudit } = require('../../dto/auditing/dog')
-const { removeDogFromSearchIndex } = require('../search')
+const { removeDogFromSearchIndex } = require('../search-index')
 const { getPersonByReference } = require('../people')
 const { addYears } = require('../../lib/date-helpers')
 const { calculateNeuteringDeadline, stripTime, extractEmail } = require('../../dto/dto-helper')
@@ -350,7 +350,7 @@ const updateDog = async (payload, user, transaction) => {
 
   const refreshedDog = await getDogByIndexNumber(payload.indexNumber, transaction)
 
-  await updateSearchIndexDog(refreshedDog, statuses, transaction)
+  await updateSearchIndexDog(refreshedDog, transaction)
 
   await sendUpdateToAudit(DOG, preChangedDog, postChangedDogAudit(refreshedDog), user)
 
@@ -389,7 +389,7 @@ const updateDogStatus = async (dogFromDB, newStatus, transaction) => {
 
   const refreshedDog = await getDogByIndexNumber(dogFromDB.index_number, transaction)
 
-  await updateSearchIndexDog(refreshedDog, statuses, transaction)
+  await updateSearchIndexDog(refreshedDog, transaction)
 }
 
 const updateStatus = async (indexNumber, newStatus, transaction) => {

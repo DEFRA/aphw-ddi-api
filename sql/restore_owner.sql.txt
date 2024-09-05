@@ -48,6 +48,14 @@ BEGIN
 	SET    deleted_at = null
 	WHERE  person_id = v_person_id;
 
+	UPDATE search_tgram
+	SET    deleted_at = null
+	WHERE  person_id = v_person_id;
+
+	UPDATE search_match_code
+	SET    deleted_at = null
+	WHERE  person_id = v_person_id;
+
   IF generate_search_index(v_person_id, null) = 'OK' THEN
   	RETURN 'Person successfully restored';
   ELSE

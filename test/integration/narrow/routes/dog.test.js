@@ -231,7 +231,7 @@ describe('Dog endpoint', () => {
     })
 
     test('PUT /dog route returns 400 with invalid response', async () => {
-      updateDog.mockResolvedValue({ id: 123, registered_person: [], dog_microchips: [], dog_breaches: [], status: { id: null } })
+      updateDog.mockResolvedValue(buildDogDao({ id: 123, index_number: 'ABC123', status_id: 'bad' }))
 
       const options = {
         method: 'PUT',
@@ -245,7 +245,7 @@ describe('Dog endpoint', () => {
 
       expect(response.statusCode).toBe(400)
       expect(payload.errors.length).toBeGreaterThan(0)
-      expect(payload.errors[0]).toBe('"status.id" must be a number')
+      expect(payload.errors[0]).toBe('"status_id" must be a number')
     })
 
     test('PUT /dog route returns 500 with db error', async () => {

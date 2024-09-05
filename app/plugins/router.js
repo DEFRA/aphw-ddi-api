@@ -23,7 +23,8 @@ const routes = [].concat(
   require('../routes/jobs'),
   require('../routes/statistics'),
   require('../routes/breaches'),
-  require('../routes/user')
+  require('../routes/user'),
+  require('../routes/prepop-codes')
 )
 
 module.exports = {

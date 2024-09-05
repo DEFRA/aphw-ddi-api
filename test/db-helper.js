@@ -4,6 +4,8 @@ const { getCountry } = require('../app/lookups')
 const { createCdo } = require('../app/repos/cdo')
 
 const truncateDatabase = async () => {
+  await sequelize.models.search_match_code.truncate()
+  await sequelize.models.search_tgram.truncate()
   await sequelize.models.search_index.truncate()
   await sequelize.models.comment.truncate()
   await sequelize.models.dog_microchip.truncate()

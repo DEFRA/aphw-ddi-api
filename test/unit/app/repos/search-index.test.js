@@ -12,6 +12,16 @@ describe('Search repo', () => {
         findAll: jest.fn(),
         findOne: jest.fn()
       },
+      search_match_code: {
+        create: jest.fn(),
+        destroy: jest.fn(),
+        findAll: jest.fn()
+      },
+      search_tgram: {
+        create: jest.fn(),
+        destroy: jest.fn(),
+        findAll: jest.fn()
+      },
       person: {
         findOne: jest.fn()
       }
@@ -25,7 +35,7 @@ describe('Search repo', () => {
 
   const sequelize = require('../../../../app/config/db')
 
-  const { addToSearchIndex, buildAddressString, updateSearchIndexDog, updateSearchIndexPerson, applyMicrochips, removeDogFromSearchIndex, cleanupPossibleOwnerWithNoDogs } = require('../../../../app/repos/search')
+  const { addToSearchIndex, buildAddressString, updateSearchIndexDog, updateSearchIndexPerson, applyMicrochips, removeDogFromSearchIndex, cleanupPossibleOwnerWithNoDogs } = require('../../../../app/repos/search-index')
 
   const { dbFindByPk } = require('../../../../app/lib/db-functions')
   jest.mock('../../../../app/lib/db-functions')
@@ -35,7 +45,7 @@ describe('Search repo', () => {
   })
 
   describe('addToSearchIndex', () => {
-    test('addToSearchIndex should call create and not destroy for new dog', async () => {
+    test('should call create and not destroy for new dog', async () => {
       sequelize.models.search_index.create.mockResolvedValue()
       getDogByIndexNumber.mockResolvedValue({ id: 1, index_number: 'ED1' })
 
@@ -63,7 +73,7 @@ describe('Search repo', () => {
       expect(sequelize.models.search_index.destroy).not.toHaveBeenCalled()
     })
 
-    test('addToSearchIndex should call destroy for existing dog', async () => {
+    test('should call destroy for existing dog', async () => {
       sequelize.models.search_index.create.mockResolvedValue()
       getDogByIndexNumber.mockResolvedValue({ id: 1, index_number: 'ED1' })
 
@@ -92,7 +102,7 @@ describe('Search repo', () => {
       expect(sequelize.models.search_index.destroy).toHaveBeenCalledTimes(1)
     })
 
-    test('addToSearchIndex should call destroy for existing dog and handle change of owner', async () => {
+    test('should call destroy for existing dog and handle change of owner', async () => {
       sequelize.models.search_index.create.mockResolvedValue()
       getDogByIndexNumber.mockResolvedValue({ id: 1, index_number: 'ED1' })
 
@@ -131,7 +141,7 @@ describe('Search repo', () => {
       expect(sequelize.models.search_index.destroy).toHaveBeenCalledTimes(1)
     })
 
-    test('addToSearchIndex should create new transaction if none passed', async () => {
+    test('should create new transaction if none passed', async () => {
       sequelize.models.search_index.create.mockResolvedValue()
       getDogByIndexNumber.mockResolvedValue({ id: 1, index_number: 'ED1' })
 
@@ -172,7 +182,7 @@ describe('Search repo', () => {
   })
 
   describe('buildAddressString', () => {
-    test('buildAddressString should return parts', async () => {
+    test('should return parts', async () => {
       const address = {
         address_line_1: 'addr1',
         address_line_2: 'addr2',
@@ -185,7 +195,7 @@ describe('Search repo', () => {
       expect(parts).toBe('addr1, addr2, town, post code, postcode')
     })
 
-    test('buildAddressString should return parts 2', async () => {
+    test('should return parts 2', async () => {
       const address = {
         address_line_1: 'addr1',
         address_line_2: 'addr2',
@@ -198,7 +208,7 @@ describe('Search repo', () => {
       expect(parts).toBe('addr1, addr2, town, postcode')
     })
 
-    test('buildAddressString should return parts without alternate', async () => {
+    test('should return parts without alternate', async () => {
       const address = {
         address_line_1: 'addr1',
         address_line_2: 'addr2',
@@ -213,19 +223,28 @@ describe('Search repo', () => {
   })
 
   describe('UpdateSearchIndexDog', () => {
-    test('UpdateSearchIndexDog should call search_index save for each row', async () => {
+    test('should call search_index save for each row', async () => {
       const mockSave = jest.fn()
       sequelize.models.search_index.findAll.mockResolvedValue([
         { dog_id: 1, person_id: 1, search: '12345', json: '{ dogName: \'Bruno\' }', save: mockSave },
         { dog_id: 2, person_id: 2, search: '34567', json: '{ dogName: \'Fido\' }', save: mockSave }
       ])
+      sequelize.models.search_tgram.findAll.mockResolvedValue([
+        { dog_id: 1, match_text: '123456789012345' },
+        { dog_id: 1, match_text: '234567890123456' },
+        { dog_id: 1, match_text: '123456789012345' },
+        { dog_id: 1, match_text: '234567890123456' }
+      ])
 
       const dog = {
         id: 1,
-        dogIndex: 123,
-        dogName: 'Bruno2',
-        microchipNumber: 123456789012345,
-        microchipNumber2: 234567890123456
+        index_number: 123,
+        name: 'Bruno2',
+        status: { status: 'Exempt' },
+        dog_microchips: [
+          { id: 1, microchip: { id: 1, microchip_number: '123456789012345' } },
+          { id: 2, microchip: { id: 2, microchip_number: '234567890123456' } }
+        ]
       }
 
       await updateSearchIndexDog(dog, {})
@@ -235,10 +254,13 @@ describe('Search repo', () => {
   })
 
   describe('UpdateSearchIndexPerson', () => {
-    test('UpdateSearchIndexPerson should call search_index save for each row', async () => {
+    test('should call search_index save for each row', async () => {
       const mockSave = jest.fn()
       sequelize.models.search_index.findAll.mockResolvedValue([
         { dog_id: 1, person_id: 1, search: '12345', json: '{ dogName: \'Bruno\', firstName: \'John\' }', save: mockSave }
+      ])
+      sequelize.models.search_tgram.findAll.mockResolvedValue([
+        { dog_id: 1, match_text: '123456789012345' }
       ])
 
       const person = {
@@ -256,7 +278,7 @@ describe('Search repo', () => {
       expect(mockSave).toHaveBeenCalledTimes(1)
     })
 
-    test('UpdateSearchIndexPerson should call search_index save for each row when changes', async () => {
+    test('should call search_index save for each row when changes', async () => {
       const mockSave = jest.fn()
       sequelize.models.search_index.findAll.mockResolvedValue([
         { dog_id: 1, person_id: 1, search: '12345', json: '{ dogName: \'Bruno\', firstName: \'John\', lastName: \'Smith\' }', save: mockSave }
@@ -280,7 +302,7 @@ describe('Search repo', () => {
   })
 
   describe('applyMicrochips', () => {
-    test('applyMicrochips should set microchip numbers at root', async () => {
+    test('should set microchip numbers at root', async () => {
       const dog = {
         dog_microchips: [
           { microchip: { microchip_number: 1234567890 } },

@@ -3,8 +3,8 @@ describe('SearchBasic endpoint', () => {
   const createServer = require('../../../../app/server')
   let server
 
-  jest.mock('../../../../app/register/search-basic')
-  const { search } = require('../../../../app/register/search-basic')
+  jest.mock('../../../../app/register/search')
+  const { search } = require('../../../../app/register/search')
 
   jest.mock('../../../../app/auth/token-validator')
   const { validate } = require('../../../../app/auth/token-validator')
