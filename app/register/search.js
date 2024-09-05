@@ -53,7 +53,7 @@ const doFuzzySearch = async (terms, type) => {
   return rankAndKeep(results, terms, thresholds.fuzzyRankThreshold, type)
 }
 
-const microchipRegex = /[\d]{14,15}/
+const microchipRegex = /\d{14,15}/
 
 const doTrigramSearch = async (terms, type) => {
   const adjustedThreshold = terms.length === 1 && microchipRegex.test(terms[0]) ? thresholds.trigramQueryMicrochipThreshold : thresholds.trigramQueryThreshold
