@@ -103,8 +103,8 @@ describe('createCertificateMessage', () => {
 
     test('should handle customFields', async () => {
       const customFields = [
-        { name: 'oneTimeCode', value: '123456' },
-        { name: 'extraField', value: 'some extra text' }
+        { name: 'one_time_code', value: '123456' },
+        { name: 'expiry_in_mins', value: 8 }
       ]
       const res = createEmailMessage({ type: 'type', id: 'id', toAddress: 'target@email.com', customFields })
 
@@ -118,8 +118,8 @@ describe('createCertificateMessage', () => {
           emailAddress: 'target@email.com',
           personalisation: {
             personalisation: {
-              oneTimeCode: '123456',
-              extraField: 'some extra text'
+              one_time_code: '123456',
+              expiry_in_mins: 8
             }
           }
         }

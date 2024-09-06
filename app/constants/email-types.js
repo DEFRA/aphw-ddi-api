@@ -1,5 +1,5 @@
 const emailTypes = {
-  oneTimeCode: 'one-time-code',
+  verufyEmail: 'verify-email',
   generalError: 'general-error'
 }
 

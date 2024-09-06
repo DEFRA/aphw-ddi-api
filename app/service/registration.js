@@ -1,6 +1,8 @@
 const { emailTypes } = require('../constants/email-types')
 const { sendEmail } = require('../messaging/send-email')
 
+const expiryInMinsForOtp = 8
+
 class RegistrationService {
   /**
    * @param {UserAccountRepository} userAccountRepository
@@ -19,14 +21,15 @@ class RegistrationService {
   /**
    * @type {RegistrationService.SendOneTimeCodeEmail}
    */
-  async SendOneTimeCodeEmail (username) {
+  async SendVerifyEmailAddress (username) {
     const oneTimeCode = this.GenerateOneTimeCode()
     this.userAccountRepository.setActivationCode(username, oneTimeCode)
     const data = {
       toAddress: username,
       type: emailTypes.oneTimeCode,
       customFields: [
-        { name: 'oneTimeCode', value: oneTimeCode }
+        { name: 'one_time_code', value: oneTimeCode },
+        { name: 'expiry_in_mins', value: expiryInMinsForOtp }
       ]
     }
     await sendEmail(data)
