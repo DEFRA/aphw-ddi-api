@@ -1,9 +1,9 @@
 const { devUser } = require('../../../mocks/auth')
-const { createMessage, createCertificateMessage } = require('../../../../app/messaging/create-message')
+const { createEventMessage, createCertificateMessage, createEmailMessage } = require('../../../../app/messaging/create-message')
 
-describe('createMessage', () => {
-  test('createMessage should handle undefined', async () => {
-    const res = createMessage({ type: 'type', source: 'source', id: 'id' })
+describe('createEventMessage', () => {
+  test('should handle undefined', async () => {
+    const res = createEventMessage({ type: 'type', source: 'source', id: 'id' })
 
     expect(res).toEqual({
       body: {
@@ -21,8 +21,10 @@ describe('createMessage', () => {
       source: 'source'
     })
   })
+})
 
-  test('createCertificateMessage should create correct content', async () => {
+describe('createCertificateMessage', () => {
+  test('should create correct content', async () => {
     const data = {
       exemption: { exemptionOrder: '2015' },
       person: {
@@ -77,6 +79,51 @@ describe('createMessage', () => {
       },
       type: 'uk.gov.defra.aphw.ddi.certificate.requested',
       source: 'aphw-ddi-api'
+    })
+  })
+
+  describe('createEmailMessage', () => {
+    test('should handle missing customFields', async () => {
+      const res = createEmailMessage({ type: 'type', id: 'id', toAddress: 'target@email.com', customFields: null })
+
+      expect(res).toEqual({
+        specversion: '1.0',
+        id: 'id',
+        type: 'type',
+        source: 'aphw-ddi-api',
+        time: expect.anything(),
+        data: {
+          emailAddress: 'target@email.com',
+          personalisation: {
+            personalisation: {}
+          }
+        }
+      })
+    })
+
+    test('should handle customFields', async () => {
+      const customFields = [
+        { name: 'oneTimeCode', value: '123456' },
+        { name: 'extraField', value: 'some extra text' }
+      ]
+      const res = createEmailMessage({ type: 'type', id: 'id', toAddress: 'target@email.com', customFields })
+
+      expect(res).toEqual({
+        specversion: '1.0',
+        id: 'id',
+        type: 'type',
+        source: 'aphw-ddi-api',
+        time: expect.anything(),
+        data: {
+          emailAddress: 'target@email.com',
+          personalisation: {
+            personalisation: {
+              oneTimeCode: '123456',
+              extraField: 'some extra text'
+            }
+          }
+        }
+      })
     })
   })
 })

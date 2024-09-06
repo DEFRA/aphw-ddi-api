@@ -1,11 +1,11 @@
 const { createMessageSender } = require('./create-message-sender')
 const { eventsTopic } = require('../config/message')
-const { createMessage } = require('./create-message')
+const { createEventMessage } = require('./create-message')
 const { validateEvent } = require('./validate-event')
 
 const sendEvent = async (data) => {
   if (validateEvent(data)) {
-    const message = createMessage(data)
+    const message = createEventMessage(data)
     const eventSender = createMessageSender(eventsTopic)
     await eventSender.sendMessage(message)
   } else {

@@ -1,5 +1,6 @@
 const { search } = require('../search/search')
 const { searchQueryParamsSchema, searchResponseSchema } = require('../schema/search')
+const { RegistrationService } = require('../service/registration')
 
 module.exports = [{
   method: 'GET',
@@ -18,6 +19,9 @@ module.exports = [{
     },
     handler: async (request, h) => {
       const results = await search(request.params.type, request.params.terms, !!request.query.fuzzy)
+
+      const regService = new RegistrationService(null)
+      console.log('otp', regService.GenerateOneTimeCode('me'))
       return h.response({ results }).code(200)
     }
   }
