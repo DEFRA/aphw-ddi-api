@@ -12,7 +12,7 @@ const { buildTsVectorQuery } = require('./search/search-builder')
 const rankAndKeep = (results, terms, threshold, type) => {
   const numRecords = results.length
 
-  const adjustedThreshold = (numRecords < 11 ? threshold / 2 : threshold)
+  const adjustedThreshold = numRecords < 11 ? threshold / 2 : threshold
 
   const mappedResults = results
     .map(res => ({ ...res, rank: rankResult(terms, res, type) }))
@@ -57,6 +57,7 @@ const microchipRegex = /\d{14,15}/
 
 const doTrigramSearch = async (terms, type) => {
   const adjustedThreshold = terms.length === 1 && microchipRegex.test(terms[0]) ? thresholds.trigramQueryMicrochipThreshold : thresholds.trigramQueryThreshold
+
   const { uniquePersons, uniqueDogs } = await trigramSearch(terms, adjustedThreshold)
 
   const results = await sequelize.models.search_index.findAll({

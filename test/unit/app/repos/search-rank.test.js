@@ -260,4 +260,24 @@ describe('rankResult', () => {
     const rank = rankResult(['butch'], row, 'dog')
     expect(rank).toBe(4)
   })
+
+  test('should return 2.4 when close match of owner lastname', () => {
+    const row = {
+      id: 124,
+      dog_id: 2,
+      person_id: 22,
+      json: {
+        firstName: 'Peter',
+        lastName: 'White',
+        dogName: 'Butch',
+        address: {
+          address_line_1: '2 test address',
+          postcode: 'TS3 2TS'
+        },
+        microchipNumber: 123456789022222
+      }
+    }
+    const rank = rankResult(['whit'], row, 'owner')
+    expect(rank).toBe(2.4000000000000004)
+  })
 })
