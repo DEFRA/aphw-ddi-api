@@ -33,6 +33,8 @@ const doFullTextSearch = async (terms, type, fuzzy) => {
     raw: true
   })
 
+  // console.log('textFirstPass', results.length)
+
   return rankAndKeep(results, terms, thresholds.fullTextRankThreshold, type)
 }
 
@@ -51,8 +53,11 @@ const doFuzzySearch = async (terms, type) => {
   return rankAndKeep(results, terms, thresholds.fuzzyRankThreshold, type)
 }
 
+const microchipRegex = /\d{14,15}/
+
 const doTrigramSearch = async (terms, type) => {
-  const { uniquePersons, uniqueDogs } = await trigramSearch(terms, thresholds.trigramQueryThreshold)
+  const adjustedThreshold = terms.length === 1 && microchipRegex.test(terms[0]) ? thresholds.trigramQueryMicrochipThreshold : thresholds.trigramQueryThreshold
+  const { uniquePersons, uniqueDogs } = await trigramSearch(terms, adjustedThreshold)
 
   const results = await sequelize.models.search_index.findAll({
     where: {
