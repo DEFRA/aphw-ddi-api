@@ -1,4 +1,5 @@
-const { mockValidate, authHeaders } = require('../../../mocks/auth')
+const { mockValidate } = require('../../../mocks/auth')
+const { portalHeader } = require('../../../mocks/jwt')
 
 describe('Counties endpoint', () => {
   // jest.mock('../../../../app/auth/token-validator')
@@ -31,7 +32,7 @@ describe('Counties endpoint', () => {
     const options = {
       method: 'GET',
       url: '/counties',
-      ...authHeaders
+      ...portalHeader
     }
 
     const response = await server.inject(options)

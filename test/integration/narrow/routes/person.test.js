@@ -1,4 +1,6 @@
 const { mockValidate, authHeaders } = require('../../../mocks/auth')
+const { portalHeader } = require('../../../mocks/jwt')
+
 describe('CDO endpoint', () => {
   const createServer = require('../../../../app/server')
   let server
@@ -20,7 +22,7 @@ describe('CDO endpoint', () => {
     const options = {
       method: 'GET',
       url: '/person/ABC123',
-      ...authHeaders
+      ...portalHeader
     }
 
     getPersonByReference.mockResolvedValue({
@@ -81,7 +83,7 @@ describe('CDO endpoint', () => {
     const options = {
       method: 'GET',
       url: '/person/ABC123',
-      ...authHeaders
+      ...portalHeader
     }
 
     getPersonByReference.mockResolvedValue(null)
@@ -95,7 +97,7 @@ describe('CDO endpoint', () => {
     const options = {
       method: 'GET',
       url: '/person/',
-      ...authHeaders
+      ...portalHeader
     }
 
     getPersonByReference.mockResolvedValue(null)
@@ -109,7 +111,7 @@ describe('CDO endpoint', () => {
     const options = {
       method: 'GET',
       url: '/person/ABC123?includeDogs=true',
-      ...authHeaders
+      ...portalHeader
     }
 
     getPersonAndDogsByReference.mockResolvedValue([
@@ -208,7 +210,7 @@ describe('CDO endpoint', () => {
           country: 'England'
         }
       },
-      ...authHeaders
+      ...portalHeader
     }
 
     updatePerson.mockResolvedValue({
@@ -262,7 +264,7 @@ describe('CDO endpoint', () => {
           country: 'England'
         }
       },
-      ...authHeaders
+      ...portalHeader
     }
 
     const response = await server.inject(options)
@@ -287,7 +289,7 @@ describe('CDO endpoint', () => {
           country: 'England'
         }
       },
-      ...authHeaders
+      ...portalHeader
     }
 
     updatePerson.mockRejectedValue({
@@ -316,7 +318,7 @@ describe('CDO endpoint', () => {
           country: 'England'
         }
       },
-      ...authHeaders
+      ...portalHeader
     }
 
     updatePerson.mockImplementation(() => { throw new Error('DB error') })
@@ -330,7 +332,7 @@ describe('CDO endpoint', () => {
     const options = {
       method: 'DELETE',
       url: '/person/P-12345',
-      ...authHeaders
+      ...portalHeader
     }
 
     getPersonAndDogsByReference.mockResolvedValue()
@@ -345,7 +347,7 @@ describe('CDO endpoint', () => {
     const options = {
       method: 'DELETE',
       url: '/person/',
-      ...authHeaders
+      ...portalHeader
     }
 
     getPersonAndDogsByReference.mockResolvedValue()
@@ -360,7 +362,7 @@ describe('CDO endpoint', () => {
     const options = {
       method: 'DELETE',
       url: '/person/P-123',
-      ...authHeaders
+      ...portalHeader
     }
 
     deletePerson.mockResolvedValue()

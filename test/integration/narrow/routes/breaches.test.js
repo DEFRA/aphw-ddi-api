@@ -6,6 +6,7 @@ const {
   AWAY_FROM_ADDR_30_DAYS_IN_YR, buildCdoDog
 } = require('../../../mocks/cdo/domain')
 const { Dog } = require('../../../../app/data/domain')
+const { portalHeader } = require('../../../mocks/jwt')
 
 describe('Breaches endpoint', () => {
   const createServer = require('../../../../app/server')
@@ -55,7 +56,7 @@ describe('Breaches endpoint', () => {
       const options = {
         method: 'GET',
         url: '/breaches/categories',
-        ...authHeaders
+        ...portalHeader
       }
 
       const response = await server.inject(options)
@@ -90,7 +91,7 @@ describe('Breaches endpoint', () => {
             'INSECURE_PLACE'
           ]
         },
-        ...authHeaders
+        ...portalHeader
       }
 
       const response = await server.inject(options)
@@ -121,7 +122,7 @@ describe('Breaches endpoint', () => {
         payload: {
           indexNumber: 'ED12345'
         },
-        ...authHeaders
+        ...portalHeader
       }
 
       const response = await server.inject(options)

@@ -3,6 +3,7 @@ const {
   buildPoliceForceDao, buildExemptionOrderDao, buildCdoDao
 } = require('../../../mocks/cdo/get')
 const { mockValidate, authHeaders } = require('../../../mocks/auth')
+const { portalHeader } = require('../../../mocks/jwt')
 
 describe('Exemption endpoint', () => {
   const createServer = require('../../../../app/server')
@@ -93,7 +94,7 @@ describe('Exemption endpoint', () => {
       method: 'PUT',
       url: '/exemption',
       payload,
-      ...authHeaders
+      ...portalHeader
     }
 
     const response = await server.inject(options)
@@ -176,7 +177,7 @@ describe('Exemption endpoint', () => {
       method: 'PUT',
       url: '/exemption',
       payload,
-      ...authHeaders
+      ...portalHeader
     }
 
     const response = await server.inject(options)
@@ -190,7 +191,7 @@ describe('Exemption endpoint', () => {
       method: 'PUT',
       url: '/exemption',
       payload: {},
-      ...authHeaders
+      ...portalHeader
     }
 
     getCdo.mockResolvedValue({
@@ -277,7 +278,7 @@ describe('Exemption endpoint', () => {
       method: 'PUT',
       url: '/exemption',
       payload,
-      ...authHeaders
+      ...portalHeader
     }
 
     const response = await server.inject(options)

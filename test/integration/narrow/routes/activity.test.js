@@ -1,5 +1,6 @@
 const { activities: mockActivities } = require('../../../mocks/activities')
 const { devUser, mockValidate, authHeaders } = require('../../../mocks/auth')
+const { portalHeader } = require('../../../mocks/jwt')
 
 describe('Activity endpoint', () => {
   const createServer = require('../../../../app/server')
@@ -35,7 +36,7 @@ describe('Activity endpoint', () => {
       const options = {
         method: 'GET',
         url: '/activities/sent/dog',
-        ...authHeaders
+        ...portalHeader
       }
 
       const response = await server.inject(options)
@@ -48,7 +49,7 @@ describe('Activity endpoint', () => {
       const options = {
         method: 'GET',
         url: '/activities/sent/dog',
-        ...authHeaders
+        ...portalHeader
       }
 
       const response = await server.inject(options)
@@ -64,7 +65,7 @@ describe('Activity endpoint', () => {
       const options = {
         method: 'GET',
         url: '/activity/1',
-        ...authHeaders
+        ...portalHeader
       }
 
       const response = await server.inject(options)
@@ -77,7 +78,7 @@ describe('Activity endpoint', () => {
       const options = {
         method: 'GET',
         url: '/activity/1',
-        ...authHeaders
+        ...portalHeader
       }
 
       const response = await server.inject(options)
@@ -94,7 +95,7 @@ describe('Activity endpoint', () => {
         method: 'POST',
         url: '/activity',
         payload: {},
-        ...authHeaders
+        ...portalHeader
       }
 
       const response = await server.inject(options)
@@ -116,7 +117,7 @@ describe('Activity endpoint', () => {
           source: 'dog',
           activityDate: new Date()
         },
-        ...authHeaders
+        ...portalHeader
       }
 
       const response = await server.inject(options)
@@ -144,7 +145,7 @@ describe('Activity endpoint', () => {
           source: 'dog',
           activityDate
         },
-        ...authHeaders
+        ...portalHeader
       }
 
       const response = await server.inject(options)
@@ -169,7 +170,7 @@ describe('Activity endpoint', () => {
           source: 'dog',
           activityDate: new Date()
         },
-        ...authHeaders
+        ...portalHeader
       }
 
       const response = await server.inject(options)
@@ -198,7 +199,7 @@ describe('Activity endpoint', () => {
           source: 'dog',
           activityDate
         },
-        ...authHeaders
+        ...portalHeader
       }
 
       const response = await server.inject(options)
@@ -223,7 +224,7 @@ describe('Activity endpoint', () => {
           source: 'dog',
           activityDate: new Date()
         },
-        ...authHeaders
+        ...portalHeader
       }
 
       const response = await server.inject(options)
@@ -239,7 +240,7 @@ describe('Activity endpoint', () => {
         method: 'POST',
         url: '/activity',
         payload: {},
-        ...authHeaders
+        ...portalHeader
       }
 
       const response = await server.inject(options)
@@ -254,7 +255,7 @@ describe('Activity endpoint', () => {
         method: 'POST',
         url: '/activities',
         payload: {},
-        ...authHeaders
+        ...portalHeader
       }
 
       const response = await server.inject(options)
@@ -278,7 +279,7 @@ describe('Activity endpoint', () => {
           activitySource: 'dog',
           label: 'New activivty'
         },
-        ...authHeaders
+        ...portalHeader
       }
 
       const response = await server.inject(options)
@@ -293,7 +294,7 @@ describe('Activity endpoint', () => {
         method: 'DELETE',
         url: '/activities',
         payload: {},
-        ...authHeaders
+        ...portalHeader
       }
 
       const response = await server.inject(options)
@@ -308,7 +309,7 @@ describe('Activity endpoint', () => {
         method: 'DELETE',
         url: '/activities/123',
         payload: {},
-        ...authHeaders
+        ...portalHeader
       }
 
       const response = await server.inject(options)

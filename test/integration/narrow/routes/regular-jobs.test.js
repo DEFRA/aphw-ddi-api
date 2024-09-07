@@ -1,5 +1,6 @@
 const { jobs: mockJobs } = require('../../../mocks/jobs')
-const { mockValidate, authHeaders } = require('../../../mocks/auth')
+const { mockValidate } = require('../../../mocks/auth')
+const { portalHeader } = require('../../../mocks/jwt')
 
 describe('Regular jobs endpoint', () => {
   const createServer = require('../../../../app/server')
@@ -24,7 +25,7 @@ describe('Regular jobs endpoint', () => {
     const options = {
       method: 'GET',
       url: '/regular-jobs',
-      ...authHeaders
+      ...portalHeader
     }
 
     const response = await server.inject(options)
@@ -37,7 +38,7 @@ describe('Regular jobs endpoint', () => {
     const options = {
       method: 'GET',
       url: '/regular-jobs',
-      ...authHeaders
+      ...portalHeader
     }
 
     const response = await server.inject(options)

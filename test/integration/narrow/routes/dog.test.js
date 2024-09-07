@@ -1,6 +1,7 @@
 const { personDaoBuilder } = require('../../../mocks/person')
 const { buildDogDao, buildRegistrationDao } = require('../../../mocks/cdo/get')
 const { mockValidate, authHeaders } = require('../../../mocks/auth')
+const { portalHeader } = require('../../../mocks/jwt')
 
 describe('Dog endpoint', () => {
   const createServer = require('../../../../app/server')
@@ -39,7 +40,7 @@ describe('Dog endpoint', () => {
       const options = {
         method: 'GET',
         url: '/dog/ED123',
-        ...authHeaders
+        ...portalHeader
       }
 
       const response = await server.inject(options)
@@ -52,7 +53,7 @@ describe('Dog endpoint', () => {
       const options = {
         method: 'GET',
         url: '/dog/ED000',
-        ...authHeaders
+        ...portalHeader
       }
 
       const response = await server.inject(options)
@@ -65,7 +66,7 @@ describe('Dog endpoint', () => {
       const options = {
         method: 'GET',
         url: '/dog/ED123',
-        ...authHeaders
+        ...portalHeader
       }
 
       const response = await server.inject(options)
@@ -81,7 +82,7 @@ describe('Dog endpoint', () => {
       const options = {
         method: 'GET',
         url: '/dog-owner/ED123',
-        ...authHeaders
+        ...portalHeader
       }
 
       const response = await server.inject(options)
@@ -129,7 +130,7 @@ describe('Dog endpoint', () => {
       const options = {
         method: 'GET',
         url: '/dog-owner/ED123?includeDogs=true',
-        ...authHeaders
+        ...portalHeader
       }
 
       const response = await server.inject(options)
@@ -145,7 +146,7 @@ describe('Dog endpoint', () => {
       const options = {
         method: 'GET',
         url: '/dog-owner/ED000',
-        ...authHeaders
+        ...portalHeader
       }
 
       const response = await server.inject(options)
@@ -158,7 +159,7 @@ describe('Dog endpoint', () => {
       const options = {
         method: 'GET',
         url: '/dog-owner/ED000',
-        ...authHeaders
+        ...portalHeader
       }
 
       const response = await server.inject(options)
@@ -171,7 +172,7 @@ describe('Dog endpoint', () => {
       const options = {
         method: 'GET',
         url: '/dog-owner/ED123',
-        ...authHeaders
+        ...portalHeader
       }
 
       const response = await server.inject(options)
@@ -188,7 +189,7 @@ describe('Dog endpoint', () => {
         method: 'POST',
         url: '/dog',
         payload: {},
-        ...authHeaders
+        ...portalHeader
       }
 
       const response = await server.inject(options)
@@ -203,7 +204,7 @@ describe('Dog endpoint', () => {
         method: 'POST',
         url: '/dog',
         payload: { dog: { name: 'Bruno' } },
-        ...authHeaders
+        ...portalHeader
       }
 
       const response = await server.inject(options)
@@ -220,7 +221,7 @@ describe('Dog endpoint', () => {
         method: 'PUT',
         url: '/dog',
         payload: {},
-        ...authHeaders
+        ...portalHeader
       }
 
       const response = await server.inject(options)
@@ -237,7 +238,7 @@ describe('Dog endpoint', () => {
         method: 'PUT',
         url: '/dog',
         payload: { indexNumber: 'ABC123' },
-        ...authHeaders
+        ...portalHeader
       }
 
       const response = await server.inject(options)
@@ -255,7 +256,7 @@ describe('Dog endpoint', () => {
         method: 'PUT',
         url: '/dog',
         payload: { indexNumber: 'ABC123' },
-        ...authHeaders
+        ...portalHeader
       }
 
       const response = await server.inject(options)
@@ -270,7 +271,7 @@ describe('Dog endpoint', () => {
         method: 'PUT',
         url: '/dog',
         payload: { indexNumber: 'ABC123' },
-        ...authHeaders
+        ...portalHeader
       }
 
       const response = await server.inject(options)
@@ -292,7 +293,7 @@ describe('Dog endpoint', () => {
         method: 'PUT',
         url: '/dog',
         payload: { indexNumber: 'ABC123' },
-        ...authHeaders
+        ...portalHeader
       }
 
       const response = await server.inject(options)
@@ -312,7 +313,7 @@ describe('Dog endpoint', () => {
       const options = {
         method: 'DELETE',
         url: '/dog/ED123',
-        ...authHeaders
+        ...portalHeader
       }
 
       const response = await server.inject(options)
@@ -330,7 +331,7 @@ describe('Dog endpoint', () => {
       const options = {
         method: 'DELETE',
         url: '/dog/ED123',
-        ...authHeaders
+        ...portalHeader
       }
 
       const response = await server.inject(options)
@@ -345,7 +346,7 @@ describe('Dog endpoint', () => {
       const options = {
         method: 'DELETE',
         url: '/dog/ED123',
-        ...authHeaders
+        ...portalHeader
       }
 
       const response = await server.inject(options)
@@ -361,7 +362,7 @@ describe('Dog endpoint', () => {
       const options = {
         method: 'DELETE',
         url: '/dog/ED123',
-        ...authHeaders
+        ...portalHeader
       }
 
       const response = await server.inject(options)
@@ -380,7 +381,7 @@ describe('Dog endpoint', () => {
       const options = {
         method: 'GET',
         url: '/dogs?forPurging=true&statuses=Exempt,Inactive,Withdrawn,Failed',
-        ...authHeaders
+        ...portalHeader
       }
 
       const response = await server.inject(options)
@@ -397,7 +398,7 @@ describe('Dog endpoint', () => {
       const options = {
         method: 'GET',
         url: '/dogs?forPurging=true&statuses=In breach,Pre-exempt,Interim exempt',
-        ...authHeaders
+        ...portalHeader
       }
 
       const response = await server.inject(options)
@@ -414,7 +415,7 @@ describe('Dog endpoint', () => {
       const options = {
         method: 'GET',
         url: '/dogs?forPurging=true&statuses=Exempt,Inactive,Withdrawn,Failed&sortKey=status&sortOrder=DESC',
-        ...authHeaders
+        ...portalHeader
       }
 
       const response = await server.inject(options)
@@ -431,7 +432,7 @@ describe('Dog endpoint', () => {
       const options = {
         method: 'GET',
         url: '/dogs?forPurging=true&statuses=Exempt,Inactive,Withdrawn,Failed&today=2000-05-01',
-        ...authHeaders
+        ...portalHeader
       }
 
       const response = await server.inject(options)
@@ -448,7 +449,7 @@ describe('Dog endpoint', () => {
       const options = {
         method: 'GET',
         url: '/dogs',
-        ...authHeaders
+        ...portalHeader
       }
 
       const response = await server.inject(options)
@@ -465,7 +466,7 @@ describe('Dog endpoint', () => {
       const options = {
         method: 'GET',
         url: '/dogs?invalid=true',
-        ...authHeaders
+        ...portalHeader
       }
 
       const response = await server.inject(options)
@@ -498,7 +499,7 @@ describe('Dog endpoint', () => {
         payload: {
           dogPks: expectedDogs
         },
-        ...authHeaders
+        ...portalHeader
       }
 
       const response = await server.inject(options)
@@ -522,7 +523,7 @@ describe('Dog endpoint', () => {
         payload: {
           dogPks: expectedDogs
         },
-        ...authHeaders
+        ...portalHeader
       }
 
       const response = await server.inject(options)
@@ -534,7 +535,7 @@ describe('Dog endpoint', () => {
         method: 'POST',
         url: '/dogs:batch-delete',
         payload: {},
-        ...authHeaders
+        ...portalHeader
       }
 
       const response = await server.inject(options)

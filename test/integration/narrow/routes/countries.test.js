@@ -1,4 +1,5 @@
-const { authHeaders, mockValidate } = require('../../../mocks/auth')
+const { mockValidate } = require('../../../mocks/auth')
+const { portalHeader } = require('../../../mocks/jwt')
 describe('Countries endpoint', () => {
   const createServer = require('../../../../app/server')
   let server
@@ -26,7 +27,7 @@ describe('Countries endpoint', () => {
     const options = {
       method: 'GET',
       url: '/countries',
-      ...authHeaders
+      ...portalHeader
     }
 
     const response = await server.inject(options)

@@ -1,4 +1,5 @@
 const { mockValidate, authHeaders } = require('../../../mocks/auth')
+const { portalHeader } = require('../../../mocks/jwt')
 describe('CDO endpoint', () => {
   const createServer = require('../../../../app/server')
   let server
@@ -78,7 +79,7 @@ describe('CDO endpoint', () => {
     const options = {
       method: 'GET',
       url: '/cdos?status=PreExempt',
-      ...authHeaders
+      ...portalHeader
     }
 
     const expectedFilter = { status: ['PreExempt'] }
@@ -150,7 +151,7 @@ describe('CDO endpoint', () => {
     const options = {
       method: 'GET',
       url: '/cdos?status=PreExempt',
-      ...authHeaders
+      ...portalHeader
     }
 
     const expectedPayload = {
@@ -168,7 +169,7 @@ describe('CDO endpoint', () => {
     const options = {
       method: 'GET',
       url: '/cdos?status=PreExempt&status=InterimExempt',
-      ...authHeaders
+      ...portalHeader
     }
 
     const expectedFilter = { status: ['PreExempt', 'InterimExempt'] }
@@ -183,7 +184,7 @@ describe('CDO endpoint', () => {
     const options = {
       method: 'GET',
       url: '/cdos?withinDays=30',
-      ...authHeaders
+      ...portalHeader
     }
 
     const expectedFilter = { withinDays: 30 }
@@ -198,7 +199,7 @@ describe('CDO endpoint', () => {
     const options = {
       method: 'GET',
       url: '/cdos?status=Failed&nonComplianceLetterSent=false',
-      ...authHeaders
+      ...portalHeader
     }
 
     const expectedFilter = { status: ['Failed'], nonComplianceLetterSent: false }
@@ -213,7 +214,7 @@ describe('CDO endpoint', () => {
     const options = {
       method: 'GET',
       url: '/cdos?status=InterimExempt&sortKey=joinedExemptionScheme&sortOrder=DESC',
-      ...authHeaders
+      ...portalHeader
     }
 
     const expectedFilter = { status: ['InterimExempt'] }
@@ -228,7 +229,7 @@ describe('CDO endpoint', () => {
     const options = {
       method: 'GET',
       url: '/cdos',
-      ...authHeaders
+      ...portalHeader
     }
 
     const response = await server.inject(options)
@@ -271,7 +272,7 @@ describe('CDO endpoint', () => {
     const options = {
       method: 'GET',
       url: '/cdos?status=PreExempt',
-      ...authHeaders
+      ...portalHeader
     }
 
     const response = await server.inject(options)
@@ -284,7 +285,7 @@ describe('CDO endpoint', () => {
     const options = {
       method: 'GET',
       url: '/cdos?status=PreExempt',
-      ...authHeaders
+      ...portalHeader
     }
 
     const response = await server.inject(options)

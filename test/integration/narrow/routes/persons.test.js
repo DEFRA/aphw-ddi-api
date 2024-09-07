@@ -1,4 +1,6 @@
-const { mockValidate, authHeaders } = require('../../../mocks/auth')
+const { mockValidate } = require('../../../mocks/auth')
+const { portalHeader } = require('../../../mocks/jwt')
+
 describe('Get persons endpoint', () => {
   const createServer = require('../../../../app/server')
   let server
@@ -24,7 +26,7 @@ describe('Get persons endpoint', () => {
       const options = {
         method: 'GET',
         url: '/persons',
-        ...authHeaders
+        ...portalHeader
       }
 
       const expectedPersons = [{
@@ -101,7 +103,7 @@ describe('Get persons endpoint', () => {
       const options = {
         method: 'GET',
         url: '/persons?orphaned=true',
-        ...authHeaders
+        ...portalHeader
       }
 
       getPersons.mockResolvedValue([])
@@ -116,7 +118,7 @@ describe('Get persons endpoint', () => {
       const options = {
         method: 'GET',
         url: '/persons?orphaned=true&limit=-1',
-        ...authHeaders
+        ...portalHeader
       }
 
       getPersons.mockResolvedValue([])
@@ -131,7 +133,7 @@ describe('Get persons endpoint', () => {
       const options = {
         method: 'GET',
         url: '/persons?orphaned=true&limit=-1&sortKey=owner&sortOrder=DESC',
-        ...authHeaders
+        ...portalHeader
       }
 
       getPersons.mockResolvedValue([])
@@ -146,7 +148,7 @@ describe('Get persons endpoint', () => {
       const options = {
         method: 'GET',
         url: '/persons?orphaned=true&limit=-1&sortKey=owner&sortOrder=ASC',
-        ...authHeaders
+        ...portalHeader
       }
 
       getPersons.mockResolvedValue([])
@@ -161,7 +163,7 @@ describe('Get persons endpoint', () => {
       const options = {
         method: 'GET',
         url: '/persons?orphaned=true&limit=-1&sortKey=owner',
-        ...authHeaders
+        ...portalHeader
       }
 
       getPersons.mockResolvedValue([])
@@ -176,7 +178,7 @@ describe('Get persons endpoint', () => {
       const options = {
         method: 'GET',
         url: '/persons?orphaned=true&limit=-1&sortKey=owner&sortOrder=DESC',
-        ...authHeaders
+        ...portalHeader
       }
 
       getPersons.mockResolvedValue([])
@@ -191,7 +193,7 @@ describe('Get persons endpoint', () => {
       const options = {
         method: 'GET',
         url: '/persons?orphaned=true&limit=-1&sortKey=owner&sortOrder=ASC',
-        ...authHeaders
+        ...portalHeader
       }
 
       getPersons.mockResolvedValue([])
@@ -206,7 +208,7 @@ describe('Get persons endpoint', () => {
       const options = {
         method: 'GET',
         url: '/persons?orphaned=true&limit=-1&sortKey=owner',
-        ...authHeaders
+        ...portalHeader
       }
 
       getPersons.mockResolvedValue([])
@@ -221,7 +223,7 @@ describe('Get persons endpoint', () => {
       const options = {
         method: 'GET',
         url: '/persons?firstName=Frodo&lastName=Baggins&dateOfBirth=2968-09-22',
-        ...authHeaders
+        ...portalHeader
       }
 
       getPersons.mockResolvedValue([])
@@ -236,7 +238,7 @@ describe('Get persons endpoint', () => {
       const options = {
         method: 'GET',
         url: '/persons?unknownParam=test',
-        ...authHeaders
+        ...portalHeader
       }
 
       const response = await server.inject(options)
@@ -269,7 +271,7 @@ describe('Get persons endpoint', () => {
         payload: {
           personReferences: expectedPersons
         },
-        ...authHeaders
+        ...portalHeader
       }
 
       const response = await server.inject(options)
@@ -284,7 +286,7 @@ describe('Get persons endpoint', () => {
         method: 'POST',
         url: '/persons:batch-delete',
         payload: {},
-        ...authHeaders
+        ...portalHeader
       }
 
       const response = await server.inject(options)
@@ -315,7 +317,7 @@ describe('Get persons endpoint', () => {
         payload: {
           personReferences: expectedPersons
         },
-        ...authHeaders
+        ...portalHeader
       }
 
       const response = await server.inject(options)

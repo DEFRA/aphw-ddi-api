@@ -1,5 +1,6 @@
 const { expectDate } = require('../../../time-helper')
 const { mockValidate, authHeaders } = require('../../../mocks/auth')
+const { portalHeader } = require('../../../mocks/jwt')
 
 describe('Jobs endpoint', () => {
   const createServer = require('../../../../app/server')
@@ -58,7 +59,7 @@ describe('Jobs endpoint', () => {
       const options = {
         method: 'POST',
         url: '/jobs/purge-soft-delete',
-        ...authHeaders
+        ...portalHeader
       }
 
       const response = await server.inject(options)
@@ -97,7 +98,7 @@ describe('Jobs endpoint', () => {
       const options = {
         method: 'POST',
         url: '/jobs/purge-soft-delete?today=2024-03-16',
-        ...authHeaders
+        ...portalHeader
       }
 
       const response = await server.inject(options)
@@ -109,7 +110,7 @@ describe('Jobs endpoint', () => {
       const options = {
         method: 'POST',
         url: '/jobs/purge-soft-delete?unknown=true',
-        ...authHeaders
+        ...portalHeader
       }
 
       const response = await server.inject(options)
@@ -122,7 +123,7 @@ describe('Jobs endpoint', () => {
       const options = {
         method: 'POST',
         url: '/jobs/purge-soft-delete',
-        ...authHeaders
+        ...portalHeader
       }
 
       const response = await server.inject(options)
@@ -140,7 +141,7 @@ describe('Jobs endpoint', () => {
       const options = {
         method: 'POST',
         url: '/jobs/expired-insurance',
-        ...authHeaders
+        ...portalHeader
       }
 
       const response = await server.inject(options)
@@ -156,7 +157,7 @@ describe('Jobs endpoint', () => {
       const options = {
         method: 'POST',
         url: '/jobs/expired-insurance?today=2024-03-16',
-        ...authHeaders
+        ...portalHeader
       }
 
       const response = await server.inject(options)
@@ -168,7 +169,7 @@ describe('Jobs endpoint', () => {
       const options = {
         method: 'POST',
         url: '/jobs/expired-insurance?unknown=true',
-        ...authHeaders
+        ...portalHeader
       }
 
       const response = await server.inject(options)
@@ -186,7 +187,7 @@ describe('Jobs endpoint', () => {
       const options = {
         method: 'POST',
         url: '/jobs/neutering-deadline',
-        ...authHeaders
+        ...portalHeader
       }
 
       const response = await server.inject(options)
@@ -202,7 +203,7 @@ describe('Jobs endpoint', () => {
       const options = {
         method: 'POST',
         url: '/jobs/neutering-deadline?today=2024-03-16',
-        ...authHeaders
+        ...portalHeader
       }
 
       const response = await server.inject(options)
@@ -214,7 +215,7 @@ describe('Jobs endpoint', () => {
       const options = {
         method: 'POST',
         url: '/jobs/neutering-deadline?unknown=true',
-        ...authHeaders
+        ...portalHeader
       }
 
       const response = await server.inject(options)

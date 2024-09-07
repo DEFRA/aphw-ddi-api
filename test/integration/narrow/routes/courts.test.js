@@ -1,5 +1,6 @@
 const { NotFoundError } = require('../../../../app/errors/not-found')
 const { mockValidate, authHeaders } = require('../../../mocks/auth')
+const { portalHeader } = require('../../../mocks/jwt')
 
 describe('Courts endpoint', () => {
   const { DuplicateResourceError } = require('../../../../app/errors/duplicate-record')
@@ -31,7 +32,7 @@ describe('Courts endpoint', () => {
       const options = {
         method: 'GET',
         url: '/courts',
-        ...authHeaders
+        ...portalHeader
       }
 
       const response = await server.inject(options)
@@ -44,7 +45,7 @@ describe('Courts endpoint', () => {
       const options = {
         method: 'GET',
         url: '/courts',
-        ...authHeaders
+        ...portalHeader
       }
 
       const response = await server.inject(options)
@@ -62,7 +63,7 @@ describe('Courts endpoint', () => {
       const options = {
         method: 'GET',
         url: '/courts',
-        ...authHeaders
+        ...portalHeader
       }
 
       const response = await server.inject(options)
@@ -92,7 +93,7 @@ describe('Courts endpoint', () => {
         payload: {
           name: 'Gondor Crown Court'
         },
-        ...authHeaders
+        ...portalHeader
       }
 
       const response = await server.inject(options)
@@ -110,7 +111,7 @@ describe('Courts endpoint', () => {
         method: 'POST',
         url: '/courts',
         payload: {},
-        ...authHeaders
+        ...portalHeader
       }
 
       const response = await server.inject(options)
@@ -126,7 +127,7 @@ describe('Courts endpoint', () => {
         payload: {
           name: 'Gondor Crown Court'
         },
-        ...authHeaders
+        ...portalHeader
       }
 
       const response = await server.inject(options)
@@ -142,7 +143,7 @@ describe('Courts endpoint', () => {
         payload: {
           name: 'Gondor Crown Court'
         },
-        ...authHeaders
+        ...portalHeader
       }
 
       const response = await server.inject(options)
@@ -169,7 +170,7 @@ describe('Courts endpoint', () => {
       const options = {
         method: 'DELETE',
         url: '/courts/1',
-        ...authHeaders
+        ...portalHeader
       }
 
       const response = await server.inject(options)
@@ -185,7 +186,7 @@ describe('Courts endpoint', () => {
       const options = {
         method: 'DELETE',
         url: '/courts/1',
-        ...authHeaders
+        ...portalHeader
       }
 
       const response = await server.inject(options)
@@ -198,7 +199,7 @@ describe('Courts endpoint', () => {
       const options = {
         method: 'DELETE',
         url: '/courts/1',
-        ...authHeaders
+        ...portalHeader
       }
 
       const response = await server.inject(options)

@@ -1,6 +1,7 @@
 const { countsPerStatus: mockCountsPerStatus, countsPerCountry: mockCountsPerCountry } = require('../../../mocks/statistics')
 const { breeds: mockBreeds } = require('../../../mocks/dog-breeds')
-const { mockValidate, authHeaders } = require('../../../mocks/auth')
+const { mockValidate } = require('../../../mocks/auth')
+const { portalHeader } = require('../../../mocks/jwt')
 
 describe('Statistics endpoint', () => {
   const createServer = require('../../../../app/server')
@@ -26,7 +27,7 @@ describe('Statistics endpoint', () => {
       const options = {
         method: 'GET',
         url: '/statistics?queryName=countsPerStatus',
-        ...authHeaders
+        ...portalHeader
       }
 
       const response = await server.inject(options)
@@ -53,7 +54,7 @@ describe('Statistics endpoint', () => {
       const options = {
         method: 'GET',
         url: '/statistics?queryNameInvalid=countsPerStatus',
-        ...authHeaders
+        ...portalHeader
       }
 
       const response = await server.inject(options)
@@ -66,7 +67,7 @@ describe('Statistics endpoint', () => {
       const options = {
         method: 'GET',
         url: '/statistics?queryName=invalidQuery',
-        ...authHeaders
+        ...portalHeader
       }
 
       const response = await server.inject(options)
@@ -79,7 +80,7 @@ describe('Statistics endpoint', () => {
       const options = {
         method: 'GET',
         url: '/statistics?queryName=countsPerStatus',
-        ...authHeaders
+        ...portalHeader
       }
 
       const response = await server.inject(options)
@@ -94,7 +95,7 @@ describe('Statistics endpoint', () => {
         const options = {
           method: 'GET',
           url: '/statistics?queryName=countsPerCountry',
-          ...authHeaders
+          ...portalHeader
         }
 
         const response = await server.inject(options)
@@ -134,7 +135,7 @@ describe('Statistics endpoint', () => {
         const options = {
           method: 'GET',
           url: '/statistics?queryName=countsPerCountry',
-          ...authHeaders
+          ...portalHeader
         }
 
         const response = await server.inject(options)

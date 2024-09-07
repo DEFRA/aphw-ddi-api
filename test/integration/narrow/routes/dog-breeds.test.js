@@ -1,5 +1,6 @@
 const { breeds: mockBreeds } = require('../../../mocks/dog-breeds')
 const { mockValidate, authHeaders } = require('../../../mocks/auth')
+const { portalHeader } = require('../../../mocks/jwt')
 
 describe('Dog breeds endpoint', () => {
   const createServer = require('../../../../app/server')
@@ -24,7 +25,7 @@ describe('Dog breeds endpoint', () => {
     const options = {
       method: 'GET',
       url: '/dog-breeds',
-      ...authHeaders
+      ...portalHeader
     }
 
     const response = await server.inject(options)
@@ -37,7 +38,7 @@ describe('Dog breeds endpoint', () => {
     const options = {
       method: 'GET',
       url: '/dog-breeds',
-      ...authHeaders
+      ...portalHeader
     }
 
     const response = await server.inject(options)
@@ -55,7 +56,7 @@ describe('Dog breeds endpoint', () => {
     const options = {
       method: 'GET',
       url: '/dog-breeds',
-      ...authHeaders
+      ...portalHeader
     }
 
     const response = await server.inject(options)

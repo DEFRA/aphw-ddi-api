@@ -1,4 +1,6 @@
-const { mockValidate, authHeaders } = require('../../../mocks/auth')
+const { mockValidate } = require('../../../mocks/auth')
+const { portalHeader } = require('../../../mocks/jwt')
+
 describe('SearchBasic endpoint', () => {
   const createServer = require('../../../../app/server')
   let server
@@ -22,7 +24,7 @@ describe('SearchBasic endpoint', () => {
     const options = {
       method: 'GET',
       url: '/search/dog/term',
-      ...authHeaders
+      ...portalHeader
     }
 
     const response = await server.inject(options)
@@ -35,7 +37,7 @@ describe('SearchBasic endpoint', () => {
     const options = {
       method: 'GET',
       url: '/search/dog/term',
-      ...authHeaders
+      ...portalHeader
     }
 
     const response = await server.inject(options)
@@ -49,7 +51,7 @@ describe('SearchBasic endpoint', () => {
     const options = {
       method: 'GET',
       url: '/search/dog/term',
-      ...authHeaders
+      ...portalHeader
     }
 
     const response = await server.inject(options)

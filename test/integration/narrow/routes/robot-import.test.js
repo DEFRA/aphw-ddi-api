@@ -1,4 +1,6 @@
-const { mockValidate, authHeaders } = require('../../../mocks/auth')
+const { mockValidate } = require('../../../mocks/auth')
+const { portalHeader } = require('../../../mocks/jwt')
+
 describe('Robot import endpoint', () => {
   jest.mock('../../../../app/storage')
   const { downloadBlob } = require('../../../../app/storage')
@@ -26,7 +28,7 @@ describe('Robot import endpoint', () => {
       headers: {
         'content-type': 'text/plain'
       },
-      ...authHeaders
+      ...portalHeader
     }
 
     const response = await server.inject(options)
@@ -52,7 +54,7 @@ describe('Robot import endpoint', () => {
       payload: {
         filename: 'register.xlsx'
       },
-      ...authHeaders
+      ...portalHeader
     }
 
     const response = await server.inject(options)
@@ -78,7 +80,7 @@ describe('Robot import endpoint', () => {
         filename: 'register.xlsx',
         stage: 'spreadsheet-validation'
       },
-      ...authHeaders
+      ...portalHeader
     }
 
     const response = await server.inject(options)
@@ -104,7 +106,7 @@ describe('Robot import endpoint', () => {
         filename: 'register.xlsx',
         stage: 'saveToDB'
       },
-      ...authHeaders
+      ...portalHeader
     }
 
     const response = await server.inject(options)

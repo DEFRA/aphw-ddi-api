@@ -1,4 +1,5 @@
-const { authHeaders, mockValidate } = require('../../../mocks/auth')
+const { mockValidate } = require('../../../mocks/auth')
+const { portalHeader } = require('../../../mocks/jwt')
 
 describe('User endpoint', () => {
   const createServer = require('../../../../app/server')
@@ -24,7 +25,7 @@ describe('User endpoint', () => {
       const options = {
         method: 'GET',
         url: '/user/me/validate',
-        ...authHeaders
+        ...portalHeader
       }
       const response = await server.inject(options)
       expect(response.statusCode).toBe(204)
@@ -39,7 +40,7 @@ describe('User endpoint', () => {
       const options = {
         method: 'GET',
         url: '/user/me/validate',
-        ...authHeaders
+        ...portalHeader
       }
       const response = await server.inject(options)
       expect(response.statusCode).toBe(401)
@@ -53,7 +54,7 @@ describe('User endpoint', () => {
       const options = {
         method: 'DELETE',
         url: '/user/me/cache',
-        ...authHeaders
+        ...portalHeader
       }
 
       expect(hashCache.has('dev-user@test.com')).toBe(true)
