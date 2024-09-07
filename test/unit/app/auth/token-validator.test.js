@@ -2,7 +2,6 @@ describe('token-validator', () => {
   describe('validate', () => {
     const token = 'abcdefgh123456'
     const hash = 'f206f17de6903f49950c041cfbafeed9'
-    const request = {}
 
     jest.mock('../../../../app/proxy/auth-server')
     const { getUserInfo } = require('../../../../app/proxy/auth-server')
