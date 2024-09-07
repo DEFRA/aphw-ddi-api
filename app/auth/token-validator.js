@@ -3,13 +3,25 @@ const { addMinutes } = require('../lib/date-helpers')
 const { isAccountEnabled } = require('../repos/user-accounts')
 const { getUserInfo } = require('../proxy/auth-server')
 const { hashCache } = require('../session/hashCache')
-const jwt = require('jsonwebtoken')
-const config = require('../config')
 
 const expiryPeriodInMins = 65
 
-const returnVal = (isValid, username = null) => {
-  return { isValid, credentials: { id: username, user: username } }
+const returnVal = (
+  isValid,
+  {
+    username = null,
+    displayname = null,
+    scopes = []
+  } = {}) => {
+  return {
+    isValid,
+    credentials: {
+      id: username,
+      user: username,
+      displayname: displayname ?? username,
+      scopes
+    }
+  }
 }
 
 const checkTokenOnline = async (username, token) => {
@@ -22,12 +34,17 @@ const checkTokenOnline = async (username, token) => {
   }
 }
 
-const validatePortal = (username, _decoded) => {
-  return returnVal(true, username)
+const validatePortal = (_username, payload) => {
+  return returnVal(true, payload)
 }
-const validateEnforcement = async (username, decoded) => {
+const validateEnforcement = async (username, payload) => {
+  const { token } = payload
+
+  if (!token) {
+    returnVal(false)
+  }
+
   const now = new Date()
-  const token = decoded.token
   const hash = crypto.createHash('md5').update(token).digest('hex')
 
   const cached = hashCache.get(username)
@@ -35,7 +52,7 @@ const validateEnforcement = async (username, decoded) => {
     if (cached.expiry > now && cached.hash === hash) {
       // Valid non-expired token
       console.info(`Got from cache - expiry in ${Math.trunc((cached.expiry - now) / 1000 / 60)} mins`)
-      return returnVal(true, username)
+      return returnVal(true, payload)
     }
   }
 
@@ -45,7 +62,7 @@ const validateEnforcement = async (username, decoded) => {
     const enabled = await isAccountEnabled(username)
     if (enabled) {
       hashCache.set(username, { hash, expiry: addMinutes(now, expiryPeriodInMins) })
-      return returnVal(true, username)
+      return returnVal(true, payload)
     }
   }
 
@@ -63,10 +80,10 @@ const validate = async (artifacts, _request, _h) => {
 
   switch (payload.iss) {
     case 'aphw-ddi-portal': {
-      return validatePortal(username, decoded)
+      return validatePortal(username, payload)
     }
     case 'aphw-ddi-enforcement': {
-      return validateEnforcement(username, decoded)
+      return validateEnforcement(username, payload)
     }
   }
 

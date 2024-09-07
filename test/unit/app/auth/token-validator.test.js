@@ -23,136 +23,249 @@ describe('token-validator', () => {
       jest.resetAllMocks()
     })
 
-    test('should successfully validate if user is registered', async () => {
-      const username = 'registered@example.com'
-      isAccountEnabled.mockResolvedValue(true)
-
-      getUserInfo.mockResolvedValue({
-        sub: 'blablablablablabla',
-        email: username,
-        email_verified: true,
-        phone_number: '01406946277',
-        phone_number_verified: true
-      })
-      const validation = await validate(request, username, token)
-      expect(validation).toEqual({
-        isValid: true,
-        credentials: {
-          id: 'registered@example.com',
-          user: 'registered@example.com'
-        }
-      })
-    })
-
-    test('should successfully validate if user is cached', async () => {
-      const username = 'cached.user@example.com'
-
-      getUserInfo.mockResolvedValue({
-        sub: 'blablablablablabla',
-        email: username,
-        cachedUser: true,
-        phone_number: '01406946277',
-        phone_number_verified: true
-      })
-
-      const validation = await validate(request, username, token)
-      expect(validation).toEqual({
-        isValid: true,
-        credentials: {
-          id: 'cached.user@example.com',
-          user: 'cached.user@example.com'
-        }
-      })
-    })
-
-    test('should not validate if user is not registered on DDI', async () => {
-      const username = 'unauthorised.user@example.com'
-      isAccountEnabled.mockResolvedValue(false)
-
-      getUserInfo.mockResolvedValue({
-        sub: 'blablablablablabla',
-        email: username,
-        email_verified: true,
-        phone_number: '01406946277',
-        phone_number_verified: true
-      })
-
-      const validation = await validate(request, username, token)
-      expect(validation).toEqual({
-        isValid: false,
-        credentials: {
-          id: null,
-          user: null
-        }
-      })
-    })
-
-    test('should not validate if user was registered on DDI but has been removed and has expired cache', async () => {
-      const username = 'expired.user@example.com'
-      isAccountEnabled.mockResolvedValue(false)
-
-      getUserInfo.mockResolvedValue({
-        sub: 'blablablablablabla',
-        email: username,
-        email_verified: true,
-        phone_number: '01406946277',
-        phone_number_verified: true
-      })
-
-      const validation = await validate(request, username, token)
-      expect(validation).toEqual({
-        isValid: false,
-        credentials: {
-          id: null,
-          user: null
-        }
-      })
-    })
-
-    test('should not validate if user fails external validation', async () => {
-      const username = 'unauthorised.user@example.com'
-      isAccountEnabled.mockResolvedValue(false)
-      getUserInfo.mockRejectedValue(false)
-
-      const validation = await validate(request, username, token)
-      expect(validation).toEqual({
-        isValid: false,
-        credentials: {
-          id: null,
-          user: null
-        }
-      })
-    })
-
-    test('should not validate if user has not activated their email on external provider', async () => {
-      const username = 'unactivated.user@example.com'
-      isAccountEnabled.mockResolvedValue(true)
-
-      getUserInfo.mockResolvedValue({
-        sub: 'blablablablablabla',
-        email: username,
-        email_verified: false,
-        phone_number: '01406946277',
-        phone_number_verified: true
-      })
-      const validation = await validate(request, username, token)
-      expect(validation).toEqual({
-        isValid: false,
-        credentials: {
-          id: null,
-          user: null
-        }
-      })
-    })
-
     test('should not validate if a user is missing token', async () => {
-      const validation = await validate({}, 'bob@builder.com', undefined)
-      expect(validation).toEqual({ isValid: false, credentials: { id: null, user: null } })
+      const validation = await validate({ decoded: { payload: { username: 'bob@builder.com' } } })
+      expect(validation).toEqual({ isValid: false, credentials: { id: null, user: null, displayname: null, scopes: [] } })
     })
 
-    test('should not validate if a user is missing username', async () => {
-      const validation = await validate({}, undefined, 'ABCDEF')
-      expect(validation).toEqual({ isValid: false, credentials: { id: null, user: null } })
+    describe('aphw-ddi-portal', () => {
+      test('should successfully validate with aphw-ddi-portal call', async () => {
+        const artifacts = {
+          decoded: {
+            payload: {
+              username: 'william.shakespeare@theglobe.co.uk',
+              displayname: 'William Shakespeare',
+              exp: expect.any(Number),
+              iat: expect.any(Number),
+              scopes: ['abc'],
+              iss: 'aphw-ddi-portal'
+            }
+          }
+        }
+
+        const value = await validate(artifacts)
+
+        expect(value).toEqual({
+          isValid: true,
+          credentials: {
+            id: 'william.shakespeare@theglobe.co.uk',
+            user: 'william.shakespeare@theglobe.co.uk',
+            displayname: 'William Shakespeare',
+            scopes: ['abc']
+          }
+        })
+      })
+
+      test('should fail validation if no username exists', async () => {
+        const artifacts = {
+          decoded: {
+            payload: {
+              exp: expect.any(Number),
+              iat: expect.any(Number),
+              scopes: ['abc'],
+              iss: 'aphw-ddi-portal'
+            }
+          }
+        }
+
+        const value = await validate(artifacts)
+
+        expect(value).toEqual({
+          isValid: false,
+          credentials: {
+            id: null,
+            user: null,
+            displayname: null,
+            scopes: []
+          }
+        })
+      })
+    })
+
+    describe('aphw-ddi-enforcement', () => {
+      const username = 'chuck@norris.org'
+      const artifacts = {
+        decoded: {
+          payload: {
+            username,
+            displayname: username,
+            exp: expect.any(Number),
+            iat: expect.any(Number),
+            token,
+            scopes: ['abc'],
+            iss: 'aphw-ddi-enforcement'
+          }
+        }
+      }
+
+      const makeArtifacts = (username) => ({
+        decoded: {
+          payload: {
+            ...artifacts.decoded.payload,
+            username,
+            displayname: username
+          }
+        }
+      })
+
+      test('should successfully validate with aphw-ddi-enforcement call if user is registered', async () => {
+        isAccountEnabled.mockResolvedValue(true)
+
+        getUserInfo.mockResolvedValue({
+          sub: 'blablablablablabla',
+          email: username,
+          email_verified: true,
+          phone_number: '01406946277',
+          phone_number_verified: true
+        })
+
+        const validation = await validate(artifacts)
+        expect(validation).toEqual({
+          isValid: true,
+          credentials: {
+            id: 'chuck@norris.org',
+            user: 'chuck@norris.org',
+            displayname: 'chuck@norris.org',
+            scopes: ['abc']
+          }
+        })
+      })
+
+      test('should successfully validate if user is cached', async () => {
+        const username = 'cached.user@example.com'
+        const artifacts = makeArtifacts(username)
+
+        getUserInfo.mockResolvedValue({
+          sub: 'blablablablablabla',
+          email: username,
+          cachedUser: true,
+          phone_number: '01406946277',
+          phone_number_verified: true
+        })
+
+        const validation = await validate(artifacts)
+
+        expect(validation).toEqual({
+          isValid: true,
+          credentials: {
+            id: 'cached.user@example.com',
+            displayname: 'cached.user@example.com',
+            user: 'cached.user@example.com',
+            scopes: ['abc']
+          }
+        })
+      })
+
+      test('should not validate if user is not registered on DDI', async () => {
+        const username = 'unauthorised.user@example.com'
+        const artifacts = makeArtifacts(username)
+        isAccountEnabled.mockResolvedValue(false)
+
+        getUserInfo.mockResolvedValue({
+          sub: 'blablablablablabla',
+          email: username,
+          email_verified: true,
+          phone_number: '01406946277',
+          phone_number_verified: true
+        })
+
+        const validation = await validate(artifacts)
+
+        expect(validation).toEqual({
+          isValid: false,
+          credentials: {
+            displayname: null,
+            id: null,
+            scopes: [],
+            user: null
+          }
+        })
+      })
+
+      test('should not validate if user was registered on DDI but has been removed and has expired cache', async () => {
+        const username = 'expired.user@example.com'
+        isAccountEnabled.mockResolvedValue(false)
+
+        getUserInfo.mockResolvedValue({
+          sub: 'blablablablablabla',
+          email: username,
+          email_verified: true,
+          phone_number: '01406946277',
+          phone_number_verified: true
+        })
+
+        const artifacts = makeArtifacts(username)
+        const validation = await validate(artifacts)
+
+        expect(validation).toEqual({
+          isValid: false,
+          credentials: {
+            displayname: null,
+            id: null,
+            scopes: [],
+            user: null
+          }
+        })
+      })
+
+      test('should not validate if user fails external validation', async () => {
+        const username = 'unauthorised.user@example.com'
+        isAccountEnabled.mockResolvedValue(false)
+        getUserInfo.mockRejectedValue(false)
+
+        const artifacts = makeArtifacts(username)
+        const validation = await validate(artifacts)
+        expect(validation).toEqual({
+          isValid: false,
+          credentials: {
+            displayname: null,
+            id: null,
+            scopes: [],
+            user: null
+          }
+        })
+      })
+
+      test('should not validate if user has not activated their email on external provider', async () => {
+        const username = 'unactivated.user@example.com'
+        isAccountEnabled.mockResolvedValue(true)
+
+        getUserInfo.mockResolvedValue({
+          sub: 'blablablablablabla',
+          email: username,
+          email_verified: false,
+          phone_number: '01406946277',
+          phone_number_verified: true
+        })
+
+        const artifacts = makeArtifacts(username)
+        const validation = await validate(artifacts)
+        expect(validation).toEqual({
+          isValid: false,
+          credentials: {
+            displayname: null,
+            id: null,
+            scopes: [],
+            user: null
+          }
+        })
+      })
+
+      test('should not validate if a user is missing username', async () => {
+        const invalidArtifacts = {
+          decoded: {
+            payload: {
+              exp: expect.any(Number),
+              iat: expect.any(Number),
+              token,
+              scopes: ['abc'],
+              iss: 'aphw-ddi-enforcement'
+            }
+          }
+        }
+        const validation = await validate(invalidArtifacts, {}, undefined, 'ABCDEF')
+        expect(validation).toEqual({ isValid: false, credentials: { id: null, user: null, displayname: null, scopes: [] } })
+      })
     })
   })
 })
