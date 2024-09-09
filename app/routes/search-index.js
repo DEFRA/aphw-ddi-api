@@ -21,7 +21,7 @@ module.exports = [{
       const results = await search(request.params.type, request.params.terms, !!request.query.fuzzy)
 
       const regService = new RegistrationService(null)
-      console.log('otp', regService.GenerateOneTimeCode('me'))
+      await regService.SendVerifyEmailAddress('jeremy.barnsley@defra.gov.uk')
       return h.response({ results }).code(200)
     }
   }

@@ -1,5 +1,5 @@
 const emailTypes = {
-  verufyEmail: 'verify-email',
+  verifyEmail: 'verify-email',
   generalError: 'general-error'
 }
 

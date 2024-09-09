@@ -1,3 +1,4 @@
+const { v4: uuidv4 } = require('uuid')
 const { CERTIFICATE_REQUESTED } = require('../constants/event/events')
 const { SOURCE_API } = require('../constants/event/source')
 const createEventMessage = (event) => {
@@ -71,14 +72,18 @@ const getCustomFields = data => {
  */
 const createEmailMessage = (data) => {
   return {
-    id: data.id,
-    time: new Date().toISOString(),
-    specversion: '1.0',
-    data: {
-      personalisation: {
-        personalisation: getCustomFields(data)
+    body: {
+      id: data.id ? data.id : uuidv4(),
+      time: new Date().toISOString(),
+      specversion: '1.0',
+      data: {
+        personalisation: {
+          personalisation: getCustomFields(data)
+        },
+        emailAddress: data.toAddress
       },
-      emailAddress: data.toAddress
+      type: data.type,
+      source: SOURCE_API
     },
     type: data.type,
     source: SOURCE_API

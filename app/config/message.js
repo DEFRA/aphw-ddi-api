@@ -43,7 +43,7 @@ if (result.error) {
 
 const eventsTopic = { ...result.value.messageQueue, ...result.value.eventsTopic }
 
-const notificationsTopic = { ...result.value.messageQueue, ...result.value.notificationsQueue }
+const notificationsTopic = { ...result.value.messageQueue, ...result.value.notificationsTopic }
 
 module.exports = {
   eventsTopic,
