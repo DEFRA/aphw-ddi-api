@@ -116,6 +116,8 @@ const removeDogFromSearchIndex = async (dogFromDb, transaction) => {
 
   const uniquePersons = new Map()
 
+  await sequelize.models.search_tgram.destroy({ where: { dog_id: dogFromDb.id } }, { transaction })
+
   for (const indexRow of dogIndexRows) {
     if (!uniquePersons.get(indexRow.person_id)) {
       uniquePersons.set(indexRow.person_id, indexRow.json)
