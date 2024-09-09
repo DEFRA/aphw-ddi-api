@@ -2,7 +2,7 @@ const {
   buildDogBreedDao, buildStatusDao, buildRegistrationDao, buildRegisteredPersonDao, buildCourtDao,
   buildPoliceForceDao, buildExemptionOrderDao, buildCdoDao
 } = require('../../../mocks/cdo/get')
-const { mockValidate, authHeaders } = require('../../../mocks/auth')
+const { mockValidate } = require('../../../mocks/auth')
 const { portalHeader } = require('../../../mocks/jwt')
 
 describe('Exemption endpoint', () => {

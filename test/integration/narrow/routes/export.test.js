@@ -1,4 +1,5 @@
-const { mockValidate, authHeaders } = require('../../../mocks/auth')
+const { mockValidate } = require('../../../mocks/auth')
+const { portalHeader } = require('../../../mocks/jwt')
 
 describe('Export endpoint', () => {
   const createServer = require('../../../../app/server')
@@ -24,7 +25,7 @@ describe('Export endpoint', () => {
     const options = {
       method: 'GET',
       url: '/export-audit',
-      ...authHeaders
+      ...portalHeader
     }
 
     sendEventToAudit.mockResolvedValue()
@@ -39,7 +40,7 @@ describe('Export endpoint', () => {
     const options = {
       method: 'GET',
       url: '/export-create-file',
-      ...authHeaders
+      ...portalHeader
     }
 
     runExportNow.mockResolvedValue('Success')

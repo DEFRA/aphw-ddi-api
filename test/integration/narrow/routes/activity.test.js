@@ -1,5 +1,5 @@
 const { activities: mockActivities } = require('../../../mocks/activities')
-const { devUser, mockValidate, authHeaders } = require('../../../mocks/auth')
+const { devUser, mockValidate } = require('../../../mocks/auth')
 const { portalHeader } = require('../../../mocks/jwt')
 
 describe('Activity endpoint', () => {

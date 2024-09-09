@@ -1,5 +1,5 @@
 const { breeds: mockBreeds } = require('../../../mocks/dog-breeds')
-const { mockValidate, authHeaders } = require('../../../mocks/auth')
+const { mockValidate } = require('../../../mocks/auth')
 const { portalHeader } = require('../../../mocks/jwt')
 
 describe('Dog breeds endpoint', () => {

@@ -1,5 +1,5 @@
 const { expectDate } = require('../../../time-helper')
-const { mockValidate, authHeaders } = require('../../../mocks/auth')
+const { mockValidate } = require('../../../mocks/auth')
 const { portalHeader } = require('../../../mocks/jwt')
 
 describe('Jobs endpoint', () => {

@@ -1,5 +1,5 @@
 const { NotFoundError } = require('../../../../app/errors/not-found')
-const { mockValidate, authHeaders } = require('../../../mocks/auth')
+const { mockValidate } = require('../../../mocks/auth')
 const { portalHeader } = require('../../../mocks/jwt')
 
 describe('Courts endpoint', () => {

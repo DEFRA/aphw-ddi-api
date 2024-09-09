@@ -1,6 +1,6 @@
 const { personDaoBuilder } = require('../../../mocks/person')
 const { buildDogDao, buildRegistrationDao } = require('../../../mocks/cdo/get')
-const { mockValidate, authHeaders } = require('../../../mocks/auth')
+const { mockValidate } = require('../../../mocks/auth')
 const { portalHeader } = require('../../../mocks/jwt')
 
 describe('Dog endpoint', () => {

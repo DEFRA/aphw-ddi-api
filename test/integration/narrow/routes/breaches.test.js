@@ -1,4 +1,4 @@
-const { devUser, mockValidate, authHeaders } = require('../../../mocks/auth')
+const { devUser, mockValidate } = require('../../../mocks/auth')
 const { buildDogDto, buildBreachDto } = require('../../../mocks/cdo/dto')
 const {
   NOT_COVERED_BY_INSURANCE,
