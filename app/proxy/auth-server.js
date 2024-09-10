@@ -1,6 +1,6 @@
 const config = require('../config')
 const wreck = require('@hapi/wreck')
-const endpoint = `${config.authServerHostname}/userinfo`
+const endpoint = `${config.authServerUrl}/userinfo`
 
 const addBearerHeader = (token) => {
   return {

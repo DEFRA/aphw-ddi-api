@@ -16,7 +16,7 @@ const schema = Joi.object({
   },
   overnightExportBatchSize: Joi.number(),
   paranoidRetentionPeriod: Joi.number(),
-  authServerHostname: Joi.string().required(),
+  authServerUrl: Joi.string().required(),
   authTokens: Joi.object({
     portalKey: Joi.string().allow('').default(''),
     enforcementKey: Joi.string().allow('').default('')
@@ -38,7 +38,7 @@ const config = {
   },
   overnightExportBatchSize: getEnvironmentVariable('OVERNIGHT_EXPORT_BATCH_SIZE'),
   paranoidRetentionPeriod: getEnvironmentVariable('PARANOID_RETENTION_PERIOD') ?? 90,
-  authServerHostname: getEnvironmentVariable('AUTH_SERVER_HOSTNAME'),
+  authServerUrl: getEnvironmentVariable('AUTH_SERVER_URL'),
   authTokens: {
     portalKey: getEnvironmentVariable('PORTAL_PUBLIC_KEY'),
     enforcementKey: getEnvironmentVariable('ENFORCEMENT_PUBLIC_KEY')

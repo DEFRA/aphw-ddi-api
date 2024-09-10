@@ -13,7 +13,7 @@ const setupCron = (server) => {
     timezone: 'Europe/London'
   })
 
-  cron.schedule(config.purgeExpiredCacheCrontab ?? '0 * * * *', async () => {
+  cron.schedule(config.purgeExpiredCacheCrontab ?? '0 */2 * * *', async () => {
     const result = purgeExpiredCache()
     console.log('hourly cron finished at ' + new Date())
     console.log(`hourly cron result ${result}`)

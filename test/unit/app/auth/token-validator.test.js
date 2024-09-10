@@ -155,6 +155,33 @@ describe('token-validator', () => {
         })
       })
 
+      test('should not validate if token is missing', async () => {
+        const username = 'unauthorised.user@example.com'
+        const artifacts = makeArtifacts(username)
+        artifacts.decoded.payload.token = null
+        isAccountEnabled.mockResolvedValue(true)
+
+        getUserInfo.mockResolvedValue({
+          sub: 'blablablablablabla',
+          email: username,
+          email_verified: true,
+          phone_number: '01406946277',
+          phone_number_verified: true
+        })
+
+        const validation = await validate(artifacts)
+
+        expect(validation).toEqual({
+          isValid: false,
+          credentials: {
+            displayname: null,
+            id: null,
+            scopes: [],
+            user: null
+          }
+        })
+      })
+
       test('should not validate if user is not registered on DDI', async () => {
         const username = 'unauthorised.user@example.com'
         const artifacts = makeArtifacts(username)

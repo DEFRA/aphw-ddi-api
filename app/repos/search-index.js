@@ -125,7 +125,6 @@ const removeDogFromSearchIndex = async (dogFromDb, transaction) => {
 
     await indexRow.destroy({ transaction })
   }
-  await sequelize.models.search_tgram.destroy({ where: { dog_id: dogFromDb.id } }, { transaction })
 
   await addPeopleOnlyIfNoDogsLeft(uniquePersons, transaction)
 }

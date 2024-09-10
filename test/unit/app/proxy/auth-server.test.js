@@ -8,7 +8,7 @@ describe('auth-server', () => {
     const { getEnvironmentVariable } = require('../../../../app/lib/environment-helpers')
 
     getEnvironmentVariable.mockImplementation(envVar => {
-      if (envVar === 'AUTH_SERVER_HOSTNAME') {
+      if (envVar === 'AUTH_SERVER_URL') {
         return 'https://dummy.com'
       }
       if (['ROBOT_SHEET_NAME'].includes(envVar)) {

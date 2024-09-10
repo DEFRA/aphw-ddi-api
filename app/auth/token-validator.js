@@ -41,7 +41,7 @@ const validateEnforcement = async (username, payload) => {
   const { token } = payload
 
   if (!token) {
-    returnVal(false)
+    return returnVal(false)
   }
 
   const now = new Date()
@@ -51,7 +51,7 @@ const validateEnforcement = async (username, payload) => {
   if (cached) {
     if (cached.expiry > now && cached.hash === hash) {
       // Valid non-expired token
-      console.info(`Got from cache - expiry in ${Math.trunc((cached.expiry - now) / 1000 / 60)} mins`)
+      // console.info(`Got from cache - expiry in ${Math.trunc((cached.expiry - now) / 1000 / 60)} mins`)
       return returnVal(true, payload)
     }
   }

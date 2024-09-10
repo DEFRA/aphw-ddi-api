@@ -26,6 +26,7 @@ services:
       POLICE_API_BASE_URL: ${POLICE_API_BASE_URL:-test}
       PORTAL_PUBLIC_KEY: ${PORTAL_PUBLIC_KEY}
       ENFORCEMENT_PUBLIC_KEY: ${ENFORCEMENT_PUBLIC_KEY}
+      AUTH_SERVER_URL: ${AUTH_SERVER_URL:-https://oidc.integration.account.gov.uk}
       POSTGRES_DB: aphw-ddi
       POSTGRES_HOST: ${POSTGRES_HOST:-aphw-ddi-api-postgres}
       POSTGRES_PORT: 5432
@@ -35,7 +36,6 @@ services:
       OVERNIGHT_JOB_CRONTAB: ${OVERNIGHT_JOB_CRONTAB:-5 4 * * *}
       OVERNIGHT_EXPORT_BATCH_SIZE: ${OVERNIGHT_EXPORT_BATCH_SIZE:-2000}
       PARANOID_RETENTION_PERIOD: ${PARANOID_RETENTION_PERIOD:-90}
-      AUTH_SERVER_HOSTNAME: ${AUTH_SERVER_HOSTNAME}
 
   aphw-ddi-api-postgres:
     image: postgres:11.22-alpine

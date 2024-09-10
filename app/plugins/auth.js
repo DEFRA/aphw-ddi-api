@@ -30,11 +30,6 @@ module.exports = {
         validate
       })
       server.auth.default('api_jwt')
-
-      server.ext('onPreAuth', async (request, h) => {
-        console.log('~~~~~~ Chris Debug ~~~~~~ onPreAuth', '')
-        return h.continue
-      })
     }
   }
 }

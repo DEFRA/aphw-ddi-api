@@ -42,6 +42,7 @@ container:
   eventsTopicAddress: aphw-ddi-events
   publicKeyPortal: dummy
   publicKeyEnforcement: dummy
+  authServerUrl: auth-server-url
   certificateRequestQueue: aphw-ddi-certificate-request
   overnightJobCrontab: 5 4 * * *
   paranoidRetentionPeriod: 90
