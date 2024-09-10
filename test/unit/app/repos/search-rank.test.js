@@ -41,7 +41,7 @@ describe('rankResult', () => {
     expect(rank).toBe(2)
   })
 
-  test('should return 4 for exact dogName match on dog search', () => {
+  test('should return 6 for exact dogName match on dog search', () => {
     const row = {
       id: 124,
       dog_id: 2,
@@ -58,10 +58,10 @@ describe('rankResult', () => {
       }
     }
     const rank = rankResult(['butch'], row, 'dog')
-    expect(rank).toBe(4)
+    expect(rank).toBe(6)
   })
 
-  test('should return 4 for joined postcode match', () => {
+  test('should return 5 for joined postcode match', () => {
     const row = {
       id: 124,
       dog_id: 2,
@@ -78,10 +78,10 @@ describe('rankResult', () => {
       }
     }
     const rank = rankResult(['ts22ts'], row, 'dog')
-    expect(rank).toBe(4)
+    expect(rank).toBe(5)
   })
 
-  test('should return 8 for exact postcode match where terms postcode is separated by a space', () => {
+  test('should return 7 for exact postcode match where terms postcode is separated by a space', () => {
     const row = {
       id: 124,
       dog_id: 2,
@@ -98,10 +98,10 @@ describe('rankResult', () => {
       }
     }
     const rank = rankResult(['ts22ts', 'ts2', '2ts'], row, 'dog')
-    expect(rank).toBe(8)
+    expect(rank).toBe(7)
   })
 
-  test('should return 1.6666666666666667 for joined postcode PARTIAL match', () => {
+  test('should return 2.5 for joined postcode PARTIAL match', () => {
     const row = {
       id: 124,
       dog_id: 2,
@@ -118,10 +118,10 @@ describe('rankResult', () => {
       }
     }
     const rank = rankResult(['ts22tt'], row, 'dog')
-    expect(rank).toBe(1.6666666666666667)
+    expect(rank).toBe(2.5)
   })
 
-  test('should return 4.666666666666667 for PARTIAL postcode match where terms postcode is separated by a space', () => {
+  test('should return 3.5 for PARTIAL postcode match where terms postcode is separated by a space', () => {
     const row = {
       id: 124,
       dog_id: 2,
@@ -138,10 +138,10 @@ describe('rankResult', () => {
       }
     }
     const rank = rankResult(['ts22ts', 'ts2', '2ts'], row, 'dog')
-    expect(rank).toBe(4.666666666666667)
+    expect(rank).toBe(3.5)
   })
 
-  test('should return 1.6 for close match of dog name on dog search', () => {
+  test('should return 3.2 for close match of dog name on dog search', () => {
     const row = {
       id: 124,
       dog_id: 2,
@@ -158,7 +158,7 @@ describe('rankResult', () => {
       }
     }
     const rank = rankResult(['butc'], row, 'dog')
-    expect(rank).toBe(1.6)
+    expect(rank).toBe(3.2)
   })
 
   test('should return 3.46 for close match of microchip on dog search', () => {
@@ -238,10 +238,10 @@ describe('rankResult', () => {
       }
     }
     const rank = rankResult(['butch'], row, 'dog')
-    expect(rank).toBe(4)
+    expect(rank).toBe(6)
   })
 
-  test('should return 4 when dogname matches - giving same result as if owner lastname was included in dogname', () => {
+  test('should return 6 when dogname matches - giving same result as if owner lastname was included in dogname', () => {
     const row = {
       id: 124,
       dog_id: 2,
@@ -258,7 +258,7 @@ describe('rankResult', () => {
       }
     }
     const rank = rankResult(['butch'], row, 'dog')
-    expect(rank).toBe(4)
+    expect(rank).toBe(6)
   })
 
   test('should return 2.4 when close match of owner lastname', () => {
