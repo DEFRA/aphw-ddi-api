@@ -1,4 +1,4 @@
-const { uniqueResults: mockUniqueResults, resultsForGrouping: mockResultsForGrouping, resultsForSorting: mockResultsForSorting } = require('../../../mocks/search-results')
+const { uniqueResults: mockUniqueResults, resultsForGrouping: mockResultsForGrouping, resultsForSorting: mockResultsForSorting, moreThanTenResults, moreThanThirtyResults } = require('../../../mocks/search-results')
 
 describe('Search repo', () => {
   jest.mock('../../../../app/config/db', () => ({
@@ -14,7 +14,9 @@ describe('Search repo', () => {
       }
     },
     fn: jest.fn(),
-    literal: jest.fn()
+    literal: jest.fn(),
+    col: jest.fn(),
+    where: jest.fn()
   }))
 
   const sequelize = require('../../../../app/config/db')
@@ -74,6 +76,42 @@ describe('Search repo', () => {
     expect(results.length).toBe(0)
   })
 
+  test('search for owner should adjust threshold if more than 10 results in first pass', async () => {
+    sequelize.models.search_index.findAll.mockResolvedValue(moreThanTenResults)
+    sequelize.models.search_match_code.findAll.mockResolvedValue([])
+    sequelize.models.search_tgram.findAll.mockResolvedValue([])
+
+    const results = await search('owner', 'smith')
+    expect(results.length).toBe(9)
+  })
+
+  test('search for microchip only should adjust threshold when fuzzy', async () => {
+    sequelize.models.search_index.findAll.mockResolvedValue(moreThanTenResults)
+    sequelize.models.search_match_code.findAll.mockResolvedValue([])
+    sequelize.models.search_tgram.findAll.mockResolvedValue([])
+
+    const results = await search('dog', '123451234512345', true)
+    expect(results.length).toBe(0)
+  })
+
+  test('search for microchip and other terms should not adjust threshold when fuzzy', async () => {
+    sequelize.models.search_index.findAll.mockResolvedValue(moreThanTenResults)
+    sequelize.models.search_match_code.findAll.mockResolvedValue([])
+    sequelize.models.search_tgram.findAll.mockResolvedValue([])
+
+    const results = await search('dog', '123451234512345 smith', true)
+    expect(results.length).toBe(11)
+  })
+
+  test('search for microchip and other terms should not adjust threshold when fuzzy - test 2', async () => {
+    sequelize.models.search_index.findAll.mockResolvedValue(moreThanTenResults)
+    sequelize.models.search_match_code.findAll.mockResolvedValue([])
+    sequelize.models.search_tgram.findAll.mockResolvedValue([])
+
+    const results = await search('dog', '123451 smith', true)
+    expect(results.length).toBe(11)
+  })
+
   test('sorting should handle', async () => {
     const testList = JSON.parse(JSON.stringify(mockResultsForSorting))
     testList.sort(sortOwnerSearch)
@@ -84,5 +122,15 @@ describe('Search repo', () => {
     expect(testList[1].lastName).toBe('Smith')
     expect(testList[2].firstName).toBe('John')
     expect(testList[2].lastName).toBe('Smith')
+  })
+
+  test('search limits results to max records', async () => {
+    const manyResults = moreThanThirtyResults()
+    sequelize.models.search_index.findAll.mockResolvedValue(manyResults)
+    sequelize.models.search_match_code.findAll.mockResolvedValue([])
+    sequelize.models.search_tgram.findAll.mockResolvedValue([])
+
+    const results = await search('owner', 'smith')
+    expect(results.length).toBe(25)
   })
 })

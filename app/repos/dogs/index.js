@@ -24,7 +24,8 @@ const {
   purgeDogByIndexNumber,
   saveDog,
   saveDogFields,
-  getDogModel
+  getDogModel,
+  determineExemptionOrder
 } = require('./dog')
 
 const {
@@ -57,5 +58,6 @@ module.exports = {
   purgeDogByIndexNumber,
   saveDog,
   saveDogFields,
-  getDogModel
+  getDogModel,
+  determineExemptionOrder
 }

@@ -57,6 +57,8 @@ const buildFuzzyCodes = (terms) => {
 const fuzzySearch = async (terms) => {
   const fuzzyCodes = buildFuzzyCodes(terms)
 
+  // console.log('fuzzy codes', fuzzyCodes)
+
   const fuzzyResults = await sequelize.models.search_match_code.findAll({
     where: {
       match_code: fuzzyCodes
