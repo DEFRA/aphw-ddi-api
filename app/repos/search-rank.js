@@ -4,7 +4,7 @@ const { getFieldValue } = require('../lib/field-helpers')
 
 const exactMatch = (word) => {
   return word.searchType === 'dog' && importantDogFields.includes(word.fieldName)
-    ? word.exactMatchWeighting * 2
+    ? word.exactMatchWeighting * 3
     : word.exactMatchWeighting
 }
 
@@ -39,8 +39,8 @@ const rankWord = (term, word) => {
     }
 
     // Check for sub-string
-    if (termLower.indexOf(wordLower) > -1 || wordLower.indexOf(termLower) > -1) {
-      return termDist < 4 ? 1 : 0
+    if (wordLower.indexOf(termLower) > -1) {
+      return termLower.length > 8 ? 1.5 : 1.0
     }
   }
   return 0

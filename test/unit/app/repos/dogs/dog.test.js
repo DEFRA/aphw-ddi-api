@@ -90,7 +90,7 @@ describe('Dog repo', () => {
 
   const sequelize = require('../../../../../app/config/db')
 
-  const { getBreeds, getStatuses, getCachedStatuses, createDogs, addImportedDog, getDogByIndexNumber, getAllDogIds, updateDog, updateStatus, updateDogFields, deleteDogByIndexNumber, switchOwnerIfNecessary, buildSwitchedOwner, recalcDeadlines, constructStatusList, constructDbSort, getOldDogs, generateClausesForOr, customSort, purgeDogByIndexNumber, saveDog, getDogModel, updateBreaches } = require('../../../../../app/repos/dogs')
+  const { getBreeds, getStatuses, getCachedStatuses, createDogs, addImportedDog, getDogByIndexNumber, getAllDogIds, updateDog, updateStatus, updateDogFields, deleteDogByIndexNumber, switchOwnerIfNecessary, buildSwitchedOwner, recalcDeadlines, constructStatusList, constructDbSort, getOldDogs, generateClausesForOr, customSort, purgeDogByIndexNumber, saveDog, getDogModel, updateBreaches, determineExemptionOrder } = require('../../../../../app/repos/dogs')
 
   beforeEach(async () => {
     jest.clearAllMocks()
@@ -1212,6 +1212,49 @@ describe('Dog repo', () => {
       const res = await getDogModel('ED123', {})
       expect(sequelize.models.dog.findOne).toHaveBeenCalledTimes(1)
       expect(res).toEqual(new Dog(buildCdoDog()))
+    })
+  })
+
+  describe('determineExemptionOrder', () => {
+    test('should throw if XL Bully in Scotland', async () => {
+      const dog = {
+        breed: 'XL Bully'
+      }
+      const owners = [{
+        address: { country: { country: 'Scotland' } }
+      }]
+      expect(() => determineExemptionOrder(dog, owners)).toThrow('XL Bully cannot be in Scotland')
+    })
+
+    test('should return 1991 if in Scotland', async () => {
+      const dog = {
+        breed: 'Breed 1'
+      }
+      const owners = [{
+        address: { country: { country: 'Scotland' } }
+      }]
+      expect(determineExemptionOrder(dog, owners)).toBe('1991')
+    })
+
+    test('should return 2023 if robot', async () => {
+      const dog = {
+        breed: 'Breed 1',
+        source: 'ROBOT'
+      }
+      const owners = [{
+        address: { country: { country: 'England' } }
+      }]
+      expect(determineExemptionOrder(dog, owners)).toBe('2023')
+    })
+
+    test('should return 2015 if not robot', async () => {
+      const dog = {
+        breed: 'Breed 1'
+      }
+      const owners = [{
+        address: { country: { country: 'England' } }
+      }]
+      expect(determineExemptionOrder(dog, owners)).toBe('2015')
     })
   })
 })
