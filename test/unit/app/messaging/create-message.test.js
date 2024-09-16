@@ -87,17 +87,21 @@ describe('createCertificateMessage', () => {
       const res = createEmailMessage({ type: 'type', id: 'id', toAddress: 'target@email.com', customFields: null })
 
       expect(res).toEqual({
-        specversion: '1.0',
-        id: 'id',
+        body: {
+          id: 'id',
+          time: expect.anything(),
+          specversion: '1.0',
+          data: {
+            personalisation: {
+              personalisation: {}
+            },
+            emailAddress: 'target@email.com'
+          },
+          type: 'type',
+          source: 'aphw-ddi-api'
+        },
         type: 'type',
-        source: 'aphw-ddi-api',
-        time: expect.anything(),
-        data: {
-          emailAddress: 'target@email.com',
-          personalisation: {
-            personalisation: {}
-          }
-        }
+        source: 'aphw-ddi-api'
       })
     })
 
@@ -109,20 +113,24 @@ describe('createCertificateMessage', () => {
       const res = createEmailMessage({ type: 'type', id: 'id', toAddress: 'target@email.com', customFields })
 
       expect(res).toEqual({
-        specversion: '1.0',
-        id: 'id',
-        type: 'type',
-        source: 'aphw-ddi-api',
-        time: expect.anything(),
-        data: {
-          emailAddress: 'target@email.com',
-          personalisation: {
+        body: {
+          id: 'id',
+          time: expect.anything(),
+          specversion: '1.0',
+          data: {
             personalisation: {
-              one_time_code: '123456',
-              expiry_in_mins: 8
-            }
-          }
-        }
+              personalisation: {
+                one_time_code: '123456',
+                expiry_in_mins: 8
+              }
+            },
+            emailAddress: 'target@email.com'
+          },
+          type: 'type',
+          source: 'aphw-ddi-api'
+        },
+        type: 'type',
+        source: 'aphw-ddi-api'
       })
     })
   })
