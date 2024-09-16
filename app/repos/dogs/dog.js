@@ -91,6 +91,20 @@ const cachedStatuses = () => {
 
 const getCachedStatuses = cachedStatuses()
 
+const determineExemptionOrder = (dog, owners) => {
+  const isScotland = owners.some(owner => owner.address.country.country === 'Scotland')
+
+  if (isScotland) {
+    if (dog.breed === 'XL Bully') {
+      throw new Error('XL Bully cannot be in Scotland')
+    } else {
+      return '1991'
+    }
+  }
+
+  return dog.source === 'ROBOT' ? '2023' : '2015'
+}
+
 const isExistingDog = (dog) => {
   const dogIndexNumber = `${dog.indexNumber}`
   return dogIndexNumber !== '' && dogIndexNumber.indexOf('ED') > -1
@@ -116,7 +130,7 @@ const createDogs = async (dogs, owners, enforcement, transaction) => {
       const dogResult = await refreshDogData(dogEntity.id, transaction)
       dogResult.existingDog = existingDog
 
-      const exemptionOrder = await getExemptionOrder(dog.source === 'ROBOT' ? '2023' : '2015')
+      const exemptionOrder = await getExemptionOrder(determineExemptionOrder(dog, owners))
 
       const registrationEntity = await createRegistration(dogEntity, dog, enforcement, exemptionOrder, transaction)
 
@@ -834,5 +848,6 @@ module.exports = {
   customSort,
   saveDog,
   saveDogFields,
-  getDogModel
+  getDogModel,
+  determineExemptionOrder
 }
