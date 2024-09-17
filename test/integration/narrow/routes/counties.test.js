@@ -1,9 +1,20 @@
+const { mockValidate } = require('../../../mocks/auth')
+const { portalHeader } = require('../../../mocks/jwt')
+
 describe('Counties endpoint', () => {
+  // jest.mock('../../../../app/auth/token-validator')
+  // const { validate } = require('../../../../app/auth/token-validator')
+  // validate.mockResolvedValue({ isValid: true, credentials: { id: 'Dev User', user: 'dev-user@test.com' } })
+
   const createServer = require('../../../../app/server')
   let server
 
   jest.mock('../../../../app/repos/counties')
   const { getCounties } = require('../../../../app/repos/counties')
+
+  jest.mock('../../../../app/auth/token-validator')
+  const { validate } = require('../../../../app/auth/token-validator')
+  validate.mockResolvedValue(mockValidate)
 
   beforeEach(async () => {
     jest.clearAllMocks()
@@ -20,7 +31,8 @@ describe('Counties endpoint', () => {
 
     const options = {
       method: 'GET',
-      url: '/counties'
+      url: '/counties',
+      ...portalHeader
     }
 
     const response = await server.inject(options)

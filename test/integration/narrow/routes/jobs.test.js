@@ -1,8 +1,14 @@
 const { expectDate } = require('../../../time-helper')
+const { mockValidate } = require('../../../mocks/auth')
+const { portalHeader } = require('../../../mocks/jwt')
 
 describe('Jobs endpoint', () => {
   const createServer = require('../../../../app/server')
   let server
+
+  jest.mock('../../../../app/auth/token-validator')
+  const { validate } = require('../../../../app/auth/token-validator')
+  validate.mockResolvedValue(mockValidate)
 
   jest.mock('../../../../app/overnight/purge-soft-deleted-records')
   const { purgeSoftDeletedRecords } = require('../../../../app/overnight/purge-soft-deleted-records')
@@ -52,7 +58,8 @@ describe('Jobs endpoint', () => {
 
       const options = {
         method: 'POST',
-        url: '/jobs/purge-soft-delete'
+        url: '/jobs/purge-soft-delete',
+        ...portalHeader
       }
 
       const response = await server.inject(options)
@@ -90,7 +97,8 @@ describe('Jobs endpoint', () => {
 
       const options = {
         method: 'POST',
-        url: '/jobs/purge-soft-delete?today=2024-03-16'
+        url: '/jobs/purge-soft-delete?today=2024-03-16',
+        ...portalHeader
       }
 
       const response = await server.inject(options)
@@ -101,7 +109,8 @@ describe('Jobs endpoint', () => {
     test('should 400 with invalid query props', async () => {
       const options = {
         method: 'POST',
-        url: '/jobs/purge-soft-delete?unknown=true'
+        url: '/jobs/purge-soft-delete?unknown=true',
+        ...portalHeader
       }
 
       const response = await server.inject(options)
@@ -113,7 +122,8 @@ describe('Jobs endpoint', () => {
 
       const options = {
         method: 'POST',
-        url: '/jobs/purge-soft-delete'
+        url: '/jobs/purge-soft-delete',
+        ...portalHeader
       }
 
       const response = await server.inject(options)
@@ -130,7 +140,8 @@ describe('Jobs endpoint', () => {
 
       const options = {
         method: 'POST',
-        url: '/jobs/expired-insurance'
+        url: '/jobs/expired-insurance',
+        ...portalHeader
       }
 
       const response = await server.inject(options)
@@ -145,7 +156,8 @@ describe('Jobs endpoint', () => {
 
       const options = {
         method: 'POST',
-        url: '/jobs/expired-insurance?today=2024-03-16'
+        url: '/jobs/expired-insurance?today=2024-03-16',
+        ...portalHeader
       }
 
       const response = await server.inject(options)
@@ -156,7 +168,8 @@ describe('Jobs endpoint', () => {
     test('should 400 with invalid query props', async () => {
       const options = {
         method: 'POST',
-        url: '/jobs/expired-insurance?unknown=true'
+        url: '/jobs/expired-insurance?unknown=true',
+        ...portalHeader
       }
 
       const response = await server.inject(options)
@@ -173,7 +186,8 @@ describe('Jobs endpoint', () => {
 
       const options = {
         method: 'POST',
-        url: '/jobs/neutering-deadline'
+        url: '/jobs/neutering-deadline',
+        ...portalHeader
       }
 
       const response = await server.inject(options)
@@ -188,7 +202,8 @@ describe('Jobs endpoint', () => {
 
       const options = {
         method: 'POST',
-        url: '/jobs/neutering-deadline?today=2024-03-16'
+        url: '/jobs/neutering-deadline?today=2024-03-16',
+        ...portalHeader
       }
 
       const response = await server.inject(options)
@@ -199,7 +214,8 @@ describe('Jobs endpoint', () => {
     test('should 400 with invalid query props', async () => {
       const options = {
         method: 'POST',
-        url: '/jobs/neutering-deadline?unknown=true'
+        url: '/jobs/neutering-deadline?unknown=true',
+        ...portalHeader
       }
 
       const response = await server.inject(options)

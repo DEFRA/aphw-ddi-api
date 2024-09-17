@@ -1,9 +1,16 @@
+const { mockValidate } = require('../../../mocks/auth')
+const { portalHeader } = require('../../../mocks/jwt')
+
 describe('Robot import endpoint', () => {
   jest.mock('../../../../app/storage')
   const { downloadBlob } = require('../../../../app/storage')
 
   jest.mock('../../../../app/import/robot')
   const { importRegister, processRegister } = require('../../../../app/import/robot')
+
+  jest.mock('../../../../app/auth/token-validator')
+  const { validate } = require('../../../../app/auth/token-validator')
+  validate.mockResolvedValue(mockValidate)
 
   const createServer = require('../../../../app/server')
   let server
@@ -20,7 +27,8 @@ describe('Robot import endpoint', () => {
       url: '/robot-import',
       headers: {
         'content-type': 'text/plain'
-      }
+      },
+      ...portalHeader
     }
 
     const response = await server.inject(options)
@@ -45,7 +53,8 @@ describe('Robot import endpoint', () => {
       },
       payload: {
         filename: 'register.xlsx'
-      }
+      },
+      ...portalHeader
     }
 
     const response = await server.inject(options)
@@ -70,7 +79,8 @@ describe('Robot import endpoint', () => {
       payload: {
         filename: 'register.xlsx',
         stage: 'spreadsheet-validation'
-      }
+      },
+      ...portalHeader
     }
 
     const response = await server.inject(options)
@@ -95,7 +105,8 @@ describe('Robot import endpoint', () => {
       payload: {
         filename: 'register.xlsx',
         stage: 'saveToDB'
-      }
+      },
+      ...portalHeader
     }
 
     const response = await server.inject(options)

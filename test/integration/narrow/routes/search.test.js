@@ -1,9 +1,16 @@
+const { mockValidate } = require('../../../mocks/auth')
+const { portalHeader } = require('../../../mocks/jwt')
+
 describe('SearchBasic endpoint', () => {
   const createServer = require('../../../../app/server')
   let server
 
   jest.mock('../../../../app/register/search')
   const { search } = require('../../../../app/register/search')
+
+  jest.mock('../../../../app/auth/token-validator')
+  const { validate } = require('../../../../app/auth/token-validator')
+  validate.mockResolvedValue(mockValidate)
 
   beforeEach(async () => {
     jest.clearAllMocks()
@@ -16,7 +23,8 @@ describe('SearchBasic endpoint', () => {
 
     const options = {
       method: 'GET',
-      url: '/search/dog/term'
+      url: '/search/dog/term',
+      ...portalHeader
     }
 
     const response = await server.inject(options)
@@ -28,7 +36,8 @@ describe('SearchBasic endpoint', () => {
 
     const options = {
       method: 'GET',
-      url: '/search/dog/term'
+      url: '/search/dog/term',
+      ...portalHeader
     }
 
     const response = await server.inject(options)
@@ -41,7 +50,8 @@ describe('SearchBasic endpoint', () => {
 
     const options = {
       method: 'GET',
-      url: '/search/dog/term'
+      url: '/search/dog/term',
+      ...portalHeader
     }
 
     const response = await server.inject(options)

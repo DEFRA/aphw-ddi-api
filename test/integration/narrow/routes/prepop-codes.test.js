@@ -1,3 +1,5 @@
+const { portalHeader } = require('../../../mocks/jwt')
+
 describe('Prepop codes endpoint', () => {
   const createServer = require('../../../../app/server')
   let server
@@ -17,7 +19,8 @@ describe('Prepop codes endpoint', () => {
   test('GET /prepop-codes returns 200', async () => {
     const options = {
       method: 'GET',
-      url: '/prepop-codes'
+      url: '/prepop-codes',
+      ...portalHeader
     }
 
     populateMatchCodes.mockResolvedValue()

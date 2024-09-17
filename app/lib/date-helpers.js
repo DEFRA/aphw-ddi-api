@@ -14,6 +14,12 @@ const addYears = (date, years) => {
   return newDate
 }
 
+const addMinutes = (date, minutes) => {
+  const newDate = new Date(date)
+  newDate.setTime(newDate.getTime() + (minutes * 60 * 1000))
+  return newDate
+}
+
 const dateTodayOrInFuture = (date) => {
   const today = new Date()
   today.setHours(0, 0, 0, 0)
@@ -27,5 +33,6 @@ module.exports = {
   formatDate,
   formatDateAsUTCNoTime,
   addYears,
+  addMinutes,
   dateTodayOrInFuture
 }

@@ -1,9 +1,16 @@
+const { mockValidate } = require('../../../mocks/auth')
+const { portalHeader } = require('../../../mocks/jwt')
+
 describe('CDO endpoint', () => {
   const createServer = require('../../../../app/server')
   let server
 
   jest.mock('../../../../app/repos/people')
   const { getPersonByReference, getPersonAndDogsByReference, updatePerson, deletePerson } = require('../../../../app/repos/people')
+
+  jest.mock('../../../../app/auth/token-validator')
+  const { validate } = require('../../../../app/auth/token-validator')
+  validate.mockResolvedValue(mockValidate)
 
   beforeEach(async () => {
     jest.clearAllMocks()
@@ -14,7 +21,8 @@ describe('CDO endpoint', () => {
   test('GET /person route returns 200 with valid payload', async () => {
     const options = {
       method: 'GET',
-      url: '/person/ABC123'
+      url: '/person/ABC123',
+      ...portalHeader
     }
 
     getPersonByReference.mockResolvedValue({
@@ -74,7 +82,8 @@ describe('CDO endpoint', () => {
   test('GET /person route returns 204 with no payload', async () => {
     const options = {
       method: 'GET',
-      url: '/person/ABC123'
+      url: '/person/ABC123',
+      ...portalHeader
     }
 
     getPersonByReference.mockResolvedValue(null)
@@ -87,7 +96,8 @@ describe('CDO endpoint', () => {
   test('GET /person route returns 400 with missing param', async () => {
     const options = {
       method: 'GET',
-      url: '/person/'
+      url: '/person/',
+      ...portalHeader
     }
 
     getPersonByReference.mockResolvedValue(null)
@@ -100,7 +110,8 @@ describe('CDO endpoint', () => {
   test('GET /person route with param includeDogs returns 200 with valid payload', async () => {
     const options = {
       method: 'GET',
-      url: '/person/ABC123?includeDogs=true'
+      url: '/person/ABC123?includeDogs=true',
+      ...portalHeader
     }
 
     getPersonAndDogsByReference.mockResolvedValue([
@@ -198,7 +209,8 @@ describe('CDO endpoint', () => {
           postcode: 'TE1 1ST',
           country: 'England'
         }
-      }
+      },
+      ...portalHeader
     }
 
     updatePerson.mockResolvedValue({
@@ -251,7 +263,8 @@ describe('CDO endpoint', () => {
           postcode: 'TE1 1ST',
           country: 'England'
         }
-      }
+      },
+      ...portalHeader
     }
 
     const response = await server.inject(options)
@@ -275,7 +288,8 @@ describe('CDO endpoint', () => {
           postcode: 'TE1 1ST',
           country: 'England'
         }
-      }
+      },
+      ...portalHeader
     }
 
     updatePerson.mockRejectedValue({
@@ -303,7 +317,8 @@ describe('CDO endpoint', () => {
           postcode: 'TE1 1ST',
           country: 'England'
         }
-      }
+      },
+      ...portalHeader
     }
 
     updatePerson.mockImplementation(() => { throw new Error('DB error') })
@@ -316,7 +331,8 @@ describe('CDO endpoint', () => {
   test('DELETE /person route returns 200 with valid payload', async () => {
     const options = {
       method: 'DELETE',
-      url: '/person/P-12345'
+      url: '/person/P-12345',
+      ...portalHeader
     }
 
     getPersonAndDogsByReference.mockResolvedValue()
@@ -330,7 +346,8 @@ describe('CDO endpoint', () => {
   test('DELETE /person route returns 400 with missing param', async () => {
     const options = {
       method: 'DELETE',
-      url: '/person/'
+      url: '/person/',
+      ...portalHeader
     }
 
     getPersonAndDogsByReference.mockResolvedValue()
@@ -344,7 +361,8 @@ describe('CDO endpoint', () => {
   test('DELETE /person route returns 400 when owner has dogs', async () => {
     const options = {
       method: 'DELETE',
-      url: '/person/P-123'
+      url: '/person/P-123',
+      ...portalHeader
     }
 
     deletePerson.mockResolvedValue()
