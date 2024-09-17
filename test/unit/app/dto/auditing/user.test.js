@@ -28,6 +28,11 @@ describe('UserAudit test', () => {
       const res = await userInfoAudit(request)
       expect(res).toEqual(devUser)
     })
+
+    test('should work if no token exists', async () => {
+      const res = await userInfoAudit({})
+      expect(res).toEqual({ username: null, displayname: null })
+    })
   })
 
   describe('userValidate', () => {
@@ -35,11 +40,19 @@ describe('UserAudit test', () => {
       const res = await userValidateAudit(request)
       expect(res).toEqual(devUser)
     })
+    test('should work if no token exists', async () => {
+      const res = await userValidateAudit({ })
+      expect(res).toEqual({ username: null, displayname: null })
+    })
   })
   describe('userLogoutAudit', () => {
     test('should be a function', async () => {
       const res = await userLogoutAudit(request)
       expect(res).toEqual(devUser)
+    })
+    test('should work if no token exists', async () => {
+      const res = await userLogoutAudit({ })
+      expect(res).toEqual({ username: null, displayname: null })
     })
   })
 })

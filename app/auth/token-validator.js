@@ -35,9 +35,11 @@ const checkTokenOnline = async (username, token) => {
 }
 
 const validatePortal = (_username, payload) => {
+  console.log('~~~~~~ Chris Debug ~~~~~~ validating portal request', '')
   return returnVal(true, payload)
 }
 const validateEnforcement = async (username, payload) => {
+  console.log('~~~~~~ Chris Debug ~~~~~~ validating enforcement request', '')
   const { token } = payload
 
   if (!token) {
@@ -70,6 +72,7 @@ const validateEnforcement = async (username, payload) => {
 }
 
 const validate = async (artifacts, _request, _h) => {
+  console.log('~~~~~~ Chris Debug ~~~~~~ validating JWT token', 'Artifacts', artifacts)
   const decoded = artifacts.decoded
   const payload = decoded.payload
   const username = payload.username
