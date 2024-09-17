@@ -1,4 +1,6 @@
 const { NotFoundError } = require('../../../../app/errors/not-found')
+const { mockValidate } = require('../../../mocks/auth')
+const { portalHeader } = require('../../../mocks/jwt')
 
 describe('Courts endpoint', () => {
   const { DuplicateResourceError } = require('../../../../app/errors/duplicate-record')
@@ -13,8 +15,12 @@ describe('Courts endpoint', () => {
   jest.mock('../../../../app/auth/get-user')
   const { getCallingUser } = require('../../../../app/auth/get-user')
 
+  jest.mock('../../../../app/auth/token-validator')
+  const { validate } = require('../../../../app/auth/token-validator')
+
   beforeEach(async () => {
     jest.clearAllMocks()
+    validate.mockResolvedValue(mockValidate)
     server = await createServer()
     await server.initialize()
   })
@@ -25,7 +31,8 @@ describe('Courts endpoint', () => {
 
       const options = {
         method: 'GET',
-        url: '/courts'
+        url: '/courts',
+        ...portalHeader
       }
 
       const response = await server.inject(options)
@@ -37,7 +44,8 @@ describe('Courts endpoint', () => {
 
       const options = {
         method: 'GET',
-        url: '/courts'
+        url: '/courts',
+        ...portalHeader
       }
 
       const response = await server.inject(options)
@@ -54,7 +62,8 @@ describe('Courts endpoint', () => {
 
       const options = {
         method: 'GET',
-        url: '/courts'
+        url: '/courts',
+        ...portalHeader
       }
 
       const response = await server.inject(options)
@@ -83,7 +92,8 @@ describe('Courts endpoint', () => {
         url: '/courts',
         payload: {
           name: 'Gondor Crown Court'
-        }
+        },
+        ...portalHeader
       }
 
       const response = await server.inject(options)
@@ -100,7 +110,8 @@ describe('Courts endpoint', () => {
       const options = {
         method: 'POST',
         url: '/courts',
-        payload: {}
+        payload: {},
+        ...portalHeader
       }
 
       const response = await server.inject(options)
@@ -115,7 +126,8 @@ describe('Courts endpoint', () => {
         url: '/courts',
         payload: {
           name: 'Gondor Crown Court'
-        }
+        },
+        ...portalHeader
       }
 
       const response = await server.inject(options)
@@ -130,7 +142,8 @@ describe('Courts endpoint', () => {
         url: '/courts',
         payload: {
           name: 'Gondor Crown Court'
-        }
+        },
+        ...portalHeader
       }
 
       const response = await server.inject(options)
@@ -156,7 +169,8 @@ describe('Courts endpoint', () => {
       })
       const options = {
         method: 'DELETE',
-        url: '/courts/1'
+        url: '/courts/1',
+        ...portalHeader
       }
 
       const response = await server.inject(options)
@@ -171,7 +185,8 @@ describe('Courts endpoint', () => {
 
       const options = {
         method: 'DELETE',
-        url: '/courts/1'
+        url: '/courts/1',
+        ...portalHeader
       }
 
       const response = await server.inject(options)
@@ -183,7 +198,8 @@ describe('Courts endpoint', () => {
 
       const options = {
         method: 'DELETE',
-        url: '/courts/1'
+        url: '/courts/1',
+        ...portalHeader
       }
 
       const response = await server.inject(options)

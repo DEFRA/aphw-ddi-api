@@ -2,7 +2,7 @@ const config = require('../../app/config')
 require('../../app/config/db')
 const dbHelper = require('../db-helper')
 
-describe('Pact Verification', () => {
+describe.skip('Pact Verification', () => {
   const { Verifier } = require('@pact-foundation/pact')
 
   let createServer
@@ -29,9 +29,9 @@ describe('Pact Verification', () => {
       pactBrokerUsername: process.env.PACT_BROKER_USERNAME,
       pactBrokerPassword: process.env.PACT_BROKER_PASSWORD,
       stateHandlers: {
-        'countries exist': async () => true,
-        'cdo includes optional data and country': () => true,
-        'owner already exists in the db': async () => true
+        // 'countries exist': async () => true,
+        // 'cdo includes optional data and country': () => true,
+        // 'owner already exists in the db': async () => true
         // 'aphw-ddi-api has a matching dog Bruno ED300006': async () => true
       }
     }

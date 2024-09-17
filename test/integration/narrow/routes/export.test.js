@@ -1,3 +1,6 @@
+const { mockValidate } = require('../../../mocks/auth')
+const { portalHeader } = require('../../../mocks/jwt')
+
 describe('Export endpoint', () => {
   const createServer = require('../../../../app/server')
   let server
@@ -8,8 +11,12 @@ describe('Export endpoint', () => {
   jest.mock('../../../../app/messaging/send-audit')
   const { sendEventToAudit } = require('../../../../app/messaging/send-audit')
 
+  jest.mock('../../../../app/auth/token-validator')
+  const { validate } = require('../../../../app/auth/token-validator')
+
   beforeEach(async () => {
     jest.clearAllMocks()
+    validate.mockResolvedValue(mockValidate)
     server = await createServer()
     await server.initialize()
   })
@@ -17,7 +24,8 @@ describe('Export endpoint', () => {
   test('GET /export-audit route returns 204 and calls sendEventToAudit', async () => {
     const options = {
       method: 'GET',
-      url: '/export-audit'
+      url: '/export-audit',
+      ...portalHeader
     }
 
     sendEventToAudit.mockResolvedValue()
@@ -31,7 +39,8 @@ describe('Export endpoint', () => {
   test('GET /export-create-file route returns 204 and calls createExportFile', async () => {
     const options = {
       method: 'GET',
-      url: '/export-create-file'
+      url: '/export-create-file',
+      ...portalHeader
     }
 
     runExportNow.mockResolvedValue('Success')

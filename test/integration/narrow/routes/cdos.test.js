@@ -1,3 +1,5 @@
+const { mockValidate } = require('../../../mocks/auth')
+const { portalHeader } = require('../../../mocks/jwt')
 describe('CDO endpoint', () => {
   const createServer = require('../../../../app/server')
   let server
@@ -5,7 +7,11 @@ describe('CDO endpoint', () => {
   jest.mock('../../../../app/repos/cdo')
   const { getSummaryCdos } = require('../../../../app/repos/cdo')
 
+  jest.mock('../../../../app/auth/token-validator')
+  const { validate } = require('../../../../app/auth/token-validator')
+
   beforeEach(async () => {
+    validate.mockResolvedValue(mockValidate)
     server = await createServer()
     await server.initialize()
   })
@@ -72,7 +78,8 @@ describe('CDO endpoint', () => {
 
     const options = {
       method: 'GET',
-      url: '/cdos?status=PreExempt'
+      url: '/cdos?status=PreExempt',
+      ...portalHeader
     }
 
     const expectedFilter = { status: ['PreExempt'] }
@@ -143,7 +150,8 @@ describe('CDO endpoint', () => {
 
     const options = {
       method: 'GET',
-      url: '/cdos?status=PreExempt'
+      url: '/cdos?status=PreExempt',
+      ...portalHeader
     }
 
     const expectedPayload = {
@@ -160,7 +168,8 @@ describe('CDO endpoint', () => {
     getSummaryCdos.mockResolvedValue([])
     const options = {
       method: 'GET',
-      url: '/cdos?status=PreExempt&status=InterimExempt'
+      url: '/cdos?status=PreExempt&status=InterimExempt',
+      ...portalHeader
     }
 
     const expectedFilter = { status: ['PreExempt', 'InterimExempt'] }
@@ -174,7 +183,8 @@ describe('CDO endpoint', () => {
     getSummaryCdos.mockResolvedValue([])
     const options = {
       method: 'GET',
-      url: '/cdos?withinDays=30'
+      url: '/cdos?withinDays=30',
+      ...portalHeader
     }
 
     const expectedFilter = { withinDays: 30 }
@@ -188,7 +198,8 @@ describe('CDO endpoint', () => {
     getSummaryCdos.mockResolvedValue([])
     const options = {
       method: 'GET',
-      url: '/cdos?status=Failed&nonComplianceLetterSent=false'
+      url: '/cdos?status=Failed&nonComplianceLetterSent=false',
+      ...portalHeader
     }
 
     const expectedFilter = { status: ['Failed'], nonComplianceLetterSent: false }
@@ -202,7 +213,8 @@ describe('CDO endpoint', () => {
     getSummaryCdos.mockResolvedValue([])
     const options = {
       method: 'GET',
-      url: '/cdos?status=InterimExempt&sortKey=joinedExemptionScheme&sortOrder=DESC'
+      url: '/cdos?status=InterimExempt&sortKey=joinedExemptionScheme&sortOrder=DESC',
+      ...portalHeader
     }
 
     const expectedFilter = { status: ['InterimExempt'] }
@@ -216,7 +228,8 @@ describe('CDO endpoint', () => {
   test('GET /cdos route returns 400 given no filter applied', async () => {
     const options = {
       method: 'GET',
-      url: '/cdos'
+      url: '/cdos',
+      ...portalHeader
     }
 
     const response = await server.inject(options)
@@ -258,7 +271,8 @@ describe('CDO endpoint', () => {
 
     const options = {
       method: 'GET',
-      url: '/cdos?status=PreExempt'
+      url: '/cdos?status=PreExempt',
+      ...portalHeader
     }
 
     const response = await server.inject(options)
@@ -270,7 +284,8 @@ describe('CDO endpoint', () => {
 
     const options = {
       method: 'GET',
-      url: '/cdos?status=PreExempt'
+      url: '/cdos?status=PreExempt',
+      ...portalHeader
     }
 
     const response = await server.inject(options)

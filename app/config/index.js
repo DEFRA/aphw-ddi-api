@@ -15,7 +15,12 @@ const schema = Joi.object({
     baseUrl: Joi.string().default('https://data.police.uk/api')
   },
   overnightExportBatchSize: Joi.number(),
-  paranoidRetentionPeriod: Joi.number()
+  paranoidRetentionPeriod: Joi.number(),
+  authServerUrl: Joi.string().required(),
+  authTokens: Joi.object({
+    portalKey: Joi.string().allow('').default(''),
+    enforcementKey: Joi.string().allow('').default('')
+  })
 })
 
 // Build config
@@ -32,7 +37,12 @@ const config = {
     baseUrl: getEnvironmentVariable('POLICE_API_BASE_URL')
   },
   overnightExportBatchSize: getEnvironmentVariable('OVERNIGHT_EXPORT_BATCH_SIZE'),
-  paranoidRetentionPeriod: getEnvironmentVariable('PARANOID_RETENTION_PERIOD') ?? 90
+  paranoidRetentionPeriod: getEnvironmentVariable('PARANOID_RETENTION_PERIOD') ?? 90,
+  authServerUrl: getEnvironmentVariable('AUTH_SERVER_URL'),
+  authTokens: {
+    portalKey: getEnvironmentVariable('PORTAL_PUBLIC_KEY'),
+    enforcementKey: getEnvironmentVariable('ENFORCEMENT_PUBLIC_KEY')
+  }
 }
 
 // Validate config

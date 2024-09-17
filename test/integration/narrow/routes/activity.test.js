@@ -1,9 +1,14 @@
 const { activities: mockActivities } = require('../../../mocks/activities')
-const { devUser } = require('../../../mocks/auth')
+const { devUser, mockValidate } = require('../../../mocks/auth')
+const { portalHeader } = require('../../../mocks/jwt')
 
 describe('Activity endpoint', () => {
   const createServer = require('../../../../app/server')
   let server
+
+  jest.mock('../../../../app/auth/token-validator')
+  const { validate } = require('../../../../app/auth/token-validator')
+  validate.mockResolvedValue(mockValidate)
 
   jest.mock('../../../../app/auth/get-user')
   const { getCallingUser } = require('../../../../app/auth/get-user')
@@ -30,7 +35,8 @@ describe('Activity endpoint', () => {
 
       const options = {
         method: 'GET',
-        url: '/activities/sent/dog'
+        url: '/activities/sent/dog',
+        ...portalHeader
       }
 
       const response = await server.inject(options)
@@ -42,7 +48,8 @@ describe('Activity endpoint', () => {
 
       const options = {
         method: 'GET',
-        url: '/activities/sent/dog'
+        url: '/activities/sent/dog',
+        ...portalHeader
       }
 
       const response = await server.inject(options)
@@ -57,7 +64,8 @@ describe('Activity endpoint', () => {
 
       const options = {
         method: 'GET',
-        url: '/activity/1'
+        url: '/activity/1',
+        ...portalHeader
       }
 
       const response = await server.inject(options)
@@ -69,7 +77,8 @@ describe('Activity endpoint', () => {
 
       const options = {
         method: 'GET',
-        url: '/activity/1'
+        url: '/activity/1',
+        ...portalHeader
       }
 
       const response = await server.inject(options)
@@ -85,7 +94,8 @@ describe('Activity endpoint', () => {
       const options = {
         method: 'POST',
         url: '/activity',
-        payload: {}
+        payload: {},
+        ...portalHeader
       }
 
       const response = await server.inject(options)
@@ -106,7 +116,8 @@ describe('Activity endpoint', () => {
           pk: 'ED300000',
           source: 'dog',
           activityDate: new Date()
-        }
+        },
+        ...portalHeader
       }
 
       const response = await server.inject(options)
@@ -133,7 +144,8 @@ describe('Activity endpoint', () => {
           pk: 'ED300000',
           source: 'dog',
           activityDate
-        }
+        },
+        ...portalHeader
       }
 
       const response = await server.inject(options)
@@ -157,7 +169,8 @@ describe('Activity endpoint', () => {
           pk: 'ED300000',
           source: 'dog',
           activityDate: new Date()
-        }
+        },
+        ...portalHeader
       }
 
       const response = await server.inject(options)
@@ -185,7 +198,8 @@ describe('Activity endpoint', () => {
           pk: 'ED300000',
           source: 'dog',
           activityDate
-        }
+        },
+        ...portalHeader
       }
 
       const response = await server.inject(options)
@@ -209,7 +223,8 @@ describe('Activity endpoint', () => {
           pk: 'ED300000',
           source: 'dog',
           activityDate: new Date()
-        }
+        },
+        ...portalHeader
       }
 
       const response = await server.inject(options)
@@ -224,7 +239,8 @@ describe('Activity endpoint', () => {
       const options = {
         method: 'POST',
         url: '/activity',
-        payload: {}
+        payload: {},
+        ...portalHeader
       }
 
       const response = await server.inject(options)
@@ -238,7 +254,8 @@ describe('Activity endpoint', () => {
       const options = {
         method: 'POST',
         url: '/activities',
-        payload: {}
+        payload: {},
+        ...portalHeader
       }
 
       const response = await server.inject(options)
@@ -261,7 +278,8 @@ describe('Activity endpoint', () => {
           activityType: 'sent',
           activitySource: 'dog',
           label: 'New activivty'
-        }
+        },
+        ...portalHeader
       }
 
       const response = await server.inject(options)
@@ -275,7 +293,8 @@ describe('Activity endpoint', () => {
       const options = {
         method: 'DELETE',
         url: '/activities',
-        payload: {}
+        payload: {},
+        ...portalHeader
       }
 
       const response = await server.inject(options)
@@ -289,7 +308,8 @@ describe('Activity endpoint', () => {
       const options = {
         method: 'DELETE',
         url: '/activities/123',
-        payload: {}
+        payload: {},
+        ...portalHeader
       }
 
       const response = await server.inject(options)
