@@ -5,10 +5,14 @@ describe('RegistrationService', function () {
   let mockUserAccountRepository
   let regService
 
+  jest.mock('../../../../app/messaging/send-email')
+  const { sendEmail } = require('../../../../app/messaging/send-email')
+
   const { RegistrationService } = require('../../../../app/service/registration')
 
   beforeEach(function () {
     jest.clearAllMocks()
+    sendEmail.mockResolvedValue()
 
     // Create a mock UserAccountRepository
     /**
@@ -30,6 +34,34 @@ describe('RegistrationService', function () {
       expect(result.length).toEqual(6)
       result = regService.GenerateOneTimeCode()
       expect(result.length).toEqual(6)
+    })
+  })
+
+  describe('sendVerifyEmailAddress', function () {
+    test('should send code in email', async () => {
+      await regService.SendVerifyEmailAddress('user@test.com')
+      expect(sendEmail).toHaveBeenCalledWith({
+        type: 'verify-email',
+        toAddress: 'user@test.com',
+        customFields: [
+          { name: 'one_time_code', value: expect.anything() },
+          { name: 'expiry_in_mins', value: '8' }
+        ]
+      })
+    })
+  })
+
+  describe('verifyUserAction', function () {
+    test('should send code in email', async () => {
+      await regService.SendVerifyEmailAddress('user@test.com')
+      expect(sendEmail).toHaveBeenCalledWith({
+        type: 'verify-email',
+        toAddress: 'user@test.com',
+        customFields: [
+          { name: 'one_time_code', value: expect.anything() },
+          { name: 'expiry_in_mins', value: '8' }
+        ]
+      })
     })
   })
 })
