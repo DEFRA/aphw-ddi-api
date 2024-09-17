@@ -2,7 +2,7 @@ const config = require('../../app/config')
 require('../../app/config/db')
 const dbHelper = require('../db-helper')
 
-xdescribe('Pact Verification', () => {
+describe.skip('Pact Verification', () => {
   const { Verifier } = require('@pact-foundation/pact')
 
   let createServer
