@@ -45,7 +45,7 @@ const validateEnforcement = async (username, payload) => {
   }
 
   const now = new Date()
-  const hash = crypto.createHash('md5').update(token).digest('hex')
+  const hash = crypto.createHash('sha512').update(token).digest('hex')
 
   const cached = hashCache.get(username)
   if (cached) {
