@@ -1,6 +1,6 @@
 {
   "name": "aphw-ddi-api",
-  "version": "0.74.4",
+  "version": "0.75.3",
   "description": "API to manage CRUD / query functions for dangerous dogs register",
   "homepage": "https://github.com/DEFRA/aphw-ddi-api",
   "main": "app/index.js",
@@ -23,9 +23,12 @@
   "dependencies": {
     "@azure/identity": "4.2.1",
     "@azure/storage-blob": "12.13.0",
+    "@hapi/basic": "^7.0.2",
     "@hapi/hapi": "20.2.2",
     "@hapi/inert": "^7.1.0",
+    "@hapi/jwt": "^3.2.0",
     "@hapi/vision": "^7.0.3",
+    "@hapi/wreck": "^18.1.0",
     "@joi/date": "2.1.0",
     "applicationinsights": "2.3.5",
     "braces": "3.0.3",
@@ -36,6 +39,7 @@
     "joi": "^17.11.0",
     "js-levenshtein": "^1.1.6",
     "json-difference": "1.16.1",
+    "jsonwebtoken": "^9.0.2",
     "node-cron": "3.0.3",
     "pdfkit": "^0.14.0",
     "pg": "^8.11.3",

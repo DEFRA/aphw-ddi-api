@@ -1,11 +1,16 @@
 const { DuplicateResourceError } = require('../../../../app/errors/duplicate-record')
 const { NotFoundError } = require('../../../../app/errors/not-found')
+const { mockValidate } = require('../../../mocks/auth')
+const { portalHeader } = require('../../../mocks/jwt')
 
 describe('Insurance endpoint', () => {
   const { insuranceCompanies } = require('../../../mocks/insurance-companies')
 
   const createServer = require('../../../../app/server')
   let server
+
+  jest.mock('../../../../app/auth/token-validator')
+  const { validate } = require('../../../../app/auth/token-validator')
 
   jest.mock('../../../../app/auth/get-user')
   const { getCallingUser } = require('../../../../app/auth/get-user')
@@ -15,6 +20,7 @@ describe('Insurance endpoint', () => {
 
   beforeEach(async () => {
     jest.clearAllMocks()
+    validate.mockResolvedValue(mockValidate)
     server = await createServer()
     await server.initialize()
   })
@@ -25,7 +31,8 @@ describe('Insurance endpoint', () => {
 
       const options = {
         method: 'GET',
-        url: '/insurance/companies'
+        url: '/insurance/companies',
+        ...portalHeader
       }
 
       const response = await server.inject(options)
@@ -41,7 +48,8 @@ describe('Insurance endpoint', () => {
 
       const options = {
         method: 'GET',
-        url: '/insurance/companies?sortKey=updatedAt&sortOrder=DESC'
+        url: '/insurance/companies?sortKey=updatedAt&sortOrder=DESC',
+        ...portalHeader
       }
 
       const response = await server.inject(options)
@@ -57,7 +65,8 @@ describe('Insurance endpoint', () => {
 
       const options = {
         method: 'GET',
-        url: '/insurance/companies?sort=ABC'
+        url: '/insurance/companies?sort=ABC',
+        ...portalHeader
       }
 
       const response = await server.inject(options)
@@ -69,7 +78,8 @@ describe('Insurance endpoint', () => {
 
       const options = {
         method: 'GET',
-        url: '/insurance/companies'
+        url: '/insurance/companies',
+        ...portalHeader
       }
 
       const response = await server.inject(options)
@@ -86,7 +96,8 @@ describe('Insurance endpoint', () => {
 
       const options = {
         method: 'GET',
-        url: '/insurance/companies'
+        url: '/insurance/companies',
+        ...portalHeader
       }
 
       const response = await server.inject(options)
@@ -115,7 +126,8 @@ describe('Insurance endpoint', () => {
         url: '/insurance/companies',
         payload: {
           name: 'Gotham City Dog Insurance'
-        }
+        },
+        ...portalHeader
       }
 
       const response = await server.inject(options)
@@ -132,7 +144,8 @@ describe('Insurance endpoint', () => {
       const options = {
         method: 'POST',
         url: '/insurance/companies',
-        payload: {}
+        payload: {},
+        ...portalHeader
       }
 
       const response = await server.inject(options)
@@ -147,7 +160,8 @@ describe('Insurance endpoint', () => {
         url: '/insurance/companies',
         payload: {
           name: 'Gotham City Dog Insurance'
-        }
+        },
+        ...portalHeader
       }
 
       const response = await server.inject(options)
@@ -162,7 +176,8 @@ describe('Insurance endpoint', () => {
         url: '/insurance/companies',
         payload: {
           name: 'Gotham City Dog Insurance'
-        }
+        },
+        ...portalHeader
       }
 
       const response = await server.inject(options)
@@ -188,7 +203,8 @@ describe('Insurance endpoint', () => {
       })
       const options = {
         method: 'DELETE',
-        url: '/insurance/companies/1'
+        url: '/insurance/companies/1',
+        ...portalHeader
       }
 
       const response = await server.inject(options)
@@ -203,7 +219,8 @@ describe('Insurance endpoint', () => {
 
       const options = {
         method: 'DELETE',
-        url: '/insurance/companies/1'
+        url: '/insurance/companies/1',
+        ...portalHeader
       }
 
       const response = await server.inject(options)
@@ -215,7 +232,8 @@ describe('Insurance endpoint', () => {
 
       const options = {
         method: 'DELETE',
-        url: '/insurance/companies/1'
+        url: '/insurance/companies/1',
+        ...portalHeader
       }
 
       const response = await server.inject(options)
