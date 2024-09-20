@@ -1,3 +1,4 @@
+const { randomInt } = require('crypto')
 const { emailTypes } = require('../constants/email-types')
 const { sendEmail } = require('../messaging/send-email')
 
@@ -26,7 +27,7 @@ class RegistrationService {
    * @type {RegistrationService.GenerateOneTimeCode}
    */
   GenerateOneTimeCode () {
-    return `${(Math.floor(100000 + Math.random() * 900000))}`
+    return `${(Math.floor(100000 + randomInt(900000)))}`
   }
 
   /**
