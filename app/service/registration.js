@@ -26,7 +26,7 @@ class RegistrationService {
   /**
    * @type {RegistrationService.GenerateOneTimeCode}
    */
-  GenerateOneTimeCode () {
+  generateOneTimeCode () {
     return `${(Math.floor(100000 + randomInt(900000)))}`
   }
 
@@ -34,8 +34,8 @@ class RegistrationService {
    * @type {RegistrationService.SendVerifyEmailAddress}
    * @param {string} username
    */
-  async SendVerifyEmailAddress (username) {
-    const oneTimeCode = this.GenerateOneTimeCode()
+  async sendVerifyEmailAddress (username) {
+    const oneTimeCode = this.generateOneTimeCode()
 
     await this.userAccountRepository.setActivationCodeAndExpiry(username, oneTimeCode, expiryInMinsForOtp)
 
@@ -55,7 +55,7 @@ class RegistrationService {
    * @param {string} username
    * @param {string} code
    */
-  async VerifyAccountActivation (username, oneTimeCode) {
+  async verifyAccountActivation (username, oneTimeCode) {
     const account = await this.userAccountRepository.getAccount(username)
     if (!account) {
       return actionResults.ACCOUNT_NOT_FOUND
@@ -84,7 +84,7 @@ class RegistrationService {
    * @param {string} username
    * @param {string} code
    */
-  async VerifyLogin (username) {
+  async verifyLogin (username) {
     const account = await this.userAccountRepository.getAccount(username)
     if (!account) {
       return actionResults.ACCOUNT_NOT_FOUND
