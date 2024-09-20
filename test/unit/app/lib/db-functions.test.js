@@ -1,4 +1,4 @@
-const { dbLogErrorToBacklog, dbLogWarningToBacklog, dbFindAll, dbFindOne, dbUpdate, dbCreate, dbDelete } = require('../../../../app/lib/db-functions')
+const { dbLogErrorToBacklog, dbLogWarningToBacklog, dbFindAll, dbFindOne, dbFindByPk, dbUpdate, dbCreate, dbDelete } = require('../../../../app/lib/db-functions')
 
 describe('DbFunctions test', () => {
   test('dbLogErrorToBacklog should handle error string', async () => {
@@ -60,6 +60,13 @@ describe('DbFunctions test', () => {
     mockModel.findOne = jest.fn()
     await dbFindOne(mockModel, { param1: 'val1' })
     expect(mockModel.findOne).toHaveBeenCalledWith({ param1: 'val1' })
+  })
+
+  test('dbFindByPk should call findByPk', async () => {
+    const mockModel = jest.fn()
+    mockModel.findByPk = jest.fn()
+    await dbFindByPk(mockModel, 'id1')
+    expect(mockModel.findByPk).toHaveBeenCalledWith('id1', undefined)
   })
 
   test('dbUpdate should call update', async () => {
