@@ -21,7 +21,7 @@ describe('Search repo (fuzzy)', () => {
 
   const sequelize = require('../../../../app/config/db')
 
-  const { search } = require('../../../../app/register/search')
+  const { search } = require('../../../../app/search/search')
 
   beforeEach(async () => {
     jest.clearAllMocks()

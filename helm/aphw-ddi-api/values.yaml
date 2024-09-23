@@ -40,6 +40,7 @@ container:
   osPlacesApiKey: os-places-api-key
   policeApiBaseUrl: police-api-base-url
   eventsTopicAddress: aphw-ddi-events
+  notificationsTopicAddress: aphw-ddi-notifications
   publicKeyPortal: dummy
   publicKeyEnforcement: dummy
   authServerUrl: auth-server-url

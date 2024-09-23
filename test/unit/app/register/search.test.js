@@ -21,8 +21,8 @@ describe('Search repo', () => {
 
   const sequelize = require('../../../../app/config/db')
 
-  const { search } = require('../../../../app/register/search')
-  const { sortOwnerSearch } = require('../../../../app/register/search/sorting-and-grouping')
+  const { search } = require('../../../../app/search/search')
+  const { sortOwnerSearch } = require('../../../../app/search/search-processors/sorting-and-grouping')
 
   beforeEach(async () => {
     jest.clearAllMocks()

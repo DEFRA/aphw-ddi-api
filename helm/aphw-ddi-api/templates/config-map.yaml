@@ -16,8 +16,10 @@ data:
   POLICE_API_BASE_URL: {{ quote .Values.container.policeApiBaseUrl }}
   {{- if and (.Values.environmentCode) (not .Values.pr) }}
   EVENTS_TOPIC_ADDRESS: {{ .Values.container.eventsTopicAddress }}-{{ .Values.environmentCode }}
+  NOTIFICATIONS_TOPIC_ADDRESS: {{ .Values.container.notificationsTopicAddress }}-{{ .Values.environmentCode }}
   {{ else }}
   EVENTS_TOPIC_ADDRESS: {{ quote .Values.container.eventsTopicAddress }}
+  NOTIFICATIONS_TOPIC_ADDRESS: {{ .Values.container.notificationsTopicAddress }}
   {{- end }}
   {{- if and (.Values.environmentCode) (not .Values.pr) }}
   CERTIFICATE_REQUEST_QUEUE: {{ .Values.container.certificateRequestQueue }}-{{ .Values.environmentCode }}

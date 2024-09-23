@@ -12,9 +12,8 @@ const schema = Joi.object({
   eventsTopic: {
     address: Joi.string()
   },
-  certificatesQueue: {
-    address: Joi.string(),
-    type: Joi.string().valid('queue')
+  notificationsTopic: {
+    address: Joi.string()
   }
 })
 
@@ -28,6 +27,9 @@ const config = {
   },
   eventsTopic: {
     address: process.env.EVENTS_TOPIC_ADDRESS
+  },
+  notificationsTopic: {
+    address: process.env.NOTIFICATIONS_TOPIC_ADDRESS
   }
 }
 
@@ -41,6 +43,9 @@ if (result.error) {
 
 const eventsTopic = { ...result.value.messageQueue, ...result.value.eventsTopic }
 
+const notificationsTopic = { ...result.value.messageQueue, ...result.value.notificationsTopic }
+
 module.exports = {
-  eventsTopic
+  eventsTopic,
+  notificationsTopic
 }
