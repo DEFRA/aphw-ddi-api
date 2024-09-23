@@ -3,6 +3,7 @@ const { addMinutes } = require('../lib/date-helpers')
 const { isAccountEnabled } = require('../repos/user-accounts')
 const { getUserInfo } = require('../proxy/auth-server')
 const { hashCache } = require('../session/hashCache')
+const { scopes } = require('../constants/auth')
 
 const expiryPeriodInMins = 65
 
@@ -37,6 +38,7 @@ const checkTokenOnline = async (username, token) => {
 const validatePortal = (_username, payload) => {
   return returnVal(true, payload)
 }
+
 const validateEnforcement = async (username, payload) => {
   const { token } = payload
 
@@ -74,6 +76,10 @@ const validate = async (artifacts, _request, _h) => {
   const decoded = artifacts.decoded
   const payload = decoded.payload
   const username = payload.username
+
+  if (!scopes.all.some(allowedScope => payload.scopes?.includes(allowedScope))) {
+    return returnVal(false)
+  }
 
   if (!username) {
     return returnVal(false)

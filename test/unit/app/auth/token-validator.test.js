@@ -36,7 +36,7 @@ describe('token-validator', () => {
               displayname: 'William Shakespeare',
               exp: expect.any(Number),
               iat: expect.any(Number),
-              scopes: ['abc'],
+              scopes: ['Dog.Index.Admin'],
               iss: 'aphw-ddi-portal'
             }
           }
@@ -50,7 +50,7 @@ describe('token-validator', () => {
             id: 'william.shakespeare@theglobe.co.uk',
             user: 'william.shakespeare@theglobe.co.uk',
             displayname: 'William Shakespeare',
-            scopes: ['abc']
+            scopes: ['Dog.Index.Admin']
           }
         })
       })
@@ -61,7 +61,7 @@ describe('token-validator', () => {
             payload: {
               exp: expect.any(Number),
               iat: expect.any(Number),
-              scopes: ['abc'],
+              scopes: ['Dog.Index.Admin'],
               iss: 'aphw-ddi-portal'
             }
           }
@@ -91,7 +91,7 @@ describe('token-validator', () => {
             exp: expect.any(Number),
             iat: expect.any(Number),
             token,
-            scopes: ['abc'],
+            scopes: ['Dog.Index.Enforcement'],
             iss: 'aphw-ddi-enforcement'
           }
         }
@@ -125,7 +125,7 @@ describe('token-validator', () => {
             id: 'chuck@norris.org',
             user: 'chuck@norris.org',
             displayname: 'chuck@norris.org',
-            scopes: ['abc']
+            scopes: ['Dog.Index.Enforcement']
           }
         })
       })
@@ -150,7 +150,7 @@ describe('token-validator', () => {
             id: 'cached.user@example.com',
             displayname: 'cached.user@example.com',
             user: 'cached.user@example.com',
-            scopes: ['abc']
+            scopes: ['Dog.Index.Enforcement']
           }
         })
       })
@@ -284,7 +284,7 @@ describe('token-validator', () => {
               exp: expect.any(Number),
               iat: expect.any(Number),
               token,
-              scopes: ['abc'],
+              scopes: ['Dog.Index.Enforcement'],
               iss: 'aphw-ddi-enforcement'
             }
           }
