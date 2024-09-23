@@ -19,9 +19,21 @@ module.exports = (sequelize, DataTypes) => {
       type: DataTypes.STRING(1000),
       allowNull: true
     },
+    activation_token_expiry: {
+      type: DataTypes.DATE,
+      allowNull: true
+    },
     activated_date: {
       type: DataTypes.DATE,
       allowNull: true
+    },
+    accepted_terms_and_conds_date: {
+      type: DataTypes.DATE,
+      allowNull: true
+    },
+    active: {
+      type: DataTypes.BOOLEAN,
+      defaultValue: true
     },
     last_login_date: {
       type: DataTypes.DATE,

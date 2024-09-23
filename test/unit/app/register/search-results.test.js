@@ -1,4 +1,4 @@
-const { mapResults } = require('../../../../app/register/search/search-results')
+const { mapResults } = require('../../../../app/search/search-processors/search-results')
 
 describe('SearchResults', () => {
   test('should map results', () => {

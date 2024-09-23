@@ -1,6 +1,7 @@
+const { v4: uuidv4 } = require('uuid')
 const { CERTIFICATE_REQUESTED } = require('../constants/event/events')
 const { SOURCE_API } = require('../constants/event/source')
-const createMessage = (event) => {
+const createEventMessage = (event) => {
   const { type, source, id, partitionKey = undefined, subject = undefined, data = undefined } = event
   return {
     body: {
@@ -55,7 +56,42 @@ const createCertificateMessage = (certificateId, data, user) => {
   }
 }
 
+const getCustomFields = data => {
+  if (!data?.customFields) {
+    return {}
+  }
+
+  return data.customFields.reduce(
+    (prev, cur) =>
+      ({ ...prev, [cur.name]: cur.value }), {}
+  )
+}
+
+/**
+ * @param {EmailSchema} data
+ */
+const createEmailMessage = (data) => {
+  return {
+    body: {
+      id: data.id ? data.id : uuidv4(),
+      time: new Date().toISOString(),
+      specversion: '1.0',
+      data: {
+        personalisation: {
+          personalisation: getCustomFields(data)
+        },
+        emailAddress: data.toAddress
+      },
+      type: data.type,
+      source: SOURCE_API
+    },
+    type: data.type,
+    source: SOURCE_API
+  }
+}
+
 module.exports = {
-  createMessage,
-  createCertificateMessage
+  createEventMessage,
+  createCertificateMessage,
+  createEmailMessage
 }
