@@ -8,8 +8,8 @@ describe('User endpoint', () => {
   jest.mock('../../../../app/auth/token-validator')
   const { validate } = require('../../../../app/auth/token-validator')
 
-  jest.mock('../../../../app/repos/user-accounts')
-  const { verifyLicenceAccepted, setLicenceAcceptedDate } = require('../../../../app/repos/user-accounts')
+  jest.mock('../../../../app/dto/licence')
+  const { userVerifyLicenceAccepted, userSetLicenceAccepted } = require('../../../../app/dto/licence')
 
   jest.mock('../../../../app/session/hashCache', () => ({
     hashCache: new Map()
@@ -52,7 +52,7 @@ describe('User endpoint', () => {
 
   describe('GET /user/me/licence', () => {
     test('should validate and return a 200 if user accepted licence', async () => {
-      verifyLicenceAccepted.mockResolvedValue(true)
+      userVerifyLicenceAccepted.mockResolvedValue(true)
       const options = {
         method: 'GET',
         url: '/user/me/licence',
@@ -63,7 +63,7 @@ describe('User endpoint', () => {
     })
 
     test('should validate and return a 404 if user not accepted licence', async () => {
-      verifyLicenceAccepted.mockResolvedValue(false)
+      userVerifyLicenceAccepted.mockResolvedValue(false)
       const options = {
         method: 'GET',
         url: '/user/me/licence',
@@ -76,7 +76,7 @@ describe('User endpoint', () => {
 
   describe('PUT /user/me/licence', () => {
     test('should return a 200 if user accepted licence', async () => {
-      setLicenceAcceptedDate.mockResolvedValue(true)
+      userSetLicenceAccepted.mockResolvedValue(true)
       const options = {
         method: 'PUT',
         url: '/user/me/licence',
@@ -87,7 +87,7 @@ describe('User endpoint', () => {
     })
 
     test('should return a 404 if user not accepted licence', async () => {
-      setLicenceAcceptedDate.mockResolvedValue(false)
+      userSetLicenceAccepted.mockResolvedValue(false)
       const options = {
         method: 'PUT',
         url: '/user/me/licence',

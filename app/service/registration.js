@@ -11,7 +11,8 @@ const actionResults = {
   ACTIVATION_CODE_EXPIRED: 'Activation code has expired',
   INVALID_ACTIVATION_CODE: 'Invalid activation code',
   MUST_ACCEPT_TS_AND_CS: 'Must accept terms and conditions',
-  OK: 'Ok'
+  OK: 'Ok',
+  ERROR: 'Error'
 }
 
 class RegistrationService {
@@ -120,7 +121,7 @@ class RegistrationService {
       return actionResults.ACCOUNT_NOT_ENABLED
     }
 
-    return await this.userAccountRepository.setLicenceAcceptedDate(username)
+    return await this.userAccountRepository.setLicenceAcceptedDate(username) ? actionResults.OK : actionResults.ERROR
   }
 }
 

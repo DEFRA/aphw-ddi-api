@@ -22,7 +22,8 @@ describe('RegistrationService', function () {
       getAccount: jest.fn(),
       setActivationCodeAndExpiry: jest.fn(),
       setActivatedDate: jest.fn(),
-      setLoginDate: jest.fn()
+      setLoginDate: jest.fn(),
+      setLicenceAcceptedDate: jest.fn()
     }
 
     // Instantiate RegistrationService with the mock repository
@@ -117,6 +118,34 @@ describe('RegistrationService', function () {
       mockUserAccountRepository.getAccount.mockResolvedValue({ active: true, activated_date: new Date(), accepted_terms_and_conds_date: new Date(), save: mockSave })
       const res = await regService.verifyLogin('user@test.com')
       expect(res).toBe(actionResults.OK)
+    })
+  })
+
+  describe('acceptedLicence', function () {
+    test('should return ACCOUNT_NOT_FOUND if no account', async () => {
+      mockUserAccountRepository.getAccount.mockResolvedValue(null)
+      const res = await regService.acceptLicence('user@test.com')
+      expect(res).toBe(actionResults.ACCOUNT_NOT_FOUND)
+    })
+
+    test('should return ACCOUNT_NOT_ENABLED if account not enabled', async () => {
+      mockUserAccountRepository.getAccount.mockResolvedValue({ active: false })
+      const res = await regService.acceptLicence('user@test.com')
+      expect(res).toBe(actionResults.ACCOUNT_NOT_ENABLED)
+    })
+
+    test('should return OK if accepted ok', async () => {
+      mockUserAccountRepository.setLicenceAcceptedDate.mockResolvedValue(true)
+      mockUserAccountRepository.getAccount.mockResolvedValue({ active: true, activated_date: new Date(), accepted_terms_and_conds_date: new Date() })
+      const res = await regService.acceptLicence('user@test.com')
+      expect(res).toBe(actionResults.OK)
+    })
+
+    test('should return ERROR if not ok', async () => {
+      mockUserAccountRepository.setLicenceAcceptedDate.mockResolvedValue(false)
+      mockUserAccountRepository.getAccount.mockResolvedValue({ active: true, activated_date: new Date(), accepted_terms_and_conds_date: new Date() })
+      const res = await regService.acceptLicence('user@test.com')
+      expect(res).toBe(actionResults.ERROR)
     })
   })
 })
