@@ -11,8 +11,8 @@ const actionResults = {
   ACTIVATION_CODE_EXPIRED: 'Activation code has expired',
   INVALID_ACTIVATION_CODE: 'Invalid activation code',
   MUST_ACCEPT_TS_AND_CS: 'Must accept terms and conditions',
-  SUCCESSFUL_ACTIVATION: 'Successful activation',
-  SUCCESSFUL_LOGIN: 'Successful login'
+  OK: 'Ok',
+  ERROR: 'Error'
 }
 
 class RegistrationService {
@@ -68,12 +68,11 @@ class RegistrationService {
     if (account.activation_token === oneTimeCode) {
       if (account.activation_token_expiry <= new Date()) {
         return actionResults.ACTIVATION_CODE_EXPIRED
-      } else {
-        account.activated_date = new Date() // UTC ??
-        await account.save()
-
-        return actionResults.SUCCESSFUL_ACTIVATION
       }
+
+      await this.userAccountRepository.setActivatedDate(username)
+
+      return actionResults.OK
     }
 
     return actionResults.INVALID_ACTIVATION_CODE
@@ -98,14 +97,31 @@ class RegistrationService {
       return actionResults.ACCOUNT_NOT_ACTIVATED
     }
 
-    account.last_login_date = new Date()
-    await account.save()
+    await this.userAccountRepository.setLoginDate(username)
 
     if (!account.accepted_terms_and_conds_date) {
       return actionResults.MUST_ACCEPT_TS_AND_CS
     }
 
-    return actionResults.SUCCESSFUL_LOGIN
+    return actionResults.OK
+  }
+
+  /**
+   * @type {RegistrationService.acceptLicence}
+   * @param {string} username
+   */
+  async acceptLicence (username) {
+    const account = await this.userAccountRepository.getAccount(username)
+
+    if (!account) {
+      return actionResults.ACCOUNT_NOT_FOUND
+    }
+
+    if (!account.active) {
+      return actionResults.ACCOUNT_NOT_ENABLED
+    }
+
+    return await this.userAccountRepository.setLicenceAcceptedDate(username) ? actionResults.OK : actionResults.ERROR
   }
 }
 

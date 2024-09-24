@@ -44,8 +44,78 @@ const setActivationCodeAndExpiry = async (username, oneTimeCode, expiryInMins) =
   return false
 }
 
+/**
+ * @param {string} username
+ * @return {Promise<boolean>}
+ */
+const setLoginDate = async (username) => {
+  const account = await sequelize.models.user_account.findOne({
+    where: { username }
+  })
+
+  if (account) {
+    account.last_login_date = new Date()
+    await account.save()
+    return true
+  }
+
+  return false
+}
+
+/**
+ * @param {string} username
+ * @return {Promise<boolean>}
+ */
+const setActivatedDate = async (username) => {
+  const account = await sequelize.models.user_account.findOne({
+    where: { username }
+  })
+
+  if (account) {
+    account.activated_date = new Date()
+    await account.save()
+    return true
+  }
+
+  return false
+}
+
+/**
+ * @param {string} username
+ * @return {Promise<boolean>}
+ */
+const setLicenceAcceptedDate = async (username) => {
+  const account = await sequelize.models.user_account.findOne({
+    where: { username }
+  })
+
+  if (account) {
+    account.accepted_terms_and_conds_date = new Date()
+    await account.save()
+    return true
+  }
+
+  return false
+}
+
+/**
+ * @param {string} username
+ * @return {Promise<boolean>}
+ */
+const verifyLicenceAccepted = async (username) => {
+  const account = await sequelize.models.user_account.findOne({
+    where: { username }
+  })
+
+  return !!account?.accepted_terms_and_conds_date
+}
+
 module.exports = {
   isAccountEnabled,
   getAccount,
-  setActivationCodeAndExpiry
+  setActivationCodeAndExpiry,
+  setActivatedDate,
+  setLoginDate,
+  verifyLicenceAccepted,
+  setLicenceAcceptedDate
 }
