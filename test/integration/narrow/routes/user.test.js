@@ -8,6 +8,9 @@ describe('User endpoint', () => {
   jest.mock('../../../../app/auth/token-validator')
   const { validate } = require('../../../../app/auth/token-validator')
 
+  jest.mock('../../../../app/dto/licence')
+  const { userVerifyLicenceAccepted, userSetLicenceAccepted } = require('../../../../app/dto/licence')
+
   jest.mock('../../../../app/session/hashCache', () => ({
     hashCache: new Map()
   }))
@@ -44,6 +47,56 @@ describe('User endpoint', () => {
       }
       const response = await server.inject(options)
       expect(response.statusCode).toBe(401)
+    })
+  })
+
+  describe('GET /user/me/licence', () => {
+    test('should validate and return a 200 true if user accepted licence', async () => {
+      userVerifyLicenceAccepted.mockResolvedValue(true)
+      const options = {
+        method: 'GET',
+        url: '/user/me/licence',
+        ...portalHeader
+      }
+      const response = await server.inject(options)
+      expect(response.statusCode).toBe(200)
+      expect(response.payload).toBe('true')
+    })
+
+    test('should validate and return a 200 false if user not accepted licence', async () => {
+      userVerifyLicenceAccepted.mockResolvedValue(false)
+      const options = {
+        method: 'GET',
+        url: '/user/me/licence',
+        ...portalHeader
+      }
+      const response = await server.inject(options)
+      expect(response.statusCode).toBe(200)
+      expect(response.payload).toBe('false')
+    })
+  })
+
+  describe('PUT /user/me/licence', () => {
+    test('should return a 200 if user accepted licence', async () => {
+      userSetLicenceAccepted.mockResolvedValue(true)
+      const options = {
+        method: 'PUT',
+        url: '/user/me/licence',
+        ...portalHeader
+      }
+      const response = await server.inject(options)
+      expect(response.statusCode).toBe(200)
+    })
+
+    test('should return a 500 if user not accepted licence', async () => {
+      userSetLicenceAccepted.mockResolvedValue(false)
+      const options = {
+        method: 'PUT',
+        url: '/user/me/licence',
+        ...portalHeader
+      }
+      const response = await server.inject(options)
+      expect(response.statusCode).toBe(500)
     })
   })
 

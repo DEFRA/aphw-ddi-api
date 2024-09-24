@@ -1,5 +1,6 @@
 const { hashCache } = require('../session/hashCache')
 const { userValidateAudit, userLogoutAudit } = require('../dto/auditing/user')
+const { userVerifyLicenceAccepted, userSetLicenceAccepted } = require('../dto/licence')
 
 module.exports = [
   {
@@ -19,6 +20,45 @@ module.exports = [
       await userValidateAudit(request)
 
       return h.response(undefined).code(204)
+    }
+  },
+  {
+    method: 'GET',
+    path: '/user/me/licence',
+    options: {
+      tags: ['api'],
+      notes: ['Checks if the calling user has accepted the licence'],
+      response: {
+        status: {
+          200: undefined,
+          401: undefined,
+          404: undefined
+        }
+      }
+    },
+    handler: async (request, h) => {
+      const res = await userVerifyLicenceAccepted(request)
+
+      return h.response(res).code(200)
+    }
+  },
+  {
+    method: 'PUT',
+    path: '/user/me/licence',
+    options: {
+      tags: ['api'],
+      notes: ['Sets the date that the user accepted the licence'],
+      response: {
+        status: {
+          200: undefined,
+          500: undefined
+        }
+      }
+    },
+    handler: async (request, h) => {
+      const res = await userSetLicenceAccepted(request)
+
+      return h.response(res).code(res ? 200 : 500)
     }
   },
   {
