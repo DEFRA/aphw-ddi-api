@@ -8,6 +8,9 @@ describe('User endpoint', () => {
   jest.mock('../../../../app/auth/token-validator')
   const { validate } = require('../../../../app/auth/token-validator')
 
+  jest.mock('../../../../app/repos/user-accounts')
+  const { verifyLicenceAccepted, setLicenceAcceptedDate } = require('../../../../app/repos/user-accounts')
+
   jest.mock('../../../../app/session/hashCache', () => ({
     hashCache: new Map()
   }))
@@ -44,6 +47,54 @@ describe('User endpoint', () => {
       }
       const response = await server.inject(options)
       expect(response.statusCode).toBe(401)
+    })
+  })
+
+  describe('GET /user/me/licence', () => {
+    test('should validate and return a 200 if user accepted licence', async () => {
+      verifyLicenceAccepted.mockResolvedValue(true)
+      const options = {
+        method: 'GET',
+        url: '/user/me/licence',
+        ...portalHeader
+      }
+      const response = await server.inject(options)
+      expect(response.statusCode).toBe(200)
+    })
+
+    test('should validate and return a 404 if user not accepted licence', async () => {
+      verifyLicenceAccepted.mockResolvedValue(false)
+      const options = {
+        method: 'GET',
+        url: '/user/me/licence',
+        ...portalHeader
+      }
+      const response = await server.inject(options)
+      expect(response.statusCode).toBe(404)
+    })
+  })
+
+  describe('PUT /user/me/licence', () => {
+    test('should return a 200 if user accepted licence', async () => {
+      setLicenceAcceptedDate.mockResolvedValue(true)
+      const options = {
+        method: 'PUT',
+        url: '/user/me/licence',
+        ...portalHeader
+      }
+      const response = await server.inject(options)
+      expect(response.statusCode).toBe(200)
+    })
+
+    test('should return a 404 if user not accepted licence', async () => {
+      setLicenceAcceptedDate.mockResolvedValue(false)
+      const options = {
+        method: 'PUT',
+        url: '/user/me/licence',
+        ...portalHeader
+      }
+      const response = await server.inject(options)
+      expect(response.statusCode).toBe(404)
     })
   })
 
