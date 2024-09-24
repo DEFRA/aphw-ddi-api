@@ -24,7 +24,7 @@ describe('token-validator', () => {
 
     test('should not validate if a user is missing token', async () => {
       const validation = await validate({ decoded: { payload: { username: 'bob@builder.com' } } })
-      expect(validation).toEqual({ isValid: false, credentials: { id: null, user: null, displayname: null, scopes: [] } })
+      expect(validation).toEqual({ isValid: false, credentials: { id: null, user: null, displayname: null, scope: [] } })
     })
 
     describe('aphw-ddi-portal', () => {
@@ -36,7 +36,7 @@ describe('token-validator', () => {
               displayname: 'William Shakespeare',
               exp: expect.any(Number),
               iat: expect.any(Number),
-              scopes: ['Dog.Index.Admin'],
+              scope: ['Dog.Index.Admin'],
               iss: 'aphw-ddi-portal'
             }
           }
@@ -50,7 +50,7 @@ describe('token-validator', () => {
             id: 'william.shakespeare@theglobe.co.uk',
             user: 'william.shakespeare@theglobe.co.uk',
             displayname: 'William Shakespeare',
-            scopes: ['Dog.Index.Admin']
+            scope: ['Dog.Index.Admin']
           }
         })
       })
@@ -61,7 +61,7 @@ describe('token-validator', () => {
             payload: {
               exp: expect.any(Number),
               iat: expect.any(Number),
-              scopes: ['Dog.Index.Admin'],
+              scope: ['Dog.Index.Admin'],
               iss: 'aphw-ddi-portal'
             }
           }
@@ -75,7 +75,7 @@ describe('token-validator', () => {
             id: null,
             user: null,
             displayname: null,
-            scopes: []
+            scope: []
           }
         })
       })
@@ -91,18 +91,19 @@ describe('token-validator', () => {
             exp: expect.any(Number),
             iat: expect.any(Number),
             token,
-            scopes: ['Dog.Index.Enforcement'],
+            scope: ['Dog.Index.Enforcement'],
             iss: 'aphw-ddi-enforcement'
           }
         }
       }
 
-      const makeArtifacts = (username) => ({
+      const makeArtifacts = (username, scope) => ({
         decoded: {
           payload: {
             ...artifacts.decoded.payload,
             username,
-            displayname: username
+            displayname: username,
+            scope: scope ?? artifacts.decoded.payload.scope
           }
         }
       })
@@ -125,7 +126,7 @@ describe('token-validator', () => {
             id: 'chuck@norris.org',
             user: 'chuck@norris.org',
             displayname: 'chuck@norris.org',
-            scopes: ['Dog.Index.Enforcement']
+            scope: ['Dog.Index.Enforcement']
           }
         })
       })
@@ -150,7 +151,30 @@ describe('token-validator', () => {
             id: 'cached.user@example.com',
             displayname: 'cached.user@example.com',
             user: 'cached.user@example.com',
-            scopes: ['Dog.Index.Enforcement']
+            scope: ['Dog.Index.Enforcement']
+          }
+        })
+      })
+
+      test('should not validate with aphw-ddi-enforcement call if user has unauthorised scopes', async () => {
+        isAccountEnabled.mockResolvedValue(true)
+
+        getUserInfo.mockResolvedValue({
+          sub: 'blablablablablabla',
+          email: username,
+          email_verified: true,
+          phone_number: '01406946277',
+          phone_number_verified: true
+        })
+
+        const validation = await validate(makeArtifacts('chuck@norris.org', ['Dog.Index.Admin']))
+        expect(validation).toEqual({
+          isValid: false,
+          credentials: {
+            displayname: null,
+            id: null,
+            scope: [],
+            user: null
           }
         })
       })
@@ -176,7 +200,7 @@ describe('token-validator', () => {
           credentials: {
             displayname: null,
             id: null,
-            scopes: [],
+            scope: [],
             user: null
           }
         })
@@ -202,7 +226,7 @@ describe('token-validator', () => {
           credentials: {
             displayname: null,
             id: null,
-            scopes: [],
+            scope: [],
             user: null
           }
         })
@@ -228,7 +252,7 @@ describe('token-validator', () => {
           credentials: {
             displayname: null,
             id: null,
-            scopes: [],
+            scope: [],
             user: null
           }
         })
@@ -246,7 +270,7 @@ describe('token-validator', () => {
           credentials: {
             displayname: null,
             id: null,
-            scopes: [],
+            scope: [],
             user: null
           }
         })
@@ -271,7 +295,7 @@ describe('token-validator', () => {
           credentials: {
             displayname: null,
             id: null,
-            scopes: [],
+            scope: [],
             user: null
           }
         })
@@ -284,13 +308,13 @@ describe('token-validator', () => {
               exp: expect.any(Number),
               iat: expect.any(Number),
               token,
-              scopes: ['Dog.Index.Enforcement'],
+              scope: ['Dog.Index.Enforcement'],
               iss: 'aphw-ddi-enforcement'
             }
           }
         }
         const validation = await validate(invalidArtifacts, {}, undefined, 'ABCDEF')
-        expect(validation).toEqual({ isValid: false, credentials: { id: null, user: null, displayname: null, scopes: [] } })
+        expect(validation).toEqual({ isValid: false, credentials: { id: null, user: null, displayname: null, scope: [] } })
       })
     })
   })

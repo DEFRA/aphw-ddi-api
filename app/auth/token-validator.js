@@ -12,7 +12,7 @@ const returnVal = (
   {
     username = null,
     displayname = null,
-    scopes = []
+    scope = []
   } = {}) => {
   return {
     isValid,
@@ -20,7 +20,7 @@ const returnVal = (
       id: username,
       user: username,
       displayname: displayname ?? username,
-      scopes
+      scope
     }
   }
 }
@@ -43,6 +43,11 @@ const validateEnforcement = async (username, payload) => {
   const { token } = payload
 
   if (!token) {
+    return returnVal(false)
+  }
+
+  // Police service should not be able to add internal scopes
+  if (scopes.internal.some(allowedScope => payload.scope?.includes(allowedScope))) {
     return returnVal(false)
   }
 
@@ -77,7 +82,7 @@ const validate = async (artifacts, _request, _h) => {
   const payload = decoded.payload
   const username = payload.username
 
-  if (!scopes.all.some(allowedScope => payload.scopes?.includes(allowedScope))) {
+  if (!scopes.all.some(allowedScope => payload.scope?.includes(allowedScope))) {
     return returnVal(false)
   }
 
