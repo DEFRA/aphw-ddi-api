@@ -3,6 +3,7 @@ const { addMinutes } = require('../lib/date-helpers')
 const { isAccountEnabled } = require('../repos/user-accounts')
 const { getUserInfo } = require('../proxy/auth-server')
 const { hashCache } = require('../session/hashCache')
+const { scopes } = require('../constants/auth')
 
 const expiryPeriodInMins = 65
 
@@ -11,7 +12,7 @@ const returnVal = (
   {
     username = null,
     displayname = null,
-    scopes = []
+    scope = []
   } = {}) => {
   return {
     isValid,
@@ -19,7 +20,7 @@ const returnVal = (
       id: username,
       user: username,
       displayname: displayname ?? username,
-      scopes
+      scope
     }
   }
 }
@@ -37,10 +38,16 @@ const checkTokenOnline = async (username, token) => {
 const validatePortal = (_username, payload) => {
   return returnVal(true, payload)
 }
+
 const validateEnforcement = async (username, payload) => {
   const { token } = payload
 
   if (!token) {
+    return returnVal(false)
+  }
+
+  // Police service should not be able to add internal scopes
+  if (scopes.internal.some(allowedScope => payload.scope?.includes(allowedScope))) {
     return returnVal(false)
   }
 
@@ -74,6 +81,10 @@ const validate = async (artifacts, _request, _h) => {
   const decoded = artifacts.decoded
   const payload = decoded.payload
   const username = payload.username
+
+  if (!scopes.all.some(allowedScope => payload.scope?.includes(allowedScope))) {
+    return returnVal(false)
+  }
 
   if (!username) {
     return returnVal(false)

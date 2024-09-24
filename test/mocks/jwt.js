@@ -18,7 +18,7 @@ const enforcementJwt = () => {
   const token = jwt.sign({
     username: 'enforcement.user@example.com',
     displayname: 'enforcement.user@example.com',
-    scopes: ['Dog.Index.Enforcement'],
+    scope: ['Dog.Index.Enforcement'],
     token: 'ZGV2LXVzZXJAdGVzdC5jb206QUJDREVGRzEyMzQ1Ng=='
   }, privateKey, options)
 
@@ -45,7 +45,7 @@ const portalJwt = () => {
   const token = jwt.sign({
     username: 'dev-user@test.com',
     displayname: 'dev-user@test.com',
-    scopes: ['Dog.Index.Admin']
+    scope: ['Dog.Index.Admin']
   }, privateKey, options)
 
   return {
