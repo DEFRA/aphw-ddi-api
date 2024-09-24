@@ -121,7 +121,7 @@ class RegistrationService {
       return actionResults.ACCOUNT_NOT_ENABLED
     }
 
-    return this.userAccountRepository.setLicenceAcceptedDate(username) ? actionResults.OK : actionResults.ERROR
+    return await this.userAccountRepository.setLicenceAcceptedDate(username) ? actionResults.OK : actionResults.ERROR
   }
 }
 
