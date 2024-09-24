@@ -47,12 +47,11 @@ module.exports = [
     path: '/user/me/licence',
     options: {
       tags: ['api'],
-      notes: ['Checks if the calling user has accepted the licence'],
+      notes: ['Sets the date that the user accepted the licence'],
       response: {
         status: {
           200: undefined,
-          401: undefined,
-          404: undefined
+          500: undefined
         }
       }
     },

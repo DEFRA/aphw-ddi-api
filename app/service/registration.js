@@ -68,11 +68,11 @@ class RegistrationService {
     if (account.activation_token === oneTimeCode) {
       if (account.activation_token_expiry <= new Date()) {
         return actionResults.ACTIVATION_CODE_EXPIRED
-      } else {
-        await this.userAccountRepository.setActivatedDate(username)
-
-        return actionResults.OK
       }
+
+      await this.userAccountRepository.setActivatedDate(username)
+
+      return actionResults.OK
     }
 
     return actionResults.INVALID_ACTIVATION_CODE
@@ -121,7 +121,7 @@ class RegistrationService {
       return actionResults.ACCOUNT_NOT_ENABLED
     }
 
-    return await this.userAccountRepository.setLicenceAcceptedDate(username) ? actionResults.OK : actionResults.ERROR
+    return this.userAccountRepository.setLicenceAcceptedDate(username) ? actionResults.OK : actionResults.ERROR
   }
 }
 
