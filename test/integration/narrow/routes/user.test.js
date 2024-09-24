@@ -51,7 +51,7 @@ describe('User endpoint', () => {
   })
 
   describe('GET /user/me/licence', () => {
-    test('should validate and return a 200 if user accepted licence', async () => {
+    test('should validate and return a 200 true if user accepted licence', async () => {
       userVerifyLicenceAccepted.mockResolvedValue(true)
       const options = {
         method: 'GET',
@@ -60,9 +60,10 @@ describe('User endpoint', () => {
       }
       const response = await server.inject(options)
       expect(response.statusCode).toBe(200)
+      expect(response.payload).toBe('true')
     })
 
-    test('should validate and return a 404 if user not accepted licence', async () => {
+    test('should validate and return a 200 false if user not accepted licence', async () => {
       userVerifyLicenceAccepted.mockResolvedValue(false)
       const options = {
         method: 'GET',
@@ -70,7 +71,8 @@ describe('User endpoint', () => {
         ...portalHeader
       }
       const response = await server.inject(options)
-      expect(response.statusCode).toBe(404)
+      expect(response.statusCode).toBe(200)
+      expect(response.payload).toBe('false')
     })
   })
 
@@ -86,7 +88,7 @@ describe('User endpoint', () => {
       expect(response.statusCode).toBe(200)
     })
 
-    test('should return a 404 if user not accepted licence', async () => {
+    test('should return a 500 if user not accepted licence', async () => {
       userSetLicenceAccepted.mockResolvedValue(false)
       const options = {
         method: 'PUT',
@@ -94,7 +96,7 @@ describe('User endpoint', () => {
         ...portalHeader
       }
       const response = await server.inject(options)
-      expect(response.statusCode).toBe(404)
+      expect(response.statusCode).toBe(500)
     })
   })
 

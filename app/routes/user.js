@@ -39,7 +39,7 @@ module.exports = [
     handler: async (request, h) => {
       const res = await userVerifyLicenceAccepted(request)
 
-      return h.response(undefined).code(res ? 200 : 404)
+      return h.response(res).code(200)
     }
   },
   {
@@ -59,7 +59,7 @@ module.exports = [
     handler: async (request, h) => {
       const res = await userSetLicenceAccepted(request)
 
-      return h.response(undefined).code(res ? 200 : 404)
+      return h.response(res).code(res ? 200 : 500)
     }
   },
   {
