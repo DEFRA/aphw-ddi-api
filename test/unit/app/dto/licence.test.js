@@ -16,7 +16,7 @@ describe('Licence test', () => {
         decoded: {
           header: { alg: 'RS256', typ: 'JWT', kid: 'aphw-ddi-enforcement' },
           payload: {
-            scopes: ['Dog.Index.Enforcement'],
+            scope: ['Dog.Index.Enforcement'],
             username: 'dev-user@test.com',
             displayname: 'Dev User',
             token: 'abcdef',
