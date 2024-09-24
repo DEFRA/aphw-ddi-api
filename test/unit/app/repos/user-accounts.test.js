@@ -9,7 +9,47 @@ describe('user-accounts', () => {
 
   const sequelize = require('../../../../app/config/db')
 
-  const { isAccountEnabled, getAccount, setActivationCodeAndExpiry, setLoginDate, setActivatedDate, setLicenceAcceptedDate, verifyLicenceAccepted } = require('../../../../app/repos/user-accounts')
+  const { createAccount, isAccountEnabled, getAccount, setActivationCodeAndExpiry, setLoginDate, setActivatedDate, setLicenceAcceptedDate, verifyLicenceAccepted } = require('../../../../app/repos/user-accounts')
+
+  describe('createAccount', () => {
+    test('should create a stub account', async () => {
+      /**
+       * @type {UserAccountDto}
+       */
+      const userDto = {
+        username: 'bill@example.com'
+      }
+
+      const expectedUserDto = {
+        username: 'bill@example.com',
+        active: true
+      }
+
+      const user = await createAccount(userDto)
+
+      expect(user).toEqual(expectedUserDto)
+    })
+
+    test('should create a stub account with telephone', async () => {
+      /**
+       * @type {UserAccountDto}
+       */
+      const userDto = {
+        username: 'bill@example.com',
+        telephone: '01234567890'
+      }
+
+      const expectedUserDto = {
+        username: 'bill@example.com',
+        active: true,
+        telephone: '01234567890'
+      }
+
+      const user = await createAccount(userDto)
+
+      expect(user).toEqual(expectedUserDto)
+    })
+  })
 
   describe('isAccountEnabled', () => {
     test('should return true if activated date and active', async () => {

@@ -44,6 +44,11 @@ module.exports = (sequelize, DataTypes) => {
       allowNull: false,
       defaultValue: sequelize.fn('now')
     },
+    updated_at: {
+      type: DataTypes.DATE,
+      allowNull: false,
+      defaultValue: sequelize.fn('now')
+    },
     deleted_at: {
       type: DataTypes.DATE,
       allowNull: true
@@ -51,7 +56,6 @@ module.exports = (sequelize, DataTypes) => {
   }, {
     sequelize,
     tableName: 'user_account',
-    timestamps: false,
     indexes: [
       {
         name: 'user_account_username_ukey',

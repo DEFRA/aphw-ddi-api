@@ -2,6 +2,35 @@ const sequelize = require('../config/db')
 const { addMinutes } = require('../lib/date-helpers')
 
 /**
+ * @typedef UserAccount
+ * @property {string} username
+ * @property {string} telephone
+ * @property {string} activation_token
+ * @property {Date} activation_token_expiry
+ * @property {Date} activated_date
+ * @property {Date} accepted_terms_and_conds_date
+ * @property {boolean} active
+ * @property {Date} last_login_date
+ * @property {Date} created_at
+ * @property {Date} updated_at
+ */
+
+/**
+ * @typedef UserAccountDto
+ * @property {string} username
+ * @property {string} [telephone]
+ * @property {boolean} [active]
+ */
+
+const createAccount = async (account) => {
+  return {
+    username: account.username,
+    telephone: account.telephone ?? undefined,
+    active: true
+  }
+}
+
+/**
  * @param {string} username
  * @return {Promise<boolean>}
  */
@@ -111,6 +140,7 @@ const verifyLicenceAccepted = async (username) => {
 }
 
 module.exports = {
+  createAccount,
   isAccountEnabled,
   getAccount,
   setActivationCodeAndExpiry,
