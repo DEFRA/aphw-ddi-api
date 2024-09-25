@@ -50,16 +50,14 @@ describe('user schema', () => {
     test('should pass with valid schema and all properties', () => {
       const request = {
         username: 'john@smith.co.uk',
-        active: false,
-        telephone: '01234567890'
+        active: false
       }
       const validation = createUserResponseSchema.validate(request, { abortEarly: false })
 
       expect(validation).toEqual({
         value: {
           username: 'john@smith.co.uk',
-          active: false,
-          telephone: '01234567890'
+          active: false
         }
       })
       expect(validation.error).not.toBeDefined()
