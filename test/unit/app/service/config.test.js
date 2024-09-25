@@ -13,6 +13,9 @@ describe('ServiceProvider', () => {
   jest.mock('../../../../app/repos/breaches')
   const breachRepository = require('../../../../app/repos/breaches')
 
+  jest.mock('../../../../app/repos/user-accounts')
+  const userRepository = require('../../../../app/repos/user-accounts')
+
   test('should instantiate', () => {
     expect(ServiceProvider.getCdoService).toBeInstanceOf(Function)
   })
@@ -69,6 +72,41 @@ describe('ServiceProvider', () => {
       expect(dogRepository.getDogModel).toHaveBeenCalledTimes(4)
       expect(dogRepository.saveDog).toHaveBeenCalledTimes(2)
       expect(breachRepository.getBreachCategories).toHaveBeenCalledTimes(2)
+    })
+  })
+
+  const request = {
+    auth: {
+      artifacts: {
+        decoded: {
+          header: { alg: 'RS256', typ: 'JWT', kid: 'aphw-ddi-enforcement' },
+          payload: {
+            scope: ['Dog.Index.Enforcement'],
+            username: 'dev-user@test.com',
+            displayname: 'Dev User',
+            token: 'abcdef',
+            iat: 1726587632,
+            exp: 1726591232,
+            aud: 'aphw-ddi-api',
+            iss: 'aphw-ddi-enforcement'
+          },
+          signature: 'abcdef'
+        }
+      }
+    }
+  }
+
+  describe('getRegistrationService', () => {
+    test('should initialise getRegistrationService', async () => {
+      const regService = ServiceProvider.getRegistrationService()
+      await regService.isUserLicenceAccepted(request)
+      expect(userRepository.verifyLicenceAccepted).toHaveBeenCalledTimes(1)
+    })
+
+    test('should use pre-initialised regService second time getRegistrationService is called', async () => {
+      const regService = ServiceProvider.getRegistrationService()
+      await regService.isUserLicenceAccepted(request)
+      expect(userRepository.verifyLicenceAccepted).toHaveBeenCalledTimes(2)
     })
   })
 })

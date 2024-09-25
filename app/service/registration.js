@@ -1,8 +1,9 @@
 const { randomInt } = require('crypto')
 const { emailTypes } = require('../constants/email-types')
 const { sendEmail } = require('../messaging/send-email')
+const { NotFoundError } = require('../errors/not-found')
 
-const expiryInMinsForOtp = '8'
+const expiryInMinsForOtp = '60'
 
 const actionResults = {
   ACCOUNT_NOT_FOUND: 'Account not found',
@@ -24,38 +25,32 @@ class RegistrationService {
   }
 
   /**
-   * @type {RegistrationService.GenerateOneTimeCode}
+   * @type {RegistrationService.getUserFromRequest}
+   */
+  getUserFromRequest (request) {
+    const payload = request.auth?.artifacts?.decoded?.payload
+    if (payload) {
+      const { username } = payload
+      return username
+    }
+    throw new NotFoundError('user not found')
+  }
+
+  /**
+   * @type {RegistrationService.generateOneTimeCode}
    */
   generateOneTimeCode () {
     return `${(Math.floor(100000 + randomInt(900000)))}`
   }
 
   /**
-   * @type {RegistrationService.SendVerifyEmailAddress}
-   * @param {string} username
+   * @type {RegistrationService.verifyEmailCode}
+   * @param request
    */
-  async sendVerifyEmailAddress (username) {
-    const oneTimeCode = this.generateOneTimeCode()
+  async verifyEmailCode (request) {
+    const username = this.getUserFromRequest(request)
+    const oneTimeCode = request.payload?.code
 
-    await this.userAccountRepository.setActivationCodeAndExpiry(username, oneTimeCode, expiryInMinsForOtp)
-
-    const data = {
-      toAddress: username,
-      type: emailTypes.verifyEmail,
-      customFields: [
-        { name: 'one_time_code', value: oneTimeCode },
-        { name: 'expiry_in_mins', value: expiryInMinsForOtp }
-      ]
-    }
-    await sendEmail(data)
-  }
-
-  /**
-   * @type {RegistrationService.VerifyAccountActivation}
-   * @param {string} username
-   * @param {string} code
-   */
-  async verifyAccountActivation (username, oneTimeCode) {
     const account = await this.userAccountRepository.getAccount(username)
     if (!account) {
       return actionResults.ACCOUNT_NOT_FOUND
@@ -122,6 +117,51 @@ class RegistrationService {
     }
 
     return await this.userAccountRepository.setLicenceAcceptedDate(username) ? actionResults.OK : actionResults.ERROR
+  }
+
+  /**
+   * @type {RegistrationService.isUserLicenceAccepted}
+   * @param {any} request
+   */
+  async isUserLicenceAccepted (request) {
+    return this.userAccountRepository.verifyLicenceAccepted(this.getUserFromRequest(request))
+  }
+
+  /**
+   * @type {RegistrationService.setUserLicenceAccepted}
+   * @param {any} request
+   */
+  async setUserLicenceAccepted (request) {
+    return this.userAccountRepository.setLicenceAcceptedDate(this.getUserFromRequest(request))
+  }
+
+  /**
+   * @type {RegistrationService.isUserEmailVerified}
+   * @param {any} request
+   */
+  async isUserEmailVerified (request) {
+    return this.userAccountRepository.isEmailVerified(this.getUserFromRequest(request))
+  }
+
+  /**
+   * @type {RegistrationService.sendVerifyEmail}
+   * @param {any} request
+   */
+  async sendVerifyEmail (request) {
+    const username = this.getUserFromRequest(request)
+    const oneTimeCode = this.generateOneTimeCode()
+
+    await this.userAccountRepository.setActivationCodeAndExpiry(username, oneTimeCode, expiryInMinsForOtp)
+
+    const data = {
+      toAddress: username,
+      type: emailTypes.verifyEmail,
+      customFields: [
+        { name: 'one_time_code', value: oneTimeCode },
+        { name: 'expiry_in_mins', value: expiryInMinsForOtp }
+      ]
+    }
+    await sendEmail(data)
   }
 }
 

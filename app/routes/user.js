@@ -1,6 +1,6 @@
 const { hashCache } = require('../session/hashCache')
 const { userValidateAudit, userLogoutAudit } = require('../dto/auditing/user')
-const { userVerifyLicenceAccepted, userSetLicenceAccepted } = require('../dto/licence')
+const { getRegistrationService } = require('../service/config')
 
 module.exports = [
   {
@@ -37,7 +37,7 @@ module.exports = [
       }
     },
     handler: async (request, h) => {
-      const res = await userVerifyLicenceAccepted(request)
+      const res = await getRegistrationService().isUserLicenceAccepted(request)
 
       return h.response(res).code(200)
     }
@@ -56,9 +56,65 @@ module.exports = [
       }
     },
     handler: async (request, h) => {
-      const res = await userSetLicenceAccepted(request)
+      const res = await getRegistrationService().setUserLicenceAccepted(request)
 
       return h.response(res).code(res ? 200 : 500)
+    }
+  },
+  {
+    method: 'GET',
+    path: '/user/me/email',
+    options: {
+      tags: ['api'],
+      notes: ['Checks if the calling user has verified their email address'],
+      response: {
+        status: {
+          200: undefined,
+          401: undefined,
+          404: undefined
+        }
+      }
+    },
+    handler: async (request, h) => {
+      const res = await getRegistrationService().isUserEmailVerified(request)
+
+      return h.response(res).code(200)
+    }
+  },
+  {
+    method: 'PUT',
+    path: '/user/me/email',
+    options: {
+      tags: ['api'],
+      notes: ['Sends and email with OTP to verfy users email address'],
+      response: {
+        status: {
+          200: undefined
+        }
+      }
+    },
+    handler: async (request, h) => {
+      await getRegistrationService().sendVerifyEmail(request)
+
+      return h.response(true).code(200)
+    }
+  },
+  {
+    method: 'POST',
+    path: '/user/me/email',
+    options: {
+      tags: ['api'],
+      notes: ['Verifies the OTP code and activates account if successful'],
+      response: {
+        status: {
+          200: undefined
+        }
+      }
+    },
+    handler: async (request, h) => {
+      const res = await getRegistrationService().verifyEmailCode(request)
+
+      return h.response({ result: res }).code(200)
     }
   },
   {

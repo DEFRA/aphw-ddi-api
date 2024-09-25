@@ -8,8 +8,8 @@ describe('User endpoint', () => {
   jest.mock('../../../../app/auth/token-validator')
   const { validate } = require('../../../../app/auth/token-validator')
 
-  jest.mock('../../../../app/dto/licence')
-  const { userVerifyLicenceAccepted, userSetLicenceAccepted } = require('../../../../app/dto/licence')
+  jest.mock('../../../../app/service/config')
+  const { getRegistrationService } = require('../../../../app/service/config')
 
   jest.mock('../../../../app/session/hashCache', () => ({
     hashCache: new Map()
@@ -19,6 +19,13 @@ describe('User endpoint', () => {
   beforeEach(async () => {
     jest.clearAllMocks()
     validate.mockResolvedValue(mockValidate)
+    getRegistrationService.mockReturnValue({
+      isUserLicenceAccepted: jest.fn(),
+      setUserLicenceAccepted: jest.fn(),
+      isUserEmailVerified: jest.fn(),
+      sendVerifyEmail: jest.fn(),
+      verifyEmailCode: jest.fn()
+    })
     server = await createServer()
     await server.initialize()
   })
@@ -52,7 +59,7 @@ describe('User endpoint', () => {
 
   describe('GET /user/me/licence', () => {
     test('should validate and return a 200 true if user accepted licence', async () => {
-      userVerifyLicenceAccepted.mockResolvedValue(true)
+      getRegistrationService().isUserLicenceAccepted.mockResolvedValue(true)
       const options = {
         method: 'GET',
         url: '/user/me/licence',
@@ -64,7 +71,7 @@ describe('User endpoint', () => {
     })
 
     test('should validate and return a 200 false if user not accepted licence', async () => {
-      userVerifyLicenceAccepted.mockResolvedValue(false)
+      getRegistrationService().isUserLicenceAccepted.mockResolvedValue(false)
       const options = {
         method: 'GET',
         url: '/user/me/licence',
@@ -78,7 +85,7 @@ describe('User endpoint', () => {
 
   describe('PUT /user/me/licence', () => {
     test('should return a 200 if user accepted licence', async () => {
-      userSetLicenceAccepted.mockResolvedValue(true)
+      getRegistrationService().setUserLicenceAccepted.mockResolvedValue(true)
       const options = {
         method: 'PUT',
         url: '/user/me/licence',
@@ -89,7 +96,7 @@ describe('User endpoint', () => {
     })
 
     test('should return a 500 if user not accepted licence', async () => {
-      userSetLicenceAccepted.mockResolvedValue(false)
+      getRegistrationService().setUserLicenceAccepted.mockResolvedValue(false)
       const options = {
         method: 'PUT',
         url: '/user/me/licence',
@@ -97,6 +104,84 @@ describe('User endpoint', () => {
       }
       const response = await server.inject(options)
       expect(response.statusCode).toBe(500)
+    })
+  })
+
+  describe('GET /user/me/email', () => {
+    test('should validate and return a 200 true if user accepted licence', async () => {
+      getRegistrationService().isUserEmailVerified.mockResolvedValue(true)
+      const options = {
+        method: 'GET',
+        url: '/user/me/email',
+        ...portalHeader
+      }
+      const response = await server.inject(options)
+      expect(response.statusCode).toBe(200)
+      expect(response.payload).toBe('true')
+    })
+
+    test('should validate and return a 200 false if user not accepted licence', async () => {
+      getRegistrationService().isUserEmailVerified.mockResolvedValue(false)
+      const options = {
+        method: 'GET',
+        url: '/user/me/email',
+        ...portalHeader
+      }
+      const response = await server.inject(options)
+      expect(response.statusCode).toBe(200)
+      expect(response.payload).toBe('false')
+    })
+  })
+
+  describe('PUT /user/me/email', () => {
+    test('should validate and return a 200 true if email sent', async () => {
+      getRegistrationService().sendVerifyEmail.mockResolvedValue(true)
+      const options = {
+        method: 'PUT',
+        url: '/user/me/email',
+        ...portalHeader
+      }
+      const response = await server.inject(options)
+      expect(response.statusCode).toBe(200)
+      expect(response.payload).toBe('true')
+    })
+
+    test('should validate and return a 500 if error', async () => {
+      getRegistrationService().sendVerifyEmail.mockImplementation(() => { throw new Error('Unable to send') })
+      const options = {
+        method: 'PUT',
+        url: '/user/me/email',
+        ...portalHeader
+      }
+      const response = await server.inject(options)
+      expect(response.statusCode).toBe(500)
+      expect(response.payload).toContain('An internal server error occurred')
+    })
+  })
+
+  describe('POST /user/me/email', () => {
+    test('should validate OTP code return a 200 with result of ok if code is correct', async () => {
+      getRegistrationService().verifyEmailCode.mockResolvedValue('Ok')
+      const options = {
+        method: 'POST',
+        url: '/user/me/email',
+        ...portalHeader
+      }
+      const response = await server.inject(options)
+      expect(response.statusCode).toBe(200)
+      expect(response.payload).toContain('Ok')
+    })
+
+    test('should validate and return a 200 with error message', async () => {
+      getRegistrationService().verifyEmailCode.mockResolvedValue('Invalid code')
+      const options = {
+        method: 'POST',
+        url: '/user/me/email',
+        ...portalHeader
+      }
+      const response = await server.inject(options)
+      expect(response.statusCode).toBe(200)
+      expect(response.payload).toContain('Invalid code')
     })
   })
 
