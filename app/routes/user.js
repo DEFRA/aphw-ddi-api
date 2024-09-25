@@ -1,8 +1,38 @@
 const { hashCache } = require('../session/hashCache')
 const { userValidateAudit, userLogoutAudit } = require('../dto/auditing/user')
 const { userVerifyLicenceAccepted, userSetLicenceAccepted } = require('../dto/licence')
+const { createAccount } = require('../repos/user-accounts')
+const { scopes } = require('../constants/auth')
+const { createUserResponseSchema, createUserRequestSchema } = require('../schema/user')
 
 module.exports = [
+  {
+    method: 'POST',
+    path: '/user',
+    options: {
+      tags: ['api'],
+      notes: ['Creates a new user account'],
+      response: {
+        status: {
+          204: createUserResponseSchema
+        }
+      },
+      validate: {
+        payload: createUserRequestSchema,
+        failAction: (request, h, err) => {
+          console.error(err)
+
+          return h.response({ errors: err.details.map(e => e.message) }).code(400).takeover()
+        }
+      },
+      auth: { scope: [scopes.admin] },
+      handler: async (request, h) => {
+        const user = await createAccount(request.payload)
+
+        return h.response(user).code(201)
+      }
+    }
+  },
   {
     method: 'GET',
     path: '/user/me/validate',

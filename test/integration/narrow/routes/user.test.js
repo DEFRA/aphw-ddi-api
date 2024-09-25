@@ -1,5 +1,5 @@
-const { mockValidate } = require('../../../mocks/auth')
-const { portalHeader } = require('../../../mocks/jwt')
+const { mockValidate, mockValidateEnforcement } = require('../../../mocks/auth')
+const { portalHeader, enforcementHeader } = require('../../../mocks/jwt')
 
 describe('User endpoint', () => {
   const createServer = require('../../../../app/server')
@@ -15,6 +15,9 @@ describe('User endpoint', () => {
     hashCache: new Map()
   }))
   const { hashCache } = require('../../../../app/session/hashCache')
+
+  jest.mock('../../../../app/repos/user-accounts')
+  const { createAccount } = require('../../../../app/repos/user-accounts')
 
   beforeEach(async () => {
     jest.clearAllMocks()
@@ -116,6 +119,72 @@ describe('User endpoint', () => {
       expect(response.statusCode).toBe(204)
       expect(hashCache.has('dev-user@test.com')).toBe(false)
     })
+  })
+
+  describe('POST /user', () => {
+    test('should add a new user and return a 201 for admin user', async () => {
+      const expectedPayload = {
+        username: 'ralph@wreckit.com',
+        active: true
+      }
+      createAccount.mockResolvedValue({
+        username: 'ralph@wreckit.com',
+        active: true
+      })
+      const options = {
+        method: 'POST',
+        url: '/user',
+        payload: {
+          username: 'ralph@wreckit.com'
+        },
+        ...portalHeader
+      }
+
+      const response = await server.inject(options)
+      expect(response.statusCode).toBe(201)
+      expect(createAccount).toHaveBeenCalledWith({
+        username: 'ralph@wreckit.com',
+        active: true
+      })
+      expect(JSON.parse(response.payload)).toEqual(expectedPayload)
+    })
+
+    test('should return 403 if request is from enforcement', async () => {
+      validate.mockResolvedValue(mockValidateEnforcement)
+      createAccount.mockResolvedValue({
+        username: 'ralph@wreckit.com',
+        active: true
+      })
+      const options = {
+        method: 'POST',
+        url: '/user',
+        payload: {
+          username: 'ralph@wreckit.com'
+        },
+        ...enforcementHeader
+      }
+
+      const response = await server.inject(options)
+      expect(response.statusCode).toBe(403)
+      expect(createAccount).not.toHaveBeenCalled()
+    })
+
+    test('should return 400 with invalid payload', async () => {
+      const options = {
+        method: 'POST',
+        url: '/user',
+        payload: {},
+        ...portalHeader
+      }
+
+      const response = await server.inject(options)
+      expect(response.statusCode).toBe(400)
+      expect(createAccount).not.toHaveBeenCalled()
+    })
+
+    // test('should not add a new user if scope is ', () => {
+    //
+    // })
   })
 
   afterEach(async () => {
