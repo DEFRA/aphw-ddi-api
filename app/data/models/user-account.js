@@ -56,6 +56,7 @@ module.exports = (sequelize, DataTypes) => {
   }, {
     sequelize,
     tableName: 'user_account',
+    timestamps: false,
     indexes: [
       {
         name: 'user_account_username_ukey',

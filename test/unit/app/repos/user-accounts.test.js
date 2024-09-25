@@ -1,18 +1,25 @@
+const { DuplicateResourceError } = require('../../../../app/errors/duplicate-record')
 describe('user-accounts', () => {
   jest.mock('../../../../app/config/db', () => ({
     models: {
       user_account: {
-        findOne: jest.fn()
+        findOne: jest.fn(),
+        create: jest.fn()
       }
-    }
+    },
+    transaction: jest.fn()
   }))
 
   const sequelize = require('../../../../app/config/db')
 
   const { createAccount, isAccountEnabled, getAccount, setActivationCodeAndExpiry, setLoginDate, setActivatedDate, setLicenceAcceptedDate, verifyLicenceAccepted } = require('../../../../app/repos/user-accounts')
 
+  afterEach(() => {
+    jest.resetAllMocks()
+  })
+
   describe('createAccount', () => {
-    test('should create a stub account', async () => {
+    test('should use a transaction if none exists', async () => {
       /**
        * @type {UserAccountDto}
        */
@@ -20,34 +27,68 @@ describe('user-accounts', () => {
         username: 'bill@example.com'
       }
 
-      const expectedUserDto = {
-        username: 'bill@example.com',
-        active: true
-      }
+      await createAccount(userDto)
 
-      const user = await createAccount(userDto)
-
-      expect(user).toEqual(expectedUserDto)
+      expect(sequelize.transaction).toHaveBeenCalled()
     })
 
-    test('should create a stub account with telephone', async () => {
+    test('should create an account', async () => {
+      sequelize.models.user_account.findOne.mockResolvedValue(null)
+      const transaction = {}
       /**
        * @type {UserAccountDto}
        */
       const userDto = {
         username: 'bill@example.com',
-        telephone: '01234567890'
+        active: true
       }
 
       const expectedUserDto = {
         username: 'bill@example.com',
-        active: true,
-        telephone: '01234567890'
+        active: true
       }
 
-      const user = await createAccount(userDto)
+      sequelize.models.user_account.create.mockResolvedValue(expectedUserDto)
+
+      const user = await createAccount(userDto, transaction)
 
       expect(user).toEqual(expectedUserDto)
+      expect(sequelize.transaction).not.toHaveBeenCalled()
+      expect(sequelize.models.user_account.create).toHaveBeenCalledWith(userDto, {})
+    })
+
+    test('should reject with duplicate if', async () => {
+      sequelize.models.user_account.findOne.mockResolvedValue({
+        created_at: '2024-09-25T19:26:14.946Z',
+        updated_at: '2024-09-25T19:26:14.946Z',
+        id: 3,
+        username: 'user@example.com',
+        active: true,
+        activation_token: null,
+        activation_token_expiry: null,
+        activated_date: null,
+        accepted_terms_and_conds_date: null,
+        last_login_date: null,
+        deleted_at: null
+      })
+
+      const transaction = {}
+      /**
+       * @type {UserAccountDto}
+       */
+      const userDto = {
+        username: 'bill@example.com',
+        active: true
+      }
+
+      const expectedUserDto = {
+        username: 'bill@example.com',
+        active: true
+      }
+
+      sequelize.models.user_account.create.mockResolvedValue(expectedUserDto)
+
+      await expect(createAccount(userDto, transaction)).rejects.toThrow(new DuplicateResourceError('This user is already in the allow list'))
     })
   })
 
