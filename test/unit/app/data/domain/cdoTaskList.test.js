@@ -636,6 +636,36 @@ describe('CdoTaskList', () => {
       expect(cdoTaskList.cdoSummary.neuteringConfirmation).toBeUndefined()
     })
 
+    test('should permit recording of Microchip before application pack is sent if it has already been set', () => {
+      const microchipNumber = '123456789012345'
+      const microchipVerification = new Date('2024-09-26')
+      const exemptionProperties = buildExemption({
+        applicationPackSent: null,
+        microchipVerification
+      })
+      const cdo = buildCdo({
+        exemption: exemptionProperties,
+        dog: buildCdoDog({
+          status: 'Pre-exempt',
+          microchipNumber
+        })
+      })
+      const cdoTaskListWithMicrochipNumber = new CdoTaskList(cdo)
+
+      expect(() => cdoTaskListWithMicrochipNumber.recordInsuranceDetails(dogsTrustCompany, inXDays(60), transactionCallback)).toThrow(new SequenceViolationError('Application pack must be sent before performing this action'))
+      expect(() => cdoTaskListWithMicrochipNumber.recordMicrochipNumber('123456789012345', null, transactionCallback)).not.toThrow(new SequenceViolationError('Application pack must be sent before performing this action'))
+      expect(() => cdoTaskListWithMicrochipNumber.recordApplicationFee(new Date('2024-07-04'), transactionCallback)).toThrow(new SequenceViolationError('Application pack must be sent before performing this action'))
+      expect(() => cdoTaskListWithMicrochipNumber.sendForm2(new Date('2024-07-04'), transactionCallback)).toThrow(new SequenceViolationError('Application pack must be sent before performing this action'))
+      expect(() => cdoTaskListWithMicrochipNumber.verifyDates(new Date('2024-07-04'), new Date('2024-07-04'), transactionCallback)).toThrow(new SequenceViolationError('Application pack must be sent before performing this action'))
+
+      expect(cdoTaskListWithMicrochipNumber.insuranceDetailsRecorded.completed).toBe(false)
+      expect(cdoTaskListWithMicrochipNumber.cdoSummary.insuranceCompany).toBeUndefined()
+      expect(cdoTaskListWithMicrochipNumber.cdoSummary.insuranceRenewal).not.toBeInstanceOf(Date)
+      expect(cdoTaskListWithMicrochipNumber.cdoSummary.microchipNumber).toBe(microchipNumber)
+      expect(cdoTaskListWithMicrochipNumber.cdoSummary.microchipVerification).toEqual(microchipVerification)
+      expect(cdoTaskListWithMicrochipNumber.cdoSummary.neuteringConfirmation).toBeUndefined()
+    })
+
     describe('sendApplicationPack', () => {
       test('should send application pack given applicationPackSent is not complete', () => {
         const sentDate = new Date()
