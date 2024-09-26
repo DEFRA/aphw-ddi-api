@@ -1,4 +1,4 @@
-const { uniqueResults: mockUniqueResults, resultsForGrouping: mockResultsForGrouping, resultsForSorting: mockResultsForSorting, moreThanTenResults, moreThanThirtyResults } = require('../../../mocks/search-results')
+const { uniqueResults: mockUniqueResults, resultsForGrouping: mockResultsForGrouping, resultsForSorting: mockResultsForSorting, moreThanTenResults /*, moreThanThirtyResults */ } = require('../../../mocks/search-results')
 
 describe('Search repo', () => {
   jest.mock('../../../../app/config/db', () => ({
