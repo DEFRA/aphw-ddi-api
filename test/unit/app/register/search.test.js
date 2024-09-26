@@ -124,6 +124,8 @@ describe('Search repo', () => {
     expect(testList[2].lastName).toBe('Smith')
   })
 
+  /*
+   * TODO - will reinstate this when we reinstate the max limit
   test('search limits results to max records', async () => {
     const manyResults = moreThanThirtyResults()
     sequelize.models.search_index.findAll.mockResolvedValue(manyResults)
@@ -133,4 +135,5 @@ describe('Search repo', () => {
     const results = await search('owner', 'smith')
     expect(results.length).toBe(25)
   })
+  */
 })
