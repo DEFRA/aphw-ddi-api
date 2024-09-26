@@ -1,6 +1,7 @@
 const { hashCache } = require('../session/hashCache')
 const { userValidateAudit, userLogoutAudit } = require('../dto/auditing/user')
 const { getRegistrationService } = require('../service/config')
+const { userBooleanResponseSchema, userStringResponseSchema } = require('../schema/user')
 
 module.exports = [
   {
@@ -30,16 +31,14 @@ module.exports = [
       notes: ['Checks if the calling user has accepted the licence'],
       response: {
         status: {
-          200: undefined,
-          401: undefined,
-          404: undefined
+          200: userBooleanResponseSchema
         }
       }
     },
     handler: async (request, h) => {
       const res = await getRegistrationService().isUserLicenceAccepted(request)
 
-      return h.response(res).code(200)
+      return h.response({ result: res }).code(200)
     }
   },
   {
@@ -50,15 +49,15 @@ module.exports = [
       notes: ['Sets the date that the user accepted the licence'],
       response: {
         status: {
-          200: undefined,
-          500: undefined
+          200: userBooleanResponseSchema,
+          500: userBooleanResponseSchema
         }
       }
     },
     handler: async (request, h) => {
       const res = await getRegistrationService().setUserLicenceAccepted(request)
 
-      return h.response(res).code(res ? 200 : 500)
+      return h.response({ result: res }).code(res ? 200 : 500)
     }
   },
   {
@@ -69,16 +68,14 @@ module.exports = [
       notes: ['Checks if the calling user has verified their email address'],
       response: {
         status: {
-          200: undefined,
-          401: undefined,
-          404: undefined
+          200: userBooleanResponseSchema
         }
       }
     },
     handler: async (request, h) => {
       const res = await getRegistrationService().isUserEmailVerified(request)
 
-      return h.response(res).code(200)
+      return h.response({ result: res }).code(200)
     }
   },
   {
@@ -89,14 +86,14 @@ module.exports = [
       notes: ['Sends and email with OTP to verfy users email address'],
       response: {
         status: {
-          200: undefined
+          200: userBooleanResponseSchema
         }
       }
     },
     handler: async (request, h) => {
       await getRegistrationService().sendVerifyEmail(request)
 
-      return h.response(true).code(200)
+      return h.response({ result: true }).code(200)
     }
   },
   {
@@ -107,7 +104,7 @@ module.exports = [
       notes: ['Verifies the OTP code and activates account if successful'],
       response: {
         status: {
-          200: undefined
+          200: userStringResponseSchema
         }
       }
     },

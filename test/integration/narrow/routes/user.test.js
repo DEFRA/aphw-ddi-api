@@ -67,7 +67,8 @@ describe('User endpoint', () => {
       }
       const response = await server.inject(options)
       expect(response.statusCode).toBe(200)
-      expect(response.payload).toBe('true')
+      console.log('JB payload', response.payload)
+      expect(JSON.parse(response.payload)).toEqual({ result: true })
     })
 
     test('should validate and return a 200 false if user not accepted licence', async () => {
@@ -79,7 +80,7 @@ describe('User endpoint', () => {
       }
       const response = await server.inject(options)
       expect(response.statusCode).toBe(200)
-      expect(response.payload).toBe('false')
+      expect(JSON.parse(response.payload)).toEqual({ result: false })
     })
   })
 
@@ -117,7 +118,7 @@ describe('User endpoint', () => {
       }
       const response = await server.inject(options)
       expect(response.statusCode).toBe(200)
-      expect(response.payload).toBe('true')
+      expect(JSON.parse(response.payload)).toEqual({ result: true })
     })
 
     test('should validate and return a 200 false if user not accepted licence', async () => {
@@ -129,7 +130,7 @@ describe('User endpoint', () => {
       }
       const response = await server.inject(options)
       expect(response.statusCode).toBe(200)
-      expect(response.payload).toBe('false')
+      expect(JSON.parse(response.payload)).toEqual({ result: false })
     })
   })
 
@@ -143,7 +144,7 @@ describe('User endpoint', () => {
       }
       const response = await server.inject(options)
       expect(response.statusCode).toBe(200)
-      expect(response.payload).toBe('true')
+      expect(JSON.parse(response.payload)).toEqual({ result: true })
     })
 
     test('should validate and return a 500 if error', async () => {
@@ -155,7 +156,7 @@ describe('User endpoint', () => {
       }
       const response = await server.inject(options)
       expect(response.statusCode).toBe(500)
-      expect(response.payload).toContain('An internal server error occurred')
+      expect(JSON.parse(response.payload).message).toBe('An internal server error occurred')
     })
   })
 
@@ -169,7 +170,7 @@ describe('User endpoint', () => {
       }
       const response = await server.inject(options)
       expect(response.statusCode).toBe(200)
-      expect(response.payload).toContain('Ok')
+      expect(JSON.parse(response.payload)).toEqual({ result: 'Ok' })
     })
 
     test('should validate and return a 200 with error message', async () => {
@@ -181,7 +182,7 @@ describe('User endpoint', () => {
       }
       const response = await server.inject(options)
       expect(response.statusCode).toBe(200)
-      expect(response.payload).toContain('Invalid code')
+      expect(JSON.parse(response.payload)).toEqual({ result: 'Invalid code' })
     })
   })
 

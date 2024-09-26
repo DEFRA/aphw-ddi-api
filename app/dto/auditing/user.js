@@ -3,7 +3,7 @@ const userInfoAudit = async (request) => {
 
   if (payload) {
     const { username, displayname } = payload
-    console.info(`User Info: ${new Date()}.  Username: ${request.auth?.artifacts?.decoded?.payload?.username}.  Issuer: ${request.auth?.artifacts?.decoded?.payload?.iss}`)
+    // console.info(`User Info: ${new Date()}.  Username: ${request.auth?.artifacts?.decoded?.payload?.username}.  Issuer: ${request.auth?.artifacts?.decoded?.payload?.iss}`)
 
     return {
       username, displayname
@@ -17,7 +17,7 @@ const userValidateAudit = async (request) => {
 
   if (payload) {
     const { username, displayname } = payload
-    console.info(`User Validation: ${new Date()}.  Username: ${payload?.username}.  Issuer: ${payload?.iss}`)
+    // console.info(`User Validation: ${new Date()}.  Username: ${payload?.username}.  Issuer: ${payload?.iss}`)
 
     return {
       username, displayname
@@ -32,7 +32,7 @@ const userLogoutAudit = async (request) => {
 
   if (payload) {
     const { username, displayname } = payload
-    console.info(`User Logout: ${new Date()}.  Username: ${payload?.username}.  Issuer: ${payload?.iss}`)
+    // console.info(`User Logout: ${new Date()}.  Username: ${payload?.username}.  Issuer: ${payload?.iss}`)
 
     return {
       username, displayname
