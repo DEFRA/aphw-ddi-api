@@ -57,25 +57,34 @@ describe('user schema', () => {
 
   describe('responseSchema', () => {
     test('should pass with valid schema', () => {
-      const request = {
+      const response = {
+        id: 1,
         username: 'john@smith.co.uk'
       }
-      const validation = createUserResponseSchema.validate(request, { abortEarly: false })
+      const validation = createUserResponseSchema.validate(response, { abortEarly: false })
 
-      expect(validation).toEqual({ value: { username: 'john@smith.co.uk', active: true } })
+      expect(validation).toEqual({
+        value: {
+          id: 1,
+          username: 'john@smith.co.uk',
+          active: true
+        }
+      })
       expect(validation.error).not.toBeDefined()
     })
 
     test('should pass with valid schema and all properties', () => {
-      const request = {
+      const response = {
+        id: 1,
         username: 'john@smith.co.uk',
         active: false,
         police_force_id: 1
       }
-      const validation = createUserResponseSchema.validate(request, { abortEarly: false })
+      const validation = createUserResponseSchema.validate(response, { abortEarly: false })
 
       expect(validation).toEqual({
         value: {
+          id: 1,
           username: 'john@smith.co.uk',
           active: false,
           police_force_id: 1
@@ -88,7 +97,7 @@ describe('user schema', () => {
       const payload = {}
       const validation = createUserResponseSchema.validate(payload, { abortEarly: false })
 
-      expect(validation.error).toEqual(new ValidationError('"username" is required'))
+      expect(validation.error).toEqual(new ValidationError('"id" is required. "username" is required'))
     })
   })
 })

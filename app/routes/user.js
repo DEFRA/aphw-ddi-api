@@ -5,6 +5,8 @@ const { createAccount } = require('../repos/user-accounts')
 const { scopes } = require('../constants/auth')
 const { createUserResponseSchema, createUserRequestSchema } = require('../schema/user')
 const { mapUserDaoToDto } = require('../dto/mappers/user')
+const { conflictSchema } = require('../schema/common/response/conflict')
+const { notFoundSchema } = require('../schema/common/response/not-found')
 
 module.exports = [
   {
@@ -15,7 +17,9 @@ module.exports = [
       notes: ['Creates a new user account'],
       response: {
         status: {
-          204: createUserResponseSchema
+          201: createUserResponseSchema,
+          409: conflictSchema,
+          404: notFoundSchema
         }
       },
       validate: {

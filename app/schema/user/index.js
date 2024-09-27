@@ -8,6 +8,7 @@ const createUserRequestSchema = Joi.object({
 })
 
 const createUserResponseSchema = Joi.object({
+  id: Joi.number().required(),
   username: Joi.string().required(),
   active: Joi.boolean().default(true),
   police_force_id: Joi.number()
