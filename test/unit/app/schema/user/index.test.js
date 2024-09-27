@@ -12,17 +12,36 @@ describe('user schema', () => {
       expect(validation.error).not.toBeDefined()
     })
 
-    test('should pass with valid schema and all properties', () => {
+    test('should pass with valid schema and police_force_id', () => {
       const request = {
         username: 'john@smith.co.uk',
-        active: false
+        active: false,
+        police_force_id: 1
       }
       const validation = createUserRequestSchema.validate(request, { abortEarly: false })
 
       expect(validation).toEqual({
         value: {
           username: 'john@smith.co.uk',
-          active: false
+          active: false,
+          police_force_id: 1
+        }
+      })
+      expect(validation.error).not.toBeDefined()
+    })
+
+    test('should pass with valid schema and more properties', () => {
+      const request = {
+        username: 'john@smith.co.uk',
+        police_force: 'ACME Police Force'
+      }
+      const validation = createUserRequestSchema.validate(request, { abortEarly: false })
+
+      expect(validation).toEqual({
+        value: {
+          username: 'john@smith.co.uk',
+          active: true,
+          police_force: 'ACME Police Force'
         }
       })
       expect(validation.error).not.toBeDefined()
@@ -50,14 +69,16 @@ describe('user schema', () => {
     test('should pass with valid schema and all properties', () => {
       const request = {
         username: 'john@smith.co.uk',
-        active: false
+        active: false,
+        police_force_id: 1
       }
       const validation = createUserResponseSchema.validate(request, { abortEarly: false })
 
       expect(validation).toEqual({
         value: {
           username: 'john@smith.co.uk',
-          active: false
+          active: false,
+          police_force_id: 1
         }
       })
       expect(validation.error).not.toBeDefined()
