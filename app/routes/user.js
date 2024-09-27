@@ -4,6 +4,7 @@ const { userVerifyLicenceAccepted, userSetLicenceAccepted } = require('../dto/li
 const { createAccount } = require('../repos/user-accounts')
 const { scopes } = require('../constants/auth')
 const { createUserResponseSchema, createUserRequestSchema } = require('../schema/user')
+const { mapUserDaoToDto } = require('../dto/mappers/user')
 
 module.exports = [
   {
@@ -27,7 +28,9 @@ module.exports = [
       },
       auth: { scope: [scopes.admin] },
       handler: async (request, h) => {
-        const user = await createAccount(request.payload)
+        const userDao = await createAccount(request.payload)
+
+        const user = mapUserDaoToDto(userDao)
 
         return h.response(user).code(201)
       }
