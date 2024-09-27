@@ -29,7 +29,7 @@ describe('user-accounts', () => {
         await callback({})
       })
       /**
-       * @type {UserAccountDto}
+       * @type {UserAccountRequestDto}
        */
       const userDto = {
         username: 'bill@example.com'
@@ -44,7 +44,7 @@ describe('user-accounts', () => {
       sequelize.models.user_account.findOne.mockResolvedValue(null)
       const transaction = {}
       /**
-       * @type {UserAccountDto}
+       * @type {UserAccountRequestDto}
        */
       const userDto = {
         username: 'bill@example.com',
@@ -71,7 +71,7 @@ describe('user-accounts', () => {
       const transaction = {}
 
       /**
-       * @type {UserAccountDto}
+       * @type {UserAccountRequestDto}
        */
       const userDto = {
         username: 'bill@example.com',
@@ -100,7 +100,7 @@ describe('user-accounts', () => {
       const transaction = {}
 
       /**
-       * @type {UserAccountDto}
+       * @type {UserAccountRequestDto}
        */
       const userDto = {
         username: 'detective.gordon@gotham.police.gov',
@@ -134,7 +134,7 @@ describe('user-accounts', () => {
       const transaction = {}
 
       /**
-       * @type {UserAccountDto}
+       * @type {UserAccountRequestDto}
        */
       const userDto = {
         username: 'bill@example.com',
@@ -165,7 +165,7 @@ describe('user-accounts', () => {
       const transaction = {}
 
       /**
-       * @type {UserAccountDto}
+       * @type {UserAccountRequestDto}
        */
       const userDto = {
         username: 'bill@example.com',
@@ -205,7 +205,7 @@ describe('user-accounts', () => {
 
       const transaction = {}
       /**
-       * @type {UserAccountDto}
+       * @type {UserAccountRequestDto}
        */
       const userDto = {
         username: 'bill@example.com',

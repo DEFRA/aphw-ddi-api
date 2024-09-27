@@ -6,20 +6,21 @@ const { NotFoundError } = require('../errors/not-found')
 
 /**
  * @typedef UserAccount
+ * @property {number} id
  * @property {string} username
- * @property {string} telephone
- * @property {string} activation_token
- * @property {Date} activation_token_expiry
- * @property {Date} activated_date
- * @property {Date} accepted_terms_and_conds_date
+ * @property {number|null} police_force_id - 1,
+ * @property {string|null} activation_token
+ * @property {Date|null} activation_token_expiry
+ * @property {Date|null} activated_date
+ * @property {Date|null} accepted_terms_and_conds_date
  * @property {boolean} active
- * @property {Date} last_login_date
+ * @property {Date|null} last_login_date
  * @property {Date} created_at
  * @property {Date} updated_at
  */
 
 /**
- * @typedef UserAccountDto
+ * @typedef UserAccountRequestDto
  * @property {string} username
  * @property {string} [telephone]
  * @property {boolean} [active]
@@ -28,9 +29,17 @@ const { NotFoundError } = require('../errors/not-found')
  */
 
 /**
- * @param {UserAccountDto} account
+ * @typedef UserAccountDto
+ * @property {string} username
+ * @property {string} [telephone]
+ * @property {boolean} [active]
+ * @property {number} [police_force_id]
+ */
+
+/**
+ * @param {UserAccountRequestDto} account
  * @param transaction
- * @return {Promise<UserAccountDto>}
+ * @return {Promise<UserAccount>}
  */
 const createAccount = async (account, transaction) => {
   if (!transaction) {
