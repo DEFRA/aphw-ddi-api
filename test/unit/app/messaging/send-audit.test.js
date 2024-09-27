@@ -8,7 +8,7 @@ const {
 jest.mock('../../../../app/messaging/send-event')
 const { sendEvent } = require('../../../../app/messaging/send-event')
 const { robotImportUser } = require('../../../../app/constants/import')
-const { CDO, COURT, DOG, EXEMPTION, PERSON, POLICE, INSURANCE } = require('../../../../app/constants/event/audit-event-object-types')
+const { CDO, COURT, DOG, EXEMPTION, PERSON, POLICE, INSURANCE, USER_ACCOUNT } = require('../../../../app/constants/event/audit-event-object-types')
 
 const devUser = {
   username: 'dev-user@test.com',
@@ -330,6 +330,13 @@ describe('SendAudit test', () => {
       const pk = determineCreatePk(DOG, entity)
 
       expect(pk).toBe('ED123')
+    })
+
+    test('should get id of user account', () => {
+      const entity = { id: 1, username: 'joe@bloggs.co.uk', police_force_id: 1 }
+      const pk = determineCreatePk(USER_ACCOUNT, entity)
+
+      expect(pk).toBe('1')
     })
 
     test('should throw for invalid object', () => {
