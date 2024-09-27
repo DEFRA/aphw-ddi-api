@@ -32,7 +32,7 @@ describe('user-accounts', () => {
       expect(sequelize.transaction).toHaveBeenCalled()
     })
 
-    test('should create an account', async () => {
+    test('should create an account with no linked police force', async () => {
       sequelize.models.user_account.findOne.mockResolvedValue(null)
       const transaction = {}
       /**
@@ -57,7 +57,62 @@ describe('user-accounts', () => {
       expect(sequelize.models.user_account.create).toHaveBeenCalledWith(userDto, {})
     })
 
-    test('should reject with duplicate if', async () => {
+    test('should create an account with linked police force from id', async () => {
+      sequelize.models.user_account.findOne.mockResolvedValue(null)
+      const transaction = {}
+      /**
+       * @type {UserAccountDto}
+       */
+      const userDto = {
+        username: 'bill@example.com',
+        active: true,
+        police_force_id: 1
+      }
+
+      const expectedUserDto = {
+        username: 'bill@example.com',
+        active: true,
+        police_force_id: 1
+      }
+
+      sequelize.models.user_account.create.mockResolvedValue(expectedUserDto)
+
+      const user = await createAccount(userDto, transaction)
+
+      expect(user).toEqual(expectedUserDto)
+      expect(sequelize.transaction).not.toHaveBeenCalled()
+      expect(sequelize.models.user_account.create).toHaveBeenCalledWith(userDto, {})
+    })
+
+    test('should create an account with linked police force from police force name', async () => {
+      sequelize.models.user_account.findOne.mockResolvedValue(null)
+      sequelize.models.police_force.findOne.mockResolvedValue(null)
+      const transaction = {}
+      /**
+       * @type {UserAccountDto}
+       */
+      const userDto = {
+        username: 'bill@example.com',
+        active: true,
+        police_force_id: 1
+      }
+
+      const expectedUserDto = {
+        username: 'bill@example.com',
+        active: true,
+        police_force_id: 1
+      }
+
+      sequelize.models.user_account.create.mockResolvedValue(expectedUserDto)
+
+      const user = await createAccount(userDto, transaction)
+
+      expect(user).toEqual(expectedUserDto)
+      expect(sequelize.transaction).not.toHaveBeenCalled()
+      expect(sequelize.models.user_account.create).toHaveBeenCalledWith(userDto, {})
+    })
+
+    test('should reject duplicated usernames', async () => {
       sequelize.models.user_account.findOne.mockResolvedValue({
         created_at: '2024-09-25T19:26:14.946Z',
         updated_at: '2024-09-25T19:26:14.946Z',

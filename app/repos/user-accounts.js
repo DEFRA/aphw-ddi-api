@@ -21,6 +21,8 @@ const { DuplicateResourceError } = require('../errors/duplicate-record')
  * @property {string} username
  * @property {string} [telephone]
  * @property {boolean} [active]
+ * @property {number} [police_force_id]
+ * @property {string} police_force
  */
 
 /**
