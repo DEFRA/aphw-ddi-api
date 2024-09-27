@@ -11,6 +11,10 @@ module.exports = (sequelize, DataTypes) => {
       type: DataTypes.STRING(250),
       allowNull: false
     },
+    police_force_id: {
+      type: DataTypes.INTEGER,
+      allowNull: true
+    },
     telephone: {
       type: DataTypes.STRING(30),
       allowNull: true
@@ -56,7 +60,9 @@ module.exports = (sequelize, DataTypes) => {
   }, {
     sequelize,
     tableName: 'user_account',
-    timestamps: false,
+    createdAt: 'created_at',
+    updatedAt: 'updated_at',
+    deletedAt: 'deleted_at',
     indexes: [
       {
         name: 'user_account_username_ukey',
@@ -74,6 +80,13 @@ module.exports = (sequelize, DataTypes) => {
       }
     ]
   })
+
+  userAccount.associate = models => {
+    userAccount.belongsTo(models.police_force, {
+      as: 'police_force',
+      foreignKey: 'police_force_id'
+    })
+  }
 
   return userAccount
 }
