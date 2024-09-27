@@ -1,6 +1,8 @@
 const sequelize = require('../config/db')
 const { addMinutes } = require('../lib/date-helpers')
 const { DuplicateResourceError } = require('../errors/duplicate-record')
+const { getPoliceForce } = require('../lookups')
+const { NotFoundError } = require('../errors/not-found')
 
 /**
  * @typedef UserAccount
@@ -35,13 +37,32 @@ const createAccount = async (account, transaction) => {
     return sequelize.transaction(async (t) => createAccount(account, t))
   }
 
-  const foundUser = await sequelize.models.user_account.findOne({ username: account.username }, transaction)
+  const foundUser = await sequelize.models.user_account.findOne({
+    where: {
+      username: account.username
+    }
+  }, transaction)
 
   if (foundUser) {
     throw new DuplicateResourceError('This user is already in the allow list')
   }
 
-  return sequelize.models.user_account.create(account, transaction)
+  const { police_force: policeForce, ...accountWithoutPoliceForce } = account
+
+  if (!policeForce || account.police_force_id) {
+    return sequelize.models.user_account.create(accountWithoutPoliceForce, transaction)
+  }
+
+  const policeForceObj = await getPoliceForce(policeForce)
+
+  if (policeForceObj === null) {
+    throw new NotFoundError(`${policeForce} not found`)
+  }
+
+  return sequelize.models.user_account.create({
+    ...accountWithoutPoliceForce,
+    police_force_id: policeForceObj.id
+  }, transaction)
 }
 
 /**

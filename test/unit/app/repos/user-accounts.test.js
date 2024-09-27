@@ -1,5 +1,10 @@
 const { DuplicateResourceError } = require('../../../../app/errors/duplicate-record')
+const { NotFoundError } = require('../../../../app/errors/not-found')
+
 describe('user-accounts', () => {
+  jest.mock('../../../../app/lookups')
+  const { getPoliceForce } = require('../../../../app/lookups')
+
   jest.mock('../../../../app/config/db', () => ({
     models: {
       user_account: {
@@ -20,6 +25,9 @@ describe('user-accounts', () => {
 
   describe('createAccount', () => {
     test('should use a transaction if none exists', async () => {
+      sequelize.transaction.mockImplementation(async (callback) => {
+        await callback({})
+      })
       /**
        * @type {UserAccountDto}
        */
@@ -59,7 +67,9 @@ describe('user-accounts', () => {
 
     test('should create an account with linked police force from id', async () => {
       sequelize.models.user_account.findOne.mockResolvedValue(null)
+
       const transaction = {}
+
       /**
        * @type {UserAccountDto}
        */
@@ -84,17 +94,83 @@ describe('user-accounts', () => {
       expect(sequelize.models.user_account.create).toHaveBeenCalledWith(userDto, {})
     })
 
-    test('should create an account with linked police force from police force name', async () => {
+    test('should use police force id if provided', async () => {
       sequelize.models.user_account.findOne.mockResolvedValue(null)
-      sequelize.models.police_force.findOne.mockResolvedValue(null)
+
       const transaction = {}
+
+      /**
+       * @type {UserAccountDto}
+       */
+      const userDto = {
+        username: 'detective.gordon@gotham.police.gov',
+        active: true,
+        police_force_id: 1,
+        police_force: 'Gotham City Police Department'
+      }
+
+      const expectedUserDto = {
+        username: 'detective.gordon@gotham.police.gov',
+        active: true,
+        police_force_id: 1
+      }
+
+      sequelize.models.user_account.create.mockResolvedValue(expectedUserDto)
+
+      const user = await createAccount(userDto, transaction)
+
+      expect(user).toEqual(expectedUserDto)
+      expect(sequelize.transaction).not.toHaveBeenCalled()
+      expect(sequelize.models.user_account.create).toHaveBeenCalledWith(expectedUserDto, {})
+      expect(getPoliceForce).not.toHaveBeenCalled()
+    })
+
+    test('should fail if police force name does not exist', async () => {
+      sequelize.models.user_account.findOne.mockResolvedValue(null)
+      const expectedPoliceForce = 'Gotham City Police Department'
+
+      getPoliceForce.mockResolvedValue(null)
+
+      const transaction = {}
+
       /**
        * @type {UserAccountDto}
        */
       const userDto = {
         username: 'bill@example.com',
         active: true,
+        police_force: expectedPoliceForce
+      }
+
+      const expectedUserDto = {
+        username: 'bill@example.com',
+        active: true,
         police_force_id: 1
+      }
+
+      sequelize.models.user_account.create.mockResolvedValue(expectedUserDto)
+
+      await expect(createAccount(userDto, transaction)).rejects.toThrow(new NotFoundError(`${expectedPoliceForce} not found`))
+    })
+
+    test('should create an account with linked police force from police force name', async () => {
+      sequelize.models.user_account.findOne.mockResolvedValue(null)
+      const expectedPoliceForce = 'Gotham City Police Department'
+
+      getPoliceForce.mockResolvedValue({
+        id: 1,
+        name: expectedPoliceForce
+      })
+
+      const transaction = {}
+
+      /**
+       * @type {UserAccountDto}
+       */
+      const userDto = {
+        username: 'bill@example.com',
+        active: true,
+        police_force: expectedPoliceForce
       }
 
       const expectedUserDto = {
@@ -109,7 +185,7 @@ describe('user-accounts', () => {
 
       expect(user).toEqual(expectedUserDto)
       expect(sequelize.transaction).not.toHaveBeenCalled()
-      expect(sequelize.models.user_account.create).toHaveBeenCalledWith(userDto, {})
+      expect(sequelize.models.user_account.create).toHaveBeenCalledWith(expectedUserDto, {})
     })
 
     test('should reject duplicated usernames', async () => {
