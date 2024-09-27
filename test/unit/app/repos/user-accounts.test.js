@@ -2,6 +2,11 @@ const { DuplicateResourceError } = require('../../../../app/errors/duplicate-rec
 const { NotFoundError } = require('../../../../app/errors/not-found')
 
 describe('user-accounts', () => {
+  const dummyAdminUser = {
+    username: 'dummy-user',
+    displayname: 'Dummy User'
+  }
+
   jest.mock('../../../../app/lookups')
   const { getPoliceForce } = require('../../../../app/lookups')
 
@@ -9,7 +14,8 @@ describe('user-accounts', () => {
     models: {
       user_account: {
         findOne: jest.fn(),
-        create: jest.fn()
+        create: jest.fn(),
+        destroy: jest.fn()
       }
     },
     transaction: jest.fn()
@@ -17,16 +23,34 @@ describe('user-accounts', () => {
 
   const sequelize = require('../../../../app/config/db')
 
-  const { createAccount, isAccountEnabled, getAccount, setActivationCodeAndExpiry, setLoginDate, setActivatedDate, setLicenceAcceptedDate, verifyLicenceAccepted } = require('../../../../app/repos/user-accounts')
+  const { createAccount, deleteAccount, isAccountEnabled, getAccount, setActivationCodeAndExpiry, setLoginDate, setActivatedDate, setLicenceAcceptedDate, verifyLicenceAccepted } = require('../../../../app/repos/user-accounts')
 
   afterEach(() => {
     jest.resetAllMocks()
   })
 
+  describe('deleteAccount', () => {
+    test('should use a transaction if none exists', async () => {
+      sequelize.transaction.mockImplementation(async (localCallback) => {
+        await localCallback({})
+      })
+
+      await deleteAccount(1, dummyAdminUser)
+
+      expect(sequelize.transaction).toHaveBeenCalled()
+    })
+
+    test('should delete an account', async () => {
+      await deleteAccount(1, dummyAdminUser, {})
+
+      expect(sequelize.models.user_account.destroy).toHaveBeenCalledWith({ where: { id: 1 }, transaction: {} })
+    })
+  })
+
   describe('createAccount', () => {
     test('should use a transaction if none exists', async () => {
-      sequelize.transaction.mockImplementation(async (callback) => {
-        await callback({})
+      sequelize.transaction.mockImplementation(async (localCallback) => {
+        await localCallback({})
       })
       /**
        * @type {UserAccountRequestDto}
@@ -35,7 +59,7 @@ describe('user-accounts', () => {
         username: 'bill@example.com'
       }
 
-      await createAccount(userDto)
+      await createAccount(userDto, dummyAdminUser)
 
       expect(sequelize.transaction).toHaveBeenCalled()
     })
@@ -58,7 +82,7 @@ describe('user-accounts', () => {
 
       sequelize.models.user_account.create.mockResolvedValue(expectedUserDto)
 
-      const user = await createAccount(userDto, transaction)
+      const user = await createAccount(userDto, dummyAdminUser, transaction)
 
       expect(user).toEqual(expectedUserDto)
       expect(sequelize.transaction).not.toHaveBeenCalled()
@@ -87,7 +111,7 @@ describe('user-accounts', () => {
 
       sequelize.models.user_account.create.mockResolvedValue(expectedUserDto)
 
-      const user = await createAccount(userDto, transaction)
+      const user = await createAccount(userDto, dummyAdminUser, transaction)
 
       expect(user).toEqual(expectedUserDto)
       expect(sequelize.transaction).not.toHaveBeenCalled()
@@ -117,7 +141,7 @@ describe('user-accounts', () => {
 
       sequelize.models.user_account.create.mockResolvedValue(expectedUserDto)
 
-      const user = await createAccount(userDto, transaction)
+      const user = await createAccount(userDto, dummyAdminUser, transaction)
 
       expect(user).toEqual(expectedUserDto)
       expect(sequelize.transaction).not.toHaveBeenCalled()
@@ -150,7 +174,7 @@ describe('user-accounts', () => {
 
       sequelize.models.user_account.create.mockResolvedValue(expectedUserDto)
 
-      await expect(createAccount(userDto, transaction)).rejects.toThrow(new NotFoundError(`${expectedPoliceForce} not found`))
+      await expect(createAccount(userDto, dummyAdminUser, transaction)).rejects.toThrow(new NotFoundError(`${expectedPoliceForce} not found`))
     })
 
     test('should create an account with linked police force from police force name', async () => {
@@ -181,7 +205,7 @@ describe('user-accounts', () => {
 
       sequelize.models.user_account.create.mockResolvedValue(expectedUserDto)
 
-      const user = await createAccount(userDto, transaction)
+      const user = await createAccount(userDto, dummyAdminUser, transaction)
 
       expect(user).toEqual(expectedUserDto)
       expect(sequelize.transaction).not.toHaveBeenCalled()
@@ -219,7 +243,7 @@ describe('user-accounts', () => {
 
       sequelize.models.user_account.create.mockResolvedValue(expectedUserDto)
 
-      await expect(createAccount(userDto, transaction)).rejects.toThrow(new DuplicateResourceError('This user is already in the allow list'))
+      await expect(createAccount(userDto, dummyAdminUser, transaction)).rejects.toThrow(new DuplicateResourceError('This user is already in the allow list'))
     })
   })
 

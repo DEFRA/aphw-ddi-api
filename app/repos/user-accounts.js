@@ -38,12 +38,13 @@ const { NotFoundError } = require('../errors/not-found')
 
 /**
  * @param {UserAccountRequestDto} account
- * @param transaction
+ * @param user
+ * @param [transaction]
  * @return {Promise<UserAccount>}
  */
-const createAccount = async (account, transaction) => {
+const createAccount = async (account, user, transaction) => {
   if (!transaction) {
-    return sequelize.transaction(async (t) => createAccount(account, t))
+    return sequelize.transaction(async (t) => createAccount(account, user, t))
   }
 
   const foundUser = await sequelize.models.user_account.findOne({
@@ -72,6 +73,14 @@ const createAccount = async (account, transaction) => {
     ...accountWithoutPoliceForce,
     police_force_id: policeForceObj.id
   }, transaction)
+}
+
+const deleteAccount = async (accountId, user, transaction) => {
+  if (!transaction) {
+    return sequelize.transaction(async (t) => deleteAccount(accountId, user, t))
+  }
+
+  await sequelize.models.user_account.destroy({ where: { id: accountId }, transaction })
 }
 
 /**
@@ -185,6 +194,7 @@ const verifyLicenceAccepted = async (username) => {
 
 module.exports = {
   createAccount,
+  deleteAccount,
   isAccountEnabled,
   getAccount,
   setActivationCodeAndExpiry,
