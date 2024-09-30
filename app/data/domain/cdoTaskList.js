@@ -57,7 +57,11 @@ class CdoTaskList {
   }
 
   get cdoSummary () {
-    const microchipNumber = this._cdo.dog.microchipNumber !== null && `${this._cdo.dog.microchipNumber}`.length > 0 ? this._cdo.dog.microchipNumber : undefined
+    let microchipNumber
+
+    if (this._cdo.dog.microchipNumber !== null) {
+      microchipNumber = `${this._cdo.dog.microchipNumber}`.length > 0 ? this._cdo.dog.microchipNumber : undefined
+    }
 
     return {
       id: this._cdo.dog.id,
@@ -208,7 +212,9 @@ class CdoTaskList {
   }
 
   recordMicrochipNumber (microchipNumber1, duplicateMicrochipNumber, callback) {
-    this._actionPackCompleteGuard()
+    if (!this.microchipNumberRecorded.completed) {
+      this._actionPackCompleteGuard()
+    }
     this._cdo.exemption.recordMicrochipNumber()
     this._cdo.dog.setMicrochipNumber(microchipNumber1, duplicateMicrochipNumber, callback)
   }
