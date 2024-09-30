@@ -29,7 +29,15 @@ describe('RegistrationService', function () {
           },
           signature: 'abcdef'
         }
+      },
+      credentials: {
+        user: 'dev-user@test.com',
+        displayname: 'Dev User'
       }
+    },
+    headers: {
+      'ddi-username': 'dev-user@test.com',
+      'ddi-displayname': 'Dev User'
     }
   }
 
@@ -177,16 +185,6 @@ describe('RegistrationService', function () {
     })
   })
 
-  describe('getUserFromRequest', () => {
-    test('should extract username', async () => {
-      expect(regService.getUserFromRequest(request)).toBe('dev-user@test.com')
-    })
-
-    test('should throw if missing username', async () => {
-      expect(() => regService.getUserFromRequest({})).toThrow(new NotFoundError('user not found'))
-    })
-  })
-
   describe('userVerifyLicenceAccepted', () => {
     test('should extract username', async () => {
       mockUserAccountRepository.verifyLicenceAccepted.mockResolvedValue(true)
@@ -195,7 +193,7 @@ describe('RegistrationService', function () {
       expect(mockUserAccountRepository.verifyLicenceAccepted).toHaveBeenCalledWith('dev-user@test.com')
     })
 
-    test('should return false if cannot extract username', async () => {
+    test('should throw if cannot extract username', async () => {
       mockUserAccountRepository.verifyLicenceAccepted.mockResolvedValue(true)
       await expect(regService.isUserLicenceAccepted({ auth: null })).rejects.toThrow(new NotFoundError('user not found'))
     })

@@ -92,7 +92,15 @@ describe('ServiceProvider', () => {
           },
           signature: 'abcdef'
         }
+      },
+      credentials: {
+        user: 'dev-user@test.com',
+        displayname: 'Dev User'
       }
+    },
+    headers: {
+      'ddi-username': 'dev-user@test.com',
+      'ddi-displayname': 'Dev User'
     }
   }
 

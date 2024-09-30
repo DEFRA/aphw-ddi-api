@@ -67,7 +67,6 @@ describe('User endpoint', () => {
       }
       const response = await server.inject(options)
       expect(response.statusCode).toBe(200)
-      console.log('JB payload', response.payload)
       expect(JSON.parse(response.payload)).toEqual({ result: true })
     })
 

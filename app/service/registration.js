@@ -1,6 +1,7 @@
 const { randomInt } = require('crypto')
 const { emailTypes } = require('../constants/email-types')
 const { sendEmail } = require('../messaging/send-email')
+const { getCallingUsername } = require('../auth/get-user')
 const { NotFoundError } = require('../errors/not-found')
 
 const expiryInMinsForOtp = '60'
@@ -25,12 +26,11 @@ class RegistrationService {
   }
 
   /**
-   * @type {RegistrationService.getUserFromRequest}
+   * @type {RegistrationService.getUsername}
    */
-  getUserFromRequest (request) {
-    const payload = request.auth?.artifacts?.decoded?.payload
-    if (payload) {
-      const { username } = payload
+  getUsername (request) {
+    const username = getCallingUsername(request)
+    if (username) {
       return username
     }
     throw new NotFoundError('user not found')
@@ -48,7 +48,7 @@ class RegistrationService {
    * @param request
    */
   async verifyEmailCode (request) {
-    const username = this.getUserFromRequest(request)
+    const username = this.getUsername(request)
     const oneTimeCode = request.payload?.code
 
     const account = await this.userAccountRepository.getAccount(username)
@@ -124,7 +124,7 @@ class RegistrationService {
    * @param {any} request
    */
   async isUserLicenceAccepted (request) {
-    return this.userAccountRepository.verifyLicenceAccepted(this.getUserFromRequest(request))
+    return this.userAccountRepository.verifyLicenceAccepted(this.getUsername(request))
   }
 
   /**
@@ -132,7 +132,7 @@ class RegistrationService {
    * @param {any} request
    */
   async setUserLicenceAccepted (request) {
-    return this.userAccountRepository.setLicenceAcceptedDate(this.getUserFromRequest(request))
+    return this.userAccountRepository.setLicenceAcceptedDate(this.getUsername(request))
   }
 
   /**
@@ -140,7 +140,7 @@ class RegistrationService {
    * @param {any} request
    */
   async isUserEmailVerified (request) {
-    return this.userAccountRepository.isEmailVerified(this.getUserFromRequest(request))
+    return this.userAccountRepository.isEmailVerified(this.getUsername(request))
   }
 
   /**
@@ -148,7 +148,7 @@ class RegistrationService {
    * @param {any} request
    */
   async sendVerifyEmail (request) {
-    const username = this.getUserFromRequest(request)
+    const username = this.getUsername(request)
     const oneTimeCode = this.generateOneTimeCode()
 
     await this.userAccountRepository.setActivationCodeAndExpiry(username, oneTimeCode, expiryInMinsForOtp)
