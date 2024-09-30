@@ -5,6 +5,12 @@ describe('get-user', () => {
       headers: {
         'ddi-username': 'dev-user@example.com',
         'ddi-displayname': 'Dev User'
+      },
+      auth: {
+        credentials: {
+          user: 'dev-user@example.com',
+          displayname: 'Dev User'
+        }
       }
     }
 
@@ -17,7 +23,29 @@ describe('get-user', () => {
       })
     })
 
-    test('should return no user if request is missing', () => {
+    test('should get calling user if only headers exist', () => {
+      const { auth: _auth, ...requestHeaders } = request
+      const result = getCallingUser(requestHeaders)
+
+      expect(result).toEqual({
+        username: 'dev-user@example.com',
+        displayname: 'Dev User'
+      })
+    })
+
+    test('should get calling user if headers exist, but credentials are missing', () => {
+      const result = getCallingUser({
+        ...request,
+        auth: {}
+      })
+
+      expect(result).toEqual({
+        username: 'dev-user@example.com',
+        displayname: 'Dev User'
+      })
+    })
+
+    test('should return no user if request and JWT credentials are undefined', () => {
       const result = getCallingUser(undefined)
 
       expect(result).toEqual({
@@ -26,7 +54,7 @@ describe('get-user', () => {
       })
     })
 
-    test('should return no user if request headers is missing', () => {
+    test('should return no user if request headers and JWT credentials are missing', () => {
       const result = getCallingUser({})
 
       expect(result).toEqual({
