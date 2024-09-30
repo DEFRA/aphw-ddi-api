@@ -1,4 +1,4 @@
-const { getCallingUser } = require('../../../../app/auth/get-user')
+const { getCallingUser, getCallingUsername } = require('../../../../app/auth/get-user')
 describe('get-user', () => {
   describe('getCallingUser', () => {
     const request = {
@@ -46,6 +46,29 @@ describe('get-user', () => {
         username: '',
         displayname: ''
       })
+    })
+  })
+
+  describe('getCallingUsername', () => {
+    test('should get username if one exists', () => {
+      const request = {
+        auth: {
+          credentials: {
+            user: 'dev-user@test.com',
+            displayname: 'dev-user@test.com'
+          }
+        }
+      }
+      expect(getCallingUsername(request)).toBe('dev-user@test.com')
+    })
+
+    test('should return null if no username exists', () => {
+      const request = {
+        auth: {
+          credentials: {}
+        }
+      }
+      expect(getCallingUsername(request)).toBe(null)
     })
   })
 })
