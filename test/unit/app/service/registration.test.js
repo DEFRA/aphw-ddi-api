@@ -1,3 +1,5 @@
+const { NotFoundError } = require('../../../../app/errors/not-found')
+
 describe('RegistrationService', function () {
   /**
    * @type {UserAccountRepository}
@@ -9,6 +11,35 @@ describe('RegistrationService', function () {
   const { sendEmail } = require('../../../../app/messaging/send-email')
 
   const { RegistrationService, actionResults } = require('../../../../app/service/registration')
+
+  const request = {
+    auth: {
+      artifacts: {
+        decoded: {
+          header: { alg: 'RS256', typ: 'JWT', kid: 'aphw-ddi-enforcement' },
+          payload: {
+            scope: ['Dog.Index.Enforcement'],
+            username: 'dev-user@test.com',
+            displayname: 'Dev User',
+            token: 'abcdef',
+            iat: 1726587632,
+            exp: 1726591232,
+            aud: 'aphw-ddi-api',
+            iss: 'aphw-ddi-enforcement'
+          },
+          signature: 'abcdef'
+        }
+      },
+      credentials: {
+        user: 'dev-user@test.com',
+        displayname: 'Dev User'
+      }
+    },
+    headers: {
+      'ddi-username': 'dev-user@test.com',
+      'ddi-displayname': 'Dev User'
+    }
+  }
 
   beforeEach(function () {
     jest.clearAllMocks()
@@ -23,7 +54,9 @@ describe('RegistrationService', function () {
       setActivationCodeAndExpiry: jest.fn(),
       setActivatedDate: jest.fn(),
       setLoginDate: jest.fn(),
-      setLicenceAcceptedDate: jest.fn()
+      verifyLicenceAccepted: jest.fn(),
+      setLicenceAcceptedDate: jest.fn(),
+      isEmailVerified: jest.fn()
     }
 
     // Instantiate RegistrationService with the mock repository
@@ -41,48 +74,51 @@ describe('RegistrationService', function () {
     })
   })
 
-  describe('sendVerifyEmailAddress', function () {
+  describe('sendVerifyEmail', function () {
     test('should send code in email', async () => {
-      await regService.sendVerifyEmailAddress('user@test.com')
+      await regService.sendVerifyEmail(request)
       expect(sendEmail).toHaveBeenCalledWith({
         type: 'verify-email',
-        toAddress: 'user@test.com',
+        toAddress: 'dev-user@test.com',
         customFields: [
           { name: 'one_time_code', value: expect.anything() },
-          { name: 'expiry_in_mins', value: '8' }
+          { name: 'expiry_in_mins', value: '60' }
         ]
       })
     })
   })
 
-  describe('verifyAccountActivation', function () {
+  describe('verifyEmailCode', function () {
     test('should return ACCOUNT_NOT_FOUND if no account', async () => {
       mockUserAccountRepository.getAccount.mockResolvedValue(null)
-      const res = await regService.verifyAccountActivation('user@test.com', '123456')
+      const res = await regService.verifyEmailCode(request)
       expect(res).toBe(actionResults.ACCOUNT_NOT_FOUND)
     })
 
     test('should return ACCOUNT_NOT_ENABLED if account not enabled', async () => {
       mockUserAccountRepository.getAccount.mockResolvedValue({ active: false })
-      const res = await regService.verifyAccountActivation('user@test.com', '123456')
+      const res = await regService.verifyEmailCode(request)
       expect(res).toBe(actionResults.ACCOUNT_NOT_ENABLED)
     })
 
     test('should return ACTIVATION_CODE_EXPIRED if code expired', async () => {
       mockUserAccountRepository.getAccount.mockResolvedValue({ active: true, activation_token: '123456', activation_token_expiry: new Date() - 1 })
-      const res = await regService.verifyAccountActivation('user@test.com', '123456')
+      const req = { ...request, payload: { code: '123456' } }
+      const res = await regService.verifyEmailCode(req)
       expect(res).toBe(actionResults.ACTIVATION_CODE_EXPIRED)
     })
 
     test('should return INVALID_ACTIVATION_CODE if wrong code', async () => {
       mockUserAccountRepository.getAccount.mockResolvedValue({ active: true, activation_token: '123456', activation_token_expiry: new Date() + 1 })
-      const res = await regService.verifyAccountActivation('user@test.com', '111111')
+      const req = { ...request, payload: { code: '111111' } }
+      const res = await regService.verifyEmailCode(req)
       expect(res).toBe(actionResults.INVALID_ACTIVATION_CODE)
     })
 
     test('should return OK if everything is good', async () => {
       mockUserAccountRepository.getAccount.mockResolvedValue({ active: true, activation_token: '123456', activation_token_expiry: new Date() + 1 })
-      const res = await regService.verifyAccountActivation('user@test.com', '123456')
+      const req = { ...request, payload: { code: '123456' } }
+      const res = await regService.verifyEmailCode(req)
       expect(res).toBe(actionResults.OK)
     })
   })
@@ -121,7 +157,7 @@ describe('RegistrationService', function () {
     })
   })
 
-  describe('acceptedLicence', function () {
+  describe('acceptLicence', function () {
     test('should return ACCOUNT_NOT_FOUND if no account', async () => {
       mockUserAccountRepository.getAccount.mockResolvedValue(null)
       const res = await regService.acceptLicence('user@test.com')
@@ -146,6 +182,48 @@ describe('RegistrationService', function () {
       mockUserAccountRepository.getAccount.mockResolvedValue({ active: true, activated_date: new Date(), accepted_terms_and_conds_date: new Date() })
       const res = await regService.acceptLicence('user@test.com')
       expect(res).toBe(actionResults.ERROR)
+    })
+  })
+
+  describe('userVerifyLicenceAccepted', () => {
+    test('should extract username', async () => {
+      mockUserAccountRepository.verifyLicenceAccepted.mockResolvedValue(true)
+      const res = await regService.isUserLicenceAccepted(request)
+      expect(res).toBeTruthy()
+      expect(mockUserAccountRepository.verifyLicenceAccepted).toHaveBeenCalledWith('dev-user@test.com')
+    })
+
+    test('should throw if cannot extract username', async () => {
+      mockUserAccountRepository.verifyLicenceAccepted.mockResolvedValue(true)
+      await expect(regService.isUserLicenceAccepted({ auth: null })).rejects.toThrow(new NotFoundError('user not found'))
+    })
+  })
+
+  describe('userSetLicenceAccepted', () => {
+    test('should extract username', async () => {
+      mockUserAccountRepository.setLicenceAcceptedDate.mockResolvedValue(true)
+      const res = await regService.setUserLicenceAccepted(request)
+      expect(res).toBeTruthy()
+      expect(mockUserAccountRepository.setLicenceAcceptedDate).toHaveBeenCalledWith('dev-user@test.com')
+    })
+
+    test('should throw if cannot extract username', async () => {
+      mockUserAccountRepository.setLicenceAcceptedDate.mockResolvedValue(true)
+      await expect(regService.setUserLicenceAccepted({ auth: null })).rejects.toThrow(new NotFoundError('user not found'))
+    })
+  })
+
+  describe('isUserEmailVerified', () => {
+    test('should extract username', async () => {
+      mockUserAccountRepository.isEmailVerified.mockResolvedValue(true)
+      const res = await regService.isUserEmailVerified(request)
+      expect(res).toBeTruthy()
+      expect(mockUserAccountRepository.isEmailVerified).toHaveBeenCalledWith('dev-user@test.com')
+    })
+
+    test('should return false if cannot extract username', async () => {
+      mockUserAccountRepository.isEmailVerified.mockResolvedValue(true)
+      await expect(regService.isUserEmailVerified({ auth: null })).rejects.toThrow(new NotFoundError('user not found'))
     })
   })
 })
