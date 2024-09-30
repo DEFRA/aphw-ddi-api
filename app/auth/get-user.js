@@ -5,8 +5,8 @@ const getCallingUser = (request) => {
   } = request?.auth?.credentials ?? {}
 
   return {
-    username: user ?? request?.headers?.['ddi-username'] ?? '',
-    displayname: displayname ?? request?.headers?.['ddi-displayname'] ?? ''
+    username: user ?? '',
+    displayname: displayname ?? ''
   }
 }
 
