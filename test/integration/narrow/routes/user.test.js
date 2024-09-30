@@ -17,7 +17,7 @@ describe('User endpoint', () => {
   const { hashCache } = require('../../../../app/session/hashCache')
 
   jest.mock('../../../../app/repos/user-accounts')
-  const { createAccount } = require('../../../../app/repos/user-accounts')
+  const { createAccount, deleteAccount } = require('../../../../app/repos/user-accounts')
 
   beforeEach(async () => {
     jest.clearAllMocks()
@@ -63,6 +63,9 @@ describe('User endpoint', () => {
       expect(createAccount).toHaveBeenCalledWith({
         username: 'ralph@wreckit.com',
         active: true
+      }, {
+        username: 'dev-user@test.com',
+        displayname: 'dev-user@test.com'
       })
       expect(JSON.parse(response.payload)).toEqual(expectedPayload)
     })
@@ -98,6 +101,23 @@ describe('User endpoint', () => {
       const response = await server.inject(options)
       expect(response.statusCode).toBe(400)
       expect(createAccount).not.toHaveBeenCalled()
+    })
+  })
+
+  describe('DELETE /user/:id', () => {
+    test('should delete a user and return a 204 for admin user', async () => {
+      const expectedPayload = undefined
+
+      const options = {
+        method: 'DELETE',
+        url: '/user/5',
+        ...portalHeader
+      }
+
+      const response = await server.inject(options)
+      expect(response.statusCode).toBe(201)
+      expect(deleteAccount).toHaveBeenCalledWith(5, user)
+      expect(response.payload).toEqual(expectedPayload)
     })
   })
 
