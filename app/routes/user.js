@@ -1,7 +1,7 @@
 const { hashCache } = require('../session/hashCache')
 const { userValidateAudit, userLogoutAudit } = require('../dto/auditing/user')
 const { userVerifyLicenceAccepted, userSetLicenceAccepted } = require('../dto/licence')
-const { createAccount } = require('../repos/user-accounts')
+const { createAccount, deleteAccount } = require('../repos/user-accounts')
 const { scopes } = require('../constants/auth')
 const { createUserResponseSchema, createUserRequestSchema } = require('../schema/user')
 const { mapUserDaoToDto } = require('../dto/mappers/user')
@@ -38,6 +38,25 @@ module.exports = [
         const user = mapUserDaoToDto(userDao)
 
         return h.response(user).code(201)
+      }
+    }
+  },
+  {
+    method: 'DELETE',
+    path: '/user/{userId?}',
+    options: {
+      tags: ['api'],
+      notes: ['Deletes a user account'],
+      response: {
+        status: {
+          204: undefined,
+          404: undefined
+        }
+      },
+      handler: async (request, h) => {
+        await deleteAccount(request.params.userId, getCallingUser(request))
+
+        return h.response(undefined).code(204)
       }
     }
   },
@@ -112,7 +131,8 @@ module.exports = [
       }
     },
     handler: async (request, h) => {
-      const username = request.headers['ddi-username']
+      const { username } = getCallingUser(request)
+
       hashCache.delete(username)
 
       console.info('Hash Key deleted for user')

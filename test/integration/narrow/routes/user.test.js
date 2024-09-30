@@ -106,7 +106,7 @@ describe('User endpoint', () => {
 
   describe('DELETE /user/:id', () => {
     test('should delete a user and return a 204 for admin user', async () => {
-      const expectedPayload = undefined
+      const expectedPayload = ''
 
       const options = {
         method: 'DELETE',
@@ -115,8 +115,13 @@ describe('User endpoint', () => {
       }
 
       const response = await server.inject(options)
-      expect(response.statusCode).toBe(201)
-      expect(deleteAccount).toHaveBeenCalledWith(5, user)
+      expect(response.statusCode).toBe(204)
+      expect(deleteAccount).toHaveBeenCalledWith(
+        '5',
+        {
+          displayname: 'dev-user@test.com',
+          username: 'dev-user@test.com'
+        })
       expect(response.payload).toEqual(expectedPayload)
     })
   })
