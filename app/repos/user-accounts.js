@@ -93,7 +93,13 @@ const deleteAccount = async (accountId, user, transaction) => {
     transaction
   })
   await sequelize.models.user_account.destroy({ where: { id: accountId }, transaction })
-  await deleteUserAccountAudit(account, user)
+
+  try {
+    await deleteUserAccountAudit(account, user)
+  } catch (e) {
+    console.log('Error while publishing delete audit record', e)
+    throw e
+  }
 }
 
 /**

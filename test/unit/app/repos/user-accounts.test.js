@@ -1,8 +1,6 @@
 const { DuplicateResourceError } = require('../../../../app/errors/duplicate-record')
 const { NotFoundError } = require('../../../../app/errors/not-found')
 const { buildUserAccount } = require('../../../mocks/user-accounts')
-const { createUserAccountAudit } = require('../../../../app/dto/auditing/user')
-const { getPoliceForce } = require('../../../../app/lookups')
 
 describe('user-accounts', () => {
   const dummyAdminUser = {
@@ -262,27 +260,23 @@ describe('user-accounts', () => {
     })
 
     test('should delete an account', async () => {
-      /**
-       * @type {UserAccount}
-       */
-      const userAccount = {
-        activated_date: undefined,
-        activation_token: undefined,
-        activation_token_expiry: undefined,
-        active: true,
-        created_at: undefined,
-        id: 1,
-        last_login_date: undefined,
-        police_force_id: undefined,
-        updated_at: undefined,
-        username: 'user@example.com',
-        accepted_terms_and_conds_date: undefined
-      }
+      const userAccount = buildUserAccount({
+        username: 'user@example.com'
+      })
       sequelize.models.user_account.findOne.mockResolvedValue(userAccount)
       await deleteAccount(1, dummyAdminUser, {})
 
       expect(sequelize.models.user_account.destroy).toHaveBeenCalledWith({ where: { id: 1 }, transaction: {} })
       expect(deleteUserAccountAudit).toHaveBeenCalledWith(userAccount, dummyAdminUser)
+    })
+
+    test('should throw if audit fails', async () => {
+      deleteUserAccountAudit.mockRejectedValue(new Error('audit error'))
+      const userAccount = buildUserAccount({
+        username: 'user@example.com'
+      })
+      sequelize.models.user_account.findOne.mockResolvedValue(userAccount)
+      await expect(deleteAccount(1, dummyAdminUser, {})).rejects.toThrow(new Error('audit error'))
     })
   })
 
