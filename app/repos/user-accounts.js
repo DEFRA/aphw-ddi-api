@@ -3,6 +3,7 @@ const { addMinutes } = require('../lib/date-helpers')
 const { DuplicateResourceError } = require('../errors/duplicate-record')
 const { getPoliceForce } = require('../lookups')
 const { NotFoundError } = require('../errors/not-found')
+const { createUserAccountAudit, deleteUserAccountAudit } = require('../dto/auditing/user')
 
 /**
  * @typedef UserAccount
@@ -59,20 +60,25 @@ const createAccount = async (account, user, transaction) => {
 
   const { police_force: policeForce, ...accountWithoutPoliceForce } = account
 
+  let createdAccount
+
   if (!policeForce || account.police_force_id) {
-    return sequelize.models.user_account.create(accountWithoutPoliceForce, transaction)
+    createdAccount = await sequelize.models.user_account.create(accountWithoutPoliceForce, transaction)
+  } else {
+    const policeForceObj = await getPoliceForce(policeForce)
+
+    if (policeForceObj === null) {
+      throw new NotFoundError(`${policeForce} not found`)
+    }
+    createdAccount = await sequelize.models.user_account.create({
+      ...accountWithoutPoliceForce,
+      police_force_id: policeForceObj.id
+    }, transaction)
   }
 
-  const policeForceObj = await getPoliceForce(policeForce)
+  await createUserAccountAudit(createdAccount, user)
 
-  if (policeForceObj === null) {
-    throw new NotFoundError(`${policeForce} not found`)
-  }
-
-  return sequelize.models.user_account.create({
-    ...accountWithoutPoliceForce,
-    police_force_id: policeForceObj.id
-  }, transaction)
+  return createdAccount
 }
 
 const deleteAccount = async (accountId, user, transaction) => {
@@ -80,7 +86,14 @@ const deleteAccount = async (accountId, user, transaction) => {
     return sequelize.transaction(async (t) => deleteAccount(accountId, user, t))
   }
 
+  const account = await sequelize.models.user_account.findOne({
+    where: {
+      id: accountId
+    },
+    transaction
+  })
   await sequelize.models.user_account.destroy({ where: { id: accountId }, transaction })
+  await deleteUserAccountAudit(account, user)
 }
 
 /**

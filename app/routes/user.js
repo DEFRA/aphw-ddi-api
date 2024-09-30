@@ -7,6 +7,7 @@ const { createUserResponseSchema, createUserRequestSchema } = require('../schema
 const { mapUserDaoToDto } = require('../dto/mappers/user')
 const { conflictSchema } = require('../schema/common/response/conflict')
 const { notFoundSchema } = require('../schema/common/response/not-found')
+const { getCallingUser } = require('../auth/get-user')
 
 module.exports = [
   {
@@ -32,7 +33,7 @@ module.exports = [
       },
       auth: { scope: [scopes.admin] },
       handler: async (request, h) => {
-        const userDao = await createAccount(request.payload)
+        const userDao = await createAccount(request.payload, getCallingUser(request))
 
         const user = mapUserDaoToDto(userDao)
 
