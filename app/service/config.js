@@ -8,6 +8,11 @@ let cdoService
  */
 let dogService
 
+/**
+ * @type {RegistrationService}
+ */
+let registrationService
+
 const getCdoService = () => {
   if (cdoService === undefined) {
     const cdoRepository = require('../repos/cdo')
@@ -29,7 +34,18 @@ const getDogService = () => {
   return dogService
 }
 
+const getRegistrationService = () => {
+  if (registrationService === undefined) {
+    const userRepository = require('../repos/user-accounts')
+    const { RegistrationService } = require('./registration')
+
+    registrationService = new RegistrationService(userRepository)
+  }
+  return registrationService
+}
+
 module.exports = {
   getCdoService,
-  getDogService
+  getDogService,
+  getRegistrationService
 }
