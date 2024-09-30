@@ -270,6 +270,14 @@ describe('user-accounts', () => {
       expect(deleteUserAccountAudit).toHaveBeenCalledWith(userAccount, dummyAdminUser)
     })
 
+    test('should reject with NotFound error if account does not exist', async () => {
+      const userAccount = buildUserAccount({
+        username: 'user@example.com'
+      })
+      sequelize.models.user_account.findOne.mockResolvedValue(null)
+      await expect(deleteAccount(1, dummyAdminUser, {})).rejects.toThrow(new NotFoundError('Account does not exist with id 1'))
+    })
+
     test('should throw if audit fails', async () => {
       deleteUserAccountAudit.mockRejectedValue(new Error('audit error'))
       const userAccount = buildUserAccount({
