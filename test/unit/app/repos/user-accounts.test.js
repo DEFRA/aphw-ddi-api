@@ -266,7 +266,7 @@ describe('user-accounts', () => {
       sequelize.models.user_account.findOne.mockResolvedValue(userAccount)
       await deleteAccount(1, dummyAdminUser, {})
 
-      expect(sequelize.models.user_account.destroy).toHaveBeenCalledWith({ where: { id: 1 }, transaction: {} })
+      expect(sequelize.models.user_account.destroy).toHaveBeenCalledWith({ where: { id: 1 }, force: true, transaction: {} })
       expect(deleteUserAccountAudit).toHaveBeenCalledWith(userAccount, dummyAdminUser)
     })
 

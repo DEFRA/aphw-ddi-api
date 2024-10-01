@@ -97,7 +97,7 @@ const deleteAccount = async (accountId, user, transaction) => {
     throw new NotFoundError(`Account does not exist with id ${accountId}`)
   }
 
-  await sequelize.models.user_account.destroy({ where: { id: accountId }, transaction })
+  await sequelize.models.user_account.destroy({ where: { id: accountId }, force: true, transaction })
 
   try {
     await deleteUserAccountAudit(account, user)
