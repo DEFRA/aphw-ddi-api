@@ -8,7 +8,8 @@ const {
 jest.mock('../../../../app/messaging/send-event')
 const { sendEvent } = require('../../../../app/messaging/send-event')
 const { robotImportUser } = require('../../../../app/constants/import')
-const { CDO, COURT, DOG, EXEMPTION, PERSON, POLICE, INSURANCE } = require('../../../../app/constants/event/audit-event-object-types')
+const { CDO, COURT, DOG, EXEMPTION, PERSON, POLICE, INSURANCE, USER_ACCOUNT } = require('../../../../app/constants/event/audit-event-object-types')
+const { buildUserAccount } = require('../../../mocks/user-accounts')
 
 const devUser = {
   username: 'dev-user@test.com',
@@ -332,6 +333,13 @@ describe('SendAudit test', () => {
       expect(pk).toBe('ED123')
     })
 
+    test('should get id of user account', () => {
+      const entity = { id: 1, username: 'joe@bloggs.co.uk', police_force_id: 1 }
+      const pk = determineCreatePk(USER_ACCOUNT, entity)
+
+      expect(pk).toBe('1')
+    })
+
     test('should throw for invalid object', () => {
       const entity = { id: 1, index_number: 'ED123', name: 'my dog' }
       expect(() => determineCreatePk('invalid', entity)).toThrow('Invalid object for create audit: invalid')
@@ -379,6 +387,13 @@ describe('SendAudit test', () => {
       const pk = determineUpdatePk(EXEMPTION, entity)
 
       expect(pk).toBe('ED123')
+    })
+
+    test('should get id of USER_ACCOUNT', () => {
+      const entity = buildUserAccount({ id: 1 })
+      const pk = determineUpdatePk(USER_ACCOUNT, entity)
+
+      expect(pk).toBe('1')
     })
 
     test('should throw for invalid object', () => {

@@ -43,6 +43,10 @@ Use Docker Compose to run service locally.
 docker-compose up
 ```
 
+## Authentication
+
+You will need to add the base64 encoded public keys from portal and enforcement in `PORTAL_PUBLIC_KEY` and`ENFORCEMENT_PUBLIC_KEY` env variables
+
 ## Test structure
 
 The tests have been structured into subfolders of `./test` as per the
@@ -117,3 +121,4 @@ The Open Government Licence (OGL) was developed by the Controller of Her Majesty
 
 It is designed to encourage use and re-use of information freely and flexibly, with only a few conditions.
 
+ 

@@ -1,15 +1,289 @@
+const { DuplicateResourceError } = require('../../../../app/errors/duplicate-record')
+const { NotFoundError } = require('../../../../app/errors/not-found')
+const { buildUserAccount } = require('../../../mocks/user-accounts')
+
 describe('user-accounts', () => {
+  const dummyAdminUser = {
+    username: 'dummy-user',
+    displayname: 'Dummy User'
+  }
+
+  jest.mock('../../../../app/lookups')
+  const { getPoliceForce } = require('../../../../app/lookups')
+
   jest.mock('../../../../app/config/db', () => ({
     models: {
       user_account: {
-        findOne: jest.fn()
+        findOne: jest.fn(),
+        create: jest.fn(),
+        destroy: jest.fn()
       }
-    }
+    },
+    transaction: jest.fn()
   }))
+
+  jest.mock('../../../../app/dto/auditing/user')
+  const { createUserAccountAudit, deleteUserAccountAudit } = require('../../../../app/dto/auditing/user')
 
   const sequelize = require('../../../../app/config/db')
 
-  const { isAccountEnabled, getAccount, setActivationCodeAndExpiry, setLoginDate, setActivatedDate, setLicenceAcceptedDate, verifyLicenceAccepted, isEmailVerified } = require('../../../../app/repos/user-accounts')
+  const { createAccount, deleteAccount, isAccountEnabled, getAccount, setActivationCodeAndExpiry, setLoginDate, setActivatedDate, setLicenceAcceptedDate, verifyLicenceAccepted, isEmailVerified } = require('../../../../app/repos/user-accounts')
+
+  afterEach(() => {
+    jest.resetAllMocks()
+  })
+
+  describe('createAccount', () => {
+    test('should use a transaction if none exists', async () => {
+      sequelize.transaction.mockImplementation(async (localCallback) => {
+        await localCallback({})
+      })
+      /**
+       * @type {UserAccountRequestDto}
+       */
+      const userDto = {
+        username: 'bill@example.com'
+      }
+
+      await createAccount(userDto, dummyAdminUser)
+
+      expect(sequelize.transaction).toHaveBeenCalled()
+    })
+
+    test('should create an account with no linked police force', async () => {
+      /**
+       * @type {UserAccount}
+       */
+      const createDao = buildUserAccount({
+        username: 'bill@example.com'
+      })
+      sequelize.models.user_account.create.mockResolvedValue(createDao)
+      sequelize.models.user_account.findOne.mockResolvedValue(null)
+      const transaction = {}
+      /**
+       * @type {UserAccountRequestDto}
+       */
+      const userDto = {
+        username: 'bill@example.com',
+        active: true
+      }
+
+      const user = await createAccount(userDto, dummyAdminUser, transaction)
+
+      expect(user).toEqual(createDao)
+      expect(sequelize.transaction).not.toHaveBeenCalled()
+      expect(sequelize.models.user_account.create).toHaveBeenCalledWith(userDto, {})
+      expect(createUserAccountAudit).toHaveBeenCalledWith(createDao, dummyAdminUser)
+    })
+
+    test('should create an account with linked police force from title', async () => {
+      /**
+       * @type {UserAccount}
+       */
+      const createDao = buildUserAccount({
+        username: 'bill@example.com',
+        active: true,
+        police_force_id: 1
+      })
+      sequelize.models.user_account.create.mockResolvedValue(createDao)
+      sequelize.models.user_account.findOne.mockResolvedValue(null)
+      getPoliceForce.mockResolvedValue({
+        id: 1,
+        name: 'Gotham City Police Department'
+      })
+      const transaction = {}
+
+      /**
+       * @type {UserAccountRequestDto}
+       */
+      const userDto = {
+        username: 'bill@example.com',
+        active: true,
+        police_force: 'Gotham City Police Department'
+      }
+
+      const expectedUserDto = {
+        username: 'bill@example.com',
+        active: true,
+        police_force_id: 1
+      }
+
+      const user = await createAccount(userDto, dummyAdminUser, transaction)
+
+      expect(user).toEqual(createDao)
+      expect(sequelize.transaction).not.toHaveBeenCalled()
+      expect(sequelize.models.user_account.create).toHaveBeenCalledWith(expectedUserDto, {})
+      expect(createUserAccountAudit).toHaveBeenCalledWith(createDao, dummyAdminUser)
+    })
+
+    test('should use police force id if provided', async () => {
+      const userUpdateDto = {
+        username: 'detective.gordon@gotham.police.gov',
+        active: true,
+        police_force_id: 1
+      }
+      /**
+       * @type {UserAccount}
+       */
+      const expectedUserDao = buildUserAccount(userUpdateDto)
+      sequelize.models.user_account.create.mockResolvedValue(expectedUserDao)
+      sequelize.models.user_account.findOne.mockResolvedValue(null)
+
+      const transaction = {}
+
+      /**
+       * @type {UserAccountRequestDto}
+       */
+      const userDto = {
+        username: 'detective.gordon@gotham.police.gov',
+        active: true,
+        police_force_id: 1,
+        police_force: 'Gotham City Police Department'
+      }
+
+      const user = await createAccount(userDto, dummyAdminUser, transaction)
+
+      expect(user).toEqual(expectedUserDao)
+      expect(sequelize.transaction).not.toHaveBeenCalled()
+      expect(sequelize.models.user_account.create).toHaveBeenCalledWith(userUpdateDto, {})
+      expect(getPoliceForce).not.toHaveBeenCalled()
+      expect(createUserAccountAudit).toHaveBeenCalledWith(expectedUserDao, dummyAdminUser)
+    })
+
+    test('should fail if police force name does not exist', async () => {
+      sequelize.models.user_account.findOne.mockResolvedValue(null)
+      const expectedPoliceForce = 'Gotham City Police Department'
+
+      getPoliceForce.mockResolvedValue(null)
+
+      const transaction = {}
+
+      /**
+       * @type {UserAccountRequestDto}
+       */
+      const userDto = {
+        username: 'bill@example.com',
+        active: true,
+        police_force: expectedPoliceForce
+      }
+
+      const expectedUserDto = {
+        username: 'bill@example.com',
+        active: true,
+        police_force_id: 1
+      }
+
+      sequelize.models.user_account.create.mockResolvedValue(expectedUserDto)
+
+      await expect(createAccount(userDto, dummyAdminUser, transaction)).rejects.toThrow(new NotFoundError(`${expectedPoliceForce} not found`))
+    })
+
+    test('should create an account with linked police force from police force name', async () => {
+      sequelize.models.user_account.findOne.mockResolvedValue(null)
+      const expectedPoliceForce = 'Gotham City Police Department'
+
+      getPoliceForce.mockResolvedValue({
+        id: 1,
+        name: expectedPoliceForce
+      })
+
+      const transaction = {}
+
+      /**
+       * @type {UserAccountRequestDto}
+       */
+      const userDto = {
+        username: 'bill@example.com',
+        active: true,
+        police_force: expectedPoliceForce
+      }
+
+      const expectedUserDto = {
+        username: 'bill@example.com',
+        active: true,
+        police_force_id: 1
+      }
+
+      sequelize.models.user_account.create.mockResolvedValue(expectedUserDto)
+
+      const user = await createAccount(userDto, dummyAdminUser, transaction)
+
+      expect(user).toEqual(expectedUserDto)
+      expect(sequelize.transaction).not.toHaveBeenCalled()
+      expect(sequelize.models.user_account.create).toHaveBeenCalledWith(expectedUserDto, {})
+    })
+
+    test('should reject duplicated usernames', async () => {
+      sequelize.models.user_account.findOne.mockResolvedValue({
+        created_at: '2024-09-25T19:26:14.946Z',
+        updated_at: '2024-09-25T19:26:14.946Z',
+        id: 3,
+        username: 'user@example.com',
+        active: true,
+        activation_token: null,
+        activation_token_expiry: null,
+        activated_date: null,
+        accepted_terms_and_conds_date: null,
+        last_login_date: null,
+        deleted_at: null
+      })
+
+      const transaction = {}
+      /**
+       * @type {UserAccountRequestDto}
+       */
+      const userDto = {
+        username: 'bill@example.com',
+        active: true
+      }
+
+      const expectedUserDto = {
+        username: 'bill@example.com',
+        active: true
+      }
+
+      sequelize.models.user_account.create.mockResolvedValue(expectedUserDto)
+
+      await expect(createAccount(userDto, dummyAdminUser, transaction)).rejects.toThrow(new DuplicateResourceError('This user is already in the allow list'))
+    })
+  })
+
+  describe('deleteAccount', () => {
+    test('should use a transaction if none exists', async () => {
+      sequelize.transaction.mockImplementation(async (localCallback) => {
+        await localCallback({})
+      })
+
+      await deleteAccount(1, dummyAdminUser)
+
+      expect(sequelize.transaction).toHaveBeenCalled()
+    })
+
+    test('should delete an account', async () => {
+      const userAccount = buildUserAccount({
+        username: 'user@example.com'
+      })
+      sequelize.models.user_account.findOne.mockResolvedValue(userAccount)
+      await deleteAccount(1, dummyAdminUser, {})
+
+      expect(sequelize.models.user_account.destroy).toHaveBeenCalledWith({ where: { id: 1 }, force: true, transaction: {} })
+      expect(deleteUserAccountAudit).toHaveBeenCalledWith(userAccount, dummyAdminUser)
+    })
+
+    test('should reject with NotFound error if account does not exist', async () => {
+      sequelize.models.user_account.findOne.mockResolvedValue(null)
+      await expect(deleteAccount(1, dummyAdminUser, {})).rejects.toThrow(new NotFoundError('Account does not exist with id 1'))
+    })
+
+    test('should throw if audit fails', async () => {
+      deleteUserAccountAudit.mockRejectedValue(new Error('audit error'))
+      const userAccount = buildUserAccount({
+        username: 'user@example.com'
+      })
+      sequelize.models.user_account.findOne.mockResolvedValue(userAccount)
+      await expect(deleteAccount(1, dummyAdminUser, {})).rejects.toThrow(new Error('audit error'))
+    })
+  })
 
   describe('isAccountEnabled', () => {
     test('should return true if active', async () => {
