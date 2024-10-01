@@ -47,7 +47,7 @@ module.exports = [
     path: '/user/{userId?}',
     options: {
       tags: ['api'],
-      notes: ['Deletes a user account'],
+      notes: ['Hard deletes a user account'],
       response: {
         status: {
           204: undefined,
