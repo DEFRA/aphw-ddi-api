@@ -27,7 +27,7 @@ describe('user-accounts', () => {
 
   const sequelize = require('../../../../app/config/db')
 
-  const { createAccount, deleteAccount, isAccountEnabled, getAccount, setActivationCodeAndExpiry, setLoginDate, setActivatedDate, setLicenceAcceptedDate, verifyLicenceAccepted } = require('../../../../app/repos/user-accounts')
+  const { createAccount, deleteAccount, isAccountEnabled, getAccount, setActivationCodeAndExpiry, setLoginDate, setActivatedDate, setLicenceAcceptedDate, verifyLicenceAccepted, isEmailVerified } = require('../../../../app/repos/user-accounts')
 
   afterEach(() => {
     jest.resetAllMocks()
@@ -286,7 +286,7 @@ describe('user-accounts', () => {
   })
 
   describe('isAccountEnabled', () => {
-    test('should return true if activated date and active', async () => {
+    test('should return true if active', async () => {
       sequelize.models.user_account.findOne.mockResolvedValue({
         id: 1,
         username: 'test@example.com',
@@ -299,21 +299,6 @@ describe('user-accounts', () => {
 
       const result = await isAccountEnabled('test@example.com')
       expect(result).toBe(true)
-    })
-
-    test('should return false if user exists but is not activated', async () => {
-      sequelize.models.user_account.findOne.mockResolvedValue({
-        id: 1,
-        username: 'test@example.com',
-        telephone: '01406946277',
-        activation_token: 'ABCDE12345',
-        activated_date: null,
-        active: true,
-        last_login_date: new Date('2024-09-02')
-      })
-
-      const result = await isAccountEnabled('test@example.com')
-      expect(result).toBe(false)
     })
 
     test('should return false if user exists and activated but not active', async () => {
@@ -508,6 +493,39 @@ describe('user-accounts', () => {
       })
 
       const result = await verifyLicenceAccepted('test@example.com')
+      expect(result).toBe(false)
+    })
+  })
+
+  describe('isEmailVerified', () => {
+    test('should return true if email has been verified', async () => {
+      sequelize.models.user_account.findOne.mockResolvedValue({
+        id: 1,
+        username: 'test@example.com',
+        telephone: '01406946277',
+        activation_token: 'ABCDE12345',
+        activated_date: new Date('2024-08-31'),
+        active: true,
+        last_login_date: new Date('2024-09-02'),
+        accepted_terms_and_conds_date: new Date()
+      })
+
+      const result = await isEmailVerified('test@example.com')
+      expect(result).toBe(true)
+    })
+
+    test('should return false if not verified', async () => {
+      sequelize.models.user_account.findOne.mockResolvedValue({
+        id: 1,
+        username: 'test@example.com',
+        telephone: '01406946277',
+        activation_token: 'ABCDE12345',
+        activated_date: null,
+        active: true,
+        last_login_date: new Date('2024-09-02')
+      })
+
+      const result = await isEmailVerified('test@example.com')
       expect(result).toBe(false)
     })
   })

@@ -116,7 +116,7 @@ const isAccountEnabled = async (username) => {
     where: { username }
   })
 
-  return !!account?.activated_date && !!account.active
+  return !!account?.active
 }
 
 /**
@@ -216,6 +216,18 @@ const verifyLicenceAccepted = async (username) => {
   return !!account?.accepted_terms_and_conds_date
 }
 
+/**
+ * @param {string} username
+ * @return {Promise<boolean>}
+ */
+const isEmailVerified = async (username) => {
+  const account = await sequelize.models.user_account.findOne({
+    where: { username }
+  })
+
+  return !!account.activated_date
+}
+
 module.exports = {
   createAccount,
   deleteAccount,
@@ -225,5 +237,6 @@ module.exports = {
   setActivatedDate,
   setLoginDate,
   verifyLicenceAccepted,
-  setLicenceAcceptedDate
+  setLicenceAcceptedDate,
+  isEmailVerified
 }

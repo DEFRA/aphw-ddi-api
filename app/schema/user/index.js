@@ -1,5 +1,13 @@
 const Joi = require('joi')
 
+const userBooleanResponseSchema = Joi.object({
+  result: Joi.boolean()
+})
+
+const userStringResponseSchema = Joi.object({
+  result: Joi.string()
+})
+
 const createUserRequestSchema = Joi.object({
   username: Joi.string().required(),
   active: Joi.boolean().default(true),
@@ -15,6 +23,8 @@ const createUserResponseSchema = Joi.object({
 })
 
 module.exports = {
+  userBooleanResponseSchema,
+  userStringResponseSchema,
   createUserRequestSchema,
   createUserResponseSchema
 }
