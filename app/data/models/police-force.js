@@ -43,6 +43,10 @@ module.exports = (sequelize, DataTypes) => {
       as: 'registrations',
       foreignKey: 'police_force_id'
     })
+    policeForce.hasMany(models.user_account, {
+      as: 'user_accounts',
+      foreignKey: 'police_force_id'
+    })
   }
 
   return policeForce

@@ -1,5 +1,111 @@
 const sequelize = require('../config/db')
 const { addMinutes } = require('../lib/date-helpers')
+const { DuplicateResourceError } = require('../errors/duplicate-record')
+const { getPoliceForce } = require('../lookups')
+const { NotFoundError } = require('../errors/not-found')
+const { createUserAccountAudit, deleteUserAccountAudit } = require('../dto/auditing/user')
+
+/**
+ * @typedef UserAccount
+ * @property {number} id
+ * @property {string} username
+ * @property {number|null} police_force_id - 1,
+ * @property {string|null} activation_token
+ * @property {Date|null} activation_token_expiry
+ * @property {Date|null} activated_date
+ * @property {Date|null} accepted_terms_and_conds_date
+ * @property {boolean} active
+ * @property {Date|null} last_login_date
+ * @property {Date} created_at
+ * @property {Date} updated_at
+ */
+
+/**
+ * @typedef UserAccountRequestDto
+ * @property {string} username
+ * @property {string} [telephone]
+ * @property {boolean} [active]
+ * @property {number} [police_force_id]
+ * @property {string} police_force
+ */
+
+/**
+ * @typedef UserAccountDto
+ * @property {string} username
+ * @property {string} [telephone]
+ * @property {boolean} [active]
+ * @property {number} [police_force_id]
+ */
+
+/**
+ * @param {UserAccountRequestDto} account
+ * @param user
+ * @param [transaction]
+ * @return {Promise<UserAccount>}
+ */
+const createAccount = async (account, user, transaction) => {
+  if (!transaction) {
+    return sequelize.transaction(async (t) => createAccount(account, user, t))
+  }
+
+  const foundUser = await sequelize.models.user_account.findOne({
+    where: {
+      username: account.username
+    }
+  }, transaction)
+
+  if (foundUser) {
+    throw new DuplicateResourceError('This user is already in the allow list')
+  }
+
+  const { police_force: policeForce, ...accountWithoutPoliceForce } = account
+
+  let createdAccount
+
+  if (!policeForce || account.police_force_id) {
+    createdAccount = await sequelize.models.user_account.create(accountWithoutPoliceForce, transaction)
+  } else {
+    const policeForceObj = await getPoliceForce(policeForce)
+
+    if (policeForceObj === null) {
+      throw new NotFoundError(`${policeForce} not found`)
+    }
+    createdAccount = await sequelize.models.user_account.create({
+      ...accountWithoutPoliceForce,
+      police_force_id: policeForceObj.id
+    }, transaction)
+  }
+
+  await createUserAccountAudit(createdAccount, user)
+
+  return createdAccount
+}
+
+const deleteAccount = async (accountId, user, transaction) => {
+  if (!transaction) {
+    return sequelize.transaction(async (t) => deleteAccount(accountId, user, t))
+  }
+
+  const account = await sequelize.models.user_account.findOne({
+    where: {
+      id: accountId
+    },
+    transaction
+  })
+
+  if (account === null) {
+    throw new NotFoundError(`Account does not exist with id ${accountId}`)
+  }
+
+  await sequelize.models.user_account.destroy({ where: { id: accountId }, force: true, transaction })
+
+  try {
+    await deleteUserAccountAudit(account, user)
+  } catch (e) {
+    console.log('Error while publishing delete audit record', e)
+    throw e
+  }
+}
 
 /**
  * @param {string} username
@@ -123,6 +229,8 @@ const isEmailVerified = async (username) => {
 }
 
 module.exports = {
+  createAccount,
+  deleteAccount,
   isAccountEnabled,
   getAccount,
   setActivationCodeAndExpiry,

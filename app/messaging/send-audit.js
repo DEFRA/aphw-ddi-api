@@ -5,7 +5,7 @@ const { getDiff } = require('json-difference')
 const { sendEvent } = require('./send-event')
 const { deepClone } = require('../lib/deep-clone')
 const { isUserValid } = require('../auth/get-user')
-const { CDO, DOG, PERSON, EXEMPTION, COURT, POLICE, ACTIVITY, INSURANCE } = require('../constants/event/audit-event-object-types')
+const { CDO, DOG, PERSON, EXEMPTION, COURT, POLICE, ACTIVITY, INSURANCE, USER_ACCOUNT } = require('../constants/event/audit-event-object-types')
 const { robotImportUser } = require('../constants/import')
 
 const sendEventToAudit = async (eventType, eventSubject, eventDescription, actioningUser) => {
@@ -205,9 +205,10 @@ const determineCreatePk = (objName, entity) => {
     return entity.dog.index_number
   } else if (objName === DOG) {
     return entity.index_number
-  } else if (objName === COURT || objName === POLICE || objName === ACTIVITY || objName === INSURANCE) {
+  } else if ([COURT, POLICE, ACTIVITY, INSURANCE, USER_ACCOUNT].includes(objName)) {
     return entity.id.toString()
   }
+
   throw new Error(`Invalid object for create audit: ${objName}`)
 }
 
@@ -218,7 +219,7 @@ const determineUpdatePk = (objName, entity) => {
     return entity.personReference || entity.person_reference
   } else if (objName === EXEMPTION) {
     return entity.index_number
-  } else if (objName === COURT || objName === POLICE || objName === ACTIVITY || objName === INSURANCE) {
+  } else if ([COURT, POLICE, ACTIVITY, INSURANCE, USER_ACCOUNT].includes(objName)) {
     return entity.id.toString()
   }
   throw new Error(`Invalid object for update audit: ${objName}`)

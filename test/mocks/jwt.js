@@ -50,8 +50,6 @@ const portalJwt = () => {
 
   return {
     headers: {
-      'ddi-username': 'dev-user@test.com',
-      'ddi-displayname': 'dev-user@test.com',
       Authorization: `Bearer ${token}`
     }
   }

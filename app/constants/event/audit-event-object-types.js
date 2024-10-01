@@ -7,5 +7,6 @@ module.exports = {
   COURT: 'court',
   ACTIVITY: 'activity',
   POLICE: 'policeForce',
-  INSURANCE: 'insuranceCompany'
+  INSURANCE: 'insuranceCompany',
+  USER_ACCOUNT: 'userAccount'
 }
