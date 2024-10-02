@@ -5,6 +5,6 @@ module.exports = Joi.object({
   type: Joi.string().required(),
   customFields: Joi.array().items({
     name: Joi.string().required(),
-    value: Joi.string()
+    value: Joi.string().allow('')
   }).optional()
 }).required()

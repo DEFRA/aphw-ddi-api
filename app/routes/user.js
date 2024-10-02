@@ -1,14 +1,15 @@
 const { hashCache } = require('../session/hashCache')
 const { userValidateAudit, userLogoutAudit } = require('../dto/auditing/user')
 const { getRegistrationService } = require('../service/config')
-const { userBooleanResponseSchema, userStringResponseSchema } = require('../schema/user')
 const { createAccount, deleteAccount } = require('../repos/user-accounts')
 const { scopes } = require('../constants/auth')
-const { createUserResponseSchema, createUserRequestSchema } = require('../schema/user')
+const { createUserResponseSchema, createUserRequestSchema, userFeedbackSchema, userBooleanResponseSchema, userStringResponseSchema } = require('../schema/user')
 const { mapUserDaoToDto } = require('../dto/mappers/user')
 const { conflictSchema } = require('../schema/common/response/conflict')
 const { notFoundSchema } = require('../schema/common/response/not-found')
 const { getCallingUser } = require('../auth/get-user')
+const { emailTypes, feedbackEmailAddress } = require('../constants/email-types')
+const { sendEmail } = require('../messaging/send-email')
 
 module.exports = [
   {
@@ -193,6 +194,44 @@ module.exports = [
       await userLogoutAudit(request)
 
       return h.response(undefined).code(204)
+    }
+  },
+  {
+    method: 'POST',
+    path: '/user/me/feedback',
+    options: {
+      tags: ['api'],
+      notes: ['Receives user feedback and forwards to Defra'],
+      response: {
+        status: {
+          200: userStringResponseSchema
+        }
+      },
+      validate: {
+        payload: userFeedbackSchema,
+        failAction: (_request, h, err) => {
+          console.error('Error validating feedback payload', err)
+
+          return h.response({ errors: err.details.map(e => e.message) }).code(400).takeover()
+        }
+      },
+      handler: async (request, h) => {
+        const customFields = []
+          .concat(request.payload?.fields.map(field => ({
+            name: field.name,
+            value: field.value
+          })))
+
+        const data = {
+          toAddress: feedbackEmailAddress,
+          type: emailTypes.feedback,
+          customFields
+        }
+
+        await sendEmail(data)
+
+        return h.response({ result: 'Ok' }).code(200)
+      }
     }
   }
 ]

@@ -22,9 +22,17 @@ const createUserResponseSchema = Joi.object({
   police_force_id: Joi.number()
 })
 
+const userFeedbackSchema = Joi.object({
+  fields: Joi.array().items({
+    name: Joi.string().required(),
+    value: Joi.string().allow('').optional()
+  }).optional()
+})
+
 module.exports = {
   userBooleanResponseSchema,
   userStringResponseSchema,
   createUserRequestSchema,
-  createUserResponseSchema
+  createUserResponseSchema,
+  userFeedbackSchema
 }
