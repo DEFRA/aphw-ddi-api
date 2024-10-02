@@ -107,6 +107,39 @@ const deleteAccount = async (accountId, user, transaction) => {
   }
 }
 
+const createAccounts = async (accountsDto, user) => {
+  const errors = []
+  const accounts = []
+
+  for (const accountDto of accountsDto) {
+    try {
+      const account = await createAccount(accountDto, user)
+      accounts.push(account)
+    } catch (e) {
+      if (e instanceof DuplicateResourceError) {
+        errors.push({
+          username: accountDto.username,
+          statusCode: 409,
+          error: 'Conflict',
+          message: e.message
+        })
+      } else {
+        errors.push({
+          username: accountDto.username,
+          statusCode: 500,
+          error: 'Internal Server Error',
+          message: e.message
+        })
+      }
+    }
+  }
+
+  return {
+    accounts,
+    errors: errors.length ? errors : undefined
+  }
+}
+
 /**
  * @param {string} username
  * @return {Promise<boolean>}
@@ -231,6 +264,7 @@ const isEmailVerified = async (username) => {
 module.exports = {
   createAccount,
   deleteAccount,
+  createAccounts,
   isAccountEnabled,
   getAccount,
   setActivationCodeAndExpiry,
