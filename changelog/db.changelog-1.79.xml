@@ -1,0 +1,189 @@
+<?xml version="1.1" encoding="utf-8" standalone="no"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog" xmlns:ext="http://www.liquibase.org/xml/ns/dbchangelog-ext" xmlns:pro="http://www.liquibase.org/xml/ns/pro" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog-ext http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-ext.xsd http://www.liquibase.org/xml/ns/pro http://www.liquibase.org/xml/ns/pro/liquibase-pro-3.9.xsd http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.9.xsd">
+  <changeSet author="C Cole" id="1">
+    <tagDatabase tag="v1.79" />
+  </changeSet>
+  <changeSet author="C Cole" id="2">
+    <addColumn tableName="police_force">
+      <column name="domain" type="TEXT" />
+    </addColumn>
+  </changeSet>
+  <changeSet author="C Cole" id="3">
+    <update tableName="police_force">
+      <column name="domain" value="avonandsomerset.police.uk"/>
+      <where>name='Avon and Somerset Constabulary'</where>
+    </update>
+    <update tableName="police_force">
+      <column name="domain" value="beds.police.uk" />
+      <where>name='Bedfordshire Police'</where>
+    </update>
+    <update tableName="police_force">
+      <column name="domain" value="cambs.police.uk" />
+      <where>name='Cambridgeshire Constabulary'</where>
+    </update>
+    <update tableName="police_force">
+      <column name="domain" value="scotland.police.uk" />
+      <where>name='Police Scotland'</where>
+    </update>
+    <update tableName="police_force">
+      <column name="domain" value="cheshire.police.uk" />
+      <where>name='Cheshire Constabulary'</where>
+    </update>
+    <update tableName="police_force">
+      <column name="domain" value="cityoflondon.police.uk" />
+      <where>name='City of London Police'</where>
+    </update>
+    <update tableName="police_force">
+      <column name="domain" value="cleveland.police.uk" />
+      <where>name='Cleveland Police'</where>
+    </update>
+    <update tableName="police_force">
+      <column name="domain" value="cumbria.pnn.police.uk" />
+      <where>name='Cumbria Constabulary'</where>
+    </update>
+    <update tableName="police_force">
+      <column name="domain" value="derbyshire.police.uk" />
+      <where>name='Derbyshire Constabulary'</where>
+    </update>
+    <update tableName="police_force">
+      <column name="domain" value="devonandcornwall.police.uk" />
+      <where>name='Devon and Cornwall Police'</where>
+    </update>
+    <update tableName="police_force">
+      <column name="domain" value="dorset.police.uk" />
+      <where>name='Dorset Police'</where>
+    </update>
+    <update tableName="police_force">
+      <column name="domain" value="durham.police.uk" />
+      <where>name='Durham Constabulary'</where>
+    </update>
+    <update tableName="police_force">
+      <column name="domain" value="dyfed-powys.police.uk" />
+      <where>name='Dyfed-Powys Police'</where>
+    </update>
+    <update tableName="police_force">
+      <column name="domain" value="essex.police.uk" />
+      <where>name='Essex Police'</where>
+    </update>
+    <update tableName="police_force">
+      <column name="domain" value="gloucestershire.police.uk" />
+      <where>name='Gloucestershire Constabulary'</where>
+    </update>
+    <update tableName="police_force">
+      <column name="domain" value="gmp.police.uk" />
+      <where>name='Greater Manchester Police'</where>
+    </update>
+    <update tableName="police_force">
+      <column name="domain" value="gwent.police.uk" />
+      <where>name='Gwent Police'</where>
+    </update>
+    <update tableName="police_force">
+      <column name="domain" value="hampshire.police.uk" />
+      <where>name='Hampshire Constabulary'</where>
+    </update>
+    <update tableName="police_force">
+      <column name="domain" value="herts.police.uk" />
+      <where>name='Hertfordshire Constabulary'</where>
+    </update>
+    <update tableName="police_force">
+      <column name="domain" value="humberside.police.uk" />
+      <where>name='Humberside Police'</where>
+    </update>
+    <update tableName="police_force">
+      <column name="domain" value="kent.police.uk" />
+      <where>name='Kent Police'</where>
+    </update>
+    <update tableName="police_force">
+      <column name="domain" value="lancashire.police.uk" />
+      <where>name='Lancashire Constabulary'</where>
+    </update>
+    <update tableName="police_force">
+      <column name="domain" value="leics.police.uk" />
+      <where>name='Leicestershire Police'</where>
+    </update>
+    <update tableName="police_force">
+      <column name="domain" value="lincs.police.uk" />
+      <where>name='Lincolnshire Police'</where>
+    </update>
+    <update tableName="police_force">
+      <column name="domain" value="merseyside.police.uk" />
+      <where>name='Merseyside Police'</where>
+    </update>
+    <update tableName="police_force">
+      <column name="domain" value="met.police.uk" />
+      <where>name='Metropolitan Police Service'</where>
+    </update>
+    <update tableName="police_force">
+      <column name="domain" value="norfolk.police.uk" />
+      <where>name='Norfolk Constabulary'</where>
+    </update>
+    <update tableName="police_force">
+      <column name="domain" value="northwales.police.uk" />
+      <where>name='North Wales Police'</where>
+    </update>
+    <update tableName="police_force">
+      <column name="domain" value="northyorkshire.police.uk" />
+      <where>name='North Yorkshire Police'</where>
+    </update>
+    <update tableName="police_force">
+      <column name="domain" value="northants.police.uk" />
+      <where>name='Northamptonshire Police'</where>
+    </update>
+    <update tableName="police_force">
+      <column name="domain" value="northumbria.police.uk" />
+      <where>name='Northumbria Police'</where>
+    </update>
+    <update tableName="police_force">
+      <column name="domain" value="notts.police.uk" />
+      <where>name='Nottinghamshire Police'</where>
+    </update>
+    <update tableName="police_force">
+      <column name="domain" value="south-wales.police.uk" />
+      <where>name='South Wales Police'</where>
+    </update>
+    <update tableName="police_force">
+      <column name="domain" value="southyorkshire.police.uk" />
+      <where>name='South Yorkshire Police'</where>
+    </update>
+    <update tableName="police_force">
+      <column name="domain" value="staffordshire.police.uk" />
+      <where>name='Staffordshire Police'</where>
+    </update>
+    <update tableName="police_force">
+      <column name="domain" value="suffolk.police.uk" />
+      <where>name='Suffolk Constabulary'</where>
+    </update>
+    <update tableName="police_force">
+      <column name="domain" value="surrey.police.uk" />
+      <where>name='Surrey Police'</where>
+    </update>
+    <update tableName="police_force">
+      <column name="domain" value="sussex.police.uk" />
+      <where>name='Sussex Police'</where>
+    </update>
+    <update tableName="police_force">
+      <column name="domain" value="thamesvalley.police.uk" />
+      <where>name='Thames Valley Police'</where>
+    </update>
+    <update tableName="police_force">
+      <column name="domain" value="warwickshire.police.uk" />
+      <where>name='Warwickshire Police'</where>
+    </update>
+    <update tableName="police_force">
+      <column name="domain" value="westmercia.police.uk" />
+      <where>name='West Mercia Police'</where>
+    </update>
+    <update tableName="police_force">
+      <column name="domain" value="westmidlands.police.uk" />
+      <where>name='West Midlands Police'</where>
+    </update>
+    <update tableName="police_force">
+      <column name="domain" value="westyorkshire.police.uk" />
+      <where>name='West Yorkshire Police'</where>
+    </update>
+    <update tableName="police_force">
+      <column name="domain" value="wiltshire.police.uk" />
+      <where>name='Wiltshire Police'</where>
+    </update>
+  </changeSet>
+</databaseChangeLog>
