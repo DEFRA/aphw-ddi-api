@@ -404,23 +404,25 @@ describe('user-accounts', () => {
 
       const createdAccounts = await createAccounts(accountsDto, dummyAdminUser)
       expect(createdAccounts).toEqual({
-        accounts: [
-          {
-            id: 1,
-            username: 'joe.bloggs@avonandsomerset.police.uk',
-            active: true
-          },
-          {
-            id: 2,
-            username: 'jane.doe@avonandsomerset.police.uk',
-            active: true
-          },
-          {
-            id: 3,
-            username: 'john.smith@example.com',
-            active: true
-          }
-        ],
+        data: {
+          accounts: [
+            {
+              id: 1,
+              username: 'joe.bloggs@avonandsomerset.police.uk',
+              active: true
+            },
+            {
+              id: 2,
+              username: 'jane.doe@avonandsomerset.police.uk',
+              active: true
+            },
+            {
+              id: 3,
+              username: 'john.smith@example.com',
+              active: true
+            }
+          ]
+        },
         errors: undefined
       })
     })
@@ -448,7 +450,7 @@ describe('user-accounts', () => {
 
       const createdAccounts = await createAccounts(accountsDto, dummyAdminUser)
       expect(createdAccounts).toEqual({
-        accounts: [],
+        data: { accounts: [] },
         errors: [
           {
             username: 'joe.bloggs@avonandsomerset.police.uk',
