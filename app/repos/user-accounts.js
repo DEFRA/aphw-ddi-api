@@ -4,6 +4,7 @@ const { DuplicateResourceError } = require('../errors/duplicate-record')
 const { getPoliceForce } = require('../lookups')
 const { NotFoundError } = require('../errors/not-found')
 const { createUserAccountAudit, deleteUserAccountAudit } = require('../dto/auditing/user')
+const { getPoliceForceByShortName } = require('./police-forces')
 
 /**
  * @typedef UserAccount
@@ -37,6 +38,39 @@ const { createUserAccountAudit, deleteUserAccountAudit } = require('../dto/audit
  * @property {number} [police_force_id]
  */
 
+const getPoliceForceIdForAccount = async ({
+  police_force_id: policeForceId,
+  police_force: policeForce,
+  username
+}, transaction) => {
+  if (policeForceId) {
+    return policeForceId
+  }
+
+  if (policeForce) {
+    const policeForceObj = await getPoliceForce(policeForce)
+
+    if (policeForceObj === null) {
+      throw new NotFoundError(`${policeForce} not found`)
+    }
+
+    return policeForceObj.id
+  }
+
+  if (username) {
+    const [, domain] = username.split('@')
+    const shortName = domain.toLowerCase().replace('.pnn.police.uk', '').replace('.police.uk', '')
+
+    const policeForceObj = await getPoliceForceByShortName(shortName, transaction)
+
+    if (policeForceObj !== null) {
+      return policeForceObj.id
+    }
+  }
+
+  return undefined
+}
+
 /**
  * @param {UserAccountRequestDto} account
  * @param user
@@ -58,23 +92,16 @@ const createAccount = async (account, user, transaction) => {
     throw new DuplicateResourceError('This user is already in the allow list')
   }
 
-  const { police_force: policeForce, ...accountWithoutPoliceForce } = account
+  const accountWithoutPoliceForce = { ...account }
+  delete accountWithoutPoliceForce.police_force
+  delete accountWithoutPoliceForce.police_force_id
 
-  let createdAccount
+  const policeForceId = await getPoliceForceIdForAccount(account, transaction)
 
-  if (!policeForce || account.police_force_id) {
-    createdAccount = await sequelize.models.user_account.create(accountWithoutPoliceForce, transaction)
-  } else {
-    const policeForceObj = await getPoliceForce(policeForce)
-
-    if (policeForceObj === null) {
-      throw new NotFoundError(`${policeForce} not found`)
-    }
-    createdAccount = await sequelize.models.user_account.create({
-      ...accountWithoutPoliceForce,
-      police_force_id: policeForceObj.id
-    }, transaction)
-  }
+  const createdAccount = await sequelize.models.user_account.create({
+    ...accountWithoutPoliceForce,
+    police_force_id: policeForceId
+  }, transaction)
 
   await createUserAccountAudit(createdAccount, user)
 
@@ -104,6 +131,46 @@ const deleteAccount = async (accountId, user, transaction) => {
   } catch (e) {
     console.log('Error while publishing delete audit record', e)
     throw e
+  }
+}
+
+/**
+ * @param {UserAccountRequestDto[]} accountsDto
+ * @param user
+ * @return {Promise<{items: *[], errors: (*[]|undefined)}>}
+ */
+const createAccounts = async (accountsDto, user) => {
+  const errors = []
+  const accounts = []
+
+  for (const accountDto of accountsDto) {
+    try {
+      const account = await createAccount(accountDto, user)
+      accounts.push(account)
+    } catch (e) {
+      if (e instanceof DuplicateResourceError) {
+        errors.push({
+          data: {
+            username: accountDto.username
+          },
+          statusCode: 409,
+          error: 'Conflict',
+          message: e.message
+        })
+      } else {
+        errors.push({
+          data: { username: accountDto.username },
+          statusCode: 500,
+          error: 'Internal Server Error',
+          message: e.message
+        })
+      }
+    }
+  }
+
+  return {
+    items: accounts,
+    errors: errors.length ? errors : undefined
   }
 }
 
@@ -231,6 +298,8 @@ const isEmailVerified = async (username) => {
 module.exports = {
   createAccount,
   deleteAccount,
+  createAccounts,
+  getPoliceForceIdForAccount,
   isAccountEnabled,
   getAccount,
   setActivationCodeAndExpiry,

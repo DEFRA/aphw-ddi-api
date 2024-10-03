@@ -83,8 +83,16 @@ const deleteForce = async (policeForceId, user, transaction) => {
   return destroyedPoliceForce
 }
 
+const getPoliceForceByShortName = async (shortName, transaction) => {
+  return sequelize.models.police_force.findOne({
+    where: { short_name: shortName },
+    transaction
+  })
+}
+
 module.exports = {
   getPoliceForces,
   addForce,
-  deleteForce
+  deleteForce,
+  getPoliceForceByShortName
 }

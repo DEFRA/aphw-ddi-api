@@ -1,5 +1,6 @@
 const { mockValidate, mockValidateEnforcement } = require('../../../mocks/auth')
-const { portalHeader, enforcementHeader } = require('../../../mocks/jwt')
+const { portalHeader, enforcementHeader, portalStandardHeader } = require('../../../mocks/jwt')
+const { buildUserAccount } = require('../../../mocks/user-accounts')
 
 describe('User endpoint', () => {
   const createServer = require('../../../../app/server')
@@ -17,7 +18,7 @@ describe('User endpoint', () => {
   const { hashCache } = require('../../../../app/session/hashCache')
 
   jest.mock('../../../../app/repos/user-accounts')
-  const { createAccount, deleteAccount } = require('../../../../app/repos/user-accounts')
+  const { createAccount, deleteAccount, createAccounts } = require('../../../../app/repos/user-accounts')
 
   jest.mock('../../../../app/messaging/send-email')
   const { sendEmail } = require('../../../../app/messaging/send-email')
@@ -81,7 +82,7 @@ describe('User endpoint', () => {
       expect(JSON.parse(response.payload)).toEqual(expectedPayload)
     })
 
-    test('should return 403 if request is from enforcement', async () => {
+    test('should return 400 if request is from enforcement', async () => {
       validate.mockResolvedValue(mockValidateEnforcement)
       createAccount.mockResolvedValue({
         username: 'ralph@wreckit.com',
@@ -105,6 +106,318 @@ describe('User endpoint', () => {
       const options = {
         method: 'POST',
         url: '/user',
+        payload: {},
+        ...portalHeader
+      }
+
+      const response = await server.inject(options)
+      expect(response.statusCode).toBe(400)
+      expect(createAccount).not.toHaveBeenCalled()
+    })
+  })
+
+  describe('POST /users', () => {
+    test('should bulk add users', async () => {
+      createAccounts.mockResolvedValue({
+        items: [
+          buildUserAccount({
+            id: 1,
+            username: 'ralph@wreckit.com'
+          }),
+          buildUserAccount({
+            id: 2,
+            username: 'scott.turner@sacramento.police.gov',
+            police_force_id: 2
+          })
+        ]
+      })
+
+      const expectedPayload = {
+        users: [
+          {
+            id: 1,
+            active: true,
+            username: 'ralph@wreckit.com'
+          },
+          {
+            id: 2,
+            active: true,
+            username: 'scott.turner@sacramento.police.gov',
+            police_force_id: 2
+          }
+        ]
+      }
+
+      const options = {
+        method: 'POST',
+        url: '/users',
+        payload: {
+          users: [
+            {
+              username: 'joe.bloggs@avonandsomerset.police.uk'
+            },
+            {
+              username: 'jane.bloggs@example.com'
+            }
+          ]
+        },
+        ...portalHeader
+      }
+
+      const response = await server.inject(options)
+      expect(response.statusCode).toBe(200)
+      expect(createAccounts).toHaveBeenCalledWith([
+        {
+          username: 'joe.bloggs@avonandsomerset.police.uk',
+          active: true
+        },
+        {
+          username: 'jane.bloggs@example.com',
+          active: true
+        }
+      ], {
+        username: 'dev-user@test.com',
+        displayname: 'dev-user@test.com'
+      })
+      expect(JSON.parse(response.payload)).toEqual(expectedPayload)
+    })
+
+    test('should bulk add users and return 400 if there are some errors', async () => {
+      createAccounts.mockResolvedValue({
+        items: [
+          buildUserAccount({
+            id: 1,
+            username: 'ralph@wreckit.com'
+          })
+        ],
+        errors: [
+          {
+            statusCode: 409,
+            error: 'conflict',
+            message: 'conflict',
+            data: { username: 'scott.turner@sacramento.police.gov' }
+          },
+          {
+            statusCode: 500,
+            message: 'error',
+            data: { username: 'invalid@example.com' }
+          }
+        ]
+      })
+
+      const expectedPayload = {
+        users: [
+          {
+            id: 1,
+            active: true,
+            username: 'ralph@wreckit.com'
+          }
+        ],
+        errors: [
+          {
+            statusCode: 409,
+            error: 'conflict',
+            message: 'conflict',
+            username: 'scott.turner@sacramento.police.gov'
+          },
+          {
+            statusCode: 500,
+            message: 'error',
+            username: 'invalid@example.com'
+          }
+        ]
+      }
+
+      const options = {
+        method: 'POST',
+        url: '/users',
+        payload: {
+          users: [
+            {
+              username: 'joe.bloggs@avonandsomerset.police.uk'
+            },
+            {
+              username: 'jane.bloggs@example.com'
+            },
+            {
+              username: 'invalid@example.com'
+            }
+          ]
+        },
+        ...portalHeader
+      }
+
+      const response = await server.inject(options)
+      expect(response.statusCode).toBe(400)
+      expect(JSON.parse(response.payload)).toEqual(expectedPayload)
+    })
+
+    test('should return 409 if all the responses are conflicts', async () => {
+      createAccounts.mockResolvedValue({
+        items: [],
+        errors: [
+          {
+            statusCode: 409,
+            message: 'conflict',
+            data: { username: 'ralph@wreckit.com' }
+          },
+          {
+            statusCode: 409,
+            message: 'conflict',
+            data: { username: 'scott.turner@sacramento.police.gov' }
+          }
+        ]
+      })
+
+      const expectedPayload = {
+        users: [],
+        errors: [
+          {
+            statusCode: 409,
+            message: 'conflict',
+            username: 'ralph@wreckit.com'
+          },
+          {
+            statusCode: 409,
+            message: 'conflict',
+            username: 'scott.turner@sacramento.police.gov'
+          }
+        ]
+      }
+
+      const options = {
+        method: 'POST',
+        url: '/users',
+        payload: {
+          users: [
+            {
+              username: 'joe.bloggs@avonandsomerset.police.uk'
+            },
+            {
+              username: 'jane.bloggs@example.com'
+            }
+          ]
+        },
+        ...portalHeader
+      }
+
+      const response = await server.inject(options)
+      expect(response.statusCode).toBe(409)
+      expect(JSON.parse(response.payload)).toEqual(expectedPayload)
+    })
+
+    test('should return 500 if all the responses are conflicts', async () => {
+      createAccounts.mockResolvedValue({
+        items: [],
+        errors: [
+          {
+            statusCode: 500,
+            message: 'conflict',
+            data: { username: 'ralph@wreckit.com' }
+          },
+          {
+            statusCode: 500,
+            message: 'conflict',
+            data: { username: 'scott.turner@sacramento.police.gov' }
+          }
+        ]
+      })
+
+      const expectedPayload = {
+        users: [],
+        errors: [
+          {
+            statusCode: 500,
+            message: 'conflict',
+            username: 'ralph@wreckit.com'
+          },
+          {
+            statusCode: 500,
+            message: 'conflict',
+            username: 'scott.turner@sacramento.police.gov'
+          }
+        ]
+      }
+
+      const options = {
+        method: 'POST',
+        url: '/users',
+        payload: {
+          users: [
+            {
+              username: 'joe.bloggs@avonandsomerset.police.uk'
+            },
+            {
+              username: 'jane.bloggs@example.com'
+            }
+          ]
+        },
+        ...portalHeader
+      }
+
+      const response = await server.inject(options)
+      expect(response.statusCode).toBe(500)
+      expect(JSON.parse(response.payload)).toEqual(expectedPayload)
+    })
+
+    test('should return 400 if request is from enforcement', async () => {
+      validate.mockResolvedValue(mockValidateEnforcement)
+      createAccount.mockResolvedValue({
+        username: 'ralph@wreckit.com',
+        active: true
+      })
+      const options = {
+        method: 'POST',
+        url: '/users',
+        payload: {
+          users: [
+            {
+              username: 'joe.bloggs@avonandsomerset.police.uk'
+            },
+            {
+              username: 'jane.bloggs@example.com'
+            }
+          ]
+        },
+        ...enforcementHeader
+      }
+
+      const response = await server.inject(options)
+      expect(response.statusCode).toBe(403)
+      expect(createAccount).not.toHaveBeenCalled()
+    })
+
+    test('should return 400 if request is from standard user', async () => {
+      validate.mockResolvedValue(mockValidateEnforcement)
+      createAccount.mockResolvedValue({
+        username: 'ralph@wreckit.com',
+        active: true
+      })
+      const options = {
+        method: 'POST',
+        url: '/users',
+        payload: {
+          users: [
+            {
+              username: 'joe.bloggs@avonandsomerset.police.uk'
+            },
+            {
+              username: 'jane.bloggs@example.com'
+            }
+          ]
+        },
+        ...portalStandardHeader
+      }
+
+      const response = await server.inject(options)
+      expect(response.statusCode).toBe(403)
+      expect(createAccount).not.toHaveBeenCalled()
+    })
+
+    test('should return 400 with invalid payload', async () => {
+      const options = {
+        method: 'POST',
+        url: '/users',
         payload: {},
         ...portalHeader
       }
