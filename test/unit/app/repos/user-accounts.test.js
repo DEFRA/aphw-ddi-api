@@ -1,7 +1,6 @@
 const { DuplicateResourceError } = require('../../../../app/errors/duplicate-record')
 const { NotFoundError } = require('../../../../app/errors/not-found')
 const { buildUserAccount } = require('../../../mocks/user-accounts')
-const { getPoliceForceIdForAccount } = require('../../../../app/repos/user-accounts')
 
 describe('user-accounts', () => {
   const dummyAdminUser = {
@@ -35,7 +34,7 @@ describe('user-accounts', () => {
     getPoliceForceByShortName.mockResolvedValue(null)
   })
 
-  const { createAccount, createAccounts, deleteAccount, isAccountEnabled, getAccount, setActivationCodeAndExpiry, setLoginDate, setActivatedDate, setLicenceAcceptedDate, verifyLicenceAccepted, isEmailVerified } = require('../../../../app/repos/user-accounts')
+  const { createAccount, createAccounts, deleteAccount, isAccountEnabled, getAccount, setActivationCodeAndExpiry, setLoginDate, setActivatedDate, setLicenceAcceptedDate, verifyLicenceAccepted, isEmailVerified, getPoliceForceIdForAccount } = require('../../../../app/repos/user-accounts')
 
   afterEach(() => {
     jest.resetAllMocks()
