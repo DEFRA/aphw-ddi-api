@@ -4,6 +4,7 @@ const { DuplicateResourceError } = require('../errors/duplicate-record')
 const { getPoliceForce } = require('../lookups')
 const { NotFoundError } = require('../errors/not-found')
 const { createUserAccountAudit, deleteUserAccountAudit } = require('../dto/auditing/user')
+const { getPoliceForceByDomain } = require('./police-forces')
 
 /**
  * @typedef UserAccount
@@ -37,6 +38,37 @@ const { createUserAccountAudit, deleteUserAccountAudit } = require('../dto/audit
  * @property {number} [police_force_id]
  */
 
+const getPoliceForceId = async ({
+  police_force_id: policeForceId,
+  police_force: policeForce,
+  username
+}, transaction) => {
+  if (policeForceId) {
+    return policeForceId
+  }
+
+  if (policeForce) {
+    const policeForceObj = await getPoliceForce(policeForce)
+
+    if (policeForceObj === null) {
+      throw new NotFoundError(`${policeForce} not found`)
+    }
+
+    return policeForceObj.id
+  }
+
+  if (username) {
+    const [, domain] = username.split('@')
+    const policeForceObj = await getPoliceForceByDomain(domain, transaction)
+
+    if (policeForceObj !== null) {
+      return policeForceObj.id
+    }
+  }
+
+  return undefined
+}
+
 /**
  * @param {UserAccountRequestDto} account
  * @param user
@@ -58,23 +90,18 @@ const createAccount = async (account, user, transaction) => {
     throw new DuplicateResourceError('This user is already in the allow list')
   }
 
-  const { police_force: policeForce, ...accountWithoutPoliceForce } = account
+  const {
+    police_force: _policeForce,
+    police_force_id: _policeForceId,
+    ...accountWithoutPoliceForce
+  } = account
 
-  let createdAccount
+  const policeForceId = await getPoliceForceId(account, transaction)
 
-  if (!policeForce || account.police_force_id) {
-    createdAccount = await sequelize.models.user_account.create(accountWithoutPoliceForce, transaction)
-  } else {
-    const policeForceObj = await getPoliceForce(policeForce)
-
-    if (policeForceObj === null) {
-      throw new NotFoundError(`${policeForce} not found`)
-    }
-    createdAccount = await sequelize.models.user_account.create({
-      ...accountWithoutPoliceForce,
-      police_force_id: policeForceObj.id
-    }, transaction)
-  }
+  const createdAccount = await sequelize.models.user_account.create({
+    ...accountWithoutPoliceForce,
+    police_force_id: policeForceId
+  }, transaction)
 
   await createUserAccountAudit(createdAccount, user)
 
