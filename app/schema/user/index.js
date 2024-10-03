@@ -22,9 +22,24 @@ const createUserResponseSchema = Joi.object({
   police_force_id: Joi.number()
 })
 
+const bulkRequestSchema = Joi.object({
+  users: Joi.array().items(createUserRequestSchema).min(1).required()
+})
+
+const bulkResponseSchema = Joi.object({
+  users: Joi.array().items(createUserResponseSchema).required(),
+  errors: Joi.array().items(Joi.object({
+    username: Joi.string().required(),
+    code: Joi.number().required(),
+    message: Joi.string()
+  }))
+})
+
 module.exports = {
   userBooleanResponseSchema,
   userStringResponseSchema,
   createUserRequestSchema,
-  createUserResponseSchema
+  createUserResponseSchema,
+  bulkRequestSchema,
+  bulkResponseSchema
 }
