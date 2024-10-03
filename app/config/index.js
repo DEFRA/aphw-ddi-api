@@ -20,7 +20,8 @@ const schema = Joi.object({
   authTokens: Joi.object({
     portalKey: Joi.string().allow('').default(''),
     enforcementKey: Joi.string().allow('').default('')
-  })
+  }),
+  userFeedbackEmailAddress: Joi.string().required()
 })
 
 // Build config
@@ -42,7 +43,8 @@ const config = {
   authTokens: {
     portalKey: getEnvironmentVariable('PORTAL_PUBLIC_KEY'),
     enforcementKey: getEnvironmentVariable('ENFORCEMENT_PUBLIC_KEY')
-  }
+  },
+  userFeedbackEmailAddress: getEnvironmentVariable('USER_FEEDBACK_EMAIL_ADDRESS')
 }
 
 // Validate config

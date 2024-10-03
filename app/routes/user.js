@@ -1,3 +1,4 @@
+const config = require('../config/index')
 const { hashCache } = require('../session/hashCache')
 const { userValidateAudit, userLogoutAudit } = require('../dto/auditing/user')
 const { getRegistrationService } = require('../service/config')
@@ -8,7 +9,7 @@ const { mapUserDaoToDto } = require('../dto/mappers/user')
 const { conflictSchema } = require('../schema/common/response/conflict')
 const { notFoundSchema } = require('../schema/common/response/not-found')
 const { getCallingUser } = require('../auth/get-user')
-const { emailTypes, feedbackEmailAddress } = require('../constants/email-types')
+const { emailTypes } = require('../constants/email-types')
 const { sendEmail } = require('../messaging/send-email')
 
 module.exports = [
@@ -223,7 +224,7 @@ module.exports = [
           })))
 
         const data = {
-          toAddress: feedbackEmailAddress,
+          toAddress: config.userFeedbackEmailAddress,
           type: emailTypes.feedback,
           customFields
         }
