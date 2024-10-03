@@ -134,6 +134,11 @@ const deleteAccount = async (accountId, user, transaction) => {
   }
 }
 
+/**
+ * @param {UserAccountRequestDto[]} accountsDto
+ * @param user
+ * @return {Promise<{accounts: *[], errors: (*[]|undefined)}>}
+ */
 const createAccounts = async (accountsDto, user) => {
   const errors = []
   const accounts = []
