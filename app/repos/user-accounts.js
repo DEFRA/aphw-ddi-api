@@ -4,7 +4,7 @@ const { DuplicateResourceError } = require('../errors/duplicate-record')
 const { getPoliceForce } = require('../lookups')
 const { NotFoundError } = require('../errors/not-found')
 const { createUserAccountAudit, deleteUserAccountAudit } = require('../dto/auditing/user')
-const { getPoliceForceByDomain } = require('./police-forces')
+const { getPoliceForceByShortName } = require('./police-forces')
 
 /**
  * @typedef UserAccount
@@ -38,7 +38,7 @@ const { getPoliceForceByDomain } = require('./police-forces')
  * @property {number} [police_force_id]
  */
 
-const getPoliceForceId = async ({
+const getPoliceForceIdForAccount = async ({
   police_force_id: policeForceId,
   police_force: policeForce,
   username
@@ -59,7 +59,8 @@ const getPoliceForceId = async ({
 
   if (username) {
     const [, domain] = username.split('@')
-    const policeForceObj = await getPoliceForceByDomain(domain, transaction)
+    const shortName = domain.replace('.pnn.police.uk', '').replace('.police.uk', '')
+    const policeForceObj = await getPoliceForceByShortName(shortName, transaction)
 
     if (policeForceObj !== null) {
       return policeForceObj.id
@@ -96,7 +97,7 @@ const createAccount = async (account, user, transaction) => {
     ...accountWithoutPoliceForce
   } = account
 
-  const policeForceId = await getPoliceForceId(account, transaction)
+  const policeForceId = await getPoliceForceIdForAccount(account, transaction)
 
   const createdAccount = await sequelize.models.user_account.create({
     ...accountWithoutPoliceForce,

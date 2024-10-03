@@ -4,6 +4,7 @@ const { sendCreateToAudit, sendDeleteToAudit } = require('../messaging/send-audi
 const { POLICE } = require('../constants/event/audit-event-object-types')
 const { NotFoundError } = require('../errors/not-found')
 const { getFindQuery, updateParanoid, findQueryV2 } = require('./shared')
+const { Sequelize } = require('sequelize')
 
 const getPoliceForces = async () => {
   try {
@@ -83,11 +84,9 @@ const deleteForce = async (policeForceId, user, transaction) => {
   return destroyedPoliceForce
 }
 
-const getPoliceForceByDomain = async (domain, transaction) => {
+const getPoliceForceByShortName = async (shortName, transaction) => {
   return sequelize.models.police_force.findOne({
-    where: {
-      domain
-    },
+    where: { short_name: `${shortName}` },
     transaction
   })
 }
@@ -96,5 +95,5 @@ module.exports = {
   getPoliceForces,
   addForce,
   deleteForce,
-  getPoliceForceByDomain
+  getPoliceForceByShortName
 }

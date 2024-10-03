@@ -5,184 +5,184 @@
   </changeSet>
   <changeSet author="C Cole" id="2">
     <addColumn tableName="police_force">
-      <column name="domain" type="TEXT" />
+      <column name="short_name" type="TEXT" />
     </addColumn>
   </changeSet>
   <changeSet author="C Cole" id="3">
     <update tableName="police_force">
-      <column name="domain" value="avonandsomerset.police.uk"/>
+      <column name="short_name" value="avonandsomerset"/>
       <where>name='Avon and Somerset Constabulary'</where>
     </update>
     <update tableName="police_force">
-      <column name="domain" value="beds.police.uk" />
+      <column name="short_name" value="beds" />
       <where>name='Bedfordshire Police'</where>
     </update>
     <update tableName="police_force">
-      <column name="domain" value="cambs.police.uk" />
+      <column name="short_name" value="cambs" />
       <where>name='Cambridgeshire Constabulary'</where>
     </update>
     <update tableName="police_force">
-      <column name="domain" value="scotland.police.uk" />
+      <column name="short_name" value="scotland" />
       <where>name='Police Scotland'</where>
     </update>
     <update tableName="police_force">
-      <column name="domain" value="cheshire.police.uk" />
+      <column name="short_name" value="cheshire" />
       <where>name='Cheshire Constabulary'</where>
     </update>
     <update tableName="police_force">
-      <column name="domain" value="cityoflondon.police.uk" />
+      <column name="short_name" value="cityoflondon" />
       <where>name='City of London Police'</where>
     </update>
     <update tableName="police_force">
-      <column name="domain" value="cleveland.police.uk" />
+      <column name="short_name" value="cleveland" />
       <where>name='Cleveland Police'</where>
     </update>
     <update tableName="police_force">
-      <column name="domain" value="cumbria.pnn.police.uk" />
+      <column name="short_name" value="cumbria" />
       <where>name='Cumbria Constabulary'</where>
     </update>
     <update tableName="police_force">
-      <column name="domain" value="derbyshire.police.uk" />
+      <column name="short_name" value="derbyshire" />
       <where>name='Derbyshire Constabulary'</where>
     </update>
     <update tableName="police_force">
-      <column name="domain" value="devonandcornwall.police.uk" />
+      <column name="short_name" value="devonandcornwall" />
       <where>name='Devon and Cornwall Police'</where>
     </update>
     <update tableName="police_force">
-      <column name="domain" value="dorset.police.uk" />
+      <column name="short_name" value="dorset" />
       <where>name='Dorset Police'</where>
     </update>
     <update tableName="police_force">
-      <column name="domain" value="durham.police.uk" />
+      <column name="short_name" value="durham" />
       <where>name='Durham Constabulary'</where>
     </update>
     <update tableName="police_force">
-      <column name="domain" value="dyfed-powys.police.uk" />
+      <column name="short_name" value="dyfed-powys" />
       <where>name='Dyfed-Powys Police'</where>
     </update>
     <update tableName="police_force">
-      <column name="domain" value="essex.police.uk" />
+      <column name="short_name" value="essex" />
       <where>name='Essex Police'</where>
     </update>
     <update tableName="police_force">
-      <column name="domain" value="gloucestershire.police.uk" />
+      <column name="short_name" value="gloucestershire" />
       <where>name='Gloucestershire Constabulary'</where>
     </update>
     <update tableName="police_force">
-      <column name="domain" value="gmp.police.uk" />
+      <column name="short_name" value="gmp" />
       <where>name='Greater Manchester Police'</where>
     </update>
     <update tableName="police_force">
-      <column name="domain" value="gwent.police.uk" />
+      <column name="short_name" value="gwent" />
       <where>name='Gwent Police'</where>
     </update>
     <update tableName="police_force">
-      <column name="domain" value="hampshire.police.uk" />
+      <column name="short_name" value="hampshire" />
       <where>name='Hampshire Constabulary'</where>
     </update>
     <update tableName="police_force">
-      <column name="domain" value="herts.police.uk" />
+      <column name="short_name" value="herts" />
       <where>name='Hertfordshire Constabulary'</where>
     </update>
     <update tableName="police_force">
-      <column name="domain" value="humberside.police.uk" />
+      <column name="short_name" value="humberside" />
       <where>name='Humberside Police'</where>
     </update>
     <update tableName="police_force">
-      <column name="domain" value="kent.police.uk" />
+      <column name="short_name" value="kent" />
       <where>name='Kent Police'</where>
     </update>
     <update tableName="police_force">
-      <column name="domain" value="lancashire.police.uk" />
+      <column name="short_name" value="lancashire" />
       <where>name='Lancashire Constabulary'</where>
     </update>
     <update tableName="police_force">
-      <column name="domain" value="leics.police.uk" />
+      <column name="short_name" value="leics" />
       <where>name='Leicestershire Police'</where>
     </update>
     <update tableName="police_force">
-      <column name="domain" value="lincs.police.uk" />
+      <column name="short_name" value="lincs" />
       <where>name='Lincolnshire Police'</where>
     </update>
     <update tableName="police_force">
-      <column name="domain" value="merseyside.police.uk" />
+      <column name="short_name" value="merseyside" />
       <where>name='Merseyside Police'</where>
     </update>
     <update tableName="police_force">
-      <column name="domain" value="met.police.uk" />
+      <column name="short_name" value="met" />
       <where>name='Metropolitan Police Service'</where>
     </update>
     <update tableName="police_force">
-      <column name="domain" value="norfolk.police.uk" />
+      <column name="short_name" value="norfolk" />
       <where>name='Norfolk Constabulary'</where>
     </update>
     <update tableName="police_force">
-      <column name="domain" value="northwales.police.uk" />
+      <column name="short_name" value="northwales" />
       <where>name='North Wales Police'</where>
     </update>
     <update tableName="police_force">
-      <column name="domain" value="northyorkshire.police.uk" />
+      <column name="short_name" value="northyorkshire" />
       <where>name='North Yorkshire Police'</where>
     </update>
     <update tableName="police_force">
-      <column name="domain" value="northants.police.uk" />
+      <column name="short_name" value="northants" />
       <where>name='Northamptonshire Police'</where>
     </update>
     <update tableName="police_force">
-      <column name="domain" value="northumbria.police.uk" />
+      <column name="short_name" value="northumbria" />
       <where>name='Northumbria Police'</where>
     </update>
     <update tableName="police_force">
-      <column name="domain" value="notts.police.uk" />
+      <column name="short_name" value="notts" />
       <where>name='Nottinghamshire Police'</where>
     </update>
     <update tableName="police_force">
-      <column name="domain" value="south-wales.police.uk" />
+      <column name="short_name" value="south-wales" />
       <where>name='South Wales Police'</where>
     </update>
     <update tableName="police_force">
-      <column name="domain" value="southyorkshire.police.uk" />
+      <column name="short_name" value="southyorkshire" />
       <where>name='South Yorkshire Police'</where>
     </update>
     <update tableName="police_force">
-      <column name="domain" value="staffordshire.police.uk" />
+      <column name="short_name" value="staffordshire" />
       <where>name='Staffordshire Police'</where>
     </update>
     <update tableName="police_force">
-      <column name="domain" value="suffolk.police.uk" />
+      <column name="short_name" value="suffolk" />
       <where>name='Suffolk Constabulary'</where>
     </update>
     <update tableName="police_force">
-      <column name="domain" value="surrey.police.uk" />
+      <column name="short_name" value="surrey" />
       <where>name='Surrey Police'</where>
     </update>
     <update tableName="police_force">
-      <column name="domain" value="sussex.police.uk" />
+      <column name="short_name" value="sussex" />
       <where>name='Sussex Police'</where>
     </update>
     <update tableName="police_force">
-      <column name="domain" value="thamesvalley.police.uk" />
+      <column name="short_name" value="thamesvalley" />
       <where>name='Thames Valley Police'</where>
     </update>
     <update tableName="police_force">
-      <column name="domain" value="warwickshire.police.uk" />
+      <column name="short_name" value="warwickshire" />
       <where>name='Warwickshire Police'</where>
     </update>
     <update tableName="police_force">
-      <column name="domain" value="westmercia.police.uk" />
+      <column name="short_name" value="westmercia" />
       <where>name='West Mercia Police'</where>
     </update>
     <update tableName="police_force">
-      <column name="domain" value="westmidlands.police.uk" />
+      <column name="short_name" value="westmidlands" />
       <where>name='West Midlands Police'</where>
     </update>
     <update tableName="police_force">
-      <column name="domain" value="westyorkshire.police.uk" />
+      <column name="short_name" value="westyorkshire" />
       <where>name='West Yorkshire Police'</where>
     </update>
     <update tableName="police_force">
-      <column name="domain" value="wiltshire.police.uk" />
+      <column name="short_name" value="wiltshire" />
       <where>name='Wiltshire Police'</where>
     </update>
   </changeSet>

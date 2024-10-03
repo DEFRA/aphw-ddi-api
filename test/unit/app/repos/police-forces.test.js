@@ -27,7 +27,7 @@ describe('Police force repo', () => {
   jest.mock('../../../../app/messaging/send-audit')
   const { sendCreateToAudit, sendDeleteToAudit } = require('../../../../app/messaging/send-audit')
 
-  const { getPoliceForces, addForce, deleteForce, getPoliceForceByDomain } = require('../../../../app/repos/police-forces')
+  const { getPoliceForces, addForce, deleteForce, getPoliceForceByShortName } = require('../../../../app/repos/police-forces')
 
   beforeEach(async () => {
     jest.clearAllMocks()
@@ -176,25 +176,25 @@ describe('Police force repo', () => {
     })
   })
 
-  describe('getPoliceForceByDomain', () => {
-    test('should get police force by domain', async () => {
-      const domain = 'rohan-police.org'
+  describe('getPoliceForceByShortName', () => {
+    test('should get police force by short name', async () => {
+      const shortName = 'rohan-police'
 
       sequelize.models.police_force.findOne.mockResolvedValueOnce({
         id: 2,
         name: 'Rohan Police Constabulary',
-        domain
+        short_name: shortName
       })
 
-      const policeForce = await getPoliceForceByDomain(domain, {})
+      const policeForce = await getPoliceForceByShortName(shortName, {})
       expect(policeForce).toEqual({
         id: 2,
         name: 'Rohan Police Constabulary',
-        domain
+        short_name: shortName
       })
       expect(sequelize.models.police_force.findOne).toHaveBeenCalledWith({
         where: {
-          domain
+          short_name: shortName
         },
         transaction: {}
       })
@@ -205,7 +205,7 @@ describe('Police force repo', () => {
 
       const domain = 'example.com'
 
-      const policeForce = await getPoliceForceByDomain(domain, {})
+      const policeForce = await getPoliceForceByShortName(domain, {})
       expect(policeForce).toBeNull()
     })
   })

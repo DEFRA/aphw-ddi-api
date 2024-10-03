@@ -1,7 +1,6 @@
 const { DuplicateResourceError } = require('../../../../app/errors/duplicate-record')
 const { NotFoundError } = require('../../../../app/errors/not-found')
 const { buildUserAccount } = require('../../../mocks/user-accounts')
-const { getPoliceForceByDomain } = require('../../../../app/repos/police-forces')
 
 describe('user-accounts', () => {
   const dummyAdminUser = {
@@ -27,12 +26,12 @@ describe('user-accounts', () => {
   const { createUserAccountAudit, deleteUserAccountAudit } = require('../../../../app/dto/auditing/user')
 
   jest.mock('../../../../app/repos/police-forces')
-  const { getPoliceForceByDomain } = require('../../../../app/repos/police-forces')
+  const { getPoliceForceByShortName } = require('../../../../app/repos/police-forces')
 
   const sequelize = require('../../../../app/config/db')
 
   beforeEach(() => {
-    getPoliceForceByDomain.mockResolvedValue(null)
+    getPoliceForceByShortName.mockResolvedValue(null)
   })
 
   const { createAccount, createAccounts, deleteAccount, isAccountEnabled, getAccount, setActivationCodeAndExpiry, setLoginDate, setActivatedDate, setLicenceAcceptedDate, verifyLicenceAccepted, isEmailVerified } = require('../../../../app/repos/user-accounts')
@@ -82,7 +81,7 @@ describe('user-accounts', () => {
       expect(sequelize.transaction).not.toHaveBeenCalled()
       expect(sequelize.models.user_account.create).toHaveBeenCalledWith(userDto, {})
       expect(createUserAccountAudit).toHaveBeenCalledWith(createDao, dummyAdminUser)
-      expect(getPoliceForceByDomain).toHaveBeenCalledWith('example.com', {})
+      expect(getPoliceForceByShortName).toHaveBeenCalledWith('example.com', {})
     })
 
     test('should create an account with linked police force from title', async () => {
@@ -125,17 +124,17 @@ describe('user-accounts', () => {
       expect(createUserAccountAudit).toHaveBeenCalledWith(createDao, dummyAdminUser)
     })
 
-    test('should create an account with linked police force from email', async () => {
-      getPoliceForceByDomain.mockResolvedValue({
+    test('should create an account with linked police force from police.uk email', async () => {
+      getPoliceForceByShortName.mockResolvedValue({
         id: 1,
         name: 'Gotham City Police Department',
-        domain: 'bill@gotham-city.police.gov'
+        domain: 'bill@gotham-city.police.uk'
       })
       /**
        * @type {UserAccount}
        */
       const createDao = buildUserAccount({
-        username: 'bill@gotham-city.police.gov',
+        username: 'bill@gotham-city.police.uk',
         active: true,
         police_force_id: 1
       })
@@ -148,12 +147,12 @@ describe('user-accounts', () => {
        * @type {UserAccountRequestDto}
        */
       const userDto = {
-        username: 'bill@gotham-city.police.gov',
+        username: 'bill@gotham-city.police.uk',
         active: true
       }
 
       const expectedUserDto = {
-        username: 'bill@gotham-city.police.gov',
+        username: 'bill@gotham-city.police.uk',
         active: true,
         police_force_id: 1
       }
@@ -163,7 +162,48 @@ describe('user-accounts', () => {
       expect(user).toEqual(createDao)
       expect(sequelize.transaction).not.toHaveBeenCalled()
       expect(sequelize.models.user_account.create).toHaveBeenCalledWith(expectedUserDto, {})
-      expect(getPoliceForceByDomain).toHaveBeenCalledWith('gotham-city.police.gov', {})
+      expect(getPoliceForceByShortName).toHaveBeenCalledWith('gotham-city', {})
+    })
+
+    test('should create an account with linked police force from pnn.police.uk email', async () => {
+      getPoliceForceByShortName.mockResolvedValue({
+        id: 1,
+        name: 'Gotham City Police Department',
+        domain: 'bill@gotham-city.pnn.police.uk'
+      })
+      /**
+       * @type {UserAccount}
+       */
+      const createDao = buildUserAccount({
+        username: 'bill@gotham-city.pnn.police.uk',
+        active: true,
+        police_force_id: 1
+      })
+      sequelize.models.user_account.create.mockResolvedValue(createDao)
+      sequelize.models.user_account.findOne.mockResolvedValue(null)
+
+      const transaction = {}
+
+      /**
+       * @type {UserAccountRequestDto}
+       */
+      const userDto = {
+        username: 'bill@gotham-city.pnn.police.uk',
+        active: true
+      }
+
+      const expectedUserDto = {
+        username: 'bill@gotham-city.pnn.police.uk',
+        active: true,
+        police_force_id: 1
+      }
+
+      const user = await createAccount(userDto, dummyAdminUser, transaction)
+
+      expect(user).toEqual(createDao)
+      expect(sequelize.transaction).not.toHaveBeenCalled()
+      expect(sequelize.models.user_account.create).toHaveBeenCalledWith(expectedUserDto, {})
+      expect(getPoliceForceByShortName).toHaveBeenCalledWith('gotham-city', {})
     })
 
     test('should use police force id if provided', async () => {
