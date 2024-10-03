@@ -30,7 +30,8 @@ const bulkResponseSchema = Joi.object({
   users: Joi.array().items(createUserResponseSchema).required(),
   errors: Joi.array().items(Joi.object({
     username: Joi.string().required(),
-    code: Joi.number().required(),
+    error: Joi.string(),
+    statusCode: Joi.number().required(),
     message: Joi.string()
   }))
 })

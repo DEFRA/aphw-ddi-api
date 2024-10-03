@@ -20,13 +20,8 @@ describe('bulk-requests', () => {
         errors: [
           {
             data: 1,
-            code: 409,
+            statusCode: 409,
             message: 'conflict'
-          },
-          {
-            data: 2,
-            code: 500,
-            message: 'error'
           }
         ]
       }
@@ -42,12 +37,12 @@ describe('bulk-requests', () => {
         errors: [
           {
             data: 1,
-            code: 409,
+            statusCode: 409,
             message: 'conflict'
           },
           {
             data: 2,
-            code: 500,
+            statusCode: 500,
             message: 'error'
           }
         ]
@@ -64,12 +59,12 @@ describe('bulk-requests', () => {
         errors: [
           {
             data: 1,
-            code: 409,
+            statusCode: 409,
             message: 'conflict'
           },
           {
             data: 2,
-            code: 409,
+            statusCode: 409,
             message: 'conflict'
           }
         ]
@@ -86,12 +81,12 @@ describe('bulk-requests', () => {
         errors: [
           {
             data: 1,
-            code: 500,
+            statusCode: 500,
             message: 'conflict'
           },
           {
             data: 2,
-            code: 500,
+            statusCode: 500,
             message: 'error'
           }
         ]

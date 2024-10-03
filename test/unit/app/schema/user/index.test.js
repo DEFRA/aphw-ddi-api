@@ -111,7 +111,7 @@ describe('user schema', () => {
   })
 
   describe('bulkRequestSchema', () => {
-    it('should validate with correct', () => {
+    test('should validate with correct', () => {
       const request = {
         users: [
           {
@@ -149,7 +149,7 @@ describe('user schema', () => {
       expect(validation.error).not.toBeDefined()
     })
 
-    it('should require a min of 1 users', () => {
+    test('should require a min of 1 users', () => {
       const request = {
         users: []
       }
@@ -159,7 +159,7 @@ describe('user schema', () => {
       expect(validation.error).toEqual(new ValidationError('"users" must contain at least 1 items'))
     })
 
-    it('should fail with empty payload', () => {
+    test('should fail with empty payload', () => {
       const request = {}
 
       const validation = bulkRequestSchema.validate(request, { abortEarly: false })
@@ -169,7 +169,7 @@ describe('user schema', () => {
   })
 
   describe('bulkResponseSchema', () => {
-    it('should succeed with valid schema', () => {
+    test('should succeed with valid schema', () => {
       const response = {
         users: [
           {
@@ -206,18 +206,19 @@ describe('user schema', () => {
       expect(validation.error).not.toBeDefined()
     })
 
-    it('should succeed with error list', () => {
+    test('should succeed with error list', () => {
       const response = {
         users: [],
         errors: [
           {
             username: 'john.smith@acme.police.gov',
-            code: 409,
+            statusCode: 409,
             message: 'conflict'
           },
           {
             username: 'user@example.com',
-            code: 500,
+            error: 'error',
+            statusCode: 500,
             message: 'error'
           }
         ]
@@ -229,12 +230,13 @@ describe('user schema', () => {
         errors: [
           {
             username: 'john.smith@acme.police.gov',
-            code: 409,
+            statusCode: 409,
             message: 'conflict'
           },
           {
             username: 'user@example.com',
-            code: 500,
+            error: 'error',
+            statusCode: 500,
             message: 'error'
           }
         ]
@@ -243,7 +245,7 @@ describe('user schema', () => {
     })
   })
 
-  it('should fail with empty payload', () => {
+  test('should fail with empty payload', () => {
     const response = {}
 
     const validation = bulkResponseSchema.validate(response, { abortEarly: false })

@@ -3,7 +3,6 @@ const { devUser } = require('../../../mocks/auth')
 const { POLICE } = require('../../../../app/constants/event/audit-event-object-types')
 const { DuplicateResourceError } = require('../../../../app/errors/duplicate-record')
 const { NotFoundError } = require('../../../../app/errors/not-found')
-const sequelize = require('../../../../app/config/db')
 
 describe('Police force repo', () => {
   jest.mock('../../../../app/config/db', () => ({

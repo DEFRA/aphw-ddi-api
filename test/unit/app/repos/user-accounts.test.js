@@ -376,7 +376,7 @@ describe('user-accounts', () => {
   })
 
   describe('createAccounts', () => {
-    it('should create accounts', async () => {
+    test('should create accounts', async () => {
       let counter = 1
       sequelize.models.user_account.findOne.mockResolvedValue(null)
       sequelize.transaction.mockImplementation(async (localCallback) => {
@@ -404,29 +404,28 @@ describe('user-accounts', () => {
 
       const createdAccounts = await createAccounts(accountsDto, dummyAdminUser)
       expect(createdAccounts).toEqual({
-        data: {
-          accounts: [
-            {
-              id: 1,
-              username: 'joe.bloggs@avonandsomerset.police.uk',
-              active: true
-            },
-            {
-              id: 2,
-              username: 'jane.doe@avonandsomerset.police.uk',
-              active: true
-            },
-            {
-              id: 3,
-              username: 'john.smith@example.com',
-              active: true
-            }
-          ]
-        },
+        items: [
+          {
+            id: 1,
+            username: 'joe.bloggs@avonandsomerset.police.uk',
+            active: true
+          },
+          {
+            id: 2,
+            username: 'jane.doe@avonandsomerset.police.uk',
+            active: true
+          },
+          {
+            id: 3,
+            username: 'john.smith@example.com',
+            active: true
+          }
+        ],
         errors: undefined
       })
     })
-    it('should return failures if there was an issue', async () => {
+
+    test('should return failures if there was an issue', async () => {
       sequelize.transaction.mockImplementation(async (localCallback) => {
         return localCallback({})
       })
@@ -450,22 +449,22 @@ describe('user-accounts', () => {
 
       const createdAccounts = await createAccounts(accountsDto, dummyAdminUser)
       expect(createdAccounts).toEqual({
-        data: { accounts: [] },
+        items: [],
         errors: [
           {
-            username: 'joe.bloggs@avonandsomerset.police.uk',
+            data: { username: 'joe.bloggs@avonandsomerset.police.uk' },
             statusCode: 409,
             error: 'Conflict',
             message: 'This user is already in the allow list'
           },
           {
-            username: 'jane.doe@avonandsomerset.police.uk',
+            data: { username: 'jane.doe@avonandsomerset.police.uk' },
             statusCode: 500,
             error: 'Internal Server Error',
             message: 'An internal server error occurred'
           },
           {
-            username: 'john.smith@example.com',
+            data: { username: 'john.smith@example.com' },
             statusCode: 500,
             error: 'Internal Server Error',
             message: 'not found error'

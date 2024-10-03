@@ -55,7 +55,32 @@ const portalJwt = () => {
   }
 }
 
+const portalJwtStandard = () => {
+  const privateKey = Buffer.from(portalPrivate, 'base64').toString()
+
+  const options = {
+    expiresIn: '1h',
+    algorithm: 'RS256',
+    audience: 'aphw-ddi-api',
+    issuer: 'aphw-ddi-portal',
+    keyid: 'aphw-ddi-portal'
+  }
+
+  const token = jwt.sign({
+    username: 'standard-user@test.com',
+    displayname: 'standard-user@test.com',
+    scope: ['Dog.Index.Standard']
+  }, privateKey, options)
+
+  return {
+    headers: {
+      Authorization: `Bearer ${token}`
+    }
+  }
+}
+
 module.exports = {
   enforcementHeader: enforcementJwt(),
-  portalHeader: portalJwt()
+  portalHeader: portalJwt(),
+  portalStandardHeader: portalJwtStandard()
 }

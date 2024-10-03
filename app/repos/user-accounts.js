@@ -60,6 +60,7 @@ const getPoliceForceIdForAccount = async ({
   if (username) {
     const [, domain] = username.split('@')
     const shortName = domain.replace('.pnn.police.uk', '').replace('.police.uk', '')
+
     const policeForceObj = await getPoliceForceByShortName(shortName, transaction)
 
     if (policeForceObj !== null) {
@@ -138,7 +139,7 @@ const deleteAccount = async (accountId, user, transaction) => {
 /**
  * @param {UserAccountRequestDto[]} accountsDto
  * @param user
- * @return {Promise<{data: {accounts: *[]}, errors: (*[]|undefined)}>}
+ * @return {Promise<{items: *[], errors: (*[]|undefined)}>}
  */
 const createAccounts = async (accountsDto, user) => {
   const errors = []
@@ -151,14 +152,16 @@ const createAccounts = async (accountsDto, user) => {
     } catch (e) {
       if (e instanceof DuplicateResourceError) {
         errors.push({
-          username: accountDto.username,
+          data: {
+            username: accountDto.username
+          },
           statusCode: 409,
           error: 'Conflict',
           message: e.message
         })
       } else {
         errors.push({
-          username: accountDto.username,
+          data: { username: accountDto.username },
           statusCode: 500,
           error: 'Internal Server Error',
           message: e.message
@@ -168,9 +171,7 @@ const createAccounts = async (accountsDto, user) => {
   }
 
   return {
-    data: {
-      accounts
-    },
+    items: accounts,
     errors: errors.length ? errors : undefined
   }
 }

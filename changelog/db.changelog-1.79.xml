@@ -9,6 +9,12 @@
     </addColumn>
   </changeSet>
   <changeSet author="C Cole" id="3">
+    <insert tableName="police_force">
+      <column name="name" value="British Transport Police" />
+      <column name="short_name" value="btp" />
+    </insert>
+  </changeSet>
+  <changeSet author="C Cole" id="4">
     <update tableName="police_force">
       <column name="short_name" value="avonandsomerset"/>
       <where>name='Avon and Somerset Constabulary'</where>
