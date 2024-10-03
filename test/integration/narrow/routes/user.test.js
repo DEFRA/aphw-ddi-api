@@ -20,6 +20,9 @@ describe('User endpoint', () => {
   jest.mock('../../../../app/repos/user-accounts')
   const { createAccount, deleteAccount, createAccounts } = require('../../../../app/repos/user-accounts')
 
+  jest.mock('../../../../app/messaging/send-email')
+  const { sendEmail } = require('../../../../app/messaging/send-email')
+
   beforeEach(async () => {
     jest.clearAllMocks()
     validate.mockResolvedValue(mockValidate)
@@ -30,6 +33,7 @@ describe('User endpoint', () => {
       sendVerifyEmail: jest.fn(),
       verifyEmailCode: jest.fn()
     })
+    sendEmail.mockResolvedValue()
     server = await createServer()
     await server.initialize()
   })
@@ -616,6 +620,34 @@ describe('User endpoint', () => {
       const response = await server.inject(options)
       expect(response.statusCode).toBe(204)
       expect(hashCache.has('dev-user@test.com')).toBe(false)
+    })
+  })
+
+  describe('POST /user/me/feedback', () => {
+    test('should return 400 if payload error', async () => {
+      const options = {
+        method: 'POST',
+        url: '/user/me/feedback',
+        ...portalHeader
+      }
+      const response = await server.inject(options)
+      expect(response.statusCode).toBe(400)
+    })
+
+    test('should return a 200 with valid payload', async () => {
+      const options = {
+        method: 'POST',
+        url: '/user/me/feedback',
+        ...portalHeader,
+        payload: {
+          fields: [
+            { name: 'field1', value: 'value1' }
+          ]
+        }
+      }
+      const response = await server.inject(options)
+      expect(response.statusCode).toBe(200)
+      expect(JSON.parse(response.payload)).toEqual({ result: 'Ok' })
     })
   })
 
