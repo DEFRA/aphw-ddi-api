@@ -47,6 +47,15 @@ describe('user schema', () => {
       expect(validation.error).not.toBeDefined()
     })
 
+    test('should not pass if username is not an email', () => {
+      const request = {
+        username: 'john.smith'
+      }
+      const validation = createUserRequestSchema.validate(request, { abortEarly: false })
+
+      expect(validation.error).toEqual(new ValidationError('"username" must be a valid email'))
+    })
+
     test('should not pass with empty payload', () => {
       const payload = {}
       const validation = createUserRequestSchema.validate(payload, { abortEarly: false })

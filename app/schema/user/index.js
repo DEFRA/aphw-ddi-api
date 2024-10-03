@@ -9,7 +9,7 @@ const userStringResponseSchema = Joi.object({
 })
 
 const createUserRequestSchema = Joi.object({
-  username: Joi.string().required(),
+  username: Joi.string().email().required(),
   active: Joi.boolean().default(true),
   police_force: Joi.string().allow('').allow(null),
   police_force_id: Joi.number()
