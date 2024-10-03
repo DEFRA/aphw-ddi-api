@@ -12,7 +12,7 @@ module.exports = (sequelize, DataTypes) => {
       allowNull: false
     },
     short_name: {
-      type: DataTypes.STRING(64),
+      type: DataTypes.STRING(30),
       allowNull: true
     },
     created_at: {

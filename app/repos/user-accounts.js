@@ -59,7 +59,7 @@ const getPoliceForceIdForAccount = async ({
 
   if (username) {
     const [, domain] = username.split('@')
-    const shortName = domain.replace('.pnn.police.uk', '').replace('.police.uk', '')
+    const shortName = domain.toLowerCase().replace('.pnn.police.uk', '').replace('.police.uk', '')
 
     const policeForceObj = await getPoliceForceByShortName(shortName, transaction)
 
@@ -92,11 +92,9 @@ const createAccount = async (account, user, transaction) => {
     throw new DuplicateResourceError('This user is already in the allow list')
   }
 
-  const {
-    police_force: _policeForce,
-    police_force_id: _policeForceId,
-    ...accountWithoutPoliceForce
-  } = account
+  const accountWithoutPoliceForce = { ...account }
+  delete accountWithoutPoliceForce.police_force
+  delete accountWithoutPoliceForce.police_force_id
 
   const policeForceId = await getPoliceForceIdForAccount(account, transaction)
 
@@ -301,6 +299,7 @@ module.exports = {
   createAccount,
   deleteAccount,
   createAccounts,
+  getPoliceForceIdForAccount,
   isAccountEnabled,
   getAccount,
   setActivationCodeAndExpiry,

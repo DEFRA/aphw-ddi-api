@@ -1,6 +1,7 @@
 const { DuplicateResourceError } = require('../../../../app/errors/duplicate-record')
 const { NotFoundError } = require('../../../../app/errors/not-found')
 const { buildUserAccount } = require('../../../mocks/user-accounts')
+const { getPoliceForceIdForAccount } = require('../../../../app/repos/user-accounts')
 
 describe('user-accounts', () => {
   const dummyAdminUser = {
@@ -471,6 +472,13 @@ describe('user-accounts', () => {
           }
         ]
       })
+    })
+  })
+
+  describe('getPoliceForceIdForAccount', () => {
+    test('should handle empty username ', async () => {
+      const result = await getPoliceForceIdForAccount({})
+      expect(result).toBeUndefined()
     })
   })
 
