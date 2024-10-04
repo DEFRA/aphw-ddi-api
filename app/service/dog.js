@@ -20,9 +20,11 @@ class DogService {
   _prepareBreaches (dog, dogBreaches, allDogBreaches, user) {
     const preAuditDog = {
       index_number: dog.indexNumber,
-      status: dog.status === statuses.InBreach ? '' : dog.status,
-      dog_breaches: []
+      status: dog.status,
+      dog_breaches: dog.dog_breaches?.map((breach) => breach.label)
     }
+
+    console.log('JB preAuditDog', preAuditDog)
 
     const callback = async () => {
       const postAuditDog = {
@@ -30,6 +32,7 @@ class DogService {
         status: statuses.InBreach,
         dog_breaches: dog.breaches.map((breach) => breach.label)
       }
+      console.log('JB postAuditDog', postAuditDog)
       await sendUpdateToAudit(DOG, preAuditDog, postAuditDog, user)
     }
 
@@ -45,6 +48,8 @@ class DogService {
     const dog = await this._dogRepository.getDogModel(dogIndex)
     const allDogBreaches = await this._breachesRepository.getBreachCategories()
 
+    console.log('JB dog', dog)
+    console.log('JB allBreaches', allDogBreaches)
     const changedDog = this._prepareBreaches(dog, dogBreaches, allDogBreaches, user)
 
     await this._dogRepository.saveDog(changedDog)

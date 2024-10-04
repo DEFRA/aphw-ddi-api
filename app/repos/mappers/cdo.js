@@ -74,6 +74,7 @@ const mapCdoPersonToPerson = (person) => {
 }
 
 const mapDogDaoToDog = (dogDao) => {
+  console.log('JB map', dogDao)
   const dogProperties = {
     id: dogDao.id,
     dogReference: dogDao.dog_reference,
@@ -91,7 +92,7 @@ const mapDogDaoToDog = (dogDao) => {
     dateUntraceable: dogDao.untraceable_date,
     microchipNumber: getMicrochip(dogDao, 1),
     microchipNumber2: getMicrochip(dogDao, 2),
-    dogBreaches: dogDao.dog_breaches.map(mapDogBreachDaoToBreachCategory)
+    dogBreaches: dogDao.dog_breaches?.map(mapDogBreachDaoToBreachCategory)
   }
   return new Dog(dogProperties)
 }
