@@ -7,7 +7,7 @@ const schema = Joi.object({
 
 const config = {
   overnightJobCrontab: process.env.OVERNIGHT_JOB_CRONTAB,
-  purgeExpiredCacheCrontab: process.env.PURGE_EXPIRED_CACHE_CRONTAB
+  purgeExpiredCacheCrontab: process.env.PURGE_EXPIRED_CACHE_CRONTAB ?? '0 */2 * * *'
 }
 
 const result = schema.validate(config, {

@@ -26,7 +26,7 @@ describe('Police force repo', () => {
   jest.mock('../../../../app/messaging/send-audit')
   const { sendCreateToAudit, sendDeleteToAudit } = require('../../../../app/messaging/send-audit')
 
-  const { getPoliceForces, addForce, deleteForce } = require('../../../../app/repos/police-forces')
+  const { getPoliceForces, addForce, deleteForce, getPoliceForceByShortName } = require('../../../../app/repos/police-forces')
 
   beforeEach(async () => {
     jest.clearAllMocks()
@@ -172,6 +172,40 @@ describe('Police force repo', () => {
       sequelize.models.police_force.findOne.mockResolvedValue(null)
 
       await expect(deleteForce(2, devUser, {})).rejects.toThrow(new NotFoundError('Police Force with id 2 does not exist'))
+    })
+  })
+
+  describe('getPoliceForceByShortName', () => {
+    test('should get police force by short name', async () => {
+      const shortName = 'rohan-police'
+
+      sequelize.models.police_force.findOne.mockResolvedValueOnce({
+        id: 2,
+        name: 'Rohan Police Constabulary',
+        short_name: shortName
+      })
+
+      const policeForce = await getPoliceForceByShortName(shortName, {})
+      expect(policeForce).toEqual({
+        id: 2,
+        name: 'Rohan Police Constabulary',
+        short_name: shortName
+      })
+      expect(sequelize.models.police_force.findOne).toHaveBeenCalledWith({
+        where: {
+          short_name: shortName
+        },
+        transaction: {}
+      })
+    })
+
+    test('should return null if police force does not exist when searched by domain', async () => {
+      sequelize.models.police_force.findOne.mockResolvedValueOnce(null)
+
+      const domain = 'example.com'
+
+      const policeForce = await getPoliceForceByShortName(domain, {})
+      expect(policeForce).toBeNull()
     })
   })
 })

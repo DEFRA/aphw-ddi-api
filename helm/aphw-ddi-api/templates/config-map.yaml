@@ -29,4 +29,5 @@ data:
   OVERNIGHT_JOB_CRONTAB: {{ quote .Values.container.overnightJobCrontab }}
   PARANOID_RETENTION_PERIOD:  {{ quote .Values.container.paranoidRetentionPeriod }}
   AUTH_SERVER_URL:  {{ quote .Values.container.authServerUrl }}
+  USER_FEEDBACK_EMAIL_ADDRESS:  {{ quote .Values.container.userFeedbackEmailAddress }}
 {{- end -}}

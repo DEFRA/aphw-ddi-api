@@ -1,6 +1,7 @@
 const emailTypes = {
   verifyEmail: 'verify-email',
-  generalError: 'general-error'
+  generalError: 'general-error',
+  feedback: 'user-feedback'
 }
 
 module.exports = {

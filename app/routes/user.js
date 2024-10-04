@@ -1,14 +1,17 @@
+const config = require('../config/index')
 const { hashCache } = require('../session/hashCache')
 const { userValidateAudit, userLogoutAudit } = require('../dto/auditing/user')
 const { getRegistrationService } = require('../service/config')
-const { userBooleanResponseSchema, userStringResponseSchema } = require('../schema/user')
-const { createAccount, deleteAccount } = require('../repos/user-accounts')
+const { createUserResponseSchema, createUserRequestSchema, userFeedbackSchema, userBooleanResponseSchema, userStringResponseSchema, bulkResponseSchema, bulkRequestSchema } = require('../schema/user')
+const { createAccount, deleteAccount, createAccounts } = require('../repos/user-accounts')
 const { scopes } = require('../constants/auth')
-const { createUserResponseSchema, createUserRequestSchema } = require('../schema/user')
 const { mapUserDaoToDto } = require('../dto/mappers/user')
 const { conflictSchema } = require('../schema/common/response/conflict')
 const { notFoundSchema } = require('../schema/common/response/not-found')
 const { getCallingUser } = require('../auth/get-user')
+const { emailTypes } = require('../constants/email-types')
+const { sendEmail } = require('../messaging/send-email')
+const { getHttpCodeFromResults } = require('../dto/mappers/bulk-requests')
 
 module.exports = [
   {
@@ -39,6 +42,47 @@ module.exports = [
         const user = mapUserDaoToDto(userDao)
 
         return h.response(user).code(201)
+      }
+    }
+  },
+  {
+    method: 'POST',
+    path: '/users',
+    options: {
+      tags: ['api'],
+      notes: ['Bulk creates a list of new user account'],
+      response: {
+        status: {
+          200: bulkResponseSchema,
+          500: bulkResponseSchema,
+          409: bulkResponseSchema
+        }
+      },
+      validate: {
+        payload: bulkRequestSchema,
+        failAction: (request, h, err) => {
+          console.error(err)
+
+          return h.response({ errors: err.details.map(e => e.message) }).code(400).takeover()
+        }
+      },
+      auth: { scope: [scopes.admin] },
+      handler: async (request, h) => {
+        const createAccountsResult = await createAccounts(request.payload.users, getCallingUser(request))
+        const mapErrors = ({ data, ...error }) => {
+          return {
+            ...error,
+            username: data.username
+          }
+        }
+        const bulkResponse = {
+          users: createAccountsResult.items.map(mapUserDaoToDto),
+          errors: createAccountsResult.errors?.map(mapErrors)
+        }
+
+        const responseCode = getHttpCodeFromResults(createAccountsResult)
+
+        return h.response(bulkResponse).code(responseCode)
       }
     }
   },
@@ -193,6 +237,44 @@ module.exports = [
       await userLogoutAudit(request)
 
       return h.response(undefined).code(204)
+    }
+  },
+  {
+    method: 'POST',
+    path: '/user/me/feedback',
+    options: {
+      tags: ['api'],
+      notes: ['Receives user feedback and forwards to Defra'],
+      response: {
+        status: {
+          200: userStringResponseSchema
+        }
+      },
+      validate: {
+        payload: userFeedbackSchema,
+        failAction: (_request, h, err) => {
+          console.error('Error validating feedback payload', err)
+
+          return h.response({ errors: err.details.map(e => e.message) }).code(400).takeover()
+        }
+      },
+      handler: async (request, h) => {
+        const customFields = []
+          .concat(request.payload?.fields.map(field => ({
+            name: field.name,
+            value: field.value
+          })))
+
+        const data = {
+          toAddress: config.userFeedbackEmailAddress,
+          type: emailTypes.feedback,
+          customFields
+        }
+
+        await sendEmail(data)
+
+        return h.response({ result: 'Ok' }).code(200)
+      }
     }
   }
 ]
