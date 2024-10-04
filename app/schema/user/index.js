@@ -43,6 +43,10 @@ const bulkResponseSchema = Joi.object({
   }))
 })
 
+const getResponseSchema = Joi.object({
+  users: Joi.array().items(createUserResponseSchema).required()
+})
+
 module.exports = {
   userBooleanResponseSchema,
   userStringResponseSchema,
@@ -50,5 +54,6 @@ module.exports = {
   createUserResponseSchema,
   userFeedbackSchema,
   bulkRequestSchema,
-  bulkResponseSchema
+  bulkResponseSchema,
+  getResponseSchema
 }
