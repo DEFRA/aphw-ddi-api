@@ -169,7 +169,7 @@ describe('DogService', function () {
         'dog',
         {
           index_number: 'ED300097',
-          status: 'In breach',
+          status: '',
           dog_breaches: []
         },
         {

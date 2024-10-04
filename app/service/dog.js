@@ -18,10 +18,12 @@ class DogService {
    * @private
    */
   _prepareBreaches (dog, dogBreaches, allDogBreaches, user) {
+    // Force audit record to show all breach reasons, even if only one new reason added
+    console.log('dog', dog)
     const preAuditDog = {
       index_number: dog.indexNumber,
-      status: dog.status,
-      dog_breaches: dog._breaches ? dog._breaches.map((breach) => breach.label) : []
+      status: dog.status === statuses.InBreach ? '' : dog.status,
+      dog_breaches: []
     }
 
     const callback = async () => {

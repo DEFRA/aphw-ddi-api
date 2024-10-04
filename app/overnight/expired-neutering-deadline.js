@@ -45,7 +45,13 @@ const findExpired = async (currentStatus, today, t) => {
         },
         {
           model: sequelize.models.dog_breach,
-          as: 'dog_breaches'
+          as: 'dog_breaches',
+          include: [
+            {
+              model: sequelize.models.breach_category,
+              as: 'breach_category'
+            }
+          ]
         }
       ]
     },
@@ -97,7 +103,7 @@ const addBreachReasonToExpiredNeuteringDeadline = async (today, user, t) => {
       }
       console.log(`Updating dog ${toUpdate.dog.index_number} adding breach reason expired neutering deadline`)
       const currentBreaches = toUpdate.dog.dog_breaches.map((breach) => breach.breach_category.short_name)
-      currentBreaches.push(breachReasons.INSURANCE_EXPIRED)
+      currentBreaches.push(breachReasons.NEUTERING_DEADLINE_EXCEEDED)
       await dogService.setBreaches(toUpdate.dog.index_number, currentBreaches, user, t)
     }
     return `Success Neutering Expiry add breach reason - updated ${addBreachReason.length} rows`

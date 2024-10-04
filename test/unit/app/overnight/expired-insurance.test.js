@@ -36,7 +36,7 @@ describe('ExpiredInsurance test', () => {
   test('setExpiredInsuranceToBreach should handle zero rows', async () => {
     dbFindAll.mockResolvedValue([])
     const res = await setExpiredInsuranceToBreach()
-    expect(res).toBe('Success Insurance Expiry - updated 0 rows')
+    expect(res).toBe('Success Insurance Expiry to Breach - updated 0 rows')
   })
 
   test('setExpiredInsuranceToBreach should handle error', async () => {
@@ -47,6 +47,6 @@ describe('ExpiredInsurance test', () => {
   test('setExpiredInsuranceToBreach should handle some rows', async () => {
     dbFindAll.mockResolvedValue(mockOvernightRows)
     const res = await setExpiredInsuranceToBreach()
-    expect(res).toBe('Success Insurance Expiry - updated 3 rows')
+    expect(res).toBe('Success Insurance Expiry to Breach - updated 3 rows')
   })
 })
