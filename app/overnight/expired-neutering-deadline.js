@@ -82,7 +82,7 @@ const setExpiredNeuteringDeadlineToInBreach = async (today, user, t) => {
 }
 
 const alreadyExpiredDeadline = (dog, expiredDeadlineId) => {
-  return dog.dog_breaches && dog.dog_breaches.some(breach => breach.breach_category_id === expiredDeadlineId)
+  return dog?.dog_breaches?.some(breach => breach.breach_category_id === expiredDeadlineId)
 }
 
 const addBreachReasonToExpiredNeuteringDeadline = async (today, user, t) => {

@@ -63,7 +63,7 @@ const setExpiredInsuranceToBreach = async (today, user, t) => {
 }
 
 const alreadyExpiredInsurance = (dog, expiredInsuranceId) => {
-  return dog.dog_breaches && dog.dog_breaches.some(breach => breach.breach_category_id === expiredInsuranceId)
+  return dog?.dog_breaches?.some(breach => breach.breach_category_id === expiredInsuranceId)
 }
 
 const addBreachReasonToExpiredInsurance = async (today, user, t) => {
