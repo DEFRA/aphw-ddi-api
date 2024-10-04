@@ -1,6 +1,7 @@
 const { DuplicateResourceError } = require('../../../../app/errors/duplicate-record')
 const { NotFoundError } = require('../../../../app/errors/not-found')
 const { buildUserAccount } = require('../../../mocks/user-accounts')
+const sequelize = require('../../../../app/config/db')
 
 describe('user-accounts', () => {
   const dummyAdminUser = {
@@ -14,6 +15,7 @@ describe('user-accounts', () => {
   jest.mock('../../../../app/config/db', () => ({
     models: {
       user_account: {
+        findAll: jest.fn(),
         findOne: jest.fn(),
         create: jest.fn(),
         destroy: jest.fn()
@@ -34,12 +36,36 @@ describe('user-accounts', () => {
     getPoliceForceByShortName.mockResolvedValue(null)
   })
 
-  const { createAccount, createAccounts, deleteAccount, isAccountEnabled, getAccount, setActivationCodeAndExpiry, setLoginDate, setActivatedDate, setLicenceAcceptedDate, verifyLicenceAccepted, isEmailVerified, getPoliceForceIdForAccount } = require('../../../../app/repos/user-accounts')
+  const { getAccounts, createAccount, createAccounts, deleteAccount, isAccountEnabled, getAccount, setActivationCodeAndExpiry, setLoginDate, setActivatedDate, setLicenceAcceptedDate, verifyLicenceAccepted, isEmailVerified, getPoliceForceIdForAccount } = require('../../../../app/repos/user-accounts')
 
   afterEach(() => {
     jest.resetAllMocks()
   })
 
+  describe('getAccounts', () => {
+    test('should get a list of accounts', async () => {
+      const userAccounts = [
+        buildUserAccount({
+          id: 1,
+          username: 'ralph@wreckit.com'
+        }),
+        buildUserAccount({
+          id: 2,
+          username: 'scott.turner@sacramento.police.gov',
+          police_force_id: 2
+        }),
+        buildUserAccount({
+          id: 3,
+          username: 'axel.foley@beverly-hills.police.gov',
+          police_force_id: 3
+        })
+      ]
+      sequelize.models.user_account.findAll.mockResolvedValue(userAccounts)
+      const returnedAccounts = await getAccounts()
+      expect(returnedAccounts).toEqual(userAccounts)
+      expect(sequelize.models.user_account.findAll).toHaveBeenCalled()
+    })
+  })
   describe('createAccount', () => {
     test('should use a transaction if none exists', async () => {
       sequelize.transaction.mockImplementation(async (localCallback) => {
