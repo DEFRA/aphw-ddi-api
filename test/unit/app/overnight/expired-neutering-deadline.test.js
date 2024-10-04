@@ -1,7 +1,7 @@
-const { setExpiredNeuteringDeadlineToInBreach, addBreachReasonToExpiredNeuteringDeadline } = require('../../../../app/overnight/expired-neutering-deadline')
-const { overnightRows: mockOvernightRows, overnightRowsInBreach: mockOvernightRowsInBreach } = require('../../../mocks/overnight/overnight-rows')
+const { setExpiredNeuteringDeadlineToInBreach } = require('../../../../app/overnight/expired-neutering-deadline')
+const { overnightRows: mockOvernightRows } = require('../../../mocks/overnight/overnight-rows')
 
-const { dbFindAll, dbFindOne } = require('../../../../app/lib/db-functions')
+const { dbFindAll } = require('../../../../app/lib/db-functions')
 jest.mock('../../../../app/lib/db-functions')
 
 const { updateStatusOnly } = require('../../../../app/repos/status')
