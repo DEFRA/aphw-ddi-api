@@ -21,10 +21,8 @@ class DogService {
     const preAuditDog = {
       index_number: dog.indexNumber,
       status: dog.status,
-      dog_breaches: dog.dog_breaches?.map((breach) => breach.label)
+      dog_breaches: dog._breaches ? dog._breaches.map((breach) => breach.label) : []
     }
-
-    console.log('JB preAuditDog', preAuditDog)
 
     const callback = async () => {
       const postAuditDog = {
@@ -32,7 +30,6 @@ class DogService {
         status: statuses.InBreach,
         dog_breaches: dog.breaches.map((breach) => breach.label)
       }
-      console.log('JB postAuditDog', postAuditDog)
       await sendUpdateToAudit(DOG, preAuditDog, postAuditDog, user)
     }
 
@@ -41,20 +38,18 @@ class DogService {
     return dog
   }
 
-  async setBreaches (dogIndex, dogBreaches, user) {
+  async setBreaches (dogIndex, dogBreaches, user, transaction) {
     /**
      * @type {import('../data/domain/dog')}
      */
     const dog = await this._dogRepository.getDogModel(dogIndex)
     const allDogBreaches = await this._breachesRepository.getBreachCategories()
 
-    console.log('JB dog', dog)
-    console.log('JB allBreaches', allDogBreaches)
     const changedDog = this._prepareBreaches(dog, dogBreaches, allDogBreaches, user)
 
-    await this._dogRepository.saveDog(changedDog)
+    await this._dogRepository.saveDog(changedDog, transaction)
 
-    return this._dogRepository.getDogModel(dogIndex)
+    return this._dogRepository.getDogModel(dogIndex, transaction)
   }
 
   async setBreach (dogDao, breachCategory, user, transaction) {

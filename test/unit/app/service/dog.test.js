@@ -78,7 +78,7 @@ describe('DogService', function () {
       await dog.getChanges()[1].callback()
       expect(mockDogRepository.getDogModel).toHaveBeenCalledWith('ED300097')
       expect(mockBreachesRepository.getBreachCategories).toHaveBeenCalled()
-      expect(mockDogRepository.saveDog).toHaveBeenCalledWith(dog)
+      expect(mockDogRepository.saveDog).toHaveBeenCalledWith(dog, undefined)
       expect(dog.getChanges()).toEqual([
         {
           key: 'dogBreaches',
@@ -169,7 +169,7 @@ describe('DogService', function () {
         'dog',
         {
           index_number: 'ED300097',
-          status: '',
+          status: 'In breach',
           dog_breaches: []
         },
         {

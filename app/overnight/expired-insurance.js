@@ -85,8 +85,7 @@ const addBreachReasonToExpiredInsurance = async (today, user, t) => {
       console.log(`Updating dog ${toUpdate.dog.index_number} adding breach reason expired insurance`)
       const currentBreaches = toUpdate.dog.dog_breaches.map((breach) => breach.breach_category.short_name)
       currentBreaches.push(breachReasons.INSURANCE_EXPIRED)
-      console.log('JB current breaches', currentBreaches)
-      await dogService.setBreach(toUpdate.dog, currentBreaches, user, t)
+      await dogService.setBreaches(toUpdate.dog.index_number, currentBreaches, user, t)
     }
     return `Success Insurance Expiry add breach reason - updated ${addBreachReason.length} rows`
   } catch (e) {

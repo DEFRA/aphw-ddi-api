@@ -74,7 +74,6 @@ const mapCdoPersonToPerson = (person) => {
 }
 
 const mapDogDaoToDog = (dogDao) => {
-  console.log('JB map', dogDao)
   const dogProperties = {
     id: dogDao.id,
     dogReference: dogDao.dog_reference,

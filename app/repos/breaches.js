@@ -47,8 +47,6 @@ const setBreaches = async (dog, dogDao, transaction) => {
     await dogBreach.destroy({ force: true, transaction })
   }
 
-  console.log('JB dog', dog)
-  console.log('JB dog.breaches', dog.breaches)
   const dogBreaches = dog.breaches.map(breach => ({
     dog_id: dogId,
     breach_category_id: breach.id
