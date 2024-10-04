@@ -1,10 +1,9 @@
-const { setExpiredNeuteringDeadlineToInBreach } = require('../../../../app/overnight/expired-neutering-deadline')
-const { overnightRows: mockOvernightRows } = require('../../../mocks/overnight/overnight-rows')
+const { setExpiredNeuteringDeadlineToInBreach, addBreachReasonToExpiredNeuteringDeadline } = require('../../../../app/overnight/expired-neutering-deadline')
+const { overnightRows: mockOvernightRows, overnightRowsInBreach: mockOvernightRowsInBreach } = require('../../../mocks/overnight/overnight-rows')
 
-const { dbFindAll } = require('../../../../app/lib/db-functions')
+const { dbFindAll, dbFindOne } = require('../../../../app/lib/db-functions')
 jest.mock('../../../../app/lib/db-functions')
 
-const { updateStatusOnly } = require('../../../../app/repos/status')
 const { Op } = require('sequelize')
 const sequelize = require('../../../../app/config/db')
 
@@ -15,6 +14,9 @@ const { statuses: mockStatuses } = require('../../../mocks/statuses')
 jest.mock('../../../../app/repos/breaches')
 const { getBreachCategories } = require('../../../../app/repos/breaches')
 const { BreachCategory } = require('../../../../app/data/domain')
+
+jest.mock('../../../../app/service/config')
+const { getDogService } = require('../../../../app/service/config')
 
 jest.mock('../../../../app/repos/status')
 
@@ -28,8 +30,11 @@ describe('ExpiredNeuteringDeadline test', () => {
 
   beforeEach(async () => {
     jest.clearAllMocks()
-    updateStatusOnly.mockResolvedValue()
     getCachedStatuses.mockResolvedValue(mockStatuses)
+    getDogService.mockReturnValue({
+      setBreaches: jest.fn(),
+      setBreach: jest.fn()
+    })
     getBreachCategories.mockResolvedValue([
       new BreachCategory({
         id: 11,
@@ -186,5 +191,46 @@ describe('ExpiredNeuteringDeadline test', () => {
     dbFindAll.mockResolvedValue(mockOvernightRows)
     const res = await setExpiredNeuteringDeadlineToInBreach()
     expect(res).toBe('Success Neutering Expiry - updated 3 rows')
+  })
+
+  test('addBreachReasonToExpiredNeuteringDeadline should handle some rows given date is on 2025-01-01', async () => {
+    dbFindAll.mockResolvedValue(mockOvernightRowsInBreach)
+    dbFindOne.mockResolvedValue(11)
+    const today = new Date('2025-01-01')
+    await addBreachReasonToExpiredNeuteringDeadline(today)
+
+    expect(dbFindAll).toHaveBeenCalledWith(undefined, expect.objectContaining({
+      where: expect.objectContaining({
+        [Op.or]: [
+          {
+            [Op.and]: [
+              {
+                neutering_deadline: {
+                  [Op.eq]: new Date('2024-06-30')
+                }
+              },
+              sequelize.literal(juneLiteral)
+            ]
+          },
+          {
+            [Op.and]: [
+              {
+                neutering_deadline: {
+                  [Op.eq]: new Date('2024-12-31')
+                }
+              },
+              sequelize.literal('1 = 1')
+            ]
+          }
+        ]
+      })
+    }))
+  })
+
+  test('addBreachReasonToExpiredNeuteringDeadline should throw if error', async () => {
+    dbFindAll.mockResolvedValue(() => { throw new Error('dummy') })
+    dbFindOne.mockResolvedValue(11)
+    const today = new Date('2025-01-01')
+    await expect(addBreachReasonToExpiredNeuteringDeadline(today)).rejects.toThrow('Error auto-updating statuses when Neutering Expiry add breach reason: TypeError: addBreachReason is not iterable')
   })
 })
