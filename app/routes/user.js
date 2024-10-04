@@ -2,8 +2,11 @@ const config = require('../config/index')
 const { hashCache } = require('../session/hashCache')
 const { userValidateAudit, userLogoutAudit } = require('../dto/auditing/user')
 const { getRegistrationService } = require('../service/config')
-const { createUserResponseSchema, createUserRequestSchema, userFeedbackSchema, userBooleanResponseSchema, userStringResponseSchema, bulkResponseSchema, bulkRequestSchema } = require('../schema/user')
-const { createAccount, deleteAccount, createAccounts } = require('../repos/user-accounts')
+const {
+  createUserResponseSchema, createUserRequestSchema, userFeedbackSchema, userBooleanResponseSchema, userStringResponseSchema, bulkResponseSchema, bulkRequestSchema,
+  getResponseSchema
+} = require('../schema/user')
+const { createAccount, deleteAccount, createAccounts, getAccounts } = require('../repos/user-accounts')
 const { scopes } = require('../constants/auth')
 const { mapUserDaoToDto } = require('../dto/mappers/user')
 const { conflictSchema } = require('../schema/common/response/conflict')
@@ -42,6 +45,27 @@ module.exports = [
         const user = mapUserDaoToDto(userDao)
 
         return h.response(user).code(201)
+      }
+    }
+  },
+  {
+    method: 'GET',
+    path: '/users',
+    options: {
+      tags: ['api'],
+      notes: ['Gets a full list of all user accounts'],
+      response: {
+        status: {
+          200: getResponseSchema
+        }
+      },
+      auth: { scope: [scopes.admin] },
+      handler: async (request, h) => {
+        const userDaos = await getAccounts()
+
+        const users = userDaos.map(mapUserDaoToDto)
+
+        return h.response({ users }).code(200)
       }
     }
   },
