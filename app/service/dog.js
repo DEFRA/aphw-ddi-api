@@ -19,7 +19,6 @@ class DogService {
    */
   _prepareBreaches (dog, dogBreaches, allDogBreaches, user) {
     // Force audit record to show all breach reasons, even if only one new reason added
-    console.log('dog', dog)
     const preAuditDog = {
       index_number: dog.indexNumber,
       status: dog.status === statuses.InBreach ? '' : dog.status,
