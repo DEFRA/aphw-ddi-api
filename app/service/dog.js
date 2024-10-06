@@ -18,6 +18,7 @@ class DogService {
    * @private
    */
   _prepareBreaches (dog, dogBreaches, allDogBreaches, user) {
+    // Force audit record to show all breach reasons, even if only one new reason added
     const preAuditDog = {
       index_number: dog.indexNumber,
       status: dog.status === statuses.InBreach ? '' : dog.status,
@@ -38,7 +39,7 @@ class DogService {
     return dog
   }
 
-  async setBreaches (dogIndex, dogBreaches, user) {
+  async setBreaches (dogIndex, dogBreaches, user, transaction) {
     /**
      * @type {import('../data/domain/dog')}
      */
@@ -47,9 +48,9 @@ class DogService {
 
     const changedDog = this._prepareBreaches(dog, dogBreaches, allDogBreaches, user)
 
-    await this._dogRepository.saveDog(changedDog)
+    await this._dogRepository.saveDog(changedDog, transaction)
 
-    return this._dogRepository.getDogModel(dogIndex)
+    return this._dogRepository.getDogModel(dogIndex, transaction)
   }
 
   async setBreach (dogDao, breachCategory, user, transaction) {
