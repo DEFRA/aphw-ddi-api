@@ -18,7 +18,7 @@ describe('User endpoint', () => {
   const { hashCache } = require('../../../../app/session/hashCache')
 
   jest.mock('../../../../app/repos/user-accounts')
-  const { createAccount, deleteAccount, createAccounts } = require('../../../../app/repos/user-accounts')
+  const { createAccount, deleteAccount, createAccounts, getAccounts } = require('../../../../app/repos/user-accounts')
 
   jest.mock('../../../../app/messaging/send-email')
   const { sendEmail } = require('../../../../app/messaging/send-email')
@@ -112,6 +112,94 @@ describe('User endpoint', () => {
 
       const response = await server.inject(options)
       expect(response.statusCode).toBe(400)
+      expect(createAccount).not.toHaveBeenCalled()
+    })
+  })
+
+  describe('GET /users', () => {
+    test('should get a list of users', async () => {
+      const userAccounts = [
+        buildUserAccount({
+          id: 1,
+          username: 'ralph@wreckit.com'
+        }),
+        buildUserAccount({
+          id: 2,
+          username: 'scott.turner@sacramento.police.gov',
+          police_force_id: 2
+        }),
+        buildUserAccount({
+          id: 3,
+          username: 'axel.foley@beverly-hills.police.gov',
+          police_force_id: 3
+        })
+      ]
+
+      getAccounts.mockResolvedValue(userAccounts)
+
+      const options = {
+        method: 'GET',
+        url: '/users',
+        ...portalHeader
+      }
+
+      const response = await server.inject(options)
+      expect(response.statusCode).toBe(200)
+      expect(getAccounts).toHaveBeenCalledWith()
+      expect(JSON.parse(response.payload)).toEqual({
+        users: [
+          {
+            id: 1,
+            username: 'ralph@wreckit.com',
+            active: true
+          },
+          {
+            id: 2,
+            username: 'scott.turner@sacramento.police.gov',
+            police_force_id: 2,
+            active: true
+          },
+          {
+            id: 3,
+            username: 'axel.foley@beverly-hills.police.gov',
+            police_force_id: 3,
+            active: true
+          }
+        ]
+      })
+    })
+
+    test('should return 400 if request is from enforcement', async () => {
+      validate.mockResolvedValue(mockValidateEnforcement)
+      createAccount.mockResolvedValue({
+        username: 'ralph@wreckit.com',
+        active: true
+      })
+      const options = {
+        method: 'GET',
+        url: '/users',
+        ...enforcementHeader
+      }
+
+      const response = await server.inject(options)
+      expect(response.statusCode).toBe(403)
+      expect(createAccount).not.toHaveBeenCalled()
+    })
+
+    test('should return 400 if request is from standard user', async () => {
+      validate.mockResolvedValue(mockValidateEnforcement)
+      createAccount.mockResolvedValue({
+        username: 'ralph@wreckit.com',
+        active: true
+      })
+      const options = {
+        method: 'GET',
+        url: '/users',
+        ...portalStandardHeader
+      }
+
+      const response = await server.inject(options)
+      expect(response.statusCode).toBe(403)
       expect(createAccount).not.toHaveBeenCalled()
     })
   })
