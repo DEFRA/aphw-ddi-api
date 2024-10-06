@@ -1,9 +1,9 @@
 const { purgeSoftDeletedRecords } = require('../overnight/purge-soft-deleted-records')
 const { jobsQuerySchema, purgeSoftDeleteResponseSchema, defaultJobsResponse } = require('../schema/jobs')
 const { purgeSoftDeletedDto } = require('../dto/overnight')
-const { setExpiredInsuranceToBreach } = require('../overnight/expired-insurance')
+const { setExpiredInsuranceToBreach, addBreachReasonToExpiredInsurance } = require('../overnight/expired-insurance')
 const { getCallingUser } = require('../auth/get-user')
-const { setExpiredNeuteringDeadlineToInBreach } = require('../overnight/expired-neutering-deadline')
+const { setExpiredNeuteringDeadlineToInBreach, addBreachReasonToExpiredNeuteringDeadline } = require('../overnight/expired-neutering-deadline')
 
 module.exports = [
   {
@@ -50,9 +50,10 @@ module.exports = [
       },
       handler: async (request, h) => {
         const now = request.query.today
+        const addBreachResponse = await addBreachReasonToExpiredInsurance(now, getCallingUser(request))
         const expiredInsuranceResponse = await setExpiredInsuranceToBreach(now, getCallingUser(request))
 
-        return h.response({ response: expiredInsuranceResponse }).code(200)
+        return h.response({ response: addBreachResponse + expiredInsuranceResponse }).code(200)
       }
     }
   },
@@ -76,9 +77,10 @@ module.exports = [
       },
       handler: async (request, h) => {
         const now = request.query.today
+        const addBreachResponse = await addBreachReasonToExpiredNeuteringDeadline(now, getCallingUser(request))
         const expiredNeuteringDeadlineResponse = await setExpiredNeuteringDeadlineToInBreach(now, getCallingUser(request))
 
-        return h.response({ response: expiredNeuteringDeadlineResponse }).code(200)
+        return h.response({ response: addBreachResponse + expiredNeuteringDeadlineResponse }).code(200)
       }
     }
   }

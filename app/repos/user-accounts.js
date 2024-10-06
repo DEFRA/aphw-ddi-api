@@ -38,6 +38,10 @@ const { getPoliceForceByShortName } = require('./police-forces')
  * @property {number} [police_force_id]
  */
 
+const getAccounts = async () => {
+  return sequelize.models.user_account.findAll()
+}
+
 const getPoliceForceIdForAccount = async ({
   police_force_id: policeForceId,
   police_force: policeForce,
@@ -296,6 +300,7 @@ const isEmailVerified = async (username) => {
 }
 
 module.exports = {
+  getAccounts,
   createAccount,
   deleteAccount,
   createAccounts,

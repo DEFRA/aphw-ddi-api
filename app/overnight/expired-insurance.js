@@ -1,62 +1,100 @@
 const sequelize = require('../config/db')
 const { Op } = require('sequelize')
 const { statuses, breachReasons } = require('../constants/statuses')
-const { dbFindAll } = require('../lib/db-functions')
+const { dbFindAll, dbFindOne } = require('../lib/db-functions')
 const ServiceProvider = require('../service/config')
+
+const findExpired = async (currentStatus, today, t) => {
+  return await dbFindAll(sequelize.models.registration, {
+    where: {
+      certificate_issued: {
+        [Op.ne]: null
+      },
+      '$dog.status.status$': currentStatus,
+      '$dog.insurance.renewal_date$': {
+        [Op.lt]: today
+      }
+    },
+    include: [
+      {
+        model: sequelize.models.dog,
+        as: 'dog',
+        include: [
+          {
+            model: sequelize.models.status,
+            as: 'status'
+          },
+          {
+            model: sequelize.models.insurance,
+            as: 'insurance'
+          },
+          {
+            model: sequelize.models.dog_breach,
+            as: 'dog_breaches',
+            include: [
+              {
+                model: sequelize.models.breach_category,
+                as: 'breach_category'
+              }
+            ]
+          }
+        ]
+      }
+    ],
+    transaction: t
+  })
+}
 
 const setExpiredInsuranceToBreach = async (today, user, t) => {
   try {
-    const setToBreach = await dbFindAll(sequelize.models.registration, {
-      where: {
-        certificate_issued: {
-          [Op.ne]: null
-        },
-        '$dog.status.status$': statuses.Exempt,
-        '$dog.insurance.renewal_date$': {
-          [Op.lt]: today
-        }
-      },
-      include: [
-        {
-          model: sequelize.models.dog,
-          as: 'dog',
-          include: [
-            {
-              model: sequelize.models.status,
-              as: 'status'
-            },
-            {
-              model: sequelize.models.insurance,
-              as: 'insurance'
-            },
-            {
-              model: sequelize.models.dog_breach,
-              as: 'dog_breaches',
-              include: [
-                {
-                  model: sequelize.models.breach_category,
-                  as: 'breach_category'
-                }
-              ]
-            }
-          ]
-        }
-      ],
-      transaction: t
-    })
+    const setToBreach = await findExpired(statuses.Exempt, today, t)
+
     const dogService = ServiceProvider.getDogService()
 
     for (const toUpdate of setToBreach) {
       console.log(`Updating dog ${toUpdate.dog.index_number} to In breach`)
       await dogService.setBreach(toUpdate.dog, [breachReasons.INSURANCE_EXPIRED], user, t)
     }
-    return `Success Insurance Expiry - updated ${setToBreach.length} rows`
+    return `Success Insurance Expiry to Breach - updated ${setToBreach.length} rows`
   } catch (e) {
-    console.log('Error auto-updating statuses when Insurance Expiry:', e)
-    throw new Error(`Error auto-updating statuses when Insurance Expiry: ${e}`)
+    console.log('Error auto-updating statuses when Insurance Expiry to Breach:', e)
+    throw new Error(`Error auto-updating statuses when Insurance Expiry to Breach: ${e}`)
+  }
+}
+
+const alreadyExpiredInsurance = (dog, expiredInsuranceId) => {
+  return dog?.dog_breaches?.some(breach => breach.breach_category_id === expiredInsuranceId)
+}
+
+const addBreachReasonToExpiredInsurance = async (today, user, t) => {
+  try {
+    const breachCategory = await dbFindOne(sequelize.models.breach_category, {
+      where: {
+        short_name: breachReasons.INSURANCE_EXPIRED
+      }
+    })
+
+    const addBreachReason = await findExpired(statuses.InBreach, today, t)
+
+    const dogService = ServiceProvider.getDogService()
+
+    for (const toUpdate of addBreachReason) {
+      if (alreadyExpiredInsurance(toUpdate.dog, breachCategory.id)) {
+        continue
+      }
+      console.log(`Updating dog ${toUpdate.dog.index_number} adding breach reason expired insurance`)
+      const currentBreaches = toUpdate.dog.dog_breaches.map((breach) => breach.breach_category.short_name)
+      currentBreaches.push(breachReasons.INSURANCE_EXPIRED)
+      await dogService.setBreaches(toUpdate.dog.index_number, currentBreaches, user, t)
+    }
+    return `Success Insurance Expiry add breach reason - updated ${addBreachReason.length} rows`
+  } catch (e) {
+    console.log('Error auto-updating statuses when Insurance Expiry add breach reason:', e)
+    throw new Error(`Error auto-updating statuses when Insurance Expiry add breach reason: ${e}`)
   }
 }
 
 module.exports = {
-  setExpiredInsuranceToBreach
+  setExpiredInsuranceToBreach,
+  addBreachReasonToExpiredInsurance
 }
