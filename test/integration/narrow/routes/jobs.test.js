@@ -14,10 +14,10 @@ describe('Jobs endpoint', () => {
   const { purgeSoftDeletedRecords } = require('../../../../app/overnight/purge-soft-deleted-records')
 
   jest.mock('../../../../app/overnight/expired-insurance')
-  const { setExpiredInsuranceToBreach } = require('../../../../app/overnight/expired-insurance')
+  const { setExpiredInsuranceToBreach, addBreachReasonToExpiredInsurance } = require('../../../../app/overnight/expired-insurance')
 
   jest.mock('../../../../app/overnight/expired-neutering-deadline')
-  const { setExpiredNeuteringDeadlineToInBreach } = require('../../../../app/overnight/expired-neutering-deadline')
+  const { setExpiredNeuteringDeadlineToInBreach, addBreachReasonToExpiredNeuteringDeadline } = require('../../../../app/overnight/expired-neutering-deadline')
 
   beforeEach(async () => {
     jest.clearAllMocks()
@@ -134,9 +134,10 @@ describe('Jobs endpoint', () => {
   describe('POST /jobs/expired-insurance', () => {
     test('POST /jobs/expired-insurance should return 200', async () => {
       const expectedDto = {
-        response: 'Success Insurance Expiry - updated 5 rows'
+        response: 'Success Insurance Expiry add reason - updated 3 rowsSuccess Insurance Expiry to breach - updated 5 rows'
       }
-      setExpiredInsuranceToBreach.mockResolvedValue('Success Insurance Expiry - updated 5 rows')
+      addBreachReasonToExpiredInsurance.mockResolvedValue('Success Insurance Expiry add reason - updated 3 rows')
+      setExpiredInsuranceToBreach.mockResolvedValue('Success Insurance Expiry to breach - updated 5 rows')
 
       const options = {
         method: 'POST',
@@ -152,7 +153,8 @@ describe('Jobs endpoint', () => {
     })
 
     test('should POST /jobs/expired-insurance?today=2024-03-16', async () => {
-      setExpiredInsuranceToBreach.mockResolvedValue('Success Insurance Expiry - updated 5 rows')
+      addBreachReasonToExpiredInsurance.mockResolvedValue('Success Insurance Expiry add reason - updated 3 rows')
+      setExpiredInsuranceToBreach.mockResolvedValue('Success Insurance Expiry to breach - updated 5 rows')
 
       const options = {
         method: 'POST',
@@ -163,6 +165,7 @@ describe('Jobs endpoint', () => {
       const response = await server.inject(options)
       expect(response.statusCode).toBe(200)
       expect(setExpiredInsuranceToBreach.mock.calls[0][0]).toEqual(new Date('2024-03-16'))
+      expect(addBreachReasonToExpiredInsurance.mock.calls[0][0]).toEqual(new Date('2024-03-16'))
     })
 
     test('should 400 with invalid query props', async () => {
@@ -180,9 +183,10 @@ describe('Jobs endpoint', () => {
   describe('POST /jobs/neutering-deadline', () => {
     test('POST /jobs/neutering-deadline should return 200', async () => {
       const expectedDto = {
-        response: 'Success Neutering Expiry - updated 5 rows'
+        response: 'Success Neutering Expiry add reason - updated 3 rowsSuccess Neutering Expiry to breach - updated 5 rows'
       }
-      setExpiredNeuteringDeadlineToInBreach.mockResolvedValue('Success Neutering Expiry - updated 5 rows')
+      addBreachReasonToExpiredNeuteringDeadline.mockResolvedValue('Success Neutering Expiry add reason - updated 3 rows')
+      setExpiredNeuteringDeadlineToInBreach.mockResolvedValue('Success Neutering Expiry to breach - updated 5 rows')
 
       const options = {
         method: 'POST',
@@ -198,7 +202,8 @@ describe('Jobs endpoint', () => {
     })
 
     test('should POST /jobs/expired-insurance?today=2024-03-16', async () => {
-      setExpiredNeuteringDeadlineToInBreach.mockResolvedValue('Success Neutering Expiry - updated 5 rows')
+      addBreachReasonToExpiredNeuteringDeadline.mockResolvedValue('Success Neutering Expiry add reason - updated 3 rows')
+      setExpiredNeuteringDeadlineToInBreach.mockResolvedValue('Success Neutering Expiry to breach - updated 5 rows')
 
       const options = {
         method: 'POST',
@@ -208,6 +213,7 @@ describe('Jobs endpoint', () => {
 
       const response = await server.inject(options)
       expect(response.statusCode).toBe(200)
+      expect(addBreachReasonToExpiredNeuteringDeadline.mock.calls[0][0]).toEqual(new Date('2024-03-16'))
       expect(setExpiredNeuteringDeadlineToInBreach.mock.calls[0][0]).toEqual(new Date('2024-03-16'))
     })
 
