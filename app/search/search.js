@@ -1,6 +1,6 @@
 const sequelize = require('../config/db')
 const { Op } = require('sequelize')
-const { thresholds /* , maxResults */ } = require('../constants/search')
+const { thresholds, maxResults } = require('../constants/search')
 const { sortAndGroupResults } = require('./search-processors/sorting-and-grouping')
 const { cleanupSearchTerms } = require('./search-processors/search-terms')
 const { mapResults } = require('./search-processors/search-results')
@@ -93,7 +93,10 @@ const combineQueryResults = (res1, res2, res3) => {
 
 const search = async (type, terms, fuzzy = false) => {
   if (terms === null || terms === undefined) {
-    return []
+    return {
+      totalFound: 0,
+      results: []
+    }
   }
 
   const termsArray = cleanupSearchTerms(terms)
@@ -112,8 +115,10 @@ const search = async (type, terms, fuzzy = false) => {
   const mappedResults = mapResults(results, type)
   const sortedResults = sortAndGroupResults(mappedResults, type)
 
-  return sortedResults
-  // return sortedResults.length > maxResults ? sortedResults.slice(0, maxResults) : sortedResults
+  return {
+    totalFound: sortedResults.length ?? 0,
+    results: sortedResults.length > maxResults ? sortedResults.slice(0, maxResults) : sortedResults
+  }
 }
 
 module.exports = {
