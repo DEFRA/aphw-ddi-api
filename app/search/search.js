@@ -120,8 +120,8 @@ const search = async (type, terms, fuzzy = false) => {
   const sortedResults = sortAndGroupResults(mappedResults, type)
 
   return resultsModel(
-    sortedResults.length ?? 0,
-    sortedResults.length > maxResults ? sortedResults.slice(0, maxResults) : sortedResults
+    sortedResults.length > maxResults ? sortedResults.slice(0, maxResults) : sortedResults,
+    sortedResults.length ?? 0
   )
 }
 
