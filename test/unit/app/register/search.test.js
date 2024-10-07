@@ -1,4 +1,4 @@
-const { uniqueResults: mockUniqueResults, resultsForGrouping: mockResultsForGrouping, resultsForSorting: mockResultsForSorting, moreThanTenResults /*, moreThanThirtyResults */ } = require('../../../mocks/search-results')
+const { uniqueResults: mockUniqueResults, resultsForGrouping: mockResultsForGrouping, resultsForSorting: mockResultsForSorting, moreThanTenResults, moreThanTwentyFiveResults } = require('../../../mocks/search-results')
 
 describe('Search repo', () => {
   jest.mock('../../../../app/config/db', () => ({
@@ -32,48 +32,52 @@ describe('Search repo', () => {
     sequelize.models.search_index.findAll.mockResolvedValue(mockUniqueResults)
 
     const results = await search()
-    expect(results.length).toBe(0)
+    expect(results.results.length).toBe(0)
+    expect(results.totalFound).toBe(0)
   })
 
   test('search for dogs should return array of unique results for standard search', async () => {
     sequelize.models.search_index.findAll.mockResolvedValue(mockUniqueResults)
 
     const results = await search('dog', 'john peter mark')
-    expect(results.length).toBe(3)
-    expect(results[0].firstName).toBe('John')
-    expect(results[0].dogId).toBe(1)
-    expect(results[0].personId).toBe(11)
-    expect(results[2].firstName).toBe('Mark')
-    expect(results[2].dogId).toBe(3)
-    expect(results[2].personId).toBe(33)
+    expect(results.results.length).toBe(3)
+    expect(results.totalFound).toBe(3)
+    expect(results.results[0].firstName).toBe('John')
+    expect(results.results[0].dogId).toBe(1)
+    expect(results.results[0].personId).toBe(11)
+    expect(results.results[2].firstName).toBe('Mark')
+    expect(results.results[2].dogId).toBe(3)
+    expect(results.results[2].personId).toBe(33)
   })
 
   test('search for owners with many dogs should return many dogs under owner', async () => {
     sequelize.models.search_index.findAll.mockResolvedValue(mockResultsForGrouping)
 
     const results = await search('owner', 'john peter mark')
-    expect(results.length).toBe(2)
-    expect(results[0].firstName).toBe('Peter')
-    expect(results[0].dogs.length).toBe(1)
-    expect(results[0].personId).toBe(22)
-    expect(results[0].dogs[0].dogName).toBe('Butch')
-    expect(results[0].dogs[0].dogId).toBe(2)
+    expect(results.totalFound).toBe(2)
+    expect(results.results.length).toBe(2)
+    expect(results.results[0].firstName).toBe('Peter')
+    expect(results.results[0].dogs.length).toBe(1)
+    expect(results.results[0].personId).toBe(22)
+    expect(results.results[0].dogs[0].dogName).toBe('Butch')
+    expect(results.results[0].dogs[0].dogId).toBe(2)
 
-    expect(results[1].firstName).toBe('John')
-    expect(results[1].dogs.length).toBe(2)
-    expect(results[1].dogs[0].dogId).toBe(1)
-    expect(results[1].personId).toBe(11)
-    expect(results[1].dogs[0].dogName).toBe('Bruno')
-    expect(results[1].dogs[0].dogId).toBe(1)
-    expect(results[1].dogs[1].dogName).toBe('Fido')
-    expect(results[1].dogs[1].dogId).toBe(3)
+    expect(results.results[1].firstName).toBe('John')
+    expect(results.results[1].dogs.length).toBe(2)
+    expect(results.results[1].dogs[0].dogId).toBe(1)
+    expect(results.results[1].personId).toBe(11)
+    expect(results.results[1].dogs[0].dogName).toBe('Bruno')
+    expect(results.results[1].dogs[0].dogId).toBe(1)
+    expect(results.results[1].dogs[1].dogName).toBe('Fido')
+    expect(results.results[1].dogs[1].dogId).toBe(3)
   })
 
   test('search for owner should return empty array when no owners', async () => {
     sequelize.models.search_index.findAll.mockResolvedValue([])
 
     const results = await search('owner', 'term1')
-    expect(results.length).toBe(0)
+    expect(results.results.length).toBe(0)
+    expect(results.totalFound).toBe(0)
   })
 
   test('search for owner should adjust threshold if more than 10 results in first pass', async () => {
@@ -82,7 +86,8 @@ describe('Search repo', () => {
     sequelize.models.search_tgram.findAll.mockResolvedValue([])
 
     const results = await search('owner', 'smith')
-    expect(results.length).toBe(9)
+    expect(results.results.length).toBe(9)
+    expect(results.totalFound).toBe(9)
   })
 
   test('search for microchip only should adjust threshold when fuzzy', async () => {
@@ -91,7 +96,8 @@ describe('Search repo', () => {
     sequelize.models.search_tgram.findAll.mockResolvedValue([])
 
     const results = await search('dog', '123451234512345', true)
-    expect(results.length).toBe(0)
+    expect(results.results.length).toBe(0)
+    expect(results.totalFound).toBe(0)
   })
 
   test('search for microchip and other terms should not adjust threshold when fuzzy', async () => {
@@ -100,7 +106,8 @@ describe('Search repo', () => {
     sequelize.models.search_tgram.findAll.mockResolvedValue([])
 
     const results = await search('dog', '123451234512345 smith', true)
-    expect(results.length).toBe(11)
+    expect(results.results.length).toBe(11)
+    expect(results.totalFound).toBe(11)
   })
 
   test('search for microchip and other terms should not adjust threshold when fuzzy - test 2', async () => {
@@ -109,7 +116,8 @@ describe('Search repo', () => {
     sequelize.models.search_tgram.findAll.mockResolvedValue([])
 
     const results = await search('dog', '123451 smith', true)
-    expect(results.length).toBe(11)
+    expect(results.results.length).toBe(11)
+    expect(results.totalFound).toBe(11)
   })
 
   test('sorting should handle', async () => {
@@ -124,16 +132,14 @@ describe('Search repo', () => {
     expect(testList[2].lastName).toBe('Smith')
   })
 
-  /*
-   * TODO - will reinstate this when we reinstate the max limit
   test('search limits results to max records', async () => {
-    const manyResults = moreThanThirtyResults()
+    const manyResults = moreThanTwentyFiveResults()
     sequelize.models.search_index.findAll.mockResolvedValue(manyResults)
     sequelize.models.search_match_code.findAll.mockResolvedValue([])
     sequelize.models.search_tgram.findAll.mockResolvedValue([])
 
     const results = await search('owner', 'smith')
-    expect(results.length).toBe(25)
+    expect(results.results.length).toBe(25)
+    expect(results.totalFound).toBe(27)
   })
-  */
 })
