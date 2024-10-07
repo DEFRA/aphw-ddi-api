@@ -19,7 +19,7 @@ describe('SearchBasic endpoint', () => {
   })
 
   test('GET /search route returns 200', async () => {
-    search.mockResolvedValue([])
+    search.mockResolvedValue({ results: [], totalFound: 0 })
 
     const options = {
       method: 'GET',
