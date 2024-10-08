@@ -7,3 +7,5 @@ helm/**/*.lock
 .idea
 .run
 .DS_Store
+*.pem
+*.base64

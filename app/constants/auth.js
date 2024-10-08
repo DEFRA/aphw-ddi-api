@@ -4,6 +4,7 @@ const overnightJobUser = {
 }
 
 const issuers = {
+  api: 'aphw-ddi-api',
   enforcement: 'aphw-ddi-enforcement',
   portal: 'aphw-ddi-portal'
 }
