@@ -67,6 +67,7 @@ const alreadyExpiredInsurance = (dog, expiredInsuranceId) => {
 }
 
 const addBreachReasonToExpiredInsurance = async (today, user, t) => {
+  let rowsChangedCount = 0
   try {
     const breachCategory = await dbFindOne(sequelize.models.breach_category, {
       where: {
@@ -86,8 +87,9 @@ const addBreachReasonToExpiredInsurance = async (today, user, t) => {
       const currentBreaches = toUpdate.dog.dog_breaches.map((breach) => breach.breach_category.short_name)
       currentBreaches.push(breachReasons.INSURANCE_EXPIRED)
       await dogService.setBreaches(toUpdate.dog.index_number, currentBreaches, user, t)
+      rowsChangedCount++
     }
-    return `Success Insurance Expiry add breach reason - updated ${addBreachReason.length} rows`
+    return `Success Insurance Expiry add breach reason - updated ${rowsChangedCount} rows`
   } catch (e) {
     console.log('Error auto-updating statuses when Insurance Expiry add breach reason:', e)
     throw new Error(`Error auto-updating statuses when Insurance Expiry add breach reason: ${e}`)
