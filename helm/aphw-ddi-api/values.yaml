@@ -43,6 +43,8 @@ container:
   notificationsTopicAddress: aphw-ddi-notifications
   publicKeyPortal: dummy
   publicKeyEnforcement: dummy
+  privateKeyApi: dummy
+  publicKeyApi: dummy
   authServerUrl: auth-server-url
   certificateRequestQueue: aphw-ddi-certificate-request
   overnightJobCrontab: 5 4 * * *
