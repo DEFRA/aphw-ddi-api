@@ -1,6 +1,6 @@
 {
   "name": "aphw-ddi-api",
-  "version": "0.77.8",
+  "version": "0.77.9",
   "description": "API to manage CRUD / query functions for dangerous dogs register",
   "homepage": "https://github.com/DEFRA/aphw-ddi-api",
   "main": "app/index.js",
