@@ -1,3 +1,4 @@
+const config = require('../config/index')
 const sequelize = require('../config/db')
 const { addMinutes } = require('../lib/date-helpers')
 const { DuplicateResourceError } = require('../errors/duplicate-record')
@@ -5,6 +6,8 @@ const { getPoliceForce } = require('../lookups')
 const { NotFoundError } = require('../errors/not-found')
 const { createUserAccountAudit, deleteUserAccountAudit } = require('../dto/auditing/user')
 const { getPoliceForceByShortName } = require('./police-forces')
+const { emailTypes } = require('../constants/email-types')
+const { sendEmail } = require('../messaging/send-email')
 
 /**
  * @typedef UserAccount
@@ -106,6 +109,14 @@ const createAccount = async (account, user, transaction) => {
     ...accountWithoutPoliceForce,
     police_force_id: policeForceId
   }, transaction)
+
+  const emailData = {
+    toAddress: account.username,
+    type: emailTypes.userInvite,
+    customFields: [{ name: 'ddi_url', value: config.enforcementUrl }]
+  }
+
+  await sendEmail(emailData)
 
   await createUserAccountAudit(createdAccount, user)
 

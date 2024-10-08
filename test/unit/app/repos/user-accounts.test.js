@@ -11,6 +11,9 @@ describe('user-accounts', () => {
   jest.mock('../../../../app/lookups')
   const { getPoliceForce } = require('../../../../app/lookups')
 
+  jest.mock('../../../../app/messaging/send-email')
+  const { sendEmail } = require('../../../../app/messaging/send-email')
+
   jest.mock('../../../../app/config/db', () => ({
     models: {
       user_account: {
@@ -33,6 +36,7 @@ describe('user-accounts', () => {
 
   beforeEach(() => {
     getPoliceForceByShortName.mockResolvedValue(null)
+    sendEmail.mockResolvedValue()
   })
 
   const { getAccounts, createAccount, createAccounts, deleteAccount, isAccountEnabled, getAccount, setActivationCodeAndExpiry, setLoginDate, setActivatedDate, setLicenceAcceptedDate, verifyLicenceAccepted, isEmailVerified, getPoliceForceIdForAccount } = require('../../../../app/repos/user-accounts')
@@ -188,6 +192,11 @@ describe('user-accounts', () => {
       expect(sequelize.transaction).not.toHaveBeenCalled()
       expect(sequelize.models.user_account.create).toHaveBeenCalledWith(expectedUserDto, {})
       expect(getPoliceForceByShortName).toHaveBeenCalledWith('gotham-city', {})
+      expect(sendEmail).toHaveBeenCalledWith({
+        customFields: [{ name: 'ddi_url', value: 'https://enforcement.com' }],
+        toAddress: 'bill@gotham-city.police.uk',
+        type: 'user-invite'
+      })
     })
 
     test('should create an account with linked police force from pnn.police.uk email', async () => {
