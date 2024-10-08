@@ -20,11 +20,16 @@ module.exports = {
             key: atob(config.authTokens.enforcementKey),
             kid: issuers.enforcement,
             algorithms: ['RS256']
+          },
+          {
+            key: atob(config.authTokens.apiKeyPublicKey),
+            kid: issuers.api,
+            algorithms: ['RS256']
           }
         ],
         verify: {
           aud: 'aphw-ddi-api',
-          iss: [issuers.portal, issuers.enforcement],
+          iss: [issuers.portal, issuers.enforcement, issuers.api],
           sub: false
         },
         validate

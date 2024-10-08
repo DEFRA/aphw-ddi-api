@@ -12,7 +12,8 @@ const { getEnvironmentVariableOrString } = require('../../../../app/lib/environm
 
 const overnightJobUser = {
   username: 'overnight-job-system-user',
-  displayname: 'Overnight Job System User'
+  displayname: 'Overnight Job System User',
+  scope: 'Dog.Index.Admin'
 }
 
 describe('AutoUpdateStatus test', () => {

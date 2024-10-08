@@ -21,6 +21,7 @@ const wreck = require('@hapi/wreck')
 
 jest.mock('../../../../app/overnight/purge-soft-deleted-records')
 const { purgeSoftDeletedRecords } = require('../../../../app/overnight/purge-soft-deleted-records')
+const config = require('../../../../app/config')
 
 let server
 
@@ -44,6 +45,13 @@ describe('RunJobs test', () => {
     expect(purgeSoftDeletedRecords).toHaveBeenCalledTimes(1)
     expect(autoUpdateStatuses).toHaveBeenCalledTimes(1)
     expect(res).toBe('ok - insurance 2 rows | ok - deleted 2 rows')
+    expect(server.inject).toHaveBeenCalledWith({
+      method: 'GET',
+      url: `/export-create-file?batchSize=${config.overnightExportBatchSize ?? 2000}`,
+      headers: {
+        Authorization: expect.any(String)
+      }
+    })
   })
 
   test('runOvernightJobs should ignore if already run today', async () => {

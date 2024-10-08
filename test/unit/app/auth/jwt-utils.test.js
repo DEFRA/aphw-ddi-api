@@ -5,7 +5,7 @@ describe('jwt-utils', () => {
   jest.mock('../../../../app/lib/environment-helpers')
   const { getEnvironmentVariable } = require('../../../../app/lib/environment-helpers')
   getEnvironmentVariable.mockImplementation((envVar) => {
-    if (envVar === 'API_PUBLIC_KEY') {
+    if (envVar === 'API_PRIVATE_KEY') {
       return keyStubs.privateKeyHash
     }
 
