@@ -2,7 +2,7 @@ const jwt = require('jsonwebtoken')
 const config = require('../config')
 
 const generateToken = (payload, { audience, issuer }) => {
-  const privateKey = Buffer.from(config.authConfig.privateKey, 'base64').toString()
+  const privateKey = Buffer.from(config.authTokens.apiKeyPrivateKey, 'base64').toString()
 
   const options = {
     expiresIn: '1h',
@@ -18,7 +18,7 @@ const generateToken = (payload, { audience, issuer }) => {
 const createJwtToken = (audience) => (username, displayname, scopes) => {
   const options = {
     audience,
-    issuer: 'aphw-ddi-portal'
+    issuer: 'aphw-ddi-api'
   }
 
   return generateToken({

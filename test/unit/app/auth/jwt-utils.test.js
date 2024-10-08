@@ -1,11 +1,11 @@
 const jwt = require('jsonwebtoken')
-const { keyStubs } = require('../../mocks/auth')
+const { keyStubs } = require('../../../mocks/auth')
 
 describe('jwt-utils', () => {
-  jest.mock('../../../app/lib/environment-helpers')
-  const { getEnvironmentVariable } = require('../../../app/lib/environment-helpers')
+  jest.mock('../../../../app/lib/environment-helpers')
+  const { getEnvironmentVariable } = require('../../../../app/lib/environment-helpers')
   getEnvironmentVariable.mockImplementation((envVar) => {
-    if (envVar === 'JWT_PRIVATE_KEY') {
+    if (envVar === 'API_PUBLIC_KEY') {
       return keyStubs.privateKeyHash
     }
 
@@ -16,15 +16,15 @@ describe('jwt-utils', () => {
     return process.env[envVar]
   })
 
-  const { generateToken, createJwtToken, createBearerHeader } = require('../../../app/auth/jwt-utils')
+  const { generateToken, createJwtToken, createBearerHeader } = require('../../../../app/auth/jwt-utils')
 
   describe('generateToken', () => {
     test('should generate a token', () => {
-      const token = generateToken({ username: 'bob@builder.com' }, { audience: 'https://example.abc', issuer: 'abc' })
+      const token = generateToken({ username: 'overnight-job-system-user' }, { audience: 'https://example.abc', issuer: 'abc' })
       expect(typeof token).toBe('string')
 
       expect(jwt.verify(token, keyStubs.publicKey)).toEqual({
-        username: 'bob@builder.com',
+        username: 'overnight-job-system-user',
         exp: expect.any(Number),
         iat: expect.any(Number),
         iss: 'abc',
@@ -38,14 +38,14 @@ describe('jwt-utils', () => {
       const expected = {
         exp: expect.any(Number),
         iat: expect.any(Number),
-        iss: 'aphw-ddi-portal',
+        iss: 'aphw-ddi-api',
         scope: ['abc'],
-        username: 'bob@builder.com',
-        displayname: 'Bob the Builder',
+        username: 'overnight-job-system-user',
+        displayname: 'Overnight Job System User',
         aud: 'https://example.abc'
       }
 
-      const token = createJwtToken('https://example.abc')('bob@builder.com', 'Bob the Builder', ['abc'])
+      const token = createJwtToken('https://example.abc')('overnight-job-system-user', 'Overnight Job System User', ['abc'])
 
       const decodedToken = jwt.verify(
         token,
@@ -53,7 +53,7 @@ describe('jwt-utils', () => {
         {
           audience: 'https://example.abc',
           algorithms: ['RS256'],
-          issuer: 'aphw-ddi-portal'
+          issuer: 'aphw-ddi-api'
         })
       expect(typeof token).toBe('string')
       expect(decodedToken).toEqual(expected)
@@ -65,17 +65,17 @@ describe('jwt-utils', () => {
       const expected = {
         exp: expect.any(Number),
         iat: expect.any(Number),
-        iss: 'aphw-ddi-portal',
-        scope: ['Dog.Index.Standard'],
-        username: 'bob@builder.com',
-        displayname: 'Bob the Builder',
+        iss: 'aphw-ddi-api',
+        scope: ['Dog.Index.Admin'],
+        username: 'overnight-job-system-user',
+        displayname: 'Overnight Job System User',
         aud: 'https://example.abc'
       }
 
       const user = {
-        username: 'bob@builder.com',
-        displayname: 'Bob the Builder',
-        scopes: ['Dog.Index.Standard']
+        username: 'overnight-job-system-user',
+        displayname: 'Overnight Job System User',
+        scopes: ['Dog.Index.Admin']
       }
       const { Authorization } = createBearerHeader('https://example.abc')(user)
 
@@ -87,7 +87,7 @@ describe('jwt-utils', () => {
         {
           audience: 'https://example.abc',
           algorithms: ['RS256'],
-          issuer: 'aphw-ddi-portal'
+          issuer: 'aphw-ddi-api'
         })
 
       expect(decodedToken).toEqual(expected)
