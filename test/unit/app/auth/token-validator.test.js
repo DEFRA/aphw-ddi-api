@@ -317,5 +317,59 @@ describe('token-validator', () => {
         expect(validation).toEqual({ isValid: false, credentials: { id: null, user: null, displayname: null, scope: [] } })
       })
     })
+
+    describe('aphw-ddi-api', () => {
+      test('should successfully validate with aphw-ddi-api call', async () => {
+        const artifacts = {
+          decoded: {
+            payload: {
+              username: 'overnight-job-system-user',
+              displayname: 'Overnight processing',
+              exp: expect.any(Number),
+              iat: expect.any(Number),
+              scope: ['Dog.Index.Admin'],
+              iss: 'aphw-ddi-api'
+            }
+          }
+        }
+
+        const value = await validate(artifacts)
+
+        expect(value).toEqual({
+          isValid: true,
+          credentials: {
+            id: 'overnight-job-system-user',
+            user: 'overnight-job-system-user',
+            displayname: 'Overnight processing',
+            scope: ['Dog.Index.Admin']
+          }
+        })
+      })
+
+      test('should fail validation if no username exists', async () => {
+        const artifacts = {
+          decoded: {
+            payload: {
+              exp: expect.any(Number),
+              iat: expect.any(Number),
+              scope: ['Dog.Index.Admin'],
+              iss: 'aphw-ddi-api'
+            }
+          }
+        }
+
+        const value = await validate(artifacts)
+
+        expect(value).toEqual({
+          isValid: false,
+          credentials: {
+            id: null,
+            user: null,
+            displayname: null,
+            scope: []
+          }
+        })
+      })
+    })
   })
 })
