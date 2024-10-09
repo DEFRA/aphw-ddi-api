@@ -31,7 +31,7 @@ const createJwtToken = (audience) => (username, displayname, scopes) => {
 const createBearerHeader = (audience) => (user) => {
   const username = user?.username
   const displayname = user?.displayname
-  const scopes = user?.scopes
+  const scopes = user?.scope
   const token = createJwtToken(audience)(username, displayname, scopes)
 
   return {

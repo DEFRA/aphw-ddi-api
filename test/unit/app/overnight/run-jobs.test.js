@@ -47,7 +47,27 @@ describe('RunJobs test', () => {
     expect(res).toBe('ok - insurance 2 rows | ok - deleted 2 rows')
     expect(server.inject).toHaveBeenCalledWith({
       method: 'GET',
-      url: `/export-create-file?batchSize=${config.overnightExportBatchSize ?? 2000}`,
+      url: '/export-create-file?batchSize=2000',
+      headers: {
+        Authorization: expect.any(String)
+      }
+    })
+  })
+
+  test('runOvernightJobs should call jobs overridden param', async () => {
+    updateRunningJobProgress.mockResolvedValue()
+    tryStartJob.mockResolvedValue(123)
+    endJob.mockResolvedValue()
+    config.overnightExportBatchSize = 1234
+    autoUpdateStatuses.mockResolvedValue('ok - insurance 2 rows')
+    purgeSoftDeletedRecords.mockResolvedValue('ok - deleted 2 rows')
+    const res = await runOvernightJobs(server)
+    expect(purgeSoftDeletedRecords).toHaveBeenCalledTimes(1)
+    expect(autoUpdateStatuses).toHaveBeenCalledTimes(1)
+    expect(res).toBe('ok - insurance 2 rows | ok - deleted 2 rows')
+    expect(server.inject).toHaveBeenCalledWith({
+      method: 'GET',
+      url: '/export-create-file?batchSize=1234',
       headers: {
         Authorization: expect.any(String)
       }
