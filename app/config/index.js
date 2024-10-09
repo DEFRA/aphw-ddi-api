@@ -19,7 +19,9 @@ const schema = Joi.object({
   authServerUrl: Joi.string().required(),
   authTokens: Joi.object({
     portalKey: Joi.string().allow('').default(''),
-    enforcementKey: Joi.string().allow('').default('')
+    enforcementKey: Joi.string().allow('').default(''),
+    apiKeyPublicKey: Joi.string().allow('').default(''),
+    apiKeyPrivateKey: Joi.string().allow('').default('')
   }),
   userFeedbackEmailAddress: Joi.string().required(),
   enforcementUrl: Joi.string().required()
@@ -43,7 +45,9 @@ const config = {
   authServerUrl: getEnvironmentVariable('AUTH_SERVER_URL'),
   authTokens: {
     portalKey: getEnvironmentVariable('PORTAL_PUBLIC_KEY'),
-    enforcementKey: getEnvironmentVariable('ENFORCEMENT_PUBLIC_KEY')
+    enforcementKey: getEnvironmentVariable('ENFORCEMENT_PUBLIC_KEY'),
+    apiKeyPublicKey: getEnvironmentVariable('API_PUBLIC_KEY'),
+    apiKeyPrivateKey: getEnvironmentVariable('API_PRIVATE_KEY')
   },
   userFeedbackEmailAddress: getEnvironmentVariable('USER_FEEDBACK_EMAIL_ADDRESS'),
   enforcementUrl: getEnvironmentVariable('ENFORCEMENT_URL')

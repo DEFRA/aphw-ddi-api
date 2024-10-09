@@ -3,11 +3,15 @@ const { autoUpdateStatuses } = require('./auto-update-statuses')
 const { createExportFile } = require('./create-export-file')
 const { tryStartJob, endJob, createNewJob } = require('../repos/regular-jobs')
 const { purgeSoftDeletedRecords } = require('./purge-soft-deleted-records')
+const { createBearerHeader } = require('../auth/jwt-utils')
+const { issuers } = require('../constants/auth')
+const { overnightJobUser: user } = require('../constants/auth')
 
 const triggerExportGeneration = server => {
   server.inject({
     method: 'GET',
-    url: `/export-create-file?batchSize=${config.overnightExportBatchSize ?? 2000}`
+    url: `/export-create-file?batchSize=${config.overnightExportBatchSize ?? 2000}`,
+    headers: createBearerHeader(issuers.api)(user)
   })
 }
 

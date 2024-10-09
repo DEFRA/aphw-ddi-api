@@ -47,6 +47,19 @@ docker-compose up
 
 You will need to add the base64 encoded public keys from portal and enforcement in `PORTAL_PUBLIC_KEY` and`ENFORCEMENT_PUBLIC_KEY` env variables
 
+To make calls from api to itself (e.g. overnight jobs), you will need to add base64 encoded private and public keys in `API_PUBLIC_KEY` and`API_PRIVATE_KEY` env variables
+
+To setup keys:
+
+```
+openssl genrsa -out private_key.pem 2048
+
+openssl rsa -pubout -in private_key.pem -out public_key.pem
+
+openssl base64 -in public_key.pem -out public_key.base64
+openssl base64 -in private_key.pem -out private_key.base64
+```
+
 ## Test structure
 
 The tests have been structured into subfolders of `./test` as per the

@@ -27,6 +27,8 @@ services:
       POLICE_API_BASE_URL: ${POLICE_API_BASE_URL:-test}
       PORTAL_PUBLIC_KEY: ${PORTAL_PUBLIC_KEY}
       ENFORCEMENT_PUBLIC_KEY: ${ENFORCEMENT_PUBLIC_KEY}
+      API_PRIVATE_KEY: ${API_PRIVATE_KEY}
+      API_PUBLIC_KEY: ${API_PUBLIC_KEY}
       AUTH_SERVER_URL: ${AUTH_SERVER_URL:-https://oidc.integration.account.gov.uk}
       POSTGRES_DB: aphw-ddi
       POSTGRES_HOST: ${POSTGRES_HOST:-aphw-ddi-api-postgres}

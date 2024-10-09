@@ -1,5 +1,5 @@
 const { mockValidate } = require('../../../mocks/auth')
-const { portalHeader } = require('../../../mocks/jwt')
+const { portalHeader, apiHeader } = require('../../../mocks/jwt')
 
 describe('Export endpoint', () => {
   const createServer = require('../../../../app/server')
@@ -36,11 +36,26 @@ describe('Export endpoint', () => {
     expect(sendEventToAudit).toHaveBeenCalled()
   })
 
-  test('GET /export-create-file route returns 204 and calls createExportFile', async () => {
+  test('GET /export-create-file route returns 204 and calls createExportFile given call from portal', async () => {
     const options = {
       method: 'GET',
       url: '/export-create-file',
       ...portalHeader
+    }
+
+    runExportNow.mockResolvedValue('Success')
+
+    const response = await server.inject(options)
+
+    expect(response.statusCode).toBe(204)
+    expect(runExportNow).toHaveBeenCalled()
+  })
+
+  test('GET /export-create-file route returns 204 and calls createExportFile given call from api', async () => {
+    const options = {
+      method: 'GET',
+      url: '/export-create-file',
+      ...apiHeader
     }
 
     runExportNow.mockResolvedValue('Success')

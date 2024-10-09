@@ -39,6 +39,10 @@ const validatePortal = (_username, payload) => {
   return returnVal(true, payload)
 }
 
+const validateApi = (_username, payload) => {
+  return returnVal(true, payload)
+}
+
 const validateEnforcement = async (username, payload) => {
   const { token } = payload
 
@@ -96,6 +100,9 @@ const validate = async (artifacts, _request, _h) => {
     }
     case 'aphw-ddi-enforcement': {
       return validateEnforcement(username, payload)
+    }
+    case 'aphw-ddi-api': {
+      return validateApi(username, payload)
     }
   }
 

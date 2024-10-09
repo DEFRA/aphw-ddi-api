@@ -1,6 +1,7 @@
 const user = {
   username: 'overnight-job-system-user',
-  displayname: 'Overnight Job System User'
+  displayname: 'Overnight Job System User',
+  scope: 'Dog.Index.Admin'
 }
 
 describe('purge-soft-deleted-records', () => {
