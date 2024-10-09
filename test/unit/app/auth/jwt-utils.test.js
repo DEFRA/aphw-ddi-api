@@ -75,7 +75,7 @@ describe('jwt-utils', () => {
       const user = {
         username: 'overnight-job-system-user',
         displayname: 'Overnight Job System User',
-        scopes: ['Dog.Index.Admin']
+        scope: ['Dog.Index.Admin']
       }
       const { Authorization } = createBearerHeader('https://example.abc')(user)
 
