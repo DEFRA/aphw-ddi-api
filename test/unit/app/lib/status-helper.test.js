@@ -24,4 +24,8 @@ describe('StatusHelper test', () => {
   test('getInactiveSubStatus should handle Inactive - untraceable', () => {
     expect(getInactiveSubStatus({ status: { status: 'Inactive' }, untraceable_date: '2024-05-15' })).toBe('untraceable')
   })
+
+  test('getInactiveSubStatus should handle Inactive when no sub status', () => {
+    expect(getInactiveSubStatus({ status: { status: 'Inactive' } })).toBe(null)
+  })
 })
