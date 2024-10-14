@@ -52,6 +52,7 @@ const cdoDogResponseSchema = Joi.object({
   name: Joi.string().allow('').allow(null),
   breed: Joi.string().required(),
   status: Joi.string().required(),
+  subStatus: Joi.string().optional().allow('').allow(null),
   dateOfBirth: Joi.date().allow(null),
   dateOfDeath: Joi.date().allow(null),
   tattoo: Joi.string().allow('').allow(null),

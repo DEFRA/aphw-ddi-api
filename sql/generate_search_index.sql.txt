@@ -12,6 +12,7 @@ DECLARE
 	v_email varchar := '';
 	v_microchip_loop_count integer := 1;
 	v_status varchar := '';
+	v_sub_status varchar := '';
 BEGIN
   CALL clear_search_index(p_person_id, p_dog_id);
 
@@ -60,6 +61,19 @@ BEGIN
     INTO STRICT v_status
     FROM status
     WHERE id = v_dog_rec.status_id;
+
+	  v_sub_status := '';
+		IF v_status = 'Inactive' THEN
+		  IF v_dog_rec.death_date IS NOT NULL THEN
+				v_sub_status := ', "dogSubStatus": "dead"';
+			ELSIF v_dog_rec.exported_date IS NOT NULL THEN
+			  v_sub_status := ', "dogSubStatus": "exported"';
+			ELSIF v_dog_rec.stolen_date IS NOT NULL THEN
+			  v_sub_status := ', "dogSubStatus": "stolen"';
+			ELSIF v_dog_rec.untraceable_date IS NOT NULL THEN
+			  v_sub_status := ', "dogSubStatus": "untraceable"';
+			END IF;
+		END IF;
 
 		FOR v_microchips IN
 			SELECT m.microchip_number
@@ -112,7 +126,7 @@ BEGIN
 			'"dogName": "' || REPLACE(v_dog_rec.name, '"', '') || '", ',
 			'"microchipNumber": "' || REPLACE(v_microchip1, '"', '') || '", ',
 			'"microchipNumber2": "' || REPLACE(v_microchip2, '"', '') || '", ',
-      '"dogStatus": "' || v_status || '"');
+      '"dogStatus": "' || v_status || '"' || v_sub_status);
 		END IF;	
 	v_search_json := v_search_json || '}';
 

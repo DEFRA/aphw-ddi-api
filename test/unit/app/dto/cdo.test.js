@@ -243,6 +243,7 @@ describe('CDO DTO', () => {
         microchipNumber: '111112222233333',
         microchipNumber2: '123451234512345',
         status: 'Interim exempt',
+        subStatus: null,
         breed: 'XL Bully',
         dateOfBirth: '2010-02-02',
         dateOfDeath: '2024-03-03',

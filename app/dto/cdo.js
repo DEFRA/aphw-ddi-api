@@ -1,6 +1,7 @@
 const { getMicrochip, calculateNeuteringDeadline } = require('./dto-helper')
 const { mapDogBreachDaoToBreachDto } = require('../repos/mappers/dog')
 const { personAddressMapper, personContactMapper } = require('./mappers/person')
+const { getInactiveSubStatus } = require('../lib/status-helper')
 
 const generateOrderSpecificData = (data) => {
   if (data.registration.exemption_order.exemption_order === '2023') {
@@ -65,6 +66,7 @@ const cdoViewDto = (data) => {
       name: data.name,
       breed: data.dog_breed.breed,
       status: data.status.status,
+      subStatus: getInactiveSubStatus(data),
       dateOfBirth: data.birth_date,
       dateOfDeath: data.death_date,
       tattoo: data.tattoo,

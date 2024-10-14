@@ -23,6 +23,7 @@ const searchResponseSchema = Joi.object({
       dogIndex: Joi.string().optional().allow('').allow(null),
       dogName: Joi.string().optional().allow('').allow(null),
       dogStatus: Joi.string().optional().allow(null),
+      dogSubStatus: Joi.string().optional().allow('').allow(null),
       personReference: Joi.string().optional(),
       firstName: Joi.string().optional().allow('').allow(null),
       lastName: Joi.string().optional().allow('').allow(null),
@@ -39,7 +40,8 @@ const searchResponseSchema = Joi.object({
         dogName: Joi.string().optional().allow('').allow(null),
         microchipNumber: Joi.string().optional().allow('').allow(null),
         microchipNumber2: Joi.string().optional().allow('').allow(null),
-        dogStatus: Joi.string()
+        dogStatus: Joi.string(),
+        dogSubStatus: Joi.string().optional().allow('').allow(null)
       })
     }),
     totalFound: Joi.number().optional()
