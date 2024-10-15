@@ -1,3 +1,7 @@
+/**
+ * @param request
+ * @return {{ displayname: string, username: string }}
+ */
 const getCallingUser = (request) => {
   const {
     user,
