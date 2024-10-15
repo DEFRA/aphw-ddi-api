@@ -4,6 +4,8 @@ const { buildAddressString } = require('../lib/address-helper')
 const { getMicrochip } = require('../dto/dto-helper')
 const { insertTrigramsPerDog, insertTrigramsPerPerson, updateTrigramsPerDogOrPerson } = require('./search-tgrams')
 const { insertPersonMatchCodes, updateMatchCodesPerPerson } = require('./search-match-codes')
+const { statuses } = require('../constants/statuses')
+const { getInactiveSubStatus } = require('../lib/status-helper')
 
 const addToSearchIndex = async (person, dog, transaction) => {
   if (!transaction) {
@@ -70,7 +72,7 @@ ${dog.microchip_number2 ? dog.microchip_number2 : ''}`.trim())
 }
 
 const buildJsonColumn = (person, dog) => {
-  return {
+  const json = {
     firstName: person.first_name,
     lastName: person.last_name,
     email: person.email,
@@ -83,6 +85,12 @@ const buildJsonColumn = (person, dog) => {
     microchipNumber2: dog.microchip_number2,
     personReference: person.person_reference
   }
+
+  if (json.dogStatus === statuses.Inactive) {
+    json.dogSubStatus = dog.subStatus
+  }
+
+  return json
 }
 
 const applyMicrochips = (dog) => {
@@ -180,12 +188,14 @@ const updateSearchIndexDog = async (dogFromDb, transaction) => {
       address: indexRow.json.address,
       organisation_name: indexRow.json.organisationName
     }
+    const status = dogFromDb.status?.status ?? indexRow.json.dogStatus
     const partialDog = {
       index_number: dogFromDb.index_number,
       name: dogFromDb.name,
-      status: dogFromDb.status?.status ?? indexRow.json.dogStatus,
+      status,
       microchip_number: getMicrochip(dogFromDb, 1),
-      microchip_number2: getMicrochip(dogFromDb, 2)
+      microchip_number2: getMicrochip(dogFromDb, 2),
+      subStatus: status === statuses.Inactive ? getInactiveSubStatus(dogFromDb) : null
     }
     indexRow.search = buildIndexColumn(partialPerson, partialDog)
     indexRow.json = buildJsonColumn(partialPerson, partialDog)

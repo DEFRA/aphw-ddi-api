@@ -34,7 +34,8 @@ const groupOwners = results => {
       dogIndex: y.dogIndex,
       dogName: y.dogName,
       microchipNumber: y.microchipNumber,
-      dogStatus: y.dogStatus
+      dogStatus: y.dogStatus,
+      dogSubStatus: y.dogSubStatus
     }))
   }))
 }

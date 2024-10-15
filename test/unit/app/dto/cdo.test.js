@@ -1,4 +1,4 @@
-const { cdoCreateDto, cdoViewDto } = require('../../../../app/dto/cdo')
+const { cdoCreateDto, cdoViewDto, generateOrderSpecificData } = require('../../../../app/dto/cdo')
 const { buildDogBreachDao } = require('../../../mocks/cdo/get')
 
 describe('CDO DTO', () => {
@@ -243,6 +243,7 @@ describe('CDO DTO', () => {
         microchipNumber: '111112222233333',
         microchipNumber2: '123451234512345',
         status: 'Interim exempt',
+        subStatus: null,
         breed: 'XL Bully',
         dateOfBirth: '2010-02-02',
         dateOfDeath: '2024-03-03',
@@ -257,5 +258,39 @@ describe('CDO DTO', () => {
     }
 
     expect(cdoDto).toEqual(expectedCdoDto)
+  })
+})
+
+describe('generateOrderSpecificData', () => {
+  test('ignores if not 2023', () => {
+    const data = { registration: { exemption_order: {} } }
+    expect(generateOrderSpecificData(data)).toBe(undefined)
+  })
+
+  test('handles if 2023 and undefined', () => {
+    const data = { registration: { exemption_order: { exemption_order: '2023' } } }
+    const res = generateOrderSpecificData(data)
+    expect(res.microchipDeadline).toBe(undefined)
+    expect(res.neuteringDeadline.toISOString()).toBe('2024-06-30T00:00:00.000Z')
+    expect(res.typedByDlo).toBe(undefined)
+    expect(res.withdrawn).toBe(undefined)
+  })
+
+  test('handles if 2023 and dates supplied', () => {
+    const data = {
+      registration: {
+        exemption_order: {
+          exemption_order: '2023'
+        }
+      },
+      microchip_deadline: new Date(2024, 11, 25),
+      typedByDlo: new Date(2024, 9, 17),
+      withdrawn: new Date(2024, 10, 3)
+    }
+    const res = generateOrderSpecificData(data)
+    expect(res.microchipDeadline).toBe(undefined)
+    expect(res.neuteringDeadline.toISOString()).toBe('2024-06-30T00:00:00.000Z')
+    expect(res.typedByDlo).toBe(undefined)
+    expect(res.withdrawn).toBe(undefined)
   })
 })

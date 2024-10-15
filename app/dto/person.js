@@ -1,3 +1,4 @@
+const { getInactiveSubStatus } = require('../lib/status-helper')
 const { getMicrochip } = require('./dto-helper')
 
 /**
@@ -151,6 +152,7 @@ const personAndDogsDto = (personAndDogs) => ({
       breed: x.dog.dog_breed.breed,
       name: x.dog.name,
       status: x.dog.status.status,
+      subStatus: getInactiveSubStatus(x.dog),
       birthDate: x.dog.birth_date,
       tattoo: x.dog.tattoo,
       colour: x.dog.colour,
