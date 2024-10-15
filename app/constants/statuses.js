@@ -8,6 +8,12 @@ const constants = {
     Withdrawn: 'Withdrawn',
     Inactive: 'Inactive'
   },
+  inactiveSubStatuses: {
+    Dead: 'dead',
+    Exported: 'exported',
+    Stolen: 'stolen',
+    Untraceable: 'untraceable'
+  },
   breachReasons: {
     NOT_COVERED_BY_INSURANCE: 'NOT_COVERED_BY_INSURANCE',
     NOT_ON_LEAD_OR_MUZZLED: 'NOT_ON_LEAD_OR_MUZZLED',
