@@ -28,8 +28,13 @@ const getCallingUsername = (request) => {
   return user.username
 }
 
+const getUserOrigin = (request) => {
+  return request.auth?.artifacts?.decoded?.payload?.iss ?? null
+}
+
 module.exports = {
   getCallingUser,
   isUserValid,
-  getCallingUsername
+  getCallingUsername,
+  getUserOrigin
 }

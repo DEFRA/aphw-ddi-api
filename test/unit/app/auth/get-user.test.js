@@ -1,4 +1,4 @@
-const { getCallingUser, getCallingUsername } = require('../../../../app/auth/get-user')
+const { getCallingUser, getCallingUsername, getUserOrigin } = require('../../../../app/auth/get-user')
 describe('get-user', () => {
   describe('getCallingUser', () => {
     const request = {
@@ -69,6 +69,39 @@ describe('get-user', () => {
         }
       }
       expect(getCallingUsername(request)).toBe(null)
+    })
+  })
+
+  describe('getUserOrigin', () => {
+    const request = {
+      auth: {
+        artifacts: {
+          decoded: {
+            header: { alg: 'RS256', typ: 'JWT', kid: 'aphw-ddi-enforcement' },
+            payload: {
+              iss: 'aphw-ddi-enforcement'
+            },
+            signature: 'abcdef'
+          }
+        },
+        credentials: {
+          user: 'dev-user@test.com',
+          displayname: 'Dev User'
+        }
+      },
+      headers: {
+        'ddi-username': 'dev-user@test.com',
+        'ddi-displayname': 'Dev User'
+      }
+    }
+    test('should get issuer', () => {
+      const issuer = getUserOrigin(request)
+      expect(issuer).toBe('aphw-ddi-enforcement')
+    })
+
+    test('should return null if does not exist', () => {
+      const issuer = getUserOrigin({ auth: { artifacts: {} } })
+      expect(issuer).toBe(null)
     })
   })
 })
