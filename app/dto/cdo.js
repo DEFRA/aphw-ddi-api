@@ -104,5 +104,6 @@ const cdoViewDto = (data) => {
 module.exports = {
   cdoCreateDto,
   cdoViewDto,
-  personContactMapper
+  personContactMapper,
+  generateOrderSpecificData
 }
