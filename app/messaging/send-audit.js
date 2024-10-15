@@ -1,6 +1,6 @@
 const { v4: uuidv4 } = require('uuid')
 const { CREATE, UPDATE, DELETE, IMPORT_MANUAL, ACTIVITY: ACTIVITY_EVENT, CHANGE_OWNER, PURGE } = require('../constants/event/events')
-const { SOURCE, SOURCE_API } = require('../constants/event/source')
+const { SOURCE, SOURCE_API, SOURCE_ENFORCEMENT } = require('../constants/event/source')
 const { getDiff } = require('json-difference')
 const { sendEvent } = require('./send-event')
 const { deepClone } = require('../lib/deep-clone')
@@ -302,6 +302,27 @@ const sendChangeOwnerToAudit = async (entity, user) => {
   await sendEvent(newOwnerEvent)
 }
 
+const sendViewToAudit = async (pk, type, subject, details, user) => {
+  if (!isUserValid(user)) {
+    throw new Error(`Username and displayname are required for auditing of ${type}`)
+  }
+
+  const event = {
+    type,
+    source: SOURCE_ENFORCEMENT,
+    id: uuidv4(),
+    partitionKey: pk,
+    subject,
+    data: {
+      message: JSON.stringify({
+        actioningUser: user,
+        details
+      })
+    }
+  }
+  await sendEvent(event)
+}
+
 module.exports = {
   sendCreateToAudit,
   sendUpdateToAudit,
@@ -315,5 +336,6 @@ module.exports = {
   determineCreatePk,
   determineUpdatePk,
   sendImportToAudit,
-  sendChangeOwnerToAudit
+  sendChangeOwnerToAudit,
+  sendViewToAudit
 }

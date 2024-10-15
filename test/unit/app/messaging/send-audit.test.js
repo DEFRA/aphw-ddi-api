@@ -2,7 +2,7 @@ const {
   isDataUnchanged, sendEventToAudit, sendCreateToAudit, sendActivityToAudit, sendUpdateToAudit,
   determineCreatePk, determineUpdatePk, sendDeleteToAudit, sendImportToAudit, sendChangeOwnerToAudit, sendPermanentDeleteToAudit,
   stripPermanentDeleteEntity,
-  determinePermanentDeletePk
+  determinePermanentDeletePk, sendViewToAudit
 } = require('../../../../app/messaging/send-audit')
 
 jest.mock('../../../../app/messaging/send-event')
@@ -399,6 +399,36 @@ describe('SendAudit test', () => {
     test('should throw for invalid object', () => {
       const entity = { id: 1, index_number: 'ED123', name: 'my dog' }
       expect(() => determineUpdatePk('invalid', entity)).toThrow('Invalid object for update audit: invalid')
+    })
+  })
+
+  describe('sendViewToAudit', () => {
+    const details = { searchTerms: '12 Badbury Drive' }
+    const _ownerDetails = { dogIndexNumbers: [] }
+    const _dogDetails = {}
+    const guid = 'd7a35bf3-8f11-4110-b447-27b7e5ceef19'
+
+    test('should send event to audit', async () => {
+      const roboCop = { username: 'robocop@detroit.police.gov', displayname: 'Robocop' }
+      await sendViewToAudit(guid, 'SEARCH', 'Enforcement Searched Something', details, roboCop)
+
+      expect(sendEvent).toBeCalledWith({
+        type: 'SEARCH',
+        source: 'aphw-ddi-enforcement',
+        id: expect.any(String),
+        partitionKey: guid, // dogPk ownerRef or guid
+        subject: 'Enforcement Searched Something',
+        data: {
+          message: JSON.stringify({
+            actioningUser: roboCop,
+            details
+          })
+        }
+      })
+    })
+
+    test('should fail given no user', async () => {
+      await expect(sendViewToAudit(guid, 'VIEW_OWNER', 'Enforcement viewed owner', details, {})).rejects.toThrow('Username and displayname are required for auditing of VIEW_OWNER')
     })
   })
 })
