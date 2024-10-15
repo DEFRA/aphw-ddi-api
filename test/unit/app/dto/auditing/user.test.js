@@ -9,6 +9,10 @@ const dummyAdminUser = {
 describe('UserAudit test', () => {
   const request = {
     auth: {
+      credentials: {
+        user: 'dev-user@test.com',
+        displayname: 'Dev User'
+      },
       artifacts: {
         decoded: {
           header: { alg: 'RS256', typ: 'JWT', kid: 'aphw-ddi-enforcement' },
@@ -59,9 +63,14 @@ describe('UserAudit test', () => {
   })
 
   describe('userInfoAudit', () => {
-    test('should be a function', async () => {
+    test('should work if token exists', async () => {
       const res = await userInfoAudit(request)
       expect(res).toEqual(devUser)
+    })
+
+    test('should work if no token exists', async () => {
+      const res = await userInfoAudit({})
+      expect(res).toEqual({ username: null, displayname: null })
     })
 
     test('should work if no token exists', async () => {
