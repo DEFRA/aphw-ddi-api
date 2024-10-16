@@ -31,6 +31,10 @@ describe('view audit', () => {
     dog: dogEntity
   })]
 
+  const singleOwnerEntity = buildRegisteredPersonDao({
+    person_reference: 'P-8AD0-561A'
+  })
+
   afterEach(() => {
     jest.clearAllMocks()
   })
@@ -47,7 +51,7 @@ describe('view audit', () => {
     })
 
     test('should get Owner pk given VIEW_OWNER_ACTIVITY call', () => {
-      const pk = determineViewAuditPk(VIEW_OWNER_ACTIVITY, ownerEntity[0])
+      const pk = determineViewAuditPk(VIEW_OWNER_ACTIVITY, singleOwnerEntity)
       expect(pk).toBe('P-8AD0-561A')
     })
 
@@ -113,10 +117,8 @@ describe('view audit', () => {
     })
 
     test('should construct VIEW_OWNER_ACTIVITY details', () => {
-      const person = buildRegisteredPersonDao({
-        person: buildPersonDao({
-          person_reference: 'P-1233-555'
-        })
+      const person = buildPersonDao({
+        person_reference: 'P-1233-555'
       })
       const cdoDetails = constructViewDetails(VIEW_OWNER_ACTIVITY, person)
       expect(cdoDetails).toEqual({
@@ -151,7 +153,10 @@ describe('view audit', () => {
 
   describe('auditOwnerActivityView', () => {
     test('should send a VIEW_OWNER_ACTIVITY audit event', async () => {
-      await auditOwnerActivityView(ownerEntity[0], roboCop)
+      const person = buildPersonDao({
+        person_reference: 'P-8AD0-561A'
+      })
+      await auditOwnerActivityView(person, roboCop)
       expect(sendViewToAudit).toHaveBeenCalledWith(
         'P-8AD0-561A',
         VIEW_OWNER_ACTIVITY,
