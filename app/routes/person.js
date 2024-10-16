@@ -4,6 +4,7 @@ const { getCallingUser } = require('../auth/get-user')
 const { getPersonByReference, getPersonAndDogsByReference, updatePerson, deletePerson } = require('../repos/people')
 const { personDto, personAndDogsDto } = require('../dto/person')
 const { schema: updateSchema } = require('../schema/person/update')
+const { auditOwnerDetailsView, auditOwnerActivityView } = require('../dto/auditing/view')
 
 module.exports = [{
   method: 'GET',
@@ -25,6 +26,12 @@ module.exports = [{
 
       if (person === null) {
         return h.response().code(204)
+      }
+
+      if (includeDogs) {
+        await auditOwnerDetailsView(person, getCallingUser(request))
+      } else {
+        await auditOwnerActivityView(person, getCallingUser(request))
       }
 
       const result = includeDogs ? personAndDogsDto(person) : personDto(person)

@@ -80,6 +80,7 @@ const domain = require('../constants/domain')
  * @property {string} created_at
  * @property {null|string} deleted_at
  * @property {string} updated_at
+ * @property {DogDao} [dog]
  */
 
 /**

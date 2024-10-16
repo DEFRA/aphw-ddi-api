@@ -1,3 +1,15 @@
+/**
+ * @param request
+ * @return {string|null}
+ */
+const getUserOrigin = (request) => {
+  return request?.auth?.artifacts?.decoded?.payload?.iss ?? null
+}
+
+/**
+ * @param request
+ * @return {{ displayname: string, username: string }}
+ */
 const getCallingUser = (request) => {
   const {
     user,
@@ -6,7 +18,8 @@ const getCallingUser = (request) => {
 
   return {
     username: user ?? '',
-    displayname: displayname ?? ''
+    displayname: displayname ?? '',
+    origin: getUserOrigin(request)
   }
 }
 
@@ -27,5 +40,6 @@ const getCallingUsername = (request) => {
 module.exports = {
   getCallingUser,
   isUserValid,
-  getCallingUsername
+  getCallingUsername,
+  getUserOrigin
 }
