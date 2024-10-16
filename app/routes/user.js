@@ -1,6 +1,5 @@
 const config = require('../config/index')
 const { hashCache } = require('../session/hashCache')
-const { userValidateAudit, userLogoutAudit } = require('../dto/auditing/user')
 const { getRegistrationService } = require('../service/config')
 const {
   createUserResponseSchema, createUserRequestSchema, userFeedbackSchema, userBooleanResponseSchema, userStringResponseSchema, bulkResponseSchema, bulkRequestSchema,
@@ -143,8 +142,6 @@ module.exports = [
       }
     },
     handler: async (request, h) => {
-      await userValidateAudit(request)
-
       return h.response(undefined).code(204)
     }
   },
@@ -257,8 +254,6 @@ module.exports = [
       hashCache.delete(username)
 
       console.info('Hash Key deleted for user')
-
-      await userLogoutAudit(request)
 
       return h.response(undefined).code(204)
     }

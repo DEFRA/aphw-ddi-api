@@ -29,6 +29,9 @@ describe('CDO endpoint', () => {
   jest.mock('../../../../app/service/config')
   const { getCdoService } = require('../../../../app/service/config')
 
+  jest.mock('../../../../app/dto/auditing/view')
+  const { auditDogDetailsView, auditDogActivityView } = require('../../../../app/dto/auditing/view')
+
   beforeEach(async () => {
     jest.clearAllMocks()
     server = await createServer()
@@ -38,10 +41,11 @@ describe('CDO endpoint', () => {
 
   describe('GET /cdo/ED123', () => {
     test('GET /cdo/ED123 route returns 200', async () => {
-      getCdo.mockResolvedValue(buildCdoDao({
+      const cdoDao = buildCdoDao({
         id: 123,
         index_number: 'ED123'
-      }))
+      })
+      getCdo.mockResolvedValue(cdoDao)
 
       const options = {
         method: 'GET',
@@ -51,6 +55,33 @@ describe('CDO endpoint', () => {
 
       const response = await server.inject(options)
       expect(response.statusCode).toBe(200)
+
+      expect(auditDogDetailsView).toHaveBeenCalledWith(cdoDao, expect.objectContaining({
+        username: 'dev-user@test.com',
+        displayname: 'Dev User'
+      }))
+    })
+
+    test('GET /cdo/ED123?type=activity route returns 200', async () => {
+      const cdoDao = buildCdoDao({
+        id: 123,
+        index_number: 'ED123'
+      })
+      getCdo.mockResolvedValue(cdoDao)
+
+      const options = {
+        method: 'GET',
+        url: '/cdo/ED123?type=activity',
+        ...portalHeader
+      }
+
+      const response = await server.inject(options)
+      expect(response.statusCode).toBe(200)
+
+      expect(auditDogActivityView).toHaveBeenCalledWith(cdoDao, expect.objectContaining({
+        username: 'dev-user@test.com',
+        displayname: 'Dev User'
+      }))
     })
 
     test('GET /cdo/ED123 route returns 404 when not found', async () => {

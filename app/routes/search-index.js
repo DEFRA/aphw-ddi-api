@@ -1,6 +1,7 @@
 const { search } = require('../search/search')
 const { searchQueryParamsSchema, searchResponseSchema } = require('../schema/search')
-const { userInfoAudit } = require('../dto/auditing/user')
+const { auditSearch } = require('../dto/auditing/view')
+const { getCallingUser } = require('../auth/get-user')
 
 module.exports = [{
   method: 'GET',
@@ -18,7 +19,7 @@ module.exports = [{
       }
     },
     handler: async (request, h) => {
-      await userInfoAudit(request)
+      await auditSearch(request.params.terms, getCallingUser(request))
 
       const results = await search(request.params.type, request.params.terms, !!request.query.fuzzy)
 
