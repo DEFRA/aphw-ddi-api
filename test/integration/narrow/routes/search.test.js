@@ -5,6 +5,9 @@ describe('SearchBasic endpoint', () => {
   const createServer = require('../../../../app/server')
   let server
 
+  jest.mock('../../../../app/dto/auditing/view')
+  const { auditSearch } = require('../../../../app/dto/auditing/view')
+
   jest.mock('../../../../app/search/search')
   const { search } = require('../../../../app/search/search')
 
@@ -16,6 +19,24 @@ describe('SearchBasic endpoint', () => {
     jest.clearAllMocks()
     server = await createServer()
     await server.initialize()
+  })
+
+  test('GET /search route returns 200', async () => {
+    search.mockResolvedValue({ results: [], totalFound: 0 })
+
+    const options = {
+      method: 'GET',
+      url: '/search/dog/term',
+      ...portalHeader
+    }
+
+    const response = await server.inject(options)
+    expect(response.statusCode).toBe(200)
+    expect(auditSearch).toHaveBeenCalledWith('term', {
+      username: 'dev-user@test.com',
+      displayname: 'dev-user@test.com',
+      origin: 'aphw-ddi-portal'
+    })
   })
 
   test('GET /search route returns 200', async () => {
