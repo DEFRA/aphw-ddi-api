@@ -46,6 +46,11 @@ describe('view audit', () => {
       expect(pk).toBe('P-8AD0-561A')
     })
 
+    test('should get Owner pk given VIEW_OWNER_ACTIVITY call', () => {
+      const pk = determineViewAuditPk(VIEW_OWNER_ACTIVITY, ownerEntity[0])
+      expect(pk).toBe('P-8AD0-561A')
+    })
+
     test('should get search term', () => {
       const entity = 'search term'
       const pk = determineViewAuditPk(SEARCH, entity)
@@ -106,6 +111,18 @@ describe('view audit', () => {
         dogIndexNumbers: ['ED300001', 'ED300002']
       })
     })
+
+    test('should construct VIEW_OWNER_ACTIVITY details', () => {
+      const person = buildRegisteredPersonDao({
+        person: buildPersonDao({
+          person_reference: 'P-1233-555'
+        })
+      })
+      const cdoDetails = constructViewDetails(VIEW_OWNER_ACTIVITY, person)
+      expect(cdoDetails).toEqual({
+        pk: 'P-1233-555'
+      })
+    })
   })
 
   describe('auditOwnerDetailsView', () => {
@@ -134,20 +151,19 @@ describe('view audit', () => {
 
   describe('auditOwnerActivityView', () => {
     test('should send a VIEW_OWNER_ACTIVITY audit event', async () => {
-      await auditOwnerActivityView(ownerEntity, roboCop)
+      await auditOwnerActivityView(ownerEntity[0], roboCop)
       expect(sendViewToAudit).toHaveBeenCalledWith(
         'P-8AD0-561A',
         VIEW_OWNER_ACTIVITY,
         'enforcement user viewed owner activity',
         {
-          pk: 'P-8AD0-561A',
-          dogIndexNumbers: ['ED300097']
+          pk: 'P-8AD0-561A'
         },
         roboCop)
     })
 
     test('should not audit a request from portal', async () => {
-      await auditOwnerActivityView(ownerEntity, {
+      await auditOwnerActivityView(ownerEntity[0], {
         username: 'dev-user@example.com',
         displayname: 'Dev User',
         origin: 'aphw-ddi-portal'

@@ -6,8 +6,10 @@ const determineViewAuditPk = (type, entity) => {
   try {
     if (type === VIEW_DOG || type === VIEW_DOG_ACTIVITY) {
       return entity.index_number
-    } else if (type === VIEW_OWNER || type === VIEW_OWNER_ACTIVITY) {
+    } else if (type === VIEW_OWNER) {
       return entity[0].person.person_reference
+    } else if (type === VIEW_OWNER_ACTIVITY) {
+      return entity.person.person_reference
     } else if (type === SEARCH) {
       return uuidv4()
     }
@@ -30,7 +32,7 @@ const constructViewDetails = (type, entity) => {
 
   if (type === SEARCH) {
     details.searchTerms = entity
-  } else if ((type === VIEW_OWNER || type === VIEW_OWNER_ACTIVITY) && Array.isArray(entity)) {
+  } else if (type === VIEW_OWNER && Array.isArray(entity)) {
     details.dogIndexNumbers = entity.map(registeredPerson => registeredPerson.dog.index_number)
   }
 

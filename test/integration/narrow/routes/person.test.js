@@ -13,7 +13,7 @@ describe('CDO endpoint', () => {
   validate.mockResolvedValue(mockValidate)
 
   jest.mock('../../../../app/dto/auditing/view')
-  const { auditOwnerView } = require('../../../../app/dto/auditing/view')
+  const { auditOwnerActivityView, auditOwnerDetailsView } = require('../../../../app/dto/auditing/view')
 
   beforeEach(async () => {
     jest.clearAllMocks()
@@ -28,7 +28,7 @@ describe('CDO endpoint', () => {
       ...portalHeader
     }
 
-    getPersonByReference.mockResolvedValue({
+    const person = {
       first_name: 'John',
       last_name: 'Doe',
       birth_date: '1990-01-01',
@@ -55,7 +55,8 @@ describe('CDO endpoint', () => {
           }
         }
       ]
-    })
+    }
+    getPersonByReference.mockResolvedValue(person)
 
     const response = await server.inject(options)
 
@@ -80,7 +81,10 @@ describe('CDO endpoint', () => {
         secondaryTelephones: []
       }
     })
-    expect(auditOwnerView).not.toHaveBeenCalled()
+    expect(auditOwnerActivityView).toHaveBeenCalledWith(person, expect.objectContaining({
+      displayname: 'dev-user@test.com',
+      username: 'dev-user@test.com'
+    }))
   })
 
   test('GET /person route returns 204 with no payload', async () => {
@@ -195,7 +199,7 @@ describe('CDO endpoint', () => {
         { id: 2, microchipNumber: null, microchipNumber2: null, breed: 'breed2', name: 'dog2', status: 'NEW', subStatus: null }
       ]
     })
-    expect(auditOwnerView).toHaveBeenCalledWith(registeredPersonList, expect.objectContaining({
+    expect(auditOwnerDetailsView).toHaveBeenCalledWith(registeredPersonList, expect.objectContaining({
       username: 'dev-user@test.com',
       displayname: 'dev-user@test.com',
       origin: 'aphw-ddi-portal'
