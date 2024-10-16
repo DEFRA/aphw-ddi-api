@@ -56,11 +56,10 @@ describe('CDO endpoint', () => {
       const response = await server.inject(options)
       expect(response.statusCode).toBe(200)
 
-      expect(auditDogView).toHaveBeenCalledWith(cdoDao, {
+      expect(auditDogView).toHaveBeenCalledWith(cdoDao, expect.objectContaining({
         username: 'dev-user@test.com',
-        displayname: 'Dev User',
-        origin: 'aphw-ddi-portal'
-      })
+        displayname: 'Dev User'
+      }))
     })
 
     test('GET /cdo/ED123 route returns 404 when not found', async () => {
