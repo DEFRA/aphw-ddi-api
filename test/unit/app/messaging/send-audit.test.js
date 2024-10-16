@@ -10,6 +10,7 @@ const { sendEvent } = require('../../../../app/messaging/send-event')
 const { robotImportUser } = require('../../../../app/constants/import')
 const { CDO, COURT, DOG, EXEMPTION, PERSON, POLICE, INSURANCE, USER_ACCOUNT } = require('../../../../app/constants/event/audit-event-object-types')
 const { buildUserAccount } = require('../../../mocks/user-accounts')
+const { VIEW_OWNER, VIEW_DOG, SEARCH } = require('../../../../app/constants/event/events')
 
 const devUser = {
   username: 'dev-user@test.com',
@@ -403,32 +404,67 @@ describe('SendAudit test', () => {
   })
 
   describe('sendViewToAudit', () => {
-    const details = { searchTerms: '12 Badbury Drive' }
-    const _ownerDetails = { dogIndexNumbers: [] }
-    const _dogDetails = {}
+    const searchDetails = { searchTerms: '12 Badbury Drive' }
     const guid = 'd7a35bf3-8f11-4110-b447-27b7e5ceef19'
+    const roboCop = { username: 'robocop@detroit.police.gov', displayname: 'Robocop', origin: 'aphw-ddi-enforcement' }
 
-    test('should send event to audit', async () => {
-      const roboCop = { username: 'robocop@detroit.police.gov', displayname: 'Robocop' }
-      await sendViewToAudit(guid, 'SEARCH', 'Enforcement Searched Something', details, roboCop)
+    test('should send search event to audit', async () => {
+      await sendViewToAudit(guid, SEARCH, 'enforcement user searched something', searchDetails, roboCop)
 
       expect(sendEvent).toBeCalledWith({
-        type: 'SEARCH',
+        type: SEARCH,
         source: 'aphw-ddi-enforcement',
         id: expect.any(String),
-        partitionKey: guid, // dogPk ownerRef or guid
-        subject: 'Enforcement Searched Something',
+        partitionKey: guid,
+        subject: 'enforcement user searched something',
         data: {
           message: JSON.stringify({
-            actioningUser: roboCop,
-            details
+            actioningUser: { username: 'robocop@detroit.police.gov', displayname: 'Robocop' },
+            details: searchDetails
+          })
+        }
+      })
+    })
+
+    test('should send owner record view to audit', async () => {
+      const ownerDetails = { pk: 'P-8AD0-561A', dogIndexNumbers: ['ED300097'] }
+      await sendViewToAudit('P-8AD0-561A', VIEW_OWNER, 'enforcement user viewed an owner', ownerDetails, roboCop)
+      expect(sendEvent).toBeCalledWith({
+        type: VIEW_OWNER,
+        source: 'aphw-ddi-enforcement',
+        id: expect.any(String),
+        partitionKey: 'P-8AD0-561A',
+        subject: 'enforcement user viewed an owner',
+        data: {
+          message: JSON.stringify({
+            actioningUser: { username: 'robocop@detroit.police.gov', displayname: 'Robocop' },
+            details: ownerDetails
+          })
+        }
+      })
+    })
+
+    test('should send dog record view to audit', async () => {
+      const pk = 'ED300097'
+      const dogDetails = { pk }
+      await sendViewToAudit('ED300097', VIEW_DOG, 'enforcement user viewed a dog', dogDetails, roboCop)
+      expect(sendEvent).toBeCalledWith({
+        type: VIEW_DOG,
+        source: 'aphw-ddi-enforcement',
+        id: expect.any(String),
+        partitionKey: pk,
+        subject: 'enforcement user viewed a dog',
+        data: {
+          message: JSON.stringify({
+            actioningUser: { username: 'robocop@detroit.police.gov', displayname: 'Robocop' },
+            details: dogDetails
           })
         }
       })
     })
 
     test('should fail given no user', async () => {
-      await expect(sendViewToAudit(guid, 'VIEW_OWNER', 'Enforcement viewed owner', details, {})).rejects.toThrow('Username and displayname are required for auditing of VIEW_OWNER')
+      await expect(sendViewToAudit(guid, 'VIEW_OWNER', 'Enforcement viewed owner', searchDetails, {})).rejects.toThrow('Username and displayname are required for auditing of VIEW_OWNER')
     })
   })
 })

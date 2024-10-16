@@ -302,8 +302,10 @@ const sendChangeOwnerToAudit = async (entity, user) => {
   await sendEvent(newOwnerEvent)
 }
 
-const sendViewToAudit = async (pk, type, subject, details, user) => {
-  if (!isUserValid(user)) {
+const sendViewToAudit = async (pk, type, subject, details, { username, displayname }) => {
+  const actioningUser = { username, displayname }
+
+  if (!isUserValid(actioningUser)) {
     throw new Error(`Username and displayname are required for auditing of ${type}`)
   }
 
@@ -315,11 +317,12 @@ const sendViewToAudit = async (pk, type, subject, details, user) => {
     subject,
     data: {
       message: JSON.stringify({
-        actioningUser: user,
+        actioningUser,
         details
       })
     }
   }
+
   await sendEvent(event)
 }
 
