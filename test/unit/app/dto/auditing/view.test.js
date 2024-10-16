@@ -1,12 +1,21 @@
 const { buildCdoDao, buildRegisteredPersonDao, buildPersonDao, buildDogDao } = require('../../../../mocks/cdo/get')
-const { VIEW_DOG, VIEW_OWNER, SEARCH } = require('../../../../../app/constants/event/events')
+const { VIEW_DOG, VIEW_OWNER, SEARCH, VIEW_OWNER_ACTIVITY, VIEW_DOG_ACTIVITY } = require('../../../../../app/constants/event/events')
+
 describe('view audit', () => {
   jest.mock('uuid', () => ({
     v4: jest.fn().mockReturnValue('816bbb6e-5df5-434b-8ec3-b6705ff7a2a7')
   }))
   const roboCop = { username: 'robocop@detroit.police.gov', displayname: 'Robocop', origin: 'aphw-ddi-enforcement' }
 
-  const { determineViewAuditPk, auditOwnerView, auditDogView, auditSearch, constructViewDetails } = require('../../../../../app/dto/auditing/view')
+  const {
+    determineViewAuditPk,
+    auditOwnerDetailsView,
+    auditOwnerActivityView,
+    auditDogDetailsView,
+    auditDogActivityView,
+    auditSearch,
+    constructViewDetails
+  } = require('../../../../../app/dto/auditing/view')
 
   jest.mock('../../../../../app/messaging/send-audit')
   const { sendViewToAudit } = require('../../../../../app/messaging/send-audit')
@@ -99,13 +108,13 @@ describe('view audit', () => {
     })
   })
 
-  describe('auditOwnerView', () => {
+  describe('auditOwnerDetailsView', () => {
     test('should send a VIEW_OWNER audit event', async () => {
-      await auditOwnerView(ownerEntity, roboCop)
+      await auditOwnerDetailsView(ownerEntity, roboCop)
       expect(sendViewToAudit).toHaveBeenCalledWith(
         'P-8AD0-561A',
         VIEW_OWNER,
-        'enforcement user viewed owner',
+        'enforcement user viewed owner details',
         {
           pk: 'P-8AD0-561A',
           dogIndexNumbers: ['ED300097']
@@ -114,7 +123,7 @@ describe('view audit', () => {
     })
 
     test('should not audit a request from portal', async () => {
-      await auditOwnerView(ownerEntity, {
+      await auditOwnerDetailsView(ownerEntity, {
         username: 'dev-user@example.com',
         displayname: 'Dev User',
         origin: 'aphw-ddi-portal'
@@ -123,22 +132,69 @@ describe('view audit', () => {
     })
   })
 
-  describe('auditDogView', () => {
+  describe('auditOwnerActivityView', () => {
+    test('should send a VIEW_OWNER_ACTIVITY audit event', async () => {
+      await auditOwnerActivityView(ownerEntity, roboCop)
+      expect(sendViewToAudit).toHaveBeenCalledWith(
+        'P-8AD0-561A',
+        VIEW_OWNER_ACTIVITY,
+        'enforcement user viewed owner activity',
+        {
+          pk: 'P-8AD0-561A',
+          dogIndexNumbers: ['ED300097']
+        },
+        roboCop)
+    })
+
+    test('should not audit a request from portal', async () => {
+      await auditOwnerActivityView(ownerEntity, {
+        username: 'dev-user@example.com',
+        displayname: 'Dev User',
+        origin: 'aphw-ddi-portal'
+      })
+      expect(sendViewToAudit).not.toHaveBeenCalled()
+    })
+  })
+
+  describe('auditDogDetailsView', () => {
     test('should record a VIEW_DOG event', async () => {
-      await auditDogView(dogEntity, roboCop)
+      await auditDogDetailsView(dogEntity, roboCop)
       expect(sendViewToAudit).toHaveBeenCalledWith(
         'ED300097',
         VIEW_DOG,
-        'enforcement user viewed dog',
+        'enforcement user viewed dog details',
         {
           pk: 'ED300097'
         },
         roboCop)
-      expect(auditDogView).toBeInstanceOf(Function)
     })
 
     test('should not audit a request from portal', async () => {
-      await auditDogView(dogEntity, {
+      await auditDogDetailsView(dogEntity, {
+        username: 'dev-user@example.com',
+        displayname: 'Dev User',
+        origin: 'aphw-ddi-portal'
+      })
+      expect(sendViewToAudit).not.toHaveBeenCalled()
+    })
+  })
+
+  describe('auditDogActivityView', () => {
+    test('should record a VIEW_DOG event', async () => {
+      await auditDogActivityView(dogEntity, roboCop)
+      expect(sendViewToAudit).toHaveBeenCalledWith(
+        'ED300097',
+        VIEW_DOG_ACTIVITY,
+        'enforcement user viewed dog activity',
+        {
+          pk: 'ED300097'
+        },
+        roboCop)
+      expect(auditDogActivityView).toBeInstanceOf(Function)
+    })
+
+    test('should not audit a request from portal', async () => {
+      await auditDogActivityView(dogEntity, {
         username: 'dev-user@example.com',
         displayname: 'Dev User',
         origin: 'aphw-ddi-portal'
