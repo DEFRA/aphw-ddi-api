@@ -6,6 +6,15 @@ describe('get-user', () => {
         credentials: {
           user: 'dev-user@example.com',
           displayname: 'Dev User'
+        },
+        artifacts: {
+          decoded: {
+            header: { alg: 'RS256', typ: 'JWT', kid: 'aphw-ddi-enforcement' },
+            payload: {
+              iss: 'aphw-ddi-enforcement'
+            },
+            signature: 'abcdef'
+          }
         }
       }
     }
@@ -15,7 +24,8 @@ describe('get-user', () => {
 
       expect(result).toEqual({
         username: 'dev-user@example.com',
-        displayname: 'Dev User'
+        displayname: 'Dev User',
+        origin: 'aphw-ddi-enforcement'
       })
     })
 
@@ -26,7 +36,8 @@ describe('get-user', () => {
 
       expect(result).toEqual({
         username: '',
-        displayname: ''
+        displayname: '',
+        origin: null
       })
     })
 
@@ -35,7 +46,8 @@ describe('get-user', () => {
 
       expect(result).toEqual({
         username: '',
-        displayname: ''
+        displayname: '',
+        origin: null
       })
     })
 
@@ -44,7 +56,8 @@ describe('get-user', () => {
 
       expect(result).toEqual({
         username: '',
-        displayname: ''
+        displayname: '',
+        origin: null
       })
     })
   })
