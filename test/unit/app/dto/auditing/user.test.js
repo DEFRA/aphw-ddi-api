@@ -35,7 +35,7 @@ describe('UserAudit test', () => {
   jest.mock('../../../../../app/messaging/send-audit')
   const { sendCreateToAudit, sendDeleteToAudit } = require('../../../../../app/messaging/send-audit')
 
-  const { userValidateAudit, userInfoAudit, userLogoutAudit, createUserAccountAudit, deleteUserAccountAudit } = require('../../../../../app/dto/auditing/user')
+  const { createUserAccountAudit, deleteUserAccountAudit } = require('../../../../../app/dto/auditing/user')
 
   describe('createUserAccountAudit', () => {
     test('should publish audit record on creation of new user', async () => {
@@ -59,44 +59,6 @@ describe('UserAudit test', () => {
       await deleteUserAccountAudit(account, dummyAdminUser)
 
       expect(sendDeleteToAudit).toHaveBeenCalledWith(USER_ACCOUNT, account, dummyAdminUser)
-    })
-  })
-
-  describe('userInfoAudit', () => {
-    test('should work if token exists', async () => {
-      const res = await userInfoAudit(request)
-      expect(res).toEqual(devUser)
-    })
-
-    test('should work if no token exists', async () => {
-      const res = await userInfoAudit({})
-      expect(res).toEqual({ username: null, displayname: null })
-    })
-
-    test('should work if no token exists', async () => {
-      const res = await userInfoAudit({})
-      expect(res).toEqual({ username: null, displayname: null })
-    })
-  })
-
-  describe('userValidate', () => {
-    test('should be a function', async () => {
-      const res = await userValidateAudit(request)
-      expect(res).toEqual(devUser)
-    })
-    test('should work if no token exists', async () => {
-      const res = await userValidateAudit({ })
-      expect(res).toEqual({ username: null, displayname: null })
-    })
-  })
-  describe('userLogoutAudit', () => {
-    test('should be a function', async () => {
-      const res = await userLogoutAudit(request)
-      expect(res).toEqual(devUser)
-    })
-    test('should work if no token exists', async () => {
-      const res = await userLogoutAudit({ })
-      expect(res).toEqual({ username: null, displayname: null })
     })
   })
 })
