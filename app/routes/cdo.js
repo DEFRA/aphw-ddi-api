@@ -16,6 +16,7 @@ const { SequenceViolationError } = require('../errors/domain/sequenceViolation')
 const { InvalidDataError } = require('../errors/domain/invalidData')
 const { InvalidDateError } = require('../errors/domain/invalidDate')
 const { getCdoByIndexNumberSchema } = require('../schema/cdo/response')
+const { auditDogView } = require('../dto/auditing/view')
 
 /**
  * @param e
@@ -73,6 +74,7 @@ module.exports = [
         if (!cdo) {
           return h.response().code(404)
         }
+        await auditDogView(cdo, getCallingUser(request))
 
         const cdoDto = cdoViewDto(cdo)
 
