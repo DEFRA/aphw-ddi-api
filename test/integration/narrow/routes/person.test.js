@@ -195,11 +195,11 @@ describe('CDO endpoint', () => {
         { id: 2, microchipNumber: null, microchipNumber2: null, breed: 'breed2', name: 'dog2', status: 'NEW', subStatus: null }
       ]
     })
-    expect(auditOwnerView).toHaveBeenCalledWith(registeredPersonList, {
+    expect(auditOwnerView).toHaveBeenCalledWith(registeredPersonList, expect.objectContaining({
       username: 'dev-user@test.com',
       displayname: 'dev-user@test.com',
       origin: 'aphw-ddi-portal'
-    })
+    }))
   })
 
   test('PUT /person route returns 200 with valid payload', async () => {

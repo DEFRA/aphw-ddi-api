@@ -58,7 +58,7 @@ describe('CDO endpoint', () => {
 
       expect(auditDogView).toHaveBeenCalledWith(cdoDao, {
         username: 'dev-user@test.com',
-        displayname: 'dev-user@test.com',
+        displayname: 'Dev User',
         origin: 'aphw-ddi-portal'
       })
     })

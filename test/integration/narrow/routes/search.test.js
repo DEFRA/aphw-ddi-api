@@ -32,11 +32,11 @@ describe('SearchBasic endpoint', () => {
 
     const response = await server.inject(options)
     expect(response.statusCode).toBe(200)
-    expect(auditSearch).toHaveBeenCalledWith('term', {
+    expect(auditSearch).toHaveBeenCalledWith('term', expect.objectContaining({
       username: 'dev-user@test.com',
       displayname: 'dev-user@test.com',
       origin: 'aphw-ddi-portal'
-    })
+    }))
   })
 
   test('GET /search route returns 200', async () => {

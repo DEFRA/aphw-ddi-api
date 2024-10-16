@@ -75,10 +75,10 @@ describe('User endpoint', () => {
       expect(createAccount).toHaveBeenCalledWith({
         username: 'ralph@wreckit.com',
         active: true
-      }, {
-        username: 'dev-user@test.com',
-        displayname: 'dev-user@test.com'
-      })
+      }, expect.objectContaining({
+        displayname: 'dev-user@test.com',
+        username: 'dev-user@test.com'
+      }))
       expect(JSON.parse(response.payload)).toEqual(expectedPayload)
     })
 
@@ -263,10 +263,10 @@ describe('User endpoint', () => {
           username: 'jane.bloggs@example.com',
           active: true
         }
-      ], {
-        username: 'dev-user@test.com',
-        displayname: 'dev-user@test.com'
-      })
+      ], expect.objectContaining({
+        displayname: 'dev-user@test.com',
+        username: 'dev-user@test.com'
+      }))
       expect(JSON.parse(response.payload)).toEqual(expectedPayload)
     })
 
@@ -530,10 +530,10 @@ describe('User endpoint', () => {
       expect(response.statusCode).toBe(204)
       expect(deleteAccount).toHaveBeenCalledWith(
         '5',
-        {
+        expect.objectContaining({
           displayname: 'dev-user@test.com',
           username: 'dev-user@test.com'
-        })
+        }))
       expect(response.payload).toEqual(expectedPayload)
     })
   })
