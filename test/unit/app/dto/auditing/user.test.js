@@ -1,4 +1,3 @@
-const { devUser } = require('../../../../mocks/auth')
 const { USER_ACCOUNT } = require('../../../../../app/constants/event/audit-event-object-types')
 
 const dummyAdminUser = {
@@ -7,31 +6,6 @@ const dummyAdminUser = {
 }
 
 describe('UserAudit test', () => {
-  const request = {
-    auth: {
-      credentials: {
-        user: 'dev-user@test.com',
-        displayname: 'Dev User'
-      },
-      artifacts: {
-        decoded: {
-          header: { alg: 'RS256', typ: 'JWT', kid: 'aphw-ddi-enforcement' },
-          payload: {
-            scopes: ['Dog.Index.Enforcement'],
-            username: 'dev-user@test.com',
-            displayname: 'Dev User',
-            token: 'abcdef',
-            iat: 1726587632,
-            exp: 1726591232,
-            aud: 'aphw-ddi-api',
-            iss: 'aphw-ddi-enforcement'
-          },
-          signature: 'abcdef'
-        }
-      }
-    }
-  }
-
   jest.mock('../../../../../app/messaging/send-audit')
   const { sendCreateToAudit, sendDeleteToAudit } = require('../../../../../app/messaging/send-audit')
 
