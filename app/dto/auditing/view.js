@@ -9,7 +9,6 @@ const determineViewAuditPk = (type, entity) => {
     } else if (type === VIEW_OWNER) {
       return entity[0].person.person_reference
     } else if (type === VIEW_OWNER_ACTIVITY) {
-      console.log('~~~~~~ Chris Debug ~~~~~~ ', 'Entity', entity)
       return entity.person_reference
     } else if (type === SEARCH) {
       return uuidv4()
@@ -42,11 +41,8 @@ const constructViewDetails = (type, entity) => {
 
 const auditOwnerView = async (ownerEntity, user, type, subject) => {
   if (user.origin !== 'aphw-ddi-portal') {
-    console.log('~~~~~~ Chris Debug ~~~~~~ auditOwnerView 44', '')
     const ownerDetails = constructViewDetails(type, ownerEntity)
-    console.log('~~~~~~ Chris Debug ~~~~~~ auditOwnerView46', '')
     await sendViewToAudit(ownerDetails.pk, type, subject, ownerDetails, user)
-    console.log('~~~~~~ Chris Debug ~~~~~~ auditOwnerView48', '')
   }
 }
 
