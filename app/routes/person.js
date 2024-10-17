@@ -68,6 +68,35 @@ module.exports = [{
       }
     }
   }
+}, {
+  method: 'PUT',
+  path: '/person-and-force-change',
+  options: {
+    tags: ['api'],
+    validate: {
+      payload: updateSchema,
+      failAction: (request, h, error) => {
+        return h.response().code(400).takeover()
+      }
+    },
+    handler: async (request, h) => {
+      const person = request.payload
+
+      try {
+        const updated = await updatePerson(person, getCallingUser(request), true)
+
+        return h.response(personDto(updated)).code(200)
+      } catch (err) {
+        console.error('Error updating person:', err)
+
+        if (err.type === 'NOT_FOUND') {
+          return h.response().code(400)
+        }
+
+        throw err
+      }
+    }
+  }
 },
 {
   method: 'DELETE',

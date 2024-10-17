@@ -7,6 +7,9 @@ const { sendUpdateToAudit, sendDeleteToAudit, sendPermanentDeleteToAudit } = req
 const { PERSON } = require('../constants/event/audit-event-object-types')
 const { personDto } = require('../dto/person')
 const { personRelationship } = require('./relationships/person')
+const { getCdo } = require('../repos/cdo')
+const { lookupPoliceForceByPostcode, matchPoliceForceByName } = require('../import/robot/police')
+const { setPoliceForceOnCdos } = require('../repos/police-forces')
 
 /**
  * @typedef CountryDao
@@ -192,9 +195,9 @@ const getOwnerOfDog = async (indexNumber) => {
   }
 }
 
-const updatePerson = async (person, user, transaction) => {
+const updatePerson = async (person, user, allowForceChange = false, transaction) => {
   if (!transaction) {
-    return await sequelize.transaction(async (t) => updatePerson(person, user, t))
+    return await sequelize.transaction(async (t) => updatePerson(person, user, allowForceChange, t))
   }
 
   try {
@@ -242,6 +245,11 @@ const updatePerson = async (person, user, transaction) => {
         person_id: existing.id,
         address_id: address.id
       }, { transaction })
+
+      if (allowForceChange) {
+        const res = await hasForceChanged(person, user, transaction)
+        console.log('JB res', res)
+      }
     }
 
     await updateContact(existing, 'Email', person.email, transaction)
@@ -558,6 +566,33 @@ const purgePersonByReferenceNumber = async (reference, user, transaction) => {
   await sendPermanentDeleteToAudit(PERSON, person, user)
 }
 
+const hasForceChanged = async (person, user, transaction) => {
+  const personAndDogs = await getPersonAndDogsByReference(person.personReference, transaction)
+  const dogIndexNumbers = personAndDogs.map(regPerson => regPerson.dog.index_number)
+  const currentPoliceForces = []
+  for (const indexNumber of dogIndexNumbers) {
+    const cdo = await getCdo(indexNumber, transaction)
+    const forceName = cdo.registration?.police_force?.name ?? 'unknown'
+    if (!currentPoliceForces.includes(forceName)) {
+      currentPoliceForces.push(forceName)
+    }
+  }
+  const newPoliceForce = person?.address?.country === 'Scotland'
+    ? await matchPoliceForceByName('police scotland')
+    : await lookupPoliceForceByPostcode(person?.address?.postcode)
+
+  console.log('JB currentPoliceForces', currentPoliceForces)
+  if (currentPoliceForces.length === 1 && newPoliceForce?.name === currentPoliceForces[0]) {
+    // No change
+    return null
+  } else if (newPoliceForce?.name) {
+    // Change all dogs
+    await setPoliceForceOnCdos(newPoliceForce, dogIndexNumbers, user, transaction)
+    return newPoliceForce.name
+  }
+  return null
+}
+
 module.exports = {
   createPeople,
   getPersonByReference,
@@ -567,5 +602,6 @@ module.exports = {
   updatePersonFields,
   getOwnerOfDog,
   deletePerson,
-  purgePersonByReferenceNumber
+  purgePersonByReferenceNumber,
+  hasForceChanged
 }

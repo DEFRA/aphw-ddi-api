@@ -1,7 +1,7 @@
 const sequelize = require('../config/db')
 const { DuplicateResourceError } = require('../errors/duplicate-record')
-const { sendCreateToAudit, sendDeleteToAudit } = require('../messaging/send-audit')
-const { POLICE } = require('../constants/event/audit-event-object-types')
+const { sendCreateToAudit, sendDeleteToAudit, sendUpdateToAudit } = require('../messaging/send-audit')
+const { POLICE, EXEMPTION } = require('../constants/event/audit-event-object-types')
 const { NotFoundError } = require('../errors/not-found')
 const { getFindQuery, updateParanoid, findQueryV2 } = require('./shared')
 
@@ -90,9 +90,50 @@ const getPoliceForceByShortName = async (shortName, transaction) => {
   })
 }
 
+const setPoliceForceOnCdos = async (policeForce, indexNumbers, user, transaction) => {
+  let madeChanges = false
+  for (const indexNumber of indexNumbers) {
+    const dogId = parseInt(indexNumber.substring(2))
+    console.log('JB dogId', dogId)
+    const exemption = await sequelize.models.registration.findOne({
+      where: { dog_id: dogId },
+      include: [{
+        model: sequelize.models.police_force,
+        as: 'police_force'
+      }],
+      transaction
+    })
+
+    if ((exemption.police_force?.id ?? -1) !== policeForce.id) {
+      const preChanged = {
+        index_number: indexNumber,
+        police_force: exemption?.police_force?.name
+      }
+
+      await sequelize.models.registration.update({
+        police_force_id: policeForce.id
+      },
+      {
+        where: { id: exemption.id },
+        transaction
+      })
+
+      const postChanged = {
+        index_number: indexNumber,
+        police_force: policeForce.name
+      }
+
+      await sendUpdateToAudit(EXEMPTION, preChanged, postChanged, user)
+      madeChanges = true
+    }
+  }
+  return madeChanges
+}
+
 module.exports = {
   getPoliceForces,
   addForce,
   deleteForce,
-  getPoliceForceByShortName
+  getPoliceForceByShortName,
+  setPoliceForceOnCdos
 }
