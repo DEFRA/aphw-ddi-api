@@ -60,7 +60,7 @@ const result = schema.validate(config, {
 
 // Throw if config is invalid
 if (result.error) {
-  throw new Error(`The server config is invalid. ${result.error.message}`)
+  throw new Error(`The server config is invalid. ${result.error.message} ${JSON.stringify(config)}`)
 }
 
 // Use the joi validated value
