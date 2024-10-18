@@ -37,13 +37,22 @@ const hasForceChanged = async (personId, person, user, transaction) => {
 
   if (currentPoliceForces.length === 1 && newPoliceForce?.name === currentPoliceForces[0]) {
     // No change
-    return null
+    return {
+      changed: false,
+      reason: 'Same as existing'
+    }
   } else if (newPoliceForce?.name) {
     // Change all dogs
     await setPoliceForceOnCdos(newPoliceForce, dogIds, user, transaction)
-    return newPoliceForce.name
+    return {
+      changed: true,
+      policeForceName: newPoliceForce.name
+    }
   }
-  return null
+  return {
+    changed: false,
+    reason: 'Not found'
+  }
 }
 
 const setPoliceForceOnCdos = async (policeForce, dogIds, user, transaction) => {

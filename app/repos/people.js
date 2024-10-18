@@ -193,12 +193,12 @@ const getOwnerOfDog = async (indexNumber) => {
   }
 }
 
-const updatePerson = async (person, user, allowForceChange = false, transaction) => {
+const updatePerson = async (person, user, transaction, allowForceChange = false) => {
   if (!transaction) {
-    return await sequelize.transaction(async (t) => updatePerson(person, user, allowForceChange, t))
+    return await sequelize.transaction(async (t) => updatePerson(person, user, t, allowForceChange))
   }
 
-  let changedPoliceForceName
+  let changedPoliceForceResult
 
   try {
     const existing = await getPersonByReference(person.personReference, transaction)
@@ -247,7 +247,7 @@ const updatePerson = async (person, user, allowForceChange = false, transaction)
       }, { transaction })
 
       if (allowForceChange) {
-        changedPoliceForceName = await hasForceChanged(existing.id, person, user, transaction)
+        changedPoliceForceResult = await hasForceChanged(existing.id, person, user, transaction)
       }
     }
 
@@ -263,8 +263,10 @@ const updatePerson = async (person, user, allowForceChange = false, transaction)
 
     await sendUpdateToAudit(PERSON, preChangedPersonDto, personDto(updatedPerson, true), user)
 
-    updatedPerson.changedPoliceForceName = changedPoliceForceName ?? undefined
-    return updatedPerson
+    return {
+      updatedPerson,
+      changedPoliceForceResult
+    }
   } catch (err) {
     console.error('Error updating person:', err)
     throw err

@@ -56,7 +56,7 @@ module.exports = [{
       try {
         const updated = await updatePerson(person, getCallingUser(request))
 
-        return h.response(personDto(updated)).code(200)
+        return h.response(personDto(updated.updatedPerson)).code(200)
       } catch (err) {
         console.error('Error updating person:', err)
 
@@ -85,7 +85,10 @@ module.exports = [{
       try {
         const updated = await updatePerson(person, getCallingUser(request), true)
 
-        return h.response(personDto(updated)).code(200)
+        return h.response({
+          person: personDto(updated.updatedPerson),
+          policeForceResult: updatePerson.policeForceResult
+        }).code(200)
       } catch (err) {
         console.error('Error updating person:', err)
 

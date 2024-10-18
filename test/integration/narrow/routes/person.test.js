@@ -227,19 +227,21 @@ describe('CDO endpoint', () => {
     }
 
     updatePerson.mockResolvedValue({
-      person_reference: 'ABC123',
-      first_name: 'John',
-      last_name: 'Doe',
-      birth_date: '1990-01-01',
-      addresses: [{
-        address: {
-          address_line_1: '1 Test Street',
-          address_line_2: 'Test',
-          town: 'Test',
-          postcode: 'TE1 1ST',
-          country: { country: 'England' }
-        }
-      }]
+      updatedPerson: {
+        person_reference: 'ABC123',
+        first_name: 'John',
+        last_name: 'Doe',
+        birth_date: '1990-01-01',
+        addresses: [{
+          address: {
+            address_line_1: '1 Test Street',
+            address_line_2: 'Test',
+            town: 'Test',
+            postcode: 'TE1 1ST',
+            country: { country: 'England' }
+          }
+        }]
+      }
     })
 
     const response = await server.inject(options)
