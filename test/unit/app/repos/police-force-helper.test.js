@@ -181,5 +181,29 @@ describe('Police force helper', () => {
       expect(res.policeForceName).toBe(undefined)
       expect(sequelize.models.registration.update).toHaveBeenCalledTimes(0)
     })
+
+    test('should handle owner with multiple dogs that need police force changing', async () => {
+      const person = { address: { country: 'England', postcode: 'TS1 1TS' } }
+      sequelize.models.registered_person.findAll.mockResolvedValue([{ dog_id: 123 }, { dog_id: 457 }, { dog_id: 789 }])
+      sequelize.models.registration.findAll.mockResolvedValue([
+        { police_force_id: 20, police_force: { id: 20, name: 'Old force' } },
+        { police_force_id: 21, police_force: { id: 21, name: 'Other force' } },
+        { police_force_id: 20, police_force: { id: 20, name: 'Old force' } }
+      ])
+      lookupPoliceForceByPostcode.mockResolvedValue({ id: 25, name: 'New force' })
+      matchPoliceForceByName.mockResolvedValue({ id: 20, name: 'Old force' })
+      sequelize.models.registration.findOne.mockResolvedValue({ id: 1255, police_force: 20 })
+
+      const res = await hasForceChanged(12345, person, devUser, {})
+
+      expect(res).not.toBe(null)
+      expect(res.changed).toBeTruthy()
+      expect(res.reason).toBe(undefined)
+      expect(res.policeForceName).toBe('New force')
+      expect(sequelize.models.registration.update).toHaveBeenCalledTimes(3)
+      expect(sequelize.models.registration.update).toHaveBeenNthCalledWith(1, { police_force_id: 25 }, { transaction: {}, where: { id: 1255 } })
+      expect(sequelize.models.registration.update).toHaveBeenNthCalledWith(2, { police_force_id: 25 }, { transaction: {}, where: { id: 1255 } })
+      expect(sequelize.models.registration.update).toHaveBeenNthCalledWith(3, { police_force_id: 25 }, { transaction: {}, where: { id: 1255 } })
+    })
   })
 })
