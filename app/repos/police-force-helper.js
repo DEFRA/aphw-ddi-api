@@ -3,6 +3,15 @@ const { lookupPoliceForceByPostcode, matchPoliceForceByName } = require('../impo
 const { EXEMPTION } = require('../constants/event/audit-event-object-types')
 const { sendUpdateToAudit } = require('../messaging/send-audit')
 
+const returnResult = (changed, reason, numOfDogs, policeForceName) => {
+  return {
+    changed,
+    reason,
+    policeForceName,
+    numOfDogs
+  }
+}
+
 const hasForceChanged = async (personId, person, user, transaction) => {
   const dogs = await sequelize.models.registered_person.findAll({
     attributes: ['dog_id'],
@@ -11,6 +20,11 @@ const hasForceChanged = async (personId, person, user, transaction) => {
   })
 
   const dogIds = dogs.map(dog => dog.dog_id)
+
+  console.log('JB dogIds', dogIds)
+  if (dogIds?.length === 0) {
+    return returnResult(false, 'No dogs', 0, undefined)
+  }
 
   const forces = await sequelize.models.registration.findAll({
     attributes: ['police_force_id'],
@@ -37,25 +51,20 @@ const hasForceChanged = async (personId, person, user, transaction) => {
 
   if (currentPoliceForces.length === 1 && newPoliceForce?.name === currentPoliceForces[0]) {
     // No change
-    return {
-      changed: false,
-      reason: 'Same as existing'
-    }
+    return returnResult(false, 'Same as existing', dogIds?.length, undefined)
   } else if (newPoliceForce?.name) {
     // Change all dogs
     await setPoliceForceOnCdos(newPoliceForce, dogIds, user, transaction)
-    return {
-      changed: true,
-      policeForceName: newPoliceForce.name
-    }
+    return returnResult(true, undefined, dogIds?.length, newPoliceForce.name)
   }
-  return {
-    changed: false,
-    reason: 'Not found'
-  }
+  return returnResult(false, 'Not found', 0, undefined)
 }
 
 const setPoliceForceOnCdos = async (policeForce, dogIds, user, transaction) => {
+  if (!policeForce?.id) {
+    return false
+  }
+
   let madeChanges = false
   for (const dogId of dogIds) {
     const exemption = await sequelize.models.registration.findOne({

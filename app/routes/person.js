@@ -83,11 +83,11 @@ module.exports = [{
       const person = request.payload
 
       try {
-        const updated = await updatePerson(person, getCallingUser(request), true)
+        const updated = await updatePerson(person, getCallingUser(request), null, true)
 
         return h.response({
           person: personDto(updated.updatedPerson),
-          policeForceResult: updatePerson.policeForceResult
+          policeForceResult: updated.changedPoliceForceResult
         }).code(200)
       } catch (err) {
         console.error('Error updating person:', err)
