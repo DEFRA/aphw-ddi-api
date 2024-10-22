@@ -21,7 +21,6 @@ const hasForceChanged = async (personId, person, user, transaction) => {
 
   const dogIds = dogs.map(dog => dog.dog_id)
 
-  console.log('JB dogIds', dogIds)
   if (dogIds?.length === 0) {
     return returnResult(false, 'No dogs', 0, undefined)
   }
