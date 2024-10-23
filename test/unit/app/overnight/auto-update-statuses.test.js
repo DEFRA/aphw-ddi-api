@@ -7,8 +7,7 @@ const { setExpiredInsuranceToBreach, addBreachReasonToExpiredInsurance } = requi
 jest.mock('../../../../app/overnight/expired-neutering-deadline')
 const { setExpiredNeuteringDeadlineToInBreach, addBreachReasonToExpiredNeuteringDeadline } = require('../../../../app/overnight/expired-neutering-deadline')
 
-jest.mock('../../../../app/lib/environment-helpers')
-const { getEnvironmentVariableOrString } = require('../../../../app/lib/environment-helpers')
+const { autoUpdateStatuses } = require('../../../../app/overnight/auto-update-statuses')
 
 const overnightJobUser = {
   username: 'overnight-job-system-user',
@@ -18,9 +17,8 @@ const overnightJobUser = {
 
 describe('AutoUpdateStatus test', () => {
   beforeEach(() => {
-    getEnvironmentVariableOrString.mockReturnValue('')
+    jest.clearAllMocks()
   })
-  const { autoUpdateStatuses } = require('../../../../app/overnight/auto-update-statuses')
 
   test('autoUpdateStatuses should handle successful results', async () => {
     setExpiredCdosToFailed.mockResolvedValue('ok - cdos 1 rows')
