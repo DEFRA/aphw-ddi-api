@@ -9,8 +9,8 @@ const addFullDogIndexIfMissing = arr => {
   })
 }
 
-const postcodeRegexPart1 = /^([A-Za-z]{1,2}[0-9]{1,2})$/
-const postcodeRegexPart2 = /^([0-9][A-Za-z]{2})$/
+const postcodeRegexPart1 = /^([A-Za-z]{1,2}[\d]{1,2})$/
+const postcodeRegexPart2 = /^([\d][A-Za-z]{2})$/
 
 // Look for two short adjacent search terms and join as if a single postcode
 const addJoinedPostcode = terms => {
