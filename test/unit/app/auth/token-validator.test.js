@@ -1,3 +1,4 @@
+
 describe('token-validator', () => {
   describe('validate', () => {
     const token = 'abcdefgh123456'
@@ -6,18 +7,28 @@ describe('token-validator', () => {
     jest.mock('../../../../app/proxy/auth-server')
     const { getUserInfo } = require('../../../../app/proxy/auth-server')
 
-    jest.mock('../../../../app/session/hashCache', () => ({
-      hashCache: new Map([
-        ['cached.user@example.com', { hash, expiry: new Date(Date.now() + (30 * 60 * 1000)) }],
-        ['expired.user@example.com', { hash, expiry: new Date(Date.now() - 1000) }]
-      ])
-    }))
-
     jest.mock('../../../../app/repos/user-accounts')
     const { isAccountEnabled } = require('../../../../app/repos/user-accounts')
 
+    jest.mock('../../../../app/cache')
+    const { set, get } = require('../../../../app/cache')
+
     const { validate } = require('../../../../app/auth/token-validator')
 
+    const hashCacheStub = new Map([
+      ['cached.user@example.com', { hash, expiry: new Date(Date.now() + (30 * 60 * 1000)) }],
+      ['expired.user@example.com', { hash, expiry: new Date(Date.now() - 1000) }]
+    ])
+
+    beforeEach(() => {
+      set.mockImplementation(async (_request, key, value) => {
+        console.log('~~~~~~ Chris Debug ~~~~~~ setting', 'Key', key)
+        hashCacheStub.set(key, value)
+      })
+      get.mockImplementation(async (_request, key) => {
+        return hashCacheStub.get(key)
+      })
+    })
     afterEach(() => {
       jest.resetAllMocks()
     })
@@ -97,6 +108,17 @@ describe('token-validator', () => {
         }
       }
 
+      const request = {
+        server: {
+          app: {
+            cache: {
+              get: async () => 'ok',
+              set: async () => {}
+            }
+          }
+        }
+      }
+
       const makeArtifacts = (username, scope) => ({
         decoded: {
           payload: {
@@ -119,7 +141,7 @@ describe('token-validator', () => {
           phone_number_verified: true
         })
 
-        const validation = await validate(artifacts)
+        const validation = await validate(artifacts, request)
         expect(validation).toEqual({
           isValid: true,
           credentials: {
@@ -129,6 +151,7 @@ describe('token-validator', () => {
             scope: ['Dog.Index.Enforcement']
           }
         })
+        expect(set).toHaveBeenCalledWith(request, 'chuck@norris.org', { expiry: expect.any(Date), hash: expect.any(String) }, 3900000)
       })
 
       test('should successfully validate if user is cached', async () => {
@@ -143,7 +166,9 @@ describe('token-validator', () => {
           phone_number_verified: true
         })
 
-        const validation = await validate(artifacts)
+        const validation = await validate(artifacts, request)
+        expect(get).toHaveBeenCalledWith(request, 'cached.user@example.com')
+        expect(set).not.toHaveBeenCalled()
 
         expect(validation).toEqual({
           isValid: true,
@@ -167,7 +192,7 @@ describe('token-validator', () => {
           phone_number_verified: true
         })
 
-        const validation = await validate(makeArtifacts('chuck@norris.org', ['Dog.Index.Admin']))
+        const validation = await validate(makeArtifacts('chuck@norris.org', ['Dog.Index.Admin']), request)
         expect(validation).toEqual({
           isValid: false,
           credentials: {
@@ -193,7 +218,7 @@ describe('token-validator', () => {
           phone_number_verified: true
         })
 
-        const validation = await validate(artifacts)
+        const validation = await validate(artifacts, request)
 
         expect(validation).toEqual({
           isValid: false,
@@ -219,7 +244,7 @@ describe('token-validator', () => {
           phone_number_verified: true
         })
 
-        const validation = await validate(artifacts)
+        const validation = await validate(artifacts, request)
 
         expect(validation).toEqual({
           isValid: false,
@@ -245,7 +270,7 @@ describe('token-validator', () => {
         })
 
         const artifacts = makeArtifacts(username)
-        const validation = await validate(artifacts)
+        const validation = await validate(artifacts, request)
 
         expect(validation).toEqual({
           isValid: false,
@@ -264,7 +289,7 @@ describe('token-validator', () => {
         getUserInfo.mockRejectedValue(false)
 
         const artifacts = makeArtifacts(username)
-        const validation = await validate(artifacts)
+        const validation = await validate(artifacts, request)
         expect(validation).toEqual({
           isValid: false,
           credentials: {
@@ -289,7 +314,7 @@ describe('token-validator', () => {
         })
 
         const artifacts = makeArtifacts(username)
-        const validation = await validate(artifacts)
+        const validation = await validate(artifacts, request)
         expect(validation).toEqual({
           isValid: false,
           credentials: {

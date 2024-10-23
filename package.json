@@ -1,6 +1,6 @@
 {
   "name": "aphw-ddi-api",
-  "version": "0.78.4",
+  "version": "0.79.1",
   "description": "API to manage CRUD / query functions for dangerous dogs register",
   "homepage": "https://github.com/DEFRA/aphw-ddi-api",
   "main": "app/index.js",
@@ -24,6 +24,7 @@
     "@azure/identity": "4.2.1",
     "@azure/storage-blob": "12.13.0",
     "@hapi/basic": "^7.0.2",
+    "@hapi/catbox-redis": "7.0.2",
     "@hapi/hapi": "20.2.2",
     "@hapi/inert": "^7.1.0",
     "@hapi/jwt": "^3.2.0",
@@ -51,6 +52,7 @@
     "uuid": "^9.0.1"
   },
   "devDependencies": {
+    "@hapi/catbox-memory": "5.0.1",
     "jest": "29.2.2",
     "jest-junit": "14.0.1",
     "jest-when": "^3.6.0",

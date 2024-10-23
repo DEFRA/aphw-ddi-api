@@ -51,6 +51,9 @@ container:
   paranoidRetentionPeriod: 90
   userFeedbackEmailAddress: dummy
   enforcementUrl: dummy
+  redisHostname: dummy
+  redisPort: 6379
+  redisPassword: dummy
 
 postgresService:
   postgresDb: dangerous_dogs_index

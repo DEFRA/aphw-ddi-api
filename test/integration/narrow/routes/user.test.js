@@ -12,16 +12,14 @@ describe('User endpoint', () => {
   jest.mock('../../../../app/service/config')
   const { getRegistrationService } = require('../../../../app/service/config')
 
-  jest.mock('../../../../app/session/hashCache', () => ({
-    hashCache: new Map()
-  }))
-  const { hashCache } = require('../../../../app/session/hashCache')
-
   jest.mock('../../../../app/repos/user-accounts')
   const { createAccount, deleteAccount, createAccounts, getAccounts } = require('../../../../app/repos/user-accounts')
 
   jest.mock('../../../../app/messaging/send-email')
   const { sendEmail } = require('../../../../app/messaging/send-email')
+
+  jest.mock('../../../../app/cache')
+  const { drop } = require('../../../../app/cache')
 
   beforeEach(async () => {
     jest.clearAllMocks()
@@ -695,19 +693,15 @@ describe('User endpoint', () => {
 
   describe('DELETE /user/me/cache', () => {
     test('DELETE /user/me/cache route returns 204', async () => {
-      hashCache.set('dev-user@test.com', 'ABCDEFG12345')
-
       const options = {
         method: 'DELETE',
         url: '/user/me/cache',
         ...portalHeader
       }
 
-      expect(hashCache.has('dev-user@test.com')).toBe(true)
-
       const response = await server.inject(options)
       expect(response.statusCode).toBe(204)
-      expect(hashCache.has('dev-user@test.com')).toBe(false)
+      expect(drop).toHaveBeenCalledWith(expect.anything(), 'dev-user@test.com')
     })
   })
 

@@ -2,8 +2,9 @@ const crypto = require('crypto')
 const { addMinutes } = require('../lib/date-helpers')
 const { isAccountEnabled } = require('../repos/user-accounts')
 const { getUserInfo } = require('../proxy/auth-server')
-const { hashCache } = require('../session/hashCache')
 const { scopes } = require('../constants/auth')
+const { get, set } = require('../cache')
+const { MINUTE } = require('../constants/time')
 
 const expiryPeriodInMins = 65
 
@@ -43,7 +44,7 @@ const validateApi = (_username, payload) => {
   return returnVal(true, payload)
 }
 
-const validateEnforcement = async (username, payload) => {
+const validateEnforcement = async (request, username, payload) => {
   const { token } = payload
 
   if (!token) {
@@ -58,9 +59,10 @@ const validateEnforcement = async (username, payload) => {
   const now = new Date()
   const hash = crypto.createHash('sha512').update(token).digest('hex')
 
-  const cached = hashCache.get(username)
+  const cached = await get(request, username)
+
   if (cached) {
-    if (cached.expiry > now && cached.hash === hash) {
+    if (new Date(cached.expiry).getTime() > now.getTime() && cached.hash === hash) {
       // Valid non-expired token
       // console.info(`Got from cache - expiry in ${Math.trunc((cached.expiry - now) / 1000 / 60)} mins`)
       return returnVal(true, payload)
@@ -73,7 +75,7 @@ const validateEnforcement = async (username, payload) => {
     const enabled = await isAccountEnabled(username)
 
     if (enabled) {
-      hashCache.set(username, { hash, expiry: addMinutes(now, expiryPeriodInMins) })
+      await set(request, username, { hash, expiry: addMinutes(now, expiryPeriodInMins) }, expiryPeriodInMins * MINUTE)
       return returnVal(true, payload)
     }
   }
@@ -81,7 +83,7 @@ const validateEnforcement = async (username, payload) => {
   return returnVal(false)
 }
 
-const validate = async (artifacts, _request, _h) => {
+const validate = async (artifacts, request, _h) => {
   const decoded = artifacts.decoded
   const payload = decoded.payload
   const username = payload.username
@@ -99,7 +101,7 @@ const validate = async (artifacts, _request, _h) => {
       return validatePortal(username, payload)
     }
     case 'aphw-ddi-enforcement': {
-      return validateEnforcement(username, payload)
+      return validateEnforcement(request, username, payload)
     }
     case 'aphw-ddi-api': {
       return validateApi(username, payload)
