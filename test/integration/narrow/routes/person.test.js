@@ -15,6 +15,9 @@ describe('CDO endpoint', () => {
   jest.mock('../../../../app/dto/auditing/view')
   const { auditOwnerActivityView, auditOwnerDetailsView } = require('../../../../app/dto/auditing/view')
 
+  jest.mock('../../../../app/repos/police-force-helper')
+  const { hasForceChanged } = require('../../../../app/repos/police-force-helper')
+
   beforeEach(async () => {
     jest.clearAllMocks()
     server = await createServer()
@@ -227,19 +230,21 @@ describe('CDO endpoint', () => {
     }
 
     updatePerson.mockResolvedValue({
-      person_reference: 'ABC123',
-      first_name: 'John',
-      last_name: 'Doe',
-      birth_date: '1990-01-01',
-      addresses: [{
-        address: {
-          address_line_1: '1 Test Street',
-          address_line_2: 'Test',
-          town: 'Test',
-          postcode: 'TE1 1ST',
-          country: { country: 'England' }
-        }
-      }]
+      updatedPerson: {
+        person_reference: 'ABC123',
+        first_name: 'John',
+        last_name: 'Doe',
+        birth_date: '1990-01-01',
+        addresses: [{
+          address: {
+            address_line_1: '1 Test Street',
+            address_line_2: 'Test',
+            town: 'Test',
+            postcode: 'TE1 1ST',
+            country: { country: 'England' }
+          }
+        }]
+      }
     })
 
     const response = await server.inject(options)
@@ -318,6 +323,158 @@ describe('CDO endpoint', () => {
     const options = {
       method: 'PUT',
       url: '/person',
+      payload: {
+        personReference: 'ABC123',
+        firstName: 'John',
+        lastName: 'Doe',
+        dateOfBirth: '1990-01-01',
+        address: {
+          addressLine1: '1 Test Street',
+          addressLine2: 'Test',
+          town: 'Test',
+          postcode: 'TE1 1ST',
+          country: 'England'
+        }
+      },
+      ...portalHeader
+    }
+
+    updatePerson.mockImplementation(() => { throw new Error('DB error') })
+
+    const response = await server.inject(options)
+
+    expect(response.statusCode).toBe(500)
+  })
+
+  test('PUT /person-and-force-change route returns 200 with valid payload', async () => {
+    const options = {
+      method: 'PUT',
+      url: '/person-and-force-change',
+      payload: {
+        personReference: 'ABC123',
+        firstName: 'John',
+        lastName: 'Doe',
+        dateOfBirth: '1990-01-01',
+        address: {
+          addressLine1: '1 Test Street changed',
+          addressLine2: 'Test',
+          town: 'Test',
+          postcode: 'TE1 1ST',
+          country: 'England'
+        }
+      },
+      ...portalHeader
+    }
+
+    updatePerson.mockResolvedValue({
+      updatedPerson: {
+        person_reference: 'ABC123',
+        first_name: 'John',
+        last_name: 'Doe',
+        birth_date: '1990-01-01',
+        addresses: [{
+          address: {
+            address_line_1: '1 Test Street changed',
+            address_line_2: 'Test',
+            town: 'Test',
+            postcode: 'TE1 1ST',
+            country: { country: 'England' }
+          }
+        }]
+      },
+      changedPoliceForceResult: {
+        changed: true,
+        policeForceName: 'New force',
+        numOfDogs: 1
+      }
+    })
+
+    const response = await server.inject(options)
+
+    expect(response.statusCode).toBe(200)
+    expect(updatePerson).toHaveBeenCalledTimes(1)
+    expect(response.result).toEqual({
+      person: {
+        personReference: 'ABC123',
+        firstName: 'John',
+        lastName: 'Doe',
+        birthDate: '1990-01-01',
+        address: {
+          addressLine1: '1 Test Street changed',
+          addressLine2: 'Test',
+          town: 'Test',
+          postcode: 'TE1 1ST',
+          country: 'England'
+        },
+        contacts: []
+      },
+      policeForceResult: {
+        changed: true,
+        policeForceName: 'New force',
+        numOfDogs: 1
+      }
+    })
+  })
+
+  test('PUT /person-and-force-change route returns 400 with invalid payload', async () => {
+    hasForceChanged.mockResolvedValue()
+    const options = {
+      method: 'PUT',
+      url: '/person-and-force-change',
+      payload: {
+        firstName: 'John',
+        lastName: 'Doe',
+        address: {
+          addressLine1: '1 Test Street',
+          addressLine2: 'Test',
+          town: 'Test',
+          postcode: 'TE1 1ST',
+          country: 'England'
+        }
+      },
+      ...portalHeader
+    }
+
+    const response = await server.inject(options)
+
+    expect(response.statusCode).toBe(400)
+  })
+
+  test('PUT /person-and-force-change route returns 400 if person not found', async () => {
+    hasForceChanged.mockResolvedValue()
+    const options = {
+      method: 'PUT',
+      url: '/person-and-force-change',
+      payload: {
+        personReference: 'ABC123',
+        firstName: 'John',
+        lastName: 'Doe',
+        dateOfBirth: '1990-01-01',
+        address: {
+          addressLine1: '1 Test Street',
+          addressLine2: 'Test',
+          town: 'Test',
+          postcode: 'TE1 1ST',
+          country: 'England'
+        }
+      },
+      ...portalHeader
+    }
+
+    updatePerson.mockRejectedValue({
+      type: 'NOT_FOUND'
+    })
+
+    const response = await server.inject(options)
+
+    expect(response.statusCode).toBe(400)
+  })
+
+  test('PUT /person-and-force-change route throws if error other than NOT_FOUND', async () => {
+    hasForceChanged.mockResolvedValue()
+    const options = {
+      method: 'PUT',
+      url: '/person-and-force-change',
       payload: {
         personReference: 'ABC123',
         firstName: 'John',

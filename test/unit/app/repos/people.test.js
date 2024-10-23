@@ -72,6 +72,9 @@ describe('People repo', () => {
   jest.mock('../../../../app/lookups')
   const { getContactType, getCountry } = require('../../../../app/lookups')
 
+  jest.mock('../../../../app/repos/police-force-helper')
+  const { hasForceChanged } = require('../../../../app/repos/police-force-helper')
+
   jest.mock('../../../../app/repos/search-index')
   const { updateSearchIndexPerson } = require('../../../../app/repos/search-index')
 
@@ -86,6 +89,7 @@ describe('People repo', () => {
 
     when(getCountry).calledWith('England').mockResolvedValue({ id: 1 })
     when(getCountry).calledWith('Wales').mockResolvedValue({ id: 2 })
+    hasForceChanged.mockResolvedValue()
 
     sendEvent.mockResolvedValue()
   })
@@ -909,6 +913,76 @@ describe('People repo', () => {
       await updatePerson(person, dummyUser, {})
 
       expect(sequelize.models.contact.create).toHaveBeenCalledTimes(1)
+    })
+
+    test('updatePerson should call hasForceChanged if flag is true', async () => {
+      updateSearchIndexPerson.mockResolvedValue()
+
+      const person = {
+        personReference: '1234',
+        firstName: 'First',
+        lastName: 'Last',
+        dateOfBirth: '1990-01-01',
+        address: {
+          addressLine1: 'Address 1',
+          addressLine2: 'Address 2',
+          town: 'Town',
+          postcode: 'Postcode',
+          country: 'England'
+        },
+        email: 'test_3@example.com'
+      }
+
+      sequelize.models.person.findAll.mockResolvedValue([{
+        id: 1,
+        first_name: 'First',
+        last_name: 'Last',
+        person_reference: '1234',
+        addresses: [
+          {
+            address: {
+              id: 1,
+              address_line_1: 'Address 1 changed',
+              address_line_2: 'Address 2',
+              town: 'Town',
+              postcode: 'Postcode changed',
+              country: { id: 1, country: 'England' }
+            }
+          }
+        ],
+        person_contacts: [
+          {
+            contact: {
+              id: 2,
+              contact: 'test2@example.com',
+              contact_type: { id: 2, contact_type: 'Email' }
+            }
+          },
+          {
+            contact: {
+              id: 1,
+              contact: 'test@example.com',
+              contact_type: { id: 1, contact_type: 'Email' }
+            }
+          }
+        ]
+      }])
+
+      sequelize.models.contact.create.mockResolvedValue({
+        id: 2,
+        contact: 'test_3@example.com'
+      })
+
+      sequelize.models.person_contact.create.mockResolvedValue({
+        id: 2,
+        person_id: 1,
+        contact_id: 2
+      })
+
+      await updatePerson(person, dummyUser, {}, true)
+
+      expect(sequelize.models.contact.create).toHaveBeenCalledTimes(1)
+      expect(hasForceChanged).toHaveBeenCalledWith(1, person, dummyUser, {})
     })
 
     test('updatePerson throws error if person not found', async () => {
