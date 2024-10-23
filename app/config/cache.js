@@ -46,6 +46,8 @@ value.useRedis = value.host !== undefined
 
 if (!value.useRedis) {
   console.info('Redis disabled, using in memory cache')
+} else {
+  console.info('Redis enabled')
 }
 
 value.catboxOptions = value.useRedis
