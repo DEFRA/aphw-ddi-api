@@ -5,7 +5,6 @@ const get = async (request, key) => {
   try {
     return await getCacheValue(getCache(request), key)
   } catch {
-    console.error(`Cannot get cache value for key: ${key}`)
     return undefined
   }
 }

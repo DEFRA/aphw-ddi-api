@@ -25,7 +25,7 @@ afterEach(async () => {
 
 describe('set cache', () => {
   test('should call getCache', async () => {
-    await set(request, key, value, value)
+    await set(request, key, value)
     expect(getCache).toHaveBeenCalled()
   })
 
@@ -51,7 +51,14 @@ describe('set cache', () => {
 
   test('should call setCacheValue with getCache, key and value', async () => {
     await set(request, key, value)
-    expect(setCacheValue).toHaveBeenCalledWith(getCache(), key, value)
+    expect(setCacheValue).toHaveBeenCalledWith(getCache(), key, value, undefined)
+  })
+
+  test('should call setCacheValue with getCache, key, value and ttl', async () => {
+    const ttl = new Date()
+    ttl.setTime(ttl.getTime() + (1000 * 60 * 60))
+    await set(request, key, value, ttl)
+    expect(setCacheValue).toHaveBeenCalledWith(getCache(), key, value, ttl)
   })
 
   test('should return undefined', async () => {
