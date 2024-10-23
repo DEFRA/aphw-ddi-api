@@ -1,5 +1,7 @@
 const Joi = require('joi')
 const { getEnvironmentVariable } = require('../lib/environment-helpers')
+const { DEVELOPMENT, TEST, PRODUCTION } = require('../constants/environments')
+const cacheConfig = require('./cache')
 
 // Define config schema
 const schema = Joi.object({
@@ -28,6 +30,7 @@ const schema = Joi.object({
 })
 
 // Build config
+
 const config = {
   serviceName: getEnvironmentVariable('SERVICE_NAME'),
   port: getEnvironmentVariable('PORT'),
@@ -66,8 +69,31 @@ if (result.error) {
 // Use the joi validated value
 const value = result.value
 
-value.isDev = value.env === 'development'
-value.isTest = value.env === 'test'
-value.isProd = value.env === 'production'
+value.isDev = value.env === DEVELOPMENT
+value.isTest = value.env === TEST
+value.isProd = value.env === PRODUCTION
 
+value.cacheConfig = cacheConfig
+
+/**
+ *
+ * @type {{
+ *  isDev: boolean;
+ *  isTest: boolean;
+ *  isProd: boolean;
+ *  cacheConfig: import('./cache.js');
+ *  userFeedbackEmailAddress: string;
+ *  authTokens: {apiKeyPublicKey: string, portalKey: string, enforcementKey: string, apiKeyPrivateKey: string};
+ *  osPlacesApi: {baseUrl: string, token: string};
+ *  port: string;
+ *  robotSheetName: string;
+ *  enforcementUrl: string;
+ *  serviceName: string;
+ *  env: string;
+ *  overnightExportBatchSize: string;
+ *  paranoidRetentionPeriod: (string|number);
+ *  policeApi: {baseUrl: string};
+ *  authServerUrl: string;
+ * }}
+ */
 module.exports = value

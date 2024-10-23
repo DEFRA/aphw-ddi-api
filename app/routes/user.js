@@ -1,5 +1,4 @@
 const config = require('../config/index')
-const { hashCache } = require('../session/hashCache')
 const { getRegistrationService } = require('../service/config')
 const {
   createUserResponseSchema, createUserRequestSchema, userFeedbackSchema, userBooleanResponseSchema, userStringResponseSchema, bulkResponseSchema, bulkRequestSchema,
@@ -14,6 +13,7 @@ const { getCallingUser } = require('../auth/get-user')
 const { emailTypes } = require('../constants/email-types')
 const { sendEmail } = require('../messaging/send-email')
 const { getHttpCodeFromResults } = require('../dto/mappers/bulk-requests')
+const { drop } = require('../cache')
 
 module.exports = [
   {
@@ -251,7 +251,7 @@ module.exports = [
     handler: async (request, h) => {
       const { username } = getCallingUser(request)
 
-      hashCache.delete(username)
+      await drop(request, username)
 
       console.info('Hash Key deleted for user')
 
