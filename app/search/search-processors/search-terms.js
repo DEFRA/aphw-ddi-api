@@ -9,6 +9,9 @@ const addFullDogIndexIfMissing = arr => {
   })
 }
 
+const postcodeRegexPart1 = /^([A-Za-z]{1,2}\d{1,2})$/
+const postcodeRegexPart2 = /^(\d[A-Za-z]{2})$/
+
 // Look for two short adjacent search terms and join as if a single postcode
 const addJoinedPostcode = terms => {
   let found1pos = -1
@@ -16,13 +19,11 @@ const addJoinedPostcode = terms => {
   if (terms.length > 1) {
     for (let termNum = 0; termNum < terms.length; termNum++) {
       const term = terms[termNum]
-      if (term.length >= 3 && term.length <= 4) {
-        if (found1pos === -1) {
-          found1pos = termNum
-        } else if (found2pos === -1) {
-          found2pos = termNum
-          break
-        }
+      if (postcodeRegexPart1.test(term)) {
+        found1pos = termNum
+      } else if (postcodeRegexPart2.test(term)) {
+        found2pos = termNum
+        break
       }
     }
     if (found1pos > -1 && found2pos > -1 && (found2pos - found1pos === 1)) {
@@ -34,5 +35,6 @@ const addJoinedPostcode = terms => {
 
 module.exports = {
   cleanupSearchTerms,
-  addFullDogIndexIfMissing
+  addFullDogIndexIfMissing,
+  addJoinedPostcode
 }
