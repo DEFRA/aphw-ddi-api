@@ -7,6 +7,7 @@ const { sendUpdateToAudit, sendDeleteToAudit, sendPermanentDeleteToAudit } = req
 const { PERSON } = require('../constants/event/audit-event-object-types')
 const { personDto } = require('../dto/person')
 const { personRelationship } = require('./relationships/person')
+const { hasForceChanged } = require('../repos/police-force-helper')
 
 /**
  * @typedef CountryDao
@@ -192,10 +193,12 @@ const getOwnerOfDog = async (indexNumber) => {
   }
 }
 
-const updatePerson = async (person, user, transaction) => {
+const updatePerson = async (person, user, transaction, allowForceChange = false) => {
   if (!transaction) {
-    return await sequelize.transaction(async (t) => updatePerson(person, user, t))
+    return await sequelize.transaction(async (t) => updatePerson(person, user, t, allowForceChange))
   }
+
+  let changedPoliceForceResult
 
   try {
     const existing = await getPersonByReference(person.personReference, transaction)
@@ -242,6 +245,10 @@ const updatePerson = async (person, user, transaction) => {
         person_id: existing.id,
         address_id: address.id
       }, { transaction })
+
+      if (allowForceChange) {
+        changedPoliceForceResult = await hasForceChanged(existing.id, person, user, transaction)
+      }
     }
 
     await updateContact(existing, 'Email', person.email, transaction)
@@ -256,7 +263,10 @@ const updatePerson = async (person, user, transaction) => {
 
     await sendUpdateToAudit(PERSON, preChangedPersonDto, personDto(updatedPerson, true), user)
 
-    return updatedPerson
+    return {
+      updatedPerson,
+      changedPoliceForceResult
+    }
   } catch (err) {
     console.error('Error updating person:', err)
     throw err
