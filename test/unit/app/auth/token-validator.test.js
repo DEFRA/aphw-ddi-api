@@ -22,7 +22,6 @@ describe('token-validator', () => {
 
     beforeEach(() => {
       set.mockImplementation(async (_request, key, value) => {
-        console.log('~~~~~~ Chris Debug ~~~~~~ setting', 'Key', key)
         hashCacheStub.set(key, value)
       })
       get.mockImplementation(async (_request, key) => {
