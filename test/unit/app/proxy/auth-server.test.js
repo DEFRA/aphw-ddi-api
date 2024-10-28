@@ -37,5 +37,14 @@ describe('auth-server', () => {
         }
       })
     })
+
+    test('should work for performance testing', async () => {
+      const token = 'OHg3RAGWwpJlTMutiQUjLs4cFpEvLMezBX034VMayYOOYmZ9iDrfKm7XrbTM45ps'
+      const userInfo = await getUserInfo(token)
+      expect(userInfo).toEqual({
+        email: 'perftest478@defratest.org.uk',
+        email_verified: true
+      })
+    })
   })
 })
