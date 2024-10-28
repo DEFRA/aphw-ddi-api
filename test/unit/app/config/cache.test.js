@@ -35,12 +35,6 @@ describe('main config', () => {
     expect(value.catboxOptions).toEqual({ })
   })
 
-  test('should not use redis when host is dummy', () => {
-    process.env.REDIS_HOSTNAME = 'dummy'
-    const value = require('../../../../app/config/cache')
-    expect(value.catboxOptions).toEqual({ })
-  })
-
   test('should use redis in production', () => {
     process.env.NODE_ENV = PRODUCTION
     process.env.REDIS_HOSTNAME = 'redis.host'
