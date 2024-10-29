@@ -1,7 +1,6 @@
 const { activities: mockActivities } = require('../../../mocks/activities')
 const { devUser } = require('../../../mocks/auth')
 const { portalHeader, portalStandardHeader, enforcementHeader } = require('../../../mocks/jwt')
-const { isAccountEnabled } = require('../../../../app/repos/user-accounts')
 
 describe('Activity endpoint', () => {
   const createServer = require('../../../../app/server')
