@@ -111,7 +111,7 @@ module.exports = [
     path: '/activity',
     options: {
       tags: ['api'],
-      auth: { scope: [scopes.admin] },
+      auth: { scope: scopes.internal },
       notes: ['On successful submission publishes an activity event of requested type'],
       response: {
         schema: successResponseSchema

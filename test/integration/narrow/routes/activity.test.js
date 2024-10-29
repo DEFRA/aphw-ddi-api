@@ -206,7 +206,7 @@ describe('Activity endpoint', () => {
           source: 'dog',
           activityDate
         },
-        ...portalHeader
+        ...portalStandardHeader
       }
 
       const response = await server.inject(options)
