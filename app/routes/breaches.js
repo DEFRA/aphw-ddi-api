@@ -26,7 +26,7 @@ module.exports = [
     method: 'POST',
     path: '/breaches/dog:setBreaches',
     options: {
-      auth: { scope: [scopes.admin, scopes.standard] },
+      auth: { scope: scopes.internal },
       validate: {
         payload: setBreachRequestSchema
       },
