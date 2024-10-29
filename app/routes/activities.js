@@ -55,7 +55,6 @@ module.exports = [
         }
       },
       handler: async (request, h) => {
-        console.log('~~~~~~ Chris Debug ~~~~~~ ', 'Request.auth', request.auth)
         const activity = await createActivity(request.payload, getCallingUser(request))
 
         return h.response({

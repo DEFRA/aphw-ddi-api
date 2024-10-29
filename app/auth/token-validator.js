@@ -46,7 +46,6 @@ const validateApi = (_username, payload) => {
 
 const validateEnforcement = async (request, username, payload) => {
   const { token } = payload
-  console.log('~~~~~~ Chris Debug ~~~~~~ ', 'Token', token)
 
   if (!token) {
     return returnVal(false)
@@ -56,7 +55,6 @@ const validateEnforcement = async (request, username, payload) => {
   if (scopes.internal.some(allowedScope => payload.scope?.includes(allowedScope))) {
     return returnVal(false)
   }
-  console.log('~~~~~~ Chris Debug ~~~~~~ passed scope v2', '')
 
   const now = new Date()
   const hash = crypto.createHash('sha512').update(token).digest('hex')
@@ -70,14 +68,12 @@ const validateEnforcement = async (request, username, payload) => {
       return returnVal(true, payload)
     }
   }
-  console.log('~~~~~~ Chris Debug ~~~~~~ not cached', '')
 
   // Validate token contents and store in cache
   const validToken = await checkTokenOnline(username, token)
-  console.log('~~~~~~ Chris Debug ~~~~~~ ', 'ValidToken', validToken)
+
   if (validToken) {
     const enabled = await isAccountEnabled(username)
-    console.log('~~~~~~ Chris Debug ~~~~~~ ', 'Enabled', enabled)
 
     if (enabled) {
       await set(request, username, { hash, expiry: addMinutes(now, expiryPeriodInMins) }, expiryPeriodInMins * MINUTE)
@@ -89,7 +85,6 @@ const validateEnforcement = async (request, username, payload) => {
 }
 
 const validate = async (artifacts, request, _h) => {
-  console.log('~~~~~~ Chris Debug ~~~~~~ validate', '')
   const decoded = artifacts.decoded
   const payload = decoded.payload
   const username = payload.username
@@ -97,7 +92,6 @@ const validate = async (artifacts, request, _h) => {
   if (!scopes.all.some(allowedScope => payload.scope?.includes(allowedScope))) {
     return returnVal(false)
   }
-  console.log('~~~~~~ Chris Debug ~~~~~~ passed scope validation', '')
 
   if (!username) {
     return returnVal(false)
