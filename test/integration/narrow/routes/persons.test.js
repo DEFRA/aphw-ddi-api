@@ -1,5 +1,5 @@
-const { mockValidate } = require('../../../mocks/auth')
-const { portalHeader } = require('../../../mocks/jwt')
+const { mockValidate, mockValidateEnforcement, mockValidateStandard } = require('../../../mocks/auth')
+const { portalHeader, enforcementHeader, portalStandardHeader } = require('../../../mocks/jwt')
 
 describe('Get persons endpoint', () => {
   const createServer = require('../../../../app/server')
@@ -10,13 +10,13 @@ describe('Get persons endpoint', () => {
 
   jest.mock('../../../../app/auth/token-validator')
   const { validate } = require('../../../../app/auth/token-validator')
-  validate.mockResolvedValue(mockValidate)
 
   jest.mock('../../../../app/repos/persons')
   const { getPersons, deletePersons } = require('../../../../app/repos/persons')
 
   beforeEach(async () => {
     jest.clearAllMocks()
+    validate.mockResolvedValue(mockValidate)
     server = await createServer()
     await server.initialize()
   })
@@ -234,6 +234,18 @@ describe('Get persons endpoint', () => {
       expect(response.result).toEqual({ persons: [] })
     })
 
+    test('should return 403 given call from enforcement', async () => {
+      validate.mockResolvedValue(mockValidateEnforcement)
+
+      const options = {
+        method: 'GET',
+        url: '/persons?firstName=Frodo&lastName=Baggins&dateOfBirth=2968-09-22',
+        ...enforcementHeader
+      }
+      const response = await server.inject(options)
+      expect(response.statusCode).toBe(403)
+    })
+
     test('GET /persons route returns 400 given invalid params', async () => {
       const options = {
         method: 'GET',
@@ -248,8 +260,10 @@ describe('Get persons endpoint', () => {
   })
 
   describe('POST /persons:batch-delete', () => {
+    const defaultPersons = ['P-1234-567', 'P-2345-678']
+
     test('should return a 200 with list of deleted persons', async () => {
-      const expectedPersons = ['P-1234-567', 'P-2345-678']
+      const expectedPersons = defaultPersons
       const expectedUser = {
         username: 'internal-user',
         displayname: 'User, Internal'
@@ -279,6 +293,36 @@ describe('Get persons endpoint', () => {
       expect(response.statusCode).toBe(200)
       expect(payload.deleted.success).toEqual(['P-1234-567', 'P-2345-678'])
       expect(deletePersons).toHaveBeenCalledWith(expectedPersons, expectedUser)
+    })
+
+    test('should return 403 given call from enforcement', async () => {
+      validate.mockResolvedValue(mockValidateEnforcement)
+
+      const options = {
+        method: 'POST',
+        url: '/persons:batch-delete',
+        payload: {
+          personReferences: defaultPersons
+        },
+        ...enforcementHeader
+      }
+      const response = await server.inject(options)
+      expect(response.statusCode).toBe(403)
+    })
+
+    test('should return 403 given call from standard user', async () => {
+      validate.mockResolvedValue(mockValidateStandard)
+
+      const options = {
+        method: 'POST',
+        url: '/persons:batch-delete',
+        payload: {
+          personReferences: defaultPersons
+        },
+        ...portalStandardHeader
+      }
+      const response = await server.inject(options)
+      expect(response.statusCode).toBe(403)
     })
 
     test('should return 400 given invalid payload', async () => {
