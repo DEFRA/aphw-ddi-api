@@ -1,6 +1,6 @@
 const { jobs: mockJobs } = require('../../../mocks/jobs')
-const { mockValidate } = require('../../../mocks/auth')
-const { portalHeader } = require('../../../mocks/jwt')
+const { mockValidate, mockValidateEnforcement, mockValidateStandard } = require('../../../mocks/auth')
+const { portalHeader, enforcementHeader, portalStandardHeader } = require('../../../mocks/jwt')
 
 describe('Regular jobs endpoint', () => {
   const createServer = require('../../../../app/server')
@@ -11,10 +11,10 @@ describe('Regular jobs endpoint', () => {
 
   jest.mock('../../../../app/auth/token-validator')
   const { validate } = require('../../../../app/auth/token-validator')
-  validate.mockResolvedValue(mockValidate)
 
   beforeEach(async () => {
     jest.clearAllMocks()
+    validate.mockResolvedValue(mockValidate)
     server = await createServer()
     await server.initialize()
   })
@@ -30,6 +30,30 @@ describe('Regular jobs endpoint', () => {
 
     const response = await server.inject(options)
     expect(response.statusCode).toBe(200)
+  })
+
+  test('should return 403 given call from enforcement', async () => {
+    validate.mockResolvedValue(mockValidateEnforcement)
+
+    const options = {
+      method: 'GET',
+      url: '/regular-jobs',
+      ...enforcementHeader
+    }
+    const response = await server.inject(options)
+    expect(response.statusCode).toBe(403)
+  })
+
+  test('should return 403 given call from standard user', async () => {
+    validate.mockResolvedValue(mockValidateStandard)
+
+    const options = {
+      method: 'GET',
+      url: '/regular-jobs',
+      ...portalStandardHeader
+    }
+    const response = await server.inject(options)
+    expect(response.statusCode).toBe(403)
   })
 
   test('GET /regular-jobs route returns 500 if db error', async () => {

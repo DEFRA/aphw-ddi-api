@@ -4,6 +4,7 @@ const { personDto } = require('../dto/person')
 const { deletePayloadSchema } = require('../schema/persons/delete')
 const { deleteResponseSchema } = require('../schema/shared/delete')
 const { getCallingUser } = require('../auth/get-user')
+const { scopes } = require('../constants/auth')
 /**
  * @typedef GetPersonsQuery
  * @property {string} [firstName]
@@ -19,6 +20,7 @@ module.exports = [
     method: 'GET',
     path: '/persons',
     options: {
+      auth: { scope: scopes.internal },
       validate: {
         query: personsQueryParamsSchema,
         failAction: (request, h, error) => {
@@ -48,6 +50,7 @@ module.exports = [
     method: 'POST',
     path: '/persons:batch-delete',
     options: {
+      auth: { scope: [scopes.admin] },
       validate: {
         payload: deletePayloadSchema,
         failAction: (request, h, error) => {

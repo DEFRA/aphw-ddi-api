@@ -1,7 +1,7 @@
 const { personDaoBuilder } = require('../../../mocks/person')
 const { buildDogDao, buildRegistrationDao } = require('../../../mocks/cdo/get')
-const { mockValidate } = require('../../../mocks/auth')
-const { portalHeader } = require('../../../mocks/jwt')
+const { mockValidate, mockValidateEnforcement, mockValidateStandard } = require('../../../mocks/auth')
+const { portalHeader, enforcementHeader, portalStandardHeader } = require('../../../mocks/jwt')
 
 describe('Dog endpoint', () => {
   const createServer = require('../../../../app/server')
@@ -22,13 +22,13 @@ describe('Dog endpoint', () => {
 
   jest.mock('../../../../app/auth/token-validator')
   const { validate } = require('../../../../app/auth/token-validator')
-  validate.mockResolvedValue(mockValidate)
 
   jest.mock('../../../../app/auth/get-user')
   const { getCallingUser } = require('../../../../app/auth/get-user')
 
   beforeEach(async () => {
     jest.clearAllMocks()
+    validate.mockResolvedValue(mockValidate)
     server = await createServer()
     await server.initialize()
   })
@@ -211,6 +211,19 @@ describe('Dog endpoint', () => {
 
       expect(response.statusCode).toBe(200)
     })
+
+    test('should return 403 given call from enforcement', async () => {
+      validate.mockResolvedValue(mockValidateEnforcement)
+
+      const options = {
+        method: 'POST',
+        url: '/dog',
+        payload: { dog: { name: 'Bruno' } },
+        ...enforcementHeader
+      }
+      const response = await server.inject(options)
+      expect(response.statusCode).toBe(403)
+    })
   })
 
   describe('PUT /dog', () => {
@@ -300,6 +313,19 @@ describe('Dog endpoint', () => {
 
       expect(response.statusCode).toBe(200)
     })
+
+    test('should return 403 given call from enforcement', async () => {
+      validate.mockResolvedValue(mockValidateEnforcement)
+
+      const options = {
+        method: 'PUT',
+        url: '/dog',
+        payload: { indexNumber: 'ABC123' },
+        ...enforcementHeader
+      }
+      const response = await server.inject(options)
+      expect(response.statusCode).toBe(403)
+    })
   })
 
   describe('DELETE /dog/ED123', () => {
@@ -323,6 +349,30 @@ describe('Dog endpoint', () => {
         displayname: 'User, Internal',
         username: 'internal-user'
       })
+    })
+
+    test('should return 403 given call from enforcement', async () => {
+      validate.mockResolvedValue(mockValidateEnforcement)
+
+      const options = {
+        method: 'DELETE',
+        url: '/dog/ED123',
+        ...enforcementHeader
+      }
+      const response = await server.inject(options)
+      expect(response.statusCode).toBe(403)
+    })
+
+    test('should return 403 given call from standard user', async () => {
+      validate.mockResolvedValue(mockValidateStandard)
+
+      const options = {
+        method: 'DELETE',
+        url: '/dog/ED123',
+        ...portalStandardHeader
+      }
+      const response = await server.inject(options)
+      expect(response.statusCode).toBe(403)
     })
 
     test('DELETE /dog/ED123 route returns 404 with invalid dog index', async () => {
@@ -507,6 +557,36 @@ describe('Dog endpoint', () => {
       expect(response.statusCode).toBe(200)
       expect(payload.deleted.success).toEqual(expectedDogs)
       expect(deleteDogs).toHaveBeenCalledWith(expectedDogs, expectedUser)
+    })
+
+    test('should return 403 given call from enforcement', async () => {
+      validate.mockResolvedValue(mockValidateEnforcement)
+
+      const options = {
+        method: 'POST',
+        url: '/dogs:batch-delete',
+        payload: {
+          dogPks: ['ED300006', 'ED300053']
+        },
+        ...enforcementHeader
+      }
+      const response = await server.inject(options)
+      expect(response.statusCode).toBe(403)
+    })
+
+    test('should return 403 given call from standard user', async () => {
+      validate.mockResolvedValue(mockValidateStandard)
+
+      const options = {
+        method: 'POST',
+        url: '/dogs:batch-delete',
+        payload: {
+          dogPks: ['ED300006', 'ED300053']
+        },
+        ...portalStandardHeader
+      }
+      const response = await server.inject(options)
+      expect(response.statusCode).toBe(403)
     })
 
     test('should return a 400 given invalid response payload', async () => {

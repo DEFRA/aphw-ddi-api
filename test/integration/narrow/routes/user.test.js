@@ -1,4 +1,4 @@
-const { mockValidate, mockValidateEnforcement } = require('../../../mocks/auth')
+const { mockValidate, mockValidateEnforcement, mockValidateStandard } = require('../../../mocks/auth')
 const { portalHeader, enforcementHeader, portalStandardHeader } = require('../../../mocks/jwt')
 const { buildUserAccount } = require('../../../mocks/user-accounts')
 
@@ -533,6 +533,30 @@ describe('User endpoint', () => {
           username: 'dev-user@test.com'
         }))
       expect(response.payload).toEqual(expectedPayload)
+    })
+
+    test('should return 403 given call from enforcement', async () => {
+      validate.mockResolvedValue(mockValidateEnforcement)
+
+      const options = {
+        method: 'DELETE',
+        url: '/user/5',
+        ...enforcementHeader
+      }
+      const response = await server.inject(options)
+      expect(response.statusCode).toBe(403)
+    })
+
+    test('should return 403 given call from standard user', async () => {
+      validate.mockResolvedValue(mockValidateStandard)
+
+      const options = {
+        method: 'DELETE',
+        url: '/user/5',
+        ...portalStandardHeader
+      }
+      const response = await server.inject(options)
+      expect(response.statusCode).toBe(403)
     })
   })
 

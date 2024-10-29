@@ -115,6 +115,7 @@ module.exports = [
     method: 'DELETE',
     path: '/user/{userId?}',
     options: {
+      auth: { scope: [scopes.admin] },
       tags: ['api'],
       notes: ['Hard deletes a user account'],
       response: {

@@ -4,12 +4,14 @@ const { purgeSoftDeletedDto } = require('../dto/overnight')
 const { setExpiredInsuranceToBreach, addBreachReasonToExpiredInsurance } = require('../overnight/expired-insurance')
 const { getCallingUser } = require('../auth/get-user')
 const { setExpiredNeuteringDeadlineToInBreach, addBreachReasonToExpiredNeuteringDeadline } = require('../overnight/expired-neutering-deadline')
+const { scopes } = require('../constants/auth')
 
 module.exports = [
   {
     method: 'POST',
     path: '/jobs/purge-soft-delete',
     options: {
+      auth: { scope: [scopes.admin] },
       notes: ['Hard deletes/purges all the dog & owner records that we soft deleted more than x days ago (90)'],
       tags: ['api'],
       validate: {
@@ -34,6 +36,7 @@ module.exports = [
     method: 'POST',
     path: '/jobs/expired-insurance',
     options: {
+      auth: { scope: [scopes.admin] },
       tags: ['api'],
       notes: ['Sets all the dog with expired insurance to In Breach'],
       response: {
@@ -61,6 +64,7 @@ module.exports = [
     method: 'POST',
     path: '/jobs/neutering-deadline',
     options: {
+      auth: { scope: [scopes.admin] },
       tags: ['api'],
       notes: ['Sets dogs who have not neutered their dogs before the deadline to In Breach'],
       response: {

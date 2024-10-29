@@ -1,6 +1,7 @@
 const { statisticsQuerySchema, statisticsResponseSchema } = require('../schema/admin/statistics')
 const { getCountsPerStatus, getCountsPerCountry } = require('../repos/statistics')
 const { countsPerStatusDto, countsPerCountryDto } = require('../dto/statistics')
+const { scopes } = require('../constants/auth')
 
 const queryCountsPerStatus = 'countsPerStatus'
 const queryCountsPerCountry = 'countsPerCountry'
@@ -9,6 +10,7 @@ module.exports = {
   method: 'GET',
   path: '/statistics',
   options: {
+    auth: { scope: [scopes.admin] },
     tags: ['api'],
     notes: ['Gets the statistics for the DDI - Counts by status and counts by country'],
     response: {
