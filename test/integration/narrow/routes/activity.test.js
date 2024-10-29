@@ -1,14 +1,10 @@
 const { activities: mockActivities } = require('../../../mocks/activities')
-const { devUser, mockValidate } = require('../../../mocks/auth')
-const { portalHeader } = require('../../../mocks/jwt')
+const { devUser } = require('../../../mocks/auth')
+const { portalHeader, portalStandardHeader, enforcementHeader } = require('../../../mocks/jwt')
 
 describe('Activity endpoint', () => {
   const createServer = require('../../../../app/server')
   let server
-
-  jest.mock('../../../../app/auth/token-validator')
-  const { validate } = require('../../../../app/auth/token-validator')
-  validate.mockResolvedValue(mockValidate)
 
   jest.mock('../../../../app/auth/get-user')
   const { getCallingUser } = require('../../../../app/auth/get-user')
@@ -22,9 +18,20 @@ describe('Activity endpoint', () => {
   jest.mock('../../../../app/service/config')
   const { getCdoService } = require('../../../../app/service/config')
 
+  jest.mock('../../../../app/proxy/auth-server')
+  const { getUserInfo } = require('../../../../app/proxy/auth-server')
+
+  jest.mock('../../../../app/repos/user-accounts')
+  const { isAccountEnabled } = require('../../../../app/repos/user-accounts')
+
   beforeEach(async () => {
     jest.clearAllMocks()
     getCallingUser.mockReturnValue(devUser)
+    getUserInfo.mockResolvedValue({
+      email: 'enforcement.user@example.com',
+      email_verified: true
+    })
+    isAccountEnabled.mockResolvedValue(true)
     server = await createServer()
     await server.initialize()
   })
@@ -199,7 +206,7 @@ describe('Activity endpoint', () => {
           source: 'dog',
           activityDate
         },
-        ...portalHeader
+        ...portalStandardHeader
       }
 
       const response = await server.inject(options)
@@ -247,6 +254,28 @@ describe('Activity endpoint', () => {
 
       expect(response.statusCode).toBe(400)
     })
+
+    test('returns 403 with call from Enforcement', async () => {
+      sendActivityToAudit.mockResolvedValue()
+      getActivityById.mockResolvedValue({ id: 1, name: 'act 1', label: 'activity 1' })
+
+      const options = {
+        method: 'POST',
+        url: '/activity',
+        payload: {
+          activity: '3',
+          activityType: 'sent',
+          pk: 'ED300000',
+          source: 'dog',
+          activityDate: new Date()
+        },
+        ...enforcementHeader
+      }
+
+      const response = await server.inject(options)
+
+      expect(response.statusCode).toBe(403)
+    })
   })
 
   describe('POST /activities', () => {
@@ -286,6 +315,54 @@ describe('Activity endpoint', () => {
 
       expect(response.statusCode).toBe(201)
     })
+
+    test('returns 403 with standard scope', async () => {
+      createActivity.mockResolvedValue({
+        activityType: 'sent',
+        activitySource: 'dog',
+        label: 'New activity',
+        id: 12345
+      })
+
+      const options = {
+        method: 'POST',
+        url: '/activities',
+        payload: {
+          activityType: 'sent',
+          activitySource: 'dog',
+          label: 'New activivty'
+        },
+        ...portalStandardHeader
+      }
+
+      const response = await server.inject(options)
+
+      expect(response.statusCode).toBe(403)
+    })
+
+    test('returns 403 with enforcement scope', async () => {
+      createActivity.mockResolvedValue({
+        activityType: 'sent',
+        activitySource: 'dog',
+        label: 'New activity',
+        id: 12345
+      })
+
+      const options = {
+        method: 'POST',
+        url: '/activities',
+        payload: {
+          activityType: 'sent',
+          activitySource: 'dog',
+          label: 'New activity'
+        },
+        ...enforcementHeader
+      }
+
+      const response = await server.inject(options)
+
+      expect(response.statusCode).toBe(403)
+    })
   })
 
   describe('DELETE /activities', () => {
@@ -315,6 +392,21 @@ describe('Activity endpoint', () => {
       const response = await server.inject(options)
 
       expect(response.statusCode).toBe(204)
+    })
+
+    test('returns 403 with call from enforcement', async () => {
+      deleteActivity.mockResolvedValue()
+
+      const options = {
+        method: 'DELETE',
+        url: '/activities/123',
+        payload: {},
+        ...enforcementHeader
+      }
+
+      const response = await server.inject(options)
+
+      expect(response.statusCode).toBe(403)
     })
   })
 

@@ -1,5 +1,6 @@
-const { mockValidate } = require('../../../mocks/auth')
-const { portalHeader } = require('../../../mocks/jwt')
+const { mockValidate, mockValidateEnforcement } = require('../../../mocks/auth')
+const { portalHeader, enforcementHeader } = require('../../../mocks/jwt')
+
 describe('CDO endpoint', () => {
   const createServer = require('../../../../app/server')
   let server
@@ -223,6 +224,18 @@ describe('CDO endpoint', () => {
     const response = await server.inject(options)
     expect(response.statusCode).toBe(200)
     expect(getSummaryCdos).toHaveBeenCalledWith(expectedFilter, expectedOrdering)
+  })
+
+  test('should return 403 given call from enforcement', async () => {
+    validate.mockResolvedValue(mockValidateEnforcement)
+
+    const options = {
+      method: 'GET',
+      url: '/cdos?status=PreExempt',
+      ...enforcementHeader
+    }
+    const response = await server.inject(options)
+    expect(response.statusCode).toBe(403)
   })
 
   test('GET /cdos route returns 400 given no filter applied', async () => {

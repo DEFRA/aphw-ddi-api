@@ -17,6 +17,7 @@ const { InvalidDataError } = require('../errors/domain/invalidData')
 const { InvalidDateError } = require('../errors/domain/invalidDate')
 const { getCdoByIndexNumberSchema } = require('../schema/cdo/response')
 const { auditDogDetailsView, auditDogActivityView } = require('../dto/auditing/view')
+const { scopes } = require('../constants/auth')
 
 /**
  * @param e
@@ -94,6 +95,7 @@ module.exports = [
     method: 'POST',
     path: '/cdo',
     options: {
+      auth: { scope: scopes.internal },
       tags: ['api'],
       notes: ['Creates a new CDO'],
       response: {
@@ -160,6 +162,7 @@ module.exports = [
     method: 'POST',
     path: '/cdo/{indexNumber}/manage:sendApplicationPack',
     options: {
+      auth: { scope: scopes.internal },
       tags: ['api'],
       notes: ['Send Application Pack Manage CDO domain action.  Publishes application pack sent event & updates the status of the sendApplicationPack stage of the CDO tasklist.  Completion of this is necessary in order to perform subsequent tasks.'],
       response: {
@@ -186,6 +189,7 @@ module.exports = [
     method: 'POST',
     path: '/cdo/{indexNumber}/manage:recordInsuranceDetails',
     options: {
+      auth: { scope: scopes.internal },
       tags: ['api'],
       notes: ['Record Insurance Details Manage CDO domain action. Records latest insurance details on CDO application'],
       validate: {
@@ -222,6 +226,7 @@ module.exports = [
     method: 'POST',
     path: '/cdo/{indexNumber}/manage:recordMicrochipNumber',
     options: {
+      auth: { scope: scopes.internal },
       tags: ['api'],
       notes: ['Record Microchip number Manage CDO domain action.  Record microchip number update as part of CDO application'],
       validate: {
@@ -258,6 +263,7 @@ module.exports = [
     method: 'POST',
     path: '/cdo/{indexNumber}/manage:recordApplicationFee',
     options: {
+      auth: { scope: scopes.internal },
       tags: ['api'],
       notes: ['Record application Fee Manage CDO domain action.  Record application fee payment as part of CDO Tasklist'],
       validate: {
@@ -293,6 +299,7 @@ module.exports = [
     method: 'POST',
     path: '/cdo/{indexNumber}/manage:sendForm2',
     options: {
+      auth: { scope: scopes.internal },
       tags: ['api'],
       notes: ['Send Form2 Manage CDO domain action.  Publishes a send Form2 event and updates status on CDO tasklist.  Task is required in order to Record verification dates'],
       response: {
@@ -319,6 +326,7 @@ module.exports = [
     method: 'POST',
     path: '/cdo/{indexNumber}/manage:verifyDates',
     options: {
+      auth: { scope: scopes.internal },
       tags: ['api'],
       notes: ['Verify Dates Manage CDO domain action.'],
       validate: {
@@ -356,6 +364,7 @@ module.exports = [
     method: 'POST',
     path: '/cdo/{indexNumber}/manage:issueCertificate',
     options: {
+      auth: { scope: scopes.internal },
       tags: ['api'],
       notes: ['Issue Certificate domain action on Manage CDO.  All other actions need to be complete in order to perform.'],
       response: {

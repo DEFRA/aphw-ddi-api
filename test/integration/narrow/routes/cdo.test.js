@@ -3,13 +3,13 @@ const { NotFoundError } = require('../../../../app/errors/not-found')
 const { CdoTaskList } = require('../../../../app/data/domain')
 const { buildCdo, buildCdoDog, buildExemption, buildCdoInsurance } = require('../../../mocks/cdo/domain')
 const { ActionAlreadyPerformedError } = require('../../../../app/errors/domain/actionAlreadyPerformed')
-const { devUser, mockValidate } = require('../../../mocks/auth')
+const { devUser, mockValidate, mockValidateEnforcement } = require('../../../mocks/auth')
 const { SequenceViolationError } = require('../../../../app/errors/domain/sequenceViolation')
 const { DuplicateResourceError } = require('../../../../app/errors/duplicate-record')
 const { InvalidDataError } = require('../../../../app/errors/domain/invalidData')
 const { InvalidDateError } = require('../../../../app/errors/domain/invalidDate')
 const { buildCdoDao } = require('../../../mocks/cdo/get')
-const { portalHeader } = require('../../../mocks/jwt')
+const { portalHeader, enforcementHeader } = require('../../../mocks/jwt')
 
 describe('CDO endpoint', () => {
   const createServer = require('../../../../app/server')
@@ -21,7 +21,6 @@ describe('CDO endpoint', () => {
 
   jest.mock('../../../../app/auth/token-validator')
   const { validate } = require('../../../../app/auth/token-validator')
-  validate.mockResolvedValue(mockValidate)
 
   jest.mock('../../../../app/auth/get-user')
   const { getCallingUser } = require('../../../../app/auth/get-user')
@@ -34,6 +33,7 @@ describe('CDO endpoint', () => {
 
   beforeEach(async () => {
     jest.clearAllMocks()
+    validate.mockResolvedValue(mockValidate)
     server = await createServer()
     getCallingUser.mockReturnValue(devUser)
     await server.initialize()
@@ -317,6 +317,19 @@ describe('CDO endpoint', () => {
 
       expect(response.statusCode).toBe(500)
     })
+
+    test('POST /cdo route returns 403 with enforcement call', async () => {
+      validate.mockResolvedValue(mockValidateEnforcement)
+      const options = {
+        method: 'POST',
+        url: '/cdo',
+        payload: mockCreatePayload,
+        ...enforcementHeader
+      }
+
+      const response = await server.inject(options)
+      expect(response.statusCode).toBe(403)
+    })
   })
 
   describe('GET /cdo/ED123/manage', () => {
@@ -444,6 +457,18 @@ describe('CDO endpoint', () => {
       expect(sendApplicationPackMock).toHaveBeenCalledWith('ED123', expect.any(Date), devUser)
     })
 
+    test('should return 403 given call from enforcement', async () => {
+      validate.mockResolvedValue(mockValidateEnforcement)
+
+      const options = {
+        method: 'POST',
+        url: '/cdo/ED123/manage:sendApplicationPack',
+        ...portalHeader
+      }
+      const response = await server.inject(options)
+      expect(response.statusCode).toBe(403)
+    })
+
     test('should throw a 404 given index does not exist', async () => {
       getCdoService.mockReturnValue({
         sendApplicationPack: async () => {
@@ -533,6 +558,22 @@ describe('CDO endpoint', () => {
           insuranceRenewal: new Date('9999-01-01')
         },
         devUser)
+    })
+
+    test('should return 403 given call from enforcement', async () => {
+      validate.mockResolvedValue(mockValidateEnforcement)
+
+      const options = {
+        method: 'POST',
+        url: '/cdo/ED123/manage:recordInsuranceDetails',
+        payload: {
+          insuranceCompany: 'Dog\'s Trust',
+          insuranceRenewal: '9999-01-01'
+        },
+        ...enforcementHeader
+      }
+      const response = await server.inject(options)
+      expect(response.statusCode).toBe(403)
     })
 
     test('should returns 400 with invalid payload', async () => {
@@ -641,6 +682,21 @@ describe('CDO endpoint', () => {
           microchipNumber: '123456789012345'
         },
         devUser)
+    })
+
+    test('should return 403 given call from enforcement', async () => {
+      validate.mockResolvedValue(mockValidateEnforcement)
+
+      const options = {
+        method: 'POST',
+        url: '/cdo/ED123/manage:recordMicrochipNumber',
+        payload: {
+          microchipNumber: '123456789012345'
+        },
+        ...enforcementHeader
+      }
+      const response = await server.inject(options)
+      expect(response.statusCode).toBe(403)
     })
 
     test('should returns 400 with invalid payload', async () => {
@@ -786,6 +842,21 @@ describe('CDO endpoint', () => {
         devUser)
     })
 
+    test('should return 403 given call from enforcement', async () => {
+      validate.mockResolvedValue(mockValidateEnforcement)
+
+      const options = {
+        method: 'POST',
+        url: '/cdo/ED123/manage:recordApplicationFee',
+        payload: {
+          applicationFeePaid: '2024-07-02'
+        },
+        ...enforcementHeader
+      }
+      const response = await server.inject(options)
+      expect(response.statusCode).toBe(403)
+    })
+
     test('should return 400 given invalid payload', async () => {
       const options = {
         method: 'POST',
@@ -893,6 +964,18 @@ describe('CDO endpoint', () => {
       expect(sendForm2Mock).toHaveBeenCalledWith('ED123', expect.any(Date), devUser)
     })
 
+    test('should return 403 given call from enforcement', async () => {
+      validate.mockResolvedValue(mockValidateEnforcement)
+
+      const options = {
+        method: 'POST',
+        url: '/cdo/ED123/manage:sendForm2',
+        ...enforcementHeader
+      }
+      const response = await server.inject(options)
+      expect(response.statusCode).toBe(403)
+    })
+
     test('should throw a 404 given index does not exist', async () => {
       getCdoService.mockReturnValue({
         sendForm2: async () => {
@@ -995,6 +1078,22 @@ describe('CDO endpoint', () => {
         microchipVerification,
         neuteringConfirmation
       }, devUser)
+    })
+
+    test('should return 403 given call from enforcement', async () => {
+      validate.mockResolvedValue(mockValidateEnforcement)
+
+      const options = {
+        method: 'POST',
+        url: '/cdo/ED123/manage:verifyDates',
+        payload: {
+          microchipVerification: '2024-07-03',
+          neuteringConfirmation: '2024-07-04'
+        },
+        ...enforcementHeader
+      }
+      const response = await server.inject(options)
+      expect(response.statusCode).toBe(403)
     })
 
     test('should throw a 404 given index does not exist', async () => {
@@ -1118,6 +1217,18 @@ describe('CDO endpoint', () => {
         certificateIssued: new Date('2024-07-30').toISOString()
       })
       expect(issueCertificateMock).toHaveBeenCalledWith('ED123', expect.any(Date), devUser)
+    })
+
+    test('should return 403 given call from enforcement', async () => {
+      validate.mockResolvedValue(mockValidateEnforcement)
+
+      const options = {
+        method: 'POST',
+        url: '/cdo/ED123/manage:issueCertificate',
+        ...enforcementHeader
+      }
+      const response = await server.inject(options)
+      expect(response.statusCode).toBe(403)
     })
 
     test('should throw a 404 given index does not exist', async () => {

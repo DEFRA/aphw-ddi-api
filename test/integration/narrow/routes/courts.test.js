@@ -1,6 +1,6 @@
 const { NotFoundError } = require('../../../../app/errors/not-found')
-const { mockValidate } = require('../../../mocks/auth')
-const { portalHeader } = require('../../../mocks/jwt')
+const { mockValidate, mockValidateEnforcement, mockValidateStandard } = require('../../../mocks/auth')
+const { portalHeader, enforcementHeader, portalStandardHeader } = require('../../../mocks/jwt')
 
 describe('Courts endpoint', () => {
   const { DuplicateResourceError } = require('../../../../app/errors/duplicate-record')
@@ -106,6 +106,36 @@ describe('Courts endpoint', () => {
       })
     })
 
+    test('should return 403 given call from standard user', async () => {
+      validate.mockResolvedValue(mockValidateStandard)
+
+      const options = {
+        method: 'POST',
+        url: '/courts',
+        payload: {
+          name: 'Gondor Crown Court'
+        },
+        ...portalStandardHeader
+      }
+      const response = await server.inject(options)
+      expect(response.statusCode).toBe(403)
+    })
+
+    test('should return 403 given call from enforcement', async () => {
+      validate.mockResolvedValue(mockValidateEnforcement)
+
+      const options = {
+        method: 'POST',
+        url: '/courts',
+        payload: {
+          name: 'Gondor Crown Court'
+        },
+        ...enforcementHeader
+      }
+      const response = await server.inject(options)
+      expect(response.statusCode).toBe(403)
+    })
+
     test('should return a 400 given schema is invalid', async () => {
       const options = {
         method: 'POST',
@@ -178,6 +208,30 @@ describe('Courts endpoint', () => {
       expect(response.statusCode).toBe(204)
 
       expect(response.payload).toBe('')
+    })
+
+    test('should return 403 given call from enforcement', async () => {
+      validate.mockResolvedValue(mockValidateEnforcement)
+
+      const options = {
+        method: 'DELETE',
+        url: '/courts/1',
+        ...enforcementHeader
+      }
+      const response = await server.inject(options)
+      expect(response.statusCode).toBe(403)
+    })
+
+    test('should return 403 given call from standard user', async () => {
+      validate.mockResolvedValue(mockValidateStandard)
+
+      const options = {
+        method: 'DELETE',
+        url: '/courts/1',
+        ...portalStandardHeader
+      }
+      const response = await server.inject(options)
+      expect(response.statusCode).toBe(403)
     })
 
     test('should return 409 given NotFoundError error', async () => {

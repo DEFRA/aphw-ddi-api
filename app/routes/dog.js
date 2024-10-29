@@ -9,6 +9,7 @@ const { deleteResponseSchema } = require('../schema/shared/delete')
 const { importDogSchema, updateDogSchema } = require('../schema/dogs/response')
 const { putDogPayloadSchema } = require('../schema/dogs/put')
 const { dogOwnerResponseSchema, dogOwnerQuerySchema } = require('../schema/person/dog-owner')
+const { scopes } = require('../constants/auth')
 
 module.exports = [
   {
@@ -87,6 +88,7 @@ module.exports = [
     method: 'POST',
     path: '/dog',
     options: {
+      auth: { scope: scopes.internal },
       tags: ['api'],
       notes: ['Imports a dog'],
       response: {
@@ -107,6 +109,7 @@ module.exports = [
     method: 'PUT',
     path: '/dog',
     options: {
+      auth: { scope: scopes.internal },
       tags: ['api'],
       notes: ['Update details on an individual dog'],
       response: {
@@ -143,6 +146,7 @@ module.exports = [
     method: 'DELETE',
     path: '/dog/{indexNumber}',
     options: {
+      auth: { scope: [scopes.admin] },
       tags: ['api'],
       notes: ['Soft Delete a dog by index number'],
       response: {
@@ -212,6 +216,7 @@ module.exports = [
     method: 'POST',
     path: '/dogs:batch-delete',
     options: {
+      auth: { scope: [scopes.admin] },
       tags: ['api'],
       notes: ['Soft deletes a batch of dogs by dog index number'],
       validate: {
