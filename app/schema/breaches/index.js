@@ -22,7 +22,16 @@ const setBreachResponseSchema = Joi.object({
   breaches: Joi.array().items(Joi.string()).min(1).required()
 }).unknown()
 
+const setBreachCategoriesResponseSchema = Joi.object({
+  breachCategories: Joi.array().items(Joi.object({
+    id: Joi.number(),
+    label: Joi.string(),
+    short_name: Joi.string()
+  }))
+})
+
 module.exports = {
   setBreachRequestSchema,
-  setBreachResponseSchema
+  setBreachResponseSchema,
+  setBreachCategoriesResponseSchema
 }

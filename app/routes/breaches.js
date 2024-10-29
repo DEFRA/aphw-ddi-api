@@ -2,24 +2,31 @@ const { getBreachCategories } = require('../repos/breaches')
 const ServiceProvider = require('../service/config')
 const { getCallingUser } = require('../auth/get-user')
 const { mapDogToDogDto } = require('../repos/mappers/dog')
-const { setBreachRequestSchema, setBreachResponseSchema } = require('../schema/breaches')
+const { setBreachRequestSchema, setBreachResponseSchema, setBreachCategoriesResponseSchema } = require('../schema/breaches')
+const { scopes } = require('../constants/auth')
 
 module.exports = [
   {
     method: 'GET',
     path: '/breaches/categories',
-    handler: async (request, h) => {
-      const breachCategories = await getBreachCategories(true)
+    options: {
+      response: {
+        schema: setBreachCategoriesResponseSchema
+      },
+      handler: async (request, h) => {
+        const breachCategories = await getBreachCategories(true)
 
-      return h.response({
-        breachCategories
-      }).code(200)
+        return h.response({
+          breachCategories
+        }).code(200)
+      }
     }
   },
   {
     method: 'POST',
     path: '/breaches/dog:setBreaches',
     options: {
+      auth: { scope: [scopes.admin, scopes.standard] },
       validate: {
         payload: setBreachRequestSchema
       },
