@@ -90,9 +90,33 @@ const getPoliceForceByShortName = async (shortName, transaction) => {
   })
 }
 
+const extractShortNameAndDomain = (email) => {
+  const lowerEmail = email.toLowerCase()
+  const atPos = lowerEmail.indexOf('@')
+  if (atPos === -1) {
+    return email
+  }
+  const domain = email.substr(atPos + 1)
+  const shortName = domain.replace('.pnn.police.uk', '').replace('.police.uk', '')
+  return {
+    domain,
+    shortName
+  }
+}
+const lookupPoliceForceByEmail = async (email) => {
+  if (!email) {
+    return 'unknown'
+  }
+  const { domain, shortName } = extractShortNameAndDomain(email)
+  const force = await getPoliceForceByShortName(shortName)
+  return force ? force.name : domain
+}
+
 module.exports = {
   getPoliceForces,
   addForce,
   deleteForce,
-  getPoliceForceByShortName
+  getPoliceForceByShortName,
+  lookupPoliceForceByEmail,
+  extractShortNameAndDomain
 }

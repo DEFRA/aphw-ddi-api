@@ -50,6 +50,7 @@ container:
   overnightJobCrontab: 5 4 * * *
   paranoidRetentionPeriod: 90
   userFeedbackEmailAddress: dummy
+  reportSomethingEmailAddress: dummy
   enforcementUrl: dummy
   redisHostname: dummy
   redisPort: 6379
