@@ -1,12 +1,16 @@
 const { getSummaryCdos } = require('../repos/cdo')
 const { mapSummaryCdoDaoToDto } = require('../repos/mappers/cdo')
 const { getCdosQuerySchema, getCdosResponseSchema } = require('../schema/cdos/get')
+const { scopes } = require('../constants/auth')
 
 module.exports = [
   {
     method: 'GET',
     path: '/cdos',
     options: {
+      tags: ['api'],
+      auth: { scope: scopes.internal },
+      notes: ['Returns filtered summary list of cdos'],
       validate: {
         query: getCdosQuerySchema,
         failAction: (request, h, err) => {
