@@ -3,11 +3,13 @@ const { EXPORT } = require('../constants/event/events')
 const { sendEventToAudit } = require('../messaging/send-audit')
 const { runExportNow } = require('../overnight/run-jobs')
 const { exportCreateFileQuerySchema } = require('../schema/export')
+const { scopes } = require('../constants/auth')
 
 module.exports = [{
   method: 'GET',
   path: '/export-audit',
   options: {
+    auth: { scope: [scopes.admin] },
     tags: ['api'],
     notes: ['Publishes an export event'],
     response: {
@@ -26,6 +28,7 @@ module.exports = [{
   method: 'GET',
   path: '/export-create-file',
   options: {
+    auth: { scope: [scopes.admin] },
     tags: ['api'],
     validate: {
       query: exportCreateFileQuerySchema
