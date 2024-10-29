@@ -9,6 +9,7 @@ const { getActivitiesSchema, getActivitySchema } = require('../schema/activity/r
 const { conflictSchema } = require('../schema/common/response/conflict')
 const { successResponseSchema } = require('../schema/common/response/ok')
 const { mapActivityDaoToActivityDto } = require('../dto/mappers/activity')
+const { scopes } = require('../constants/auth')
 
 module.exports = [
   {
@@ -37,6 +38,7 @@ module.exports = [
     path: '/activities',
     options: {
       tags: ['api'],
+      auth: { scope: [scopes.admin] },
       notes: ['Creates a new custom activity type'],
       validate: {
         payload: createActivitySchema,
@@ -53,6 +55,7 @@ module.exports = [
         }
       },
       handler: async (request, h) => {
+        console.log('~~~~~~ Chris Debug ~~~~~~ ', 'Request.auth', request.auth)
         const activity = await createActivity(request.payload, getCallingUser(request))
 
         return h.response({
@@ -68,6 +71,7 @@ module.exports = [
     method: 'DELETE',
     path: '/activities/{activityId}',
     options: {
+      auth: { scope: [scopes.admin] },
       tags: ['api'],
       notes: ['Deletes an activity type by id'],
       response: {
@@ -108,6 +112,7 @@ module.exports = [
     path: '/activity',
     options: {
       tags: ['api'],
+      auth: { scope: [scopes.admin] },
       notes: ['On successful submission publishes an activity event of requested type'],
       response: {
         schema: successResponseSchema
@@ -138,5 +143,4 @@ module.exports = [
       }
     }
   }
-
 ]
