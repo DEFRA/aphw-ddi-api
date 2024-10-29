@@ -1,6 +1,6 @@
 const { expectDate } = require('../../../time-helper')
-const { mockValidate } = require('../../../mocks/auth')
-const { portalHeader } = require('../../../mocks/jwt')
+const { mockValidate, mockValidateEnforcement, mockValidateStandard } = require('../../../mocks/auth')
+const { portalHeader, enforcementHeader, portalStandardHeader } = require('../../../mocks/jwt')
 
 describe('Jobs endpoint', () => {
   const createServer = require('../../../../app/server')
@@ -8,7 +8,6 @@ describe('Jobs endpoint', () => {
 
   jest.mock('../../../../app/auth/token-validator')
   const { validate } = require('../../../../app/auth/token-validator')
-  validate.mockResolvedValue(mockValidate)
 
   jest.mock('../../../../app/overnight/purge-soft-deleted-records')
   const { purgeSoftDeletedRecords } = require('../../../../app/overnight/purge-soft-deleted-records')
@@ -21,6 +20,7 @@ describe('Jobs endpoint', () => {
 
   beforeEach(async () => {
     jest.clearAllMocks()
+    validate.mockResolvedValue(mockValidate)
     server = await createServer()
     await server.initialize()
   })
@@ -106,6 +106,30 @@ describe('Jobs endpoint', () => {
       expect(purgeSoftDeletedRecords).toHaveBeenCalledWith(new Date('2024-03-16'))
     })
 
+    test('should return 403 given call from enforcement', async () => {
+      validate.mockResolvedValue(mockValidateEnforcement)
+
+      const options = {
+        method: 'POST',
+        url: '/jobs/purge-soft-delete',
+        ...enforcementHeader
+      }
+      const response = await server.inject(options)
+      expect(response.statusCode).toBe(403)
+    })
+
+    test('should return 403 given call from standard user', async () => {
+      validate.mockResolvedValue(mockValidateStandard)
+
+      const options = {
+        method: 'POST',
+        url: '/jobs/purge-soft-delete',
+        ...portalStandardHeader
+      }
+      const response = await server.inject(options)
+      expect(response.statusCode).toBe(403)
+    })
+
     test('should 400 with invalid query props', async () => {
       const options = {
         method: 'POST',
@@ -168,6 +192,30 @@ describe('Jobs endpoint', () => {
       expect(addBreachReasonToExpiredInsurance.mock.calls[0][0]).toEqual(new Date('2024-03-16'))
     })
 
+    test('should return 403 given call from enforcement', async () => {
+      validate.mockResolvedValue(mockValidateEnforcement)
+
+      const options = {
+        method: 'POST',
+        url: '/jobs/expired-insurance',
+        ...enforcementHeader
+      }
+      const response = await server.inject(options)
+      expect(response.statusCode).toBe(403)
+    })
+
+    test('should return 403 given call from standard user', async () => {
+      validate.mockResolvedValue(mockValidateStandard)
+
+      const options = {
+        method: 'POST',
+        url: '/jobs/expired-insurance',
+        ...portalStandardHeader
+      }
+      const response = await server.inject(options)
+      expect(response.statusCode).toBe(403)
+    })
+
     test('should 400 with invalid query props', async () => {
       const options = {
         method: 'POST',
@@ -199,6 +247,30 @@ describe('Jobs endpoint', () => {
       expect(response.statusCode).toBe(200)
       expectDate(setExpiredNeuteringDeadlineToInBreach.mock.calls[0][0]).toBeNow()
       expect(responseData).toEqual(expectedDto)
+    })
+
+    test('should return 403 given call from enforcement', async () => {
+      validate.mockResolvedValue(mockValidateEnforcement)
+
+      const options = {
+        method: 'POST',
+        url: '/jobs/neutering-deadline',
+        ...enforcementHeader
+      }
+      const response = await server.inject(options)
+      expect(response.statusCode).toBe(403)
+    })
+
+    test('should return 403 given call from standard user', async () => {
+      validate.mockResolvedValue(mockValidateStandard)
+
+      const options = {
+        method: 'POST',
+        url: '/jobs/neutering-deadline',
+        ...portalStandardHeader
+      }
+      const response = await server.inject(options)
+      expect(response.statusCode).toBe(403)
     })
 
     test('should POST /jobs/expired-insurance?today=2024-03-16', async () => {

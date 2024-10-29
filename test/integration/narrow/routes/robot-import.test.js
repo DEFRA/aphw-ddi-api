@@ -1,5 +1,5 @@
-const { mockValidate } = require('../../../mocks/auth')
-const { portalHeader } = require('../../../mocks/jwt')
+const { mockValidate, mockValidateEnforcement, mockValidateStandard } = require('../../../mocks/auth')
+const { portalHeader, enforcementHeader, portalStandardHeader } = require('../../../mocks/jwt')
 
 describe('Robot import endpoint', () => {
   jest.mock('../../../../app/storage')
@@ -10,13 +10,13 @@ describe('Robot import endpoint', () => {
 
   jest.mock('../../../../app/auth/token-validator')
   const { validate } = require('../../../../app/auth/token-validator')
-  validate.mockResolvedValue(mockValidate)
 
   const createServer = require('../../../../app/server')
   let server
 
   beforeEach(async () => {
     jest.clearAllMocks()
+    validate.mockResolvedValue(mockValidate)
     server = await createServer()
     await server.initialize()
   })
@@ -111,6 +111,44 @@ describe('Robot import endpoint', () => {
 
     const response = await server.inject(options)
     expect(response.statusCode).toBe(200)
+  })
+
+  test('should return 403 given call from enforcement', async () => {
+    validate.mockResolvedValue(mockValidateEnforcement)
+
+    const options = {
+      method: 'POST',
+      url: '/robot-import',
+      headers: {
+        'content-type': 'application/json'
+      },
+      payload: {
+        filename: 'register.xlsx',
+        stage: 'saveToDB'
+      },
+      ...enforcementHeader
+    }
+    const response = await server.inject(options)
+    expect(response.statusCode).toBe(403)
+  })
+
+  test('should return 403 given call from standard user', async () => {
+    validate.mockResolvedValue(mockValidateStandard)
+
+    const options = {
+      method: 'POST',
+      url: '/robot-import',
+      headers: {
+        'content-type': 'application/json'
+      },
+      payload: {
+        filename: 'register.xlsx',
+        stage: 'saveToDB'
+      },
+      ...portalStandardHeader
+    }
+    const response = await server.inject(options)
+    expect(response.statusCode).toBe(403)
   })
 
   afterEach(async () => {

@@ -27,10 +27,15 @@ const getBreachCategoryDAOs = async (userSelectableOnly = false) => {
   })
 }
 
+/**
+ * @param {boolean} userSelectableOnly
+ * @return {Promise<BreachCategory[]>}
+ */
 const getBreachCategories = async (userSelectableOnly = false) => {
   const breachCategoryDaos = await getBreachCategoryDAOs(userSelectableOnly)
   return breachCategoryDaos.map(breachCategory => new BreachCategory(breachCategory))
 }
+
 /**
  * @param {import('../data/domain/dog')} dog
  * @param dogDao

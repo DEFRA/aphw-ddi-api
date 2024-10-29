@@ -2,8 +2,8 @@ const {
   buildDogBreedDao, buildStatusDao, buildRegistrationDao, buildRegisteredPersonDao, buildCourtDao,
   buildPoliceForceDao, buildExemptionOrderDao, buildCdoDao
 } = require('../../../mocks/cdo/get')
-const { mockValidate } = require('../../../mocks/auth')
-const { portalHeader } = require('../../../mocks/jwt')
+const { mockValidate, mockValidateEnforcement } = require('../../../mocks/auth')
+const { portalHeader, enforcementHeader } = require('../../../mocks/jwt')
 
 describe('Exemption endpoint', () => {
   const createServer = require('../../../../app/server')
@@ -17,34 +17,34 @@ describe('Exemption endpoint', () => {
 
   jest.mock('../../../../app/auth/token-validator')
   const { validate } = require('../../../../app/auth/token-validator')
-  validate.mockResolvedValue(mockValidate)
 
   beforeEach(async () => {
     jest.clearAllMocks()
+    validate.mockResolvedValue(mockValidate)
     server = await createServer()
     await server.initialize()
   })
 
-  test('PUT /exemption route returns 200 with valid 2015 payload', async () => {
-    const payload = {
-      exemptionOrder: 2015,
-      indexNumber: 'ED123',
-      cdoIssued: '2020-01-01',
-      cdoExpiry: '2020-02-01',
-      court: 'Test Court',
-      policeForce: 'Test Police Force',
-      legislationOfficer: 'Test Officer',
-      certificateIssued: '2020-03-01',
-      applicationFeePaid: '2020-03-01',
-      neuteringConfirmation: '2020-04-01',
-      microchipVerification: '2020-04-01',
-      joinedExemptionScheme: '2020-05-01',
-      insurance: {
-        company: 'Test Insurance',
-        renewalDate: '2020-06-01'
-      }
+  const payload = {
+    exemptionOrder: 2015,
+    indexNumber: 'ED123',
+    cdoIssued: '2020-01-01',
+    cdoExpiry: '2020-02-01',
+    court: 'Test Court',
+    policeForce: 'Test Police Force',
+    legislationOfficer: 'Test Officer',
+    certificateIssued: '2020-03-01',
+    applicationFeePaid: '2020-03-01',
+    neuteringConfirmation: '2020-04-01',
+    microchipVerification: '2020-04-01',
+    joinedExemptionScheme: '2020-05-01',
+    insurance: {
+      company: 'Test Insurance',
+      renewalDate: '2020-06-01'
     }
+  }
 
+  test('PUT /exemption route returns 200 with valid 2015 payload', async () => {
     getCdo.mockResolvedValue(buildCdoDao({
       id: 123,
       index_number: 'ED123',
@@ -184,6 +184,19 @@ describe('Exemption endpoint', () => {
 
     expect(response.statusCode).toBe(200)
     expect(updateExemption).toHaveBeenCalled()
+  })
+
+  test('PUT /exemption return 403 given call from enforcement', async () => {
+    validate.mockResolvedValue(mockValidateEnforcement)
+
+    const options = {
+      method: 'PUT',
+      url: '/exemption',
+      payload,
+      ...enforcementHeader
+    }
+    const response = await server.inject(options)
+    expect(response.statusCode).toBe(403)
   })
 
   test('PUT /exemption returns 400 with invalid 2015 payload', async () => {

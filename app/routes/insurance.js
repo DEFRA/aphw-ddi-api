@@ -3,6 +3,7 @@ const { createAdminItem } = require('../schema/admin/create')
 const { getCallingUser } = require('../auth/get-user')
 const { insuranceQuerySchema, getInsuranceCompaniesResponseSchema, insuranceCompanySchema } = require('../schema/admin/insurance')
 const { conflictSchema } = require('../schema/common/response/conflict')
+const { scopes } = require('../constants/auth')
 
 const sortKeys = {
   updatedAt: 'updated_at',
@@ -45,6 +46,7 @@ module.exports = [
     method: 'POST',
     path: '/insurance/companies',
     options: {
+      auth: { scope: [scopes.admin] },
       tags: ['api'],
       notes: ['Add a new insurance company'],
       response: {
@@ -75,6 +77,7 @@ module.exports = [
     method: 'DELETE',
     path: '/insurance/companies/{insuranceCompanyId}',
     options: {
+      auth: { scope: [scopes.admin] },
       tags: ['api'],
       notes: ['Deletes insurance company with insurance Company Id'],
       response: {

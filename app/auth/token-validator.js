@@ -71,6 +71,7 @@ const validateEnforcement = async (request, username, payload) => {
 
   // Validate token contents and store in cache
   const validToken = await checkTokenOnline(username, token)
+
   if (validToken) {
     const enabled = await isAccountEnabled(username)
 

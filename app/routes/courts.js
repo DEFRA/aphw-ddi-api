@@ -5,6 +5,7 @@ const { courtsResponseSchema, createCourtResponseSchema } = require('../schema/c
 const { conflictSchema } = require('../schema/common/response/conflict')
 const { notFoundSchema } = require('../schema/common/response/not-found')
 const { mapCourtToDto } = require('../dto/courts')
+const { scopes } = require('../constants/auth')
 
 module.exports = [
   {
@@ -30,6 +31,7 @@ module.exports = [
     method: 'POST',
     path: '/courts',
     options: {
+      auth: { scope: [scopes.admin] },
       tags: ['api'],
       notes: ['Creates a new court'],
       response: {
@@ -60,6 +62,7 @@ module.exports = [
     method: 'DELETE',
     path: '/courts/{courtId}',
     options: {
+      auth: { scope: [scopes.admin] },
       tags: ['api'],
       notes: ['Soft deletes a court from the DB'],
       response: {

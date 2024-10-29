@@ -1,7 +1,7 @@
 const { countsPerStatus: mockCountsPerStatus, countsPerCountry: mockCountsPerCountry } = require('../../../mocks/statistics')
 const { breeds: mockBreeds } = require('../../../mocks/dog-breeds')
-const { mockValidate } = require('../../../mocks/auth')
-const { portalHeader } = require('../../../mocks/jwt')
+const { mockValidate, mockValidateEnforcement, mockValidateStandard } = require('../../../mocks/auth')
+const { portalHeader, enforcementHeader, portalStandardHeader } = require('../../../mocks/jwt')
 
 describe('Statistics endpoint', () => {
   const createServer = require('../../../../app/server')
@@ -12,10 +12,10 @@ describe('Statistics endpoint', () => {
 
   jest.mock('../../../../app/auth/token-validator')
   const { validate } = require('../../../../app/auth/token-validator')
-  validate.mockResolvedValue(mockValidate)
 
   beforeEach(async () => {
     jest.clearAllMocks()
+    validate.mockResolvedValue(mockValidate)
     server = await createServer()
     await server.initialize()
   })
@@ -46,6 +46,30 @@ describe('Statistics endpoint', () => {
       expect(response.result[5].total).toBe(70)
       expect(response.result[6].status.name).toBe('Inactive')
       expect(response.result[6].total).toBe(80)
+    })
+
+    test('should return 403 given call from enforcement', async () => {
+      validate.mockResolvedValue(mockValidateEnforcement)
+
+      const options = {
+        method: 'GET',
+        url: '/statistics?queryName=countsPerStatus',
+        ...enforcementHeader
+      }
+      const response = await server.inject(options)
+      expect(response.statusCode).toBe(403)
+    })
+
+    test('should return 403 given call from standard user', async () => {
+      validate.mockResolvedValue(mockValidateStandard)
+
+      const options = {
+        method: 'GET',
+        url: '/statistics?queryName=countsPerStatus',
+        ...portalStandardHeader
+      }
+      const response = await server.inject(options)
+      expect(response.statusCode).toBe(403)
     })
 
     test('route returns 400 if invalid param key name', async () => {

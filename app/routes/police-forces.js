@@ -5,6 +5,7 @@ const { getPoliceForcesResponseSchema, policeForceSchema } = require('../schema/
 const { mapPoliceForceDaoToDto } = require('../dto/police-force')
 const { conflictSchema } = require('../schema/common/response/conflict')
 const { notFoundSchema } = require('../schema/common/response/not-found')
+const { scopes } = require('../constants/auth')
 
 module.exports = [
   {
@@ -30,6 +31,7 @@ module.exports = [
     method: 'POST',
     path: '/police-forces',
     options: {
+      auth: { scope: [scopes.admin] },
       tags: ['api'],
       notes: ['Create a new police force'],
       response: {
@@ -60,6 +62,7 @@ module.exports = [
     method: 'DELETE',
     path: '/police-forces/{policeForceId}',
     options: {
+      auth: { scope: [scopes.admin] },
       tags: ['api'],
       response: {
         status: {
