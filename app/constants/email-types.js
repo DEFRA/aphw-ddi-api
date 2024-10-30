@@ -6,6 +6,19 @@ const emailTypes = {
   reportSomething: 'report-something'
 }
 
+const reportSomethingSubjectLines = {
+  Defra: 'Police correspondence received',
+  Police: 'We\'ve received your report'
+}
+
+const reportSomethingAudit = {
+  id: '4',
+  label: 'Police correspondence',
+  activityType: 'received'
+}
+
 module.exports = {
-  emailTypes
+  emailTypes,
+  reportSomethingSubjectLines,
+  reportSomethingAudit
 }

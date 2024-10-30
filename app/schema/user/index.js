@@ -33,7 +33,8 @@ const reportSomethingSchema = Joi.object({
   fields: Joi.array().items({
     name: Joi.string().required(),
     value: Joi.string().allow('').optional()
-  }).optional()
+  }).optional(),
+  reportData: Joi.object().optional()
 })
 
 const bulkRequestSchema = Joi.object({
