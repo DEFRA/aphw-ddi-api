@@ -257,6 +257,12 @@ describe('Police force repo', () => {
       expect(shortName).toBe('unknown')
     })
 
+    test('should handle undefined email', async () => {
+      const { domain, shortName } = extractShortNameAndDomain(undefined)
+      expect(domain).toBe(undefined)
+      expect(shortName).toBe('unknown')
+    })
+
     test('should handle email with no @', async () => {
       const { domain, shortName } = extractShortNameAndDomain('bad-email')
       expect(domain).toBe('bad-email')
