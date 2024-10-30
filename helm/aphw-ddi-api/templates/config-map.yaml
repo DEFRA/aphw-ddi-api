@@ -30,6 +30,7 @@ data:
   PARANOID_RETENTION_PERIOD:  {{ quote .Values.container.paranoidRetentionPeriod }}
   AUTH_SERVER_URL:  {{ quote .Values.container.authServerUrl }}
   USER_FEEDBACK_EMAIL_ADDRESS:  {{ quote .Values.container.userFeedbackEmailAddress }}
+  REPORT_SOMETHING_EMAIL_ADDRESS:  {{ quote .Values.container.reportSomethingEmailAddress }}
   ENFORCEMENT_URL:  {{ quote .Values.container.enforcementUrl }}
   REDIS_HOSTNAME: {{ quote .Values.container.redisHostname }}
   REDIS_PORT: {{ quote .Values.container.redisPort }}

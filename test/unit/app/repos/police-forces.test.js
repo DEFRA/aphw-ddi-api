@@ -3,6 +3,7 @@ const { devUser } = require('../../../mocks/auth')
 const { POLICE } = require('../../../../app/constants/event/audit-event-object-types')
 const { DuplicateResourceError } = require('../../../../app/errors/duplicate-record')
 const { NotFoundError } = require('../../../../app/errors/not-found')
+const { extractShortNameAndDomain } = require('../../../../app/lib/string-helpers')
 
 describe('Police force repo', () => {
   jest.mock('../../../../app/config/db', () => ({
@@ -26,7 +27,7 @@ describe('Police force repo', () => {
   jest.mock('../../../../app/messaging/send-audit')
   const { sendCreateToAudit, sendDeleteToAudit } = require('../../../../app/messaging/send-audit')
 
-  const { getPoliceForces, addForce, deleteForce, getPoliceForceByShortName } = require('../../../../app/repos/police-forces')
+  const { getPoliceForces, addForce, deleteForce, getPoliceForceByShortName, lookupPoliceForceByEmail } = require('../../../../app/repos/police-forces')
 
   beforeEach(async () => {
     jest.clearAllMocks()
@@ -206,6 +207,66 @@ describe('Police force repo', () => {
 
       const policeForce = await getPoliceForceByShortName(domain, {})
       expect(policeForce).toBeNull()
+    })
+  })
+
+  describe('lookupPoliceForceByEmail', () => {
+    test('should get police force by email', async () => {
+      const shortName = 'short-police-name'
+
+      sequelize.models.police_force.findOne.mockResolvedValueOnce({
+        id: 2,
+        name: 'Rohan Police Constabulary',
+        short_name: shortName
+      })
+
+      const policeForce = await lookupPoliceForceByEmail('some-email@short-police-name.police.uk')
+      expect(policeForce).toEqual('Rohan Police Constabulary')
+      expect(sequelize.models.police_force.findOne).toHaveBeenCalledWith({
+        where: {
+          short_name: shortName
+        },
+        transaction: undefined
+      })
+    })
+
+    test('should return domain if police force does not exist when searched by domain', async () => {
+      sequelize.models.police_force.findOne.mockResolvedValueOnce(null)
+
+      const policeForce = await lookupPoliceForceByEmail('some-email@bad-domain.police.uk', {})
+      expect(policeForce).toBe('bad-domain.police.uk')
+    })
+  })
+
+  describe('extractShortNameAndDomain', () => {
+    test('should get domain and shortName', async () => {
+      const { domain, shortName } = extractShortNameAndDomain('some-email@abc.police.uk')
+      expect(domain).toBe('abc.police.uk')
+      expect(shortName).toBe('abc')
+    })
+
+    test('should get domain and shortName', async () => {
+      const { domain, shortName } = extractShortNameAndDomain('some-email@abc.pnn.police.uk')
+      expect(domain).toBe('abc.pnn.police.uk')
+      expect(shortName).toBe('abc')
+    })
+
+    test('should handle null email', async () => {
+      const { domain, shortName } = extractShortNameAndDomain(null)
+      expect(domain).toBe(null)
+      expect(shortName).toBe('unknown')
+    })
+
+    test('should handle undefined email', async () => {
+      const { domain, shortName } = extractShortNameAndDomain(undefined)
+      expect(domain).toBe(undefined)
+      expect(shortName).toBe('unknown')
+    })
+
+    test('should handle email with no @', async () => {
+      const { domain, shortName } = extractShortNameAndDomain('bad-email')
+      expect(domain).toBe('bad-email')
+      expect(shortName).toBe('unknown')
     })
   })
 })

@@ -1,0 +1,64 @@
+<?xml version="1.1" encoding="utf-8" standalone="no"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog" xmlns:ext="http://www.liquibase.org/xml/ns/dbchangelog-ext" xmlns:pro="http://www.liquibase.org/xml/ns/pro" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog-ext http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-ext.xsd http://www.liquibase.org/xml/ns/pro http://www.liquibase.org/xml/ns/pro/liquibase-pro-3.9.xsd http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.9.xsd">
+  <changeSet author="J Barnsley" id="1">
+    <tagDatabase tag="v1.80" />
+  </changeSet>
+  <changeSet author="J Barnsley" id="2">
+    <update tableName="breach_category">
+      <column name="label" value="annual evidence of insurance not provided to Defra"/>
+      <where>short_name='NOT_COVERED_BY_INSURANCE'</where>
+    </update>
+    <update tableName="breach_category">
+      <column name="label" value="annual evidence of insurance not provided to Defra"/>
+      <where>short_name='NOT_COVERED_BY_INSURANCE'</where>
+    </update>
+    <update tableName="breach_category">
+      <column name="label" value="dog not kept on lead or muzzled in public place"/>
+      <where>short_name='NOT_ON_LEAD_OR_MUZZLED'</where>
+    </update>
+    <update tableName="breach_category">
+      <column name="label" value="dog away from registered address for over 30 days in a 12-month period"/>
+      <where>short_name='AWAY_FROM_ADDR_30_DAYS_IN_YR'</where>
+    </update>
+    <update tableName="breach_category">
+      <column name="label" value="exemption certificate not provided to police within five days of request"/>
+      <where>short_name='EXEMPTION_NOT_PROVIDED_TO_POLICE'</where>
+    </update>
+    <update tableName="breach_category">
+      <column name="label" value="insurance evidence not provided to police within five days of request"/>
+      <where>short_name='INSURANCE_NOT_PROVIDED_TO_POLICE'</where>
+    </update>
+    <update tableName="breach_category">
+      <column name="label" value="owner did not allow police to read microchip on request"/>
+      <where>short_name='MICROCHIP_NOT_READ_BY_POLICE'</where>
+    </update>
+    <insert tableName="breach_category">
+      <column name="label" value="owner sold, exchanged or gifted dog, or advertised it as such" />
+      <column name="short_name" value="SOLD_EXCHANGED_OR_GIFTED" />
+    </insert>
+    <insert tableName="breach_category">
+      <column name="label" value="dog in the control of a person under 16 years of age" />
+      <column name="short_name" value="PERSON_UNDER_16_YEARS" />
+    </insert>
+    <insert tableName="breach_category">
+      <column name="label" value="dog abandoned or allowed to stray" />
+      <column name="short_name" value="ABANDONED_OR_STRAY" />
+    </insert>
+    <update tableName="breach_category">
+      <column name="label" value="dog not neutered by neutering deadline"/>
+      <where>short_name='NEUTERING_DEADLINE_EXCEEDED'</where>
+    </update>
+    <update tableName="breach_category">
+      <column name="user_selectable" value="true"/>
+      <where>short_name='NEUTERING_DEADLINE_EXCEEDED'</where>
+    </update>
+    <insert tableName="breach_category">
+      <column name="label" value="dog not microchipped by microchipping deadline" />
+      <column name="short_name" value="MICROCHIP_DEADLINE_EXCEEDED" />
+    </insert>
+    <insert tableName="breach_category">
+      <column name="label" value="change of address has crossed border between England/Wales and Scotland" />
+      <column name="short_name" value="CROSSED_BORDER" />
+    </insert>
+  </changeSet>
+</databaseChangeLog>
