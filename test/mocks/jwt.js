@@ -27,6 +27,7 @@ const enforcementJwt = () => {
     headers: {
       'ddi-username': 'enforcement.user@example.com',
       'ddi-displayname': 'enforcement.user@example.com',
+      'enforcement-user-agent': 'Mozilla/5.0',
       Authorization: `Bearer ${token}`
     }
   }
