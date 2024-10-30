@@ -116,6 +116,26 @@ describe('view audit', () => {
       })
     })
 
+    test('should construct VIEW_OWNER details where owner has no dogs', () => {
+      const person1 = buildRegisteredPersonDao({
+        person: buildPersonDao({
+          person_reference: 'P-1233-555'
+        }),
+        dog: null
+      })
+      const person2 = buildRegisteredPersonDao({
+        person: buildPersonDao({
+          person_reference: 'P-1233-555'
+        }),
+        dog: null
+      })
+      const cdoDetails = constructViewDetails(VIEW_OWNER, [person1, person2])
+      expect(cdoDetails).toEqual({
+        pk: 'P-1233-555',
+        dogIndexNumbers: []
+      })
+    })
+
     test('should construct VIEW_OWNER_ACTIVITY details', () => {
       const person = buildPersonDao({
         person_reference: 'P-1233-555'
