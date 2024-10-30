@@ -13,6 +13,9 @@ describe('token-validator', () => {
     jest.mock('../../../../app/cache')
     const { set, get } = require('../../../../app/cache')
 
+    jest.mock('../../../../app/messaging/send-audit')
+    const { sendLoginToAudit } = require('../../../../app/messaging/send-audit')
+
     const { validate } = require('../../../../app/auth/token-validator')
 
     const hashCacheStub = new Map([
@@ -115,6 +118,9 @@ describe('token-validator', () => {
               set: async () => {}
             }
           }
+        },
+        headers: {
+          'enforcement-user-agent': 'Safari iPhone'
         }
       }
 
@@ -151,6 +157,7 @@ describe('token-validator', () => {
           }
         })
         expect(set).toHaveBeenCalledWith(request, 'chuck@norris.org', { expiry: expect.any(Date), hash: expect.any(String) }, 3900000)
+        expect(sendLoginToAudit).toHaveBeenCalledWith({ username, displayname: username }, 'Safari iPhone')
       })
 
       test('should successfully validate if user is cached', async () => {

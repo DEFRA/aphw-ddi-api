@@ -15,8 +15,6 @@ const { sendEmail } = require('../messaging/send-email')
 const { getHttpCodeFromResults } = require('../dto/mappers/bulk-requests')
 const { drop } = require('../cache')
 const { sendReportSomethingEmails, createAuditsForReportSomething } = require('../lib/email-helper')
-const { lookupPoliceForceByEmail } = require('../repos/police-forces')
-const { sendLoginToAudit } = require('../messaging/send-audit')
 
 module.exports = [
   {
@@ -146,8 +144,6 @@ module.exports = [
       }
     },
     handler: async (request, h) => {
-      await sendLoginToAudit(getCallingUser(request), request.headers['enforcement-user-agent'])
-
       return h.response(undefined).code(204)
     }
   },

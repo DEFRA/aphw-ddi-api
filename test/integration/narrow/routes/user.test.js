@@ -18,9 +18,6 @@ describe('User endpoint', () => {
   jest.mock('../../../../app/messaging/send-email')
   const { sendEmail } = require('../../../../app/messaging/send-email')
 
-  jest.mock('../../../../app/messaging/send-audit')
-  const { sendLoginToAudit } = require('../../../../app/messaging/send-audit')
-
   jest.mock('../../../../app/cache')
   const { drop } = require('../../../../app/cache')
 
@@ -583,7 +580,6 @@ describe('User endpoint', () => {
       }
       const response = await server.inject(options)
       expect(response.statusCode).toBe(204)
-      expect(sendLoginToAudit).toHaveBeenCalledWith(expect.anything(), 'Mozilla/5.0')
     })
 
     test('should not validate and return a 401 if user is not registered', async () => {
