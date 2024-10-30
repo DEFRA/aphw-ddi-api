@@ -326,6 +326,8 @@ const sendViewToAudit = async (pk, type, subject, details, { username, displayna
   await sendEvent(event)
 }
 
+const sendLoginToAudit = async (user) => {}
+
 module.exports = {
   sendCreateToAudit,
   sendUpdateToAudit,
@@ -340,5 +342,6 @@ module.exports = {
   determineUpdatePk,
   sendImportToAudit,
   sendChangeOwnerToAudit,
-  sendViewToAudit
+  sendViewToAudit,
+  sendLoginToAudit
 }

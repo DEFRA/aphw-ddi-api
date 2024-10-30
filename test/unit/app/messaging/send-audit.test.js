@@ -2,7 +2,7 @@ const {
   isDataUnchanged, sendEventToAudit, sendCreateToAudit, sendActivityToAudit, sendUpdateToAudit,
   determineCreatePk, determineUpdatePk, sendDeleteToAudit, sendImportToAudit, sendChangeOwnerToAudit, sendPermanentDeleteToAudit,
   stripPermanentDeleteEntity,
-  determinePermanentDeletePk, sendViewToAudit
+  determinePermanentDeletePk, sendViewToAudit, sendLoginToAudit
 } = require('../../../../app/messaging/send-audit')
 
 jest.mock('../../../../app/messaging/send-event')
@@ -465,6 +465,12 @@ describe('SendAudit test', () => {
 
     test('should fail given no user', async () => {
       await expect(sendViewToAudit(guid, 'VIEW_OWNER', 'Enforcement viewed owner', searchDetails, {})).rejects.toThrow('Username and displayname are required for auditing of VIEW_OWNER')
+    })
+  })
+
+  describe('sendLoginToAudit', () => {
+    test('should be a function', () => {
+      expect(sendLoginToAudit).toBeInstanceOf(Function)
     })
   })
 })
