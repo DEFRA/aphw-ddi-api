@@ -250,5 +250,17 @@ describe('Police force repo', () => {
       expect(domain).toBe('abc.pnn.police.uk')
       expect(shortName).toBe('abc')
     })
+
+    test('should handle null email', async () => {
+      const { domain, shortName } = extractShortNameAndDomain(null)
+      expect(domain).toBe(null)
+      expect(shortName).toBe('unknown')
+    })
+
+    test('should handle email with no @', async () => {
+      const { domain, shortName } = extractShortNameAndDomain('bad-email')
+      expect(domain).toBe('bad-email')
+      expect(shortName).toBe('unknown')
+    })
   })
 })
