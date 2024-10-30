@@ -9,6 +9,7 @@ module.exports = {
   UPDATE: 'uk.gov.defra.ddi.event.update',
   CHANGE_OWNER: 'uk.gov.defra.ddi.event.change.owner',
   SEARCH: 'uk.gov.defra.ddi.event.external.search',
+  LOGIN: 'uk.gov.defra.ddi.event.external.login',
   VIEW_OWNER: 'uk.gov.defra.ddi.event.external.view.owner',
   VIEW_OWNER_ACTIVITY: 'uk.gov.defra.ddi.event.external.view.owner.activity',
   VIEW_DOG: 'uk.gov.defra.ddi.event.external.view.dog',
