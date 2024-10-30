@@ -3,6 +3,7 @@ const { devUser } = require('../../../mocks/auth')
 const { POLICE } = require('../../../../app/constants/event/audit-event-object-types')
 const { DuplicateResourceError } = require('../../../../app/errors/duplicate-record')
 const { NotFoundError } = require('../../../../app/errors/not-found')
+const { extractShortNameAndDomain } = require('../../../../app/lib/string-helpers')
 
 describe('Police force repo', () => {
   jest.mock('../../../../app/config/db', () => ({
@@ -26,7 +27,7 @@ describe('Police force repo', () => {
   jest.mock('../../../../app/messaging/send-audit')
   const { sendCreateToAudit, sendDeleteToAudit } = require('../../../../app/messaging/send-audit')
 
-  const { getPoliceForces, addForce, deleteForce, getPoliceForceByShortName, lookupPoliceForceByEmail, extractShortNameAndDomain } = require('../../../../app/repos/police-forces')
+  const { getPoliceForces, addForce, deleteForce, getPoliceForceByShortName, lookupPoliceForceByEmail } = require('../../../../app/repos/police-forces')
 
   beforeEach(async () => {
     jest.clearAllMocks()
