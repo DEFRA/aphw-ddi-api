@@ -5,6 +5,7 @@ const { getUserInfo } = require('../proxy/auth-server')
 const { scopes } = require('../constants/auth')
 const { get, set } = require('../cache')
 const { MINUTE } = require('../constants/time')
+const { sendLoginToAudit } = require('../messaging/send-audit')
 
 const expiryPeriodInMins = 65
 
@@ -76,6 +77,8 @@ const validateEnforcement = async (request, username, payload) => {
     const enabled = await isAccountEnabled(username)
 
     if (enabled) {
+      await sendLoginToAudit({ username, displayname: username }, request.headers['enforcement-user-agent'])
+
       await set(request, username, { hash, expiry: addMinutes(now, expiryPeriodInMins) }, expiryPeriodInMins * MINUTE)
       return returnVal(true, payload)
     }

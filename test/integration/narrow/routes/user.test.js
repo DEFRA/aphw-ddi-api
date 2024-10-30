@@ -571,6 +571,17 @@ describe('User endpoint', () => {
       expect(response.statusCode).toBe(204)
     })
 
+    test('should validate and return a 204 if user is registered', async () => {
+      validate.mockResolvedValue(mockValidateEnforcement)
+      const options = {
+        method: 'GET',
+        url: '/user/me/validate',
+        ...enforcementHeader
+      }
+      const response = await server.inject(options)
+      expect(response.statusCode).toBe(204)
+    })
+
     test('should not validate and return a 401 if user is not registered', async () => {
       validate.mockResolvedValue({
         ...mockValidate,

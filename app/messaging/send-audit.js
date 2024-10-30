@@ -1,5 +1,5 @@
 const { v4: uuidv4 } = require('uuid')
-const { CREATE, UPDATE, DELETE, IMPORT_MANUAL, ACTIVITY: ACTIVITY_EVENT, CHANGE_OWNER, PURGE } = require('../constants/event/events')
+const { CREATE, UPDATE, DELETE, IMPORT_MANUAL, ACTIVITY: ACTIVITY_EVENT, CHANGE_OWNER, PURGE, LOGIN } = require('../constants/event/events')
 const { SOURCE, SOURCE_API, SOURCE_ENFORCEMENT } = require('../constants/event/source')
 const { getDiff } = require('json-difference')
 const { sendEvent } = require('./send-event')
@@ -326,6 +326,33 @@ const sendViewToAudit = async (pk, type, subject, details, { username, displayna
   await sendEvent(event)
 }
 
+const sendLoginToAudit = async ({ username, displayname }, userAgent) => {
+  const actioningUser = { username, displayname }
+
+  if (!isUserValid(actioningUser)) {
+    throw new Error('Username and displayname are required for auditing of LOGIN')
+  }
+
+  const event = {
+    type: LOGIN,
+    source: SOURCE_ENFORCEMENT,
+    id: uuidv4(),
+    partitionKey: 'login',
+    subject: 'new user logged into the system',
+    data: {
+      message: JSON.stringify({
+        actioningUser,
+        details: {
+          username,
+          userAgent
+        }
+      })
+    }
+  }
+
+  await sendEvent(event)
+}
+
 module.exports = {
   sendCreateToAudit,
   sendUpdateToAudit,
@@ -340,5 +367,6 @@ module.exports = {
   determineUpdatePk,
   sendImportToAudit,
   sendChangeOwnerToAudit,
-  sendViewToAudit
+  sendViewToAudit,
+  sendLoginToAudit
 }
