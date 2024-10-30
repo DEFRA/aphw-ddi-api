@@ -29,6 +29,13 @@ const userFeedbackSchema = Joi.object({
   }).optional()
 })
 
+const reportSomethingSchema = Joi.object({
+  fields: Joi.array().items({
+    name: Joi.string().required(),
+    value: Joi.string().allow('').optional()
+  }).optional()
+})
+
 const bulkRequestSchema = Joi.object({
   users: Joi.array().items(createUserRequestSchema).min(1).required()
 })
@@ -53,6 +60,7 @@ module.exports = {
   createUserRequestSchema,
   createUserResponseSchema,
   userFeedbackSchema,
+  reportSomethingSchema,
   bulkRequestSchema,
   bulkResponseSchema,
   getResponseSchema

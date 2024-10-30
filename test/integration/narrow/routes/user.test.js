@@ -757,6 +757,34 @@ describe('User endpoint', () => {
     })
   })
 
+  describe('POST /user/me/report-something', () => {
+    test('should return 400 if payload error', async () => {
+      const options = {
+        method: 'POST',
+        url: '/user/me/report-something',
+        ...portalHeader
+      }
+      const response = await server.inject(options)
+      expect(response.statusCode).toBe(400)
+    })
+
+    test('should return a 200 with valid payload', async () => {
+      const options = {
+        method: 'POST',
+        url: '/user/me/report-something',
+        ...portalHeader,
+        payload: {
+          fields: [
+            { name: 'field1', value: 'value1' }
+          ]
+        }
+      }
+      const response = await server.inject(options)
+      expect(response.statusCode).toBe(200)
+      expect(JSON.parse(response.payload)).toEqual({ result: 'Ok' })
+    })
+  })
+
   afterEach(async () => {
     await server.stop()
   })

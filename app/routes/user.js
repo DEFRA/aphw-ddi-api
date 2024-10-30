@@ -2,7 +2,7 @@ const config = require('../config/index')
 const { getRegistrationService } = require('../service/config')
 const {
   createUserResponseSchema, createUserRequestSchema, userFeedbackSchema, userBooleanResponseSchema, userStringResponseSchema, bulkResponseSchema, bulkRequestSchema,
-  getResponseSchema
+  getResponseSchema, reportSomethingSchema
 } = require('../schema/user')
 const { createAccount, deleteAccount, createAccounts, getAccounts } = require('../repos/user-accounts')
 const { scopes } = require('../constants/auth')
@@ -14,6 +14,8 @@ const { emailTypes } = require('../constants/email-types')
 const { sendEmail } = require('../messaging/send-email')
 const { getHttpCodeFromResults } = require('../dto/mappers/bulk-requests')
 const { drop } = require('../cache')
+// const { sendActivityToAudit } = require('../messaging/send-audit')
+const { lookupPoliceForceByEmail } = require('../repos/police-forces')
 
 module.exports = [
   {
@@ -293,6 +295,48 @@ module.exports = [
 
         await sendEmail(data)
 
+        return h.response({ result: 'Ok' }).code(200)
+      }
+    }
+  },
+  {
+    method: 'POST',
+    path: '/user/me/report-something',
+    options: {
+      tags: ['api'],
+      notes: ['Receives user reporting something to Defra and forwards to Defra'],
+      response: {
+        status: {
+          200: userStringResponseSchema
+        }
+      },
+      validate: {
+        payload: reportSomethingSchema,
+        failAction: (_request, h, err) => {
+          console.error('Error validating report-something payload', err)
+
+          return h.response({ errors: err.details.map(e => e.message) }).code(400).takeover()
+        }
+      },
+      handler: async (request, h) => {
+        const userField = request?.payload?.fields.find(x => x.name === 'ReportedBy')
+        const policeForce = await lookupPoliceForceByEmail(userField?.value)
+
+        const customFields = [{ name: 'PoliceForce', value: policeForce }]
+          .concat(request.payload?.fields.map(field => ({
+            name: field.name,
+            value: field.value
+          })))
+
+        const data = {
+          toAddress: config.reportSomethingEmailAddress,
+          type: emailTypes.reportSomething,
+          customFields
+        }
+
+        await sendEmail(data)
+
+        // await sendActivityToAudit(activityData)
         return h.response({ result: 'Ok' }).code(200)
       }
     }

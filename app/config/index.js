@@ -26,6 +26,7 @@ const schema = Joi.object({
     apiKeyPrivateKey: Joi.string().allow('').default('')
   }),
   userFeedbackEmailAddress: Joi.string().required(),
+  reportSomethingEmailAddress: Joi.string().required(),
   enforcementUrl: Joi.string().required()
 })
 
@@ -53,6 +54,7 @@ const config = {
     apiKeyPrivateKey: getEnvironmentVariable('API_PRIVATE_KEY')
   },
   userFeedbackEmailAddress: getEnvironmentVariable('USER_FEEDBACK_EMAIL_ADDRESS'),
+  reportSomethingEmailAddress: getEnvironmentVariable('REPORT_SOMETHING_EMAIL_ADDRESS'),
   enforcementUrl: getEnvironmentVariable('ENFORCEMENT_URL')
 }
 

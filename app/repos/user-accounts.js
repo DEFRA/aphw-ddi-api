@@ -1,6 +1,7 @@
 const config = require('../config/index')
 const sequelize = require('../config/db')
 const { addMinutes } = require('../lib/date-helpers')
+const { extractShortNameAndDomain } = require('../lib/string-helpers')
 const { DuplicateResourceError } = require('../errors/duplicate-record')
 const { getPoliceForce } = require('../lookups')
 const { NotFoundError } = require('../errors/not-found')
@@ -65,9 +66,7 @@ const getPoliceForceIdForAccount = async ({
   }
 
   if (username) {
-    const [, domain] = username.split('@')
-    const shortName = domain.toLowerCase().replace('.pnn.police.uk', '').replace('.police.uk', '')
-
+    const { shortName } = extractShortNameAndDomain(username)
     const policeForceObj = await getPoliceForceByShortName(shortName, transaction)
 
     if (policeForceObj !== null) {

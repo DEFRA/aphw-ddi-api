@@ -1,6 +1,7 @@
 const sequelize = require('../config/db')
 const { DuplicateResourceError } = require('../errors/duplicate-record')
 const { sendCreateToAudit, sendDeleteToAudit } = require('../messaging/send-audit')
+const { extractShortNameAndDomain } = require('../lib/string-helpers')
 const { POLICE } = require('../constants/event/audit-event-object-types')
 const { NotFoundError } = require('../errors/not-found')
 const { getFindQuery, updateParanoid, findQueryV2 } = require('./shared')
@@ -90,9 +91,19 @@ const getPoliceForceByShortName = async (shortName, transaction) => {
   })
 }
 
+const lookupPoliceForceByEmail = async (email) => {
+  if (!email) {
+    return 'unknown'
+  }
+  const { domain, shortName } = extractShortNameAndDomain(email)
+  const force = await getPoliceForceByShortName(shortName)
+  return force ? force.name : domain
+}
+
 module.exports = {
   getPoliceForces,
   addForce,
   deleteForce,
-  getPoliceForceByShortName
+  getPoliceForceByShortName,
+  lookupPoliceForceByEmail
 }
