@@ -14,8 +14,7 @@ const { emailTypes } = require('../constants/email-types')
 const { sendEmail } = require('../messaging/send-email')
 const { getHttpCodeFromResults } = require('../dto/mappers/bulk-requests')
 const { drop } = require('../cache')
-// const { sendActivityToAudit } = require('../messaging/send-audit')
-const { lookupPoliceForceByEmail } = require('../repos/police-forces')
+const { sendReportSomethingEmails, createAuditsForReportSomething } = require('../lib/email-helper')
 
 module.exports = [
   {
@@ -319,24 +318,10 @@ module.exports = [
         }
       },
       handler: async (request, h) => {
-        const userField = request?.payload?.fields.find(x => x.name === 'ReportedBy')
-        const policeForce = await lookupPoliceForceByEmail(userField?.value)
+        const reportData = await sendReportSomethingEmails(request?.payload)
 
-        const customFields = [{ name: 'PoliceForce', value: policeForce }]
-          .concat(request.payload?.fields.map(field => ({
-            name: field.name,
-            value: field.value
-          })))
+        await createAuditsForReportSomething(reportData)
 
-        const data = {
-          toAddress: config.reportSomethingEmailAddress,
-          type: emailTypes.reportSomething,
-          customFields
-        }
-
-        await sendEmail(data)
-
-        // await sendActivityToAudit(activityData)
         return h.response({ result: 'Ok' }).code(200)
       }
     }

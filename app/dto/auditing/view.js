@@ -33,7 +33,7 @@ const constructViewDetails = (type, entity) => {
   if (type === SEARCH) {
     details.searchTerms = entity
   } else if (type === VIEW_OWNER && Array.isArray(entity)) {
-    details.dogIndexNumbers = entity.map(registeredPerson => registeredPerson.dog.index_number)
+    details.dogIndexNumbers = entity.map(registeredPerson => registeredPerson.dog?.index_number)
   }
 
   return details
