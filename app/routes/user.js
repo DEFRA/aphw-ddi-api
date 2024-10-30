@@ -16,12 +16,14 @@ const { getHttpCodeFromResults } = require('../dto/mappers/bulk-requests')
 const { drop } = require('../cache')
 // const { sendActivityToAudit } = require('../messaging/send-audit')
 const { lookupPoliceForceByEmail } = require('../repos/police-forces')
+const { sendLoginToAudit } = require('../messaging/send-audit')
 
 module.exports = [
   {
     method: 'POST',
     path: '/user',
     options: {
+      auth: { scope: [scopes.admin] },
       tags: ['api'],
       notes: ['Creates a new user account'],
       response: {
@@ -39,7 +41,6 @@ module.exports = [
           return h.response({ errors: err.details.map(e => e.message) }).code(400).takeover()
         }
       },
-      auth: { scope: [scopes.admin] },
       handler: async (request, h) => {
         const userDao = await createAccount(request.payload, getCallingUser(request))
 
@@ -53,6 +54,7 @@ module.exports = [
     method: 'GET',
     path: '/users',
     options: {
+      auth: { scope: [scopes.admin] },
       tags: ['api'],
       notes: ['Gets a full list of all user accounts'],
       response: {
@@ -60,7 +62,6 @@ module.exports = [
           200: getResponseSchema
         }
       },
-      auth: { scope: [scopes.admin] },
       handler: async (request, h) => {
         const userDaos = await getAccounts()
 
@@ -74,6 +75,7 @@ module.exports = [
     method: 'POST',
     path: '/users',
     options: {
+      auth: { scope: [scopes.admin] },
       tags: ['api'],
       notes: ['Bulk creates a list of new user account'],
       response: {
@@ -91,7 +93,6 @@ module.exports = [
           return h.response({ errors: err.details.map(e => e.message) }).code(400).takeover()
         }
       },
-      auth: { scope: [scopes.admin] },
       handler: async (request, h) => {
         const createAccountsResult = await createAccounts(request.payload.users, getCallingUser(request))
         const mapErrors = ({ data, ...error }) => {
@@ -145,6 +146,8 @@ module.exports = [
       }
     },
     handler: async (request, h) => {
+      await sendLoginToAudit(getCallingUser(request), request.headers['enforcement-user-agent'])
+
       return h.response(undefined).code(204)
     }
   },
