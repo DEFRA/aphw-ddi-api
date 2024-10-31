@@ -55,62 +55,6 @@ describe('EmailHelper test', () => {
       expect(sendActivityToAudit).not.toHaveBeenCalled()
     })
 
-    // test('should create audit records for each dog', async () => {
-    //   const data = { reportData: { dogs: ['ED123', 'ED456', 'ED789'] }, policeForce: 'test force 1' }
-    //   await createAuditsForReportSomething(data)
-    //   expect(sendActivityToAudit).toHaveBeenCalledTimes(3)
-    //   expect(sendActivityToAudit).toHaveBeenNthCalledWith(1, {
-    //     activityId: expect.any(String),
-    //     activity: '4',
-    //     activityDate: expect.anything(),
-    //     activityLabel: 'Police correspondence received from test force 1',
-    //     activityType: 'received',
-    //     pk: 'ED123',
-    //     source: 'dog',
-    //     targetPk: 'dog'
-    //   },
-    //   { username: data?.username, displayname: data?.username })
-    //   expect(sendActivityToAudit).toHaveBeenNthCalledWith(2, {
-    //     activityId: expect.any(String),
-    //     activity: '4',
-    //     activityDate: expect.anything(),
-    //     activityLabel: 'Police correspondence received from test force 1',
-    //     activityType: 'received',
-    //     pk: 'ED456',
-    //     source: 'dog',
-    //     targetPk: 'dog'
-    //   },
-    //   { username: data?.username, displayname: data?.username })
-    //   expect(sendActivityToAudit).toHaveBeenNthCalledWith(3, {
-    //     activityId: expect.any(String),
-    //     activity: '4',
-    //     activityDate: expect.anything(),
-    //     activityLabel: 'Police correspondence received from test force 1',
-    //     activityType: 'received',
-    //     pk: 'ED789',
-    //     source: 'dog',
-    //     targetPk: 'dog'
-    //   },
-    //   { username: data?.username, displayname: data?.username })
-    // })
-    //
-    // test('should create audit record for owner', async () => {
-    //   const data = { reportData: { sourceType: 'owner', pk: 'P-123' }, policeForce: 'test force 1' }
-    //   await createAuditsForReportSomething(data)
-    //   expect(sendActivityToAudit).toHaveBeenCalledTimes(1)
-    //   expect(sendActivityToAudit).toHaveBeenNthCalledWith(1, {
-    //     activityId: expect.any(String),
-    //     activity: '4',
-    //     activityDate: expect.anything(),
-    //     activityLabel: 'Police correspondence received from test force 1',
-    //     activityType: 'received',
-    //     pk: 'P-123',
-    //     source: 'owner',
-    //     targetPk: 'owner'
-    //   },
-    //   { username: data?.username, displayname: data?.username })
-    // })
-
     test('should create audit record for Report Dog in Breach on dog page', async () => {
       const data = { reportData: { sourceType: 'dog', personReference: 'P-BBDC-8579', pk: 'ED300002', dogs: ['ED300002'], reportType: 'in-breach', subTitle: 'Dog ED300002', dogChosen: { indexNumber: 'ED300002' }, dogBreaches: ['Dog not kept on lead or muzzled in public place', 'Dog kept in insecure place', 'Dog away from registered address for over 30 days in a 12-month period'] }, policeForce: 'dallas.police.gov', username: 'robocop@dallas.police.gov' }
       await createAuditsForReportSomething(data)
@@ -126,6 +70,7 @@ describe('EmailHelper test', () => {
         activityLabel: expect.any(String),
         reportType: reportTypes.inBreach
       })
+      expect(sendActivityToAudit.mock.calls[0][0].activityLabel).toBe('Police correspondence from dallas.police.gov')
     })
 
     test('should create audit record for Report Change of Address on dog page', async () => {

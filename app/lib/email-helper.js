@@ -54,7 +54,7 @@ const createAuditPayload = (data, pk, source, targetPk, activityId, reportType) 
     activityDate: new Date(),
     targetPk,
     reportType,
-    activityLabel: `${reportSomethingAudit.label} ${reportSomethingAudit.activityType} from ${data?.policeForce}`
+    activityLabel: `${reportSomethingAudit.label} from ${data?.policeForce}`
   }
 }
 /**
