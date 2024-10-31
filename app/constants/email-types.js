@@ -11,6 +11,28 @@ const reportSomethingSubjectLines = {
   Police: 'We\'ve received your report'
 }
 
+/**
+ * @typedef ReportType
+ * @type {'in-breach'|'changed-address'|'dog-died'|'something-else'}
+ */
+
+/**
+ * @typedef ReportTypeEnum
+ * @property {ReportType} inBreach
+ * @property {ReportType} changedAddress
+ * @property {ReportType} dogDied
+ * @property {ReportType} somethingElse
+ */
+/**
+ * @type {ReportTypeEnum}
+ */
+const reportTypes = {
+  inBreach: 'in-breach',
+  changedAddress: 'changed-address',
+  dogDied: 'dog-died',
+  somethingElse: 'something-else'
+}
+
 const reportSomethingAudit = {
   id: '4',
   label: 'Police correspondence',
@@ -20,5 +42,6 @@ const reportSomethingAudit = {
 module.exports = {
   emailTypes,
   reportSomethingSubjectLines,
-  reportSomethingAudit
+  reportSomethingAudit,
+  reportTypes
 }
