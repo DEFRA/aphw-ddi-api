@@ -22,7 +22,11 @@ containerSecret:
   name: aphw-ddi-api-container-secret
   type: Opaque
 
-deployment: {}
+deployment:
+  minReplicas: 1
+  maxReplicas: 10
+  cpuThreshold: 80
+  memoryThreshold: 80
 
 container:
   requestMemory: 100Mi
