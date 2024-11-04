@@ -27,10 +27,10 @@ deployment:
   minReplicas: 1
   maxReplicas: 10
   cpuThreshold: 80
-  memoryThreshold: 80
+  memoryThreshold: 2250Mi
 
 container:
-  requestMemory: 100Mi
+  requestMemory: 200Mi
   requestCpu: 100m
   limitMemory: 2500Mi
   limitCpu: 500m
