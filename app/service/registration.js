@@ -26,7 +26,8 @@ class RegistrationService {
   }
 
   /**
-   * @type {RegistrationService.getUsername}
+   * @param request
+   * @return {string}
    */
   getUsername (request) {
     const username = getCallingUsername(request)
@@ -37,15 +38,15 @@ class RegistrationService {
   }
 
   /**
-   * @type {RegistrationService.generateOneTimeCode}
+   * @return {string}
    */
   generateOneTimeCode () {
     return `${(Math.floor(100000 + randomInt(900000)))}`
   }
 
   /**
-   * @type {RegistrationService.verifyEmailCode}
    * @param request
+   * @return {Promise<string>}
    */
   async verifyEmailCode (request) {
     const username = this.getUsername(request)
@@ -74,9 +75,8 @@ class RegistrationService {
   }
 
   /**
-   * @type {RegistrationService.VerifyLogin}
    * @param {string} username
-   * @param {string} code
+   * @return {Promise<string>}
    */
   async verifyLogin (username) {
     const account = await this.userAccountRepository.getAccount(username)
@@ -102,8 +102,8 @@ class RegistrationService {
   }
 
   /**
-   * @type {RegistrationService.acceptLicence}
    * @param {string} username
+   * @return {Promise<string|string>}
    */
   async acceptLicence (username) {
     const account = await this.userAccountRepository.getAccount(username)
@@ -120,32 +120,32 @@ class RegistrationService {
   }
 
   /**
-   * @type {RegistrationService.isUserLicenceAccepted}
-   * @param {any} request
+   * @param request
+   * @return {Promise<{accepted: boolean, valid: boolean}>}
    */
-  async isUserLicenceAccepted (request) {
-    return this.userAccountRepository.verifyLicenceAccepted(this.getUsername(request))
+  async isUserLicenceValid (request) {
+    return this.userAccountRepository.verifyLicenseValid(this.getUsername(request))
   }
 
   /**
-   * @type {RegistrationService.setUserLicenceAccepted}
-   * @param {any} request
+   * @param request
+   * @return {Promise<boolean>}
    */
   async setUserLicenceAccepted (request) {
     return this.userAccountRepository.setLicenceAcceptedDate(this.getUsername(request))
   }
 
   /**
-   * @type {RegistrationService.isUserEmailVerified}
-   * @param {any} request
+   * @param request
+   * @return {Promise<boolean>}
    */
   async isUserEmailVerified (request) {
     return this.userAccountRepository.isEmailVerified(this.getUsername(request))
   }
 
   /**
-   * @type {RegistrationService.sendVerifyEmail}
-   * @param {any} request
+   * @param request
+   * @return {Promise<void>}
    */
   async sendVerifyEmail (request) {
     const username = this.getUsername(request)
