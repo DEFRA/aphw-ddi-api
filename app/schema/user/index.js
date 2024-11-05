@@ -1,7 +1,10 @@
 const Joi = require('joi')
 
 const userBooleanResponseSchema = Joi.object({
-  result: Joi.boolean()
+  result: Joi.object({
+    valid: Joi.boolean(),
+    accepted: Joi.boolean()
+  })
 })
 
 const userStringResponseSchema = Joi.object({
