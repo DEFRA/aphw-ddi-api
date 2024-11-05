@@ -160,7 +160,7 @@ module.exports = [
       }
     },
     handler: async (request, h) => {
-      const res = await getRegistrationService().isUserLicenceAccepted(request)
+      const res = await getRegistrationService().isUserLicenceValid(request)
 
       return h.response({ result: res }).code(200)
     }

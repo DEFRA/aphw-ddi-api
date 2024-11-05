@@ -600,7 +600,7 @@ describe('User endpoint', () => {
 
   describe('GET /user/me/licence', () => {
     test('should validate and return a 200 true if user accepted licence', async () => {
-      getRegistrationService().isUserLicenceAccepted.mockResolvedValue(true)
+      getRegistrationService().isUserLicenceValid.mockResolvedValue(true)
       const options = {
         method: 'GET',
         url: '/user/me/licence',
@@ -612,7 +612,7 @@ describe('User endpoint', () => {
     })
 
     test('should validate and return a 200 false if user not accepted licence', async () => {
-      getRegistrationService().isUserLicenceAccepted.mockResolvedValue(false)
+      getRegistrationService().isUserLicenceValid.mockResolvedValue(false)
       const options = {
         method: 'GET',
         url: '/user/me/licence',

@@ -149,6 +149,13 @@ describe('RegistrationService', function () {
       expect(res).toBe(actionResults.MUST_ACCEPT_TS_AND_CS)
     })
 
+    test('should return MUST_ACCEPT_TS_AND_CS if terms and conds not accepted yet', async () => {
+      const mockSave = jest.fn()
+      mockUserAccountRepository.getAccount.mockResolvedValue({ active: true, activated_date: new Date(), save: mockSave })
+      const res = await regService.verifyLogin('user@test.com')
+      expect(res).toBe(actionResults.MUST_ACCEPT_TS_AND_CS)
+    })
+
     test('should return OK if all good', async () => {
       const mockSave = jest.fn()
       mockUserAccountRepository.getAccount.mockResolvedValue({ active: true, activated_date: new Date(), accepted_terms_and_conds_date: new Date(), save: mockSave })
@@ -185,7 +192,27 @@ describe('RegistrationService', function () {
     })
   })
 
-  describe('userVerifyLicenceAccepted', () => {
+  describe('userVerifyLicenceValid', () => {
+    test('should extract username', async () => {
+      mockUserAccountRepository.verifyLicenseValid.mockResolvedValue({
+        accepted: true,
+        valid: true
+      })
+      const res = await regService.isUserLicenceValid(request)
+      expect(res).toEqual({
+        accepted: true,
+        valid: true
+      })
+      expect(mockUserAccountRepository.verifyLicenceAccepted).toHaveBeenCalledWith('dev-user@test.com')
+    })
+
+    test('should throw if cannot extract username', async () => {
+      mockUserAccountRepository.verifyLicenceAccepted.mockResolvedValue(true)
+      await expect(regService.isUserLicenceValid({ auth: null })).rejects.toThrow(new NotFoundError('user not found'))
+    })
+  })
+
+  describe('userVerifyLicenceValid', () => {
     test('should extract username', async () => {
       mockUserAccountRepository.verifyLicenceAccepted.mockResolvedValue(true)
       const res = await regService.isUserLicenceAccepted(request)
