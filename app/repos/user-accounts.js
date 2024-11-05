@@ -42,10 +42,29 @@ const { sendEmail } = require('../messaging/send-email')
  * @property {number} [police_force_id]
  */
 
+/**
+ * @typedef GetAccounts
+ * @return {Promise<UserAccount[]>}
+ */
+/**
+ * @type {GetAccounts}
+ */
 const getAccounts = async () => {
   return sequelize.models.user_account.findAll()
 }
 
+/**
+ * @typedef GetPoliceForceIdForAccount
+ * @param {number} policeForceId
+ * @param policeForce
+ * @param username
+ * @param transaction
+ * @return {Promise<undefined|number>}
+ */
+
+/**
+ * @type {GetPoliceForceIdForAccount}
+ */
 const getPoliceForceIdForAccount = async ({
   police_force_id: policeForceId,
   police_force: policeForce,
@@ -78,10 +97,14 @@ const getPoliceForceIdForAccount = async ({
 }
 
 /**
+ * @typedef CreateAccount
  * @param {UserAccountRequestDto} account
  * @param user
  * @param [transaction]
  * @return {Promise<UserAccount>}
+ */
+/**
+ * @type {CreateAccount}
  */
 const createAccount = async (account, user, transaction) => {
   if (!transaction) {
@@ -122,6 +145,16 @@ const createAccount = async (account, user, transaction) => {
   return createdAccount
 }
 
+/**
+ * @typedef DeleteAccount
+ * @param accountId
+ * @param user
+ * @param transaction
+ * @return {Promise<undefined>}
+ */
+/**
+ * @type {DeleteAccount}
+ */
 const deleteAccount = async (accountId, user, transaction) => {
   if (!transaction) {
     return sequelize.transaction(async (t) => deleteAccount(accountId, user, t))
@@ -149,9 +182,14 @@ const deleteAccount = async (accountId, user, transaction) => {
 }
 
 /**
+ * @typedef CreateAccounts
  * @param {UserAccountRequestDto[]} accountsDto
  * @param user
  * @return {Promise<{items: *[], errors: (*[]|undefined)}>}
+ */
+
+/**
+ * @type {CreateAccounts}
  */
 const createAccounts = async (accountsDto, user) => {
   const errors = []
@@ -189,8 +227,13 @@ const createAccounts = async (accountsDto, user) => {
 }
 
 /**
+ * @typedef IsAccountEnabled
  * @param {string} username
  * @return {Promise<boolean>}
+ */
+
+/**
+ * @type {IsAccountEnabled}
  */
 const isAccountEnabled = async (username) => {
   const account = await sequelize.models.user_account.findOne({
@@ -201,8 +244,13 @@ const isAccountEnabled = async (username) => {
 }
 
 /**
+ * @typedef GetAccount
  * @param {string} username
  * @return {Promise<UserAccount>}
+ */
+
+/**
+ * @type {GetAccount}
  */
 const getAccount = async (username) => {
   return await sequelize.models.user_account.findOne({
@@ -211,10 +259,15 @@ const getAccount = async (username) => {
 }
 
 /**
+ * @typedef SetActivationCodeAndExpiry
  * @param {string} username
  * @param {string} oneTimeCode
  * @param {int} expiryInMins
  * @return {Promise<boolean>}
+ */
+
+/**
+ * @type {SetActivationCodeAndExpiry}
  */
 const setActivationCodeAndExpiry = async (username, oneTimeCode, expiryInMins) => {
   const account = await sequelize.models.user_account.findOne({
@@ -232,8 +285,13 @@ const setActivationCodeAndExpiry = async (username, oneTimeCode, expiryInMins) =
 }
 
 /**
+ * @typedef SetLoginDate
  * @param {string} username
  * @return {Promise<boolean>}
+ */
+
+/**
+ * @type SetLoginDate
  */
 const setLoginDate = async (username) => {
   const account = await sequelize.models.user_account.findOne({
@@ -250,8 +308,13 @@ const setLoginDate = async (username) => {
 }
 
 /**
+ * @typedef SetActivatedDate
  * @param {string} username
  * @return {Promise<boolean>}
+ */
+
+/**
+ * @type {SetActivatedDate}
  */
 const setActivatedDate = async (username) => {
   const account = await sequelize.models.user_account.findOne({
@@ -268,8 +331,13 @@ const setActivatedDate = async (username) => {
 }
 
 /**
+ * @typedef SetLicenceAcceptedDate
  * @param {string} username
  * @return {Promise<boolean>}
+ */
+
+/**
+ * @type {SetLicenceAcceptedDate}
  */
 const setLicenceAcceptedDate = async (username) => {
   const account = await sequelize.models.user_account.findOne({
@@ -286,8 +354,13 @@ const setLicenceAcceptedDate = async (username) => {
 }
 
 /**
+ * @typedef VerifyLicenceAccepted
  * @param {string} username
  * @return {Promise<boolean>}
+ */
+
+/**
+ * @type VerifyLicenceAccepted
  */
 const verifyLicenceAccepted = async (username) => {
   const account = await sequelize.models.user_account.findOne({
@@ -298,8 +371,42 @@ const verifyLicenceAccepted = async (username) => {
 }
 
 /**
+ * @typedef VerifyLicenseValid
+ * @param {string} username
+ * @return {Promise<{
+ *   accepted: boolean;
+ *   valid: boolean;
+ * }>}
+ */
+/** @type {VerifyLicenseValid} **/
+const verifyLicenseValid = async (username) => {
+  const account = await sequelize.models.user_account.findOne({
+    where: { username }
+  })
+
+  const yearAgo = new Date()
+  yearAgo.setUTCFullYear(yearAgo.getUTCFullYear() - 1)
+  yearAgo.setUTCHours(23)
+  yearAgo.setUTCMinutes(59)
+  yearAgo.setUTCMilliseconds(999)
+  yearAgo.setUTCSeconds(59)
+
+  const accepted = !!account?.accepted_terms_and_conds_date
+  const valid = accepted && account.accepted_terms_and_conds_date > yearAgo
+
+  return {
+    accepted,
+    valid
+  }
+}
+
+/**
+ * @typedef IsEmailVerified
  * @param {string} username
  * @return {Promise<boolean>}
+ */
+/**
+ * @type {IsEmailVerified}
  */
 const isEmailVerified = async (username) => {
   const account = await sequelize.models.user_account.findOne({
@@ -309,6 +416,27 @@ const isEmailVerified = async (username) => {
   return !!account.activated_date
 }
 
+/**
+ * @typedef UserAccountRepository
+ * @property {GetAccounts} getAccounts
+ * @property {CreateAccount} createAccount
+ * @property {DeleteAccount} deleteAccount
+ * @property {CreateAccounts} createAccounts
+ * @property {GetPoliceForceIdForAccount} getPoliceForceIdForAccount
+ * @property {IsAccountEnabled} isAccountEnabled
+ * @property {GetAccount} getAccount
+ * @property {SetActivationCodeAndExpiry} setActivationCodeAndExpiry
+ * @property {SetActivatedDate} setActivatedDate
+ * @property {SetLoginDate} setLoginDate
+ * @property {VerifyLicenceAccepted} verifyLicenceAccepted
+ * @property {VerifyLicenseValid} verifyLicenseValid
+ * @property {SetLicenceAcceptedDate} setLicenceAcceptedDate
+ * @property {IsEmailVerified} isEmailVerified
+ */
+
+/**
+ * @type {UserAccountRepository}
+ */
 module.exports = {
   getAccounts,
   createAccount,
@@ -321,6 +449,7 @@ module.exports = {
   setActivatedDate,
   setLoginDate,
   verifyLicenceAccepted,
+  verifyLicenseValid,
   setLicenceAcceptedDate,
   isEmailVerified
 }
