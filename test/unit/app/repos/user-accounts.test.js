@@ -39,7 +39,7 @@ describe('user-accounts', () => {
     sendEmail.mockResolvedValue()
   })
 
-  const { getAccounts, createAccount, createAccounts, deleteAccount, isAccountEnabled, getAccount, setActivationCodeAndExpiry, setLoginDate, setActivatedDate, setLicenceAcceptedDate, verifyLicenceAccepted, isEmailVerified, getPoliceForceIdForAccount } = require('../../../../app/repos/user-accounts')
+  const { getAccounts, createAccount, createAccounts, deleteAccount, isAccountEnabled, getAccount, setActivationCodeAndExpiry, setLoginDate, setActivatedDate, setLicenceAcceptedDate, verifyLicenseValid, isEmailVerified, getPoliceForceIdForAccount } = require('../../../../app/repos/user-accounts')
 
   afterEach(() => {
     jest.resetAllMocks()
@@ -694,36 +694,98 @@ describe('user-accounts', () => {
     })
   })
 
-  describe('verifyLicenceAccepted', () => {
-    test('should return true if accepted date', async () => {
+  describe('verifyLicenceValid', () => {
+    test('should return true if the license was accepted less than a year ago', async () => {
       sequelize.models.user_account.findOne.mockResolvedValue({
         id: 1,
         username: 'test@example.com',
         telephone: '01406946277',
         activation_token: 'ABCDE12345',
-        activated_date: new Date('2024-08-31'),
+        activated_date: new Date('2023-09-01'),
         active: true,
         last_login_date: new Date('2024-09-02'),
         accepted_terms_and_conds_date: new Date()
       })
 
-      const result = await verifyLicenceAccepted('test@example.com')
-      expect(result).toBe(true)
+      const result = await verifyLicenseValid('test@example.com')
+      expect(result).toEqual({
+        accepted: true,
+        valid: true
+      })
     })
 
-    test('should return false if not accepted', async () => {
+    test('should return false if the license was accepted over a year ago', async () => {
+      const aYearAgo = new Date()
+      aYearAgo.setUTCFullYear(aYearAgo.getFullYear() - 1)
+      aYearAgo.setUTCDate(aYearAgo.getUTCDate() + 1)
+      aYearAgo.setUTCHours(0)
+      aYearAgo.setUTCMinutes(0)
+      aYearAgo.setUTCMilliseconds(0)
+      aYearAgo.setUTCSeconds(0)
+      aYearAgo.setTime(aYearAgo.getTime() - 1)
+
       sequelize.models.user_account.findOne.mockResolvedValue({
         id: 1,
         username: 'test@example.com',
         telephone: '01406946277',
         activation_token: 'ABCDE12345',
-        activated_date: null,
+        activated_date: new Date('2023-09-01'),
         active: true,
-        last_login_date: new Date('2024-09-02')
+        last_login_date: new Date('2024-09-02'),
+        accepted_terms_and_conds_date: aYearAgo
       })
 
-      const result = await verifyLicenceAccepted('test@example.com')
-      expect(result).toBe(false)
+      const result = await verifyLicenseValid('test@example.com')
+      expect(result).toEqual({
+        accepted: true,
+        valid: false
+      })
+    })
+
+    test('should return true if the license was accepted a day later than a year ago', async () => {
+      const almostYearAgo = new Date()
+      almostYearAgo.setUTCFullYear(almostYearAgo.getFullYear() - 1)
+      almostYearAgo.setUTCDate(almostYearAgo.getUTCDate() + 1)
+      almostYearAgo.setUTCHours(23)
+      almostYearAgo.setUTCMinutes(59)
+      almostYearAgo.setUTCMilliseconds(999)
+      almostYearAgo.setUTCSeconds(59)
+
+      sequelize.models.user_account.findOne.mockResolvedValue({
+        id: 1,
+        username: 'test@example.com',
+        telephone: '01406946277',
+        activation_token: 'ABCDE12345',
+        activated_date: new Date('2023-09-01'),
+        active: true,
+        last_login_date: new Date('2024-09-02'),
+        accepted_terms_and_conds_date: almostYearAgo
+      })
+
+      const result = await verifyLicenseValid('test@example.com')
+      expect(result).toEqual({
+        accepted: true,
+        valid: true
+      })
+    })
+
+    test('should return false if the license was not accepted', async () => {
+      sequelize.models.user_account.findOne.mockResolvedValue({
+        id: 1,
+        username: 'test@example.com',
+        telephone: '01406946277',
+        activation_token: 'ABCDE12345',
+        activated_date: new Date('2023-10-01'),
+        active: true,
+        last_login_date: new Date('2024-09-02'),
+        accepted_terms_and_conds_date: null
+      })
+
+      const result = await verifyLicenseValid('test@example.com')
+      expect(result).toEqual({
+        accepted: false,
+        valid: false
+      })
     })
   })
 
