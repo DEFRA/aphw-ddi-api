@@ -25,7 +25,7 @@ describe('User endpoint', () => {
     jest.clearAllMocks()
     validate.mockResolvedValue(mockValidate)
     getRegistrationService.mockReturnValue({
-      isUserLicenceAccepted: jest.fn(),
+      isUserLicenceValid: jest.fn(),
       setUserLicenceAccepted: jest.fn(),
       isUserEmailVerified: jest.fn(),
       sendVerifyEmail: jest.fn(),
@@ -600,7 +600,7 @@ describe('User endpoint', () => {
 
   describe('GET /user/me/licence', () => {
     test('should validate and return a 200 true if user accepted licence', async () => {
-      getRegistrationService().isUserLicenceValid.mockResolvedValue(true)
+      getRegistrationService().isUserLicenceValid.mockResolvedValue({ accepted: true, valid: true })
       const options = {
         method: 'GET',
         url: '/user/me/licence',
@@ -608,11 +608,11 @@ describe('User endpoint', () => {
       }
       const response = await server.inject(options)
       expect(response.statusCode).toBe(200)
-      expect(JSON.parse(response.payload)).toEqual({ result: true })
+      expect(JSON.parse(response.payload)).toEqual({ result: { accepted: true, valid: true } })
     })
 
     test('should validate and return a 200 false if user not accepted licence', async () => {
-      getRegistrationService().isUserLicenceValid.mockResolvedValue(false)
+      getRegistrationService().isUserLicenceValid.mockResolvedValue({ accepted: false, valid: false })
       const options = {
         method: 'GET',
         url: '/user/me/licence',
@@ -620,7 +620,7 @@ describe('User endpoint', () => {
       }
       const response = await server.inject(options)
       expect(response.statusCode).toBe(200)
-      expect(JSON.parse(response.payload)).toEqual({ result: false })
+      expect(JSON.parse(response.payload)).toEqual({ result: { accepted: false, valid: false } })
     })
   })
 

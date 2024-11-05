@@ -54,7 +54,7 @@ describe('RegistrationService', function () {
       setActivationCodeAndExpiry: jest.fn(),
       setActivatedDate: jest.fn(),
       setLoginDate: jest.fn(),
-      verifyLicenceAccepted: jest.fn(),
+      verifyLicenseValid: jest.fn(),
       setLicenceAcceptedDate: jest.fn(),
       isEmailVerified: jest.fn()
     }
@@ -194,35 +194,15 @@ describe('RegistrationService', function () {
 
   describe('userVerifyLicenceValid', () => {
     test('should extract username', async () => {
-      mockUserAccountRepository.verifyLicenseValid.mockResolvedValue({
-        accepted: true,
-        valid: true
-      })
+      mockUserAccountRepository.verifyLicenseValid.mockResolvedValue({ valid: true })
       const res = await regService.isUserLicenceValid(request)
-      expect(res).toEqual({
-        accepted: true,
-        valid: true
-      })
-      expect(mockUserAccountRepository.verifyLicenceAccepted).toHaveBeenCalledWith('dev-user@test.com')
-    })
-
-    test('should throw if cannot extract username', async () => {
-      mockUserAccountRepository.verifyLicenceAccepted.mockResolvedValue(true)
-      await expect(regService.isUserLicenceValid({ auth: null })).rejects.toThrow(new NotFoundError('user not found'))
-    })
-  })
-
-  describe('userVerifyLicenceValid', () => {
-    test('should extract username', async () => {
-      mockUserAccountRepository.verifyLicenceAccepted.mockResolvedValue(true)
-      const res = await regService.isUserLicenceAccepted(request)
       expect(res).toBeTruthy()
-      expect(mockUserAccountRepository.verifyLicenceAccepted).toHaveBeenCalledWith('dev-user@test.com')
+      expect(mockUserAccountRepository.verifyLicenseValid).toHaveBeenCalledWith('dev-user@test.com')
     })
 
     test('should throw if cannot extract username', async () => {
-      mockUserAccountRepository.verifyLicenceAccepted.mockResolvedValue(true)
-      await expect(regService.isUserLicenceAccepted({ auth: null })).rejects.toThrow(new NotFoundError('user not found'))
+      mockUserAccountRepository.verifyLicenseValid.mockResolvedValue({ valid: true })
+      await expect(regService.isUserLicenceValid({ auth: null })).rejects.toThrow(new NotFoundError('user not found'))
     })
   })
 

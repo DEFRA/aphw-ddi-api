@@ -39,7 +39,7 @@ describe('user-accounts', () => {
     sendEmail.mockResolvedValue()
   })
 
-  const { getAccounts, createAccount, createAccounts, deleteAccount, isAccountEnabled, getAccount, setActivationCodeAndExpiry, setLoginDate, setActivatedDate, setLicenceAcceptedDate, verifyLicenceAccepted, verifyLicenseValid, isEmailVerified, getPoliceForceIdForAccount } = require('../../../../app/repos/user-accounts')
+  const { getAccounts, createAccount, createAccounts, deleteAccount, isAccountEnabled, getAccount, setActivationCodeAndExpiry, setLoginDate, setActivatedDate, setLicenceAcceptedDate, verifyLicenseValid, isEmailVerified, getPoliceForceIdForAccount } = require('../../../../app/repos/user-accounts')
 
   afterEach(() => {
     jest.resetAllMocks()
@@ -691,39 +691,6 @@ describe('user-accounts', () => {
 
       const res = await setLicenceAcceptedDate('test@example.com')
       expect(res).toBeFalsy()
-    })
-  })
-
-  describe('verifyLicenceAccepted', () => {
-    test('should return true if accepted date', async () => {
-      sequelize.models.user_account.findOne.mockResolvedValue({
-        id: 1,
-        username: 'test@example.com',
-        telephone: '01406946277',
-        activation_token: 'ABCDE12345',
-        activated_date: new Date('2023-08-31'),
-        active: true,
-        last_login_date: new Date('2024-09-02'),
-        accepted_terms_and_conds_date: new Date()
-      })
-
-      const result = await verifyLicenceAccepted('test@example.com')
-      expect(result).toBe(true)
-    })
-
-    test('should return false if not accepted', async () => {
-      sequelize.models.user_account.findOne.mockResolvedValue({
-        id: 1,
-        username: 'test@example.com',
-        telephone: '01406946277',
-        activation_token: 'ABCDE12345',
-        activated_date: null,
-        active: true,
-        last_login_date: new Date('2024-09-02')
-      })
-
-      const result = await verifyLicenceAccepted('test@example.com')
-      expect(result).toBe(false)
     })
   })
 

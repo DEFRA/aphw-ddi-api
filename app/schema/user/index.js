@@ -1,6 +1,10 @@
 const Joi = require('joi')
 
 const userBooleanResponseSchema = Joi.object({
+  result: Joi.boolean()
+})
+
+const userValidResponseSchema = Joi.object({
   result: Joi.object({
     valid: Joi.boolean(),
     accepted: Joi.boolean()
@@ -60,6 +64,7 @@ const getResponseSchema = Joi.object({
 
 module.exports = {
   userBooleanResponseSchema,
+  userValidResponseSchema,
   userStringResponseSchema,
   createUserRequestSchema,
   createUserResponseSchema,

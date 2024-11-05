@@ -108,13 +108,13 @@ describe('ServiceProvider', () => {
     test('should initialise getRegistrationService', async () => {
       const regService = ServiceProvider.getRegistrationService()
       await regService.isUserLicenceValid(request)
-      expect(userRepository.verifyLicenceAccepted).toHaveBeenCalledTimes(1)
+      expect(userRepository.verifyLicenseValid).toHaveBeenCalledTimes(1)
     })
 
     test('should use pre-initialised regService second time getRegistrationService is called', async () => {
       const regService = ServiceProvider.getRegistrationService()
       await regService.isUserLicenceValid(request)
-      expect(userRepository.verifyLicenceAccepted).toHaveBeenCalledTimes(2)
+      expect(userRepository.verifyLicenseValid).toHaveBeenCalledTimes(2)
     })
   })
 })

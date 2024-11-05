@@ -2,7 +2,8 @@ const config = require('../config/index')
 const { getRegistrationService } = require('../service/config')
 const {
   createUserResponseSchema, createUserRequestSchema, userFeedbackSchema, userBooleanResponseSchema, userStringResponseSchema, bulkResponseSchema, bulkRequestSchema,
-  getResponseSchema, reportSomethingSchema
+  getResponseSchema, reportSomethingSchema,
+  userValidResponseSchema
 } = require('../schema/user')
 const { createAccount, deleteAccount, createAccounts, getAccounts } = require('../repos/user-accounts')
 const { scopes } = require('../constants/auth')
@@ -155,7 +156,7 @@ module.exports = [
       notes: ['Checks if the calling user has accepted the licence'],
       response: {
         status: {
-          200: userBooleanResponseSchema
+          200: userValidResponseSchema
         }
       }
     },

@@ -354,23 +354,6 @@ const setLicenceAcceptedDate = async (username) => {
 }
 
 /**
- * @typedef VerifyLicenceAccepted
- * @param {string} username
- * @return {Promise<boolean>}
- */
-
-/**
- * @type VerifyLicenceAccepted
- */
-const verifyLicenceAccepted = async (username) => {
-  const account = await sequelize.models.user_account.findOne({
-    where: { username }
-  })
-
-  return !!account?.accepted_terms_and_conds_date
-}
-
-/**
  * @typedef VerifyLicenseValid
  * @param {string} username
  * @return {Promise<{
@@ -428,7 +411,6 @@ const isEmailVerified = async (username) => {
  * @property {SetActivationCodeAndExpiry} setActivationCodeAndExpiry
  * @property {SetActivatedDate} setActivatedDate
  * @property {SetLoginDate} setLoginDate
- * @property {VerifyLicenceAccepted} verifyLicenceAccepted
  * @property {VerifyLicenseValid} verifyLicenseValid
  * @property {SetLicenceAcceptedDate} setLicenceAcceptedDate
  * @property {IsEmailVerified} isEmailVerified
@@ -448,7 +430,6 @@ module.exports = {
   setActivationCodeAndExpiry,
   setActivatedDate,
   setLoginDate,
-  verifyLicenceAccepted,
   verifyLicenseValid,
   setLicenceAcceptedDate,
   isEmailVerified
