@@ -1,9 +1,10 @@
 const config = require('../config/index')
 const { getRegistrationService } = require('../service/config')
 const {
-  createUserResponseSchema, createUserRequestSchema, userFeedbackSchema, userBooleanResponseSchema, userStringResponseSchema, bulkResponseSchema, bulkRequestSchema,
-  getResponseSchema, reportSomethingSchema,
-  userValidResponseSchema
+  createUserRequestSchema, userFeedbackSchema, userBooleanResponseSchema, userStringResponseSchema, bulkResponseSchema, bulkRequestSchema,
+  fullUserResponseSchema, reportSomethingSchema,
+  userValidResponseSchema,
+  getUserResponseSchema
 } = require('../schema/user')
 const { createAccount, deleteAccount, createAccounts, getAccounts } = require('../repos/user-accounts')
 const { scopes } = require('../constants/auth')
@@ -27,7 +28,7 @@ module.exports = [
       notes: ['Creates a new user account'],
       response: {
         status: {
-          201: createUserResponseSchema,
+          201: fullUserResponseSchema,
           409: conflictSchema,
           404: notFoundSchema
         }
@@ -45,10 +46,14 @@ module.exports = [
 
         const user = mapUserDaoToDto(userDao)
 
+        console.log('~~~~~~ Chris Debug ~~~~~~ ', 'User', user)
         return h.response(user).code(201)
       }
     }
   },
+  /**
+   * TODO: forceId, forceName, username
+   */
   {
     method: 'GET',
     path: '/users',
@@ -58,7 +63,7 @@ module.exports = [
       notes: ['Gets a full list of all user accounts'],
       response: {
         status: {
-          200: getResponseSchema
+          200: getUserResponseSchema
         }
       },
       handler: async (request, h) => {
@@ -93,7 +98,9 @@ module.exports = [
         }
       },
       handler: async (request, h) => {
+        console.log('~~~~~~ Chris Debug ~~~~~~ start', '')
         const createAccountsResult = await createAccounts(request.payload.users, getCallingUser(request))
+        console.log('~~~~~~ Chris Debug ~~~~~~ ', 'CreateAccountsResult', createAccountsResult)
         const mapErrors = ({ data, ...error }) => {
           return {
             ...error,
@@ -107,6 +114,7 @@ module.exports = [
 
         const responseCode = getHttpCodeFromResults(createAccountsResult)
 
+        console.log('~~~~~~ Chris Debug ~~~~~~ ', 'ResponseCode', responseCode)
         return h.response(bulkResponse).code(responseCode)
       }
     }

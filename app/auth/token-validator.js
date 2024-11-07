@@ -77,6 +77,9 @@ const validateEnforcement = async (request, username, payload) => {
     const enabled = await isAccountEnabled(username)
 
     if (enabled) {
+      /**
+       * TODO: update last_login_date
+       */
       await sendLoginToAudit({ username, displayname: username }, request.headers['enforcement-user-agent'])
 
       await set(request, username, { hash, expiry: addMinutes(now, expiryPeriodInMins) }, expiryPeriodInMins * MINUTE)

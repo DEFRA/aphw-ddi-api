@@ -23,6 +23,7 @@ const { sendEmail } = require('../messaging/send-email')
  * @property {Date|null} last_login_date
  * @property {Date} created_at
  * @property {Date} updated_at
+ * @property {null|PoliceForceDao} police_force
  */
 
 /**
@@ -39,7 +40,7 @@ const { sendEmail } = require('../messaging/send-email')
  * @property {string} username
  * @property {string} [telephone]
  * @property {boolean} [active]
- * @property {number} [police_force_id]
+ * @property {number} [policeForceId]
  */
 
 /**
@@ -50,7 +51,12 @@ const { sendEmail } = require('../messaging/send-email')
  * @type {GetAccounts}
  */
 const getAccounts = async () => {
-  return sequelize.models.user_account.findAll()
+  return sequelize.models.user_account.findAll({
+    include: {
+      model: sequelize.models.police_force,
+      as: 'police_force'
+    }
+  })
 }
 
 /**

@@ -1,6 +1,8 @@
 const { mockValidate, mockValidateEnforcement, mockValidateStandard } = require('../../../mocks/auth')
 const { portalHeader, enforcementHeader, portalStandardHeader } = require('../../../mocks/jwt')
-const { buildUserAccount } = require('../../../mocks/user-accounts')
+const { buildUserAccount, buildUserDto } = require('../../../mocks/user-accounts')
+const { buildPoliceForce } = require('../../../mocks/police-forces')
+const { buildPoliceForceDao } = require('../../../mocks/cdo/get')
 
 describe('User endpoint', () => {
   const createServer = require('../../../../app/server')
@@ -11,6 +13,9 @@ describe('User endpoint', () => {
 
   jest.mock('../../../../app/service/config')
   const { getRegistrationService } = require('../../../../app/service/config')
+
+  jest.mock('../../../../app/repos/police-forces')
+  const { getPoliceForces } = require('../../../../app/repos/police-forces')
 
   jest.mock('../../../../app/repos/user-accounts')
   const { createAccount, deleteAccount, createAccounts, getAccounts } = require('../../../../app/repos/user-accounts')
@@ -38,27 +43,21 @@ describe('User endpoint', () => {
 
   describe('POST /user', () => {
     test('should add a new user and return a 201 for admin user', async () => {
-      const expectedPayload = {
+      const expectedPayload = buildUserDto({
         id: 2,
-        police_force_id: 1,
+        policeForceId: 1,
         username: 'ralph@wreckit.com',
-        active: true
-      }
-      createAccount.mockResolvedValue({
+        active: true,
+        createdAt: '2024-09-27T15:18:36.563Z'
+      })
+      createAccount.mockResolvedValue(buildUserAccount({
         username: 'ralph@wreckit.com',
         created_at: '2024-09-27T15:18:36.563Z',
         updated_at: '2024-09-27T15:18:36.563Z',
         id: 2,
         police_force_id: 1,
-        active: true,
-        telephone: null,
-        activation_token: null,
-        activation_token_expiry: null,
-        activated_date: null,
-        accepted_terms_and_conds_date: null,
-        last_login_date: null,
-        deleted_at: null
-      })
+        active: true
+      }))
       const options = {
         method: 'POST',
         url: '/user',
@@ -119,17 +118,53 @@ describe('User endpoint', () => {
       const userAccounts = [
         buildUserAccount({
           id: 1,
-          username: 'ralph@wreckit.com'
+          username: 'ralph@wreckit.com',
+          activated_date: new Date('2024-11-06'),
+          accepted_terms_and_conds_date: new Date('2024-11-06'),
+          created_at: new Date('2024-11-06'),
+          last_login_date: null
         }),
         buildUserAccount({
           id: 2,
-          username: 'scott.turner@sacramento.police.gov',
-          police_force_id: 2
+          username: 'scott.turner@sacramento.police.uk',
+          police_force_id: 2,
+          activated_date: null,
+          accepted_terms_and_conds_date: new Date('2024-11-06'),
+          last_login_date: null,
+          created_at: new Date('2024-11-06'),
+          police_force: buildPoliceForceDao({
+            id: 2,
+            name: 'Sacramento Police Department',
+            short_name: 'sacramento'
+          })
         }),
         buildUserAccount({
           id: 3,
-          username: 'axel.foley@beverly-hills.police.gov',
-          police_force_id: 3
+          username: 'axel.foley@beverly-hills.police.uk',
+          police_force_id: 3,
+          activated_date: new Date('2024-11-06'),
+          accepted_terms_and_conds_date: new Date('2024-11-06'),
+          last_login_date: null,
+          created_at: new Date('2024-11-06'),
+          police_force: buildPoliceForceDao({
+            id: 3,
+            name: 'Beverly Hills Police Department',
+            short_name: 'beverly-hills'
+          })
+        }),
+        buildUserAccount({
+          id: 4,
+          username: 'axel.foley@beverly-hills.pnn.police.uk',
+          police_force_id: 3,
+          activated_date: null,
+          accepted_terms_and_conds_date: null,
+          last_login_date: null,
+          created_at: new Date('2024-11-06'),
+          police_force: buildPoliceForceDao({
+            id: 3,
+            name: 'Beverly Hills Police Department',
+            short_name: 'beverly-hills'
+          })
         })
       ]
 
@@ -146,23 +181,48 @@ describe('User endpoint', () => {
       expect(getAccounts).toHaveBeenCalledWith()
       expect(JSON.parse(response.payload)).toEqual({
         users: [
-          {
+          expect.objectContaining({
             id: 1,
             username: 'ralph@wreckit.com',
-            active: true
-          },
-          {
+            active: true,
+            activated: '2024-11-06T00:00:00.000Z',
+            accepted: '2024-11-06T00:00:00.000Z',
+            lastLogin: false,
+            createdAt: '2024-11-06T00:00:00.000Z'
+          }),
+          expect.objectContaining({
             id: 2,
-            username: 'scott.turner@sacramento.police.gov',
-            police_force_id: 2,
-            active: true
-          },
-          {
+            username: 'scott.turner@sacramento.police.uk',
+            policeForceId: 2,
+            active: true,
+            policeForce: 'Sacramento Police Department',
+            activated: false,
+            accepted: '2024-11-06T00:00:00.000Z',
+            lastLogin: false,
+            createdAt: '2024-11-06T00:00:00.000Z'
+          }),
+          expect.objectContaining({
             id: 3,
-            username: 'axel.foley@beverly-hills.police.gov',
-            police_force_id: 3,
-            active: true
-          }
+            username: 'axel.foley@beverly-hills.police.uk',
+            policeForceId: 3,
+            active: true,
+            accepted: '2024-11-06T00:00:00.000Z',
+            activated: '2024-11-06T00:00:00.000Z',
+            policeForce: 'Beverly Hills Police Department',
+            lastLogin: false,
+            createdAt: '2024-11-06T00:00:00.000Z'
+          }),
+          expect.objectContaining({
+            id: 4,
+            username: 'axel.foley@beverly-hills.pnn.police.uk',
+            policeForceId: 3,
+            active: true,
+            activated: false,
+            policeForce: 'Beverly Hills Police Department',
+            accepted: false,
+            lastLogin: false,
+            createdAt: '2024-11-06T00:00:00.000Z'
+          })
         ]
       })
     })
@@ -220,17 +280,17 @@ describe('User endpoint', () => {
 
       const expectedPayload = {
         users: [
-          {
+          expect.objectContaining({
             id: 1,
             active: true,
             username: 'ralph@wreckit.com'
-          },
-          {
+          }),
+          expect.objectContaining({
             id: 2,
             active: true,
             username: 'scott.turner@sacramento.police.gov',
-            police_force_id: 2
-          }
+            policeForceId: 2
+          })
         ]
       }
 
@@ -293,11 +353,11 @@ describe('User endpoint', () => {
 
       const expectedPayload = {
         users: [
-          {
+          expect.objectContaining({
             id: 1,
             active: true,
             username: 'ralph@wreckit.com'
-          }
+          })
         ],
         errors: [
           {
