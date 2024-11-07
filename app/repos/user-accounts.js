@@ -91,9 +91,6 @@ const makeUserAccountDbFilter = filter => Object.entries(filter).reduce((whereBl
  */
 
 /**
- * TODO: username
- */
-/**
  * @param {GetAccountsFilterOptions} filter
  * @param sort
  * @return {Promise<UserAccount[]>}

@@ -88,6 +88,30 @@ describe('user-accounts', () => {
       })
     })
 
+    test('should filter accounts by multiple results', async () => {
+      const userAccounts = [
+        axelFoley
+      ]
+      sequelize.models.user_account.findAll.mockResolvedValue(userAccounts)
+      const returnedAccounts = await getAccounts({
+        username: 'axel.foley@beverly-hills.police.gov',
+        policeForceId: 3,
+        policeForce: 'Beverly Hills Police Department'
+      })
+      expect(returnedAccounts).toEqual(userAccounts)
+      expect(sequelize.models.user_account.findAll).toHaveBeenCalledWith({
+        where: {
+          username: 'axel.foley@beverly-hills.police.gov',
+          police_force_id: 3,
+          '$police_force.name$': 'Beverly Hills Police Department'
+        },
+        include: {
+          model: sequelize.models.police_force,
+          as: 'police_force'
+        }
+      })
+    })
+
     test('should filter accounts by forceId', async () => {
       const userAccounts = [
         axelFoley
@@ -142,6 +166,7 @@ describe('user-accounts', () => {
       })
     })
   })
+
   describe('createAccount', () => {
     test('should use a transaction if none exists', async () => {
       sequelize.transaction.mockImplementation(async (localCallback) => {
