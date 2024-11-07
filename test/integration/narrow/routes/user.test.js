@@ -178,7 +178,7 @@ describe('User endpoint', () => {
 
       const response = await server.inject(options)
       expect(response.statusCode).toBe(200)
-      expect(getAccounts).toHaveBeenCalledWith()
+      expect(getAccounts).toHaveBeenCalledWith({})
       expect(JSON.parse(response.payload)).toEqual({
         users: [
           expect.objectContaining({
@@ -224,6 +224,37 @@ describe('User endpoint', () => {
             createdAt: '2024-11-06T00:00:00.000Z'
           })
         ]
+      })
+    })
+
+    test('should get a filtered list of users', async () => {
+      const userAccounts = [
+        buildUserAccount({
+          id: 2,
+          username: 'scott.turner@sacramento.police.gov',
+          police_force_id: 2,
+          police_force: buildPoliceForceDao({
+            id: 2,
+            name: 'Sacramento Police Department',
+            short_name: 'sacramento'
+          })
+        })
+      ]
+
+      getAccounts.mockResolvedValue(userAccounts)
+
+      const options = {
+        method: 'GET',
+        url: '/users?policeForceId=2&policeForce=Sacramento%20Police%20Department&username=scott.turner@sacramento.police.gov',
+        ...portalHeader
+      }
+
+      const response = await server.inject(options)
+      expect(response.statusCode).toBe(200)
+      expect(getAccounts).toHaveBeenCalledWith({
+        policeForceId: 2,
+        username: 'scott.turner@sacramento.police.gov',
+        policeForce: 'Sacramento Police Department'
       })
     })
 

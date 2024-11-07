@@ -67,6 +67,12 @@ const getUserResponseSchema = Joi.object({
   users: Joi.array().items(fullUserResponseSchema).required()
 })
 
+const getUsersQuerySchema = Joi.object({
+  username: Joi.string().optional(),
+  policeForceId: Joi.number().optional(),
+  policeForce: Joi.string().optional()
+})
+
 module.exports = {
   userBooleanResponseSchema,
   userValidResponseSchema,
@@ -76,5 +82,6 @@ module.exports = {
   reportSomethingSchema,
   bulkRequestSchema,
   bulkResponseSchema,
-  getUserResponseSchema
+  getUserResponseSchema,
+  getUsersQuerySchema
 }

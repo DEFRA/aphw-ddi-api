@@ -4,7 +4,8 @@ const {
   createUserRequestSchema, userFeedbackSchema, userBooleanResponseSchema, userStringResponseSchema, bulkResponseSchema, bulkRequestSchema,
   fullUserResponseSchema, reportSomethingSchema,
   userValidResponseSchema,
-  getUserResponseSchema
+  getUserResponseSchema,
+  getUsersQuerySchema
 } = require('../schema/user')
 const { createAccount, deleteAccount, createAccounts, getAccounts } = require('../repos/user-accounts')
 const { scopes } = require('../constants/auth')
@@ -46,7 +47,6 @@ module.exports = [
 
         const user = mapUserDaoToDto(userDao)
 
-        console.log('~~~~~~ Chris Debug ~~~~~~ ', 'User', user)
         return h.response(user).code(201)
       }
     }
@@ -61,13 +61,17 @@ module.exports = [
       auth: { scope: [scopes.admin] },
       tags: ['api'],
       notes: ['Gets a full list of all user accounts'],
+      validate: {
+        query: getUsersQuerySchema
+      },
       response: {
         status: {
           200: getUserResponseSchema
         }
       },
       handler: async (request, h) => {
-        const userDaos = await getAccounts()
+        const filter = request.query ?? {}
+        const userDaos = await getAccounts(filter)
 
         const users = userDaos.map(mapUserDaoToDto)
 
