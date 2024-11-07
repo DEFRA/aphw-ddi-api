@@ -44,19 +44,75 @@ const { sendEmail } = require('../messaging/send-email')
  */
 
 /**
- * @typedef GetAccounts
- * @return {Promise<UserAccount[]>}
+ * @param filter
+ * @return {{ where?: { police_force_id?: number; '$police_force.name$': string }}}
+ */
+const makeUserAccountDbFilter = filter => Object.entries(filter).reduce((whereBlock, [key, value]) => {
+  if (key === 'policeForceId') {
+    return {
+      where: {
+        ...whereBlock.where,
+        police_force_id: value
+      }
+    }
+  }
+
+  if (key === 'policeForce') {
+    return {
+      where: {
+        ...whereBlock.where,
+        '$police_force.name$': value
+      }
+    }
+  }
+
+  if (key === 'username') {
+    return {
+      where: {
+        ...whereBlock.where,
+        username: value
+      }
+    }
+  }
+
+  return {}
+}, {})
+
+/**
+ * @typedef GetAccountsFilterOptions
+ * @property {number} [policeForceId]
+ * @property {string} [policeForce]
  */
 /**
- * @type {GetAccounts}
+ * @typedef GetAccounts
+ * @param {GetAccountsFilterOptions} filter
+ * @param sort
+ * @return {Promise<UserAccount[]>}
  */
-const getAccounts = async () => {
-  return sequelize.models.user_account.findAll({
+
+/**
+ * TODO: username
+ */
+/**
+ * @param {GetAccountsFilterOptions} filter
+ * @param sort
+ * @return {Promise<UserAccount[]>}
+ */
+const getAccounts = async (filter = {}, sort = {}) => {
+  const where = makeUserAccountDbFilter(filter)
+
+  const order = {}
+
+  const options = {
     include: {
       model: sequelize.models.police_force,
       as: 'police_force'
-    }
-  })
+    },
+    ...where,
+    ...order
+  }
+
+  return sequelize.models.user_account.findAll(options)
 }
 
 /**

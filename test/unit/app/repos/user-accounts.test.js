@@ -1,6 +1,7 @@
 const { DuplicateResourceError } = require('../../../../app/errors/duplicate-record')
 const { NotFoundError } = require('../../../../app/errors/not-found')
 const { buildUserAccount } = require('../../../mocks/user-accounts')
+const { buildPoliceForceDao } = require('../../../mocks/cdo/get')
 
 describe('user-accounts', () => {
   const dummyAdminUser = {
@@ -46,27 +47,99 @@ describe('user-accounts', () => {
   })
 
   describe('getAccounts', () => {
+    const ralph = buildUserAccount({
+      id: 1,
+      username: 'ralph@wreckit.com'
+    })
+    const turner = buildUserAccount({
+      id: 2,
+      username: 'scott.turner@sacramento.police.gov',
+      police_force_id: 2,
+      police_force: buildPoliceForceDao({
+        id: 2,
+        name: 'Sacramento Police Department',
+        short_name: 'sacramento'
+      })
+    })
+    const axelFoley = buildUserAccount({
+      id: 3,
+      username: 'axel.foley@beverly-hills.police.gov',
+      police_force_id: 3,
+      police_force: buildPoliceForceDao({
+        id: 3,
+        name: 'Beverly Hills Police Department',
+        short_name: 'beverly-hills'
+      })
+    })
     test('should get a list of accounts', async () => {
       const userAccounts = [
-        buildUserAccount({
-          id: 1,
-          username: 'ralph@wreckit.com'
-        }),
-        buildUserAccount({
-          id: 2,
-          username: 'scott.turner@sacramento.police.gov',
-          police_force_id: 2
-        }),
-        buildUserAccount({
-          id: 3,
-          username: 'axel.foley@beverly-hills.police.gov',
-          police_force_id: 3
-        })
+        ralph,
+        turner,
+        axelFoley
       ]
       sequelize.models.user_account.findAll.mockResolvedValue(userAccounts)
       const returnedAccounts = await getAccounts()
       expect(returnedAccounts).toEqual(userAccounts)
-      expect(sequelize.models.user_account.findAll).toHaveBeenCalled()
+      expect(sequelize.models.user_account.findAll).toHaveBeenCalledWith({
+        include: {
+          model: sequelize.models.police_force,
+          as: 'police_force'
+        }
+      })
+    })
+
+    test('should filter accounts by forceId', async () => {
+      const userAccounts = [
+        axelFoley
+      ]
+      sequelize.models.user_account.findAll.mockResolvedValue(userAccounts)
+      const returnedAccounts = await getAccounts({ policeForceId: 3 })
+      expect(returnedAccounts).toEqual(userAccounts)
+      expect(sequelize.models.user_account.findAll).toHaveBeenCalledWith({
+        where: {
+          police_force_id: 3
+        },
+        include: {
+          model: sequelize.models.police_force,
+          as: 'police_force'
+        }
+      })
+    })
+
+    test('should filter accounts by forceName', async () => {
+      const userAccounts = [
+        axelFoley
+      ]
+      sequelize.models.user_account.findAll.mockResolvedValue(userAccounts)
+      const returnedAccounts = await getAccounts({ policeForce: 'Beverly Hills Police Department' })
+      expect(returnedAccounts).toEqual(userAccounts)
+      expect(sequelize.models.user_account.findAll).toHaveBeenCalledWith({
+        where: {
+          '$police_force.name$': 'Beverly Hills Police Department'
+        },
+        include: {
+          model: sequelize.models.police_force,
+          as: 'police_force'
+        }
+      })
+    })
+
+    test('should filter accounts by username', async () => {
+      const userAccounts = [
+        ralph
+      ]
+      sequelize.models.user_account.findAll.mockResolvedValue(userAccounts)
+      const returnedAccounts = await getAccounts({ username: 'ralph@wreckit.com' })
+      expect(returnedAccounts).toEqual(userAccounts)
+      expect(sequelize.models.user_account.findAll).toHaveBeenCalledWith({
+        where: {
+          username: 'ralph@wreckit.com'
+        },
+        include: {
+          model: sequelize.models.police_force,
+          as: 'police_force'
+        }
+      })
     })
   })
   describe('createAccount', () => {
