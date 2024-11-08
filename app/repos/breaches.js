@@ -78,7 +78,7 @@ const removeBreachReasonFromDog = async (dog, breachCategoryId, transaction) => 
     transaction
   })
 
-  if (dogBreach) {
+  if (dogBreach?.id) {
     await dogBreach.destroy({ force: true, transaction })
   }
 }
