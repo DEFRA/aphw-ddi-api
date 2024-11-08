@@ -60,8 +60,32 @@ const setBreaches = async (dog, dogDao, transaction) => {
   await sequelize.models.dog_breach.bulkCreate(dogBreaches, { transaction })
 }
 
+/**
+ * @param {import('../data/domain/dog')} dog
+ * @param dogDao
+ * @param [transaction]
+ * @return {Promise<void>}
+ */
+const removeBreachReasonFromDog = async (dog, breachCategoryId, transaction) => {
+  if (!transaction) {
+    return await sequelize.transaction(async (t) => removeBreachReasonFromDog(dog, breachCategoryId, t))
+  }
+  const dogBreach = await sequelize.models.dog_breach.findOne({
+    where: {
+      dog_id: dog.id,
+      breach_category_id: breachCategoryId
+    },
+    transaction
+  })
+
+  if (dogBreach) {
+    await dogBreach.destroy({ force: true, transaction })
+  }
+}
+
 module.exports = {
   getBreachCategoryDAOs,
   getBreachCategories,
-  setBreaches
+  setBreaches,
+  removeBreachReasonFromDog
 }

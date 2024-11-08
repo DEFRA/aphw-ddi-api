@@ -5,6 +5,7 @@ const { updateStatusOnly } = require('../repos/status')
 const { dbFindAll } = require('../lib/db-functions')
 
 const setExpiredCdosToFailed = async (today, user, t) => {
+  console.log('JB setExpiredCdo here1')
   try {
     const setToFailed = await dbFindAll(sequelize.models.registration, {
       where: {

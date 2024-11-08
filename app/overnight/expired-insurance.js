@@ -13,7 +13,8 @@ const findExpired = async (currentStatus, today, t) => {
       '$dog.status.status$': currentStatus,
       '$dog.insurance.renewal_date$': {
         [Op.lt]: today
-      }
+      },
+      '$dog.exemption_order.exemption_order$': '1991'
     },
     include: [
       {
@@ -37,6 +38,10 @@ const findExpired = async (currentStatus, today, t) => {
                 as: 'breach_category'
               }
             ]
+          },
+          {
+            model: sequelize.models.exemption_order,
+            as: 'exemption_order'
           }
         ]
       }

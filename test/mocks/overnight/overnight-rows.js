@@ -63,7 +63,65 @@ const overnightRowsInBreach = [
   }
 ]
 
+const overnightRowsInBreachInclExpiredInsurance = [
+  {
+    dog: {
+      index_number: 'ED123',
+      breed: {
+        breed: 'XL Bully'
+      },
+      status: 'In breach',
+      exemption_order: '2023',
+      dog_breaches: [{
+        breach_category_id: 11,
+        breach_category: {
+          short_name: 'INSURANCE_EXPIRED'
+        }
+      }]
+    }
+  },
+  {
+    dog: {
+      index_number: 'ED125',
+      breed: {
+        breed: 'XL Bully'
+      },
+      status: 'In breach',
+      exemption_order: '2023',
+      dog_breaches: [{
+        breach_category_id: 12,
+        breach_category: {
+          short_name: 'OTHER_REASON'
+        }
+      },
+      {
+        breach_category_id: 11,
+        breach_category: {
+          short_anme: 'INSURANCE_EXPIRED'
+        }
+      }]
+    }
+  },
+  {
+    dog: {
+      index_number: 'ED127',
+      breed: {
+        breed: 'XL Bully'
+      },
+      status: 'In breach',
+      exemption_order: '2023',
+      dog_breaches: [{
+        breach_category_id: 11,
+        breach_category: {
+          short_anme: 'INSURANCE_EXPIRED'
+        }
+      }]
+    }
+  }
+]
+
 module.exports = {
   overnightRows,
-  overnightRowsInBreach
+  overnightRowsInBreach,
+  overnightRowsInBreachInclExpiredInsurance
 }
