@@ -26,8 +26,20 @@ describe('Revert Expired Insurance extra tests', () => {
   })
 
   test('moreThanJustExpiredInsurance where no reasons', () => {
-    const dog = { dog_breaches: [] }
+    const dog = { dog_breaches: null }
     const res = moreThanJustExpiredInsurance(dog, 11)
     expect(res).toBeFalsy()
+  })
+
+  test('moreThanJustExpiredInsurance where single expired reason', () => {
+    const dog = { dog_breaches: [{ breach_category_id: 11 }] }
+    const res = moreThanJustExpiredInsurance(dog, 11)
+    expect(res).toBeFalsy()
+  })
+
+  test('moreThanJustExpiredInsurance where single expired reason', () => {
+    const dog = { dog_breaches: [{ breach_category_id: 11 }, { breach_category_id: 15 }] }
+    const res = moreThanJustExpiredInsurance(dog, 11)
+    expect(res).toBeTruthy()
   })
 })

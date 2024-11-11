@@ -1,5 +1,5 @@
 const { revertExpiredInsurance } = require('../../../../app/overnight/revert-expired-insurance')
-const { overnightRowsInBreachInclExpiredInsurance: mockOvernightRowsInBreach } = require('../../../mocks/overnight/overnight-rows')
+const { overnightRowsInBreachInclExpiredInsurance, overnightRowsInBreachExclExpiredInsurance } = require('../../../mocks/overnight/overnight-rows')
 
 const { dbFindAll, dbFindOne } = require('../../../../app/lib/db-functions')
 jest.mock('../../../../app/lib/db-functions')
@@ -45,9 +45,16 @@ describe('Revert Expired Insurance test', () => {
   })
 
   test('revertExpiredInsurance should handle some rows', async () => {
-    dbFindAll.mockResolvedValue(mockOvernightRowsInBreach)
+    dbFindAll.mockResolvedValue(overnightRowsInBreachInclExpiredInsurance)
     dbFindOne.mockResolvedValue({ id: 11 })
     const res = await revertExpiredInsurance()
     expect(res).toBe('Success Revert In-breach Insurance to Exempt - updated 3 rows')
+  })
+
+  test('revertExpiredInsurance should handle some rows', async () => {
+    dbFindAll.mockResolvedValue(overnightRowsInBreachExclExpiredInsurance)
+    dbFindOne.mockResolvedValue({ id: 11 })
+    const res = await revertExpiredInsurance()
+    expect(res).toBe('Success Revert In-breach Insurance to Exempt - updated 0 rows')
   })
 })
