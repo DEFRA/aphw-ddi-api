@@ -88,7 +88,11 @@ const makeUserAccountDbOrdering = (sort) => {
     }
 
     if (key === 'policeForce') {
-      return [['$police_force.name$', value], ['username', value]]
+      return [['$police_force.name$', value], ['username', sortOrder.ASC]]
+    }
+
+    if (key === 'activated') {
+      return [sequelize.literal(`CASE WHEN activated_date IS NULL THEN 2 ELSE 1 END ${value ? sortOrder.ASC : sortOrder.DESC}`), ['username', sortOrder.ASC]]
     }
 
     return ordering
@@ -98,11 +102,21 @@ const makeUserAccountDbOrdering = (sort) => {
     order: order.length ? order : defaultOrdering
   }
 }
-
+/**
+ * @typedef {'ASC'|'DESC'} SortOrder
+ */
 /**
  * @typedef GetAccountsFilterOptions
  * @property {number} [policeForceId]
  * @property {string} [policeForce]
+ */
+
+/**
+ * @typedef GetAccountsSortOptions
+ * @property {SortOrder} [policeForce]
+ * @property {SortOrder} [username]
+ * @property {SortOrder} [policeForce]
+ * @property {boolean} [activated]
  */
 /**
  * @typedef GetAccounts
@@ -113,7 +127,7 @@ const makeUserAccountDbOrdering = (sort) => {
 
 /**
  * @param {GetAccountsFilterOptions} filter
- * @param sort
+ * @param {GetAccountsSortOptions} sort
  * @return {Promise<UserAccount[]>}
  */
 const getAccounts = async (filter = {}, sort = {}) => {

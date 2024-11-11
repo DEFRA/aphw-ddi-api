@@ -16,6 +16,7 @@ describe('user-accounts', () => {
   const { sendEmail } = require('../../../../app/messaging/send-email')
 
   jest.mock('../../../../app/config/db', () => ({
+    literal: jest.fn(),
     models: {
       user_account: {
         findAll: jest.fn(),
@@ -71,6 +72,7 @@ describe('user-accounts', () => {
         short_name: 'beverly-hills'
       })
     })
+
     test('should get a list of accounts', async () => {
       const userAccounts = [
         ralph,
@@ -186,6 +188,38 @@ describe('user-accounts', () => {
       })
     })
 
+    test('should sort accounts by activated=true', async () => {
+      const userAccounts = [
+        axelFoley
+      ]
+      sequelize.models.user_account.findAll.mockResolvedValue(userAccounts)
+      await getAccounts({}, { activated: true })
+      expect(sequelize.models.user_account.findAll).toHaveBeenCalledWith({
+        order: [undefined, ['username', 'ASC']],
+        include: {
+          model: sequelize.models.police_force,
+          as: 'police_force'
+        }
+      })
+      expect(sequelize.literal).toHaveBeenCalledWith('CASE WHEN activated_date IS NULL THEN 2 ELSE 1 END ASC')
+    })
+
+    test('should sort accounts by activated=false', async () => {
+      const userAccounts = [
+        axelFoley
+      ]
+      sequelize.models.user_account.findAll.mockResolvedValue(userAccounts)
+      await getAccounts({}, { activated: false })
+      expect(sequelize.models.user_account.findAll).toHaveBeenCalledWith({
+        order: [undefined, ['username', 'ASC']],
+        include: {
+          model: sequelize.models.police_force,
+          as: 'police_force'
+        }
+      })
+      expect(sequelize.literal).toHaveBeenCalledWith('CASE WHEN activated_date IS NULL THEN 2 ELSE 1 END DESC')
+    })
+
     test('should sort accounts by police force DESC', async () => {
       const userAccounts = [
         axelFoley
@@ -193,7 +227,7 @@ describe('user-accounts', () => {
       sequelize.models.user_account.findAll.mockResolvedValue(userAccounts)
       await getAccounts({}, { policeForce: 'DESC' })
       expect(sequelize.models.user_account.findAll).toHaveBeenCalledWith({
-        order: [['$police_force.name$', 'DESC'], ['username', 'DESC']],
+        order: [['$police_force.name$', 'DESC'], ['username', 'ASC']],
         include: {
           model: sequelize.models.police_force,
           as: 'police_force'
