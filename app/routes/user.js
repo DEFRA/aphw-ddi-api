@@ -116,9 +116,8 @@ module.exports = [
         }
       },
       handler: async (request, h) => {
-        console.log('~~~~~~ Chris Debug ~~~~~~ start', '')
         const createAccountsResult = await createAccounts(request.payload.users, getCallingUser(request))
-        console.log('~~~~~~ Chris Debug ~~~~~~ ', 'CreateAccountsResult', createAccountsResult)
+
         const mapErrors = ({ data, ...error }) => {
           return {
             ...error,
@@ -132,7 +131,6 @@ module.exports = [
 
         const responseCode = getHttpCodeFromResults(createAccountsResult)
 
-        console.log('~~~~~~ Chris Debug ~~~~~~ ', 'ResponseCode', responseCode)
         return h.response(bulkResponse).code(responseCode)
       }
     }
@@ -281,8 +279,6 @@ module.exports = [
       const { username } = getCallingUser(request)
 
       await drop(request, username)
-
-      console.info('Hash Key deleted for user')
 
       return h.response(undefined).code(204)
     }
