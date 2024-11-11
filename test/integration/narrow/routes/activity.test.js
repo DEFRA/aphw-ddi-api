@@ -31,7 +31,7 @@ describe('Activity endpoint', () => {
       email: 'enforcement.user@example.com',
       email_verified: true
     })
-    isAccountEnabled.mockResolvedValue([true, { ...devUser, save: jest.fn() }])
+    isAccountEnabled.mockResolvedValue(true)
     server = await createServer()
     await server.initialize()
   })

@@ -1,18 +1,15 @@
 const forces = [
   {
     id: 3,
-    name: 'Eastern Constabulary',
-    short_name: 'eastern'
+    name: 'Eastern Constabulary'
   },
   {
     id: 1,
-    name: 'Northern Constabulary',
-    short_name: 'northern'
+    name: 'Northern Constabulary'
   },
   {
     id: 2,
-    name: 'Southern Constabulary',
-    short_name: 'southern'
+    name: 'Southern Constabulary'
   }
 ]
 
