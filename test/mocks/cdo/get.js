@@ -134,7 +134,7 @@ const status = buildStatusDao()
 
 /**
  *
- * @param {Partial<PoliceForceDao>} partialPoliceForce
+ * @param {PoliceForceDao} partialPoliceForce
  * @return {PoliceForceDao}
  */
 const buildPoliceForceDao = (partialPoliceForce = {}) => ({
@@ -143,7 +143,6 @@ const buildPoliceForceDao = (partialPoliceForce = {}) => ({
   created_at: null,
   deleted_at: null,
   updated_at: null,
-  short_name: 'somerset',
   ...partialPoliceForce
 })
 /**

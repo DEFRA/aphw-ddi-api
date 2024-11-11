@@ -1,11 +1,8 @@
 const config = require('../config/index')
 const { getRegistrationService } = require('../service/config')
 const {
-  createUserRequestSchema, userFeedbackSchema, userBooleanResponseSchema, userStringResponseSchema, bulkResponseSchema, bulkRequestSchema,
-  fullUserResponseSchema, reportSomethingSchema,
-  userValidResponseSchema,
-  getUserResponseSchema,
-  getUsersQuerySchema
+  createUserResponseSchema, createUserRequestSchema, userFeedbackSchema, userBooleanResponseSchema, userStringResponseSchema, bulkResponseSchema, bulkRequestSchema,
+  getResponseSchema, reportSomethingSchema
 } = require('../schema/user')
 const { createAccount, deleteAccount, createAccounts, getAccounts } = require('../repos/user-accounts')
 const { scopes } = require('../constants/auth')
@@ -29,7 +26,7 @@ module.exports = [
       notes: ['Creates a new user account'],
       response: {
         status: {
-          201: fullUserResponseSchema,
+          201: createUserResponseSchema,
           409: conflictSchema,
           404: notFoundSchema
         }
@@ -58,38 +55,17 @@ module.exports = [
       auth: { scope: [scopes.admin] },
       tags: ['api'],
       notes: ['Gets a full list of all user accounts'],
-      validate: {
-        query: getUsersQuerySchema
-      },
       response: {
         status: {
-          200: getUserResponseSchema
+          200: getResponseSchema
         }
       },
       handler: async (request, h) => {
-        const sort = {}
-        const filter = Object.entries(request.query).reduce((filterObj, [key, value]) => {
-          if (['username', 'policeForceId', 'policeForce'].includes(key)) {
-            return {
-              ...filterObj,
-              [key]: value
-            }
-          }
-
-          if (key === 'sortKey' && value === 'activated') {
-            sort.activated = request.query.activated !== undefined ? request.query.activated : true
-          } else if (key === 'sortKey') {
-            sort[value] = request.query.sortOrder ?? 'ASC'
-          }
-          return filterObj
-        }, {})
-
-        const userDaos = await getAccounts(filter, sort)
+        const userDaos = await getAccounts()
 
         const users = userDaos.map(mapUserDaoToDto)
-        const count = users.length
 
-        return h.response({ users, count }).code(200)
+        return h.response({ users }).code(200)
       }
     }
   },
@@ -117,7 +93,6 @@ module.exports = [
       },
       handler: async (request, h) => {
         const createAccountsResult = await createAccounts(request.payload.users, getCallingUser(request))
-
         const mapErrors = ({ data, ...error }) => {
           return {
             ...error,
@@ -180,12 +155,12 @@ module.exports = [
       notes: ['Checks if the calling user has accepted the licence'],
       response: {
         status: {
-          200: userValidResponseSchema
+          200: userBooleanResponseSchema
         }
       }
     },
     handler: async (request, h) => {
-      const res = await getRegistrationService().isUserLicenceValid(request)
+      const res = await getRegistrationService().isUserLicenceAccepted(request)
 
       return h.response({ result: res }).code(200)
     }
@@ -279,6 +254,8 @@ module.exports = [
       const { username } = getCallingUser(request)
 
       await drop(request, username)
+
+      console.info('Hash Key deleted for user')
 
       return h.response(undefined).code(204)
     }

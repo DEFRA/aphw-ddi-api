@@ -1,6 +1,5 @@
-const { createUserRequestSchema, fullUserResponseSchema, bulkRequestSchema, bulkResponseSchema } = require('../../../../../app/schema/user')
+const { createUserRequestSchema, createUserResponseSchema, bulkRequestSchema, bulkResponseSchema } = require('../../../../../app/schema/user')
 const { ValidationError } = require('joi')
-const { buildUserDto } = require('../../../../mocks/user-accounts')
 describe('user schema', () => {
   describe('requestSchema', () => {
     test('should pass with valid schema', () => {
@@ -71,7 +70,7 @@ describe('user schema', () => {
         id: 1,
         username: 'john@smith.co.uk'
       }
-      const validation = fullUserResponseSchema.validate(response, { abortEarly: false })
+      const validation = createUserResponseSchema.validate(response, { abortEarly: false })
 
       expect(validation).toEqual({
         value: {
@@ -84,30 +83,20 @@ describe('user schema', () => {
     })
 
     test('should pass with valid schema and all properties', () => {
-      const response = buildUserDto({
+      const response = {
         id: 1,
-        username: 'john@eastern.police.uk',
+        username: 'john@smith.co.uk',
         active: false,
-        policeForceId: 1,
-        policeForce: 'Eastern police',
-        accepted: new Date('2024-10-11'),
-        activated: new Date('2024-10-11'),
-        lastLogin: new Date('2024-11-11'),
-        createdAt: new Date('2024-10-10')
-      })
-      const validation = fullUserResponseSchema.validate(response, { abortEarly: false })
+        police_force_id: 1
+      }
+      const validation = createUserResponseSchema.validate(response, { abortEarly: false })
 
       expect(validation).toEqual({
         value: {
           id: 1,
-          username: 'john@eastern.police.uk',
+          username: 'john@smith.co.uk',
           active: false,
-          policeForceId: 1,
-          policeForce: 'Eastern police',
-          accepted: new Date('2024-10-11'),
-          activated: new Date('2024-10-11'),
-          lastLogin: new Date('2024-11-11'),
-          createdAt: new Date('2024-10-10')
+          police_force_id: 1
         }
       })
       expect(validation.error).not.toBeDefined()
@@ -115,7 +104,7 @@ describe('user schema', () => {
 
     test('should not pass with empty payload', () => {
       const payload = {}
-      const validation = fullUserResponseSchema.validate(payload, { abortEarly: false })
+      const validation = createUserResponseSchema.validate(payload, { abortEarly: false })
 
       expect(validation.error).toEqual(new ValidationError('"id" is required. "username" is required'))
     })
@@ -187,13 +176,13 @@ describe('user schema', () => {
             id: 1,
             username: 'john.smith@acme.police.gov',
             active: true,
-            policeForceId: 2
+            police_force_id: 2
           },
           {
             id: 1,
             username: 'user@example.com',
             active: true,
-            policeForceId: undefined
+            police_force_id: undefined
           }
         ]
       }
@@ -205,7 +194,7 @@ describe('user schema', () => {
             id: 1,
             username: 'john.smith@acme.police.gov',
             active: true,
-            policeForceId: 2
+            police_force_id: 2
           },
           {
             id: 1,

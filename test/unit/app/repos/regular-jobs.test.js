@@ -26,7 +26,7 @@ describe('RegularJobs repo', () => {
   jest.mock('../../../../app/overnight/create-export-file')
   const { createExportFile } = require('../../../../app/overnight/create-export-file')
 
-  const { tryStartJob, endJob, getRegularJobs, createNewJob, updateRunningJobProgress, hasJobRunBefore } = require('../../../../app/repos/regular-jobs')
+  const { tryStartJob, endJob, getRegularJobs, createNewJob, updateRunningJobProgress } = require('../../../../app/repos/regular-jobs')
 
   beforeEach(async () => {
     jest.clearAllMocks()
@@ -157,31 +157,5 @@ describe('RegularJobs repo', () => {
     expect(res.id).toBe(123)
     expect(res.result).toBe(' Extra text to add')
     expect(mockSave).toHaveBeenCalledTimes(1)
-  })
-
-  test('hasJobRunBefore should return true if job exists', async () => {
-    sequelize.models.regular_job.findOne.mockResolvedValue({ id: 123 })
-
-    const res = await hasJobRunBefore('revert')
-
-    expect(res).toBeTruthy()
-
-    expect(sequelize.models.regular_job.findOne).toHaveBeenCalledTimes(1)
-  })
-
-  test('hasJobRunBefore should return false if job not found', async () => {
-    sequelize.models.regular_job.findOne.mockResolvedValue()
-
-    const res = await hasJobRunBefore('revert')
-
-    expect(res).toBeFalsy()
-
-    expect(sequelize.models.regular_job.findOne).toHaveBeenCalledTimes(1)
-  })
-
-  test('hasJobRunBefore should error if DB error', async () => {
-    sequelize.models.regular_job.findOne.mockImplementation(() => { throw new Error('DB error') })
-
-    await expect(hasJobRunBefore('revert')).rejects.toThrow('DB error')
   })
 })
