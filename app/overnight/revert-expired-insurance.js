@@ -63,5 +63,6 @@ const revertExpiredInsurance = async (_today, user, t) => {
 
 module.exports = {
   revertExpiredInsurance,
-  moreThanJustExpiredInsurance
+  moreThanJustExpiredInsurance,
+  includesInsuranceExpiry
 }
