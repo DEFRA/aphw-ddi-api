@@ -1,4 +1,5 @@
 const Joi = require('joi')
+const { sortOrder } = require('../../constants/sorting')
 
 const userBooleanResponseSchema = Joi.object({
   result: Joi.boolean()
@@ -71,7 +72,10 @@ const getUserResponseSchema = Joi.object({
 const getUsersQuerySchema = Joi.object({
   username: Joi.string().optional(),
   policeForceId: Joi.number().optional(),
-  policeForce: Joi.string().optional()
+  policeForce: Joi.string().optional(),
+  sortKey: Joi.string().allow('username', 'activated', 'policeForce').optional(),
+  sortOrder: Joi.string().allow(sortOrder.ASC, sortOrder.DESC).optional(),
+  activated: Joi.boolean().truthy('Y').falsy('N').optional()
 })
 
 module.exports = {

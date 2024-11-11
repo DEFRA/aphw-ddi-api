@@ -70,6 +70,7 @@ module.exports = [
         }
       },
       handler: async (request, h) => {
+        const sort = {}
         const filter = Object.entries(request.query).reduce((filterObj, [key, value]) => {
           if (['username', 'policeForceId', 'policeForce'].includes(key)) {
             return {
@@ -77,9 +78,16 @@ module.exports = [
               [key]: value
             }
           }
+
+          if (key === 'sortKey' && value === 'activated') {
+            sort.activated = request.query.activated !== undefined ? request.query.activated : true
+          } else if (key === 'sortKey') {
+            sort[value] = request.query.sortOrder ?? 'ASC'
+          }
           return filterObj
         }, {})
-        const userDaos = await getAccounts(filter)
+
+        const userDaos = await getAccounts(filter, sort)
 
         const users = userDaos.map(mapUserDaoToDto)
         const count = users.length

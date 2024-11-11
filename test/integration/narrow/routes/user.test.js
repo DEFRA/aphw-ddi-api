@@ -1,7 +1,6 @@
 const { mockValidate, mockValidateEnforcement, mockValidateStandard } = require('../../../mocks/auth')
 const { portalHeader, enforcementHeader, portalStandardHeader } = require('../../../mocks/jwt')
 const { buildUserAccount, buildUserDto } = require('../../../mocks/user-accounts')
-const { buildPoliceForce } = require('../../../mocks/police-forces')
 const { buildPoliceForceDao } = require('../../../mocks/cdo/get')
 
 describe('User endpoint', () => {
@@ -13,9 +12,6 @@ describe('User endpoint', () => {
 
   jest.mock('../../../../app/service/config')
   const { getRegistrationService } = require('../../../../app/service/config')
-
-  jest.mock('../../../../app/repos/police-forces')
-  const { getPoliceForces } = require('../../../../app/repos/police-forces')
 
   jest.mock('../../../../app/repos/user-accounts')
   const { createAccount, deleteAccount, createAccounts, getAccounts } = require('../../../../app/repos/user-accounts')
@@ -114,16 +110,42 @@ describe('User endpoint', () => {
   })
 
   describe('GET /users', () => {
+    const wreckitRalph = buildUserAccount({
+      id: 1,
+      username: 'ralph@wreckit.com',
+      activated_date: new Date('2024-11-06'),
+      accepted_terms_and_conds_date: new Date('2024-11-06'),
+      created_at: new Date('2024-11-06'),
+      last_login_date: null
+    })
+    const scottTurner = buildUserAccount({
+      id: 2,
+      username: 'scott.turner@sacramento.police.gov',
+      police_force_id: 2,
+      police_force: buildPoliceForceDao({
+        id: 2,
+        name: 'Sacramento Police Department',
+        short_name: 'sacramento'
+      })
+    })
+    const axelFoley = buildUserAccount({
+      id: 3,
+      username: 'axel.foley@beverly-hills.police.uk',
+      police_force_id: 3,
+      activated_date: new Date('2024-11-06'),
+      accepted_terms_and_conds_date: new Date('2024-11-06'),
+      last_login_date: null,
+      created_at: new Date('2024-11-06'),
+      police_force: buildPoliceForceDao({
+        id: 3,
+        name: 'Beverly Hills Police Department',
+        short_name: 'beverly-hills'
+      })
+    })
+
     test('should get a list of users', async () => {
       const userAccounts = [
-        buildUserAccount({
-          id: 1,
-          username: 'ralph@wreckit.com',
-          activated_date: new Date('2024-11-06'),
-          accepted_terms_and_conds_date: new Date('2024-11-06'),
-          created_at: new Date('2024-11-06'),
-          last_login_date: null
-        }),
+        wreckitRalph,
         buildUserAccount({
           id: 2,
           username: 'scott.turner@sacramento.police.uk',
@@ -138,20 +160,7 @@ describe('User endpoint', () => {
             short_name: 'sacramento'
           })
         }),
-        buildUserAccount({
-          id: 3,
-          username: 'axel.foley@beverly-hills.police.uk',
-          police_force_id: 3,
-          activated_date: new Date('2024-11-06'),
-          accepted_terms_and_conds_date: new Date('2024-11-06'),
-          last_login_date: null,
-          created_at: new Date('2024-11-06'),
-          police_force: buildPoliceForceDao({
-            id: 3,
-            name: 'Beverly Hills Police Department',
-            short_name: 'beverly-hills'
-          })
-        }),
+        axelFoley,
         buildUserAccount({
           id: 4,
           username: 'axel.foley@beverly-hills.pnn.police.uk',
@@ -178,7 +187,7 @@ describe('User endpoint', () => {
 
       const response = await server.inject(options)
       expect(response.statusCode).toBe(200)
-      expect(getAccounts).toHaveBeenCalledWith({})
+      expect(getAccounts).toHaveBeenCalledWith({}, {})
       expect(JSON.parse(response.payload)).toEqual({
         count: 4,
         users: [
@@ -228,25 +237,16 @@ describe('User endpoint', () => {
       })
     })
 
-    test('should get a filtered list of users', async () => {
+    test('should get a filtered and sorted list of users', async () => {
       const userAccounts = [
-        buildUserAccount({
-          id: 2,
-          username: 'scott.turner@sacramento.police.gov',
-          police_force_id: 2,
-          police_force: buildPoliceForceDao({
-            id: 2,
-            name: 'Sacramento Police Department',
-            short_name: 'sacramento'
-          })
-        })
+        scottTurner
       ]
 
       getAccounts.mockResolvedValue(userAccounts)
 
       const options = {
         method: 'GET',
-        url: '/users?policeForceId=2&policeForce=Sacramento%20Police%20Department&username=scott.turner@sacramento.police.gov',
+        url: '/users?policeForceId=2&policeForce=Sacramento%20Police%20Department&username=scott.turner@sacramento.police.gov&sortKey=policeForce&sortOrder=DESC',
         ...portalHeader
       }
 
@@ -256,7 +256,61 @@ describe('User endpoint', () => {
         policeForceId: 2,
         username: 'scott.turner@sacramento.police.gov',
         policeForce: 'Sacramento Police Department'
-      })
+      }, { policeForce: 'DESC' })
+    })
+
+    test('should get a list of users sorted by activated', async () => {
+      const userAccounts = [
+        scottTurner
+      ]
+
+      getAccounts.mockResolvedValue(userAccounts)
+
+      const options = {
+        method: 'GET',
+        url: '/users?sortKey=activated&activated=Y',
+        ...portalHeader
+      }
+
+      const response = await server.inject(options)
+      expect(response.statusCode).toBe(200)
+      expect(getAccounts).toHaveBeenCalledWith({}, { activated: true })
+    })
+
+    test('should handle missing sort order with activated', async () => {
+      const userAccounts = [
+        scottTurner
+      ]
+
+      getAccounts.mockResolvedValue(userAccounts)
+
+      const options = {
+        method: 'GET',
+        url: '/users?sortKey=activated',
+        ...portalHeader
+      }
+
+      const response = await server.inject(options)
+      expect(response.statusCode).toBe(200)
+      expect(getAccounts).toHaveBeenCalledWith({}, { activated: true })
+    })
+
+    test('should handle missing sort order with username', async () => {
+      const userAccounts = [
+        scottTurner
+      ]
+
+      getAccounts.mockResolvedValue(userAccounts)
+
+      const options = {
+        method: 'GET',
+        url: '/users?sortKey=username',
+        ...portalHeader
+      }
+
+      const response = await server.inject(options)
+      expect(response.statusCode).toBe(200)
+      expect(getAccounts).toHaveBeenCalledWith({}, { username: 'ASC' })
     })
 
     test('should return 400 if request is from enforcement', async () => {
