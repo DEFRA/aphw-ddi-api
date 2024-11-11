@@ -322,7 +322,7 @@ const createAccounts = async (accountsDto, user) => {
 /**
  * @typedef IsAccountEnabled
  * @param {string} username
- * @return {Promise<boolean>}
+ * @return {Promise<[boolean, UserAccount]>}
  */
 
 /**
@@ -333,7 +333,7 @@ const isAccountEnabled = async (username) => {
     where: { username }
   })
 
-  return !!account?.active
+  return [!!account?.active, account]
 }
 
 /**

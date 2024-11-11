@@ -707,7 +707,7 @@ describe('User endpoint', () => {
   })
 
   describe('GET /user/me/validate', () => {
-    test('should validate and return a 204 if user is registered', async () => {
+    test('should validate portal users and return a 204 if user is registered', async () => {
       const options = {
         method: 'GET',
         url: '/user/me/validate',
@@ -717,7 +717,7 @@ describe('User endpoint', () => {
       expect(response.statusCode).toBe(204)
     })
 
-    test('should validate and return a 204 if user is registered', async () => {
+    test('should validate enforcement users and return a 204 if user is registered', async () => {
       validate.mockResolvedValue(mockValidateEnforcement)
       const options = {
         method: 'GET',

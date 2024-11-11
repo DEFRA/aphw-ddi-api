@@ -1,7 +1,6 @@
 const { createUserRequestSchema, fullUserResponseSchema, bulkRequestSchema, bulkResponseSchema } = require('../../../../../app/schema/user')
 const { ValidationError } = require('joi')
-const Joi = require('joi')
-const { buildUserAccount, buildUserDto } = require('../../../../mocks/user-accounts')
+const { buildUserDto } = require('../../../../mocks/user-accounts')
 describe('user schema', () => {
   describe('requestSchema', () => {
     test('should pass with valid schema', () => {

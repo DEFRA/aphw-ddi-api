@@ -699,7 +699,7 @@ describe('user-accounts', () => {
 
   describe('isAccountEnabled', () => {
     test('should return true if active', async () => {
-      sequelize.models.user_account.findOne.mockResolvedValue({
+      const mockUserAccount = {
         id: 1,
         username: 'test@example.com',
         telephone: '01406946277',
@@ -707,14 +707,15 @@ describe('user-accounts', () => {
         activated_date: new Date('2024-08-31'),
         active: true,
         last_login_date: new Date('2024-09-02')
-      })
+      }
+      sequelize.models.user_account.findOne.mockResolvedValue(mockUserAccount)
 
       const result = await isAccountEnabled('test@example.com')
-      expect(result).toBe(true)
+      expect(result).toEqual([true, mockUserAccount])
     })
 
     test('should return false if user exists and activated but not active', async () => {
-      sequelize.models.user_account.findOne.mockResolvedValue({
+      const mockUserAccount = {
         id: 1,
         username: 'test@example.com',
         telephone: '01406946277',
@@ -722,17 +723,18 @@ describe('user-accounts', () => {
         activated_date: new Date('2024-08-31'),
         active: false,
         last_login_date: new Date('2024-09-02')
-      })
+      }
+      sequelize.models.user_account.findOne.mockResolvedValue(mockUserAccount)
 
       const result = await isAccountEnabled('test@example.com')
-      expect(result).toBe(false)
+      expect(result).toEqual([false, mockUserAccount])
     })
 
     test('should return false if user does not exist', async () => {
       sequelize.models.user_account.findOne.mockResolvedValue(null)
 
       const result = await isAccountEnabled('test@example.com')
-      expect(result).toBe(false)
+      expect(result).toEqual([false, null])
     })
   })
 

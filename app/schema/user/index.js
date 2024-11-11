@@ -84,6 +84,7 @@ module.exports = {
   userStringResponseSchema,
   createUserRequestSchema,
   userFeedbackSchema,
+  fullUserResponseSchema,
   reportSomethingSchema,
   bulkRequestSchema,
   bulkResponseSchema,
