@@ -41,9 +41,9 @@ describe('Police force repo', () => {
       const forces = await getPoliceForces()
 
       expect(forces).toHaveLength(3)
-      expect(forces).toContainEqual({ id: 3, name: 'Eastern Constabulary', short_name: 'eastern' })
-      expect(forces).toContainEqual({ id: 1, name: 'Northern Constabulary', short_name: 'northern' })
-      expect(forces).toContainEqual({ id: 2, name: 'Southern Constabulary', short_name: 'southern' })
+      expect(forces).toContainEqual({ id: 3, name: 'Eastern Constabulary' })
+      expect(forces).toContainEqual({ id: 1, name: 'Northern Constabulary' })
+      expect(forces).toContainEqual({ id: 2, name: 'Southern Constabulary' })
     })
 
     test('getForces should throw if error', async () => {

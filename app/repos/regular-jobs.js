@@ -15,19 +15,6 @@ const getRegularJobs = async () => {
   }
 }
 
-const hasJobRunBefore = async (jobText) => {
-  try {
-    const job = await sequelize.models.regular_job.findOne({
-      where: { result: { [Op.like]: `Success %${jobText}%` } }
-    })
-
-    return !!job?.id
-  } catch (e) {
-    console.log('Error running hasOneOffJobRunBefore:', e)
-    throw e
-  }
-}
-
 const tryStartJob = async (trans) => {
   if (!trans) {
     return await sequelize.transaction(async (t) => tryStartJob(t))
@@ -118,6 +105,5 @@ module.exports = {
   endJob,
   getRegularJobs,
   updateRunningJobProgress,
-  createNewJob,
-  hasJobRunBefore
+  createNewJob
 }

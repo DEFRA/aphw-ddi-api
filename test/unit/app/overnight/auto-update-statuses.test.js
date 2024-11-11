@@ -1,10 +1,3 @@
-const mockTransaction = jest.fn()
-jest.mock('../../../../app/config/db', () => ({
-  transaction: jest.fn().mockImplementation(async (fn) => {
-    return await fn(mockTransaction)
-  })
-}))
-
 jest.mock('../../../../app/overnight/expired-cdo')
 const { setExpiredCdosToFailed } = require('../../../../app/overnight/expired-cdo')
 
@@ -13,12 +6,6 @@ const { setExpiredInsuranceToBreach, addBreachReasonToExpiredInsurance } = requi
 
 jest.mock('../../../../app/overnight/expired-neutering-deadline')
 const { setExpiredNeuteringDeadlineToInBreach, addBreachReasonToExpiredNeuteringDeadline } = require('../../../../app/overnight/expired-neutering-deadline')
-
-jest.mock('../../../../app/repos/regular-jobs')
-const { hasJobRunBefore } = require('../../../../app/repos/regular-jobs')
-
-jest.mock('../../../../app/overnight/revert-expired-insurance')
-const { revertExpiredInsurance } = require('../../../../app/overnight/revert-expired-insurance')
 
 const { autoUpdateStatuses } = require('../../../../app/overnight/auto-update-statuses')
 
@@ -31,11 +18,9 @@ const overnightJobUser = {
 describe('AutoUpdateStatus test', () => {
   beforeEach(() => {
     jest.clearAllMocks()
-    hasJobRunBefore.mockResolvedValue(true)
   })
 
-  test('autoUpdateStatuses should handle successful results when not running revertExpiredInsurance', async () => {
-    revertExpiredInsurance.mockResolvedValue('ok - revert 3 rows')
+  test('autoUpdateStatuses should handle successful results', async () => {
     setExpiredCdosToFailed.mockResolvedValue('ok - cdos 1 rows')
     addBreachReasonToExpiredInsurance.mockResolvedValue('ok - insurance add reason 2 rows')
     setExpiredInsuranceToBreach.mockResolvedValue('ok - insurance to breach 2 rows')
@@ -48,25 +33,6 @@ describe('AutoUpdateStatus test', () => {
     expect(setExpiredCdosToFailed).toHaveBeenCalledWith(expect.any(Date), overnightJobUser, expect.anything())
     expect(addBreachReasonToExpiredInsurance).toHaveBeenCalledWith(expect.any(Date), overnightJobUser, expect.anything())
     expect(addBreachReasonToExpiredNeuteringDeadline).toHaveBeenCalledWith(expect.any(Date), overnightJobUser, expect.anything())
-    expect(revertExpiredInsurance).not.toHaveBeenCalled()
-  })
-
-  test('autoUpdateStatuses should handle successful results when not running revertExpiredInsurance', async () => {
-    hasJobRunBefore.mockResolvedValue(false)
-    revertExpiredInsurance.mockResolvedValue('ok - revert 3 rows')
-    setExpiredCdosToFailed.mockResolvedValue('ok - cdos 1 rows')
-    addBreachReasonToExpiredInsurance.mockResolvedValue('ok - insurance add reason 2 rows')
-    setExpiredInsuranceToBreach.mockResolvedValue('ok - insurance to breach 2 rows')
-    addBreachReasonToExpiredNeuteringDeadline.mockResolvedValue('ok - neutering add reason 2 rows')
-    setExpiredNeuteringDeadlineToInBreach.mockResolvedValue('ok - neutering to breach 2 rows')
-    const res = await autoUpdateStatuses()
-    expect(res).toBe('ok - cdos 1 rows | ok - revert 3 rows | ok - insurance add reason 2 rows | ok - insurance to breach 2 rows | ok - neutering add reason 2 rows | ok - neutering to breach 2 rows')
-    expect(setExpiredNeuteringDeadlineToInBreach).toHaveBeenCalledWith(expect.any(Date), overnightJobUser, expect.anything())
-    expect(setExpiredInsuranceToBreach).toHaveBeenCalledWith(expect.any(Date), overnightJobUser, expect.anything())
-    expect(setExpiredCdosToFailed).toHaveBeenCalledWith(expect.any(Date), overnightJobUser, expect.anything())
-    expect(addBreachReasonToExpiredInsurance).toHaveBeenCalledWith(expect.any(Date), overnightJobUser, expect.anything())
-    expect(addBreachReasonToExpiredNeuteringDeadline).toHaveBeenCalledWith(expect.any(Date), overnightJobUser, expect.anything())
-    expect(revertExpiredInsurance).toHaveBeenCalledWith(expect.any(Date), overnightJobUser, expect.anything())
   })
 
   test('autoUpdateStatuses should handle errors', async () => {
