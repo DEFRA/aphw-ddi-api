@@ -64,7 +64,8 @@ const bulkResponseSchema = Joi.object({
 })
 
 const getUserResponseSchema = Joi.object({
-  users: Joi.array().items(fullUserResponseSchema).required()
+  users: Joi.array().items(fullUserResponseSchema).required(),
+  count: Joi.number().required()
 })
 
 const getUsersQuerySchema = Joi.object({
