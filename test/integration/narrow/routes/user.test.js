@@ -180,6 +180,7 @@ describe('User endpoint', () => {
       expect(response.statusCode).toBe(200)
       expect(getAccounts).toHaveBeenCalledWith({})
       expect(JSON.parse(response.payload)).toEqual({
+        count: 4,
         users: [
           expect.objectContaining({
             id: 1,

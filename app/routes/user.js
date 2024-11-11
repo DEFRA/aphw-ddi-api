@@ -70,12 +70,21 @@ module.exports = [
         }
       },
       handler: async (request, h) => {
-        const filter = request.query ?? {}
+        const filter = Object.entries(request.query).reduce((filterObj, [key, value]) => {
+          if (['username', 'policeForceId', 'policeForce'].includes(key)) {
+            return {
+              ...filterObj,
+              [key]: value
+            }
+          }
+          return filterObj
+        }, {})
         const userDaos = await getAccounts(filter)
 
         const users = userDaos.map(mapUserDaoToDto)
+        const count = users.length
 
-        return h.response({ users }).code(200)
+        return h.response({ users, count }).code(200)
       }
     }
   },
