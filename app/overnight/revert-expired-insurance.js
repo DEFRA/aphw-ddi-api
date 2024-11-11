@@ -15,13 +15,17 @@ const findExpired = async (currentStatus, t) => {
       '$dog.status.status$': currentStatus,
       '$exemption_order.exemption_order$': '2023'
     },
-    include: insuranceRelationship,
+    include: insuranceRelationship(sequelize),
     transaction: t
   })
 }
 
+const includesInsuranceExpiry = (dog, expiredInsuranceId) => {
+  return dog?.dog_breaches?.some(breach => breach.breach_category_id === expiredInsuranceId)
+}
+
 const moreThanJustExpiredInsurance = (dog, expiredInsuranceId) => {
-  return !(dog?.dog_breaches?.some(breach => breach.breach_category_id === expiredInsuranceId) && dog?.dog_breaches?.length === 1)
+  return (dog?.dog_breaches?.length ?? 0) > 1
 }
 
 const revertExpiredInsurance = async (_today, user, t) => {
@@ -37,15 +41,17 @@ const revertExpiredInsurance = async (_today, user, t) => {
     let rowsChangedCount = 0
 
     for (const inBreach of inBreachRows) {
-      if (moreThanJustExpiredInsurance(inBreach.dog, breachCategory.id)) {
-        // Remove insurance breach reason but leave others
-        console.log(`Updating dog ${inBreach.dog.index_number} removing a breach reason`)
-        await removeBreachReasonFromDog(inBreach.dog.id, breachCategory.id, t)
-        rowsChangedCount++
-      } else {
-        console.log(`Updating dog ${inBreach.dog.index_number} back to Exempt`)
-        await updateStatusOnly(inBreach.dog, statuses.Exempt, user, t)
-        rowsChangedCount++
+      if (includesInsuranceExpiry(inBreach.dog, breachCategory.id)) {
+        if (moreThanJustExpiredInsurance(inBreach.dog, breachCategory.id)) {
+          // Remove insurance breach reason but leave others
+          console.log(`Updating dog ${inBreach.dog.index_number} removing a breach reason`)
+          await removeBreachReasonFromDog(inBreach.dog, breachCategory.id, t)
+          rowsChangedCount++
+        } else {
+          console.log(`Updating dog ${inBreach.dog.index_number} back to Exempt`)
+          await updateStatusOnly(inBreach.dog, statuses.Exempt, user, t)
+          rowsChangedCount++
+        }
       }
     }
     return `Success Revert In-breach Insurance to Exempt - updated ${rowsChangedCount} rows`
