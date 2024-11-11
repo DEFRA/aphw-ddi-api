@@ -38,6 +38,7 @@ describe('Breaches repo', () => {
       dog_breach: {
         destroy: jest.fn(),
         findAll: jest.fn(),
+        findOne: jest.fn(),
         bulkCreate: jest.fn()
       },
       dog: {
@@ -49,7 +50,7 @@ describe('Breaches repo', () => {
 
   const sequelize = require('../../../../app/config/db')
 
-  const { getBreachCategories, setBreaches, getBreachCategoryDAOs } = require('../../../../app/repos/breaches')
+  const { getBreachCategories, setBreaches, getBreachCategoryDAOs, removeBreachReasonFromDog } = require('../../../../app/repos/breaches')
 
   beforeEach(async () => {
     jest.clearAllMocks()
@@ -230,6 +231,32 @@ describe('Breaches repo', () => {
           breach_category_id: 4
         }
       ], { transaction: {} })
+    })
+  })
+
+  describe('removeBreachReasonFromDog', () => {
+    test('should start a transaction if none exists', async () => {
+      await removeBreachReasonFromDog({}, 11)
+      expect(sequelize.transaction).toHaveBeenCalledTimes(1)
+    })
+
+    test('should not start a transaction if already exists', async () => {
+      await removeBreachReasonFromDog({ id: 123 }, 11, {})
+      expect(sequelize.transaction).not.toHaveBeenCalled()
+    })
+
+    test('should remove reason if exists in dogs breach list', async () => {
+      const mockDestroy = jest.fn()
+      sequelize.models.dog_breach.findOne.mockResolvedValue({ destroy: mockDestroy, id: 456 })
+      await removeBreachReasonFromDog({ id: 123 }, 11, {})
+      expect(mockDestroy).toHaveBeenCalled()
+    })
+
+    test('should not remove reason if does not exist in dogs breach list', async () => {
+      const mockDestroy = jest.fn()
+      sequelize.models.dog_breach.findOne.mockResolvedValue({ destroy: mockDestroy })
+      await removeBreachReasonFromDog({ id: 123 }, 11, {})
+      expect(mockDestroy).not.toHaveBeenCalled()
     })
   })
 })

@@ -4,6 +4,8 @@ const { purgeSoftDeletedDto } = require('../dto/overnight')
 const { setExpiredInsuranceToBreach, addBreachReasonToExpiredInsurance } = require('../overnight/expired-insurance')
 const { getCallingUser } = require('../auth/get-user')
 const { setExpiredNeuteringDeadlineToInBreach, addBreachReasonToExpiredNeuteringDeadline } = require('../overnight/expired-neutering-deadline')
+const { revertExpiredInsurance } = require('../overnight/revert-expired-insurance')
+const { hasJobRunBefore } = require('../repos/regular-jobs')
 const { scopes } = require('../constants/auth')
 
 module.exports = [
@@ -53,10 +55,17 @@ module.exports = [
       },
       handler: async (request, h) => {
         const now = request.query.today
+        const insuranceRevertAlreadyRun = await hasJobRunBefore('Success Revert In-breach Insurance to Exempt')
+
+        let revertResponse = ''
+        if (!insuranceRevertAlreadyRun) {
+          revertResponse = await revertExpiredInsurance(now, getCallingUser(request))
+        }
+
         const addBreachResponse = await addBreachReasonToExpiredInsurance(now, getCallingUser(request))
         const expiredInsuranceResponse = await setExpiredInsuranceToBreach(now, getCallingUser(request))
 
-        return h.response({ response: addBreachResponse + expiredInsuranceResponse }).code(200)
+        return h.response({ response: revertResponse + addBreachResponse + expiredInsuranceResponse }).code(200)
       }
     }
   },
