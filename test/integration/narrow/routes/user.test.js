@@ -1,6 +1,7 @@
 const { mockValidate, mockValidateEnforcement, mockValidateStandard } = require('../../../mocks/auth')
 const { portalHeader, enforcementHeader, portalStandardHeader } = require('../../../mocks/jwt')
-const { buildUserAccount } = require('../../../mocks/user-accounts')
+const { buildUserAccount, buildUserDto } = require('../../../mocks/user-accounts')
+const { buildPoliceForceDao } = require('../../../mocks/cdo/get')
 
 describe('User endpoint', () => {
   const createServer = require('../../../../app/server')
@@ -25,7 +26,7 @@ describe('User endpoint', () => {
     jest.clearAllMocks()
     validate.mockResolvedValue(mockValidate)
     getRegistrationService.mockReturnValue({
-      isUserLicenceAccepted: jest.fn(),
+      isUserLicenceValid: jest.fn(),
       setUserLicenceAccepted: jest.fn(),
       isUserEmailVerified: jest.fn(),
       sendVerifyEmail: jest.fn(),
@@ -38,27 +39,21 @@ describe('User endpoint', () => {
 
   describe('POST /user', () => {
     test('should add a new user and return a 201 for admin user', async () => {
-      const expectedPayload = {
+      const expectedPayload = buildUserDto({
         id: 2,
-        police_force_id: 1,
+        policeForceId: 1,
         username: 'ralph@wreckit.com',
-        active: true
-      }
-      createAccount.mockResolvedValue({
+        active: true,
+        createdAt: '2024-09-27T15:18:36.563Z'
+      })
+      createAccount.mockResolvedValue(buildUserAccount({
         username: 'ralph@wreckit.com',
         created_at: '2024-09-27T15:18:36.563Z',
         updated_at: '2024-09-27T15:18:36.563Z',
         id: 2,
         police_force_id: 1,
-        active: true,
-        telephone: null,
-        activation_token: null,
-        activation_token_expiry: null,
-        activated_date: null,
-        accepted_terms_and_conds_date: null,
-        last_login_date: null,
-        deleted_at: null
-      })
+        active: true
+      }))
       const options = {
         method: 'POST',
         url: '/user',
@@ -115,21 +110,70 @@ describe('User endpoint', () => {
   })
 
   describe('GET /users', () => {
+    const wreckitRalph = buildUserAccount({
+      id: 1,
+      username: 'ralph@wreckit.com',
+      activated_date: new Date('2024-11-06'),
+      accepted_terms_and_conds_date: new Date('2024-11-06'),
+      created_at: new Date('2024-11-06'),
+      last_login_date: null
+    })
+    const scottTurner = buildUserAccount({
+      id: 2,
+      username: 'scott.turner@sacramento.police.gov',
+      police_force_id: 2,
+      police_force: buildPoliceForceDao({
+        id: 2,
+        name: 'Sacramento Police Department',
+        short_name: 'sacramento'
+      })
+    })
+    const axelFoley = buildUserAccount({
+      id: 3,
+      username: 'axel.foley@beverly-hills.police.uk',
+      police_force_id: 3,
+      activated_date: new Date('2024-11-06'),
+      accepted_terms_and_conds_date: new Date('2024-11-06'),
+      last_login_date: null,
+      created_at: new Date('2024-11-06'),
+      police_force: buildPoliceForceDao({
+        id: 3,
+        name: 'Beverly Hills Police Department',
+        short_name: 'beverly-hills'
+      })
+    })
+
     test('should get a list of users', async () => {
       const userAccounts = [
-        buildUserAccount({
-          id: 1,
-          username: 'ralph@wreckit.com'
-        }),
+        wreckitRalph,
         buildUserAccount({
           id: 2,
-          username: 'scott.turner@sacramento.police.gov',
-          police_force_id: 2
+          username: 'scott.turner@sacramento.police.uk',
+          police_force_id: 2,
+          activated_date: null,
+          accepted_terms_and_conds_date: new Date('2024-11-06'),
+          last_login_date: null,
+          created_at: new Date('2024-11-06'),
+          police_force: buildPoliceForceDao({
+            id: 2,
+            name: 'Sacramento Police Department',
+            short_name: 'sacramento'
+          })
         }),
+        axelFoley,
         buildUserAccount({
-          id: 3,
-          username: 'axel.foley@beverly-hills.police.gov',
-          police_force_id: 3
+          id: 4,
+          username: 'axel.foley@beverly-hills.pnn.police.uk',
+          police_force_id: 3,
+          activated_date: null,
+          accepted_terms_and_conds_date: null,
+          last_login_date: null,
+          created_at: new Date('2024-11-06'),
+          police_force: buildPoliceForceDao({
+            id: 3,
+            name: 'Beverly Hills Police Department',
+            short_name: 'beverly-hills'
+          })
         })
       ]
 
@@ -143,28 +187,130 @@ describe('User endpoint', () => {
 
       const response = await server.inject(options)
       expect(response.statusCode).toBe(200)
-      expect(getAccounts).toHaveBeenCalledWith()
+      expect(getAccounts).toHaveBeenCalledWith({}, {})
       expect(JSON.parse(response.payload)).toEqual({
+        count: 4,
         users: [
-          {
+          expect.objectContaining({
             id: 1,
             username: 'ralph@wreckit.com',
-            active: true
-          },
-          {
+            active: true,
+            activated: '2024-11-06T00:00:00.000Z',
+            accepted: '2024-11-06T00:00:00.000Z',
+            lastLogin: false,
+            createdAt: '2024-11-06T00:00:00.000Z'
+          }),
+          expect.objectContaining({
             id: 2,
-            username: 'scott.turner@sacramento.police.gov',
-            police_force_id: 2,
-            active: true
-          },
-          {
+            username: 'scott.turner@sacramento.police.uk',
+            policeForceId: 2,
+            active: true,
+            policeForce: 'Sacramento Police Department',
+            activated: false,
+            accepted: '2024-11-06T00:00:00.000Z',
+            lastLogin: false,
+            createdAt: '2024-11-06T00:00:00.000Z'
+          }),
+          expect.objectContaining({
             id: 3,
-            username: 'axel.foley@beverly-hills.police.gov',
-            police_force_id: 3,
-            active: true
-          }
+            username: 'axel.foley@beverly-hills.police.uk',
+            policeForceId: 3,
+            active: true,
+            accepted: '2024-11-06T00:00:00.000Z',
+            activated: '2024-11-06T00:00:00.000Z',
+            policeForce: 'Beverly Hills Police Department',
+            lastLogin: false,
+            createdAt: '2024-11-06T00:00:00.000Z'
+          }),
+          expect.objectContaining({
+            id: 4,
+            username: 'axel.foley@beverly-hills.pnn.police.uk',
+            policeForceId: 3,
+            active: true,
+            activated: false,
+            policeForce: 'Beverly Hills Police Department',
+            accepted: false,
+            lastLogin: false,
+            createdAt: '2024-11-06T00:00:00.000Z'
+          })
         ]
       })
+    })
+
+    test('should get a filtered and sorted list of users', async () => {
+      const userAccounts = [
+        scottTurner
+      ]
+
+      getAccounts.mockResolvedValue(userAccounts)
+
+      const options = {
+        method: 'GET',
+        url: '/users?policeForceId=2&policeForce=Sacramento%20Police%20Department&username=scott.turner@sacramento.police.gov&sortKey=policeForce&sortOrder=DESC',
+        ...portalHeader
+      }
+
+      const response = await server.inject(options)
+      expect(response.statusCode).toBe(200)
+      expect(getAccounts).toHaveBeenCalledWith({
+        policeForceId: 2,
+        username: 'scott.turner@sacramento.police.gov',
+        policeForce: 'Sacramento Police Department'
+      }, { policeForce: 'DESC' })
+    })
+
+    test('should get a list of users sorted by activated', async () => {
+      const userAccounts = [
+        scottTurner
+      ]
+
+      getAccounts.mockResolvedValue(userAccounts)
+
+      const options = {
+        method: 'GET',
+        url: '/users?sortKey=activated&activated=Y',
+        ...portalHeader
+      }
+
+      const response = await server.inject(options)
+      expect(response.statusCode).toBe(200)
+      expect(getAccounts).toHaveBeenCalledWith({}, { activated: true })
+    })
+
+    test('should handle missing sort order with activated', async () => {
+      const userAccounts = [
+        scottTurner
+      ]
+
+      getAccounts.mockResolvedValue(userAccounts)
+
+      const options = {
+        method: 'GET',
+        url: '/users?sortKey=activated',
+        ...portalHeader
+      }
+
+      const response = await server.inject(options)
+      expect(response.statusCode).toBe(200)
+      expect(getAccounts).toHaveBeenCalledWith({}, { activated: true })
+    })
+
+    test('should handle missing sort order with username', async () => {
+      const userAccounts = [
+        scottTurner
+      ]
+
+      getAccounts.mockResolvedValue(userAccounts)
+
+      const options = {
+        method: 'GET',
+        url: '/users?sortKey=username',
+        ...portalHeader
+      }
+
+      const response = await server.inject(options)
+      expect(response.statusCode).toBe(200)
+      expect(getAccounts).toHaveBeenCalledWith({}, { username: 'ASC' })
     })
 
     test('should return 400 if request is from enforcement', async () => {
@@ -220,17 +366,17 @@ describe('User endpoint', () => {
 
       const expectedPayload = {
         users: [
-          {
+          expect.objectContaining({
             id: 1,
             active: true,
             username: 'ralph@wreckit.com'
-          },
-          {
+          }),
+          expect.objectContaining({
             id: 2,
             active: true,
             username: 'scott.turner@sacramento.police.gov',
-            police_force_id: 2
-          }
+            policeForceId: 2
+          })
         ]
       }
 
@@ -293,11 +439,11 @@ describe('User endpoint', () => {
 
       const expectedPayload = {
         users: [
-          {
+          expect.objectContaining({
             id: 1,
             active: true,
             username: 'ralph@wreckit.com'
-          }
+          })
         ],
         errors: [
           {
@@ -561,7 +707,7 @@ describe('User endpoint', () => {
   })
 
   describe('GET /user/me/validate', () => {
-    test('should validate and return a 204 if user is registered', async () => {
+    test('should validate portal users and return a 204 if user is registered', async () => {
       const options = {
         method: 'GET',
         url: '/user/me/validate',
@@ -571,7 +717,7 @@ describe('User endpoint', () => {
       expect(response.statusCode).toBe(204)
     })
 
-    test('should validate and return a 204 if user is registered', async () => {
+    test('should validate enforcement users and return a 204 if user is registered', async () => {
       validate.mockResolvedValue(mockValidateEnforcement)
       const options = {
         method: 'GET',
@@ -600,7 +746,7 @@ describe('User endpoint', () => {
 
   describe('GET /user/me/licence', () => {
     test('should validate and return a 200 true if user accepted licence', async () => {
-      getRegistrationService().isUserLicenceAccepted.mockResolvedValue(true)
+      getRegistrationService().isUserLicenceValid.mockResolvedValue({ accepted: true, valid: true })
       const options = {
         method: 'GET',
         url: '/user/me/licence',
@@ -608,11 +754,11 @@ describe('User endpoint', () => {
       }
       const response = await server.inject(options)
       expect(response.statusCode).toBe(200)
-      expect(JSON.parse(response.payload)).toEqual({ result: true })
+      expect(JSON.parse(response.payload)).toEqual({ result: { accepted: true, valid: true } })
     })
 
     test('should validate and return a 200 false if user not accepted licence', async () => {
-      getRegistrationService().isUserLicenceAccepted.mockResolvedValue(false)
+      getRegistrationService().isUserLicenceValid.mockResolvedValue({ accepted: false, valid: false })
       const options = {
         method: 'GET',
         url: '/user/me/licence',
@@ -620,7 +766,7 @@ describe('User endpoint', () => {
       }
       const response = await server.inject(options)
       expect(response.statusCode).toBe(200)
-      expect(JSON.parse(response.payload)).toEqual({ result: false })
+      expect(JSON.parse(response.payload)).toEqual({ result: { accepted: false, valid: false } })
     })
   })
 
