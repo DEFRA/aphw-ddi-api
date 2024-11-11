@@ -3,6 +3,7 @@ const { Op } = require('sequelize')
 const { statuses, breachReasons } = require('../constants/statuses')
 const { dbFindAll, dbFindOne } = require('../lib/db-functions')
 const ServiceProvider = require('../service/config')
+const { insuranceRelationship } = require('./overnight-relationships')
 
 const findExpired = async (currentStatus, today, t) => {
   return await dbFindAll(sequelize.models.registration, {
@@ -13,34 +14,10 @@ const findExpired = async (currentStatus, today, t) => {
       '$dog.status.status$': currentStatus,
       '$dog.insurance.renewal_date$': {
         [Op.lt]: today
-      }
+      },
+      '$exemption_order.exemption_order$': '1991'
     },
-    include: [
-      {
-        model: sequelize.models.dog,
-        as: 'dog',
-        include: [
-          {
-            model: sequelize.models.status,
-            as: 'status'
-          },
-          {
-            model: sequelize.models.insurance,
-            as: 'insurance'
-          },
-          {
-            model: sequelize.models.dog_breach,
-            as: 'dog_breaches',
-            include: [
-              {
-                model: sequelize.models.breach_category,
-                as: 'breach_category'
-              }
-            ]
-          }
-        ]
-      }
-    ],
+    include: insuranceRelationship(sequelize),
     transaction: t
   })
 }
