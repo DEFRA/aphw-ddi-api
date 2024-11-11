@@ -16,9 +16,11 @@ const autoUpdateStatuses = async () => {
 
     await sequelize.transaction(async (t) => {
       result = result + await setExpiredCdosToFailed(today, user, t) + ' | '
+
       if (!insuranceRevertAlreadyRun) {
         result = result + await revertExpiredInsurance(today, user, t) + ' | '
       }
+
       result = result + await addBreachReasonToExpiredInsurance(today, user, t) + ' | '
       result = result + await setExpiredInsuranceToBreach(today, user, t) + ' | '
       result = result + await addBreachReasonToExpiredNeuteringDeadline(today, user, t) + ' | '

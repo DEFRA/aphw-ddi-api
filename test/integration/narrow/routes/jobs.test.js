@@ -9,11 +9,17 @@ describe('Jobs endpoint', () => {
   jest.mock('../../../../app/auth/token-validator')
   const { validate } = require('../../../../app/auth/token-validator')
 
+  jest.mock('../../../../app/repos/regular-jobs')
+  const { hasJobRunBefore } = require('../../../../app/repos/regular-jobs')
+
   jest.mock('../../../../app/overnight/purge-soft-deleted-records')
   const { purgeSoftDeletedRecords } = require('../../../../app/overnight/purge-soft-deleted-records')
 
   jest.mock('../../../../app/overnight/expired-insurance')
   const { setExpiredInsuranceToBreach, addBreachReasonToExpiredInsurance } = require('../../../../app/overnight/expired-insurance')
+
+  jest.mock('../../../../app/overnight/revert-expired-insurance')
+  const { revertExpiredInsurance } = require('../../../../app/overnight/revert-expired-insurance')
 
   jest.mock('../../../../app/overnight/expired-neutering-deadline')
   const { setExpiredNeuteringDeadlineToInBreach, addBreachReasonToExpiredNeuteringDeadline } = require('../../../../app/overnight/expired-neutering-deadline')
@@ -158,10 +164,12 @@ describe('Jobs endpoint', () => {
   describe('POST /jobs/expired-insurance', () => {
     test('POST /jobs/expired-insurance should return 200', async () => {
       const expectedDto = {
-        response: 'Success Insurance Expiry add reason - updated 3 rowsSuccess Insurance Expiry to breach - updated 5 rows'
+        response: 'Success Revert Insurance Expiry - updated 10 rowsSuccess Insurance Expiry add reason - updated 3 rowsSuccess Insurance Expiry to breach - updated 5 rows'
       }
       addBreachReasonToExpiredInsurance.mockResolvedValue('Success Insurance Expiry add reason - updated 3 rows')
       setExpiredInsuranceToBreach.mockResolvedValue('Success Insurance Expiry to breach - updated 5 rows')
+      revertExpiredInsurance.mockResolvedValue('Success Revert Insurance Expiry - updated 10 rows')
+      hasJobRunBefore.mockResolvedValue(false)
 
       const options = {
         method: 'POST',
@@ -173,12 +181,37 @@ describe('Jobs endpoint', () => {
       const responseData = JSON.parse(response.payload)
       expect(response.statusCode).toBe(200)
       expectDate(setExpiredInsuranceToBreach.mock.calls[0][0]).toBeNow()
+      expectDate(revertExpiredInsurance.mock.calls[0][0]).toBeNow()
+      expect(responseData).toEqual(expectedDto)
+    })
+
+    test('POST /jobs/expired-insurance should return 200 but not run revert if already run', async () => {
+      const expectedDto = {
+        response: 'Success Insurance Expiry add reason - updated 3 rowsSuccess Insurance Expiry to breach - updated 5 rows'
+      }
+      addBreachReasonToExpiredInsurance.mockResolvedValue('Success Insurance Expiry add reason - updated 3 rows')
+      setExpiredInsuranceToBreach.mockResolvedValue('Success Insurance Expiry to breach - updated 5 rows')
+      revertExpiredInsurance.mockResolvedValue('Success Revert Insurance Expiry - updated 10 rows')
+      hasJobRunBefore.mockResolvedValue(true)
+
+      const options = {
+        method: 'POST',
+        url: '/jobs/expired-insurance',
+        ...portalHeader
+      }
+
+      const response = await server.inject(options)
+      const responseData = JSON.parse(response.payload)
+      expect(response.statusCode).toBe(200)
+      expectDate(setExpiredInsuranceToBreach.mock.calls[0][0]).toBeNow()
+      expect(revertExpiredInsurance).not.toHaveBeenCalled()
       expect(responseData).toEqual(expectedDto)
     })
 
     test('should POST /jobs/expired-insurance?today=2024-03-16', async () => {
       addBreachReasonToExpiredInsurance.mockResolvedValue('Success Insurance Expiry add reason - updated 3 rows')
       setExpiredInsuranceToBreach.mockResolvedValue('Success Insurance Expiry to breach - updated 5 rows')
+      hasJobRunBefore.mockResolvedValue(true)
 
       const options = {
         method: 'POST',
@@ -193,6 +226,7 @@ describe('Jobs endpoint', () => {
     })
 
     test('should return 403 given call from enforcement', async () => {
+      hasJobRunBefore.mockResolvedValue(true)
       validate.mockResolvedValue(mockValidateEnforcement)
 
       const options = {
@@ -205,6 +239,7 @@ describe('Jobs endpoint', () => {
     })
 
     test('should return 403 given call from standard user', async () => {
+      hasJobRunBefore.mockResolvedValue(true)
       validate.mockResolvedValue(mockValidateStandard)
 
       const options = {
@@ -217,6 +252,7 @@ describe('Jobs endpoint', () => {
     })
 
     test('should 400 with invalid query props', async () => {
+      hasJobRunBefore.mockResolvedValue(true)
       const options = {
         method: 'POST',
         url: '/jobs/expired-insurance?unknown=true',

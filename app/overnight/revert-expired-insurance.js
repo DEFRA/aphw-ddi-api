@@ -4,6 +4,7 @@ const { statuses, breachReasons } = require('../constants/statuses')
 const { dbFindAll, dbFindOne } = require('../lib/db-functions')
 const { updateStatusOnly } = require('../repos/status')
 const { removeBreachReasonFromDog } = require('../repos/breaches')
+const { insuranceRelationship } = require('./overnight-relationships')
 
 const findExpired = async (currentStatus, t) => {
   return await dbFindAll(sequelize.models.registration, {
@@ -14,36 +15,7 @@ const findExpired = async (currentStatus, t) => {
       '$dog.status.status$': currentStatus,
       '$exemption_order.exemption_order$': '2023'
     },
-    include: [
-      {
-        model: sequelize.models.exemption_order,
-        as: 'exemption_order'
-      },
-      {
-        model: sequelize.models.dog,
-        as: 'dog',
-        include: [
-          {
-            model: sequelize.models.status,
-            as: 'status'
-          },
-          {
-            model: sequelize.models.insurance,
-            as: 'insurance'
-          },
-          {
-            model: sequelize.models.dog_breach,
-            as: 'dog_breaches',
-            include: [
-              {
-                model: sequelize.models.breach_category,
-                as: 'breach_category'
-              }
-            ]
-          }
-        ]
-      }
-    ],
+    include: insuranceRelationship,
     transaction: t
   })
 }
