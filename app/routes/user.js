@@ -51,9 +51,6 @@ module.exports = [
       }
     }
   },
-  /**
-   * TODO: forceId, forceName, username
-   */
   {
     method: 'GET',
     path: '/users',
