@@ -1,3 +1,4 @@
+const { buildUserAccount } = require('../../../mocks/user-accounts')
 
 describe('token-validator', () => {
   describe('validate', () => {
@@ -96,6 +97,20 @@ describe('token-validator', () => {
 
     describe('aphw-ddi-enforcement', () => {
       const username = 'chuck@norris.org'
+      const saveMock = jest.fn()
+      const userAccount = buildUserAccount({
+        id: 1,
+        username: 'test@example.com',
+        telephone: '01406946277',
+        activation_token: 'ABCDE12345',
+        activated_date: new Date('2024-08-31'),
+        active: true,
+        last_login_date: undefined,
+        save () {
+          saveMock(this)
+        }
+      })
+
       const artifacts = {
         decoded: {
           payload: {
@@ -136,7 +151,7 @@ describe('token-validator', () => {
       })
 
       test('should successfully validate with aphw-ddi-enforcement call if user is registered', async () => {
-        isAccountEnabled.mockResolvedValue(true)
+        isAccountEnabled.mockResolvedValue([true, userAccount])
 
         getUserInfo.mockResolvedValue({
           sub: 'blablablablablabla',
@@ -158,6 +173,7 @@ describe('token-validator', () => {
         })
         expect(set).toHaveBeenCalledWith(request, 'chuck@norris.org', { expiry: expect.any(Date), hash: expect.any(String) }, 3900000)
         expect(sendLoginToAudit).toHaveBeenCalledWith({ username, displayname: username }, 'Safari iPhone')
+        expect(saveMock.mock.calls[0][0].activated_date).toEqual(expect.any(Date))
       })
 
       test('should successfully validate if user is cached', async () => {
@@ -188,7 +204,7 @@ describe('token-validator', () => {
       })
 
       test('should not validate with aphw-ddi-enforcement call if user has unauthorised scopes', async () => {
-        isAccountEnabled.mockResolvedValue(true)
+        isAccountEnabled.mockResolvedValue([true, buildUserAccount({ username: 'chuck@norris.org' })])
 
         getUserInfo.mockResolvedValue({
           sub: 'blablablablablabla',
@@ -214,7 +230,7 @@ describe('token-validator', () => {
         const username = 'unauthorised.user@example.com'
         const artifacts = makeArtifacts(username)
         artifacts.decoded.payload.token = null
-        isAccountEnabled.mockResolvedValue(true)
+        isAccountEnabled.mockResolvedValue([true, buildUserAccount({ username })])
 
         getUserInfo.mockResolvedValue({
           sub: 'blablablablablabla',
@@ -240,7 +256,7 @@ describe('token-validator', () => {
       test('should not validate if user is not registered on DDI', async () => {
         const username = 'unauthorised.user@example.com'
         const artifacts = makeArtifacts(username)
-        isAccountEnabled.mockResolvedValue(false)
+        isAccountEnabled.mockResolvedValue([false, null])
 
         getUserInfo.mockResolvedValue({
           sub: 'blablablablablabla',
@@ -265,7 +281,7 @@ describe('token-validator', () => {
 
       test('should not validate if user was registered on DDI but has been removed and has expired cache', async () => {
         const username = 'expired.user@example.com'
-        isAccountEnabled.mockResolvedValue(false)
+        isAccountEnabled.mockResolvedValue([false, null])
 
         getUserInfo.mockResolvedValue({
           sub: 'blablablablablabla',

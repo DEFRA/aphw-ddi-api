@@ -7,6 +7,8 @@ const isProd = () => {
   return process.env.NODE_ENV === 'production'
 }
 
+const MAX_CONNECTIONS = 50
+
 const hooks = {
   beforeConnect: async (cfg) => {
     if (isProd()) {
@@ -45,7 +47,7 @@ const dbConfig = {
   schema: process.env.POSTGRES_SCHEMA_NAME,
   username: process.env.POSTGRES_USERNAME,
   pool: {
-    max: 20,
+    max: MAX_CONNECTIONS,
     min: 5
   }
 }
