@@ -74,9 +74,11 @@ const validateEnforcement = async (request, username, payload) => {
   const validToken = await checkTokenOnline(username, token)
 
   if (validToken) {
-    const enabled = await isAccountEnabled(username)
+    const [enabled, userAccount] = await isAccountEnabled(username)
 
     if (enabled) {
+      userAccount.last_login_date = new Date()
+      await userAccount.save()
       await sendLoginToAudit({ username, displayname: username }, request.headers['enforcement-user-agent'])
 
       await set(request, username, { hash, expiry: addMinutes(now, expiryPeriodInMins) }, expiryPeriodInMins * MINUTE)

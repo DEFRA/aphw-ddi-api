@@ -71,6 +71,7 @@ services:
       PARANOID_RETENTION_PERIOD: ${PARANOID_RETENTION_PERIOD:-90}
       USER_FEEDBACK_EMAIL_ADDRESS: ${USER_FEEDBACK_EMAIL_ADDRESS:-dummy@example.com}
       ENFORCEMENT_URL: ${ENFORCEMENT_URL}
+      REPORT_SOMETHING_EMAIL_ADDRESS: ${REPORT_SOMETHING_EMAIL_ADDRESS:-report@example.com}
 
   aphw-ddi-api-postgres-api-tests:
     image: postgres:11.22-alpine

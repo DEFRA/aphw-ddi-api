@@ -5,15 +5,25 @@ const { extractShortNameAndDomain } = require('../lib/string-helpers')
 const { POLICE } = require('../constants/event/audit-event-object-types')
 const { NotFoundError } = require('../errors/not-found')
 const { getFindQuery, updateParanoid, findQueryV2 } = require('./shared')
+/**
+ * @typedef PoliceForce
+ * @property {number} id
+ * @property {string} name
+ * @property {Date} created_at
+ * @property {Date} updated_at
+ * @property {string} short_name
+ */
 
+/**
+ *
+ * @return {Promise<Model<PoliceForce, TModelAttributes>[]>}
+ */
 const getPoliceForces = async () => {
   try {
-    const policeForces = await sequelize.models.police_force.findAll({
+    return await sequelize.models.police_force.findAll({
       attributes: ['id', 'name'],
       order: [[sequelize.fn('lower', sequelize.col('name')), 'ASC']]
     })
-
-    return policeForces
   } catch (e) {
     console.log('Error retrieving police forces:', e)
     throw e

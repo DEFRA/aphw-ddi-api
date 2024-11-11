@@ -1,4 +1,5 @@
 const Joi = require('joi')
+const { sortOrder } = require('../../constants/sorting')
 
 const userBooleanResponseSchema = Joi.object({
   result: Joi.boolean()
@@ -22,11 +23,16 @@ const createUserRequestSchema = Joi.object({
   police_force_id: Joi.number()
 })
 
-const createUserResponseSchema = Joi.object({
+const fullUserResponseSchema = Joi.object({
   id: Joi.number().required(),
   username: Joi.string().required(),
   active: Joi.boolean().default(true),
-  police_force_id: Joi.number()
+  policeForceId: Joi.number().optional(),
+  policeForce: Joi.string().optional(),
+  accepted: Joi.date().iso().allow(false),
+  activated: Joi.date().iso().allow(false),
+  lastLogin: Joi.date().iso().allow(false),
+  createdAt: Joi.date().iso().allow(false)
 })
 
 const userFeedbackSchema = Joi.object({
@@ -49,7 +55,7 @@ const bulkRequestSchema = Joi.object({
 })
 
 const bulkResponseSchema = Joi.object({
-  users: Joi.array().items(createUserResponseSchema).required(),
+  users: Joi.array().items(fullUserResponseSchema).required(),
   errors: Joi.array().items(Joi.object({
     username: Joi.string().required(),
     error: Joi.string(),
@@ -58,8 +64,18 @@ const bulkResponseSchema = Joi.object({
   }))
 })
 
-const getResponseSchema = Joi.object({
-  users: Joi.array().items(createUserResponseSchema).required()
+const getUserResponseSchema = Joi.object({
+  users: Joi.array().items(fullUserResponseSchema).required(),
+  count: Joi.number().required()
+})
+
+const getUsersQuerySchema = Joi.object({
+  username: Joi.string().optional(),
+  policeForceId: Joi.number().optional(),
+  policeForce: Joi.string().optional(),
+  sortKey: Joi.string().allow('username', 'activated', 'policeForce').optional(),
+  sortOrder: Joi.string().allow(sortOrder.ASC, sortOrder.DESC).optional(),
+  activated: Joi.boolean().truthy('Y').falsy('N').optional()
 })
 
 module.exports = {
@@ -67,10 +83,11 @@ module.exports = {
   userValidResponseSchema,
   userStringResponseSchema,
   createUserRequestSchema,
-  createUserResponseSchema,
   userFeedbackSchema,
+  fullUserResponseSchema,
   reportSomethingSchema,
   bulkRequestSchema,
   bulkResponseSchema,
-  getResponseSchema
+  getUserResponseSchema,
+  getUsersQuerySchema
 }

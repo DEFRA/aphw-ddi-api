@@ -92,6 +92,10 @@ const domain = require('../constants/domain')
  * @typedef PoliceForceDao
  * @property {number} id
  * @property {string} name
+ * @property {string} short_name
+ * @property {string} created_at
+ * @property {null|string} deleted_at
+ * @property {string} updated_at
  */
 /**
  * @typedef {{ id: number; name: string; created_at: string|null; deleted_at: string|null; updated_at: string|null }} CourtDao

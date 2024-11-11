@@ -9,6 +9,7 @@ const { createUserAccountAudit, deleteUserAccountAudit } = require('../dto/audit
 const { getPoliceForceByShortName } = require('./police-forces')
 const { emailTypes } = require('../constants/email-types')
 const { sendEmail } = require('../messaging/send-email')
+const { sortOrder } = require('../constants/sorting')
 
 /**
  * @typedef UserAccount
@@ -23,6 +24,7 @@ const { sendEmail } = require('../messaging/send-email')
  * @property {Date|null} last_login_date
  * @property {Date} created_at
  * @property {Date} updated_at
+ * @property {null|PoliceForceDao} police_force
  */
 
 /**
@@ -39,18 +41,109 @@ const { sendEmail } = require('../messaging/send-email')
  * @property {string} username
  * @property {string} [telephone]
  * @property {boolean} [active]
- * @property {number} [police_force_id]
+ * @property {number} [policeForceId]
  */
 
 /**
- * @typedef GetAccounts
- * @return {Promise<UserAccount[]>}
+ * @param filter
+ * @return {{ where?: { police_force_id?: number; '$police_force.name$': string }}}
+ */
+const makeUserAccountDbFilter = filter => Object.entries(filter).reduce((whereBlock, [key, value]) => {
+  if (key === 'policeForceId') {
+    return {
+      where: {
+        ...whereBlock.where,
+        police_force_id: value
+      }
+    }
+  }
+
+  if (key === 'policeForce') {
+    return {
+      where: {
+        ...whereBlock.where,
+        '$police_force.name$': value
+      }
+    }
+  }
+
+  if (key === 'username') {
+    return {
+      where: {
+        ...whereBlock.where,
+        username: value
+      }
+    }
+  }
+
+  return {}
+}, {})
+
+const makeUserAccountDbOrdering = (sort) => {
+  const defaultOrdering = [['username', sortOrder.ASC]]
+
+  const order = Object.entries(sort).reduce((ordering, [key, value]) => {
+    if (key === 'username') {
+      return [['username', value]]
+    }
+
+    if (key === 'policeForce') {
+      return [['$police_force.name$', value], ['username', sortOrder.ASC]]
+    }
+
+    if (key === 'activated') {
+      return [sequelize.literal(`CASE WHEN activated_date IS NULL THEN 2 ELSE 1 END ${value ? sortOrder.ASC : sortOrder.DESC}`), ['username', sortOrder.ASC]]
+    }
+
+    return ordering
+  }, [])
+
+  return {
+    order: order.length ? order : defaultOrdering
+  }
+}
+/**
+ * @typedef {'ASC'|'DESC'} SortOrder
  */
 /**
- * @type {GetAccounts}
+ * @typedef GetAccountsFilterOptions
+ * @property {number} [policeForceId]
+ * @property {string} [policeForce]
  */
-const getAccounts = async () => {
-  return sequelize.models.user_account.findAll()
+
+/**
+ * @typedef GetAccountsSortOptions
+ * @property {SortOrder} [policeForce]
+ * @property {SortOrder} [username]
+ * @property {SortOrder} [policeForce]
+ * @property {boolean} [activated]
+ */
+/**
+ * @typedef GetAccounts
+ * @param {GetAccountsFilterOptions} filter
+ * @param sort
+ * @return {Promise<UserAccount[]>}
+ */
+
+/**
+ * @param {GetAccountsFilterOptions} filter
+ * @param {GetAccountsSortOptions} sort
+ * @return {Promise<UserAccount[]>}
+ */
+const getAccounts = async (filter = {}, sort = {}) => {
+  const where = makeUserAccountDbFilter(filter)
+  const order = makeUserAccountDbOrdering(sort)
+
+  const options = {
+    include: {
+      model: sequelize.models.police_force,
+      as: 'police_force'
+    },
+    ...where,
+    ...order
+  }
+
+  return sequelize.models.user_account.findAll(options)
 }
 
 /**
@@ -229,7 +322,7 @@ const createAccounts = async (accountsDto, user) => {
 /**
  * @typedef IsAccountEnabled
  * @param {string} username
- * @return {Promise<boolean>}
+ * @return {Promise<[boolean, UserAccount]>}
  */
 
 /**
@@ -240,7 +333,7 @@ const isAccountEnabled = async (username) => {
     where: { username }
   })
 
-  return !!account?.active
+  return [!!account?.active, account]
 }
 
 /**
