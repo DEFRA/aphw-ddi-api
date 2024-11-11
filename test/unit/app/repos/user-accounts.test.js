@@ -81,6 +81,7 @@ describe('user-accounts', () => {
       const returnedAccounts = await getAccounts()
       expect(returnedAccounts).toEqual(userAccounts)
       expect(sequelize.models.user_account.findAll).toHaveBeenCalledWith({
+        order: [['username', 'ASC']],
         include: {
           model: sequelize.models.police_force,
           as: 'police_force'
@@ -105,6 +106,7 @@ describe('user-accounts', () => {
           police_force_id: 3,
           '$police_force.name$': 'Beverly Hills Police Department'
         },
+        order: [['username', 'ASC']],
         include: {
           model: sequelize.models.police_force,
           as: 'police_force'
@@ -123,6 +125,7 @@ describe('user-accounts', () => {
         where: {
           police_force_id: 3
         },
+        order: [['username', 'ASC']],
         include: {
           model: sequelize.models.police_force,
           as: 'police_force'
@@ -141,6 +144,7 @@ describe('user-accounts', () => {
         where: {
           '$police_force.name$': 'Beverly Hills Police Department'
         },
+        order: [['username', 'ASC']],
         include: {
           model: sequelize.models.police_force,
           as: 'police_force'
@@ -159,6 +163,52 @@ describe('user-accounts', () => {
         where: {
           username: 'ralph@wreckit.com'
         },
+        order: [['username', 'ASC']],
+        include: {
+          model: sequelize.models.police_force,
+          as: 'police_force'
+        }
+      })
+    })
+
+    test('should sort accounts by email', async () => {
+      const userAccounts = [
+        axelFoley
+      ]
+      sequelize.models.user_account.findAll.mockResolvedValue(userAccounts)
+      await getAccounts({}, { username: 'ASC' })
+      expect(sequelize.models.user_account.findAll).toHaveBeenCalledWith({
+        order: [['username', 'ASC']],
+        include: {
+          model: sequelize.models.police_force,
+          as: 'police_force'
+        }
+      })
+    })
+
+    test('should sort accounts by police force DESC', async () => {
+      const userAccounts = [
+        axelFoley
+      ]
+      sequelize.models.user_account.findAll.mockResolvedValue(userAccounts)
+      await getAccounts({}, { policeForce: 'DESC' })
+      expect(sequelize.models.user_account.findAll).toHaveBeenCalledWith({
+        order: [['$police_force.name$', 'DESC'], ['username', 'DESC']],
+        include: {
+          model: sequelize.models.police_force,
+          as: 'police_force'
+        }
+      })
+    })
+
+    test('should sort accounts by police force DESC', async () => {
+      const userAccounts = [
+        axelFoley
+      ]
+      sequelize.models.user_account.findAll.mockResolvedValue(userAccounts)
+      await getAccounts({}, { policeForce: 'ASC' })
+      expect(sequelize.models.user_account.findAll).toHaveBeenCalledWith({
+        order: [['$police_force.name$', 'ASC'], ['username', 'ASC']],
         include: {
           model: sequelize.models.police_force,
           as: 'police_force'

@@ -9,6 +9,7 @@ const { createUserAccountAudit, deleteUserAccountAudit } = require('../dto/audit
 const { getPoliceForceByShortName } = require('./police-forces')
 const { emailTypes } = require('../constants/email-types')
 const { sendEmail } = require('../messaging/send-email')
+const { sortOrder } = require('../constants/sorting')
 
 /**
  * @typedef UserAccount
@@ -78,6 +79,26 @@ const makeUserAccountDbFilter = filter => Object.entries(filter).reduce((whereBl
   return {}
 }, {})
 
+const makeUserAccountDbOrdering = (sort) => {
+  const defaultOrdering = [['username', sortOrder.ASC]]
+
+  const order = Object.entries(sort).reduce((ordering, [key, value]) => {
+    if (key === 'username') {
+      return [['username', value]]
+    }
+
+    if (key === 'policeForce') {
+      return [['$police_force.name$', value], ['username', value]]
+    }
+
+    return ordering
+  }, [])
+
+  return {
+    order: order.length ? order : defaultOrdering
+  }
+}
+
 /**
  * @typedef GetAccountsFilterOptions
  * @property {number} [policeForceId]
@@ -97,8 +118,7 @@ const makeUserAccountDbFilter = filter => Object.entries(filter).reduce((whereBl
  */
 const getAccounts = async (filter = {}, sort = {}) => {
   const where = makeUserAccountDbFilter(filter)
-
-  const order = {}
+  const order = makeUserAccountDbOrdering(sort)
 
   const options = {
     include: {
