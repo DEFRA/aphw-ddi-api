@@ -36,6 +36,9 @@ describe('db config', () => {
     process.env.POSTGRES_USERNAME = 'username'
     process.env.POSTGRES_PASSWORD = 'password'
     process.env.NODE_ENV = 'production'
+    process.env.POSTGRES_HOST = 'aphw-ddi-api'
+    process.env.POSTGRES_PORT = '5432'
+    process.env.POSTGRES_SCHEMA_NAME = 'public'
     require('../../../../app/config/db')
     expect(mockSequelizeCall).toHaveBeenCalledWith('myDB', 'username', 'password', {
       database: 'myDB',
