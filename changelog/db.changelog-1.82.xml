@@ -1,0 +1,97 @@
+<?xml version="1.1" encoding="utf-8" standalone="no"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog" xmlns:ext="http://www.liquibase.org/xml/ns/dbchangelog-ext" xmlns:pro="http://www.liquibase.org/xml/ns/pro" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog-ext http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-ext.xsd http://www.liquibase.org/xml/ns/pro http://www.liquibase.org/xml/ns/pro/liquibase-pro-3.9.xsd http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.9.xsd">
+  <changeSet author="J Barnsley" id="1">
+    <tagDatabase tag="v1.82.0" />
+  </changeSet>
+  <changeSet author="J Barnsley" id="2">
+    <addColumn tableName="breach_category">
+      <column name="display_order" type="INTEGER" defaultValue="1000">
+        <constraints nullable="false" />
+      </column>
+    </addColumn>
+  </changeSet>
+  <changeSet author="J Barnsley" id="3">
+    <update tableName="breach_category">
+      <column name="display_order" value="5"/>
+      <where>short_name='NOT_COVERED_BY_INSURANCE'</where>
+    </update>
+    <update tableName="breach_category">
+      <column name="user_selectable" valueBoolean="false"/>
+      <where>short_name='NOT_COVERED_BY_INSURANCE'</where>
+    </update>
+    <update tableName="breach_category">
+      <column name="display_order" value="15"/>
+      <where>short_name='NOT_ON_LEAD_OR_MUZZLED'</where>
+    </update>
+    <update tableName="breach_category">
+      <column name="display_order" value="20"/>
+      <where>short_name='INSECURE_PLACE'</where>
+    </update>
+    <update tableName="breach_category">
+      <column name="display_order" value="25"/>
+      <where>short_name='AWAY_FROM_ADDR_30_DAYS_IN_YR'</where>
+    </update>
+    <update tableName="breach_category">
+      <column name="display_order" value="30"/>
+      <where>short_name='EXEMPTION_NOT_PROVIDED_TO_POLICE'</where>
+    </update>
+    <update tableName="breach_category">
+      <column name="label" value="exemption certificate not provided to police within 5 days of request"/>
+      <where>short_name='EXEMPTION_NOT_PROVIDED_TO_POLICE'</where>
+    </update>
+    <update tableName="breach_category">
+      <column name="display_order" value="35"/>
+      <where>short_name='INSURANCE_NOT_PROVIDED_TO_POLICE'</where>
+    </update>
+    <update tableName="breach_category">
+      <column name="label" value="insurance evidence not provided to police within 5 days of request"/>
+      <where>short_name='INSURANCE_NOT_PROVIDED_TO_POLICE'</where>
+    </update>
+    <update tableName="breach_category">
+      <column name="display_order" value="40"/>
+      <where>short_name='MICROCHIP_NOT_READ_BY_POLICE'</where>
+    </update>
+    <update tableName="breach_category">
+      <column name="display_order" value="45"/>
+      <where>short_name='NO_CHANGE_OF_REG_ADDRESS'</where>
+    </update>
+    <update tableName="breach_category">
+      <column name="display_order" value="50"/>
+      <where>short_name='DOG_DEATH_NOT_REPORTED'</where>
+    </update>
+    <update tableName="breach_category">
+      <column name="display_order" value="55"/>
+      <where>short_name='DOG_EXPORT_NOT_REPORTED'</where>
+    </update>
+    <update tableName="breach_category">
+      <column name="display_order" value="60"/>
+      <where>short_name='DOG_EXPORT_NOT_REPORTED'</where>
+    </update>
+    <update tableName="breach_category">
+      <column name="display_order" value="65"/>
+      <where>short_name='SOLD_EXCHANGED_OR_GIFTED'</where>
+    </update>
+    <update tableName="breach_category">
+      <column name="display_order" value="70"/>
+      <where>short_name='PERSON_UNDER_16_YEARS'</where>
+    </update>
+    <update tableName="breach_category">
+      <column name="display_order" value="75"/>
+      <where>short_name='ABANDONED_OR_STRAY'</where>
+    </update>
+    <update tableName="breach_category">
+      <column name="display_order" value="80"/>
+      <where>short_name='NEUTERING_DEADLINE_EXCEEDED'</where>
+    </update>
+    <update tableName="breach_category">
+      <column name="display_order" value="90"/>
+      <where>short_name='CROSSED_BORDER'</where>
+    </update>
+    <insert tableName="breach_category">
+      <column name="label" value="insurance evidence not provided to Defra within 5 days of request" />
+      <column name="short_name" value="INSURANCE_NOT_PROVIDED_TO_DEFRA" />
+      <column name="user_selectable" valueBoolean="true" />
+      <column name="display_order" value="10" />
+    </insert>
+  </changeSet>
+</databaseChangeLog>

@@ -22,7 +22,7 @@ const getBreachCategoryDAOs = async (userSelectableOnly = false) => {
     : {}
 
   return sequelize.models.breach_category.findAll({
-    order: [sequelize.col('id')],
+    order: [sequelize.col('display_order')],
     where
   })
 }
