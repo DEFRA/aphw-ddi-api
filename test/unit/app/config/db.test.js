@@ -53,14 +53,14 @@ describe('db config', () => {
       hooks: {
         beforeConnect: expect.anything()
       },
-      host: undefined,
+      host: 'aphw-ddi-api',
       logging: false,
       password: 'password',
       pool: {
         max: 20,
         min: 5
       },
-      port: undefined,
+      port: '5432',
       retry: {
         backoffBase: 500,
         backoffExponent: 1.1,
@@ -71,7 +71,7 @@ describe('db config', () => {
         name: 'connection',
         timeout: 60000
       },
-      schema: undefined,
+      schema: 'public',
       username: 'username'
     })
   })
