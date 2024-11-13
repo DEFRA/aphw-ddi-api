@@ -1,0 +1,19 @@
+<?xml version="1.1" encoding="utf-8" standalone="no"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog" xmlns:ext="http://www.liquibase.org/xml/ns/dbchangelog-ext" xmlns:pro="http://www.liquibase.org/xml/ns/pro" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog-ext http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-ext.xsd http://www.liquibase.org/xml/ns/pro http://www.liquibase.org/xml/ns/pro/liquibase-pro-3.9.xsd http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.9.xsd">
+  <changeSet author="J Barnsley" id="1">
+    <tagDatabase tag="v1.83" />
+  </changeSet>
+  <changeSet author="J Barnsley" id="2">
+    <sql splitStatements="false">
+      UPDATE registration r2
+      SET neutering_deadline = '2025-06-30'
+      WHERE r2.id in 
+      (SELECT r.id
+      FROM registration r,
+	         dog d
+      WHERE r.dog_id = d.id
+      AND r.deleted_at IS NULL
+      AND d.birth_date >= '2023-07-01');
+    </sql>
+  </changeSet>
+</databaseChangeLog>
