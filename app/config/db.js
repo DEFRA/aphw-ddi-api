@@ -1,5 +1,3 @@
-/* istanbul ignore file */
-
 const { Sequelize } = require('sequelize')
 const { DefaultAzureCredential } = require('@azure/identity')
 
@@ -7,7 +5,7 @@ const isProd = () => {
   return process.env.NODE_ENV === 'production'
 }
 
-const MAX_CONNECTIONS = 50
+const MAX_CONNECTIONS = 20
 
 const hooks = {
   beforeConnect: async (cfg) => {
