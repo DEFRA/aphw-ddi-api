@@ -1,4 +1,4 @@
-const { getMicrochip, calculateNeuteringDeadline } = require('./dto-helper')
+const { getMicrochip } = require('./dto-helper')
 const { mapDogBreachDaoToBreachDto } = require('../repos/mappers/dog')
 const { personAddressMapper, personContactMapper } = require('./mappers/person')
 const { getInactiveSubStatus } = require('../lib/status-helper')
@@ -7,7 +7,7 @@ const generateOrderSpecificData = (data) => {
   if (data.registration.exemption_order.exemption_order === '2023') {
     return {
       microchipDeadline: data.registration.microchip_deadline,
-      neuteringDeadline: calculateNeuteringDeadline(data.birth_date),
+      neuteringDeadline: data.registration.neutering_deadline,
       typedByDlo: data.registration.typed_by_dlo,
       withdrawn: data.registration.withdrawn
     }

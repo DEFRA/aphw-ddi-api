@@ -23,7 +23,7 @@ const calculateNeuteringDeadline = (dateOfBirth) => {
   const age = differenceInYears(base, dateOfBirth)
 
   if (age < 1) {
-    return new Date('2024-12-31')
+    return new Date('2025-06-30')
   }
 
   return new Date('2024-06-30')
