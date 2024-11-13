@@ -40,7 +40,7 @@ describe('DtoHelper test', () => {
   test('calculateNeuteringDeadline should return 2024-12-31 if less than 1 year old', () => {
     const deadline = calculateNeuteringDeadline(new Date('2023-02-01'))
 
-    expect(deadline).toEqual(new Date('2024-12-31'))
+    expect(deadline).toEqual(new Date('2025-06-30'))
   })
 
   test('calculateNeuteringDeadline should return 2024-06-30 if at least 1 year old', () => {

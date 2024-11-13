@@ -1,11 +1,10 @@
 const { setExpiredNeuteringDeadlineToInBreach, addBreachReasonToExpiredNeuteringDeadline } = require('../../../../app/overnight/expired-neutering-deadline')
-const { overnightRows: mockOvernightRows, overnightRowsInBreach: mockOvernightRowsInBreach } = require('../../../mocks/overnight/overnight-rows')
+const { overnightRowsWithNeuteringDeadline: mockOvernightRowsWithNeuteringDeadline } = require('../../../mocks/overnight/overnight-rows')
 
 const { dbFindAll, dbFindOne } = require('../../../../app/lib/db-functions')
 jest.mock('../../../../app/lib/db-functions')
 
 const { Op } = require('sequelize')
-const sequelize = require('../../../../app/config/db')
 
 jest.mock('../../../../app/repos/dogs')
 const { getCachedStatuses } = require('../../../../app/repos/dogs')
@@ -25,9 +24,6 @@ describe('ExpiredNeuteringDeadline test', () => {
     transaction: jest.fn()
   }))
 
-  const juneDeadlineSwitchedOn = true
-  const juneLiteral = juneDeadlineSwitchedOn ? '1 = 1' : '1 = 0'
-
   beforeEach(async () => {
     jest.clearAllMocks()
     getCachedStatuses.mockResolvedValue(mockStatuses)
@@ -44,193 +40,72 @@ describe('ExpiredNeuteringDeadline test', () => {
     ])
   })
 
-  test('setExpiredNeuteringDeadlineToInBreach should handle zero rows', async () => {
-    dbFindAll.mockResolvedValue([])
-    const res = await setExpiredNeuteringDeadlineToInBreach()
-    expect(res).toBe('Success Neutering Expiry - updated 0 rows')
-  })
+  describe('setExpiredNeuteringDeadlineToInBreach', () => {
+    test('should handle zero rows', async () => {
+      dbFindAll.mockResolvedValue([])
+      const res = await setExpiredNeuteringDeadlineToInBreach()
+      expect(res).toBe('Success Neutering Expiry - updated 0 rows')
+    })
 
-  test('setExpiredNeuteringDeadlineToInBreach should handle error', async () => {
-    dbFindAll.mockImplementation(() => { throw new Error('dummy error') })
-    await expect(setExpiredNeuteringDeadlineToInBreach).rejects.toThrow('dummy error')
-  })
+    test('should handle error', async () => {
+      dbFindAll.mockImplementation(() => { throw new Error('dummy error') })
+      await expect(setExpiredNeuteringDeadlineToInBreach).rejects.toThrow('dummy error')
+    })
 
-  test('setExpiredNeuteringDeadlineToInBreach should handle some rows given date is before 2024-07-27', async () => {
-    dbFindAll.mockResolvedValue(mockOvernightRows)
-    const today = new Date('2024-07-26')
-    await setExpiredNeuteringDeadlineToInBreach(today)
+    test('should handle some rows given a date prior to deadline expiry', async () => {
+      dbFindAll.mockResolvedValue(mockOvernightRowsWithNeuteringDeadline)
+      const today = new Date('2024-10-01')
+      const res = await setExpiredNeuteringDeadlineToInBreach(today)
 
-    expect(dbFindAll).toHaveBeenCalledWith(undefined, expect.objectContaining({
-      where: expect.objectContaining({
-        [Op.or]: [
-          {
-            [Op.and]: [
-              {
-                neutering_deadline: {
-                  [Op.eq]: new Date('2024-06-30')
-                }
-              },
-              sequelize.literal('1 = 0')
-            ]
-          },
-          {
-            [Op.and]: [
-              {
-                neutering_deadline: {
-                  [Op.eq]: new Date('2024-12-31')
-                }
-              },
-              sequelize.literal('1 = 0')
-            ]
+      expect(dbFindAll).toHaveBeenCalledWith(undefined, expect.objectContaining({
+        where: expect.objectContaining({
+          neutering_deadline: {
+            [Op.lt]: today
           }
-        ]
-      })
-    }))
+        })
+      }))
+      expect(res).toBe('Success Neutering Expiry - updated 4 rows')
+    })
   })
 
-  test('setExpiredNeuteringDeadlineToInBreach should handle some rows given date is on 2024-07-27', async () => {
-    dbFindAll.mockResolvedValue(mockOvernightRows)
-    const today = new Date('2024-07-27')
-    await setExpiredNeuteringDeadlineToInBreach(today)
+  describe('addBreachReasonToExpiredNeuteringDeadline', () => {
+    test('should handle all rows given date is after expiry', async () => {
+      dbFindAll.mockResolvedValue(mockOvernightRowsWithNeuteringDeadline.filter(row => row.dog.status.status === 'In breach'))
+      dbFindOne.mockResolvedValue({ id: 12 })
+      const today = new Date('2025-01-01')
+      const res = await addBreachReasonToExpiredNeuteringDeadline(today)
 
-    expect(dbFindAll).toHaveBeenCalledWith(undefined, expect.objectContaining({
-      where: expect.objectContaining({
-        [Op.or]: [
-          {
-            [Op.and]: [
-              {
-                neutering_deadline: {
-                  [Op.eq]: new Date('2024-06-30')
-                }
-              },
-              sequelize.literal(juneLiteral)
-            ]
-          },
-          {
-            [Op.and]: [
-              {
-                neutering_deadline: {
-                  [Op.eq]: new Date('2024-12-31')
-                }
-              },
-              sequelize.literal('1 = 0')
-            ]
+      expect(dbFindAll).toHaveBeenCalledWith(undefined, expect.objectContaining({
+        where: expect.objectContaining({
+          neutering_deadline: {
+            [Op.lt]: today
           }
-        ]
-      })
-    }))
-  })
+        })
+      }))
+      expect(res).toBe('Success Neutering Expiry add breach reason - updated 2 rows')
+    })
 
-  test('setExpiredNeuteringDeadlineToInBreach should handle some rows given date is before 2025-01-01', async () => {
-    dbFindAll.mockResolvedValue(mockOvernightRows)
-    const today = new Date('2024-12-31')
-    await setExpiredNeuteringDeadlineToInBreach(today)
+    test('should handle some rows given date after for some and before for some', async () => {
+      const today = new Date('2024-10-17')
+      dbFindAll.mockResolvedValue(mockOvernightRowsWithNeuteringDeadline.filter(row => row.dog.status.status === 'In breach' && new Date(row.dog.exemption.neutering_deadline) < today))
+      dbFindOne.mockResolvedValue({ id: 12 })
+      const res = await addBreachReasonToExpiredNeuteringDeadline(today)
 
-    expect(dbFindAll).toHaveBeenCalledWith(undefined, expect.objectContaining({
-      where: expect.objectContaining({
-        [Op.or]: [
-          {
-            [Op.and]: [
-              {
-                neutering_deadline: {
-                  [Op.eq]: new Date('2024-06-30')
-                }
-              },
-              sequelize.literal(juneLiteral)
-            ]
-          },
-          {
-            [Op.and]: [
-              {
-                neutering_deadline: {
-                  [Op.eq]: new Date('2024-12-31')
-                }
-              },
-              sequelize.literal('1 = 0')
-            ]
+      expect(dbFindAll).toHaveBeenCalledWith(undefined, expect.objectContaining({
+        where: expect.objectContaining({
+          neutering_deadline: {
+            [Op.lt]: today
           }
-        ]
-      })
-    }))
-  })
+        })
+      }))
+      expect(res).toBe('Success Neutering Expiry add breach reason - updated 1 rows')
+    })
 
-  test('setExpiredNeuteringDeadlineToInBreach should handle some rows given date is on 2025-01-01', async () => {
-    dbFindAll.mockResolvedValue(mockOvernightRows)
-    const today = new Date('2025-01-01')
-    await setExpiredNeuteringDeadlineToInBreach(today)
-
-    expect(dbFindAll).toHaveBeenCalledWith(undefined, expect.objectContaining({
-      where: expect.objectContaining({
-        [Op.or]: [
-          {
-            [Op.and]: [
-              {
-                neutering_deadline: {
-                  [Op.eq]: new Date('2024-06-30')
-                }
-              },
-              sequelize.literal(juneLiteral)
-            ]
-          },
-          {
-            [Op.and]: [
-              {
-                neutering_deadline: {
-                  [Op.eq]: new Date('2024-12-31')
-                }
-              },
-              sequelize.literal('1 = 1')
-            ]
-          }
-        ]
-      })
-    }))
-  })
-
-  test('setExpiredNeuteringDeadlineToInBreach should handle some rows', async () => {
-    dbFindAll.mockResolvedValue(mockOvernightRows)
-    const res = await setExpiredNeuteringDeadlineToInBreach()
-    expect(res).toBe('Success Neutering Expiry - updated 3 rows')
-  })
-
-  test('addBreachReasonToExpiredNeuteringDeadline should handle some rows given date is on 2025-01-01', async () => {
-    dbFindAll.mockResolvedValue(mockOvernightRowsInBreach)
-    dbFindOne.mockResolvedValue(11)
-    const today = new Date('2025-01-01')
-    await addBreachReasonToExpiredNeuteringDeadline(today)
-
-    expect(dbFindAll).toHaveBeenCalledWith(undefined, expect.objectContaining({
-      where: expect.objectContaining({
-        [Op.or]: [
-          {
-            [Op.and]: [
-              {
-                neutering_deadline: {
-                  [Op.eq]: new Date('2024-06-30')
-                }
-              },
-              sequelize.literal(juneLiteral)
-            ]
-          },
-          {
-            [Op.and]: [
-              {
-                neutering_deadline: {
-                  [Op.eq]: new Date('2024-12-31')
-                }
-              },
-              sequelize.literal('1 = 1')
-            ]
-          }
-        ]
-      })
-    }))
-  })
-
-  test('addBreachReasonToExpiredNeuteringDeadline should throw if error', async () => {
-    dbFindAll.mockResolvedValue(() => { throw new Error('dummy') })
-    dbFindOne.mockResolvedValue(11)
-    const today = new Date('2025-01-01')
-    await expect(addBreachReasonToExpiredNeuteringDeadline(today)).rejects.toThrow('Error auto-updating statuses when Neutering Expiry add breach reason: TypeError: addBreachReason is not iterable')
+    test('should throw if error', async () => {
+      dbFindAll.mockResolvedValue(() => { throw new Error('dummy') })
+      dbFindOne.mockResolvedValue({ id: 12 })
+      const today = new Date('2025-01-01')
+      await expect(addBreachReasonToExpiredNeuteringDeadline(today)).rejects.toThrow('Error auto-updating statuses when Neutering Expiry add breach reason: TypeError: addBreachReason is not iterable')
+    })
   })
 })
