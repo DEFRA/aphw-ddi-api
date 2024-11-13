@@ -171,9 +171,76 @@ const overnightRowsInBreachExclExpiredInsurance = [
   }
 ]
 
+const overnightRowsWithNeuteringDeadline = [
+  {
+    dog: {
+      index_number: 'ED123',
+      status: {
+        status: 'In breach'
+      },
+      dog_breaches: [{
+        breach_category_id: 12,
+        breach_category: {
+          short_name: 'NEUTERING_DEADLINE_EXCEEDED'
+        }
+      }],
+      exemption: {
+        neutering_deadline: new Date(2024, 9, 10)
+      }
+    }
+  },
+  {
+    dog: {
+      index_number: 'ED124',
+      status: {
+        status: 'In breach'
+      },
+      dog_breaches: [{
+        breach_category_id: 11,
+        breach_category: {
+          short_name: 'INSURANCE_EXPIRED'
+        }
+      }],
+      exemption: {
+        neutering_deadline: new Date(2024, 9, 15)
+      }
+    }
+  },
+  {
+    dog: {
+      index_number: 'ED125',
+      status: {
+        status: 'In breach'
+      },
+      dog_breaches: [{
+        breach_category_id: 15,
+        breach_category: {
+          short_name: 'OTHER_REASON'
+        }
+      }],
+      exemption: {
+        neutering_deadline: new Date(2024, 9, 20)
+      }
+    }
+  },
+  {
+    dog: {
+      index_number: 'ED126',
+      status: {
+        status: 'Exempt'
+      },
+      dog_breaches: [],
+      exemption: {
+        neutering_deadline: new Date(2024, 9, 25)
+      }
+    }
+  }
+]
+
 module.exports = {
   overnightRows,
   overnightRowsInBreach,
   overnightRowsInBreachInclExpiredInsurance,
-  overnightRowsInBreachExclExpiredInsurance
+  overnightRowsInBreachExclExpiredInsurance,
+  overnightRowsWithNeuteringDeadline
 }

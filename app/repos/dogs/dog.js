@@ -12,7 +12,7 @@ const { preChangedDogAudit, postChangedDogAudit } = require('../../dto/auditing/
 const { removeDogFromSearchIndex } = require('../search-index')
 const { getPersonByReference } = require('../people')
 const { addYears } = require('../../lib/date-helpers')
-const { calculateNeuteringDeadline, stripTime, extractEmail } = require('../../dto/dto-helper')
+const { extractEmail } = require('../../dto/dto-helper')
 const { setBreaches } = require('../breaches')
 const { mapDogDaoToDog } = require('../mappers/cdo')
 
@@ -399,8 +399,6 @@ const updateDogStatus = async (dogFromDB, newStatus, transaction) => {
 
   await dogFromDB.save({ transaction })
 
-  await recalcDeadlines(dogFromDB, transaction)
-
   const refreshedDog = await getDogByIndexNumber(dogFromDB.index_number, transaction)
 
   await updateSearchIndexDog(refreshedDog, transaction)
@@ -416,33 +414,6 @@ const updateStatus = async (indexNumber, newStatus, transaction) => {
   await updateDogStatus(dogFromDB, newStatus, transaction)
 
   return newStatus
-}
-
-const recalcDeadlines = async (dog, transaction) => {
-  if (!transaction) {
-    return await sequelize.transaction(async (t) => recalcDeadlines(dog, t))
-  }
-
-  const reg = await sequelize.models.registration.findOne({
-    where: { dog_id: dog.id },
-    include: [{
-      model: sequelize.models.exemption_order,
-      as: 'exemption_order'
-    }]
-  },
-  { transaction })
-
-  if (reg?.exemption_order?.exemption_order !== '2023') {
-    return
-  }
-
-  const prevDeadline = reg.neutering_deadline
-  const newDeadline = stripTime(calculateNeuteringDeadline(dog.birth_date))
-
-  if (prevDeadline !== newDeadline) {
-    reg.neutering_deadline = newDeadline
-    await reg.save({ transaction })
-  }
 }
 
 const updateDogFields = (dbDog, payload, breeds, statuses) => {
@@ -840,7 +811,6 @@ module.exports = {
   purgeDogByIndexNumber,
   switchOwnerIfNecessary,
   buildSwitchedOwner,
-  recalcDeadlines,
   getOldDogs,
   constructStatusList,
   constructDbSort,

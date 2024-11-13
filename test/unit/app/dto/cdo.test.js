@@ -173,6 +173,7 @@ describe('CDO DTO', () => {
         microchip_verification: '2024-10-10',
         non_compliance_letter_sent: '2024-11-11',
         microchip_deadline: '2024-01-02',
+        neutering_deadline: '2024-02-03',
         typed_by_dlo: '2024-02-03',
         withdrawn: '2024-12-12'
       },
@@ -231,7 +232,7 @@ describe('CDO DTO', () => {
         joinedExemptionScheme: '2024-07-21',
         nonComplianceLetterSent: '2024-11-11',
         microchipDeadline: '2024-01-02',
-        neuteringDeadline: new Date(Date.UTC(2024, 5, 30)),
+        neuteringDeadline: '2024-02-03',
         typedByDlo: '2024-02-03',
         withdrawn: '2024-12-12'
       },
@@ -271,7 +272,7 @@ describe('generateOrderSpecificData', () => {
     const data = { registration: { exemption_order: { exemption_order: '2023' } } }
     const res = generateOrderSpecificData(data)
     expect(res.microchipDeadline).toBe(undefined)
-    expect(res.neuteringDeadline.toISOString()).toBe('2024-06-30T00:00:00.000Z')
+    expect(res.neuteringDeadline).toBe(undefined)
     expect(res.typedByDlo).toBe(undefined)
     expect(res.withdrawn).toBe(undefined)
   })
@@ -281,15 +282,16 @@ describe('generateOrderSpecificData', () => {
       registration: {
         exemption_order: {
           exemption_order: '2023'
-        }
+        },
+        microchip_deadline: new Date(2024, 11, 25),
+        neutering_deadline: new Date(2024, 10, 15)
       },
-      microchip_deadline: new Date(2024, 11, 25),
       typedByDlo: new Date(2024, 9, 17),
       withdrawn: new Date(2024, 10, 3)
     }
     const res = generateOrderSpecificData(data)
-    expect(res.microchipDeadline).toBe(undefined)
-    expect(res.neuteringDeadline.toISOString()).toBe('2024-06-30T00:00:00.000Z')
+    expect(res.microchipDeadline.toISOString()).toBe('2024-12-25T00:00:00.000Z')
+    expect(res.neuteringDeadline.toISOString()).toBe('2024-11-15T00:00:00.000Z')
     expect(res.typedByDlo).toBe(undefined)
     expect(res.withdrawn).toBe(undefined)
   })
