@@ -5,12 +5,12 @@
   </changeSet>
   <changeSet author="J Barnsley" id="2">
     <sql splitStatements="false">
-      UPDATE public.registration r2
+      UPDATE registration r2
       SET neutering_deadline = '2025-06-30'
       WHERE r2.id in 
       (SELECT r.id
-      FROM public.registration r,
-	    public.dog d
+      FROM registration r,
+	         dog d
       WHERE r.dog_id = d.id
       AND r.deleted_at IS NULL
       AND d.birth_date >= '2023-07-01');
