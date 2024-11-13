@@ -10,9 +10,12 @@
       WHERE r2.id in 
       (SELECT r.id
       FROM registration r,
-	         dog d
+	         dog d,
+           exemption_order eo
       WHERE r.dog_id = d.id
       AND r.deleted_at IS NULL
+      AND eo.id = r.exemption_order_id
+      AND eo.exemption_order = '2023'
       AND d.birth_date >= '2023-07-01');
     </sql>
   </changeSet>
