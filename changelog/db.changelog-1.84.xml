@@ -1,0 +1,16 @@
+<?xml version="1.1" encoding="utf-8" standalone="no"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog" xmlns:ext="http://www.liquibase.org/xml/ns/dbchangelog-ext" xmlns:pro="http://www.liquibase.org/xml/ns/pro" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog-ext http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-ext.xsd http://www.liquibase.org/xml/ns/pro http://www.liquibase.org/xml/ns/pro/liquibase-pro-3.9.xsd http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.9.xsd">
+  <changeSet author="J Barnsley" id="1">
+    <tagDatabase tag="v1.84.0" />
+  </changeSet>
+  <changeSet author="J Barnsley" id="2">
+    <update tableName="breach_category">
+      <column name="display_order" value="85"/>
+      <where>short_name='MICROCHIP_DEADLINE_EXCEEDED'</where>
+    </update>
+    <update tableName="breach_category">
+      <column name="user_selectable" valueBoolean="true"/>
+      <where>short_name='MICROCHIP_DEADLINE_EXCEEDED'</where>
+    </update>
+  </changeSet>
+</databaseChangeLog>

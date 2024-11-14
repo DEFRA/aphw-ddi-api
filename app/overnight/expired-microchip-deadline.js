@@ -8,20 +8,21 @@ const ServiceProvider = require('../service/config')
 const findExpired = async (currentStatus, today, t) => {
   return await dbFindAll(sequelize.models.registration, {
     where: {
-      neutering_deadline: {
+      microchip_deadline: {
         [Op.lt]: today
       },
-      neutering_confirmation: {
+      microchip_verification: {
         [Op.eq]: null
       },
-      '$dog.status.status$': currentStatus
+      '$dog.status.status$': currentStatus,
+      '$exemption_order.exemption_order$': '2015'
     },
     include: overnightRelationship(sequelize),
     transaction: t
   })
 }
 
-const setExpiredNeuteringDeadlineToInBreach = async (today, user, t) => {
+const setExpiredMicrochipDeadlineToInBreach = async (today, user, t) => {
   try {
     const setStatusToBreach = await findExpired(statuses.Exempt, today, t)
 
@@ -29,13 +30,13 @@ const setExpiredNeuteringDeadlineToInBreach = async (today, user, t) => {
 
     for (const toUpdateStatus of setStatusToBreach) {
       console.log(`Updating dog ${toUpdateStatus.dog.index_number} to In breach`)
-      await dogService.setBreach(toUpdateStatus.dog, [breachReasons.NEUTERING_DEADLINE_EXCEEDED], user, t)
+      await dogService.setBreach(toUpdateStatus.dog, [breachReasons.MICROCHIP_DEADLINE_EXCEEDED], user, t)
     }
 
-    return `Success Neutering Expiry - updated ${setStatusToBreach.length} rows`
+    return `Success Microchip Expiry - updated ${setStatusToBreach.length} rows`
   } catch (e) {
-    console.log('Error auto-updating statuses when Neutering Expiry:', e)
-    throw new Error(`Error auto-updating statuses when Neutering Expiry: ${e}`)
+    console.log('Error auto-updating statuses when Microchip Expiry:', e)
+    throw new Error(`Error auto-updating statuses when Microchip Expiry: ${e}`)
   }
 }
 
@@ -43,12 +44,12 @@ const alreadyExpiredDeadline = (dog, expiredDeadlineId) => {
   return dog?.dog_breaches?.some(breach => breach.breach_category_id === expiredDeadlineId)
 }
 
-const addBreachReasonToExpiredNeuteringDeadline = async (today, user, t) => {
+const addBreachReasonToExpiredMicrochipDeadline = async (today, user, t) => {
   let rowsChangedCount = 0
   try {
     const breachCategory = await dbFindOne(sequelize.models.breach_category, {
       where: {
-        short_name: breachReasons.NEUTERING_DEADLINE_EXCEEDED
+        short_name: breachReasons.MICROCHIP_DEADLINE_EXCEEDED
       }
     })
 
@@ -60,20 +61,20 @@ const addBreachReasonToExpiredNeuteringDeadline = async (today, user, t) => {
       if (alreadyExpiredDeadline(toUpdate.dog, breachCategory.id)) {
         continue
       }
-      console.log(`Updating dog ${toUpdate.dog.index_number} adding breach reason expired neutering deadline`)
+      console.log(`Updating dog ${toUpdate.dog.index_number} adding breach reason expired microchip deadline`)
       const currentBreaches = toUpdate.dog.dog_breaches.map((breach) => breach.breach_category.short_name)
-      currentBreaches.push(breachReasons.NEUTERING_DEADLINE_EXCEEDED)
+      currentBreaches.push(breachReasons.MICROCHIP_DEADLINE_EXCEEDED)
       await dogService.setBreaches(toUpdate.dog.index_number, currentBreaches, user, t)
       rowsChangedCount++
     }
-    return `Success Neutering Expiry add breach reason - updated ${rowsChangedCount} rows`
+    return `Success Microchip Expiry add breach reason - updated ${rowsChangedCount} rows`
   } catch (e) {
-    console.log('Error auto-updating statuses when Neutering Expiry add breach reason:', e)
-    throw new Error(`Error auto-updating statuses when Neutering Expiry add breach reason: ${e}`)
+    console.log('Error auto-updating statuses when Microchip Expiry add breach reason:', e)
+    throw new Error(`Error auto-updating statuses when Microchip Expiry add breach reason: ${e}`)
   }
 }
 
 module.exports = {
-  setExpiredNeuteringDeadlineToInBreach,
-  addBreachReasonToExpiredNeuteringDeadline
+  setExpiredMicrochipDeadlineToInBreach,
+  addBreachReasonToExpiredMicrochipDeadline
 }

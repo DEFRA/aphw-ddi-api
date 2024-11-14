@@ -1,4 +1,4 @@
-const insuranceRelationship = sequelize => [
+const overnightRelationship = sequelize => [
   {
     model: sequelize.models.exemption_order,
     as: 'exemption_order'
@@ -30,5 +30,5 @@ const insuranceRelationship = sequelize => [
 ]
 
 module.exports = {
-  insuranceRelationship
+  overnightRelationship
 }

@@ -4,7 +4,7 @@ const { statuses, breachReasons } = require('../constants/statuses')
 const { dbFindAll, dbFindOne } = require('../lib/db-functions')
 const { updateStatusOnly } = require('../repos/status')
 const { removeBreachReasonFromDog } = require('../repos/breaches')
-const { insuranceRelationship } = require('./overnight-relationships')
+const { overnightRelationship } = require('./overnight-relationships')
 
 const findExpired = async (currentStatus, t) => {
   return await dbFindAll(sequelize.models.registration, {
@@ -15,7 +15,7 @@ const findExpired = async (currentStatus, t) => {
       '$dog.status.status$': currentStatus,
       '$exemption_order.exemption_order$': '2023'
     },
-    include: insuranceRelationship(sequelize),
+    include: overnightRelationship(sequelize),
     transaction: t
   })
 }
