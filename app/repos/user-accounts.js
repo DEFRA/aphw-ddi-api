@@ -88,7 +88,7 @@ const makeUserAccountDbOrdering = (sort) => {
     }
 
     if (key === 'policeForce') {
-      return [['$police_force.name$', value], ['username', sortOrder.ASC]]
+      return [[sequelize.col('police_force.name'), value], ['username', sortOrder.ASC]]
     }
 
     if (key === 'activated') {

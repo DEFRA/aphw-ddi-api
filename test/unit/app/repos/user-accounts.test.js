@@ -17,6 +17,7 @@ describe('user-accounts', () => {
 
   jest.mock('../../../../app/config/db', () => ({
     literal: jest.fn(),
+    col: jest.fn(),
     models: {
       user_account: {
         findAll: jest.fn(),
@@ -227,12 +228,13 @@ describe('user-accounts', () => {
       sequelize.models.user_account.findAll.mockResolvedValue(userAccounts)
       await getAccounts({}, { policeForce: 'DESC' })
       expect(sequelize.models.user_account.findAll).toHaveBeenCalledWith({
-        order: [['$police_force.name$', 'DESC'], ['username', 'ASC']],
+        order: [[undefined, 'DESC'], ['username', 'ASC']],
         include: {
           model: sequelize.models.police_force,
           as: 'police_force'
         }
       })
+      expect(sequelize.col).toHaveBeenCalledWith('police_force.name')
     })
 
     test('should sort accounts by police force DESC', async () => {
@@ -242,12 +244,13 @@ describe('user-accounts', () => {
       sequelize.models.user_account.findAll.mockResolvedValue(userAccounts)
       await getAccounts({}, { policeForce: 'ASC' })
       expect(sequelize.models.user_account.findAll).toHaveBeenCalledWith({
-        order: [['$police_force.name$', 'ASC'], ['username', 'ASC']],
+        order: [[undefined, 'ASC'], ['username', 'ASC']],
         include: {
           model: sequelize.models.police_force,
           as: 'police_force'
         }
       })
+      expect(sequelize.col).toHaveBeenCalledWith('police_force.name')
     })
   })
 
