@@ -92,7 +92,7 @@ const makeUserAccountDbOrdering = (sort) => {
     }
 
     if (key === 'activated') {
-      return [sequelize.literal(`CASE WHEN activated_date IS NULL THEN 2 ELSE 1 END ${value ? sortOrder.ASC : sortOrder.DESC}`), ['username', sortOrder.ASC]]
+      return [sequelize.literal(`CASE WHEN (accepted_terms_and_conds_date IS NULL AND activated_date IS NULL) THEN 4 WHEN activated_date IS NULL THEN 3 WHEN accepted_terms_and_conds_date IS NULL THEN 2 ELSE 1 END ${value ? sortOrder.ASC : sortOrder.DESC}`), ['username', sortOrder.ASC]]
     }
 
     return ordering
