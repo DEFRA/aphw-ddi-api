@@ -2,7 +2,6 @@ const { DuplicateResourceError } = require('../../../../app/errors/duplicate-rec
 const { NotFoundError } = require('../../../../app/errors/not-found')
 const { buildUserAccount } = require('../../../mocks/user-accounts')
 const { buildPoliceForceDao } = require('../../../mocks/cdo/get')
-const sequelize = require('../../../../app/config/db')
 
 describe('user-accounts', () => {
   const dummyAdminUser = {
