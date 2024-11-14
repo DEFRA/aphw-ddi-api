@@ -2,7 +2,7 @@ const sequelize = require('../config/db')
 const { Op } = require('sequelize')
 const { statuses, breachReasons } = require('../constants/statuses')
 const { dbFindAll, dbFindOne } = require('../lib/db-functions')
-const { overnightRelationship } = require('./overnight-relationships')
+const { registrationRelationship } = require('./overnight-relationships')
 const ServiceProvider = require('../service/config')
 
 const findExpired = async (currentStatus, today, t) => {
@@ -17,7 +17,7 @@ const findExpired = async (currentStatus, today, t) => {
       '$dog.status.status$': currentStatus,
       '$exemption_order.exemption_order$': '2015'
     },
-    include: overnightRelationship(sequelize),
+    include: registrationRelationship(sequelize),
     transaction: t
   })
 }

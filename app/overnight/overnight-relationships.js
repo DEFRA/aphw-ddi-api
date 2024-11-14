@@ -1,4 +1,4 @@
-const overnightRelationship = sequelize => [
+const registrationRelationship = sequelize => [
   {
     model: sequelize.models.exemption_order,
     as: 'exemption_order'
@@ -30,5 +30,5 @@ const overnightRelationship = sequelize => [
 ]
 
 module.exports = {
-  overnightRelationship
+  registrationRelationship
 }

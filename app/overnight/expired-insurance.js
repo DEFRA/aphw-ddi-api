@@ -3,7 +3,7 @@ const { Op } = require('sequelize')
 const { statuses, breachReasons } = require('../constants/statuses')
 const { dbFindAll, dbFindOne } = require('../lib/db-functions')
 const ServiceProvider = require('../service/config')
-const { overnightRelationship } = require('./overnight-relationships')
+const { registrationRelationship } = require('./overnight-relationships')
 
 const findExpired = async (currentStatus, today, t) => {
   return await dbFindAll(sequelize.models.registration, {
@@ -17,7 +17,7 @@ const findExpired = async (currentStatus, today, t) => {
       },
       '$exemption_order.exemption_order$': '1991'
     },
-    include: overnightRelationship(sequelize),
+    include: registrationRelationship(sequelize),
     transaction: t
   })
 }
