@@ -4,6 +4,7 @@ const { setExpiredCdosToFailed } = require('./expired-cdo')
 const { setExpiredInsuranceToBreach, addBreachReasonToExpiredInsurance } = require('./expired-insurance')
 const { revertExpiredInsurance } = require('./revert-expired-insurance')
 const { setExpiredNeuteringDeadlineToInBreach, addBreachReasonToExpiredNeuteringDeadline } = require('./expired-neutering-deadline')
+const { setExpiredMicrochipDeadlineToInBreach, addBreachReasonToExpiredMicrochipDeadline } = require('./expired-microchip-deadline')
 const { overnightJobUser: user } = require('../constants/auth')
 
 const autoUpdateStatuses = async () => {
@@ -24,7 +25,9 @@ const autoUpdateStatuses = async () => {
       result = result + await addBreachReasonToExpiredInsurance(today, user, t) + ' | '
       result = result + await setExpiredInsuranceToBreach(today, user, t) + ' | '
       result = result + await addBreachReasonToExpiredNeuteringDeadline(today, user, t) + ' | '
-      result = result + await setExpiredNeuteringDeadlineToInBreach(today, user, t)
+      result = result + await setExpiredNeuteringDeadlineToInBreach(today, user, t) + ' | '
+      result = result + await addBreachReasonToExpiredMicrochipDeadline(today, user, t) + ' | '
+      result = result + await setExpiredMicrochipDeadlineToInBreach(today, user, t)
     })
   } catch (e) {
     console.log('Error auto-updating statuses:', e)
