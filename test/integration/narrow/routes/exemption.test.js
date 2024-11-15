@@ -103,6 +103,68 @@ describe('Exemption endpoint', () => {
     expect(updateExemption).toHaveBeenCalled()
   })
 
+  test('PUT /exemption route returns 200 with valid 2015 payload for XLB', async () => {
+    getCdo.mockResolvedValue(buildCdoDao({
+      id: 123,
+      index_number: 'ED123',
+      dog_breed: buildDogBreedDao({
+        breed: 'XL Bully'
+      }),
+      status: buildStatusDao({
+        status: 'NEW'
+      }),
+      registration: buildRegistrationDao({
+        court: buildCourtDao({
+          name: 'court1'
+        }),
+        police_force: buildPoliceForceDao({
+          name: 'force1'
+        }),
+        exemption_order: { exemption_order: '2015' }
+      }),
+      registered_person: [buildRegisteredPersonDao()]
+    }))
+
+    updateExemption.mockResolvedValue({
+      id: 123,
+      dog_id: 300095,
+      index_number: 'ED123',
+      dog_breed: {
+        breed: 'XL Bully'
+      },
+      status: {
+        status: 'NEW'
+      },
+      court: {
+        name: 'court1'
+      },
+      police_force: {
+        name: 'force1'
+      },
+      exemption_order: {
+        exemption_order: '2015'
+      },
+      neuteringDeadline: new Date() + 100,
+      microchipDeadline: new Date() + 200,
+      registered_person: [{
+        person: {
+        }
+      }]
+    })
+
+    const options = {
+      method: 'PUT',
+      url: '/exemption',
+      payload,
+      ...portalHeader
+    }
+
+    const response = await server.inject(options)
+
+    expect(response.statusCode).toBe(200)
+    expect(updateExemption).toHaveBeenCalled()
+  })
+
   test('PUT /exemption route returns 200 with valid 2023 payload', async () => {
     const payload = {
       exemptionOrder: 2023,
