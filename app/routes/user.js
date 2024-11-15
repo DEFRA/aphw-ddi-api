@@ -76,8 +76,8 @@ module.exports = [
             }
           }
 
-          if (key === 'sortKey' && value === 'activated') {
-            sort.activated = request.query.activated !== undefined ? request.query.activated : true
+          if (key === 'sortKey' && value === 'indexAccess') {
+            sort.activated = request.query.indexAccessSortOrder !== undefined ? request.query.indexAccessSortOrder : true
           } else if (key === 'sortKey') {
             sort[value] = request.query.sortOrder ?? 'ASC'
           }
