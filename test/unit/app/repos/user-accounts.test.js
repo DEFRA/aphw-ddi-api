@@ -202,7 +202,7 @@ describe('user-accounts', () => {
           as: 'police_force'
         }
       })
-      expect(sequelize.literal).toHaveBeenCalledWith('CASE WHEN activated_date IS NULL THEN 2 ELSE 1 END ASC')
+      expect(sequelize.literal).toHaveBeenCalledWith('CASE WHEN (accepted_terms_and_conds_date IS NULL AND activated_date IS NULL) THEN 4 WHEN activated_date IS NULL THEN 3 WHEN accepted_terms_and_conds_date IS NULL THEN 2 ELSE 1 END ASC')
     })
 
     test('should sort accounts by activated=false', async () => {
@@ -218,7 +218,7 @@ describe('user-accounts', () => {
           as: 'police_force'
         }
       })
-      expect(sequelize.literal).toHaveBeenCalledWith('CASE WHEN activated_date IS NULL THEN 2 ELSE 1 END DESC')
+      expect(sequelize.literal).toHaveBeenCalledWith('CASE WHEN (accepted_terms_and_conds_date IS NULL AND activated_date IS NULL) THEN 4 WHEN activated_date IS NULL THEN 3 WHEN accepted_terms_and_conds_date IS NULL THEN 2 ELSE 1 END DESC')
     })
 
     test('should sort accounts by police force DESC', async () => {
