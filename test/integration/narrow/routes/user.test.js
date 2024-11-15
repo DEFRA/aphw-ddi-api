@@ -259,7 +259,7 @@ describe('User endpoint', () => {
       }, { policeForce: 'DESC' })
     })
 
-    test('should get a list of users sorted by activated', async () => {
+    test('should get a list of users sorted by indexAccess true', async () => {
       const userAccounts = [
         scottTurner
       ]
@@ -268,7 +268,7 @@ describe('User endpoint', () => {
 
       const options = {
         method: 'GET',
-        url: '/users?sortKey=activated&activated=Y',
+        url: '/users?sortKey=indexAccess&indexAccessSortOrder=Y',
         ...portalHeader
       }
 
@@ -277,7 +277,7 @@ describe('User endpoint', () => {
       expect(getAccounts).toHaveBeenCalledWith({}, { activated: true })
     })
 
-    test('should handle missing sort order with activated', async () => {
+    test('should get a list of users sorted by no indexAccess', async () => {
       const userAccounts = [
         scottTurner
       ]
@@ -286,7 +286,25 @@ describe('User endpoint', () => {
 
       const options = {
         method: 'GET',
-        url: '/users?sortKey=activated',
+        url: '/users?sortKey=indexAccess&indexAccessSortOrder=N',
+        ...portalHeader
+      }
+
+      const response = await server.inject(options)
+      expect(response.statusCode).toBe(200)
+      expect(getAccounts).toHaveBeenCalledWith({}, { activated: false })
+    })
+
+    test('should handle missing sort order with indexAccess', async () => {
+      const userAccounts = [
+        scottTurner
+      ]
+
+      getAccounts.mockResolvedValue(userAccounts)
+
+      const options = {
+        method: 'GET',
+        url: '/users?sortKey=indexAccess',
         ...portalHeader
       }
 
