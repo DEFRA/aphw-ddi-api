@@ -73,9 +73,9 @@ const getUsersQuerySchema = Joi.object({
   username: Joi.string().optional(),
   policeForceId: Joi.number().optional(),
   policeForce: Joi.string().optional(),
-  sortKey: Joi.string().allow('username', 'activated', 'policeForce').optional(),
+  sortKey: Joi.string().allow('username', 'indexAccess', 'policeForce').optional(),
   sortOrder: Joi.string().allow(sortOrder.ASC, sortOrder.DESC).optional(),
-  activated: Joi.boolean().truthy('Y').falsy('N').optional()
+  indexAccessSortOrder: Joi.boolean().truthy('Y').falsy('N').optional()
 })
 
 module.exports = {
