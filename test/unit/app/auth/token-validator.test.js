@@ -363,6 +363,23 @@ describe('token-validator', () => {
         const validation = await validate(invalidArtifacts, {}, undefined, 'ABCDEF')
         expect(validation).toEqual({ isValid: false, credentials: { id: null, user: null, displayname: null, scope: [] } })
       })
+
+      test('should not validate if wrong issuer', async () => {
+        const invalidArtifacts = {
+          decoded: {
+            payload: {
+              exp: expect.any(Number),
+              iat: expect.any(Number),
+              token,
+              scope: ['Dog.Index.Enforcement'],
+              iss: 'invalid',
+              username: 'testuser'
+            }
+          }
+        }
+        const validation = await validate(invalidArtifacts, {}, undefined, 'ABCDEF')
+        expect(validation).toEqual({ isValid: false, credentials: { id: null, user: null, displayname: null, scope: [] } })
+      })
     })
 
     describe('aphw-ddi-api', () => {
