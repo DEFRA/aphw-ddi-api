@@ -21,7 +21,19 @@ const exemption = Joi.object({
   }).optional()
 })
 
+const payloadSchema2015Xlb = exemption.append({
+  neuteringDeadline: Joi.date().iso().optional(),
+  microchipDeadline: Joi.date().iso().optional()
+})
+
+const payloadSchema2023 = exemption.append({
+  microchipDeadline: Joi.date().iso().optional(),
+  typedByDlo: Joi.date().iso().optional(),
+  withdrawn: Joi.date().iso().optional()
+})
+
 const fullExemptionPayloadSchema = exemption.append({
+  neuteringDeadline: Joi.date().iso().optional(),
   microchipDeadline: Joi.date().iso().optional(),
   typedByDlo: Joi.date().iso().optional(),
   withdrawn: Joi.date().iso().optional()
@@ -35,7 +47,9 @@ const validatePayload = async (payload) => {
   const order = cdo?.registration.exemption_order.exemption_order
 
   if (order === '2023') {
-    schema = fullExemptionPayloadSchema
+    schema = payloadSchema2023
+  } else if (order === '2015' && cdo?.dog_breed?.breed === 'XL Bully') {
+    schema = payloadSchema2015Xlb
   }
 
   const { value, error } = schema.validate(payload)

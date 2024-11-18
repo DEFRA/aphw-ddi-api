@@ -11,6 +11,11 @@ const generateOrderSpecificData = (data) => {
       typedByDlo: data.registration.typed_by_dlo,
       withdrawn: data.registration.withdrawn
     }
+  } else if (data.registration.exemption_order.exemption_order === '2015' && data.dog_breed.breed === 'XL Bully') {
+    return {
+      microchipDeadline: data.registration.microchip_deadline,
+      neuteringDeadline: data.registration.neutering_deadline
+    }
   }
 }
 
