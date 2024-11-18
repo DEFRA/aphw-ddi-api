@@ -30,7 +30,7 @@ const updateExemption = async (data, user, transaction) => {
 
     updateRegistration(registration, data, policeForce)
 
-    handleOrder2023(registration, data)
+    handleOrderSpecificFields(registration, data)
 
     await handleCourt(registration, data, cdo)
 
@@ -131,11 +131,14 @@ const updateRegistration = (registration, data, policeForce) => {
   }
 }
 
-const handleOrder2023 = (registration, data) => {
+const handleOrderSpecificFields = (registration, data) => {
   if (registration.exemption_order.exemption_order === '2023') {
     registration.microchip_deadline = data.microchipDeadline ?? null
     registration.typed_by_dlo = data.typedByDlo ?? null
     registration.withdrawn = data.withdrawn ?? null
+  } else if (registration.exemption_order.exemption_order === '2015') {
+    registration.neutering_deadline = data.neuteringDeadline ?? null
+    registration.microchip_deadline = data.microchipDeadline ?? null
   }
 }
 
