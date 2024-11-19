@@ -187,6 +187,9 @@ const overnightRowsWithNeuteringDeadline = [
       exemption: {
         neutering_deadline: new Date(2024, 9, 10)
       }
+    },
+    exemption_order: {
+      exemption_order: '2023'
     }
   },
   {
@@ -204,6 +207,9 @@ const overnightRowsWithNeuteringDeadline = [
       exemption: {
         neutering_deadline: new Date(2024, 9, 15)
       }
+    },
+    exemption_order: {
+      exemption_order: '2023'
     }
   },
   {
@@ -221,6 +227,9 @@ const overnightRowsWithNeuteringDeadline = [
       exemption: {
         neutering_deadline: new Date(2024, 9, 20)
       }
+    },
+    exemption_order: {
+      exemption_order: '2023'
     }
   },
   {
@@ -233,6 +242,9 @@ const overnightRowsWithNeuteringDeadline = [
       exemption: {
         neutering_deadline: new Date(2024, 9, 25)
       }
+    },
+    exemption_order: {
+      exemption_order: '2023'
     }
   }
 ]

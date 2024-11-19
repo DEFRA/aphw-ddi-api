@@ -21,6 +21,11 @@ const findExpired = async (currentStatus, today, t) => {
   })
 }
 
+const ignoreOrderAndBreedCombination = (reg) => {
+  return !(reg.exemption_order?.exemption_order === '2023' ||
+    (reg.exemption_order?.exemption_order === '2015' && reg.dog?.dog_breed?.breed === 'XL Bully'))
+}
+
 const setExpiredNeuteringDeadlineToInBreach = async (today, user, t) => {
   try {
     const setStatusToBreach = await findExpired(statuses.Exempt, today, t)
@@ -28,6 +33,9 @@ const setExpiredNeuteringDeadlineToInBreach = async (today, user, t) => {
     const dogService = ServiceProvider.getDogService()
 
     for (const toUpdateStatus of setStatusToBreach) {
+      if (ignoreOrderAndBreedCombination(toUpdateStatus)) {
+        continue
+      }
       console.log(`Updating dog ${toUpdateStatus.dog.index_number} to In breach`)
       await dogService.setBreach(toUpdateStatus.dog, [breachReasons.NEUTERING_DEADLINE_EXCEEDED], user, t)
     }
@@ -57,7 +65,7 @@ const addBreachReasonToExpiredNeuteringDeadline = async (today, user, t) => {
     const dogService = ServiceProvider.getDogService()
 
     for (const toUpdate of addBreachReason) {
-      if (alreadyExpiredDeadline(toUpdate.dog, breachCategory.id)) {
+      if (alreadyExpiredDeadline(toUpdate.dog, breachCategory.id) || ignoreOrderAndBreedCombination(toUpdate)) {
         continue
       }
       console.log(`Updating dog ${toUpdate.dog.index_number} adding breach reason expired neutering deadline`)
@@ -75,5 +83,6 @@ const addBreachReasonToExpiredNeuteringDeadline = async (today, user, t) => {
 
 module.exports = {
   setExpiredNeuteringDeadlineToInBreach,
-  addBreachReasonToExpiredNeuteringDeadline
+  addBreachReasonToExpiredNeuteringDeadline,
+  ignoreOrderAndBreedCombination
 }
