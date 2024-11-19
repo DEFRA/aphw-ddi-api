@@ -1,4 +1,4 @@
-const { setExpiredNeuteringDeadlineToInBreach, addBreachReasonToExpiredNeuteringDeadline } = require('../../../../app/overnight/expired-neutering-deadline')
+const { setExpiredNeuteringDeadlineToInBreach, addBreachReasonToExpiredNeuteringDeadline, ignoreOrderAndBreedCombination } = require('../../../../app/overnight/expired-neutering-deadline')
 const { overnightRowsWithNeuteringDeadline: mockOvernightRowsWithNeuteringDeadline } = require('../../../mocks/overnight/overnight-rows')
 
 const { dbFindAll, dbFindOne } = require('../../../../app/lib/db-functions')
@@ -64,7 +64,7 @@ describe('ExpiredNeuteringDeadline test', () => {
           }
         })
       }))
-      expect(res).toBe('Success Neutering Expiry - updated 4 rows')
+      expect(res).toBe('Success Neutering Expiry - updated 5 rows')
     })
   })
 
@@ -106,6 +106,32 @@ describe('ExpiredNeuteringDeadline test', () => {
       dbFindOne.mockResolvedValue({ id: 12 })
       const today = new Date('2025-01-01')
       await expect(addBreachReasonToExpiredNeuteringDeadline(today)).rejects.toThrow('Error auto-updating statuses when Neutering Expiry add breach reason: TypeError: addBreachReason is not iterable')
+    })
+  })
+
+  describe('ignoreOrderAndBreedCombination', () => {
+    test('should return false for 2023', async () => {
+      const registration = { exemption_order: { exemption_order: '2023' } }
+      const res = await ignoreOrderAndBreedCombination(registration)
+      expect(res).toBeFalsy()
+    })
+
+    test('should return false for 2015 XLB', async () => {
+      const registration = { exemption_order: { exemption_order: '2015' }, dog: { dog_breed: { breed: 'XL Bully' } } }
+      const res = await ignoreOrderAndBreedCombination(registration)
+      expect(res).toBeFalsy()
+    })
+
+    test('should return true for 2015 other breeds', async () => {
+      const registration = { exemption_order: { exemption_order: '2015' }, dog: { dog_breed: { breed: 'other breed' } } }
+      const res = await ignoreOrderAndBreedCombination(registration)
+      expect(res).toBeTruthy()
+    })
+
+    test('should return true for 1991', async () => {
+      const registration = { exemption_order: { exemption_order: '1991' } }
+      const res = await ignoreOrderAndBreedCombination(registration)
+      expect(res).toBeTruthy()
     })
   })
 })
