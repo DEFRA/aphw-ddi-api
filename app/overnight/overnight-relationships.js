@@ -12,6 +12,10 @@ const registrationRelationship = sequelize => [
         as: 'status'
       },
       {
+        model: sequelize.models.dog_breed,
+        as: 'dog_breed'
+      },
+      {
         model: sequelize.models.insurance,
         as: 'insurance'
       },
