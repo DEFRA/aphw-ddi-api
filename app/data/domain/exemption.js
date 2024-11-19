@@ -102,7 +102,7 @@ class Exemption extends Changeable {
 
     const insuranceRenewalDate = this._insurance[0]?.renewalDate ?? new Date(0)
 
-    return insuranceRenewalDate.getTime() > today.getTime()
+    return insuranceRenewalDate.getTime() >= today.getTime()
   }
 
   _exemptionIsComplete () {
