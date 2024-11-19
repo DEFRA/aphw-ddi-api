@@ -64,7 +64,7 @@ describe('ExpiredNeuteringDeadline test', () => {
           }
         })
       }))
-      expect(res).toBe('Success Neutering Expiry - updated 4 rows')
+      expect(res).toBe('Success Neutering Expiry - updated 5 rows')
     })
   })
 

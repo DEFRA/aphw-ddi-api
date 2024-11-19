@@ -246,6 +246,21 @@ const overnightRowsWithNeuteringDeadline = [
     exemption_order: {
       exemption_order: '2023'
     }
+  },
+  {
+    dog: {
+      index_number: 'ED127',
+      status: {
+        status: 'Exempt'
+      },
+      dog_breaches: [],
+      exemption: {
+        neutering_deadline: new Date(2024, 9, 26)
+      }
+    },
+    exemption_order: {
+      exemption_order: '1991'
+    }
   }
 ]
 
