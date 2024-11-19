@@ -295,4 +295,40 @@ describe('generateOrderSpecificData', () => {
     expect(res.typedByDlo).toBe(undefined)
     expect(res.withdrawn).toBe(undefined)
   })
+
+  test('handles if 2015 and XLB', () => {
+    const data = {
+      registration: {
+        exemption_order: {
+          exemption_order: '2015'
+        },
+        microchip_deadline: new Date(2024, 11, 25),
+        neutering_deadline: new Date(2024, 10, 15)
+      },
+      dog_breed: {
+        breed: 'XL Bully'
+      }
+    }
+    const res = generateOrderSpecificData(data)
+    expect(res.microchipDeadline.toISOString()).toBe('2024-12-25T00:00:00.000Z')
+    expect(res.neuteringDeadline.toISOString()).toBe('2024-11-15T00:00:00.000Z')
+  })
+
+  test('handles if 2015 and not XLB', () => {
+    const data = {
+      registration: {
+        exemption_order: {
+          exemption_order: '2015'
+        },
+        microchip_deadline: new Date(2024, 11, 25),
+        neutering_deadline: new Date(2024, 10, 15)
+      },
+      dog_breed: {
+        breed: 'Other'
+      }
+    }
+    const res = generateOrderSpecificData(data)
+    expect(res.microchipDeadline.toISOString()).toBe('2024-12-25T00:00:00.000Z')
+    expect(res.neuteringDeadline).toBe(undefined)
+  })
 })
