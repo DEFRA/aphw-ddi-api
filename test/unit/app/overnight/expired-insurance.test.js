@@ -1,5 +1,5 @@
 const { setExpiredInsuranceToBreach, addBreachReasonToExpiredInsurance } = require('../../../../app/overnight/expired-insurance')
-const { overnightRows: mockOvernightRows, overnightRowsInBreach: mockOvernightRowsInBreach } = require('../../../mocks/overnight/overnight-rows')
+const { overnightRows: mockOvernightRows, overnightRowsInBreachInclExpiredInsurance } = require('../../../mocks/overnight/overnight-rows')
 
 const { dbFindAll, dbFindOne } = require('../../../../app/lib/db-functions')
 jest.mock('../../../../app/lib/db-functions')
@@ -57,16 +57,16 @@ describe('ExpiredInsurance test', () => {
     expect(res).toBe('Success Insurance Expiry to Breach - updated 3 rows')
   })
 
-  test('addBreachReasonToExpiredInsurance should handle some rows', async () => {
-    dbFindAll.mockResolvedValue(mockOvernightRowsInBreach)
-    dbFindOne.mockResolvedValue(11)
+  test('addBreachReasonToExpiredInsurance should handle rows that are not already expired', async () => {
+    dbFindAll.mockResolvedValue(overnightRowsInBreachInclExpiredInsurance)
+    dbFindOne.mockResolvedValue({ id: 11 })
     const res = await addBreachReasonToExpiredInsurance()
-    expect(res).toBe('Success Insurance Expiry add breach reason - updated 2 rows')
+    expect(res).toBe('Success Insurance Expiry add breach reason - updated 1 rows')
   })
 
   test('addBreachReasonToExpiredInsurance should throw if error', async () => {
     dbFindAll.mockResolvedValue(() => { throw new Error('dummy') })
-    dbFindOne.mockResolvedValue(11)
+    dbFindOne.mockResolvedValue({ id: 11 })
     await expect(addBreachReasonToExpiredInsurance()).rejects.toThrow('Error auto-updating statuses when Insurance Expiry add breach reason: TypeError: addBreachReason is not iterable')
   })
 })

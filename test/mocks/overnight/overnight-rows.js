@@ -68,14 +68,14 @@ const overnightRowsInBreachInclExpiredInsurance = [
     dog: {
       index_number: 'ED123',
       breed: {
-        breed: 'XL Bully'
+        breed: 'Breed'
       },
       status: 'In breach',
-      exemption_order: '2023',
+      exemption_order: '1991',
       dog_breaches: [{
-        breach_category_id: 11,
+        breach_category_id: 12,
         breach_category: {
-          short_name: 'INSURANCE_EXPIRED'
+          short_name: 'OTHER'
         }
       }]
     }
@@ -84,10 +84,10 @@ const overnightRowsInBreachInclExpiredInsurance = [
     dog: {
       index_number: 'ED125',
       breed: {
-        breed: 'XL Bully'
+        breed: 'Breed'
       },
       status: 'In breach',
-      exemption_order: '2023',
+      exemption_order: '1991',
       dog_breaches: [{
         breach_category_id: 12,
         breach_category: {
@@ -106,10 +106,10 @@ const overnightRowsInBreachInclExpiredInsurance = [
     dog: {
       index_number: 'ED127',
       breed: {
-        breed: 'XL Bully'
+        breed: 'Breed'
       },
       status: 'In breach',
-      exemption_order: '2023',
+      exemption_order: '1991',
       dog_breaches: [{
         breach_category_id: 11,
         breach_category: {
