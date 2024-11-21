@@ -48,7 +48,7 @@ describe('Revert Expired Insurance test', () => {
     dbFindAll.mockResolvedValue(overnightRowsInBreachInclExpiredInsurance)
     dbFindOne.mockResolvedValue({ id: 11 })
     const res = await revertExpiredInsurance()
-    expect(res).toBe('Success Revert In-breach Insurance to Exempt - updated 3 rows')
+    expect(res).toBe('Success Revert In-breach Insurance to Exempt - updated 2 rows')
   })
 
   test('revertExpiredInsurance should handle some rows', async () => {

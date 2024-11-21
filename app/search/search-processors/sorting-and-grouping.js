@@ -14,6 +14,16 @@ const groupBy = (list, keyGetter) => {
   return map
 }
 
+const populateAddress = results => {
+  if (!results || results.length === 0) {
+    return []
+  }
+  results.forEach((row) => {
+    row.address = buildAddressForSearchResults(row.address)
+  })
+  return results
+}
+
 const groupOwners = results => {
   if (!results || results.length === 0) {
     return []
@@ -56,7 +66,8 @@ const alphaSort = (a, b) => {
 
 const sortAndGroupResults = (mappedResults, type) => {
   if (type === 'dog') {
-    return mappedResults.sort(sortDogSearch)
+    const populatedResults = populateAddress(mappedResults)
+    return populatedResults.sort(sortDogSearch)
   } else if (type === 'owner') {
     // Owner
     const groupedResults = groupOwners(mappedResults)

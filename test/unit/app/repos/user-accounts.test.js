@@ -174,6 +174,22 @@ describe('user-accounts', () => {
       })
     })
 
+    test('should ignore filter if invalid key', async () => {
+      const userAccounts = [
+        ralph
+      ]
+      sequelize.models.user_account.findAll.mockResolvedValue(userAccounts)
+      const returnedAccounts = await getAccounts({ invalidkey: 'ralph@wreckit.com' })
+      expect(returnedAccounts).toEqual(userAccounts)
+      expect(sequelize.models.user_account.findAll).toHaveBeenCalledWith({
+        order: [['username', 'ASC']],
+        include: {
+          model: sequelize.models.police_force,
+          as: 'police_force'
+        }
+      })
+    })
+
     test('should sort accounts by email', async () => {
       const userAccounts = [
         axelFoley
@@ -251,6 +267,21 @@ describe('user-accounts', () => {
         }
       })
       expect(sequelize.col).toHaveBeenCalledWith('police_force.name')
+    })
+
+    test('should ignore sort if invalid key', async () => {
+      const userAccounts = [
+        axelFoley
+      ]
+      sequelize.models.user_account.findAll.mockResolvedValue(userAccounts)
+      await getAccounts({}, { invalidkey: 'DESC' })
+      expect(sequelize.models.user_account.findAll).toHaveBeenCalledWith({
+        order: [['username', 'ASC']],
+        include: {
+          model: sequelize.models.police_force,
+          as: 'police_force'
+        }
+      })
     })
   })
 
