@@ -590,7 +590,7 @@ const moreThanTenResults = [
   }
 ]
 
-const moreThanTwentyFiveResults = () => {
+const moreThanTwentyResults = () => {
   const results1 = JSON.parse(JSON.stringify(moreThanTenResults))
   const results2 = JSON.parse(JSON.stringify(moreThanTenResults))
   const results3 = JSON.parse(JSON.stringify(moreThanTenResults))
@@ -621,5 +621,5 @@ module.exports = {
   fuzzySearchResults,
   trigramSearchResults,
   moreThanTenResults,
-  moreThanTwentyFiveResults
+  moreThanTwentyResults
 }

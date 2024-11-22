@@ -1,5 +1,5 @@
 const cleanupSearchTerms = (terms) => {
-  const cleaned = addFullDogIndexIfMissing(terms.replaceAll('  ', ' ').replaceAll('*', ':*').split(' '))
+  const cleaned = addFullDogIndexIfMissing(terms.replace(/\s+/g, ' ').replaceAll('*', ':*').split(' '))
   return addJoinedPostcode(cleaned)
 }
 
