@@ -34,7 +34,8 @@ const getPageFromCache = async (user, request) => {
   if (cached) {
     if (new Date(cached.expiry).getTime() > now.getTime()) {
       // Valid result
-      return resultsModel(true, cached.results.results.splice((pageNum - 1) * resultsPerPage, resultsPerPage), cached.results.totalFound, pageNum)
+      const startPos = (pageNum - 1) * resultsPerPage
+      return resultsModel(true, cached.results.results.slice(startPos, startPos + resultsPerPage), cached.results.totalFound, pageNum)
     }
   }
 
@@ -45,7 +46,7 @@ const saveResultsToCacheAndGetPageOne = async (user, request, results) => {
   const cacheKey = buildSearchCacheKey(user, request)
   const now = new Date()
   await set(request, cacheKey, { results, expiry: addMinutes(now, expiryPeriodInMins) }, expiryPeriodInMins * MINUTE)
-  return resultsModel(true, results.results?.splice(0, resultsPerPage), results.totalFound, 1)
+  return resultsModel(true, results.results?.slice(0, resultsPerPage), results.totalFound, 1)
 }
 
 module.exports = {

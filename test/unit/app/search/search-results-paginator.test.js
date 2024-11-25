@@ -3,6 +3,8 @@ const { set, get } = require('../../../../app/cache')
 
 const { buildSearchCacheKey, saveResultsToCacheAndGetPageOne, getPageFromCache } = require('../../../../app/search/search-processors/search-results-paginator')
 
+const array1to30 = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30]
+
 describe('Search results paginator', () => {
   beforeEach(function () {
     jest.clearAllMocks()
@@ -27,14 +29,12 @@ describe('Search results paginator', () => {
 
   describe('saveResultsToCacheAndGetPageOne', () => {
     test('should save', async () => {
-      const array1to30 = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30]
-      const splicedRemainder1to30 = [21, 22, 23, 24, 25, 26, 27, 28, 29, 30]
       const user = { username: 'testuser@here.com' }
       const request = { params: { terms: 'term1,term2' } }
       const results = { totalFound: 30, results: array1to30 }
       const res = await saveResultsToCacheAndGetPageOne(user, request, results)
       const expiryInMins = 1000 * 60 * 65
-      expect(set).toHaveBeenCalledWith(request, 'testuser@here.com|term1,term2|false', { results: { results: splicedRemainder1to30, totalFound: 30 }, expiry: expect.anything() }, expiryInMins)
+      expect(set).toHaveBeenCalledWith(request, 'testuser@here.com|term1,term2|false', { results: { results: array1to30, totalFound: 30 }, expiry: expect.anything() }, expiryInMins)
       expect(res).toEqual({
         success: true,
         results: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20],
@@ -46,7 +46,6 @@ describe('Search results paginator', () => {
 
   describe('getPageFromCache', () => {
     test('should get first page', async () => {
-      const array1to30 = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30]
       const now = new Date()
       const expiryTime = new Date()
       expiryTime.setTime(now.getTime() + (5 * 60 * 1000))
@@ -65,7 +64,6 @@ describe('Search results paginator', () => {
   })
 
   test('should get second page', async () => {
-    const array1to30 = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30]
     const now = new Date()
     const expiryTime = new Date()
     expiryTime.setTime(now.getTime() + (5 * 60 * 1000))
@@ -96,7 +94,6 @@ describe('Search results paginator', () => {
   })
 
   test('should handle page if cache expired', async () => {
-    const array1to30 = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30]
     const now = new Date()
     const expiryTime = new Date()
     expiryTime.setTime(now.getTime() - (5 * 60 * 1000))
