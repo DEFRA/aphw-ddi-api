@@ -3,7 +3,7 @@ const { addMinutes } = require('../../lib/date-helpers')
 const { get, set } = require('../../cache')
 
 const resultsPerPage = 20
-const expiryPeriodInMins = MINUTE * 65
+const expiryPeriodInMins = 65
 
 const buildSearchCacheKey = (user, request) => {
   return `${user?.username}|${request.params?.terms}|${request.query?.fuzzy ?? 'false'}|${request.query?.national ?? 'false'}`
@@ -44,7 +44,7 @@ const getPageFromCache = async (user, request) => {
 const saveResultsToCacheAndGetPageOne = async (user, request, results) => {
   const cacheKey = buildSearchCacheKey(user, request)
   const now = new Date()
-  await set(request, cacheKey, { results, expiry: addMinutes(now, expiryPeriodInMins) }, expiryPeriodInMins)
+  await set(request, cacheKey, { results, expiry: addMinutes(now, expiryPeriodInMins) }, expiryPeriodInMins * MINUTE)
   return resultsModel(true, results.results?.splice(0, resultsPerPage), results.totalFound, 1)
 }
 
