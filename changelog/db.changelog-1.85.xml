@@ -1,0 +1,81 @@
+<?xml version="1.1" encoding="utf-8" standalone="no"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog" xmlns:ext="http://www.liquibase.org/xml/ns/dbchangelog-ext" xmlns:pro="http://www.liquibase.org/xml/ns/pro" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog-ext http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-ext.xsd http://www.liquibase.org/xml/ns/pro http://www.liquibase.org/xml/ns/pro/liquibase-pro-3.9.xsd http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.9.xsd">
+  <changeSet author="J Barnsley" id="1">
+    <tagDatabase tag="v1.85.0" />
+  </changeSet>
+  <changeSet author="J Barnsley" id="2">
+    <createTable tableName="police_force_group">
+      <column autoIncrement="true" name="id" type="INTEGER">
+        <constraints nullable="false" primaryKey="true" primaryKeyName="police_force_group_pkey" />
+      </column>
+      <column name="display_text" type="VARCHAR(100)">
+        <constraints nullable="false" unique="true" uniqueConstraintName="police_force_group_display_text_ukey" />
+      </column>
+      <column name="deleted_at" type="TIMESTAMP WITH TIME ZONE" />
+      <column name="created_at" type="TIMESTAMP WITH TIME ZONE" />
+      <column name="updated_at" type="TIMESTAMP WITH TIME ZONE" />
+    </createTable>
+  </changeSet>
+  <changeSet author="J Barnsley" id="3">
+    <createTable tableName="police_force_group_item">
+      <column autoIncrement="true" name="id" type="INTEGER">
+        <constraints nullable="false" primaryKey="true" primaryKeyName="police_force_group_item_pkey" />
+      </column>
+      <column name="police_force_group_id" type="INTEGER">
+        <constraints nullable="false" />
+      </column>
+      <column name="police_force_id" type="INTEGER">
+        <constraints nullable="false" />
+      </column>
+      <column name="deleted_at" type="TIMESTAMP WITH TIME ZONE" />
+      <column name="created_at" type="TIMESTAMP WITH TIME ZONE" />
+      <column name="updated_at" type="TIMESTAMP WITH TIME ZONE" />
+    </createTable>
+  </changeSet>
+  <changeSet author="J Barnsley" id="4">
+    <addForeignKeyConstraint baseColumnNames="police_force_group_id" baseTableName="police_force_group_item" constraintName="fk_police_force_group_item_group_id" referencedColumnNames="id" referencedTableName="dog" />
+    <addForeignKeyConstraint baseColumnNames="police_force_id" baseTableName="police_force_group_item" constraintName="fk_police_force_group_item_force_id" referencedColumnNames="id" referencedTableName="breach_category" />
+  </changeSet>
+  <changeSet author="C Cole" id="5">
+    <insert tableName="breach_category">
+      <column name="label" value="dog not covered by third party insurance" />
+      <column name="short_name" value="NOT_COVERED_BY_INSURANCE" />
+    </insert>
+    <insert tableName="breach_category">
+      <column name="label" value="dog not kept on lead or muzzled" />
+      <column name="short_name" value="NOT_ON_LEAD_OR_MUZZLED" />
+    </insert>
+    <insert tableName="breach_category">
+      <column name="label" value="dog kept in insecure place" />
+      <column name="short_name" value="INSECURE_PLACE" />
+    </insert>
+    <insert tableName="breach_category">
+      <column name="label" value="dog away from registered address for over 30 days in one year" />
+      <column name="short_name" value="AWAY_FROM_ADDR_30_DAYS_IN_YR" />
+    </insert>
+    <insert tableName="breach_category">
+      <column name="label" value="exemption certificate not provided to police" />
+      <column name="short_name" value="EXEMPTION_NOT_PROVIDED_TO_POLICE" />
+    </insert>
+    <insert tableName="breach_category">
+      <column name="label" value="insurance evidence not provided to police" />
+      <column name="short_name" value="INSURANCE_NOT_PROVIDED_TO_POLICE" />
+    </insert>
+    <insert tableName="breach_category">
+      <column name="label" value="owner not allowed police to read microchip" />
+      <column name="short_name" value="MICROCHIP_NOT_READ_BY_POLICE" />
+    </insert>
+    <insert tableName="breach_category">
+      <column name="label" value="change of registered address not provided to Defra" />
+      <column name="short_name" value="NO_CHANGE_OF_REG_ADDRESS" />
+    </insert>
+    <insert tableName="breach_category">
+      <column name="label" value="death of dog not reported to Defra" />
+      <column name="short_name" value="DOG_DEATH_NOT_REPORTED" />
+    </insert>
+    <insert tableName="breach_category">
+      <column name="label" value="dog’s export not reported to Defra" />
+      <column name="short_name" value="DOG_EXPORT_NOT_REPORTED" />
+    </insert>
+  </changeSet>
+</databaseChangeLog>
