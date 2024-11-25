@@ -33,49 +33,91 @@
     </createTable>
   </changeSet>
   <changeSet author="J Barnsley" id="4">
-    <addForeignKeyConstraint baseColumnNames="police_force_group_id" baseTableName="police_force_group_item" constraintName="fk_police_force_group_item_group_id" referencedColumnNames="id" referencedTableName="dog" />
-    <addForeignKeyConstraint baseColumnNames="police_force_id" baseTableName="police_force_group_item" constraintName="fk_police_force_group_item_force_id" referencedColumnNames="id" referencedTableName="breach_category" />
+    <addForeignKeyConstraint baseColumnNames="police_force_group_id" baseTableName="police_force_group_item" constraintName="fk_police_force_group_item_group_id" referencedColumnNames="id" referencedTableName="police_force_group" />
+    <addForeignKeyConstraint baseColumnNames="police_force_id" baseTableName="police_force_group_item" constraintName="fk_police_force_group_item_force_id" referencedColumnNames="id" referencedTableName="police_force" />
   </changeSet>
-  <changeSet author="C Cole" id="5">
-    <insert tableName="breach_category">
-      <column name="label" value="dog not covered by third party insurance" />
-      <column name="short_name" value="NOT_COVERED_BY_INSURANCE" />
+  <changeSet author="J Barnsley" id="5">
+    <insert tableName="police_force_group">
+      <column name="display_text" value="Bedfordshire, Cambridgeshire and Hertfordshire police forces" />
     </insert>
-    <insert tableName="breach_category">
-      <column name="label" value="dog not kept on lead or muzzled" />
-      <column name="short_name" value="NOT_ON_LEAD_OR_MUZZLED" />
+    <insert tableName="police_force_group">
+      <column name="display_text" value="Devon and Cornwall, and Dorset police forces" />
     </insert>
-    <insert tableName="breach_category">
-      <column name="label" value="dog kept in insecure place" />
-      <column name="short_name" value="INSECURE_PLACE" />
+    <insert tableName="police_force_group">
+      <column name="display_text" value="Norfolk and Suffolk police forces" />
     </insert>
-    <insert tableName="breach_category">
-      <column name="label" value="dog away from registered address for over 30 days in one year" />
-      <column name="short_name" value="AWAY_FROM_ADDR_30_DAYS_IN_YR" />
+    <insert tableName="police_force_group">
+      <column name="display_text" value="Cheshire and North Wales police forces" />
     </insert>
-    <insert tableName="breach_category">
-      <column name="label" value="exemption certificate not provided to police" />
-      <column name="short_name" value="EXEMPTION_NOT_PROVIDED_TO_POLICE" />
+    <insert tableName="police_force_group">
+      <column name="display_text" value="Surrey and Sussex police forces" />
     </insert>
-    <insert tableName="breach_category">
-      <column name="label" value="insurance evidence not provided to police" />
-      <column name="short_name" value="INSURANCE_NOT_PROVIDED_TO_POLICE" />
+  </changeSet>
+  <changeSet author="J Barnsley" id="6">
+    <insert tableName="police_force_group_item">
+      <column name="police_force_group_id" value="1" />
+      <column name="police_force_id" value="2" />
     </insert>
-    <insert tableName="breach_category">
-      <column name="label" value="owner not allowed police to read microchip" />
-      <column name="short_name" value="MICROCHIP_NOT_READ_BY_POLICE" />
+    <insert tableName="police_force_group_item">
+      <column name="police_force_group_id" value="1" />
+      <column name="police_force_id" value="3" />
     </insert>
-    <insert tableName="breach_category">
-      <column name="label" value="change of registered address not provided to Defra" />
-      <column name="short_name" value="NO_CHANGE_OF_REG_ADDRESS" />
+    <insert tableName="police_force_group_item">
+      <column name="police_force_group_id" value="1" />
+      <column name="police_force_id" value="22" />
     </insert>
-    <insert tableName="breach_category">
-      <column name="label" value="death of dog not reported to Defra" />
-      <column name="short_name" value="DOG_DEATH_NOT_REPORTED" />
+    <insert tableName="police_force_group">
+      <column name="police_force_group_id" value="2" />
+      <column name="police_force_id" value="11" />
     </insert>
-    <insert tableName="breach_category">
-      <column name="label" value="dog’s export not reported to Defra" />
-      <column name="short_name" value="DOG_EXPORT_NOT_REPORTED" />
+    <insert tableName="police_force_group">
+      <column name="police_force_group_id" value="2" />
+      <column name="police_force_id" value="10" />
     </insert>
+    <insert tableName="police_force_group">
+      <column name="police_force_group_id" value="3" />
+      <column name="police_force_id" value="31" />
+    </insert>
+    <insert tableName="police_force_group">
+      <column name="police_force_group_id" value="3" />
+      <column name="police_force_id" value="42" />
+    </insert>
+    <insert tableName="police_force_group">
+      <column name="police_force_group_id" value="4" />
+      <column name="police_force_id" value="5" />
+    </insert>
+    <insert tableName="police_force_group">
+      <column name="police_force_group_id" value="4" />
+      <column name="police_force_id" value="32" />
+    </insert>
+    <insert tableName="police_force_group">
+      <column name="police_force_group_id" value="5" />
+      <column name="police_force_id" value="43" />
+    </insert>
+    <insert tableName="police_force_group">
+      <column name="police_force_group_id" value="5" />
+      <column name="police_force_id" value="44" />
+    </insert>
+  </changeSet>
+  <changeSet author="J Barnsley" id="7">
+    <addColumn tableName="search_index">
+      <column name="police_force_id" type="INTEGER">
+        <constraints nullable="true" />
+      </column>
+    </addColumn>
+  </changeSet>
+  <changeSet author="J Barnsley" id="8">
+    <sql splitStatements="false">
+      UPDATE search_index si2
+      SET police_force_id = (SELECT r.id
+      FROM registration r,
+	         dog d,
+           exemption_order eo
+      WHERE r.dog_id = d.id
+      AND r.deleted_at IS NULL
+      AND eo.id = r.exemption_order_id
+      AND eo.exemption_order = '2023'
+      AND d.birth_date >= '2023-07-01');
+    </sql>
   </changeSet>
 </databaseChangeLog>
