@@ -6,7 +6,7 @@ const resultsPerPage = 20
 const expiryPeriodInMins = 65
 
 const buildSearchCacheKey = (user, request) => {
-  return `${user?.username}|${request.params?.terms}|${request.query?.fuzzy ?? 'false'}|${request.query?.national ?? 'false'}`
+  return `${user?.username}|${request.params?.terms}|${request.query?.fuzzy ?? 'false'}`
 }
 
 const resultsModel = (success, results, totalFound, page) => {
