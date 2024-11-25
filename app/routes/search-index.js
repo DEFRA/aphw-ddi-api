@@ -5,8 +5,8 @@ const { getCallingUser } = require('../auth/get-user')
 const { getPageFromCache, saveResultsToCacheAndGetPageOne } = require('../search/search-processors/search-results-paginator')
 
 const createResponse = (resp) => {
-  if (resp?.status) {
-    delete resp.status
+  if (resp?.success) {
+    delete resp.success
   }
   return { results: resp }
 }
@@ -29,7 +29,7 @@ module.exports = [{
     handler: async (request, h) => {
       const user = getCallingUser(request)
       const cachedPage = await getPageFromCache(user, request)
-      if (cachedPage?.status !== 200) {
+      if (!cachedPage?.success) {
         await auditSearch(request.params.terms, user)
 
         const results = await search(request.params.type, request.params.terms, !!request.query.fuzzy)
