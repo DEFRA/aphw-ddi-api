@@ -17,6 +17,7 @@ const { InvalidDataError } = require('../../errors/domain/invalidData')
  * @property {Date|null} applicationFeePaid
  * @property {{company: string; renewalDate: Date }[]} insurance
  * @property {Date|null} neuteringConfirmation
+ * @property {Date|null} neuteringDeadline
  * @property {Date|null} microchipVerification
  * @property {Date} joinedExemptionScheme
  * @property {Date|null} nonComplianceLetterSent
@@ -39,8 +40,10 @@ class Exemption extends Changeable {
     this._certificateIssued = exemptionProperties.certificateIssued
     this._applicationFeePaid = exemptionProperties.applicationFeePaid
     this._insurance = exemptionProperties.insurance
+    this._neuteringDeadline = exemptionProperties.neuteringDeadline
     this._neuteringConfirmation = exemptionProperties.neuteringConfirmation
     this._microchipVerification = exemptionProperties.microchipVerification
+    this._microchipDeadline = exemptionProperties.microchipDeadline
     this.joinedExemptionScheme = exemptionProperties.joinedExemptionScheme
     this.nonComplianceLetterSent = exemptionProperties.nonComplianceLetterSent
     this.applicationPackSent = exemptionProperties.applicationPackSent
@@ -72,8 +75,16 @@ class Exemption extends Changeable {
     return this._neuteringConfirmation
   }
 
+  get neuteringDeadline () {
+    return this._neuteringDeadline
+  }
+
   get microchipVerification () {
     return this._microchipVerification
+  }
+
+  get microchipDeadline () {
+    return this._microchipDeadline
   }
 
   get certificateIssued () {
@@ -166,6 +177,8 @@ class Exemption extends Changeable {
     this._updates.update('form2Sent', auditDate, callback)
   }
 
+  // TODO: This shouldn't verify dates if neuteringConfirmation does not exist
+  // TODO: Create a new method that takes a dog (if Dog is 2015 it can bypass)
   verifyDates (microchipVerification, neuteringConfirmation, callback) {
     if (microchipVerification.getTime() > Date.now() || neuteringConfirmation.getTime() > Date.now()) {
       throw new InvalidDateError('Date must be today or in the past')

@@ -27,7 +27,7 @@ const buildCdoPerson = (cdoPersonPartial = {}) => ({
  *  dateOfDeath: null|Date,
  *  sex: string|null,
  *  dogReference: string,
- *  dateOfBirth: string|null,
+ *  dateOfBirth: Date|null,
  *  indexNumber: string,
  *  breed: string,
  *  microchipNumber2: string|null,
@@ -86,6 +86,7 @@ const buildCdoInsurance = (insurancePartial = {}) => ({
  * @property {Date} cdoExpiry - Expiry date of the CDO.
  * @property {CdoInsurance[]} insurance - Array of insurance details.
  * @property {Date|null} microchipVerification - Microchip verification status, currently null.
+ * @property {Date|null} microchipDeadline - Microchip verification status, currently null.
  * @property {Date|null} neuteringConfirmation - Neutering confirmation status, currently null.
  * @property {string} court - Name of the court.
  * @property {Date|null} nonComplianceLetterSent - Status of non-compliance letter sent, currently null.
@@ -114,7 +115,9 @@ const buildExemption = (exemptionPartial = {}) => ({
   applicationFeePaid: null,
   insurance: [],
   neuteringConfirmation: null,
+  neuteringDeadline: null,
   microchipVerification: null,
+  microchipDeadline: null,
   joinedExemptionScheme: new Date('2023-12-10'),
   nonComplianceLetterSent: null,
   applicationPackSent: null,

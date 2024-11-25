@@ -170,7 +170,9 @@ describe('cdo mappers', () => {
         application_fee_paid: '2024-05-05',
         form_two_sent: '2024-05-07',
         microchip_verification: '2024-05-06',
+        microchip_deadline: '2024-05-06',
         neutering_confirmation: '2024-05-08',
+        neutering_deadline: '2024-05-08',
         insurance_details_recorded: '2024-05-08',
         microchip_number_recorded: '2024-05-08',
         application_fee_payment_recorded: '2024-05-08',
@@ -188,7 +190,9 @@ describe('cdo mappers', () => {
       expect(mappedRegistration.applicationFeePaid).toEqual(new Date('2024-05-05'))
       expect(mappedRegistration.form2Sent).toEqual(new Date('2024-05-07'))
       expect(mappedRegistration.microchipVerification).toEqual(new Date('2024-05-06'))
+      expect(mappedRegistration.microchipDeadline).toEqual(new Date('2024-05-06'))
       expect(mappedRegistration.neuteringConfirmation).toEqual(new Date('2024-05-08'))
+      expect(mappedRegistration.neuteringDeadline).toEqual(new Date('2024-05-08'))
       expect(mappedRegistration.certificateIssued).toEqual(new Date('2024-05-04'))
       expect(mappedRegistration.insurance[0].renewalDate).toEqual(new Date('2024-05-04'))
       expect(mappedRegistration.insuranceDetailsRecorded).toEqual(new Date('2024-05-08'))
@@ -228,6 +232,21 @@ describe('cdo mappers', () => {
   })
 
   describe('mapDogDaoToDog', () => {
+    test('should map dogDao to Dog', () => {
+      const dogDao = buildDogDao({
+        birth_date: '2024-10-11',
+        death_date: '2024-10-11',
+        exported_date: '2024-10-11',
+        stolen_date: '2024-10-11',
+        untraceable_date: '2024-10-11'
+      })
+      const dog = mapDogDaoToDog(dogDao)
+      expect(dog.dateOfBirth).toEqual(new Date('2024-10-11'))
+      expect(dog.dateOfDeath).toEqual(new Date('2024-10-11'))
+      expect(dog.dateStolen).toEqual(new Date('2024-10-11'))
+      expect(dog.dateUntraceable).toEqual(new Date('2024-10-11'))
+    })
+
     test('should map dog breaches', () => {
       const dogDao = buildDogDao({
         dog_breaches: dogBreachDAOs
