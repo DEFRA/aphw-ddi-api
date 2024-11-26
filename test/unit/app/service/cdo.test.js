@@ -355,6 +355,57 @@ describe('CdoService', function () {
         }, devUser)
     })
 
+    test('should verifyDates given ', async () => {
+      const microchipVerification = undefined
+      const neuteringConfirmation = undefined
+      const microchipDeadline = new Date(`${new Date().getUTCFullYear() + 1}-07-03`)
+
+      const cdoIndexNumber = 'ED300097'
+      const cdoTaskList = new CdoTaskList(buildCdo({
+        exemption: buildExemption({ applicationPackSent: new Date(), form2Sent: new Date() }),
+        dog: buildCdoDog({ dateOfBirth: new Date() })
+      }))
+      mockCdoRepository.getCdoTaskList.mockResolvedValue(cdoTaskList)
+
+      await cdoService.verifyDates(cdoIndexNumber, {
+        microchipVerification,
+        neuteringConfirmation,
+        microchipDeadline,
+        dogNotFitForMicrochip: true,
+        dogNotNeutered: true
+      }, devUser)
+
+      expect(mockCdoRepository.saveCdoTaskList).toHaveBeenCalledWith(cdoTaskList)
+      expect(cdoTaskList.getUpdates().exemption).toEqual([{
+        key: 'verificationDateRecorded',
+        value: {
+          microchipVerification,
+          neuteringConfirmation,
+          verificationDatesRecorded: expect.any(Date),
+          neuteringDeadline: expect.any(Date),
+          microchipDeadline: expect.any(Date)
+        },
+        callback: expect.any(Function)
+      }])
+      await cdoTaskList.getUpdates().exemption[0].callback()
+      expect(sendUpdateToAudit).toHaveBeenCalledWith(
+        'exemption',
+        {
+          index_number: 'ED300097',
+          neutering_confirmation: null,
+          microchip_verification: null,
+          neutering_deadline: null,
+          microchip_deadline: null
+        },
+        {
+          index_number: 'ED300097',
+          neutering_confirmation: neuteringConfirmation,
+          microchip_verification: microchipVerification,
+          neutering_deadline: expect.any(Date),
+          microchip_deadline: expect.any(Date)
+        }, devUser)
+    })
+
     test('should handle repo error', async () => {
       const cdoIndexNumber = 'ED300097'
       const cdoTaskList = new CdoTaskList(buildCdo({

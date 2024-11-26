@@ -215,7 +215,10 @@ class CdoService {
 
     cdoTaskList.verifyDates({
       microchipVerification: verificationDates.microchipVerification,
-      neuteringConfirmation: verificationDates.neuteringConfirmation
+      neuteringConfirmation: verificationDates.neuteringConfirmation,
+      microchipDeadline: verificationDates.microchipDeadline,
+      dogNotNeutered: verificationDates.dogNotNeutered,
+      dogNotFitForMicrochip: verificationDates.dogNotFitForMicrochip
     }, callback)
 
     return this.cdoRepository.saveCdoTaskList(cdoTaskList)
