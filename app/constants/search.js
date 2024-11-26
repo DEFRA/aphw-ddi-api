@@ -39,8 +39,6 @@ const thresholds = {
   fullTextRankThreshold: 1.01
 }
 
-const maxResults = 25
-
 module.exports = {
   matchCodeSearchFields,
   trigramSearchFields,
@@ -48,6 +46,5 @@ module.exports = {
   importantDogFields,
   importantOwnerFields,
   dogFieldsRequiringCloseMatch,
-  thresholds,
-  maxResults
+  thresholds
 }
