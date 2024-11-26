@@ -33,8 +33,6 @@ const doFullTextSearch = async (terms, type, fuzzy) => {
     raw: true
   })
 
-  // console.log('textFirstPass', results.length)
-
   return rankAndKeep(results, terms, thresholds.fullTextRankThreshold, type)
 }
 
@@ -47,8 +45,6 @@ const doFuzzySearch = async (terms, type) => {
     },
     raw: true
   })
-
-  // console.log('fuzzyFirstPass', results.length)
 
   return rankAndKeep(results, terms, thresholds.fuzzyRankThreshold, type)
 }
@@ -69,8 +65,6 @@ const doTrigramSearch = async (terms, type) => {
     },
     raw: true
   })
-
-  // console.log('trigramFirstPass', results.length)
 
   return rankAndKeep(results, terms, thresholds.trigramRankThreshold, type)
 }
@@ -98,22 +92,20 @@ const resultsModel = (results, totalFound) => {
   }
 }
 
-const search = async (type, terms, fuzzy = false) => {
+const search = async (type, terms, fuzzy = false, national = false) => {
   if (terms === null || terms === undefined) {
     return resultsModel([], 0)
   }
 
   const termsArray = cleanupSearchTerms(terms)
 
-  const fullTextToKeep = await doFullTextSearch(termsArray, type, fuzzy)
+  const policeForceIds = national ? undefined : await getUsersForceList()
+
+  const fullTextToKeep = await doFullTextSearch(termsArray, type, fuzzy, policeForceIds)
 
   const fuzzyToKeep = fuzzy ? await doFuzzySearch(termsArray, type) : []
 
   const trigramToKeep = fuzzy ? await doTrigramSearch(termsArray, type) : []
-
-  // console.log('fullTextToKeep', fullTextToKeep.length)
-  // console.log('fuzzyToKeep', fuzzyToKeep.length)
-  // console.log('trigramToKeep', trigramToKeep.length)
 
   const results = combineQueryResults(fullTextToKeep, fuzzyToKeep, trigramToKeep)
   const mappedResults = mapResults(results, type)

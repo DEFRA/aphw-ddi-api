@@ -96,6 +96,14 @@ const setPoliceForceOnCdos = async (policeForce, dogIds, user, transaction) => {
 
       await sendUpdateToAudit(EXEMPTION, preChanged, postChanged, user)
       madeChanges = true
+
+      await sequelize.models.search_index.update({
+        police_force_id: policeForce.id
+      },
+      {
+        where: { dog_id: dogId },
+        transaction
+      })
     }
   }
   return madeChanges

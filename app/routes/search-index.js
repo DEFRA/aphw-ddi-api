@@ -21,7 +21,7 @@ module.exports = [{
     handler: async (request, h) => {
       await auditSearch(request.params.terms, getCallingUser(request))
 
-      const results = await search(request.params.type, request.params.terms, !!request.query.fuzzy)
+      const results = await search(request.params.type, request.params.terms, !!request.query.fuzzy, !!request.query.national)
 
       return h.response({ results }).code(200)
     }

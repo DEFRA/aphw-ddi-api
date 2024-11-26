@@ -19,6 +19,10 @@ module.exports = (sequelize, DataTypes) => {
       type: DataTypes.INTEGER,
       allowNull: true
     },
+    police_force_id: {
+      type: DataTypes.INTEGER,
+      allowNull: true
+    },
     json: {
       type: DataTypes.JSONB
     },

@@ -41,13 +41,13 @@
       <column name="display_text" value="Bedfordshire, Cambridgeshire and Hertfordshire police forces" />
     </insert>
     <insert tableName="police_force_group">
-      <column name="display_text" value="Devon and Cornwall, and Dorset police forces" />
+      <column name="display_text" value="Devon &amp; Cornwall and Dorset police forces" />
     </insert>
     <insert tableName="police_force_group">
-      <column name="display_text" value="Norfolk and Suffolk police forces" />
+      <column name="display_text" value="Norfolk and Suffolk constabularies" />
     </insert>
     <insert tableName="police_force_group">
-      <column name="display_text" value="Cheshire and North Wales police forces" />
+      <column name="display_text" value="Cheshire Constabulary and North Wales Police" />
     </insert>
     <insert tableName="police_force_group">
       <column name="display_text" value="Surrey and Sussex police forces" />
@@ -66,35 +66,35 @@
       <column name="police_force_group_id" value="1" />
       <column name="police_force_id" value="22" />
     </insert>
-    <insert tableName="police_force_group">
+    <insert tableName="police_force_group_item">
       <column name="police_force_group_id" value="2" />
       <column name="police_force_id" value="11" />
     </insert>
-    <insert tableName="police_force_group">
+    <insert tableName="police_force_group_item">
       <column name="police_force_group_id" value="2" />
       <column name="police_force_id" value="10" />
     </insert>
-    <insert tableName="police_force_group">
+    <insert tableName="police_force_group_item">
       <column name="police_force_group_id" value="3" />
       <column name="police_force_id" value="31" />
     </insert>
-    <insert tableName="police_force_group">
+    <insert tableName="police_force_group_item">
       <column name="police_force_group_id" value="3" />
       <column name="police_force_id" value="42" />
     </insert>
-    <insert tableName="police_force_group">
+    <insert tableName="police_force_group_item">
       <column name="police_force_group_id" value="4" />
       <column name="police_force_id" value="5" />
     </insert>
-    <insert tableName="police_force_group">
+    <insert tableName="police_force_group_item">
       <column name="police_force_group_id" value="4" />
       <column name="police_force_id" value="32" />
     </insert>
-    <insert tableName="police_force_group">
+    <insert tableName="police_force_group_item">
       <column name="police_force_group_id" value="5" />
       <column name="police_force_id" value="43" />
     </insert>
-    <insert tableName="police_force_group">
+    <insert tableName="police_force_group_item">
       <column name="police_force_group_id" value="5" />
       <column name="police_force_id" value="44" />
     </insert>
@@ -108,16 +108,17 @@
   </changeSet>
   <changeSet author="J Barnsley" id="8">
     <sql splitStatements="false">
-      UPDATE search_index si2
-      SET police_force_id = (SELECT r.id
-      FROM registration r,
-	         dog d,
-           exemption_order eo
-      WHERE r.dog_id = d.id
-      AND r.deleted_at IS NULL
-      AND eo.id = r.exemption_order_id
-      AND eo.exemption_order = '2023'
-      AND d.birth_date >= '2023-07-01');
+      UPDATE search_index si
+      SET police_force_id = 
+      (SELECT r.police_force_id
+      FROM registration r
+      WHERE r.dog_id = si.dog_id
+      AND r.deleted_at IS NULL);
     </sql>
+  </changeSet>
+  <changeSet author="J Barnsley" id="9">
+    <createIndex indexName="search_index_police_idx" tableName="search_index">
+    <column name="police_force_id" />
+    </createIndex>
   </changeSet>
 </databaseChangeLog>

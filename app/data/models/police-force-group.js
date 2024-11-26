@@ -39,9 +39,9 @@ module.exports = (sequelize, DataTypes) => {
   })
 
   policeForceGroup.associate = models => {
-    policeForceGroup.belongsTo(models.force_group_item, {
-      as: 'force_group_item',
-      foreignKey: 'force_group_item_id'
+    policeForceGroup.belongsTo(models.police_force_group_item, {
+      as: 'police_force_group_item',
+      foreignKey: 'police_force_group_item_id'
     })
   }
 
