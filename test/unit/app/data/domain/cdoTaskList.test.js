@@ -802,7 +802,7 @@ describe('CdoTaskList', () => {
       test('should record verification dates', () => {
         const microchipVerification = new Date('2024-07-03')
         const neuteringConfirmation = new Date('2024-07-03')
-        cdoTaskList.verifyDates({ microchipVerification, neuteringConfirmation }, transactionCallback)
+        cdoTaskList.verifyDates({ microchipVerification, neuteringConfirmation }, () => transactionCallback)
         expect(cdoTaskList.cdoSummary.microchipVerification).toEqual(microchipVerification)
         expect(cdoTaskList.cdoSummary.neuteringConfirmation).toEqual(neuteringConfirmation)
         expect(cdoTaskList.verificationDateRecorded.completed).toBe(true)
@@ -846,68 +846,67 @@ describe('CdoTaskList', () => {
   })
 
   describe('6th Si', () => {
+    const tomorrow = new Date()
+    tomorrow.setUTCDate(tomorrow.getDate() + 1)
+    tomorrow.setUTCHours(0, 0, 0, 0)
+
+    const sixteenMonthsAgo = new Date(today)
+    sixteenMonthsAgo.setUTCHours(0, 0, 0, 0)
+    sixteenMonthsAgo.setUTCMonth(today.getMonth() - 16)
+
+    const lessThanSixteenMonthsAgo = new Date(sixteenMonthsAgo)
+    lessThanSixteenMonthsAgo.setUTCDate(lessThanSixteenMonthsAgo.getUTCDate() + 1)
+
+    const inTheFuture = new Date(today)
+    inTheFuture.setUTCFullYear(inTheFuture.getUTCFullYear() + 1)
+
+    const buildExemptionWithBase = exemptionPartial => {
+      return buildExemption({
+        exemptionOrder: '2015',
+        applicationPackSent: new Date('2024-06-25'),
+        form2Sent: new Date('2024-05-24'),
+        applicationFeePaid: new Date('2024-06-24'),
+        neuteringConfirmation: new Date('2024-03-09'),
+        microchipVerification: new Date('2024-03-09'),
+        insuranceDetailsRecorded: new Date('2024-08-07'),
+        microchipNumberRecorded: new Date('2024-08-07'),
+        verificationDatesRecorded: new Date('2024-08-07'),
+        insurance: [buildCdoInsurance({
+          company: 'Dogs R Us',
+          renewalDate: new Date('2025-06-25')
+        })],
+        ...exemptionPartial
+      })
+    }
+
+    const buildDogWithBase = dogPartial => {
+      return buildCdoDog({
+        microchipNumber: '123456789012345',
+        dateOfBirth: lessThanSixteenMonthsAgo,
+        breed: 'XL Bully',
+        ...dogPartial
+      })
+    }
+
+    /**
+     * @param {{ exemptionPartial?: Partial<Exemption>; dogPartial?: Partial<CdoDogParams>}} partials
+     * @return {CdoTaskList}
+     */
+    const buildCdoWithBase = ({ exemptionPartial = {}, dogPartial = {} } = {}) => {
+      const exemptionProperties = buildExemptionWithBase(exemptionPartial)
+      const dogProperties = buildDogWithBase(dogPartial)
+
+      const cdo = buildCdo({
+        dog: dogProperties,
+        exemption: exemptionProperties
+      })
+      return new CdoTaskList(cdo)
+    }
     afterEach(() => {
       jest.clearAllMocks()
     })
 
     describe('verification step complete given verificationDatesRecorded & neuteringConfirmation=undefined', () => {
-      const tomorrow = new Date()
-      tomorrow.setUTCDate(tomorrow.getDate() + 1)
-      tomorrow.setUTCHours(0, 0, 0, 0)
-
-      const sixteenMonthsAgo = new Date(today)
-      sixteenMonthsAgo.setUTCHours(0, 0, 0, 0)
-      sixteenMonthsAgo.setUTCMonth(today.getMonth() - 16)
-
-      const lessThanSixteenMonthsAgo = new Date(sixteenMonthsAgo)
-      lessThanSixteenMonthsAgo.setUTCDate(lessThanSixteenMonthsAgo.getUTCDate() + 1)
-
-      const inTheFuture = new Date(today)
-      inTheFuture.setUTCFullYear(inTheFuture.getUTCFullYear() + 1)
-
-      const buildExemptionWithBase = exemptionPartial => {
-        return buildExemption({
-          exemptionOrder: '2015',
-          applicationPackSent: new Date('2024-06-25'),
-          form2Sent: new Date('2024-05-24'),
-          applicationFeePaid: new Date('2024-06-24'),
-          neuteringConfirmation: new Date('2024-03-09'),
-          microchipVerification: new Date('2024-03-09'),
-          insuranceDetailsRecorded: new Date('2024-08-07'),
-          microchipNumberRecorded: new Date('2024-08-07'),
-          verificationDatesRecorded: new Date('2024-08-07'),
-          insurance: [buildCdoInsurance({
-            company: 'Dogs R Us',
-            renewalDate: new Date('2025-06-25')
-          })],
-          ...exemptionPartial
-        })
-      }
-
-      const buildDogWithBase = dogPartial => {
-        return buildCdoDog({
-          microchipNumber: '123456789012345',
-          dateOfBirth: lessThanSixteenMonthsAgo,
-          breed: 'XL Bully',
-          ...dogPartial
-        })
-      }
-
-      /**
-       * @param {{ exemptionPartial?: Partial<Exemption>; dogPartial?: Partial<CdoDogParams>}} partials
-       * @return {CdoTaskList}
-       */
-      const buildCdoWithBase = ({ exemptionPartial = {}, dogPartial = {} } = {}) => {
-        const exemptionProperties = buildExemptionWithBase(exemptionPartial)
-        const dogProperties = buildDogWithBase(dogPartial)
-
-        const cdo = buildCdo({
-          dog: dogProperties,
-          exemption: exemptionProperties
-        })
-        return new CdoTaskList(cdo)
-      }
-
       const verificationCompletedTest = (cdoTaskList, completed = true) => {
         expect(cdoTaskList.verificationDateRecorded).toEqual(expect.objectContaining({
           key: 'verificationDateRecorded',
@@ -931,7 +930,7 @@ describe('CdoTaskList', () => {
       describe('2015 dog', () => {
         describe('given dog under 16 months', () => {
           test('should return true given verificationDatesRecorded and neuteringDeadline recorded', () => {
-            // 2015 XL Bully, exemption DOB < 16 months, dog's neutering not verified, neutering deadline set
+          // 2015 XL Bully, exemption DOB < 16 months, dog's neutering not verified, neutering deadline set
             const cdoTaskList = buildCdoWithBase({
               exemptionPartial: {
                 microchipVerification: undefined,
@@ -945,7 +944,7 @@ describe('CdoTaskList', () => {
 
           describe('neutering confirmation undefined', () => {
             test('should return false given Dog has no date of birth', () => {
-              // 2015 XL Bully, exemption DOB < 16 months, dog's neutering not verified, neutering deadline set
+            // 2015 XL Bully, exemption DOB < 16 months, dog's neutering not verified, neutering deadline set
               const cdoTaskList = buildCdoWithBase({
                 exemptionPartial: { neuteringConfirmation: undefined, neuteringDeadline: tomorrow },
                 dogPartial: { dateOfBirth: undefined }
@@ -954,7 +953,7 @@ describe('CdoTaskList', () => {
             })
 
             test('should return false given verificationDatesRecorded and neuteringDeadline today', () => {
-              // 2015 XL Bully, exemption DOB < 16 months, dog's neutering not verified, neutering deadline set
+            // 2015 XL Bully, exemption DOB < 16 months, dog's neutering not verified, neutering deadline set
               const cdoTaskList = buildCdoWithBase({
                 exemptionPartial: { neuteringConfirmation: undefined, neuteringDeadline: new Date() }
               })
@@ -962,7 +961,7 @@ describe('CdoTaskList', () => {
             })
 
             test('should return false given and neutering deadline not set', () => {
-              // 2015 XL Bully, exemption DOB < 16 months, dog's neutering not verified, neutering deadline set
+            // 2015 XL Bully, exemption DOB < 16 months, dog's neutering not verified, neutering deadline set
               const cdoTaskList = buildCdoWithBase({
                 exemptionPartial: { neuteringConfirmation: undefined, neuteringDeadline: undefined }
               })
@@ -972,7 +971,7 @@ describe('CdoTaskList', () => {
 
           describe('microchipVerification undefined', () => {
             test('should return false given verificationDatesRecorded and microchipDeadline today', () => {
-              // 2015 XL Bully, exemption DOB < 16 months, dog's neutering not verified, neutering deadline set
+            // 2015 XL Bully, exemption DOB < 16 months, dog's neutering not verified, neutering deadline set
               const cdoTaskList = buildCdoWithBase({
                 exemptionPartial: { microchipVerification: undefined, microchipDeadline: thisMorning }
               })
@@ -980,14 +979,14 @@ describe('CdoTaskList', () => {
             })
 
             test('should return true given verificationDatesRecorded and microchipDeadline in the future', () => {
-              // 2015 XL Bully, exemption DOB < 16 months, dog's neutering not verified, neutering deadline set
+            // 2015 XL Bully, exemption DOB < 16 months, dog's neutering not verified, neutering deadline set
               const cdoTaskList = buildCdoWithBase({
                 exemptionPartial: { microchipVerification: undefined, microchipDeadline: inTheFuture }
               })
               verificationIsComplete(cdoTaskList)
             })
             test('should return false given and microchip not verified', () => {
-              // 2015 XL Bully, exemption DOB < 16 months, dog's neutering not verified, neutering deadline set
+            // 2015 XL Bully, exemption DOB < 16 months, dog's neutering not verified, neutering deadline set
               const cdoTaskList = buildCdoWithBase({
                 exemptionPartial: { microchipVerification: undefined }
               })
@@ -996,7 +995,7 @@ describe('CdoTaskList', () => {
           })
 
           test('should return false given verification Dates not Recorded', () => {
-            // 2015 XL Bully, exemption DOB < 16 months, dog's neutering not verified, neutering deadline set
+          // 2015 XL Bully, exemption DOB < 16 months, dog's neutering not verified, neutering deadline set
             const cdoTaskList = buildCdoWithBase({
               exemptionPartial: {
                 neuteringConfirmation: undefined,
@@ -1011,7 +1010,7 @@ describe('CdoTaskList', () => {
         })
 
         test('should return false given dog 16 months old and microchip selected', () => {
-          // 2015 XL Bully, exemption DOB < 16 months, dog's neutering not verified, neutering deadline set
+        // 2015 XL Bully, exemption DOB < 16 months, dog's neutering not verified, neutering deadline set
           const cdoTaskList = buildCdoWithBase({
             dogPartial: { dateOfBirth: sixteenMonthsAgo },
             exemptionPartial: { neuteringConfirmation: undefined, neuteringDeadline: inTheFuture }
@@ -1021,7 +1020,7 @@ describe('CdoTaskList', () => {
       })
 
       test('should return false if not 2015 Dog', () => {
-        // 2015 XL Bully, exemption DOB < 16 months, dog's neutering not verified, neutering deadline set
+      // 2015 XL Bully, exemption DOB < 16 months, dog's neutering not verified, neutering deadline set
         const cdoTaskList = buildCdoWithBase({
           exemptionPartial: { microchipDeadline: tomorrow, exemptionOrder: '2023' }
         })
@@ -1030,7 +1029,42 @@ describe('CdoTaskList', () => {
     })
 
     describe('verify Dates', () => {
+      const microchipVerification = new Date('2024-11-26')
+      const neuteringConfirmation = new Date('2024-11-26')
+      const microchipDeadline = new Date(`${today.getUTCFullYear()}-11-26`)
+      const callback = jest.fn()
 
+      test('should handle neutering confirmation dogNotNeutered', () => {
+        const cdoTaskList = buildCdoWithBase({
+          exemptionPartial: {
+            microchipVerification: undefined,
+            neuteringConfirmation: undefined
+          },
+          dogPartial: { dateOfBirth: new Date() }
+        })
+
+        cdoTaskList.verifyDates({ microchipVerification, dogNotNeutered: true }, callback)
+        expect(cdoTaskList.verificationDateRecorded.completed).toBe(true)
+        expect(cdoTaskList.verificationDateRecorded.timestamp).toEqual(expect.any(Date))
+        expect(cdoTaskList.cdoSummary.neuteringDeadline).toEqual(expect.any(Date))
+        expect(cdoTaskList.cdoSummary.microchipDeadline).toBeUndefined()
+      })
+
+      test('should handle Dog not fit for microchipping', () => {
+        const cdoTaskList = buildCdoWithBase({
+          exemptionPartial: {
+            microchipVerification: undefined,
+            neuteringConfirmation: undefined
+          },
+          dogPartial: { dateOfBirth: new Date() }
+        })
+
+        cdoTaskList.verifyDates({ neuteringConfirmation, dogNotFitForMicrochip: true, microchipDeadline }, callback)
+        expect(cdoTaskList.verificationDateRecorded.completed).toBe(true)
+        expect(cdoTaskList.verificationDateRecorded.timestamp).toEqual(expect.any(Date))
+        expect(cdoTaskList.cdoSummary.microchipDeadline).toEqual(expect.any(Date))
+        expect(cdoTaskList.cdoSummary.neuteringDeadline).toBeUndefined()
+      })
     })
   })
 })

@@ -78,7 +78,9 @@ class CdoTaskList {
       applicationFeePaid: this._cdo.exemption.applicationFeePaid ?? undefined,
       form2Sent: this._cdo.exemption.form2Sent ?? undefined,
       neuteringConfirmation: this._cdo.exemption.neuteringConfirmation ?? undefined,
+      neuteringDeadline: this._cdo.exemption.neuteringDeadline ?? undefined,
       microchipVerification: this._cdo.exemption.microchipVerification ?? undefined,
+      microchipDeadline: this._cdo.exemption.microchipDeadline ?? undefined,
       certificateIssued: this._cdo.exemption.certificateIssued ?? undefined,
       status: this._cdo.dog.status ?? undefined
     }
@@ -290,11 +292,34 @@ class CdoTaskList {
     this._cdo.exemption.sendForm2(sentDate, callback)
   }
 
-  verifyDates ({ microchipVerification, neuteringConfirmation }, callback) {
+  /**
+   *
+   * @param {{
+   *    microchipVerification?: Date|undefined;
+   *    neuteringConfirmation?: Date|undefined;
+   *    neuteringDeadline?: Date|undefined
+   *    dogNotFitForMicrochip?: true|undefined;
+   *    dogNotNeutered?: true|undefined
+   * }} dateVerfication
+   * @param neuteringConfirmation
+   * @param callback
+   * @return {void}
+   */
+  verifyDates ({
+    microchipVerification,
+    neuteringConfirmation,
+    dogNotFitForMicrochip,
+    dogNotNeutered,
+    microchipDeadline
+  }, callback) {
     this._actionPackCompleteGuard()
     this._form2CompleteGuard()
 
-    this._cdo.exemption.verifyDates(microchipVerification, neuteringConfirmation, callback)
+    if (dogNotFitForMicrochip || dogNotNeutered) {
+      return this._cdo.exemption.verifyDatesWithDeadline({ microchipVerification, neuteringConfirmation, microchipDeadline }, this._cdo.dog, callback)
+    }
+
+    return this._cdo.exemption.verifyDates(microchipVerification, neuteringConfirmation, callback)
   }
 
   issueCertificate (certificateIssued, callback) {

@@ -184,9 +184,10 @@ class Exemption extends Changeable {
    *     microchipDeadline?: Date|undefined
    * }} verifyOptions
    * @param {Dog} dog
-   * @param callback
+   * @param {function(Exemption): () => Promise<void>} callbackFn
+   * @return {void}
    */
-  verifyDatesWithDeadline ({ microchipVerification, neuteringConfirmation, microchipDeadline }, dog, callback) {
+  verifyDatesWithDeadline ({ microchipVerification, neuteringConfirmation, microchipDeadline }, dog, callbackFn) {
     const sixteenMonthsAgo = new Date()
     sixteenMonthsAgo.setUTCHours(23, 59, 59, 999)
     sixteenMonthsAgo.setUTCMonth(sixteenMonthsAgo.getUTCMonth() - 16)
@@ -198,7 +199,7 @@ class Exemption extends Changeable {
 
     // New allowance only applies to 2015 Dogs
     if (this.exemptionOrder !== '2015' || (!!microchipVerification && !!neuteringConfirmation)) {
-      return this.verifyDates(microchipVerification, neuteringConfirmation, callback)
+      return this.verifyDates(microchipVerification, neuteringConfirmation, callbackFn)
     }
 
     // 6th Si Neutering Confirmation rules only apply to Dogs under 16 months
@@ -259,10 +260,17 @@ class Exemption extends Changeable {
         verificationDatesRecorded,
         ...deadlines
       },
-      callback)
+      callbackFn(this))
   }
 
-  verifyDates (microchipVerification, neuteringConfirmation, callback) {
+  /**
+   *
+   * @param microchipVerification
+   * @param neuteringConfirmation
+   * @param {function(Exemption): () => Promise<void>} callbackFn
+   * @return {void}
+   */
+  verifyDates (microchipVerification, neuteringConfirmation, callbackFn) {
     if (!microchipVerification) {
       throw new Error('Microchip verification required')
     }
@@ -278,6 +286,7 @@ class Exemption extends Changeable {
     this._microchipVerification = microchipVerification
     this._neuteringConfirmation = neuteringConfirmation
     this._verificationDatesRecorded = verificationDatesRecorded
+    const callback = callbackFn(this)
     this._updates.update(
       'verificationDateRecorded',
       {
@@ -285,7 +294,8 @@ class Exemption extends Changeable {
         neuteringConfirmation,
         verificationDatesRecorded
       },
-      callback)
+      callback
+    )
   }
 
   issueCertificate (certificateIssued, callback) {

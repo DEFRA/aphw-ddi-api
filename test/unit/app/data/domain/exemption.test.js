@@ -214,7 +214,9 @@ describe('Exemption', () => {
     }
 
     const exemption = new Exemption(verifyDatesProperties)
-    const callback = jest.fn()
+    const callbackInside = jest.fn()
+
+    const callback = _ => callbackInside
 
     test('should start with correct details', () => {
       expect(exemption.microchipVerification).toBeNull()
@@ -235,7 +237,7 @@ describe('Exemption', () => {
             microchipVerification,
             verificationDatesRecorded: expect.any(Date)
           },
-          callback
+          callback: callbackInside
         }
       ])
     })
@@ -277,11 +279,12 @@ describe('Exemption', () => {
     const defaultDog = new Dog(dogProperties)
 
     const callback = jest.fn()
+    const callbackFn = jest.fn().mockImplementation(_ => callback)
 
     test('should verifyDates if dates exist', () => {
       const exemption = new Exemption(verifyDatesProperties)
       const dog = new Dog(dogProperties)
-      exemption.verifyDatesWithDeadline({ microchipVerification, neuteringConfirmation }, dog, callback)
+      exemption.verifyDatesWithDeadline({ microchipVerification, neuteringConfirmation }, dog, callbackFn)
       expect(exemption.verificationDatesRecorded).toEqual(expect.any(Date))
       expect(exemption.getChanges()).toEqual([
         {
@@ -294,6 +297,7 @@ describe('Exemption', () => {
           callback
         }
       ])
+      expect(callbackFn).toHaveBeenCalled()
     })
 
     test('should verifyDates if Dog is under 16 months and neuteringConfirmation is undefined', () => {
@@ -303,7 +307,7 @@ describe('Exemption', () => {
       const inTwoMonths = new Date(underSixteenMonthsAgo)
       inTwoMonths.setUTCMonth(underSixteenMonthsAgo.getUTCMonth() + 18)
 
-      exemption.verifyDatesWithDeadline({ microchipVerification }, dog, callback)
+      exemption.verifyDatesWithDeadline({ microchipVerification }, dog, callbackFn)
       expect(exemption.neuteringConfirmation).toBeUndefined()
       expect(exemption.neuteringDeadline).toEqual(inTwoMonths)
       expect(exemption.verificationDatesRecorded).toEqual(expect.any(Date))
@@ -338,7 +342,7 @@ describe('Exemption', () => {
       const microchipDeadlineSubmittedDate = new Date(`${new Date().getUTCFullYear() + 1}-11-01`)
       const expectedMicrochipDeadlineDate = new Date(`${new Date().getUTCFullYear() + 1}-11-29`)
 
-      exemption.verifyDatesWithDeadline({ neuteringConfirmation, microchipDeadline: microchipDeadlineSubmittedDate }, defaultDog, callback)
+      exemption.verifyDatesWithDeadline({ neuteringConfirmation, microchipDeadline: microchipDeadlineSubmittedDate }, defaultDog, callbackFn)
       expect(exemption.microchipVerification).toBeUndefined()
       expect(exemption.microchipDeadline).toEqual(expectedMicrochipDeadlineDate)
       expect(exemption.verificationDatesRecorded).toEqual(expect.any(Date))

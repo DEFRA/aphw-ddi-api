@@ -472,7 +472,7 @@ const getCdoTaskList = async (indexNumber, transaction) => {
 /**
  * @typedef SaveCdoTaskList
  * @param {import('../data/domain/cdoTaskList').CdoTaskList} cdoTaskList
- * @param transaction
+ * @param [transaction]
  * @return {Promise<import('../data/domain/cdoTaskList').CdoTaskList>}
  */
 /**

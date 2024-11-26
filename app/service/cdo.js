@@ -176,21 +176,39 @@ class CdoService {
     return this.cdoRepository.saveCdoTaskList(cdoTaskList)
   }
 
+  /**
+   * @param cdoIndexNumber
+   * @param {{
+   *   neuteringConfirmation?: Date|undefined;
+   *   microchipVerification?: Date|undefined;
+   *   microchipDeadline?: Date|undefined;
+   *   dogNotNeutered?: true|undefined;
+   *   dogNotFitForMicrochip?: true|undefined;
+   * }} verificationDates
+   * @param user
+   * @return {Promise<import('../data/domain/cdoTaskList').CdoTaskList>}
+   */
   async verifyDates (cdoIndexNumber, verificationDates, user) {
     const cdoTaskList = await this.cdoRepository.getCdoTaskList(cdoIndexNumber)
     const preNeuteringConfirmation = cdoTaskList.cdoSummary.neuteringConfirmation
     const preMicrochipVerificationn = cdoTaskList.cdoSummary.microchipVerification
+    const preNeuteringDeadline = cdoTaskList.cdoSummary.neuteringDeadline
+    const preMicrochipDeadline = cdoTaskList.cdoSummary.microchipDeadline
 
-    const callback = async () => {
+    const callback = exemption => async () => {
       const preAudit = {
         index_number: cdoIndexNumber,
         neutering_confirmation: preNeuteringConfirmation ?? null,
-        microchip_verification: preMicrochipVerificationn ?? null
+        microchip_verification: preMicrochipVerificationn ?? null,
+        neutering_deadline: preNeuteringDeadline ?? null,
+        microchip_deadline: preMicrochipDeadline ?? null
       }
       const postAudit = {
         index_number: cdoIndexNumber,
-        neutering_confirmation: verificationDates.neuteringConfirmation,
-        microchip_verification: verificationDates.microchipVerification
+        neutering_confirmation: exemption.neuteringConfirmation,
+        microchip_verification: exemption.microchipVerification,
+        neutering_deadline: exemption.neuteringDeadline ?? null,
+        microchip_deadline: exemption.microchipDeadline ?? null
       }
       await sendUpdateToAudit(EXEMPTION, preAudit, postAudit, user)
     }
@@ -199,6 +217,7 @@ class CdoService {
       microchipVerification: verificationDates.microchipVerification,
       neuteringConfirmation: verificationDates.neuteringConfirmation
     }, callback)
+
     return this.cdoRepository.saveCdoTaskList(cdoTaskList)
   }
 

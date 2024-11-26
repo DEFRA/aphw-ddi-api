@@ -342,12 +342,16 @@ describe('CdoService', function () {
         {
           index_number: 'ED300097',
           neutering_confirmation: null,
-          microchip_verification: null
+          microchip_verification: null,
+          neutering_deadline: null,
+          microchip_deadline: null
         },
         {
           index_number: 'ED300097',
           neutering_confirmation: neuteringConfirmation,
-          microchip_verification: microchipVerification
+          microchip_verification: microchipVerification,
+          neutering_deadline: null,
+          microchip_deadline: null
         }, devUser)
     })
 
