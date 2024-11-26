@@ -356,6 +356,15 @@ describe('Exemption', () => {
       ])
     })
 
+    test('should throw if neutering confirmation is missing and Dog is not an XL Bully', () => {
+      const exemption = new Exemption(verifyDatesProperties)
+      const pitBull = new Dog(buildCdoDog({
+        ...defaultDog,
+        breed: 'Pit Bull Terrier'
+      }))
+
+      expect(() => exemption.verifyDatesWithDeadline({ microchipVerification }, pitBull, callback)).toThrow(new Error('Neutering date required for Pit Bull Terrier'))
+    })
     test('should throw if neutering confirmation is missing and Dog is sixteen months old or more', () => {
       const exemption = new Exemption(verifyDatesProperties)
       const dog = new Dog(buildCdoDog({

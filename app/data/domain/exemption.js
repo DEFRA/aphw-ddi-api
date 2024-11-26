@@ -206,6 +206,11 @@ class Exemption extends Changeable {
       throw new Error('Neutering confirmation required')
     }
 
+    // 6th Si Neutering Confirmation rules only applies to XL Bullies
+    if (!neuteringConfirmation && dog.breed !== 'XL Bully') {
+      throw new Error(`Neutering date required for ${dog.breed}`)
+    }
+
     // 6th Si To bypass microchipVerification microchip deadline must be set
     if (!microchipVerification && !microchipDeadline) {
       throw new Error('Microchip deadline required')
