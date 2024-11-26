@@ -195,7 +195,10 @@ class CdoService {
       await sendUpdateToAudit(EXEMPTION, preAudit, postAudit, user)
     }
 
-    cdoTaskList.verifyDates(verificationDates.microchipVerification, verificationDates.neuteringConfirmation, callback)
+    cdoTaskList.verifyDates({
+      microchipVerification: verificationDates.microchipVerification,
+      neuteringConfirmation: verificationDates.neuteringConfirmation
+    }, callback)
     return this.cdoRepository.saveCdoTaskList(cdoTaskList)
   }
 

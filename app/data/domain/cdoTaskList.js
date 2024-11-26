@@ -3,6 +3,9 @@ const { ActionAlreadyPerformedError } = require('../../errors/domain/actionAlrea
 const { SequenceViolationError } = require('../../errors/domain/sequenceViolation')
 const { dateTodayOrInFuture } = require('../../lib/date-helpers')
 
+const endOfDay = new Date()
+endOfDay.setHours(23, 59, 59, 999)
+
 class CdoTaskList {
   /**
    * @param {Cdo} cdo
@@ -10,6 +13,8 @@ class CdoTaskList {
   constructor (cdo) {
     this._cdo = cdo
   }
+
+  static endOfDay
 
   static dateStageComplete (stage) {
     return stage instanceof Date
@@ -165,14 +170,65 @@ class CdoTaskList {
     )
   }
 
+  get neuteringRulesPassed () {
+    if (!CdoTaskList.dateStageComplete(this._cdo.exemption.verificationDatesRecorded)) {
+      return false
+    }
+
+    const sixteenMonthsAgo = new Date()
+    sixteenMonthsAgo.setUTCMonth(sixteenMonthsAgo.getUTCMonth() - 16)
+    sixteenMonthsAgo.setUTCHours(0, 0, 0, 0)
+
+    const dogDateOfBirth = this._cdo.dog.dateOfBirth
+
+    // Date of Birth must be less than 16 months ago
+    if (
+      !(
+        CdoTaskList.dateStageComplete(dogDateOfBirth) &&
+        dogDateOfBirth.getTime() > sixteenMonthsAgo.getTime()
+      )
+    ) {
+      return false
+    }
+
+    // Neutering deadline today
+    return CdoTaskList.dateStageComplete(this._cdo.exemption.neuteringDeadline) &&
+        this._cdo.exemption.neuteringDeadline >= endOfDay
+  }
+
+  get microchipRulesPassed () {
+    if (!CdoTaskList.dateStageComplete(this._cdo.exemption.verificationDatesRecorded)) {
+      return false
+    }
+
+    if (!CdoTaskList.dateStageComplete(this._cdo.exemption.microchipDeadline)) {
+      return false
+    }
+
+    // Microchip deadline yesterday
+    return Date.now() < this._cdo.exemption.microchipDeadline.getTime()
+  }
+
   get verificationDateRecorded () {
+    if (this.exemption.exemptionOrder !== '2015') {
+      return undefined
+    }
+
     let timestamp
     let completed
 
-    if (
-      CdoTaskList.dateStageComplete(this.cdoSummary.microchipVerification) &&
-      CdoTaskList.dateStageComplete(this.cdoSummary.neuteringConfirmation)
-    ) {
+    let neuteringRulesPassed = this.neuteringRulesPassed
+    let microchipRulesPassed = this.microchipRulesPassed
+
+    if (CdoTaskList.dateStageComplete(this.cdoSummary.microchipVerification)) {
+      microchipRulesPassed = true
+    }
+
+    if (CdoTaskList.dateStageComplete(this.cdoSummary.neuteringConfirmation)) {
+      neuteringRulesPassed = true
+    }
+
+    if (neuteringRulesPassed && microchipRulesPassed) {
       completed = true
       timestamp = this._cdo.exemption.verificationDatesRecorded
     }
@@ -234,7 +290,7 @@ class CdoTaskList {
     this._cdo.exemption.sendForm2(sentDate, callback)
   }
 
-  verifyDates (microchipVerification, neuteringConfirmation, callback) {
+  verifyDates ({ microchipVerification, neuteringConfirmation }, callback) {
     this._actionPackCompleteGuard()
     this._form2CompleteGuard()
 
