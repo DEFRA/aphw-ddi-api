@@ -36,7 +36,7 @@ const thresholds = {
   trigramQueryMicrochipThreshold: 0.55,
   trigramRankThreshold: 1.001,
   fuzzyRankThreshold: 1.001,
-  fullTextRankThreshold: 1.01
+  fullTextRankThreshold: 1
 }
 
 module.exports = {

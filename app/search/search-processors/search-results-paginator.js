@@ -1,3 +1,4 @@
+const { eventsTopic } = require('../../config/message')
 const { MINUTE } = require('../../constants/time')
 const { addMinutes } = require('../../lib/date-helpers')
 const { get, set } = require('../../cache')
@@ -5,8 +6,14 @@ const { get, set } = require('../../cache')
 const resultsPerPage = 20
 const expiryPeriodInMins = 65
 
+const getEnvCode = (configItem) => {
+  const envParts = configItem ? `${configItem}`.split('-') : []
+  return envParts?.length === 4 ? envParts[3] : ''
+}
+
 const buildSearchCacheKey = (user, request) => {
-  return `${user?.username}|${request.params?.terms}|${request.query?.fuzzy ?? 'false'}`
+  const env = getEnvCode(eventsTopic?.address)
+  return `${env}|${user?.username}|${request.params?.terms}|${request.query?.fuzzy ?? 'false'}`
 }
 
 const resultsModel = (success, results, totalFound, page) => {
@@ -50,6 +57,7 @@ const saveResultsToCacheAndGetPageOne = async (user, request, results) => {
 }
 
 module.exports = {
+  getEnvCode,
   buildSearchCacheKey,
   getPageFromCache,
   saveResultsToCacheAndGetPageOne

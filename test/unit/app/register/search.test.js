@@ -86,8 +86,8 @@ describe('Search repo', () => {
     sequelize.models.search_tgram.findAll.mockResolvedValue([])
 
     const results = await search('owner', 'smith')
-    expect(results.results.length).toBe(9)
-    expect(results.totalFound).toBe(9)
+    expect(results.results.length).toBe(11)
+    expect(results.totalFound).toBe(11)
   })
 
   test('search for microchip only should adjust threshold when fuzzy', async () => {
@@ -106,8 +106,8 @@ describe('Search repo', () => {
     sequelize.models.search_tgram.findAll.mockResolvedValue([])
 
     const results = await search('dog', '123451234512345 smith', true)
-    expect(results.results.length).toBe(11)
-    expect(results.totalFound).toBe(11)
+    expect(results.results.length).toBe(13)
+    expect(results.totalFound).toBe(13)
   })
 
   test('search for microchip and other terms should not adjust threshold when fuzzy - test 2', async () => {
@@ -116,8 +116,8 @@ describe('Search repo', () => {
     sequelize.models.search_tgram.findAll.mockResolvedValue([])
 
     const results = await search('dog', '123451 smith', true)
-    expect(results.results.length).toBe(11)
-    expect(results.totalFound).toBe(11)
+    expect(results.results.length).toBe(13)
+    expect(results.totalFound).toBe(13)
   })
 
   test('sorting should handle', async () => {
