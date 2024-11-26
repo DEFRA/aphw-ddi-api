@@ -33,6 +33,7 @@ services:
       USER_FEEDBACK_EMAIL_ADDRESS: dummy@here.com
       REPORT_SOMETHING_EMAIL_ADDRESS: report-something@here.com
       ENFORCEMENT_URL: https://enforcement.com
+      EVENTS_TOPIC_ADDRESS: aphw-ddi-events-localtest
 
   aphw-ddi-api-azurite:
     image: mcr.microsoft.com/azure-storage/azurite:3.23.0
