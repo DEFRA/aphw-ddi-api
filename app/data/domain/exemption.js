@@ -177,9 +177,95 @@ class Exemption extends Changeable {
     this._updates.update('form2Sent', auditDate, callback)
   }
 
-  // TODO: This shouldn't verify dates if neuteringConfirmation does not exist
-  // TODO: Create a new method that takes a dog (if Dog is 2015 it can bypass)
+  /**
+   * @param {{
+   *     microchipVerification?: Date|undefined;
+   *     neuteringConfirmation?: Date|undefined;
+   *     microchipDeadline?: Date|undefined
+   * }} verifyOptions
+   * @param {Dog} dog
+   * @param callback
+   */
+  verifyDatesWithDeadline ({ microchipVerification, neuteringConfirmation, microchipDeadline }, dog, callback) {
+    const sixteenMonthsAgo = new Date()
+    sixteenMonthsAgo.setUTCHours(23, 59, 59, 999)
+    sixteenMonthsAgo.setUTCMonth(sixteenMonthsAgo.getUTCMonth() - 16)
+
+    const thisMorning = new Date()
+    thisMorning.setUTCHours(0, 0, 0, 0)
+
+    const dogIsSixteenMonthsOrOver = dog.dateOfBirth < sixteenMonthsAgo.getTime()
+
+    // New allowance only applies to 2015 Dogs
+    if (this.exemptionOrder !== '2015' || (!!microchipVerification && !!neuteringConfirmation)) {
+      return this.verifyDates(microchipVerification, neuteringConfirmation, callback)
+    }
+
+    // 6th Si Neutering Confirmation rules only apply to Dogs under 16 months
+    if (!neuteringConfirmation && dogIsSixteenMonthsOrOver) {
+      throw new Error('Neutering confirmation required')
+    }
+
+    // 6th Si To bypass microchipVerification microchip deadline must be set
+    if (!microchipVerification && !microchipDeadline) {
+      throw new Error('Microchip deadline required')
+    }
+
+    // 6th Si To bypass microchipVerification microchip deadline must be today or in future
+    if (!microchipVerification && microchipDeadline.getTime() < thisMorning.getTime()) {
+      throw new Error('Microchip deadline must be today or in the future')
+    }
+
+    if (neuteringConfirmation && neuteringConfirmation.getTime() > Date.now()) {
+      throw new InvalidDateError('Date must be today or in the past')
+    }
+
+    /**
+     * @type {{neuteringDeadline?: Date; microchipDeadline?: Date }}
+     */
+    const deadlines = {}
+
+    if (!neuteringConfirmation) {
+      const neuteringDeadline = new Date(dog.dateOfBirth)
+      neuteringDeadline.setUTCMonth(dog.dateOfBirth.getUTCMonth() + 18)
+      deadlines.neuteringDeadline = neuteringDeadline
+      this._neuteringDeadline = neuteringDeadline
+    }
+
+    if (!microchipVerification) {
+      // Adding 28 days to deadline
+      const microchipDeadlinePlus28 = new Date(microchipDeadline)
+      microchipDeadlinePlus28.setUTCDate(microchipDeadlinePlus28.getDate() + 28)
+      this._microchipDeadline = microchipDeadlinePlus28
+      deadlines.microchipDeadline = microchipDeadlinePlus28
+    } else if (microchipVerification.getTime() > Date.now()) {
+      throw new InvalidDateError('Date must be today or in the past')
+    }
+
+    const verificationDatesRecorded = new Date()
+    this._microchipVerification = microchipVerification
+    this._neuteringConfirmation = neuteringConfirmation
+    this._verificationDatesRecorded = verificationDatesRecorded
+    this._updates.update(
+      'verificationDateRecorded',
+      {
+        microchipVerification,
+        neuteringConfirmation,
+        verificationDatesRecorded,
+        ...deadlines
+      },
+      callback)
+  }
+
   verifyDates (microchipVerification, neuteringConfirmation, callback) {
+    if (!microchipVerification) {
+      throw new Error('Microchip verification required')
+    }
+
+    if (!neuteringConfirmation) {
+      throw new Error('Neutering confirmation required')
+    }
+
     if (microchipVerification.getTime() > Date.now() || neuteringConfirmation.getTime() > Date.now()) {
       throw new InvalidDateError('Date must be today or in the past')
     }

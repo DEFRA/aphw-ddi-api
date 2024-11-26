@@ -2,8 +2,9 @@ const Exemption = require('../../../../../app/data/domain/exemption')
 const { inXDays } = require('../../../../time-helper')
 const { InvalidDateError } = require('../../../../../app/errors/domain/invalidDate')
 const { IncompleteDataError } = require('../../../../../app/errors/domain/incompleteData')
-const { buildExemption, buildCdoInsurance } = require('../../../../mocks/cdo/domain')
+const { buildExemption, buildCdoInsurance, buildCdoDog } = require('../../../../mocks/cdo/domain')
 const { SequenceViolationError } = require('../../../../../app/errors/domain/sequenceViolation')
+const { Dog } = require('../../../../../app/data/domain')
 
 describe('Exemption', () => {
   const exemptionProperties = {
@@ -242,6 +243,159 @@ describe('Exemption', () => {
     test('should throw if either date is in the future', () => {
       expect(() => exemption.verifyDates(new Date('9999-01-01'), neuteringConfirmation, callback)).toThrow(new InvalidDateError('Date must be today or in the past'))
       expect(() => exemption.verifyDates(microchipVerification, new Date('9999-01-01'), callback)).toThrow(new InvalidDateError('Date must be today or in the past'))
+    })
+
+    test('should throw if either microchipVerification or neuteringConfirmation is missing', () => {
+      const exemption = new Exemption(verifyDatesProperties)
+      expect(() => exemption.verifyDates(undefined, neuteringConfirmation, callback)).toThrow(new InvalidDateError('Microchip verification required'))
+      expect(() => exemption.verifyDates(microchipVerification, undefined, callback)).toThrow(new InvalidDateError('Neutering confirmation required'))
+    })
+  })
+
+  describe('verifyDatesWithDeadline', () => {
+    const microchipVerification = new Date('2024-07-03')
+    const neuteringConfirmation = new Date('2024-07-03')
+
+    const thisMorning = new Date()
+    thisMorning.setUTCHours(0, 0, 0, 0)
+
+    const sixteenMonthsAgo = new Date(thisMorning)
+    sixteenMonthsAgo.setUTCMonth(sixteenMonthsAgo.getUTCMonth() - 16)
+
+    const underSixteenMonthsAgo = new Date(sixteenMonthsAgo)
+    underSixteenMonthsAgo.setUTCDate(underSixteenMonthsAgo.getUTCDate() + 1)
+
+    const verifyDatesProperties = {
+      ...exemptionProperties,
+      microchipVerification: null,
+      neuteringConfirmation: null
+    }
+    const dogProperties = buildCdoDog({
+      dateOfBirth: underSixteenMonthsAgo
+    })
+
+    const defaultDog = new Dog(dogProperties)
+
+    const callback = jest.fn()
+
+    test('should verifyDates if dates exist', () => {
+      const exemption = new Exemption(verifyDatesProperties)
+      const dog = new Dog(dogProperties)
+      exemption.verifyDatesWithDeadline({ microchipVerification, neuteringConfirmation }, dog, callback)
+      expect(exemption.verificationDatesRecorded).toEqual(expect.any(Date))
+      expect(exemption.getChanges()).toEqual([
+        {
+          key: 'verificationDateRecorded',
+          value: {
+            neuteringConfirmation,
+            microchipVerification,
+            verificationDatesRecorded: expect.any(Date)
+          },
+          callback
+        }
+      ])
+    })
+
+    test('should verifyDates if Dog is under 16 months and neuteringConfirmation is undefined', () => {
+      const exemption = new Exemption(verifyDatesProperties)
+      const dog = new Dog(dogProperties)
+
+      const inTwoMonths = new Date(underSixteenMonthsAgo)
+      inTwoMonths.setUTCMonth(underSixteenMonthsAgo.getUTCMonth() + 18)
+
+      exemption.verifyDatesWithDeadline({ microchipVerification }, dog, callback)
+      expect(exemption.neuteringConfirmation).toBeUndefined()
+      expect(exemption.neuteringDeadline).toEqual(inTwoMonths)
+      expect(exemption.verificationDatesRecorded).toEqual(expect.any(Date))
+      expect(exemption.getChanges()).toEqual([
+        {
+          key: 'verificationDateRecorded',
+          value: {
+            neuteringConfirmation: undefined,
+            microchipVerification,
+            neuteringDeadline: expect.any(Date),
+            verificationDatesRecorded: expect.any(Date)
+          },
+          callback
+        }
+      ])
+    })
+
+    test('should not fail if microchip deadline is 00:00:00 today', () => {
+      const exemption = new Exemption(verifyDatesProperties)
+
+      exemption.verifyDatesWithDeadline({ neuteringConfirmation, microchipDeadline: new Date(thisMorning) }, defaultDog, callback)
+    })
+
+    test('should fail if microchip deadline is 23:59:59:999 yesterday', () => {
+      const exemption = new Exemption(verifyDatesProperties)
+
+      expect(() => exemption.verifyDatesWithDeadline({ neuteringConfirmation, microchipDeadline: new Date(thisMorning.getTime() - 1) }, defaultDog, callback)).toThrow(new Error('Microchip deadline must be today or in the future'))
+    })
+
+    test('should verifyDates for a 2015 Dog if microchipConfirmation is undefined but microchip deadline is today or later', () => {
+      const exemption = new Exemption(verifyDatesProperties)
+      const microchipDeadlineSubmittedDate = new Date(`${new Date().getUTCFullYear() + 1}-11-01`)
+      const expectedMicrochipDeadlineDate = new Date(`${new Date().getUTCFullYear() + 1}-11-29`)
+
+      exemption.verifyDatesWithDeadline({ neuteringConfirmation, microchipDeadline: microchipDeadlineSubmittedDate }, defaultDog, callback)
+      expect(exemption.microchipVerification).toBeUndefined()
+      expect(exemption.microchipDeadline).toEqual(expectedMicrochipDeadlineDate)
+      expect(exemption.verificationDatesRecorded).toEqual(expect.any(Date))
+      expect(exemption.getChanges()).toEqual([
+        {
+          key: 'verificationDateRecorded',
+          value: {
+            microchipVerification: undefined,
+            neuteringConfirmation,
+            microchipDeadline: expectedMicrochipDeadlineDate,
+            verificationDatesRecorded: expect.any(Date)
+          },
+          callback
+        }
+      ])
+    })
+
+    test('should throw if neutering confirmation is missing and Dog is sixteen months old or more', () => {
+      const exemption = new Exemption(verifyDatesProperties)
+      const dog = new Dog(buildCdoDog({
+        dateOfBirth: sixteenMonthsAgo
+      }))
+      expect(() => exemption.verifyDatesWithDeadline({ microchipVerification }, dog, callback)).toThrow(new Error('Neutering confirmation required'))
+    })
+
+    test('should throw if neutering confirmation is missing and given undefined dog DOB', () => {
+      const exemption = new Exemption(verifyDatesProperties)
+      const dog = new Dog(buildCdoDog({
+        dateOfBirth: sixteenMonthsAgo
+      }))
+      expect(() => exemption.verifyDatesWithDeadline({ microchipVerification }, dog, callback)).toThrow(new Error('Neutering confirmation required'))
+    })
+
+    test('should throw if microchip verification is missing and no microchip deadline exists', () => {
+      const exemption = new Exemption(verifyDatesProperties)
+      expect(() => exemption.verifyDatesWithDeadline({ neuteringConfirmation }, defaultDog, callback)).toThrow(new Error('Microchip deadline required'))
+    })
+
+    test('should use standard verifyDates if cdo is not 2015', () => {
+      const exemption2023 = new Exemption(buildExemption({
+        ...verifyDatesProperties,
+        exemptionOrder: '2023'
+      }))
+      const exemption1991 = new Exemption(buildExemption({
+        ...verifyDatesProperties,
+        exemptionOrder: '1991'
+      }))
+      const dog = new Dog(dogProperties)
+      expect(() => exemption2023.verifyDatesWithDeadline({ microchipVerification }, dog, callback)).toThrow(new Error('Neutering confirmation required'))
+      expect(() => exemption1991.verifyDatesWithDeadline({ microchipVerification }, dog, callback)).toThrow(new Error('Neutering confirmation required'))
+    })
+
+    test('should throw if either date is in the future', () => {
+      const exemption = new Exemption(verifyDatesProperties)
+      const dog = new Dog(dogProperties)
+      expect(() => exemption.verifyDatesWithDeadline({ microchipVerification: new Date('9999-01-01'), neuteringConfirmation }, dog, callback)).toThrow(new InvalidDateError('Date must be today or in the past'))
+      expect(() => exemption.verifyDatesWithDeadline({ microchipVerification, neuteringConfirmation: new Date('9999-01-01') }, dog, callback)).toThrow(new InvalidDateError('Date must be today or in the past'))
     })
   })
 
