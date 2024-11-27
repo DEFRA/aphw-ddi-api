@@ -14,8 +14,6 @@ class CdoTaskList {
     this._cdo = cdo
   }
 
-  static endOfDay
-
   static dateStageComplete (stage) {
     return stage instanceof Date
   }
