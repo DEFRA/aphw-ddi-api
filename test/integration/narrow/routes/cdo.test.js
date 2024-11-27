@@ -336,7 +336,7 @@ describe('CDO endpoint', () => {
     test('should return an initialised manage cdo task list', async () => {
       const cdoTaskList = new CdoTaskList(buildCdo())
       cdoRepository.getCdoTaskList.mockResolvedValue(cdoTaskList)
-      const getTaskListMock = jest.fn((indexNumber) => cdoTaskList)
+      const getTaskListMock = jest.fn(_ => cdoTaskList)
       getCdoService.mockReturnValue({
         getTaskList: getTaskListMock
       })
@@ -351,6 +351,13 @@ describe('CDO endpoint', () => {
       expect(response.statusCode).toBe(200)
       expect(getTaskListMock).toHaveBeenCalledWith('ED123')
       expect(payload).toEqual({
+        verificationOptions: {
+          dogDeclaredUnfit: expect.any(Boolean),
+          neuteringBypassedUnder16: expect.any(Boolean),
+          allowDogDeclaredUnfit: expect.any(Boolean),
+          allowNeuteringBypass: expect.any(Boolean),
+          showNeuteringBypass: expect.any(Boolean)
+        },
         tasks: {
           applicationPackSent: {
             key: 'applicationPackSent',

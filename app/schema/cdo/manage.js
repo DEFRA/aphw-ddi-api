@@ -55,6 +55,13 @@ const manageCdoResponseSchema = Joi.object({
     verificationDateRecorded: taskSchemaBuilder('verificationDateRecorded'),
     certificateIssued: taskSchemaBuilder('certificateIssued')
   }).unknown(),
+  verificationOptions: Joi.object({
+    dogDeclaredUnfit: Joi.boolean(),
+    neuteringBypassedUnder16: Joi.boolean(),
+    allowDogDeclaredUnfit: Joi.boolean(),
+    allowNeuteringBypass: Joi.boolean(),
+    showNeuteringBypass: Joi.boolean()
+  }),
   applicationPackSent: Joi.date().optional(),
   insuranceCompany: Joi.string().optional(),
   insuranceRenewal: Joi.date().optional(),

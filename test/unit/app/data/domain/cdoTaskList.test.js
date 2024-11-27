@@ -1,5 +1,5 @@
 const { CdoTaskList, Cdo, CdoTask } = require('../../../../../app/data/domain')
-const { buildCdo, buildExemption, buildTask, buildCdoInsurance, buildCdoDog, buildCdoPerson } = require('../../../../mocks/cdo/domain')
+const { buildCdo, buildExemption, buildTask, buildCdoInsurance, buildCdoDog } = require('../../../../mocks/cdo/domain')
 const { ActionAlreadyPerformedError } = require('../../../../../app/errors/domain/actionAlreadyPerformed')
 const { SequenceViolationError } = require('../../../../../app/errors/domain/sequenceViolation')
 const { inXDays } = require('../../../../time-helper')
