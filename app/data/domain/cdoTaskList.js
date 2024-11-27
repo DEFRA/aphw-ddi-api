@@ -3,9 +3,6 @@ const { ActionAlreadyPerformedError } = require('../../errors/domain/actionAlrea
 const { SequenceViolationError } = require('../../errors/domain/sequenceViolation')
 const { dateTodayOrInFuture } = require('../../lib/date-helpers')
 
-const endOfDay = new Date()
-endOfDay.setHours(23, 59, 59, 999)
-
 class CdoTaskList {
   /**
    * @param {Cdo} cdo
@@ -183,6 +180,9 @@ class CdoTaskList {
     if (!this._cdo.dog.youngerThanSixteenMonths) {
       return false
     }
+
+    const endOfDay = new Date()
+    endOfDay.setHours(23, 59, 59, 999)
 
     // Neutering deadline today
     return CdoTaskList.dateStageComplete(this._cdo.exemption.neuteringDeadline) &&
