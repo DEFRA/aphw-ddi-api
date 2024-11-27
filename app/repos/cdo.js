@@ -513,9 +513,9 @@ const saveCdoTaskList = async (cdoTaskList, transaction) => {
 
           if (model) {
             if (Object.prototype.hasOwnProperty.call(update.value, key)) {
-              model[field] = update.value[key]
+              model[field] = update.value[key] ?? null
             } else {
-              model[field] = update.value
+              model[field] = update.value ?? null
             }
           }
         }

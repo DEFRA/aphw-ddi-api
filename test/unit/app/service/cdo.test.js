@@ -379,8 +379,8 @@ describe('CdoService', function () {
       expect(cdoTaskList.getUpdates().exemption).toEqual([{
         key: 'verificationDateRecorded',
         value: {
-          microchipVerification,
-          neuteringConfirmation,
+          microchipVerification: null,
+          neuteringConfirmation: null,
           verificationDatesRecorded: expect.any(Date),
           neuteringDeadline: expect.any(Date),
           microchipDeadline: expect.any(Date)

@@ -229,7 +229,10 @@ class Exemption extends Changeable {
     /**
      * @type {{neuteringDeadline?: Date; microchipDeadline?: Date }}
      */
-    const deadlines = {}
+    const deadlines = {
+      neuteringDeadline: null,
+      microchipDeadline: null
+    }
 
     if (!neuteringConfirmation) {
       const neuteringDeadline = new Date(dog.dateOfBirth)
@@ -255,8 +258,8 @@ class Exemption extends Changeable {
     this._updates.update(
       'verificationDateRecorded',
       {
-        microchipVerification,
-        neuteringConfirmation,
+        microchipVerification: microchipVerification ?? null,
+        neuteringConfirmation: neuteringConfirmation ?? null,
         verificationDatesRecorded,
         ...deadlines
       },

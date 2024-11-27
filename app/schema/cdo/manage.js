@@ -23,8 +23,18 @@ const recordApplicationFeeSchema = Joi.object({
 }).required()
 
 const verifyDatesSchema = Joi.object({
-  microchipVerification: Joi.date().required(),
-  neuteringConfirmation: Joi.date().required()
+  neuteringConfirmation: Joi.alternatives().conditional('dogNotNeutered', { is: true, then: Joi.date().optional(), otherwise: Joi.date().required() }),
+  microchipVerification: Joi.alternatives().conditional('dogNotFitForMicrochip', { is: true, then: Joi.date().optional(), otherwise: Joi.date().required() }),
+  microchipDeadline: Joi.alternatives().conditional('dogNotFitForMicrochip', { is: true, then: Joi.date().required(), otherwise: Joi.disallow() }),
+  dogNotNeutered: Joi.boolean().default(false),
+  dogNotFitForMicrochip: Joi.boolean().default(false)
+}).required()
+
+const verifyDatesSchemaResponse = Joi.object({
+  microchipVerification: Joi.alternatives().conditional('microchipDeadline', { is: Joi.date(), then: Joi.date().optional(), otherwise: Joi.date().required() }),
+  neuteringConfirmation: Joi.alternatives().conditional('neuteringDeadline', { is: Joi.date(), then: Joi.date().optional(), otherwise: Joi.date().required() }),
+  neuteringDeadline: Joi.date().optional(),
+  microchipDeadline: Joi.date().optional()
 }).required()
 
 const taskSchemaBuilder = (key) => Joi.object({
@@ -75,6 +85,7 @@ module.exports = {
   recordMicrochipNumberResponseSchema,
   recordApplicationFeeSchema,
   verifyDatesSchema,
+  verifyDatesSchemaResponse,
   manageCdoResponseSchema,
   simpleConflictSchema,
   recordMicrochipNumberConflictSchema,
