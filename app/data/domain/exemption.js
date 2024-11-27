@@ -231,14 +231,8 @@ class Exemption extends Changeable {
    * @return {void}
    */
   verifyDatesWithDeadline ({ microchipVerification, neuteringConfirmation, microchipDeadline }, dog, callbackFn) {
-    const sixteenMonthsAgo = new Date()
-    sixteenMonthsAgo.setUTCHours(23, 59, 59, 999)
-    sixteenMonthsAgo.setUTCMonth(sixteenMonthsAgo.getUTCMonth() - 16)
-
     const thisMorning = new Date()
     thisMorning.setUTCHours(0, 0, 0, 0)
-
-    const dogIsSixteenMonthsOrOver = dog.dateOfBirth < sixteenMonthsAgo.getTime()
 
     // New allowance only applies to 2015 Dogs
     if (this.exemptionOrder !== '2015' || (!!microchipVerification && !!neuteringConfirmation)) {
@@ -246,7 +240,7 @@ class Exemption extends Changeable {
     }
 
     // 6th Si Neutering Confirmation rules only apply to Dogs under 16 months
-    if (!neuteringConfirmation && dogIsSixteenMonthsOrOver) {
+    if (!neuteringConfirmation && !dog.youngerThanSixteenMonths) {
       throw new Error('Neutering confirmation required')
     }
 

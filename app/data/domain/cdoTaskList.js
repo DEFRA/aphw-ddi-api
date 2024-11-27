@@ -177,19 +177,12 @@ class CdoTaskList {
       return false
     }
 
-    const sixteenMonthsAgo = new Date()
-    sixteenMonthsAgo.setUTCMonth(sixteenMonthsAgo.getUTCMonth() - 16)
-    sixteenMonthsAgo.setUTCHours(0, 0, 0, 0)
-
-    const dogDateOfBirth = this._cdo.dog.dateOfBirth
+    if (this._cdo.dog.breed !== 'XL Bully') {
+      return false
+    }
 
     // Date of Birth must be less than 16 months ago
-    if (
-      !(
-        CdoTaskList.dateStageComplete(dogDateOfBirth) &&
-        dogDateOfBirth.getTime() > sixteenMonthsAgo.getTime()
-      )
-    ) {
+    if (!this._cdo.dog.youngerThanSixteenMonths) {
       return false
     }
 
@@ -243,6 +236,50 @@ class CdoTaskList {
       },
       timestamp
     )
+  }
+
+  get verificationOptions () {
+    if (this._cdo.exemption.exemptionOrder !== '2015') {
+      return {
+        dogDeclaredUnfit: false,
+        neuteringBypassedUnder16: false,
+        allowDogDeclaredUnfit: false,
+        allowNeuteringBypass: false,
+        showNeuteringBypass: false
+      }
+    }
+
+    let dogDeclaredUnfit = this.verificationDateRecorded.completed
+    let neuteringBypassedUnder16 = this.verificationDateRecorded.completed
+    let showNeuteringBypass = this._cdo.dog.youngerThanSixteenMonths !== false
+
+    if (this._cdo.exemption.microchipVerification instanceof Date) {
+      dogDeclaredUnfit = false
+    }
+
+    if (this._cdo.exemption.neuteringConfirmation instanceof Date) {
+      neuteringBypassedUnder16 = false
+    }
+
+    if (!this.microchipRulesPassed) {
+      dogDeclaredUnfit = false
+    }
+
+    if (!this.neuteringRulesPassed) {
+      neuteringBypassedUnder16 = false
+    }
+
+    if (this._cdo.dog.breed !== 'XL Bully') {
+      showNeuteringBypass = false
+    }
+
+    return {
+      dogDeclaredUnfit,
+      neuteringBypassedUnder16,
+      allowDogDeclaredUnfit: true,
+      allowNeuteringBypass: showNeuteringBypass && this._cdo.dog.youngerThanSixteenMonths === true,
+      showNeuteringBypass
+    }
   }
 
   get certificateIssued () {
