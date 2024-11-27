@@ -137,11 +137,7 @@ class Exemption extends Changeable {
       return false
     }
 
-    if (this.microchipDeadline.getTime() < Date.now()) {
-      return false
-    }
-
-    return true
+    return this.microchipDeadline.getTime() < Date.now()
   }
 
   get _neuteringConfirmationComplete () {
@@ -153,11 +149,7 @@ class Exemption extends Changeable {
       return false
     }
 
-    if (this.neuteringDeadline.getTime() < Date.now()) {
-      return false
-    }
-
-    return true
+    return this.neuteringDeadline.getTime() < Date.now()
   }
 
   get verificationComplete () {
