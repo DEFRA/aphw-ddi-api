@@ -1,4 +1,4 @@
-const { uniqueResults: mockUniqueResults, resultsForGrouping: mockResultsForGrouping, resultsForSorting: mockResultsForSorting, moreThanTenResults, moreThanTwentyFiveResults } = require('../../../mocks/search-results')
+const { uniqueResults: mockUniqueResults, resultsForGrouping: mockResultsForGrouping, resultsForSorting: mockResultsForSorting, moreThanTenResults } = require('../../../mocks/search-results')
 
 describe('Search repo', () => {
   jest.mock('../../../../app/config/db', () => ({
@@ -86,8 +86,8 @@ describe('Search repo', () => {
     sequelize.models.search_tgram.findAll.mockResolvedValue([])
 
     const results = await search('owner', 'smith')
-    expect(results.results.length).toBe(9)
-    expect(results.totalFound).toBe(9)
+    expect(results.results.length).toBe(11)
+    expect(results.totalFound).toBe(11)
   })
 
   test('search for microchip only should adjust threshold when fuzzy', async () => {
@@ -106,8 +106,8 @@ describe('Search repo', () => {
     sequelize.models.search_tgram.findAll.mockResolvedValue([])
 
     const results = await search('dog', '123451234512345 smith', true)
-    expect(results.results.length).toBe(11)
-    expect(results.totalFound).toBe(11)
+    expect(results.results.length).toBe(13)
+    expect(results.totalFound).toBe(13)
   })
 
   test('search for microchip and other terms should not adjust threshold when fuzzy - test 2', async () => {
@@ -116,8 +116,8 @@ describe('Search repo', () => {
     sequelize.models.search_tgram.findAll.mockResolvedValue([])
 
     const results = await search('dog', '123451 smith', true)
-    expect(results.results.length).toBe(11)
-    expect(results.totalFound).toBe(11)
+    expect(results.results.length).toBe(13)
+    expect(results.totalFound).toBe(13)
   })
 
   test('sorting should handle', async () => {
@@ -130,16 +130,5 @@ describe('Search repo', () => {
     expect(testList[1].lastName).toBe('Smith')
     expect(testList[2].firstName).toBe('John')
     expect(testList[2].lastName).toBe('Smith')
-  })
-
-  test('search limits results to max records', async () => {
-    const manyResults = moreThanTwentyFiveResults()
-    sequelize.models.search_index.findAll.mockResolvedValue(manyResults)
-    sequelize.models.search_match_code.findAll.mockResolvedValue([])
-    sequelize.models.search_tgram.findAll.mockResolvedValue([])
-
-    const results = await search('owner', 'smith')
-    expect(results.results.length).toBe(25)
-    expect(results.totalFound).toBe(27)
   })
 })

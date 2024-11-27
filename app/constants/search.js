@@ -36,10 +36,8 @@ const thresholds = {
   trigramQueryMicrochipThreshold: 0.55,
   trigramRankThreshold: 1.001,
   fuzzyRankThreshold: 1.001,
-  fullTextRankThreshold: 1.01
+  fullTextRankThreshold: 1
 }
-
-const maxResults = 25
 
 module.exports = {
   matchCodeSearchFields,
@@ -48,6 +46,5 @@ module.exports = {
   importantDogFields,
   importantOwnerFields,
   dogFieldsRequiringCloseMatch,
-  thresholds,
-  maxResults
+  thresholds
 }

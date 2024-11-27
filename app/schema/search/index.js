@@ -37,7 +37,8 @@ const searchResponseSchema = Joi.object({
         dogSubStatus: Joi.string().optional().allow('').allow(null)
       })
     }),
-    totalFound: Joi.number().optional()
+    totalFound: Joi.number().optional(),
+    page: Joi.number().optional()
   }
 })
 
