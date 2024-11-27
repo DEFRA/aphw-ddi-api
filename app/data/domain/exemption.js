@@ -120,9 +120,52 @@ class Exemption extends Changeable {
     return this.form2Sent instanceof Date &&
       this.applicationPackSent instanceof Date &&
       this.applicationFeePaid instanceof Date &&
-      this.microchipVerification instanceof Date &&
-      this.neuteringConfirmation instanceof Date &&
+      this.verificationComplete &&
       this._checkIfInsuranceIsValid()
+  }
+
+  get _microchipVerificationComplete () {
+    if (this.microchipVerification instanceof Date) {
+      return true
+    }
+
+    if (this.exemptionOrder !== '2015') {
+      return false
+    }
+
+    if (!(this.microchipDeadline instanceof Date)) {
+      return false
+    }
+
+    if (this.microchipDeadline.getTime() < Date.now()) {
+      return false
+    }
+
+    return true
+  }
+
+  get _neuteringConfirmationComplete () {
+    if (this.neuteringConfirmation instanceof Date) {
+      return true
+    }
+
+    if (!(this.neuteringDeadline instanceof Date)) {
+      return false
+    }
+
+    if (this.neuteringDeadline.getTime() < Date.now()) {
+      return false
+    }
+
+    return true
+  }
+
+  get verificationComplete () {
+    if (!(this.verificationDatesRecorded instanceof Date)) {
+      return false
+    }
+
+    return this._microchipVerificationComplete && this._neuteringConfirmationComplete
   }
 
   /**

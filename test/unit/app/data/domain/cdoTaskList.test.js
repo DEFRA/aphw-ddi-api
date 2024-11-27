@@ -1031,7 +1031,7 @@ describe('CdoTaskList', () => {
     describe('verify Dates', () => {
       const microchipVerification = new Date('2024-11-26')
       const neuteringConfirmation = new Date('2024-11-26')
-      const microchipDeadline = new Date(`${today.getUTCFullYear()}-11-26`)
+      const microchipDeadline = new Date(`${today.getUTCFullYear() + 1}-11-26`)
       const callback = jest.fn()
 
       test('should handle neutering confirmation dogNotNeutered', () => {
