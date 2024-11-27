@@ -127,8 +127,35 @@ const getUsersForceList = async (user) => {
   return usersMainPoliceForceId ? [usersMainPoliceForceId] : undefined
 }
 
+const getUsersForceGroupName = async (username) => {
+  const account = await getAccount(username?.toLowerCase())
+  const usersMainPoliceForceId = account?.police_force_id
+
+  if (usersMainPoliceForceId) {
+    const forceGroup = await sequelize.models.police_force_group_item.findOne({
+      where: { police_force_id: usersMainPoliceForceId }
+    })
+
+    if (forceGroup?.police_force_group_id) {
+      const group = await sequelize.models.police_force_group.findOne({
+        where: { id: forceGroup.police_force_group_id }
+      })
+      return group.display_text
+    }
+
+    const forceName = await sequelize.models.police_force.findOne({
+      where: { id: usersMainPoliceForceId }
+    })
+
+    return forceName?.name ?? undefined
+  }
+
+  return undefined
+}
+
 module.exports = {
   hasForceChanged,
   setPoliceForceOnCdos,
-  getUsersForceList
+  getUsersForceList,
+  getUsersForceGroupName
 }

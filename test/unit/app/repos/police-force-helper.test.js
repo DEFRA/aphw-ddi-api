@@ -14,6 +14,12 @@ describe('Police force helper', () => {
       search_index: {
         update: jest.fn()
       },
+      police_force: {
+        findOne: jest.fn()
+      },
+      police_force_group: {
+        findOne: jest.fn()
+      },
       police_force_group_item: {
         findOne: jest.fn(),
         findAll: jest.fn()
@@ -32,7 +38,7 @@ describe('Police force helper', () => {
   jest.mock('../../../../app/repos/user-accounts')
   const { getAccount } = require('../../../../app/repos/user-accounts')
 
-  const { setPoliceForceOnCdos, hasForceChanged, getUsersForceList } = require('../../../../app/repos/police-force-helper')
+  const { setPoliceForceOnCdos, hasForceChanged, getUsersForceList, getUsersForceGroupName } = require('../../../../app/repos/police-force-helper')
 
   beforeEach(async () => {
     jest.clearAllMocks()
@@ -241,6 +247,35 @@ describe('Police force helper', () => {
       ])
       const res = await getUsersForceList(devUser)
       expect(res).toEqual([1, 22, 3])
+    })
+  })
+
+  describe('getUsersForceGroupName', () => {
+    test('returns undefined if no police force set', async () => {
+      getAccount.mockResolvedValue({ police_force_id: null })
+      const res = await getUsersForceGroupName(devUser.username)
+      expect(res).toBe(undefined)
+    })
+
+    test('returns single force if force is not joined with others', async () => {
+      getAccount.mockResolvedValue({ police_force_id: 123 })
+      sequelize.models.police_force.findOne.mockResolvedValue({ police_force_id: 123, name: 'Test Force 1' })
+      sequelize.models.police_force_group_item.findOne.mockResolvedValue()
+      const res = await getUsersForceGroupName(devUser.username)
+      expect(res).toEqual('Test Force 1')
+    })
+
+    test('returns group force name if force is joined with others', async () => {
+      getAccount.mockResolvedValue({ police_force_id: 22 })
+      sequelize.models.police_force_group_item.findOne.mockResolvedValue({ police_force_group_id: 12 })
+      sequelize.models.police_force_group_item.findAll.mockResolvedValue([
+        { police_force_group_id: 12, police_force_id: 1 },
+        { police_force_group_id: 12, police_force_id: 22 },
+        { police_force_group_id: 12, police_force_id: 3 }
+      ])
+      sequelize.models.police_force_group.findOne.mockResolvedValue({ display_text: 'Force 1 and Force 2 grouped' })
+      const res = await getUsersForceGroupName(devUser.username)
+      expect(res).toEqual('Force 1 and Force 2 grouped')
     })
   })
 })

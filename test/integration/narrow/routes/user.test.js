@@ -22,6 +22,9 @@ describe('User endpoint', () => {
   jest.mock('../../../../app/cache')
   const { drop } = require('../../../../app/cache')
 
+  jest.mock('../../../../app/repos/police-force-helper')
+  const { getUsersForceGroupName } = require('../../../../app/repos/police-force-helper')
+
   beforeEach(async () => {
     jest.clearAllMocks()
     validate.mockResolvedValue(mockValidate)
@@ -957,6 +960,20 @@ describe('User endpoint', () => {
       const response = await server.inject(options)
       expect(response.statusCode).toBe(200)
       expect(JSON.parse(response.payload)).toEqual({ result: 'Ok' })
+    })
+  })
+
+  describe('GET /user/me/police-force', () => {
+    test('should validate and return 200', async () => {
+      getUsersForceGroupName.mockResolvedValue('Test Force')
+      const options = {
+        method: 'GET',
+        url: '/user/me/police-force',
+        ...portalHeader
+      }
+      const response = await server.inject(options)
+      expect(response.statusCode).toBe(200)
+      expect(JSON.parse(response.payload)).toEqual({ result: 'Test Force' })
     })
   })
 
