@@ -257,6 +257,14 @@ describe('Police force helper', () => {
       expect(res).toBe(undefined)
     })
 
+    test('returns undefined if force set but invalid', async () => {
+      getAccount.mockResolvedValue({ police_force_id: 999 })
+      sequelize.models.police_force.findOne.mockResolvedValue()
+      sequelize.models.police_force_group_item.findOne.mockResolvedValue()
+      const res = await getUsersForceGroupName(devUser.username)
+      expect(res).toBe(undefined)
+    })
+
     test('returns single force if force is not joined with others', async () => {
       getAccount.mockResolvedValue({ police_force_id: 123 })
       sequelize.models.police_force.findOne.mockResolvedValue({ police_force_id: 123, name: 'Test Force 1' })
