@@ -100,14 +100,14 @@ class Dog extends Changeable {
 
   get youngerThanSixteenMonths () {
     const sixteenMonths = new Date()
-    sixteenMonths.setUTCHours(0, 0, 0, 0)
+    sixteenMonths.setUTCHours(23, 59, 59, 999)
     sixteenMonths.setUTCMonth(sixteenMonths.getUTCMonth() - 16)
 
     if (!this.dateOfBirth) {
       return undefined
     }
 
-    return this.dateOfBirth.getTime() < sixteenMonths.getTime()
+    return this.dateOfBirth.getTime() > sixteenMonths.getTime()
   }
 }
 

@@ -163,10 +163,11 @@ describe('Dog', () => {
     const thisMorning = new Date()
     thisMorning.setUTCHours(0, 0, 0, 0)
 
-    const sixteenMonths = new Date(thisMorning)
+    const sixteenMonths = new Date()
     sixteenMonths.setUTCMonth(sixteenMonths.getUTCMonth() - 16)
 
     const youngerThanSixteenMonths = new Date(sixteenMonths)
+    youngerThanSixteenMonths.setUTCDate(youngerThanSixteenMonths.getUTCDate() + 1)
     youngerThanSixteenMonths.setUTCMilliseconds(youngerThanSixteenMonths.getUTCMilliseconds() - 1)
 
     test('should show if Dog is under 16 months', () => {
