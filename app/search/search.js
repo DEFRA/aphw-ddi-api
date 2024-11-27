@@ -8,6 +8,7 @@ const { fuzzySearch } = require('../repos/search-match-codes')
 const { trigramSearch } = require('../repos/search-tgrams')
 const { rankResult } = require('../repos/search-rank')
 const { buildTsVectorQuery } = require('./search-processors/search-builder')
+const { getUsersForceList } = require('../repos/police-force-helper')
 
 const rankAndKeep = (results, terms, threshold, type) => {
   const numRecords = results.length
@@ -21,28 +22,34 @@ const rankAndKeep = (results, terms, threshold, type) => {
   return mappedResults
 }
 
-const doFullTextSearch = async (terms, type, fuzzy) => {
+const doFullTextSearch = async (terms, type, fuzzy, policeForceIds) => {
   const termsQuery = buildTsVectorQuery(terms, fuzzy)
 
+  let whereClause = { search: { [Op.match]: sequelize.fn('to_tsquery', termsQuery) } }
+
+  if (policeForceIds) {
+    whereClause = { ...whereClause, police_force_id: policeForceIds }
+  }
+
   const results = await sequelize.models.search_index.findAll({
-    where: {
-      search: {
-        [Op.match]: sequelize.fn('to_tsquery', termsQuery)
-      }
-    },
+    where: whereClause,
     raw: true
   })
 
   return rankAndKeep(results, terms, thresholds.fullTextRankThreshold, type)
 }
 
-const doFuzzySearch = async (terms, type) => {
+const doFuzzySearch = async (terms, type, policeForceIds) => {
   const fuzzyPersonIds = await fuzzySearch(terms)
 
+  let whereClause = { person_id: fuzzyPersonIds }
+
+  if (policeForceIds) {
+    whereClause = { ...whereClause, police_force_id: policeForceIds }
+  }
+
   const results = await sequelize.models.search_index.findAll({
-    where: {
-      person_id: fuzzyPersonIds
-    },
+    where: whereClause,
     raw: true
   })
 
@@ -51,18 +58,24 @@ const doFuzzySearch = async (terms, type) => {
 
 const microchipRegex = /\d{14,15}/
 
-const doTrigramSearch = async (terms, type) => {
+const doTrigramSearch = async (terms, type, policeForceIds) => {
   const adjustedThreshold = terms.length === 1 && microchipRegex.test(terms[0]) ? thresholds.trigramQueryMicrochipThreshold : thresholds.trigramQueryThreshold
 
   const { uniquePersons, uniqueDogs } = await trigramSearch(terms, adjustedThreshold)
 
+  let whereClause = {
+    [Op.or]: [
+      { person_id: uniquePersons },
+      { dog_id: uniqueDogs }
+    ]
+  }
+
+  if (policeForceIds) {
+    whereClause = { ...whereClause, police_force_id: policeForceIds }
+  }
+
   const results = await sequelize.models.search_index.findAll({
-    where: {
-      [Op.or]: [
-        { person_id: uniquePersons },
-        { dog_id: uniqueDogs }
-      ]
-    },
+    where: whereClause,
     raw: true
   })
 
@@ -92,20 +105,20 @@ const resultsModel = (results, totalFound) => {
   }
 }
 
-const search = async (type, terms, fuzzy = false, national = false) => {
+const search = async (user, type, terms, fuzzy = false, national = false) => {
   if (terms === null || terms === undefined) {
     return resultsModel([], 0)
   }
 
   const termsArray = cleanupSearchTerms(terms)
 
-  const policeForceIds = national ? undefined : await getUsersForceList()
+  const policeForceIds = national ? undefined : await getUsersForceList(user)
 
   const fullTextToKeep = await doFullTextSearch(termsArray, type, fuzzy, policeForceIds)
 
-  const fuzzyToKeep = fuzzy ? await doFuzzySearch(termsArray, type) : []
+  const fuzzyToKeep = fuzzy ? await doFuzzySearch(termsArray, type, policeForceIds) : []
 
-  const trigramToKeep = fuzzy ? await doTrigramSearch(termsArray, type) : []
+  const trigramToKeep = fuzzy ? await doTrigramSearch(termsArray, type, policeForceIds) : []
 
   const results = combineQueryResults(fullTextToKeep, fuzzyToKeep, trigramToKeep)
   const mappedResults = mapResults(results, type)

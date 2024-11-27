@@ -41,7 +41,26 @@ describe('SearchBasic endpoint', () => {
 
     const response = await server.inject(options)
     expect(response.statusCode).toBe(200)
-    expect(auditSearch).toHaveBeenCalledWith('term', {
+    expect(auditSearch).toHaveBeenCalledWith('term', {}, {
+      username: 'dev-user@test.com',
+      displayname: 'Dev User'
+    })
+  })
+
+  test('GET /search route returns 200 with national search', async () => {
+    getPageFromCache.mockResolvedValue({ results: [], totalFound: 0 })
+    search.mockResolvedValue({ results: [], totalFound: 0 })
+    getCallingUser.mockReturnValue(devUser)
+
+    const options = {
+      method: 'GET',
+      url: '/search/dog/term?national=true',
+      ...portalHeader
+    }
+
+    const response = await server.inject(options)
+    expect(response.statusCode).toBe(200)
+    expect(auditSearch).toHaveBeenCalledWith('term', { national: 'true' }, {
       username: 'dev-user@test.com',
       displayname: 'Dev User'
     })
@@ -69,7 +88,7 @@ describe('SearchBasic endpoint', () => {
 
     const options = {
       method: 'GET',
-      url: '/search/dog/term',
+      url: '/search/dog/term?page=2',
       ...portalHeader
     }
 
@@ -85,7 +104,7 @@ describe('SearchBasic endpoint', () => {
     getCallingUser.mockReturnValue(devUser)
     const options = {
       method: 'GET',
-      url: '/search/dog/term',
+      url: '/search/dog/term?page=2',
       ...portalHeader
     }
 
@@ -100,7 +119,7 @@ describe('SearchBasic endpoint', () => {
     getCallingUser.mockReturnValue(devUser)
     const options = {
       method: 'GET',
-      url: '/search/dog/term',
+      url: '/search/dog/term?page=2',
       ...portalHeader
     }
 
@@ -115,7 +134,7 @@ describe('SearchBasic endpoint', () => {
     getCallingUser.mockReturnValue(devUser)
     const options = {
       method: 'GET',
-      url: '/search/dog/term',
+      url: '/search/dog/term?page=2',
       ...portalHeader
     }
 
