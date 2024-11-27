@@ -1132,6 +1132,22 @@ describe('CdoTaskList', () => {
         })
       })
 
+      test('should not pre-select Dog declared unfit for microchip and neutering bypassed given date set', () => {
+        const cdoTaskList = buildCdoWithBase({
+          exemptionPartial: {
+            microchipVerification: new Date(),
+            neuteringConfirmation: new Date()
+          }
+        })
+        expect(cdoTaskList.verificationOptions).toEqual({
+          dogDeclaredUnfit: false,
+          neuteringBypassedUnder16: false,
+          allowDogDeclaredUnfit: true,
+          allowNeuteringBypass: true,
+          showNeuteringBypass: true
+        })
+      })
+
       test('should not allow dog not neutered if Dog over 16 yrs', () => {
         const cdoTaskList = buildCdoWithBase({
           exemptionPartial: {
