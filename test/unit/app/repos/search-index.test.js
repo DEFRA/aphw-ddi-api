@@ -353,6 +353,25 @@ describe('Search repo', () => {
 
       expect(mockSave).toHaveBeenCalledTimes(2)
     })
+
+    test('should handle orig police force being null', async () => {
+      const mockSave = jest.fn()
+      sequelize.models.search_index.findAll.mockResolvedValue([
+        { dog_id: 1, person_id: 1, search: '12345', json: '{ dogName: \'Bruno\' }', save: mockSave },
+        { dog_id: 2, person_id: 2, search: '34567', json: '{ dogName: \'Fido\' }', save: mockSave }
+      ])
+
+      const dog = {
+        id: 123,
+        index_number: 123,
+        name: 'Bruno2',
+        status: { status: 'Exempt' }
+      }
+
+      await updateSearchIndexPolice(dog.id, null, 46, {})
+
+      expect(mockSave).toHaveBeenCalledTimes(2)
+    })
   })
 
   describe('applyMicrochips', () => {
