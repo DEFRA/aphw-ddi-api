@@ -244,6 +244,8 @@ describe('Exemption', () => {
           value: {
             neuteringConfirmation,
             microchipVerification,
+            microchipDeadline: null,
+            neuteringDeadline: null,
             verificationDatesRecorded: expect.any(Date)
           },
           callback: callbackInside
@@ -298,6 +300,8 @@ describe('Exemption', () => {
           value: {
             neuteringConfirmation,
             microchipVerification,
+            microchipDeadline: null,
+            neuteringDeadline: null,
             verificationDatesRecorded: expect.any(Date)
           },
           callback

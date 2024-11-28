@@ -321,7 +321,9 @@ class Exemption extends Changeable {
       {
         microchipVerification,
         neuteringConfirmation,
-        verificationDatesRecorded
+        verificationDatesRecorded,
+        neuteringDeadline: null,
+        microchipDeadline: null
       },
       callback
     )
