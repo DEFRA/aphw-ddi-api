@@ -31,7 +31,9 @@ const constructViewDetails = (type, entity) => {
   }
 
   if (type === SEARCH) {
-    details.searchTerms = entity
+    details.searchTerms = entity.searchTerms
+    details.fuzzy = `${entity.fuzzy}` === 'true'
+    details.national = `${entity.national}` === 'true'
   } else if (type === VIEW_OWNER && Array.isArray(entity)) {
     details.dogIndexNumbers = entity.map(registeredPerson => registeredPerson.dog?.index_number)
   }
@@ -67,9 +69,14 @@ const auditDogActivityView = async (dogEntity, user) => {
   await auditDogView(dogEntity, user, VIEW_DOG_ACTIVITY, 'enforcement user viewed dog activity')
 }
 
-const auditSearch = async (searchTerm, user) => {
+const auditSearch = async (searchTerms, extraParams, user) => {
   if (user.origin !== 'aphw-ddi-portal') {
-    const searchDetails = constructViewDetails(SEARCH, searchTerm)
+    const details = {
+      searchTerms,
+      fuzzy: extraParams?.fuzzy,
+      national: extraParams?.national
+    }
+    const searchDetails = constructViewDetails(SEARCH, details)
     await sendViewToAudit(searchDetails.pk, SEARCH, 'enforcement user performed search', searchDetails, user)
   }
 }

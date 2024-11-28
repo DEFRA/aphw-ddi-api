@@ -85,10 +85,12 @@ describe('view audit', () => {
 
     test('should construct SEARCH details', () => {
       const searchTerms = '12 Anywhere Str'
-      const searchDetails = constructViewDetails(SEARCH, searchTerms)
+      const searchDetails = constructViewDetails(SEARCH, { searchTerms, fuzzy: true, national: true })
       expect(searchDetails).toEqual({
         pk: '816bbb6e-5df5-434b-8ec3-b6705ff7a2a7',
-        searchTerms: '12 Anywhere Str'
+        searchTerms: '12 Anywhere Str',
+        fuzzy: true,
+        national: true
       })
     })
 
@@ -248,20 +250,22 @@ describe('view audit', () => {
     const searchTerms = '12 Badbury Drive'
 
     test('should record a SEARCH audit event', async () => {
-      await auditSearch(searchTerms, roboCop)
+      await auditSearch(searchTerms, { fuzzy: false, national: true }, roboCop)
       expect(sendViewToAudit).toHaveBeenCalledWith(
         '816bbb6e-5df5-434b-8ec3-b6705ff7a2a7',
         SEARCH,
         'enforcement user performed search',
         {
           pk: '816bbb6e-5df5-434b-8ec3-b6705ff7a2a7',
-          searchTerms
+          searchTerms,
+          fuzzy: false,
+          national: true
         },
         roboCop)
     })
 
     test('should not audit a request from portal', async () => {
-      await auditSearch(searchTerms, {
+      await auditSearch(searchTerms, undefined, {
         username: 'dev-user@example.com',
         displayname: 'Dev User',
         origin: 'aphw-ddi-portal'

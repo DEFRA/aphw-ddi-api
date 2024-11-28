@@ -1,5 +1,5 @@
 module.exports = (sequelize, DataTypes) => {
-  const searchIndex = sequelize.define('search_index', {
+  const policeForceGroup = sequelize.define('police_force_group', {
     id: {
       autoIncrement: true,
       autoIncrementIdentity: true,
@@ -7,38 +7,29 @@ module.exports = (sequelize, DataTypes) => {
       allowNull: false,
       primaryKey: true
     },
-    search: {
-      type: DataTypes.TSVECTOR,
+    display_text: {
+      type: DataTypes.STRING(200),
       allowNull: false
-    },
-    person_id: {
-      type: DataTypes.INTEGER,
-      allowNull: true
-    },
-    dog_id: {
-      type: DataTypes.INTEGER,
-      allowNull: true
-    },
-    police_force_id: {
-      type: DataTypes.INTEGER,
-      allowNull: true
-    },
-    json: {
-      type: DataTypes.JSONB
     },
     created_at: {
       type: DataTypes.DATE,
       allowNull: false,
       defaultValue: sequelize.fn('now')
+    },
+    deleted_at: {
+      type: DataTypes.DATE,
+      allowNull: true
     }
   }, {
     sequelize,
-    tableName: 'search_index',
+    tableName: 'police_force_group',
+    paranoid: true,
     createdAt: 'created_at',
+    deletedAt: 'deleted_at',
     updatedAt: 'updated_at',
     indexes: [
       {
-        name: 'search_index_pkey',
+        name: 'police_force_group_pkey',
         unique: true,
         fields: [
           { name: 'id' }
@@ -47,5 +38,5 @@ module.exports = (sequelize, DataTypes) => {
     ]
   })
 
-  return searchIndex
+  return policeForceGroup
 }

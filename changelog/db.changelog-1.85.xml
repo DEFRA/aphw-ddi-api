@@ -1,0 +1,124 @@
+<?xml version="1.1" encoding="utf-8" standalone="no"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog" xmlns:ext="http://www.liquibase.org/xml/ns/dbchangelog-ext" xmlns:pro="http://www.liquibase.org/xml/ns/pro" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog-ext http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-ext.xsd http://www.liquibase.org/xml/ns/pro http://www.liquibase.org/xml/ns/pro/liquibase-pro-3.9.xsd http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.9.xsd">
+  <changeSet author="J Barnsley" id="1">
+    <tagDatabase tag="v1.85.0" />
+  </changeSet>
+  <changeSet author="J Barnsley" id="2">
+    <createTable tableName="police_force_group">
+      <column autoIncrement="true" name="id" type="INTEGER">
+        <constraints nullable="false" primaryKey="true" primaryKeyName="police_force_group_pkey" />
+      </column>
+      <column name="display_text" type="VARCHAR(100)">
+        <constraints nullable="false" unique="true" uniqueConstraintName="police_force_group_display_text_ukey" />
+      </column>
+      <column name="deleted_at" type="TIMESTAMP WITH TIME ZONE" />
+      <column name="created_at" type="TIMESTAMP WITH TIME ZONE" />
+      <column name="updated_at" type="TIMESTAMP WITH TIME ZONE" />
+    </createTable>
+  </changeSet>
+  <changeSet author="J Barnsley" id="3">
+    <createTable tableName="police_force_group_item">
+      <column autoIncrement="true" name="id" type="INTEGER">
+        <constraints nullable="false" primaryKey="true" primaryKeyName="police_force_group_item_pkey" />
+      </column>
+      <column name="police_force_group_id" type="INTEGER">
+        <constraints nullable="false" />
+      </column>
+      <column name="police_force_id" type="INTEGER">
+        <constraints nullable="false" />
+      </column>
+      <column name="deleted_at" type="TIMESTAMP WITH TIME ZONE" />
+      <column name="created_at" type="TIMESTAMP WITH TIME ZONE" />
+      <column name="updated_at" type="TIMESTAMP WITH TIME ZONE" />
+    </createTable>
+  </changeSet>
+  <changeSet author="J Barnsley" id="4">
+    <addForeignKeyConstraint baseColumnNames="police_force_group_id" baseTableName="police_force_group_item" constraintName="fk_police_force_group_item_group_id" referencedColumnNames="id" referencedTableName="police_force_group" />
+    <addForeignKeyConstraint baseColumnNames="police_force_id" baseTableName="police_force_group_item" constraintName="fk_police_force_group_item_force_id" referencedColumnNames="id" referencedTableName="police_force" />
+  </changeSet>
+  <changeSet author="J Barnsley" id="5">
+    <insert tableName="police_force_group">
+      <column name="display_text" value="Bedfordshire, Cambridgeshire and Hertfordshire police forces" />
+    </insert>
+    <insert tableName="police_force_group">
+      <column name="display_text" value="Devon &amp; Cornwall and Dorset police forces" />
+    </insert>
+    <insert tableName="police_force_group">
+      <column name="display_text" value="Norfolk and Suffolk constabularies" />
+    </insert>
+    <insert tableName="police_force_group">
+      <column name="display_text" value="Cheshire Constabulary and North Wales Police" />
+    </insert>
+    <insert tableName="police_force_group">
+      <column name="display_text" value="Surrey and Sussex police forces" />
+    </insert>
+  </changeSet>
+  <changeSet author="J Barnsley" id="6">
+    <insert tableName="police_force_group_item">
+      <column name="police_force_group_id" value="1" />
+      <column name="police_force_id" value="2" />
+    </insert>
+    <insert tableName="police_force_group_item">
+      <column name="police_force_group_id" value="1" />
+      <column name="police_force_id" value="3" />
+    </insert>
+    <insert tableName="police_force_group_item">
+      <column name="police_force_group_id" value="1" />
+      <column name="police_force_id" value="22" />
+    </insert>
+    <insert tableName="police_force_group_item">
+      <column name="police_force_group_id" value="2" />
+      <column name="police_force_id" value="11" />
+    </insert>
+    <insert tableName="police_force_group_item">
+      <column name="police_force_group_id" value="2" />
+      <column name="police_force_id" value="10" />
+    </insert>
+    <insert tableName="police_force_group_item">
+      <column name="police_force_group_id" value="3" />
+      <column name="police_force_id" value="31" />
+    </insert>
+    <insert tableName="police_force_group_item">
+      <column name="police_force_group_id" value="3" />
+      <column name="police_force_id" value="42" />
+    </insert>
+    <insert tableName="police_force_group_item">
+      <column name="police_force_group_id" value="4" />
+      <column name="police_force_id" value="5" />
+    </insert>
+    <insert tableName="police_force_group_item">
+      <column name="police_force_group_id" value="4" />
+      <column name="police_force_id" value="32" />
+    </insert>
+    <insert tableName="police_force_group_item">
+      <column name="police_force_group_id" value="5" />
+      <column name="police_force_id" value="43" />
+    </insert>
+    <insert tableName="police_force_group_item">
+      <column name="police_force_group_id" value="5" />
+      <column name="police_force_id" value="44" />
+    </insert>
+  </changeSet>
+  <changeSet author="J Barnsley" id="7">
+    <addColumn tableName="search_index">
+      <column name="police_force_id" type="INTEGER">
+        <constraints nullable="true" />
+      </column>
+    </addColumn>
+  </changeSet>
+  <changeSet author="J Barnsley" id="8">
+    <sql splitStatements="false">
+      UPDATE search_index si
+      SET police_force_id = 
+      (SELECT r.police_force_id
+      FROM registration r
+      WHERE r.dog_id = si.dog_id
+      AND r.deleted_at IS NULL);
+    </sql>
+  </changeSet>
+  <changeSet author="J Barnsley" id="9">
+    <createIndex indexName="search_index_police_idx" tableName="search_index">
+    <column name="police_force_id" />
+    </createIndex>
+  </changeSet>
+</databaseChangeLog>

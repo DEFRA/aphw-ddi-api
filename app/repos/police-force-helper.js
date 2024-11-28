@@ -2,6 +2,7 @@ const sequelize = require('../config/db')
 const { lookupPoliceForceByPostcode, matchPoliceForceByName } = require('../import/robot/police')
 const { EXEMPTION } = require('../constants/event/audit-event-object-types')
 const { sendUpdateToAudit } = require('../messaging/send-audit')
+const { getAccount } = require('../repos/user-accounts')
 
 const returnResult = (changed, reason, numOfDogs, policeForceName) => {
   return {
@@ -96,12 +97,65 @@ const setPoliceForceOnCdos = async (policeForce, dogIds, user, transaction) => {
 
       await sendUpdateToAudit(EXEMPTION, preChanged, postChanged, user)
       madeChanges = true
+
+      await sequelize.models.search_index.update({
+        police_force_id: policeForce.id
+      },
+      {
+        where: { dog_id: dogId },
+        transaction
+      })
     }
   }
   return madeChanges
 }
 
+const getUsersForceList = async (user) => {
+  const account = await getAccount(user?.username?.toLowerCase())
+  const usersMainPoliceForceId = account?.police_force_id
+  if (usersMainPoliceForceId) {
+    const forceGroup = await sequelize.models.police_force_group_item.findOne({
+      where: { police_force_id: usersMainPoliceForceId }
+    })
+    if (forceGroup?.police_force_group_id) {
+      const policeForces = await sequelize.models.police_force_group_item.findAll({
+        where: { police_force_group_id: forceGroup.police_force_group_id }
+      })
+      return policeForces.map(force => force.police_force_id)
+    }
+  }
+  return usersMainPoliceForceId ? [usersMainPoliceForceId] : undefined
+}
+
+const getUsersForceGroupName = async (username) => {
+  const account = await getAccount(username?.toLowerCase())
+  const usersMainPoliceForceId = account?.police_force_id
+
+  if (usersMainPoliceForceId) {
+    const forceGroup = await sequelize.models.police_force_group_item.findOne({
+      where: { police_force_id: usersMainPoliceForceId }
+    })
+
+    if (forceGroup?.police_force_group_id) {
+      const group = await sequelize.models.police_force_group.findOne({
+        where: { id: forceGroup.police_force_group_id }
+      })
+      return group.display_text
+    }
+
+    const forceName = await sequelize.models.police_force.findOne({
+      where: { id: usersMainPoliceForceId }
+    })
+
+    return forceName?.name ?? undefined
+  }
+
+  return undefined
+}
+
 module.exports = {
   hasForceChanged,
-  setPoliceForceOnCdos
+  setPoliceForceOnCdos,
+  getUsersForceList,
+  getUsersForceGroupName
 }

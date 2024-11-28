@@ -12,12 +12,13 @@ const { scopes } = require('../constants/auth')
 const { mapUserDaoToDto } = require('../dto/mappers/user')
 const { conflictSchema } = require('../schema/common/response/conflict')
 const { notFoundSchema } = require('../schema/common/response/not-found')
-const { getCallingUser } = require('../auth/get-user')
+const { getCallingUser, getCallingUsername } = require('../auth/get-user')
 const { emailTypes } = require('../constants/email-types')
 const { sendEmail } = require('../messaging/send-email')
 const { getHttpCodeFromResults } = require('../dto/mappers/bulk-requests')
 const { drop } = require('../cache')
 const { sendReportSomethingEmails, createAuditsForReportSomething } = require('../lib/email-helper')
+const { getUsersForceGroupName } = require('../repos/police-force-helper')
 
 module.exports = [
   {
@@ -243,6 +244,24 @@ module.exports = [
       await getRegistrationService().sendVerifyEmail(request)
 
       return h.response({ result: true }).code(200)
+    }
+  },
+  {
+    method: 'GET',
+    path: '/user/me/police-force',
+    options: {
+      tags: ['api'],
+      notes: ['Checks what police force or force group the user is part of'],
+      response: {
+        status: {
+          200: userStringResponseSchema
+        }
+      }
+    },
+    handler: async (request, h) => {
+      const res = await getUsersForceGroupName(getCallingUsername(request))
+
+      return h.response({ result: res }).code(200)
     }
   },
   {

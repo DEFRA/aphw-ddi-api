@@ -48,6 +48,7 @@ const addToSearchIndex = async (person, dog, transaction) => {
     search: buildIndexColumn(person, refreshedDogEntity),
     person_id: person.id,
     dog_id: dog.id,
+    police_force_id: dog.registration.police_force_id,
     json: jsonValues
   }, { transaction })
 
@@ -128,7 +129,7 @@ const removeDogFromSearchIndex = async (dogFromDb, transaction) => {
 
   for (const indexRow of dogIndexRows) {
     if (!uniquePersons.get(indexRow.person_id)) {
-      uniquePersons.set(indexRow.person_id, indexRow.json)
+      uniquePersons.set(indexRow.person_id, { json: indexRow.json, policeForceId: indexRow.police_force_id })
     }
 
     await indexRow.destroy({ transaction })
@@ -147,7 +148,8 @@ const addPeopleOnlyIfNoDogsLeft = async (persons, transaction) => {
     })
 
     if (!searchIndexExists) {
-      const person = persons.get(personId)
+      const personDetails = persons.get(personId)
+      const person = personDetails.json
 
       const partialPerson = {
         first_name: person.firstName,
@@ -164,6 +166,7 @@ const addPeopleOnlyIfNoDogsLeft = async (persons, transaction) => {
         search: buildIndexColumn(partialPerson, {}),
         person_id: personId,
         dog_id: null,
+        police_force_id: personDetails.policeForceId,
         json: jsonValues
       }, { transaction })
 
