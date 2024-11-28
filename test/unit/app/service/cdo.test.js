@@ -342,12 +342,67 @@ describe('CdoService', function () {
         {
           index_number: 'ED300097',
           neutering_confirmation: null,
-          microchip_verification: null
+          microchip_verification: null,
+          neutering_deadline: null,
+          microchip_deadline: null
         },
         {
           index_number: 'ED300097',
           neutering_confirmation: neuteringConfirmation,
-          microchip_verification: microchipVerification
+          microchip_verification: microchipVerification,
+          neutering_deadline: null,
+          microchip_deadline: null
+        }, devUser)
+    })
+
+    test('should verifyDates given dogNotFitForMicrochip and dogNotNeutered', async () => {
+      const microchipVerification = undefined
+      const neuteringConfirmation = undefined
+      const microchipDeadline = new Date(`${new Date().getUTCFullYear() + 1}-07-03`)
+
+      const cdoIndexNumber = 'ED300097'
+      const cdoTaskList = new CdoTaskList(buildCdo({
+        exemption: buildExemption({ applicationPackSent: new Date(), form2Sent: new Date() }),
+        dog: buildCdoDog({ dateOfBirth: new Date() })
+      }))
+      mockCdoRepository.getCdoTaskList.mockResolvedValue(cdoTaskList)
+
+      await cdoService.verifyDates(cdoIndexNumber, {
+        microchipVerification,
+        neuteringConfirmation,
+        microchipDeadline,
+        dogNotFitForMicrochip: true,
+        dogNotNeutered: true
+      }, devUser)
+
+      expect(mockCdoRepository.saveCdoTaskList).toHaveBeenCalledWith(cdoTaskList)
+      expect(cdoTaskList.getUpdates().exemption).toEqual([{
+        key: 'verificationDateRecorded',
+        value: {
+          microchipVerification: null,
+          neuteringConfirmation: null,
+          verificationDatesRecorded: expect.any(Date),
+          neuteringDeadline: expect.any(Date),
+          microchipDeadline: expect.any(Date)
+        },
+        callback: expect.any(Function)
+      }])
+      await cdoTaskList.getUpdates().exemption[0].callback()
+      expect(sendUpdateToAudit).toHaveBeenCalledWith(
+        'exemption',
+        {
+          index_number: 'ED300097',
+          neutering_confirmation: null,
+          microchip_verification: null,
+          neutering_deadline: null,
+          microchip_deadline: null
+        },
+        {
+          index_number: 'ED300097',
+          neutering_confirmation: neuteringConfirmation,
+          microchip_verification: microchipVerification,
+          neutering_deadline: expect.any(Date),
+          microchip_deadline: expect.any(Date)
         }, devUser)
     })
 
@@ -391,6 +446,74 @@ describe('CdoService', function () {
         dog: buildCdoDog({
           microchipNumber: '123456789012345',
           status: 'Pre-exempt'
+        })
+      }))
+
+      mockCdoRepository.getCdoTaskList.mockResolvedValue(cdoTaskList)
+      mockCdoRepository.saveCdoTaskList.mockResolvedValue(cdoTaskList)
+
+      const result = await cdoService.issueCertificate(cdoIndexNumber, sentDate, devUser)
+
+      expect(mockCdoRepository.getCdoTaskList).toHaveBeenCalledWith(cdoIndexNumber)
+      expect(mockCdoRepository.saveCdoTaskList).toHaveBeenCalledWith(cdoTaskList)
+      expect(result).toBe(sentDate)
+      expect(cdoTaskList.getUpdates().exemption).toEqual([{
+        key: 'certificateIssued',
+        value: sentDate,
+        callback: undefined
+      }])
+
+      await cdoTaskList.getUpdates().dog[0].callback()
+
+      expect(sendUpdateToAudit).toHaveBeenCalledWith(
+        'exemption',
+        {
+          index_number: 'ED300097',
+          certificate_issued: undefined
+        },
+        {
+          index_number: 'ED300097',
+          certificate_issued: sentDate
+        },
+        devUser)
+      expect(sendUpdateToAudit).toHaveBeenCalledWith(
+        'dog',
+        {
+          index_number: 'ED300097',
+          status: 'Pre-exempt'
+        },
+        {
+          index_number: 'ED300097',
+          status: 'Exempt'
+        },
+        devUser)
+    })
+
+    test('should issue certificate given only microchip and neutering deadlines set', async () => {
+      const sentDate = new Date()
+      const cdoIndexNumber = 'ED300097'
+      const cdoTaskList = new CdoTaskList(buildCdo({
+        exemption: buildExemption({
+          exemptionOrder: '2015',
+          applicationPackSent: new Date(),
+          form2Sent: new Date(),
+          applicationFeePaid: new Date(),
+          neuteringConfirmation: undefined,
+          microchipVerification: undefined,
+          neuteringDeadline: new Date('9999-10-01'),
+          microchipDeadline: new Date('9999-10-01'),
+          insuranceDetailsRecorded: new Date(),
+          microchipNumberRecorded: new Date(),
+          verificationDatesRecorded: new Date(),
+          insurance: [buildCdoInsurance({
+            renewalDate: new Date('9999-01-01'),
+            company: 'Dogs Trust'
+          })]
+        }),
+        dog: buildCdoDog({
+          microchipNumber: '123456789012345',
+          status: 'Pre-exempt',
+          dateOfBirth: new Date()
         })
       }))
 

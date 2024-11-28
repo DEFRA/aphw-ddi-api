@@ -97,6 +97,18 @@ class Dog extends Changeable {
     this._updates.update('dogBreaches', dogBreachBreaches, undefined)
     this.setStatus(statuses.InBreach, callback)
   }
+
+  get youngerThanSixteenMonths () {
+    const sixteenMonths = new Date()
+    sixteenMonths.setUTCHours(23, 59, 59, 999)
+    sixteenMonths.setUTCMonth(sixteenMonths.getUTCMonth() - 16)
+
+    if (!this.dateOfBirth) {
+      return undefined
+    }
+
+    return this.dateOfBirth.getTime() > sixteenMonths.getTime()
+  }
 }
 
 module.exports = Dog

@@ -112,7 +112,14 @@ describe('mapCdoTaskListToDto', () => {
       form2Sent: new Date('2024-05-24'),
       neuteringConfirmation: new Date('2024-02-10'),
       microchipVerification: new Date('2024-03-09'),
-      certificateIssued: new Date('2024-06-27')
+      certificateIssued: new Date('2024-06-27'),
+      verificationOptions: {
+        dogDeclaredUnfit: expect.any(Boolean),
+        neuteringBypassedUnder16: expect.any(Boolean),
+        allowDogDeclaredUnfit: expect.any(Boolean),
+        allowNeuteringBypass: expect.any(Boolean),
+        showNeuteringBypass: expect.any(Boolean)
+      }
     }))
   })
 })
