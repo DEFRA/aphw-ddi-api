@@ -1,4 +1,4 @@
-const { dateTodayOrInFuture } = require('../../lib/date-helpers')
+const { dateTodayOrInFuture, dateTodayOrInPast, stripTime, addMonths, addDays } = require('../../lib/date-helpers')
 const { InvalidDateError } = require('../../errors/domain/invalidDate')
 const { IncompleteDataError } = require('../../errors/domain/incompleteData')
 const { Changeable } = require('./changeable')
@@ -17,6 +17,7 @@ const { InvalidDataError } = require('../../errors/domain/invalidData')
  * @property {Date|null} applicationFeePaid
  * @property {{company: string; renewalDate: Date }[]} insurance
  * @property {Date|null} neuteringConfirmation
+ * @property {Date|null} neuteringDeadline
  * @property {Date|null} microchipVerification
  * @property {Date} joinedExemptionScheme
  * @property {Date|null} nonComplianceLetterSent
@@ -39,8 +40,10 @@ class Exemption extends Changeable {
     this._certificateIssued = exemptionProperties.certificateIssued
     this._applicationFeePaid = exemptionProperties.applicationFeePaid
     this._insurance = exemptionProperties.insurance
+    this._neuteringDeadline = exemptionProperties.neuteringDeadline
     this._neuteringConfirmation = exemptionProperties.neuteringConfirmation
     this._microchipVerification = exemptionProperties.microchipVerification
+    this._microchipDeadline = exemptionProperties.microchipDeadline
     this.joinedExemptionScheme = exemptionProperties.joinedExemptionScheme
     this.nonComplianceLetterSent = exemptionProperties.nonComplianceLetterSent
     this.applicationPackSent = exemptionProperties.applicationPackSent
@@ -72,8 +75,16 @@ class Exemption extends Changeable {
     return this._neuteringConfirmation
   }
 
+  get neuteringDeadline () {
+    return this._neuteringDeadline
+  }
+
   get microchipVerification () {
     return this._microchipVerification
+  }
+
+  get microchipDeadline () {
+    return this._microchipDeadline
   }
 
   get certificateIssued () {
@@ -109,9 +120,44 @@ class Exemption extends Changeable {
     return this.form2Sent instanceof Date &&
       this.applicationPackSent instanceof Date &&
       this.applicationFeePaid instanceof Date &&
-      this.microchipVerification instanceof Date &&
-      this.neuteringConfirmation instanceof Date &&
+      this.verificationComplete &&
       this._checkIfInsuranceIsValid()
+  }
+
+  get _microchipVerificationComplete () {
+    if (this.microchipVerification instanceof Date) {
+      return true
+    }
+
+    if (this.exemptionOrder !== '2015') {
+      return false
+    }
+
+    if (!(this.microchipDeadline instanceof Date)) {
+      return false
+    }
+
+    return this.microchipDeadline.getTime() > Date.now()
+  }
+
+  get _neuteringConfirmationComplete () {
+    if (this.neuteringConfirmation instanceof Date) {
+      return true
+    }
+
+    if (!(this.neuteringDeadline instanceof Date)) {
+      return false
+    }
+
+    return this.neuteringDeadline.getTime() > Date.now()
+  }
+
+  get verificationComplete () {
+    if (!(this.verificationDatesRecorded instanceof Date)) {
+      return false
+    }
+
+    return this._microchipVerificationComplete && this._neuteringConfirmationComplete
   }
 
   /**
@@ -166,10 +212,71 @@ class Exemption extends Changeable {
     this._updates.update('form2Sent', auditDate, callback)
   }
 
-  verifyDates (microchipVerification, neuteringConfirmation, callback) {
-    if (microchipVerification.getTime() > Date.now() || neuteringConfirmation.getTime() > Date.now()) {
+  /**
+   * @param {{
+   *     microchipVerification?: Date|undefined;
+   *     neuteringConfirmation?: Date|undefined;
+   *     microchipDeadline?: Date|undefined
+   * }} verifyOptions
+   * @param {Dog} dog
+   * @param {function(Exemption): () => Promise<void>} callbackFn
+   * @return {void}
+   */
+  verifyDatesWithDeadline ({ microchipVerification, neuteringConfirmation, microchipDeadline }, dog, callbackFn) {
+    const thisMorning = stripTime(new Date())
+
+    // New allowance only applies to 2015 Dogs
+    if (this.exemptionOrder !== '2015' || (!!microchipVerification && !!neuteringConfirmation)) {
+      return this.verifyDates(microchipVerification, neuteringConfirmation, callbackFn)
+    }
+
+    // 6th Si Neutering Confirmation rules only apply to Dogs under 16 months
+    if (!neuteringConfirmation && !dog.youngerThanSixteenMonths) {
+      throw new Error('Neutering confirmation required')
+    }
+
+    // 6th Si Neutering Confirmation rules only applies to XL Bullies
+    if (!neuteringConfirmation && dog.breed !== 'XL Bully') {
+      throw new Error(`Neutering date required for ${dog.breed}`)
+    }
+
+    // 6th Si To bypass microchipVerification microchip deadline must be set
+    if (!microchipVerification && !microchipDeadline) {
+      throw new Error('Microchip deadline required')
+    }
+
+    // 6th Si To bypass microchipVerification microchip deadline must be today or in future
+    if (!microchipVerification && microchipDeadline.getTime() < thisMorning.getTime()) {
+      throw new Error('Microchip deadline must be today or in the future')
+    }
+
+    if (neuteringConfirmation && neuteringConfirmation.getTime() > Date.now()) {
       throw new InvalidDateError('Date must be today or in the past')
     }
+
+    /**
+     * @type {{neuteringDeadline?: Date; microchipDeadline?: Date }}
+     */
+    const deadlines = {
+      neuteringDeadline: null,
+      microchipDeadline: null
+    }
+
+    if (!neuteringConfirmation) {
+      const neuteringDeadline = addMonths(new Date(dog.dateOfBirth), 18)
+      deadlines.neuteringDeadline = neuteringDeadline
+      this._neuteringDeadline = neuteringDeadline
+    }
+
+    if (!microchipVerification) {
+      // Adding 28 days to deadline
+      const microchipDeadlinePlus28 = addDays(new Date(microchipDeadline), 28)
+      this._microchipDeadline = microchipDeadlinePlus28
+      deadlines.microchipDeadline = microchipDeadlinePlus28
+    } else if (!dateTodayOrInPast(microchipVerification)) {
+      throw new InvalidDateError('Date must be today or in the past')
+    }
+
     const verificationDatesRecorded = new Date()
     this._microchipVerification = microchipVerification
     this._neuteringConfirmation = neuteringConfirmation
@@ -177,11 +284,47 @@ class Exemption extends Changeable {
     this._updates.update(
       'verificationDateRecorded',
       {
+        microchipVerification: microchipVerification ?? null,
+        neuteringConfirmation: neuteringConfirmation ?? null,
+        verificationDatesRecorded,
+        ...deadlines
+      },
+      callbackFn(this))
+  }
+
+  /**
+   *
+   * @param microchipVerification
+   * @param neuteringConfirmation
+   * @param {function(Exemption): () => Promise<void>} callbackFn
+   * @return {void}
+   */
+  verifyDates (microchipVerification, neuteringConfirmation, callbackFn) {
+    if (!microchipVerification) {
+      throw new Error('Microchip verification required')
+    }
+
+    if (!neuteringConfirmation) {
+      throw new Error('Neutering confirmation required')
+    }
+
+    if (microchipVerification.getTime() > Date.now() || neuteringConfirmation.getTime() > Date.now()) {
+      throw new InvalidDateError('Date must be today or in the past')
+    }
+    const verificationDatesRecorded = new Date()
+    this._microchipVerification = microchipVerification
+    this._neuteringConfirmation = neuteringConfirmation
+    this._verificationDatesRecorded = verificationDatesRecorded
+    const callback = callbackFn(this)
+    this._updates.update(
+      'verificationDateRecorded',
+      {
         microchipVerification,
         neuteringConfirmation,
         verificationDatesRecorded
       },
-      callback)
+      callback
+    )
   }
 
   issueCertificate (certificateIssued, callback) {

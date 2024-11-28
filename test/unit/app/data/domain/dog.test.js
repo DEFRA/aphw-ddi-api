@@ -158,4 +158,52 @@ describe('Dog', () => {
       ])
     })
   })
+
+  describe('Date of Birth', () => {
+    const thisMorning = new Date()
+    thisMorning.setUTCHours(0, 0, 0, 0)
+
+    const sixteenMonths = new Date()
+    sixteenMonths.setUTCMonth(sixteenMonths.getUTCMonth() - 16)
+
+    const youngerThanSixteenMonths = new Date(sixteenMonths)
+    youngerThanSixteenMonths.setUTCDate(youngerThanSixteenMonths.getUTCDate() + 1)
+    youngerThanSixteenMonths.setUTCMilliseconds(youngerThanSixteenMonths.getUTCMilliseconds() - 1)
+
+    test('should show if Dog is under 16 months', () => {
+      const dogProperties = buildCdoDog({
+        dateOfBirth: youngerThanSixteenMonths
+      })
+
+      const dog = new Dog(dogProperties)
+      expect(dog.youngerThanSixteenMonths).toBe(true)
+    })
+
+    test('should show if Dog is 16 months or older', () => {
+      const dogProperties = buildCdoDog({
+        dateOfBirth: sixteenMonths
+      })
+
+      const dog = new Dog(dogProperties)
+      expect(dog.youngerThanSixteenMonths).toBe(false)
+    })
+
+    test('should show if Dog DOB is undefined', () => {
+      const dogProperties = buildCdoDog({
+        dateOfBirth: undefined
+      })
+
+      const dog = new Dog(dogProperties)
+      expect(dog.youngerThanSixteenMonths).toBe(undefined)
+    })
+
+    test('should show if Dog DOB is null', () => {
+      const dogProperties = buildCdoDog({
+        dateOfBirth: null
+      })
+
+      const dog = new Dog(dogProperties)
+      expect(dog.youngerThanSixteenMonths).toBe(undefined)
+    })
+  })
 })

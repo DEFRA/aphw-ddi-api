@@ -472,7 +472,7 @@ const getCdoTaskList = async (indexNumber, transaction) => {
 /**
  * @typedef SaveCdoTaskList
  * @param {import('../data/domain/cdoTaskList').CdoTaskList} cdoTaskList
- * @param transaction
+ * @param [transaction]
  * @return {Promise<import('../data/domain/cdoTaskList').CdoTaskList>}
  */
 /**
@@ -513,7 +513,7 @@ const saveCdoTaskList = async (cdoTaskList, transaction) => {
 
           if (model) {
             if (Object.prototype.hasOwnProperty.call(update.value, key)) {
-              model[field] = update.value[key]
+              model[field] = update.value[key] ?? null
             } else {
               model[field] = update.value
             }

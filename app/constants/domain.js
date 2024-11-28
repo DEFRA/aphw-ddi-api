@@ -9,6 +9,8 @@ const domain = {
     verificationDateRecorded: [
       'neuteringConfirmation',
       'microchipVerification',
+      'neuteringDeadline',
+      'microchipDeadline',
       'verificationDatesRecorded'
     ],
     certificateIssued: ['certificateIssued'],
@@ -28,6 +30,8 @@ const domain = {
     verificationDatesRecorded: 'dog.registration.verification_dates_recorded',
     neuteringConfirmation: 'dog.registration.neutering_confirmation',
     microchipVerification: 'dog.registration.microchip_verification',
+    neuteringDeadline: 'dog.registration.neutering_deadline',
+    microchipDeadline: 'dog.registration.microchip_deadline',
     certificateIssued: 'dog.registration.certificate_issued',
     insurance: 'dog.insurance',
     microchip: 'dog.microchip',

@@ -36,6 +36,13 @@ const buildCdoTaskListDtoTasks = (partialCdoTaskListDto = {}) => ({
 })
 
 const buildCdoTaskListDto = (partialCdoTaskListDto = {}) => ({
+  verificationOptions: {
+    dogDeclaredUnfit: false,
+    neuteringBypassedUnder16: false,
+    allowDogDeclaredUnfit: true,
+    allowNeuteringBypass: false,
+    showNeuteringBypass: true
+  },
   ...partialCdoTaskListDto,
   tasks: buildCdoTaskListDtoTasks(partialCdoTaskListDto.tasks)
 })

@@ -336,7 +336,7 @@ describe('CDO endpoint', () => {
     test('should return an initialised manage cdo task list', async () => {
       const cdoTaskList = new CdoTaskList(buildCdo())
       cdoRepository.getCdoTaskList.mockResolvedValue(cdoTaskList)
-      const getTaskListMock = jest.fn((indexNumber) => cdoTaskList)
+      const getTaskListMock = jest.fn(_ => cdoTaskList)
       getCdoService.mockReturnValue({
         getTaskList: getTaskListMock
       })
@@ -351,6 +351,13 @@ describe('CDO endpoint', () => {
       expect(response.statusCode).toBe(200)
       expect(getTaskListMock).toHaveBeenCalledWith('ED123')
       expect(payload).toEqual({
+        verificationOptions: {
+          dogDeclaredUnfit: expect.any(Boolean),
+          neuteringBypassedUnder16: expect.any(Boolean),
+          allowDogDeclaredUnfit: expect.any(Boolean),
+          allowNeuteringBypass: expect.any(Boolean),
+          showNeuteringBypass: expect.any(Boolean)
+        },
         tasks: {
           applicationPackSent: {
             key: 'applicationPackSent',
@@ -1075,8 +1082,60 @@ describe('CDO endpoint', () => {
         neuteringConfirmation: neuteringConfirmation.toISOString()
       })
       expect(verifyDatesMock).toHaveBeenCalledWith('ED123', {
+        dogNotNeutered: false,
+        dogNotFitForMicrochip: false,
         microchipVerification,
         neuteringConfirmation
+      }, devUser)
+    })
+
+    test('should return 201 given dogNotNeutered and dogNotFitForMicrochip call', async () => {
+      const verifyDatesMock = jest.fn()
+      const microchipVerification = undefined
+      const neuteringConfirmation = undefined
+      const neuteringDeadline = new Date()
+      const microchipDeadlineCall = new Date('9999-10-01')
+      const microchipDeadline = new Date('9999-10-29')
+
+      neuteringDeadline.setFullYear(neuteringDeadline.getFullYear() + 1)
+      getCdoService.mockReturnValue({
+        verifyDates: verifyDatesMock
+      })
+      verifyDatesMock.mockResolvedValue(new CdoTaskList(buildCdo({
+        exemption: buildExemption({
+          applicationFeePaid: new Date(),
+          microchipVerification,
+          neuteringConfirmation,
+          neuteringDeadline,
+          microchipDeadline
+        })
+      })))
+
+      const options = {
+        method: 'POST',
+        url: '/cdo/ED123/manage:verifyDates',
+        payload: {
+          microchipDeadline: '9999-10-01',
+          dogNotNeutered: true,
+          dogNotFitForMicrochip: true
+        },
+        ...portalHeader
+      }
+      const response = await server.inject(options)
+      const payload = JSON.parse(response.payload)
+      expect(response.statusCode).toBe(201)
+      expect(payload).toEqual({
+        microchipVerification: undefined,
+        neuteringConfirmation: undefined,
+        neuteringDeadline: neuteringDeadline.toISOString(),
+        microchipDeadline: microchipDeadline.toISOString()
+      })
+      expect(verifyDatesMock).toHaveBeenCalledWith('ED123', {
+        microchipVerification,
+        neuteringConfirmation,
+        microchipDeadline: microchipDeadlineCall,
+        dogNotNeutered: true,
+        dogNotFitForMicrochip: true
       }, devUser)
     })
 
