@@ -181,9 +181,6 @@ class CdoTaskList {
       return false
     }
 
-    const endOfDay = new Date()
-    endOfDay.setHours(23, 59, 59, 999)
-
     if (!CdoTaskList.dateStageComplete(this._cdo.exemption.neuteringDeadline)) {
       return false
     }
