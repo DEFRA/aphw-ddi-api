@@ -1,4 +1,5 @@
 const { uniqueResults, matchCodeResults, trigramResults } = require('../../../mocks/search-results')
+const { devUser } = require('../../../mocks/auth')
 
 describe('Search repo (fuzzy)', () => {
   jest.mock('../../../../app/config/db', () => ({
@@ -11,6 +12,9 @@ describe('Search repo (fuzzy)', () => {
       },
       search_tgram: {
         findAll: jest.fn()
+      },
+      user_account: {
+        findOne: jest.fn()
       }
     },
     fn: jest.fn(),
@@ -32,7 +36,7 @@ describe('Search repo (fuzzy)', () => {
     sequelize.models.search_match_code.findAll.mockResolvedValue(matchCodeResults)
     sequelize.models.search_tgram.findAll.mockResolvedValue(trigramResults)
 
-    const results = await search('dog', 'john mark peter', true)
+    const results = await search(devUser, 'dog', 'john mark peter', true)
     expect(results.results.length).toBe(3)
     expect(results.totalFound).toBe(3)
     expect(results.results[0].firstName).toBe('John')

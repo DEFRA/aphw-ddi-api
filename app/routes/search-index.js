@@ -28,11 +28,11 @@ module.exports = [{
     },
     handler: async (request, h) => {
       const user = getCallingUser(request)
-      const cachedPage = await getPageFromCache(user, request)
+      const cachedPage = request.query?.page ? await getPageFromCache(user, request) : undefined
       if (!cachedPage?.success) {
-        await auditSearch(request.params.terms, user)
+        await auditSearch(request.params.terms, request.query, user)
 
-        const results = await search(request.params.type, request.params.terms, !!request.query.fuzzy)
+        const results = await search(user, request.params.type, request.params.terms, !!request.query.fuzzy, !!request.query.national)
         const pageOne = await saveResultsToCacheAndGetPageOne(user, request, results)
         return h.response(createResponse(pageOne)).code(200)
       }

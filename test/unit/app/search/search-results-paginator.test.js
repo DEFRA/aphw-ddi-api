@@ -37,14 +37,14 @@ describe('Search results paginator', () => {
       const user = { username: 'testuser@here.com' }
       const request = { params: { terms: 'term1,term2' } }
       const res = buildSearchCacheKey(user, request)
-      expect(res).toEqual('localtest|testuser@here.com|term1,term2|false')
+      expect(res).toEqual('localtest|testuser@here.com|term1,term2|false|false')
     })
 
     test('should return compound string with extra param values', () => {
       const user = { username: 'testuser@here.com' }
       const request = { params: { terms: 'term1,term2' }, query: { fuzzy: true, national: true } }
       const res = buildSearchCacheKey(user, request)
-      expect(res).toEqual('localtest|testuser@here.com|term1,term2|true')
+      expect(res).toEqual('localtest|testuser@here.com|term1,term2|true|true')
     })
   })
 
@@ -55,7 +55,7 @@ describe('Search results paginator', () => {
       const results = { totalFound: 30, results: array1to30 }
       const res = await saveResultsToCacheAndGetPageOne(user, request, results)
       const expiryInMins = 1000 * 60 * 65
-      expect(set).toHaveBeenCalledWith(request, 'localtest|testuser@here.com|term1,term2|false', { results: { results: array1to30, totalFound: 30 }, expiry: expect.anything() }, expiryInMins)
+      expect(set).toHaveBeenCalledWith(request, 'localtest|testuser@here.com|term1,term2|false|false', { results: { results: array1to30, totalFound: 30 }, expiry: expect.anything() }, expiryInMins)
       expect(res).toEqual({
         success: true,
         results: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20],

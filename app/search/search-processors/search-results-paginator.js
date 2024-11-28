@@ -13,7 +13,7 @@ const getEnvCode = (configItem) => {
 
 const buildSearchCacheKey = (user, request) => {
   const env = getEnvCode(eventsTopic?.address)
-  return `${env}|${user?.username}|${request.params?.terms}|${request.query?.fuzzy ?? 'false'}`
+  return `${env}|${user?.username}|${request.params?.terms}|${request.query?.fuzzy ?? 'false'}|${request.query?.national ?? 'false'}`
 }
 
 const resultsModel = (success, results, totalFound, page) => {

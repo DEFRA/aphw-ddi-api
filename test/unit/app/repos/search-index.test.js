@@ -62,7 +62,10 @@ describe('Search repo', () => {
       const dog = {
         id: 456,
         dogName: 'Bruno',
-        microchipNumber: 123456789012345
+        microchipNumber: 123456789012345,
+        registration: {
+          police_force_id: 5
+        }
       }
 
       dbFindByPk.mockResolvedValue(dog)
@@ -91,7 +94,10 @@ describe('Search repo', () => {
         dogIndex: 123,
         dogName: 'Bruno',
         existingDog: true,
-        microchipNumber: 123456789012345
+        microchipNumber: 123456789012345,
+        registration: {
+          police_force_id: 6
+        }
       }
 
       dbFindByPk.mockResolvedValue(dog)
@@ -115,6 +121,8 @@ describe('Search repo', () => {
         }
       }
 
+      sequelize.models.search_index.findOne.mockResolvedValue({ json: person })
+
       const dog = {
         id: 456,
         dogIndex: 123,
@@ -130,6 +138,9 @@ describe('Search repo', () => {
             firstName: 'Peter',
             lastName: 'Snow'
           }
+        },
+        registration: {
+          police_force_id: 7
         }
       }
 
@@ -137,7 +148,7 @@ describe('Search repo', () => {
 
       await addToSearchIndex(person, dog, {})
 
-      expect(sequelize.models.search_index.create).toHaveBeenCalledTimes(2)
+      expect(sequelize.models.search_index.create).toHaveBeenCalledTimes(1)
       expect(sequelize.models.search_index.destroy).toHaveBeenCalledTimes(1)
     })
 
@@ -160,7 +171,10 @@ describe('Search repo', () => {
         dogName: 'Bruno',
         existingDog: true,
         microchipNumber: 123456789012345,
-        microchipNumber2: 112345678901234
+        microchipNumber2: 112345678901234,
+        registration: {
+          police_force_id: 10
+        }
       }
 
       const dogFromDb = {
