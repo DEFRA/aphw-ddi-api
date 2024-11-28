@@ -11,6 +11,10 @@ describe('CdoTaskList', () => {
   thisMorning.setHours(0, 0, 0, 0)
   const in60Days = inXDays(60)
 
+  const tomorrow = new Date()
+  tomorrow.setUTCDate(tomorrow.getDate() + 1)
+  tomorrow.setUTCHours(0, 0, 0, 0)
+
   const buildDefaultTaskList = () => {
     const exemptionProperties = buildExemption({
       applicationPackSent: null
@@ -846,10 +850,6 @@ describe('CdoTaskList', () => {
   })
 
   describe('6th Si', () => {
-    const tomorrow = new Date()
-    tomorrow.setUTCDate(tomorrow.getDate() + 1)
-    tomorrow.setUTCHours(0, 0, 0, 0)
-
     const sixteenMonthsAgo = new Date(today)
     sixteenMonthsAgo.setUTCHours(0, 0, 0, 0)
     sixteenMonthsAgo.setUTCMonth(today.getMonth() - 16)
@@ -1200,6 +1200,50 @@ describe('CdoTaskList', () => {
           allowNeuteringBypass: false,
           showNeuteringBypass: true
         })
+      })
+    })
+
+    describe('microchipRulesPassed', () => {
+      test('should pass if deadline is tomorrow', () => {
+        const cdoTasklist = buildCdoWithBase({
+          exemptionPartial: {
+            microchipVerification: undefined,
+            microchipDeadline: tomorrow
+          }
+        })
+        expect(cdoTasklist.microchipRulesPassed).toBe(true)
+      })
+
+      test('should not pass if deadline is today', () => {
+        const cdoTasklist = buildCdoWithBase({
+          exemptionPartial: {
+            microchipVerification: undefined,
+            microchipDeadline: today
+          }
+        })
+        expect(cdoTasklist.microchipRulesPassed).toBe(false)
+      })
+    })
+
+    describe('neuteringRulesPassed', () => {
+      test('should pass if deadline is tomorrow', () => {
+        const cdoTasklist = buildCdoWithBase({
+          exemptionPartial: {
+            neuteringConfirmation: undefined,
+            neuteringDeadline: tomorrow
+          }
+        })
+        expect(cdoTasklist.neuteringRulesPassed).toBe(true)
+      })
+
+      test('should not pass if deadline is today', () => {
+        const cdoTasklist = buildCdoWithBase({
+          exemptionPartial: {
+            neuteringConfirmation: undefined,
+            neuteringDeadline: today
+          }
+        })
+        expect(cdoTasklist.neuteringRulesPassed).toBe(false)
       })
     })
   })

@@ -184,9 +184,12 @@ class CdoTaskList {
     const endOfDay = new Date()
     endOfDay.setHours(23, 59, 59, 999)
 
-    // Neutering deadline today
-    return CdoTaskList.dateStageComplete(this._cdo.exemption.neuteringDeadline) &&
-        this._cdo.exemption.neuteringDeadline >= endOfDay
+    if (!CdoTaskList.dateStageComplete(this._cdo.exemption.neuteringDeadline)) {
+      return false
+    }
+
+    // Neutering deadline > today
+    return Date.now() < this._cdo.exemption.neuteringDeadline
   }
 
   get microchipRulesPassed () {
@@ -198,7 +201,7 @@ class CdoTaskList {
       return false
     }
 
-    // Microchip deadline yesterday
+    // Microchip deadline > yesterday
     return Date.now() < this._cdo.exemption.microchipDeadline.getTime()
   }
 
