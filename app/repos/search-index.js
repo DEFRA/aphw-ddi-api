@@ -253,6 +253,22 @@ const updateSearchIndexPerson = async (person, transaction) => {
   }
 }
 
+const updateSearchIndexPolice = async (dogId, oldPoliceForceId, newPoliceForceId, transaction) => {
+  if ((oldPoliceForceId ?? -1) === newPoliceForceId) {
+    return
+  }
+
+  const indexRows = await sequelize.models.search_index.findAll({
+    where: { dog_id: dogId },
+    transaction
+  })
+
+  for (const indexRow of indexRows) {
+    indexRow.police_force_id = newPoliceForceId
+    await indexRow.save({ transaction })
+  }
+}
+
 const cleanupPossibleOwnerWithNoDogs = async (personId, transaction) => {
   const personsNoDogs = await sequelize.models.search_index.findAll({
     where: {
@@ -283,5 +299,6 @@ module.exports = {
   updateSearchIndexDog,
   updateSearchIndexPerson,
   applyMicrochips,
-  cleanupPossibleOwnerWithNoDogs
+  cleanupPossibleOwnerWithNoDogs,
+  updateSearchIndexPolice
 }

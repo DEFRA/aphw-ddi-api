@@ -10,6 +10,7 @@ const { updateStatus } = require('./dogs')
 const { preChangedExemptionAudit, postChangedExemptionAudit } = require('../dto/auditing/exemption')
 const { deepClone } = require('../lib/deep-clone')
 const { dateTodayOrInFuture } = require('../lib/date-helpers')
+const { updateSearchIndexPolice } = require('./search-index')
 
 const updateExemption = async (data, user, transaction) => {
   if (!transaction) {
@@ -20,6 +21,7 @@ const updateExemption = async (data, user, transaction) => {
     const cdo = await lookupCdo(data)
 
     const policeForce = await lookupPoliceForce(data)
+    const origPoliceForceId = cdo?.registration?.police_force_id
 
     const preChanged = preChangedExemptionAudit(cdo)
 
@@ -42,6 +44,8 @@ const updateExemption = async (data, user, transaction) => {
 
     data.status = changedStatus
     const postChanged = postChangedExemptionAudit(data)
+
+    await updateSearchIndexPolice(cdo.id, origPoliceForceId, policeForce?.id, transaction)
 
     await sendUpdateToAudit(EXEMPTION, preChanged, postChanged, user)
 
