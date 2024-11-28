@@ -50,6 +50,13 @@ const mapCdoTaskListToDto = (cdoTaskList) => ({
     verificationDateRecorded: mapTaskToTaskDto(cdoTaskList.verificationDateRecorded),
     certificateIssued: mapTaskToTaskDto(cdoTaskList.certificateIssued)
   },
+  verificationOptions: {
+    dogDeclaredUnfit: cdoTaskList.verificationOptions.dogDeclaredUnfit,
+    neuteringBypassedUnder16: cdoTaskList.verificationOptions.neuteringBypassedUnder16,
+    allowDogDeclaredUnfit: cdoTaskList.verificationOptions.allowDogDeclaredUnfit,
+    allowNeuteringBypass: cdoTaskList.verificationOptions.allowNeuteringBypass,
+    showNeuteringBypass: cdoTaskList.verificationOptions.showNeuteringBypass
+  },
   applicationPackSent: cdoTaskList.cdoSummary.applicationPackSent,
   insuranceCompany: cdoTaskList.cdoSummary.insuranceCompany,
   insuranceRenewal: cdoTaskList.cdoSummary.insuranceRenewal,

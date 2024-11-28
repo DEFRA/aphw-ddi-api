@@ -73,9 +73,11 @@ class CdoTaskList {
       applicationFeePaid: this._cdo.exemption.applicationFeePaid ?? undefined,
       form2Sent: this._cdo.exemption.form2Sent ?? undefined,
       neuteringConfirmation: this._cdo.exemption.neuteringConfirmation ?? undefined,
+      neuteringDeadline: this._cdo.exemption.neuteringDeadline ?? undefined,
       microchipVerification: this._cdo.exemption.microchipVerification ?? undefined,
+      microchipDeadline: this._cdo.exemption.microchipDeadline ?? undefined,
       certificateIssued: this._cdo.exemption.certificateIssued ?? undefined,
-      status: this._cdo.dog.status ?? undefined
+      status: this._cdo.dog.status
     }
   }
 
@@ -165,14 +167,61 @@ class CdoTaskList {
     )
   }
 
+  get neuteringRulesPassed () {
+    if (!CdoTaskList.dateStageComplete(this._cdo.exemption.verificationDatesRecorded)) {
+      return false
+    }
+
+    if (this._cdo.dog.breed !== 'XL Bully') {
+      return false
+    }
+
+    // Date of Birth must be less than 16 months ago
+    if (!this._cdo.dog.youngerThanSixteenMonths) {
+      return false
+    }
+
+    if (!CdoTaskList.dateStageComplete(this._cdo.exemption.neuteringDeadline)) {
+      return false
+    }
+
+    // Neutering deadline > today
+    return Date.now() < this._cdo.exemption.neuteringDeadline
+  }
+
+  get microchipRulesPassed () {
+    if (!CdoTaskList.dateStageComplete(this._cdo.exemption.verificationDatesRecorded)) {
+      return false
+    }
+
+    if (!CdoTaskList.dateStageComplete(this._cdo.exemption.microchipDeadline)) {
+      return false
+    }
+
+    // Microchip deadline > yesterday
+    return Date.now() < this._cdo.exemption.microchipDeadline.getTime()
+  }
+
   get verificationDateRecorded () {
+    if (this.exemption.exemptionOrder !== '2015') {
+      return undefined
+    }
+
     let timestamp
     let completed
 
-    if (
-      CdoTaskList.dateStageComplete(this.cdoSummary.microchipVerification) &&
-      CdoTaskList.dateStageComplete(this.cdoSummary.neuteringConfirmation)
-    ) {
+    let neuteringRulesPassed = this.neuteringRulesPassed
+    let microchipRulesPassed = this.microchipRulesPassed
+
+    if (CdoTaskList.dateStageComplete(this.cdoSummary.microchipVerification)) {
+      microchipRulesPassed = true
+    }
+
+    if (CdoTaskList.dateStageComplete(this.cdoSummary.neuteringConfirmation)) {
+      neuteringRulesPassed = true
+    }
+
+    if (neuteringRulesPassed && microchipRulesPassed) {
       completed = true
       timestamp = this._cdo.exemption.verificationDatesRecorded
     }
@@ -185,6 +234,50 @@ class CdoTaskList {
       },
       timestamp
     )
+  }
+
+  get verificationOptions () {
+    if (this._cdo.exemption.exemptionOrder !== '2015') {
+      return {
+        dogDeclaredUnfit: false,
+        neuteringBypassedUnder16: false,
+        allowDogDeclaredUnfit: false,
+        allowNeuteringBypass: false,
+        showNeuteringBypass: false
+      }
+    }
+
+    let dogDeclaredUnfit = this.verificationDateRecorded.completed
+    let neuteringBypassedUnder16 = this.verificationDateRecorded.completed
+    let showNeuteringBypass = this._cdo.dog.youngerThanSixteenMonths !== false
+
+    if (this._cdo.exemption.microchipVerification instanceof Date) {
+      dogDeclaredUnfit = false
+    }
+
+    if (this._cdo.exemption.neuteringConfirmation instanceof Date) {
+      neuteringBypassedUnder16 = false
+    }
+
+    if (!this.microchipRulesPassed) {
+      dogDeclaredUnfit = false
+    }
+
+    if (!this.neuteringRulesPassed) {
+      neuteringBypassedUnder16 = false
+    }
+
+    if (this._cdo.dog.breed !== 'XL Bully') {
+      showNeuteringBypass = false
+    }
+
+    return {
+      dogDeclaredUnfit,
+      neuteringBypassedUnder16,
+      allowDogDeclaredUnfit: true,
+      allowNeuteringBypass: showNeuteringBypass && this._cdo.dog.youngerThanSixteenMonths === true,
+      showNeuteringBypass
+    }
   }
 
   get certificateIssued () {
@@ -234,11 +327,34 @@ class CdoTaskList {
     this._cdo.exemption.sendForm2(sentDate, callback)
   }
 
-  verifyDates (microchipVerification, neuteringConfirmation, callback) {
+  /**
+   *
+   * @param {{
+   *    microchipVerification?: Date|undefined;
+   *    neuteringConfirmation?: Date|undefined;
+   *    neuteringDeadline?: Date|undefined
+   *    dogNotFitForMicrochip?: true|undefined;
+   *    dogNotNeutered?: true|undefined
+   * }} dateVerfication
+   * @param neuteringConfirmation
+   * @param callback
+   * @return {void}
+   */
+  verifyDates ({
+    microchipVerification,
+    neuteringConfirmation,
+    dogNotFitForMicrochip,
+    dogNotNeutered,
+    microchipDeadline
+  }, callback) {
     this._actionPackCompleteGuard()
     this._form2CompleteGuard()
 
-    this._cdo.exemption.verifyDates(microchipVerification, neuteringConfirmation, callback)
+    if (dogNotFitForMicrochip || dogNotNeutered) {
+      return this._cdo.exemption.verifyDatesWithDeadline({ microchipVerification, neuteringConfirmation, microchipDeadline }, this._cdo.dog, callback)
+    }
+
+    return this._cdo.exemption.verifyDates(microchipVerification, neuteringConfirmation, callback)
   }
 
   issueCertificate (certificateIssued, callback) {

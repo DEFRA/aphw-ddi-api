@@ -769,7 +769,7 @@ describe('CDO repo', () => {
       }))
       expect(cdoTaskList.verificationDateRecorded.completed).toBe(false)
 
-      cdoTaskList.verifyDates(microchipVerification, neuteringConfirmation, callback)
+      cdoTaskList.verifyDates({ microchipVerification, neuteringConfirmation }, callback)
 
       const taskList = await saveCdoTaskList(cdoTaskList, {})
 
@@ -778,6 +778,70 @@ describe('CDO repo', () => {
       expect(dog.registration.neutering_confirmation).toEqual(neuteringConfirmation)
       expect(taskList.cdoSummary.microchipVerification).toEqual(microchipVerification)
       expect(taskList.cdoSummary.neuteringConfirmation).toEqual(neuteringConfirmation)
+
+      expect(callback).toHaveBeenCalledTimes(1)
+    })
+
+    test('should update verificationDateRecorded with deadlines', async () => {
+      const neuteringConfirmation = undefined
+      const microchipVerification = undefined
+      const dateOfBirth = new Date()
+      const microchipDeadline = new Date('9999-11-1')
+      const expectedMicrochipDeadline = new Date('9999-11-29')
+
+      const dog = buildCdoDao({
+        birth_date: dateOfBirth,
+        registration: buildRegistrationDao({
+          exemption_order: '2015',
+          neutering_confirmation: null,
+          microchip_verification: null
+        })
+      })
+      dog.registration.save = jest.fn()
+      const editedDog = buildCdoDao({
+        birth_date: dateOfBirth,
+        registration: buildRegistrationDao({
+          exemption_order: '2015',
+          neutering_confirmation: null,
+          microchip_verification: null,
+          microchip_deadline: expectedMicrochipDeadline,
+          neutering_deadline: new Date()
+        })
+      })
+
+      sequelize.models.dog.findAll.mockResolvedValueOnce([dog])
+      sequelize.models.dog.findAll.mockResolvedValueOnce([editedDog])
+
+      const callback = jest.fn()
+
+      const cdoTaskList = new CdoTaskList(buildCdo({
+        dog: buildCdoDog({ dateOfBirth }),
+        exemption: buildExemption({
+          applicationPackSent: new Date(),
+          form2Sent: new Date()
+        })
+      }))
+      expect(cdoTaskList.verificationDateRecorded.completed).toBe(false)
+
+      cdoTaskList.verifyDates({
+        microchipVerification,
+        neuteringConfirmation,
+        dogNotFitForMicrochip: true,
+        dogNotNeutered: true,
+        microchipDeadline
+      }, callback)
+
+      const taskList = await saveCdoTaskList(cdoTaskList, {})
+
+      expect(dog.registration.save).toHaveBeenCalled()
+      expect(dog.registration.microchip_verification).toEqual(null)
+      expect(dog.registration.neutering_confirmation).toEqual(null)
+      expect(dog.registration.neutering_deadline).toEqual(expect.any(Date))
+      expect(dog.registration.microchip_deadline).toEqual(expectedMicrochipDeadline)
+      expect(taskList.cdoSummary.neuteringConfirmation).toEqual(undefined)
+      expect(taskList.cdoSummary.microchipVerification).toEqual(undefined)
+      expect(taskList.cdoSummary.microchipDeadline).toEqual(expectedMicrochipDeadline)
+      expect(taskList.cdoSummary.neuteringDeadline).toEqual(expect.any(Date))
 
       expect(callback).toHaveBeenCalledTimes(1)
     })
@@ -839,7 +903,7 @@ describe('CDO repo', () => {
       }))
       expect(cdoTaskList.verificationDateRecorded.completed).toBe(false)
 
-      cdoTaskList.verifyDates(new Date(), new Date(), callback)
+      cdoTaskList.verifyDates({ microchipVerification: new Date(), neuteringConfirmation: new Date() }, callback)
 
       await expect(saveCdoTaskList(cdoTaskList, {})).rejects.toThrow('Missing model')
     })

@@ -10,7 +10,7 @@ const {
   recordInsuranceDetailsSchema, recordInsuranceDetailsResponseSchema, recordMicrochipNumberSchema,
   recordMicrochipNumberResponseSchema, recordApplicationFeeSchema, verifyDatesSchema, manageCdoResponseSchema,
   recordMicrochipNumberConflictSchema,
-  simpleConflictSchema, issueCertificateResponseSchema
+  simpleConflictSchema, issueCertificateResponseSchema, verifyDatesSchemaResponse
 } = require('../schema/cdo/manage')
 const { SequenceViolationError } = require('../errors/domain/sequenceViolation')
 const { InvalidDataError } = require('../errors/domain/invalidData')
@@ -339,7 +339,7 @@ module.exports = [
       },
       response: {
         status: {
-          201: verifyDatesSchema
+          201: verifyDatesSchemaResponse
         }
       },
       handler: async (request, h) => {
@@ -351,7 +351,9 @@ module.exports = [
 
           return h.response({
             microchipVerification: cdoTaskList.cdoSummary.microchipVerification,
-            neuteringConfirmation: cdoTaskList.cdoSummary.neuteringConfirmation
+            neuteringConfirmation: cdoTaskList.cdoSummary.neuteringConfirmation,
+            neuteringDeadline: cdoTaskList.cdoSummary.neuteringDeadline,
+            microchipDeadline: cdoTaskList.cdoSummary.microchipDeadline
           }).code(201)
         } catch (e) {
           return handleErrors(e, 'verifyDates', indexNumber, h)
