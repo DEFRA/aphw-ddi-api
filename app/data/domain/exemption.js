@@ -1,4 +1,4 @@
-const { dateTodayOrInFuture } = require('../../lib/date-helpers')
+const { dateTodayOrInFuture, dateTodayOrInPast, stripTime, addMonths, addDays } = require('../../lib/date-helpers')
 const { InvalidDateError } = require('../../errors/domain/invalidDate')
 const { IncompleteDataError } = require('../../errors/domain/incompleteData')
 const { Changeable } = require('./changeable')
@@ -137,7 +137,7 @@ class Exemption extends Changeable {
       return false
     }
 
-    return this.microchipDeadline.getTime() < Date.now()
+    return this.microchipDeadline.getTime() > Date.now()
   }
 
   get _neuteringConfirmationComplete () {
@@ -149,7 +149,7 @@ class Exemption extends Changeable {
       return false
     }
 
-    return this.neuteringDeadline.getTime() < Date.now()
+    return this.neuteringDeadline.getTime() > Date.now()
   }
 
   get verificationComplete () {
@@ -223,8 +223,7 @@ class Exemption extends Changeable {
    * @return {void}
    */
   verifyDatesWithDeadline ({ microchipVerification, neuteringConfirmation, microchipDeadline }, dog, callbackFn) {
-    const thisMorning = new Date()
-    thisMorning.setUTCHours(0, 0, 0, 0)
+    const thisMorning = stripTime(new Date())
 
     // New allowance only applies to 2015 Dogs
     if (this.exemptionOrder !== '2015' || (!!microchipVerification && !!neuteringConfirmation)) {
@@ -264,19 +263,17 @@ class Exemption extends Changeable {
     }
 
     if (!neuteringConfirmation) {
-      const neuteringDeadline = new Date(dog.dateOfBirth)
-      neuteringDeadline.setUTCMonth(dog.dateOfBirth.getUTCMonth() + 18)
+      const neuteringDeadline = addMonths(new Date(dog.dateOfBirth), 18)
       deadlines.neuteringDeadline = neuteringDeadline
       this._neuteringDeadline = neuteringDeadline
     }
 
     if (!microchipVerification) {
       // Adding 28 days to deadline
-      const microchipDeadlinePlus28 = new Date(microchipDeadline)
-      microchipDeadlinePlus28.setUTCDate(microchipDeadlinePlus28.getDate() + 28)
+      const microchipDeadlinePlus28 = addDays(new Date(microchipDeadline), 28)
       this._microchipDeadline = microchipDeadlinePlus28
       deadlines.microchipDeadline = microchipDeadlinePlus28
-    } else if (microchipVerification.getTime() > Date.now()) {
+    } else if (!dateTodayOrInPast(microchipVerification)) {
       throw new InvalidDateError('Date must be today or in the past')
     }
 
