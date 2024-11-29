@@ -207,15 +207,11 @@ class CdoTaskList {
   }
 
   get verificationDateRecorded () {
-    if (this.exemption.exemptionOrder !== '2015') {
-      return undefined
-    }
-
     let timestamp
     let completed
 
-    let neuteringRulesPassed = this.neuteringRulesPassed
-    let microchipRulesPassed = this.microchipRulesPassed
+    let neuteringRulesPassed = this.exemption.exemptionOrder === '2015' ? this.neuteringRulesPassed : false
+    let microchipRulesPassed = this.exemption.exemptionOrder === '2015' ? this.microchipRulesPassed : false
 
     if (CdoTaskList.dateStageComplete(this.cdoSummary.microchipVerification)) {
       microchipRulesPassed = true

@@ -70,7 +70,7 @@ const manageCdoResponseSchema = Joi.object({
   form2Sent: Joi.date().optional(),
   cdoSummary: Joi.object({
     dog: Joi.object({
-      name: Joi.string().optional()
+      name: Joi.string().allow('').allow(null).optional()
     }).optional(),
     person: Joi.object({
       firstName: Joi.string().allow('').allow(null).optional(),
@@ -78,7 +78,7 @@ const manageCdoResponseSchema = Joi.object({
     }).optional(),
     exemption: Joi.object({
       cdoExpiry: Joi.date().optional(),
-      neuteringDeadline: Joi.date().optional()
+      neuteringDeadline: Joi.date().allow('').allow(null).optional()
     })
   }).optional()
 }).unknown()
