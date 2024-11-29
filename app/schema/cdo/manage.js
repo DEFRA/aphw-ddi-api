@@ -67,7 +67,20 @@ const manageCdoResponseSchema = Joi.object({
   insuranceRenewal: Joi.date().optional(),
   microchipNumber: Joi.string().optional(),
   applicationFeePaid: Joi.date().optional(),
-  form2Sent: Joi.date().optional()
+  form2Sent: Joi.date().optional(),
+  cdoSummary: Joi.object({
+    dog: Joi.object({
+      name: Joi.string().optional()
+    }).optional(),
+    person: Joi.object({
+      firstName: Joi.string().allow('').allow(null).optional(),
+      lastName: Joi.string().allow('').allow(null).optional()
+    }).optional(),
+    exemption: Joi.object({
+      cdoExpiry: Joi.date().optional(),
+      neuteringDeadline: Joi.date().optional()
+    })
+  }).optional()
 }).unknown()
 
 const simpleConflictSchema = Joi.object({

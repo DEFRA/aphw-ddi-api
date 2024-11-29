@@ -24,6 +24,12 @@ const mapTaskToTaskDto = (task) => ({
  * @property {CdoTaskDto} certificateIssued
  */
 /**
+ * @typedef CdoSummary
+ * @property {{ name: string }} dog
+ * @property {{ cdoExpiry: Date|undefined }} exemption
+ * @property {{ firstname: string; lastName: string }} person
+ */
+/**
  * @typedef CdoTaskListDto
  * @property {CdoTaskListTasksDto} tasks
  * @property {Date|undefined} applicationPackSent
@@ -35,6 +41,7 @@ const mapTaskToTaskDto = (task) => ({
  * @property {Date|undefined} neuteringConfirmation
  * @property {Date|undefined} microchipVerification
  * @property {Date|undefined} certificateIssued
+ * @property {CdoSummary} cdoSummary
  */
 /**
  * @param {CdoTaskList} cdoTaskList
@@ -65,7 +72,20 @@ const mapCdoTaskListToDto = (cdoTaskList) => ({
   form2Sent: cdoTaskList.cdoSummary.form2Sent,
   neuteringConfirmation: cdoTaskList.cdoSummary.neuteringConfirmation,
   microchipVerification: cdoTaskList.cdoSummary.microchipVerification,
-  certificateIssued: cdoTaskList.cdoSummary.certificateIssued
+  microchipDeadline: cdoTaskList.cdoSummary.microchipDeadline,
+  certificateIssued: cdoTaskList.cdoSummary.certificateIssued,
+  cdoSummary: {
+    exemption: {
+      cdoExpiry: cdoTaskList.cdoSummary.cdoExpiry
+    },
+    person: {
+      firstName: cdoTaskList.cdoSummary.ownerFirstName,
+      lastName: cdoTaskList.cdoSummary.ownerLastName
+    },
+    dog: {
+      name: cdoTaskList.cdoSummary.dogName
+    }
+  }
 })
 
 module.exports = {
