@@ -77,7 +77,11 @@ class CdoTaskList {
       microchipVerification: this._cdo.exemption.microchipVerification ?? undefined,
       microchipDeadline: this._cdo.exemption.microchipDeadline ?? undefined,
       certificateIssued: this._cdo.exemption.certificateIssued ?? undefined,
-      status: this._cdo.dog.status
+      status: this._cdo.dog.status,
+      dogName: this._cdo.dog.name,
+      cdoExpiry: this._cdo.exemption.cdoExpiry,
+      ownerFirstName: this._cdo.person.firstName,
+      ownerLastName: this._cdo.person.lastName
     }
   }
 

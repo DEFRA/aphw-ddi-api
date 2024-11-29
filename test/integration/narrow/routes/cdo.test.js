@@ -408,6 +408,136 @@ describe('CDO endpoint', () => {
             readonly: false,
             timestamp: undefined
           }
+        },
+        cdoSummary: {
+          dog: {
+            name: 'Rex300'
+          },
+          exemption: {
+            cdoExpiry: '2023-12-10T00:00:00.000Z'
+          },
+          person: {
+            firstName: 'Alex',
+            lastName: 'Carter'
+          }
+        }
+      })
+    })
+
+    test('should return a complete manage cdo task list', async () => {
+      const cdoTaskList = new CdoTaskList(buildCdo({
+        exemption: buildExemption({
+          applicationPackSent: new Date('2024-06-25'),
+          form2Sent: new Date('2024-05-24'),
+          applicationFeePaid: new Date('2024-06-24'),
+          neuteringConfirmation: new Date('2024-02-10'),
+          microchipVerification: new Date('2024-03-09'),
+          microchipDeadline: new Date('2024-03-09'),
+          insurance: [buildCdoInsurance({
+            company: 'Dogs R Us',
+            renewalDate: new Date('9999-10-10')
+          })],
+          certificateIssued: new Date('2024-06-27')
+        }),
+        dog: buildCdoDog({
+          microchipNumber: '123456789012345'
+        })
+      }))
+      cdoRepository.getCdoTaskList.mockResolvedValue(cdoTaskList)
+      const getTaskListMock = jest.fn(_ => cdoTaskList)
+      getCdoService.mockReturnValue({
+        getTaskList: getTaskListMock
+      })
+      const options = {
+        method: 'GET',
+        url: '/cdo/ED123/manage',
+        ...portalHeader
+      }
+
+      const response = await server.inject(options)
+      const payload = JSON.parse(response.payload)
+      expect(response.statusCode).toBe(200)
+      expect(getTaskListMock).toHaveBeenCalledWith('ED123')
+      expect(payload).toEqual({
+        verificationOptions: {
+          dogDeclaredUnfit: expect.any(Boolean),
+          neuteringBypassedUnder16: expect.any(Boolean),
+          allowDogDeclaredUnfit: expect.any(Boolean),
+          allowNeuteringBypass: expect.any(Boolean),
+          showNeuteringBypass: expect.any(Boolean)
+        },
+        tasks: {
+          applicationPackSent: {
+            key: 'applicationPackSent',
+            available: true,
+            completed: true,
+            readonly: true,
+            timestamp: '2024-06-25T00:00:00.000Z'
+          },
+          insuranceDetailsRecorded: {
+            key: 'insuranceDetailsRecorded',
+            available: true,
+            completed: true,
+            readonly: false,
+            timestamp: null
+          },
+          microchipNumberRecorded: {
+            key: 'microchipNumberRecorded',
+            available: true,
+            completed: true,
+            readonly: false,
+            timestamp: null
+          },
+          applicationFeePaid: {
+            key: 'applicationFeePaid',
+            available: true,
+            completed: true,
+            readonly: false,
+            timestamp: null
+          },
+          form2Sent: {
+            key: 'form2Sent',
+            available: true,
+            completed: true,
+            readonly: true,
+            timestamp: '2024-05-24T00:00:00.000Z'
+          },
+          verificationDateRecorded: {
+            key: 'verificationDateRecorded',
+            available: true,
+            completed: true,
+            readonly: false,
+            timestamp: null
+          },
+          certificateIssued: {
+            key: 'certificateIssued',
+            available: false,
+            completed: true,
+            readonly: false,
+            timestamp: '2024-06-27T00:00:00.000Z'
+          }
+        },
+        applicationFeePaid: '2024-06-24T00:00:00.000Z',
+        applicationPackSent: '2024-06-25T00:00:00.000Z',
+        certificateIssued: '2024-06-27T00:00:00.000Z',
+        form2Sent: '2024-05-24T00:00:00.000Z',
+        insuranceCompany: 'Dogs R Us',
+        insuranceRenewal: '9999-10-10T00:00:00.000Z',
+        microchipDeadline: '2024-03-09T00:00:00.000Z',
+        microchipNumber: '123456789012345',
+        microchipVerification: '2024-03-09T00:00:00.000Z',
+        neuteringConfirmation: '2024-02-10T00:00:00.000Z',
+        cdoSummary: {
+          dog: {
+            name: 'Rex300'
+          },
+          exemption: {
+            cdoExpiry: '2023-12-10T00:00:00.000Z'
+          },
+          person: {
+            firstName: 'Alex',
+            lastName: 'Carter'
+          }
         }
       })
     })

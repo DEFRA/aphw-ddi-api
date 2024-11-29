@@ -1,11 +1,22 @@
-const { buildCdo, buildExemption, buildCdoInsurance, buildCdoDog } = require('../../../mocks/cdo/domain')
+const { buildCdo, buildExemption, buildCdoInsurance, buildCdoDog, buildCdoPerson } = require('../../../mocks/cdo/domain')
 const { CdoTaskList } = require('../../../../app/data/domain')
 const { mapCdoTaskListToDto } = require('../../../../app/dto/cdoTaskList')
 const { buildCdoTaskListDto, buildCdoTaskListDtoTasks } = require('../../../mocks/cdo/dto')
 
 describe('mapCdoTaskListToDto', () => {
   test('should map cdoTaskListToDto', () => {
-    const cdo = buildCdo()
+    const cdo = buildCdo({
+      person: buildCdoPerson({
+        firstName: 'Alex',
+        lastName: 'Carter'
+      }),
+      dog: buildCdoDog({
+        name: 'Rex'
+      }),
+      exemption: buildExemption({
+        cdoExpiry: new Date('9999-10-10')
+      })
+    })
     const cdoTaskList = new CdoTaskList(cdo)
     const cdoTaskListDto = mapCdoTaskListToDto(cdoTaskList)
     const expectedDto = buildCdoTaskListDto({
@@ -26,7 +37,19 @@ describe('mapCdoTaskListToDto', () => {
       form2Sent: undefined,
       neuteringConfirmation: undefined,
       microchipVerification: undefined,
-      certificateIssued: undefined
+      certificateIssued: undefined,
+      cdoSummary: {
+        dog: {
+          name: 'Rex'
+        },
+        person: {
+          firstName: 'Alex',
+          lastName: 'Carter'
+        },
+        exemption: {
+          cdoExpiry: new Date('9999-10-10')
+        }
+      }
     })
 
     expect(cdoTaskListDto).toEqual(expectedDto)
@@ -72,7 +95,19 @@ describe('mapCdoTaskListToDto', () => {
       form2Sent: undefined,
       neuteringConfirmation: undefined,
       microchipVerification: undefined,
-      certificateIssued: undefined
+      certificateIssued: undefined,
+      cdoSummary: {
+        dog: {
+          name: 'Rex300'
+        },
+        person: {
+          firstName: 'Alex',
+          lastName: 'Carter'
+        },
+        exemption: {
+          cdoExpiry: new Date('2023-12-10')
+        }
+      }
     })
     expect(cdoTaskListDto).toEqual(expectedDto)
   })
@@ -87,6 +122,7 @@ describe('mapCdoTaskListToDto', () => {
       applicationFeePaid: new Date('2024-06-24'),
       neuteringConfirmation: new Date('2024-02-10'),
       microchipVerification: new Date('2024-03-09'),
+      microchipDeadline: new Date('2024-03-09'),
       insurance: [buildCdoInsurance({
         company: 'Dogs R Us',
         renewalDate: futureDate
@@ -112,6 +148,7 @@ describe('mapCdoTaskListToDto', () => {
       form2Sent: new Date('2024-05-24'),
       neuteringConfirmation: new Date('2024-02-10'),
       microchipVerification: new Date('2024-03-09'),
+      microchipDeadline: new Date('2024-03-09'),
       certificateIssued: new Date('2024-06-27'),
       verificationOptions: {
         dogDeclaredUnfit: expect.any(Boolean),
