@@ -23,8 +23,8 @@ const recordApplicationFeeSchema = Joi.object({
 }).required()
 
 const verifyDatesSchema = Joi.object({
-  neuteringConfirmation: Joi.alternatives().conditional('dogNotNeutered', { is: true, then: Joi.date().optional(), otherwise: Joi.date().required() }),
-  microchipVerification: Joi.alternatives().conditional('dogNotFitForMicrochip', { is: true, then: Joi.date().optional(), otherwise: Joi.date().required() }),
+  neuteringConfirmation: Joi.alternatives().conditional('dogNotNeutered', { is: true, then: Joi.any().strip(), otherwise: Joi.date().required() }),
+  microchipVerification: Joi.alternatives().conditional('dogNotFitForMicrochip', { is: true, then: Joi.any().strip(), otherwise: Joi.date().required() }),
   microchipDeadline: Joi.alternatives().conditional('dogNotFitForMicrochip', { is: true, then: Joi.date().required(), otherwise: Joi.disallow() }),
   dogNotNeutered: Joi.boolean().default(false),
   dogNotFitForMicrochip: Joi.boolean().default(false)
@@ -67,7 +67,20 @@ const manageCdoResponseSchema = Joi.object({
   insuranceRenewal: Joi.date().optional(),
   microchipNumber: Joi.string().optional(),
   applicationFeePaid: Joi.date().optional(),
-  form2Sent: Joi.date().optional()
+  form2Sent: Joi.date().optional(),
+  cdoSummary: Joi.object({
+    dog: Joi.object({
+      name: Joi.string().optional()
+    }).optional(),
+    person: Joi.object({
+      firstName: Joi.string().allow('').allow(null).optional(),
+      lastName: Joi.string().allow('').allow(null).optional()
+    }).optional(),
+    exemption: Joi.object({
+      cdoExpiry: Joi.date().optional(),
+      neuteringDeadline: Joi.date().optional()
+    })
+  }).optional()
 }).unknown()
 
 const simpleConflictSchema = Joi.object({

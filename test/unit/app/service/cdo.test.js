@@ -332,6 +332,8 @@ describe('CdoService', function () {
         value: {
           microchipVerification,
           neuteringConfirmation,
+          microchipDeadline: null,
+          neuteringDeadline: null,
           verificationDatesRecorded: expect.any(Date)
         },
         callback: expect.any(Function)

@@ -91,6 +91,8 @@ describe('CdoTaskList', () => {
       expect(cdoTaskList.cdoSummary).toEqual({
         id: 300097,
         indexNumber: 'ED300097',
+        dogName: 'Rex300',
+        cdoExpiry: new Date('2023-12-10'),
         applicationPackSent: undefined,
         insuranceCompany: undefined,
         insuranceRenewal: undefined,
@@ -100,6 +102,8 @@ describe('CdoTaskList', () => {
         neuteringConfirmation: undefined,
         microchipVerification: undefined,
         certificateIssued: undefined,
+        ownerFirstName: 'Alex',
+        ownerLastName: 'Carter',
         status: 'Pre-exempt'
       })
     })
@@ -144,6 +148,10 @@ describe('CdoTaskList', () => {
         id: 300097,
         indexNumber: 'ED300097',
         applicationPackSent: new Date('2024-06-25'),
+        dogName: 'Rex300',
+        cdoExpiry: new Date('2023-12-10'),
+        ownerFirstName: 'Alex',
+        ownerLastName: 'Carter',
         insuranceCompany: undefined,
         insuranceRenewal: undefined,
         microchipNumber: undefined,
@@ -541,6 +549,7 @@ describe('CdoTaskList', () => {
         microchipNumberRecorded: new Date('2024-08-07'),
         applicationFeePaymentRecorded: new Date('2024-08-07'),
         verificationDatesRecorded: new Date('2024-08-07'),
+        microchipDeadline: new Date('2024-08-07'),
         insurance: [buildCdoInsurance({
           company: 'Dogs R Us',
           renewalDate: in60Days
@@ -609,6 +618,10 @@ describe('CdoTaskList', () => {
       expect(cdoTaskList.cdoSummary).toEqual({
         id: 300097,
         indexNumber: 'ED300097',
+        dogName: 'Rex300',
+        ownerFirstName: 'Alex',
+        ownerLastName: 'Carter',
+        cdoExpiry: new Date('2023-12-10'),
         applicationPackSent: new Date('2024-06-25'),
         insuranceCompany: 'Dogs R Us',
         insuranceRenewal: in60Days,
@@ -617,6 +630,7 @@ describe('CdoTaskList', () => {
         form2Sent: new Date('2024-05-24'),
         neuteringConfirmation: new Date('2024-02-10'),
         microchipVerification: new Date('2024-03-09'),
+        microchipDeadline: new Date('2024-08-07'),
         certificateIssued: new Date('2024-06-27'),
         status: 'Interim exempt'
       })
