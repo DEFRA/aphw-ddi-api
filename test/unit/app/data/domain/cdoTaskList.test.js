@@ -1047,9 +1047,20 @@ describe('CdoTaskList', () => {
       test('should return false if not 2015 Dog', () => {
       // 2015 XL Bully, exemption DOB < 16 months, dog's neutering not verified, neutering deadline set
         const cdoTaskList = buildCdoWithBase({
-          exemptionPartial: { microchipDeadline: tomorrow, exemptionOrder: '2023' }
+          exemptionPartial: {
+            microchipDeadline: tomorrow,
+            exemptionOrder: '2023',
+            microchipVerification: undefined
+          }
         })
-        expect(cdoTaskList.verificationDateRecorded).toBeUndefined()
+        expect(cdoTaskList.verificationDateRecorded).toEqual(new CdoTask(
+          'verificationDateRecorded',
+          {
+            available: true,
+            completed: false
+          },
+          undefined
+        ))
       })
     })
 
@@ -1111,6 +1122,27 @@ describe('CdoTaskList', () => {
           allowDogDeclaredUnfit: true,
           allowNeuteringBypass: true,
           showNeuteringBypass: true
+        })
+      })
+
+      test('should allow Dog declared unfit if Dog is 2015 Dog', () => {
+        const cdoTaskList = buildCdoWithBase({
+          dogPartial: {
+            breed: 'Pit Bull Terrier',
+            name: undefined
+          },
+          exemptionPartial: {
+            verificationDatesRecorded: undefined,
+            microchipVerification: undefined,
+            neuteringConfirmation: undefined
+          }
+        })
+        expect(cdoTaskList.verificationOptions).toEqual({
+          dogDeclaredUnfit: false,
+          neuteringBypassedUnder16: false,
+          allowDogDeclaredUnfit: true,
+          allowNeuteringBypass: false,
+          showNeuteringBypass: false
         })
       })
 
