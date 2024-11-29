@@ -81,6 +81,14 @@ const populatePoliceForce = async (register, rollback, transaction) => {
         throw new Error(`CDO not found - indexNumber ${dog.indexNumber}`)
       }
 
+      await sequelize.models.search_index.update({
+        police_force_id: forceId
+      },
+      {
+        where: { dog_id: dog.indexNumber },
+        transaction
+      })
+
       if (!registration.police_force_id) {
         registration.police_force_id = forceId
         await registration.save({ transaction })
