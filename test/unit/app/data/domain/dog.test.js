@@ -176,7 +176,7 @@ describe('Dog', () => {
       })
 
       const dog = new Dog(dogProperties)
-      expect(dog.youngerThanSixteenMonths).toBe(true)
+      expect(dog.youngerThanSixteenMonthsAtDate(thisMorning)).toBe(true)
     })
 
     test('should show if Dog is 16 months or older', () => {
@@ -185,7 +185,7 @@ describe('Dog', () => {
       })
 
       const dog = new Dog(dogProperties)
-      expect(dog.youngerThanSixteenMonths).toBe(false)
+      expect(dog.youngerThanSixteenMonthsAtDate(thisMorning)).toBe(false)
     })
 
     test('should show if Dog DOB is undefined', () => {
@@ -194,7 +194,7 @@ describe('Dog', () => {
       })
 
       const dog = new Dog(dogProperties)
-      expect(dog.youngerThanSixteenMonths).toBe(undefined)
+      expect(dog.youngerThanSixteenMonthsAtDate(thisMorning)).toBe(undefined)
     })
 
     test('should show if Dog DOB is null', () => {
@@ -203,7 +203,7 @@ describe('Dog', () => {
       })
 
       const dog = new Dog(dogProperties)
-      expect(dog.youngerThanSixteenMonths).toBe(undefined)
+      expect(dog.youngerThanSixteenMonthsAtDate(thisMorning)).toBe(undefined)
     })
   })
 })

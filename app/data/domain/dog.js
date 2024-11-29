@@ -98,8 +98,8 @@ class Dog extends Changeable {
     this.setStatus(statuses.InBreach, callback)
   }
 
-  get youngerThanSixteenMonths () {
-    const sixteenMonths = new Date()
+  youngerThanSixteenMonthsAtDate (date) {
+    const sixteenMonths = new Date(date)
     sixteenMonths.setUTCHours(23, 59, 59, 999)
     sixteenMonths.setUTCMonth(sixteenMonths.getUTCMonth() - 16)
 

@@ -942,7 +942,7 @@ describe('CdoTaskList', () => {
       const verificationIsNotComplete = (cdoTaskList) => verificationCompletedTest(cdoTaskList, false)
 
       describe('2015 dog', () => {
-        describe('given dog under 16 months', () => {
+        describe('given dog under 16 months as of CDO Issued date', () => {
           test('should return true given verificationDatesRecorded and neuteringDeadline recorded', () => {
           // 2015 XL Bully, exemption DOB < 16 months, dog's neutering not verified, neutering deadline set
             const cdoTaskList = buildCdoWithBase({
@@ -1038,7 +1038,7 @@ describe('CdoTaskList', () => {
         // 2015 XL Bully, exemption DOB < 16 months, dog's neutering not verified, neutering deadline set
           const cdoTaskList = buildCdoWithBase({
             dogPartial: { dateOfBirth: sixteenMonthsAgo },
-            exemptionPartial: { neuteringConfirmation: undefined, neuteringDeadline: inTheFuture }
+            exemptionPartial: { neuteringConfirmation: undefined, neuteringDeadline: inTheFuture, cdoIssued: today }
           })
           verificationIsNotComplete(cdoTaskList)
         })
@@ -1093,9 +1093,13 @@ describe('CdoTaskList', () => {
     })
 
     describe('verificationOptions', () => {
-      test('should allow Dog declared unfit and neutering bypass given 2015 and Dog under 16 months', () => {
+      test('should allow Dog declared unfit and neutering bypass given 2015 and Dog under 16 months as of CDO issued date', () => {
         const cdoTaskList = buildCdoWithBase({
+          dogPartial: {
+            dateOfBirth: new Date('2023-07-01')
+          },
           exemptionPartial: {
+            cdoIssued: new Date('2024-10-01'),
             verificationDatesRecorded: undefined,
             microchipVerification: undefined,
             neuteringConfirmation: undefined
@@ -1107,6 +1111,27 @@ describe('CdoTaskList', () => {
           allowDogDeclaredUnfit: true,
           allowNeuteringBypass: true,
           showNeuteringBypass: true
+        })
+      })
+
+      test('should not allow dog not neutered if Dog over 16 months as of CDO Issue Date', () => {
+        const cdoTaskList = buildCdoWithBase({
+          exemptionPartial: {
+            cdoIssued: new Date('2024-11-29'),
+            microchipVerification: undefined,
+            neuteringConfirmation: undefined,
+            verificationDatesRecorded: undefined
+          },
+          dogPartial: {
+            dateOfBirth: new Date('2023-07-01')
+          }
+        })
+        expect(cdoTaskList.verificationOptions).toEqual({
+          dogDeclaredUnfit: false,
+          neuteringBypassedUnder16: false,
+          allowDogDeclaredUnfit: true,
+          allowNeuteringBypass: false,
+          showNeuteringBypass: false
         })
       })
 
@@ -1159,24 +1184,6 @@ describe('CdoTaskList', () => {
           allowDogDeclaredUnfit: true,
           allowNeuteringBypass: true,
           showNeuteringBypass: true
-        })
-      })
-
-      test('should not allow dog not neutered if Dog over 16 yrs', () => {
-        const cdoTaskList = buildCdoWithBase({
-          exemptionPartial: {
-            microchipVerification: undefined,
-            neuteringConfirmation: undefined,
-            verificationDatesRecorded: undefined
-          },
-          dogPartial: { dateOfBirth: new Date('2004-10-10') }
-        })
-        expect(cdoTaskList.verificationOptions).toEqual({
-          dogDeclaredUnfit: false,
-          neuteringBypassedUnder16: false,
-          allowDogDeclaredUnfit: true,
-          allowNeuteringBypass: false,
-          showNeuteringBypass: false
         })
       })
 
