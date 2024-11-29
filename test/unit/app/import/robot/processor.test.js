@@ -1,5 +1,3 @@
-const { processRegisterRows, populatePoliceForce } = require('../../../../../app/import/robot/processor')
-
 jest.mock('../../../../../app/repos/cdo')
 const { createCdo } = require('../../../../../app/repos/cdo')
 
@@ -16,6 +14,18 @@ jest.mock('../../../../../app/import/robot/owner-search')
 const { ownerSearch } = require('../../../../../app/import/robot/owner-search')
 
 describe('Processor tests', () => {
+  jest.mock('../../../../../app/config/db', () => ({
+    models: {
+      search_index: {
+        update: jest.fn()
+      }
+    }
+  }))
+
+  const sequelize = require('../../../../../app/config/db')
+
+  const { processRegisterRows, populatePoliceForce } = require('../../../../../app/import/robot/processor')
+
   beforeEach(async () => {
     jest.clearAllMocks()
   })
@@ -106,6 +116,7 @@ describe('Processor tests', () => {
     getPoliceForce.mockResolvedValue({ id: 123 })
     dbFindOne.mockResolvedValue({ save: mockSave })
     ownerSearch.mockResolvedValue()
+    sequelize.models.search_index.update.mockResolvedValue()
 
     const data = {
       add: [
@@ -131,6 +142,7 @@ describe('Processor tests', () => {
     await populatePoliceForce(data)
 
     expect(mockSave).toHaveBeenCalled()
+    expect(sequelize.models.search_index.update).toHaveBeenCalled()
   })
 
   test('should get police force but not save if rollback', async () => {
