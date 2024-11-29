@@ -47,10 +47,17 @@ class CdoTaskList {
     }
   }
 
+  get _preCertificateMicrochipStageComplete () {
+    if (this.microchipRulesPassed && this.cdoSummary) {
+      return true
+    }
+    return this.microchipNumberRecorded.completed
+  }
+
   get _preCertificateStepsComplete () {
     return this.applicationPackSent.completed &&
     this.insuranceDetailsRecorded.completed &&
-    this.microchipNumberRecorded.completed &&
+    this._preCertificateMicrochipStageComplete &&
     this.applicationFeePaid.completed &&
     this.form2Sent.completed &&
     this.verificationDateRecorded.completed
@@ -172,6 +179,10 @@ class CdoTaskList {
   }
 
   get neuteringRulesPassed () {
+    if (this.exemption.exemptionOrder !== '2015') {
+      return false
+    }
+
     if (!CdoTaskList.dateStageComplete(this._cdo.exemption.verificationDatesRecorded)) {
       return false
     }
@@ -194,6 +205,10 @@ class CdoTaskList {
   }
 
   get microchipRulesPassed () {
+    if (this.exemption.exemptionOrder !== '2015') {
+      return false
+    }
+
     if (!CdoTaskList.dateStageComplete(this._cdo.exemption.verificationDatesRecorded)) {
       return false
     }
@@ -210,8 +225,8 @@ class CdoTaskList {
     let timestamp
     let completed
 
-    let neuteringRulesPassed = this.exemption.exemptionOrder === '2015' ? this.neuteringRulesPassed : false
-    let microchipRulesPassed = this.exemption.exemptionOrder === '2015' ? this.microchipRulesPassed : false
+    let neuteringRulesPassed = this.neuteringRulesPassed
+    let microchipRulesPassed = this.microchipRulesPassed
 
     if (CdoTaskList.dateStageComplete(this.cdoSummary.microchipVerification)) {
       microchipRulesPassed = true

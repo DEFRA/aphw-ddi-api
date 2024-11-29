@@ -883,7 +883,7 @@ describe('CdoTaskList', () => {
         neuteringConfirmation: new Date('2024-03-09'),
         microchipVerification: new Date('2024-03-09'),
         insuranceDetailsRecorded: new Date('2024-08-07'),
-        microchipNumberRecorded: new Date('2024-08-07'),
+        microchipNumberRecorded: undefined,
         verificationDatesRecorded: new Date('2024-08-07'),
         insurance: [buildCdoInsurance({
           company: 'Dogs R Us',
@@ -895,7 +895,6 @@ describe('CdoTaskList', () => {
 
     const buildDogWithBase = dogPartial => {
       return buildCdoDog({
-        microchipNumber: '123456789012345',
         dateOfBirth: lessThanSixteenMonthsAgo,
         breed: 'XL Bully',
         ...dogPartial
@@ -943,7 +942,7 @@ describe('CdoTaskList', () => {
 
       describe('2015 dog', () => {
         describe('given dog under 16 months as of CDO Issued date', () => {
-          test('should return true given verificationDatesRecorded and neuteringDeadline recorded', () => {
+          test('should return true given verificationDatesRecorded, microchipDeadline and neuteringDeadline recorded', () => {
           // 2015 XL Bully, exemption DOB < 16 months, dog's neutering not verified, neutering deadline set
             const cdoTaskList = buildCdoWithBase({
               exemptionPartial: {
@@ -954,6 +953,29 @@ describe('CdoTaskList', () => {
               }
             })
             verificationIsComplete(cdoTaskList)
+          })
+
+          test('should return true given verificationDatesRecorded and microchipDeadline recorded', () => {
+          // 2015 XL Bully, exemption DOB < 16 months, dog's neutering not verified, neutering deadline set
+            const cdoTaskList = buildCdoWithBase({
+              exemptionPartial: {
+                microchipVerification: undefined,
+                microchipDeadline: tomorrow
+              }
+            })
+            verificationIsComplete(cdoTaskList)
+          })
+
+          test('should not return true given microchipDeadline recorded but dog is not XL Bully', () => {
+          // 2015 XL Bully, exemption DOB < 16 months, dog's neutering not verified, neutering deadline set
+            const cdoTaskList = buildCdoWithBase({
+              exemptionPartial: {
+                microchipVerification: undefined,
+                microchipDeadline: tomorrow,
+                exemptionOrder: '1991'
+              }
+            })
+            verificationIsNotComplete(cdoTaskList)
           })
 
           describe('neutering confirmation undefined', () => {
@@ -1297,6 +1319,41 @@ describe('CdoTaskList', () => {
           }
         })
         expect(cdoTasklist.neuteringRulesPassed).toBe(false)
+      })
+    })
+
+    describe('can complete', () => {
+      test('should return certificate issued as available given all other items are complete and microchip deadline exists - for 2015 Bully', () => {
+        const exemptionProperties = buildExemption({
+          applicationPackSent: new Date('2024-06-25'),
+          form2Sent: new Date('2024-05-24'),
+          applicationFeePaid: new Date('2024-06-24'),
+          neuteringConfirmation: new Date('2024-02-10'),
+          microchipVerification: new Date('2024-03-09'),
+          insuranceDetailsRecorded: new Date('2024-08-07'),
+          microchipNumberRecorded: new Date('2024-08-07'),
+          verificationDatesRecorded: new Date('2024-08-07'),
+          insurance: [buildCdoInsurance({
+            company: 'Dogs R Us',
+            renewalDate: new Date('2025-06-25')
+          })]
+        })
+        const dogProperties = buildCdoDog({
+          microchipNumber: '123456789012345'
+        })
+        const cdo = buildCdo({
+          dog: dogProperties,
+          exemption: exemptionProperties
+        })
+        const cdoTaskList = new CdoTaskList(cdo)
+
+        expect(cdoTaskList.certificateIssued).toEqual(expect.objectContaining({
+          key: 'certificateIssued',
+          available: true,
+          completed: false,
+          readonly: false,
+          timestamp: undefined
+        }))
       })
     })
   })
