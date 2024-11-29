@@ -181,7 +181,7 @@ class CdoTaskList {
     }
 
     // Date of Birth must be less than 16 months ago
-    if (!this._cdo.dog.youngerThanSixteenMonths) {
+    if (!this._cdo.dog.youngerThanSixteenMonthsAtDate(this._cdo.exemption.cdoIssued)) {
       return false
     }
 
@@ -253,7 +253,7 @@ class CdoTaskList {
 
     let dogDeclaredUnfit = this.verificationDateRecorded.completed
     let neuteringBypassedUnder16 = this.verificationDateRecorded.completed
-    let showNeuteringBypass = this._cdo.dog.youngerThanSixteenMonths !== false
+    let showNeuteringBypass = this._cdo.dog.youngerThanSixteenMonthsAtDate(this._cdo.exemption.cdoIssued) !== false
 
     if (this._cdo.exemption.microchipVerification instanceof Date) {
       dogDeclaredUnfit = false
@@ -279,7 +279,7 @@ class CdoTaskList {
       dogDeclaredUnfit,
       neuteringBypassedUnder16,
       allowDogDeclaredUnfit: true,
-      allowNeuteringBypass: showNeuteringBypass && this._cdo.dog.youngerThanSixteenMonths === true,
+      allowNeuteringBypass: showNeuteringBypass && this._cdo.dog.youngerThanSixteenMonthsAtDate(this._cdo.exemption.cdoIssued) === true,
       showNeuteringBypass
     }
   }

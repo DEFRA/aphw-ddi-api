@@ -268,6 +268,7 @@ describe('Exemption', () => {
   describe('verifyDatesWithDeadline', () => {
     const microchipVerification = new Date('2024-07-03')
     const neuteringConfirmation = new Date('2024-07-03')
+    const cdoIssued = new Date(thisMorning)
 
     const sixteenMonthsAgo = new Date(thisMorning)
     sixteenMonthsAgo.setUTCMonth(sixteenMonthsAgo.getUTCMonth() - 16)
@@ -277,9 +278,11 @@ describe('Exemption', () => {
 
     const verifyDatesProperties = {
       ...exemptionProperties,
+      cdoIssued,
       microchipVerification: null,
       neuteringConfirmation: null
     }
+
     const dogProperties = buildCdoDog({
       dateOfBirth: underSixteenMonthsAgo
     })
@@ -388,15 +391,8 @@ describe('Exemption', () => {
 
       expect(() => exemption.verifyDatesWithDeadline({ microchipVerification }, pitBull, callback)).toThrow(new Error('Neutering date required for Pit Bull Terrier'))
     })
-    test('should throw if neutering confirmation is missing and Dog is sixteen months old or more', () => {
-      const exemption = new Exemption(verifyDatesProperties)
-      const dog = new Dog(buildCdoDog({
-        dateOfBirth: sixteenMonthsAgo
-      }))
-      expect(() => exemption.verifyDatesWithDeadline({ microchipVerification }, dog, callback)).toThrow(new Error('Neutering confirmation required'))
-    })
 
-    test('should throw if neutering confirmation is missing and given undefined dog DOB', () => {
+    test('should throw if neutering confirmation is missing and Dog is sixteen months old or more', () => {
       const exemption = new Exemption(verifyDatesProperties)
       const dog = new Dog(buildCdoDog({
         dateOfBirth: sixteenMonthsAgo

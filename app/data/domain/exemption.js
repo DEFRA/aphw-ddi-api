@@ -231,7 +231,7 @@ class Exemption extends Changeable {
     }
 
     // 6th Si Neutering Confirmation rules only apply to Dogs under 16 months
-    if (!neuteringConfirmation && !dog.youngerThanSixteenMonths) {
+    if (!neuteringConfirmation && !dog.youngerThanSixteenMonthsAtDate(this.cdoIssued)) {
       throw new Error('Neutering confirmation required')
     }
 
