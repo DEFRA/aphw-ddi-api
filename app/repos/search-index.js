@@ -149,7 +149,7 @@ const addPeopleOnlyIfNoDogsLeft = async (persons, transaction) => {
 
     if (!searchIndexExists) {
       const personDetails = persons.get(personId)
-      const person = personDetails.json
+      const person = personDetails.json ?? personDetails
 
       const partialPerson = {
         first_name: person.firstName,
@@ -296,6 +296,7 @@ module.exports = {
   addToSearchIndex,
   buildAddressString,
   removeDogFromSearchIndex,
+  addPeopleOnlyIfNoDogsLeft,
   updateSearchIndexDog,
   updateSearchIndexPerson,
   applyMicrochips,
