@@ -440,7 +440,8 @@ describe('CDO endpoint', () => {
           certificateIssued: new Date('2024-06-27')
         }),
         dog: buildCdoDog({
-          microchipNumber: '123456789012345'
+          microchipNumber: '123456789012345',
+          microchipNumber2: '123456789012345'
         })
       }))
       cdoRepository.getCdoTaskList.mockResolvedValue(cdoTaskList)
@@ -525,6 +526,7 @@ describe('CDO endpoint', () => {
         insuranceRenewal: '9999-10-10T00:00:00.000Z',
         microchipDeadline: '2024-03-09T00:00:00.000Z',
         microchipNumber: '123456789012345',
+        microchipNumber2: '123456789012345',
         microchipVerification: '2024-03-09T00:00:00.000Z',
         neuteringConfirmation: '2024-02-10T00:00:00.000Z',
         cdoSummary: {

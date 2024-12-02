@@ -66,6 +66,7 @@ const manageCdoResponseSchema = Joi.object({
   insuranceCompany: Joi.string().optional(),
   insuranceRenewal: Joi.date().optional(),
   microchipNumber: Joi.string().optional(),
+  microchipNumber2: Joi.string().optional(),
   applicationFeePaid: Joi.date().optional(),
   form2Sent: Joi.date().optional(),
   cdoSummary: Joi.object({
