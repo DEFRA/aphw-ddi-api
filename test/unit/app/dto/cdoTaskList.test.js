@@ -130,7 +130,8 @@ describe('mapCdoTaskListToDto', () => {
       certificateIssued: new Date('2024-06-27')
     })
     const dogProperties = buildCdoDog({
-      microchipNumber: '123456789012345'
+      microchipNumber: '123456789012345',
+      microchipNumber2: '123456789012345'
     })
     const cdo = buildCdo({
       dog: dogProperties,
@@ -144,6 +145,7 @@ describe('mapCdoTaskListToDto', () => {
       insuranceCompany: cdoTaskList.cdoSummary.insuranceCompany,
       insuranceRenewal: futureDate,
       microchipNumber: '123456789012345',
+      microchipNumber2: '123456789012345',
       applicationFeePaid: new Date('2024-06-24'),
       form2Sent: new Date('2024-05-24'),
       neuteringConfirmation: new Date('2024-02-10'),
