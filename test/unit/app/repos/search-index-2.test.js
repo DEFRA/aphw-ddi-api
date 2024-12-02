@@ -22,7 +22,10 @@ describe('Search repo', () => {
   jest.mock('../../../../app/repos/search-tgrams')
   const { updateTrigramsPerDogOrPerson } = require('../../../../app/repos/search-tgrams')
 
-  const { updateSearchIndexDog } = require('../../../../app/repos/search-index')
+  jest.mock('../../../../app/repos/search-match-codes')
+  const { updateMatchCodesPerPerson } = require('../../../../app/repos/search-match-codes')
+
+  const { updateSearchIndexDog, addPeopleOnlyIfNoDogsLeft } = require('../../../../app/repos/search-index')
 
   beforeEach(async () => {
     jest.clearAllMocks()
@@ -76,6 +79,98 @@ describe('Search repo', () => {
         search: undefined
       }
       expect(updateTrigramsPerDogOrPerson).toHaveBeenCalledWith(1, 'dog', expectDogCall, {})
+    })
+  })
+
+  describe('addPeopleOnlyIfNoDogsLeft', () => {
+    test('should handle person with json structure', async () => {
+      const mockSave = jest.fn()
+      sequelize.models.search_index.findAll.mockResolvedValue([
+        { dog_id: 1, person_id: 1, search: '12345', json: '{ firstName: \'John\', lastName: \'Smith\' }', save: mockSave }
+      ])
+
+      const persons = new Map()
+      persons.set(1, {
+        json: {
+          id: 1,
+          personReference: 'P-123',
+          firstName: 'Peter',
+          lastName: 'Brown',
+          organisationName: 'My Org Name',
+          address: {
+            address_line_1: 'addr1',
+            address_line_2: 'addr2',
+            town: 'town',
+            postcode: 'postcode',
+            country: 'England'
+          },
+          email: 'myemail@email.com'
+        }
+      })
+
+      await addPeopleOnlyIfNoDogsLeft(persons, {})
+
+      expect(sequelize.models.search_index.create).toHaveBeenCalledTimes(1)
+      const partialPerson = {
+        first_name: 'Peter',
+        last_name: 'Brown',
+        email: 'myemail@email.com',
+        organisation_name: 'My Org Name',
+        address: {
+          address_line_1: 'addr1',
+          address_line_2: 'addr2',
+          postcode: 'postcode',
+          town: 'town',
+          country: 'England'
+        },
+        person_reference: 'P-123'
+      }
+      expect(updateMatchCodesPerPerson).toHaveBeenCalledWith(1, { json: partialPerson }, {})
+      expect(updateTrigramsPerDogOrPerson).toHaveBeenCalledWith(1, 'person', { json: partialPerson }, {})
+    })
+
+    test('should handle person with without json structure', async () => {
+      const mockSave = jest.fn()
+      sequelize.models.search_index.findAll.mockResolvedValue([
+        { dog_id: 1, person_id: 1, search: '12345', json: '{ firstName: \'John\', lastName: \'Smith\' }', save: mockSave }
+      ])
+
+      const persons = new Map()
+      persons.set(1, {
+        id: 1,
+        personReference: 'P-123',
+        firstName: 'Peter',
+        lastName: 'Brown',
+        organisationName: 'My Org Name',
+        address: {
+          address_line_1: 'addr1',
+          address_line_2: 'addr2',
+          town: 'town',
+          postcode: 'postcode',
+          country: 'England'
+        },
+        email: 'myemail@email.com'
+      })
+
+      await addPeopleOnlyIfNoDogsLeft(persons, {})
+
+      expect(sequelize.models.search_index.create).toHaveBeenCalledTimes(1)
+      const partialPerson = {
+        first_name: 'Peter',
+        last_name: 'Brown',
+        email: 'myemail@email.com',
+        organisation_name: 'My Org Name',
+        address: {
+          address_line_1: 'addr1',
+          address_line_2: 'addr2',
+          postcode: 'postcode',
+          town: 'town',
+          country: 'England'
+        },
+        person_reference: 'P-123'
+      }
+      expect(updateMatchCodesPerPerson).toHaveBeenCalledWith(1, { json: partialPerson }, {})
+      expect(updateTrigramsPerDogOrPerson).toHaveBeenCalledWith(1, 'person', { json: partialPerson }, {})
     })
   })
 })
