@@ -97,6 +97,7 @@ describe('CdoTaskList', () => {
         insuranceCompany: undefined,
         insuranceRenewal: undefined,
         microchipNumber: undefined,
+        microchipNumber2: undefined,
         applicationFeePaid: undefined,
         form2Sent: undefined,
         neuteringConfirmation: undefined,
@@ -557,7 +558,8 @@ describe('CdoTaskList', () => {
         certificateIssued: new Date('2024-06-27')
       })
       const dogProperties = buildCdoDog({
-        microchipNumber: '123456789012345'
+        microchipNumber: '123456789012345',
+        microchipNumber2: '123456789012346'
       })
       const cdo = buildCdo({
         dog: dogProperties,
@@ -626,6 +628,7 @@ describe('CdoTaskList', () => {
         insuranceCompany: 'Dogs R Us',
         insuranceRenewal: in60Days,
         microchipNumber: '123456789012345',
+        microchipNumber2: '123456789012346',
         applicationFeePaid: new Date('2024-06-24'),
         form2Sent: new Date('2024-05-24'),
         neuteringConfirmation: new Date('2024-02-10'),

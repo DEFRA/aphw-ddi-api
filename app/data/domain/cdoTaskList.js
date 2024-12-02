@@ -65,9 +65,14 @@ class CdoTaskList {
 
   get cdoSummary () {
     let microchipNumber
+    let microchipNumber2
 
     if (this._cdo.dog.microchipNumber !== null) {
       microchipNumber = `${this._cdo.dog.microchipNumber}`.length > 0 ? this._cdo.dog.microchipNumber : undefined
+    }
+
+    if (this._cdo.dog.microchipNumber2 !== null) {
+      microchipNumber2 = `${this._cdo.dog.microchipNumber2}`.length > 0 ? this._cdo.dog.microchipNumber2 : undefined
     }
 
     return {
@@ -77,6 +82,7 @@ class CdoTaskList {
       insuranceCompany: this._cdo.exemption.insurance[0]?.company ?? undefined,
       insuranceRenewal: this._cdo.exemption.insurance[0]?.renewalDate ?? undefined,
       microchipNumber,
+      microchipNumber2,
       applicationFeePaid: this._cdo.exemption.applicationFeePaid ?? undefined,
       form2Sent: this._cdo.exemption.form2Sent ?? undefined,
       neuteringConfirmation: this._cdo.exemption.neuteringConfirmation ?? undefined,
