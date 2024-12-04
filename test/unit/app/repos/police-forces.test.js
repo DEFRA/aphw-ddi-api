@@ -27,7 +27,7 @@ describe('Police force repo', () => {
   jest.mock('../../../../app/messaging/send-audit')
   const { sendCreateToAudit, sendDeleteToAudit } = require('../../../../app/messaging/send-audit')
 
-  const { getPoliceForces, addForce, deleteForce, getPoliceForceByShortName, lookupPoliceForceByEmail } = require('../../../../app/repos/police-forces')
+  const { getPoliceForces, addForce, deleteForce, getPoliceForceByShortName, getPoliceForceByApiCode, lookupPoliceForceByEmail } = require('../../../../app/repos/police-forces')
 
   beforeEach(async () => {
     jest.clearAllMocks()
@@ -213,6 +213,47 @@ describe('Police force repo', () => {
       const shortName = null
 
       const policeForce = await getPoliceForceByShortName(shortName, {})
+      expect(policeForce).toBeNull()
+    })
+  })
+
+  describe('getPoliceForceByApiCode', () => {
+    test('should get police force by api code', async () => {
+      const apiCode = 'rohan-police'
+
+      sequelize.models.police_force.findOne.mockResolvedValueOnce({
+        id: 2,
+        name: 'Rohan Police Constabulary',
+        api_code: apiCode
+      })
+
+      const policeForce = await getPoliceForceByApiCode(apiCode, {})
+      expect(policeForce).toEqual({
+        id: 2,
+        name: 'Rohan Police Constabulary',
+        api_code: apiCode
+      })
+      expect(sequelize.models.police_force.findOne).toHaveBeenCalledWith({
+        where: {
+          api_code: apiCode
+        },
+        transaction: {}
+      })
+    })
+
+    test('should return null if police force does not exist', async () => {
+      sequelize.models.police_force.findOne.mockResolvedValueOnce(null)
+
+      const apiCode = 'test-force'
+
+      const policeForce = await getPoliceForceByApiCode(apiCode, {})
+      expect(policeForce).toBeNull()
+    })
+
+    test('should return null if code is null', async () => {
+      const apiCode = null
+
+      const policeForce = await getPoliceForceByApiCode(apiCode, {})
       expect(policeForce).toBeNull()
     })
   })
