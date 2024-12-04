@@ -343,15 +343,16 @@ describe('CDO endpoint', () => {
       })
       const options = {
         method: 'GET',
-        url: '/cdo/ED123/manage',
+        url: '/cdo/ED300097/manage',
         ...portalHeader
       }
 
       const response = await server.inject(options)
       const payload = JSON.parse(response.payload)
       expect(response.statusCode).toBe(200)
-      expect(getTaskListMock).toHaveBeenCalledWith('ED123')
+      expect(getTaskListMock).toHaveBeenCalledWith('ED300097')
       expect(payload).toEqual({
+        indexNumber: 'ED300097',
         verificationOptions: {
           dogDeclaredUnfit: expect.any(Boolean),
           neuteringBypassedUnder16: expect.any(Boolean),
@@ -459,6 +460,8 @@ describe('CDO endpoint', () => {
           certificateIssued: new Date('2024-06-27')
         }),
         dog: buildCdoDog({
+          id: '123',
+          indexNumber: 'ED123',
           microchipNumber: '123456789012345',
           microchipNumber2: '123456789012345'
         })
@@ -479,6 +482,7 @@ describe('CDO endpoint', () => {
       expect(response.statusCode).toBe(200)
       expect(getTaskListMock).toHaveBeenCalledWith('ED123')
       expect(payload).toEqual({
+        indexNumber: 'ED123',
         verificationOptions: {
           dogDeclaredUnfit: expect.any(Boolean),
           neuteringBypassedUnder16: expect.any(Boolean),
