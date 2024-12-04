@@ -115,7 +115,7 @@ describe('CdoTaskList', () => {
       })
       const cdo = buildCdo({
         exemption: exemptionProperties,
-        dog: buildCdoDog({ microchipNumber: '' })
+        dog: buildCdoDog({ microchipNumber: '', microchipNumber2: '' })
       })
       const cdoTaskList = new CdoTaskList(cdo)
       expect(cdoTaskList.applicationPackSent).toEqual(new CdoTask('applicationPackSent', {
