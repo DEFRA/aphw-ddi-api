@@ -91,7 +91,10 @@ module.exports = [
     },
     handler: async (request, h) => {
       const shortName = request.params.shortName
-      const policeForce = mapPoliceForceDaoToDto(await getPoliceForceByShortName(shortName))
+      console.log('JB shortName', shortName)
+      const forceDao = await getPoliceForceByShortName(shortName)
+      console.log('JB forceDao', forceDao)
+      const policeForce = forceDao ? mapPoliceForceDaoToDto(forceDao) : null
 
       return h.response({
         policeForce
