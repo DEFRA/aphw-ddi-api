@@ -1,7 +1,7 @@
 const wreck = require('@hapi/wreck')
 const config = require('../../config/index')
 const { getPostcodeLongLat } = require('./postcode')
-const { getPoliceForceByShortName } = require('../../repos/police-forces')
+const { getPoliceForceByApiCode } = require('../../repos/police-forces')
 
 const policeBaseUrl = config.policeApi.baseUrl
 const policeLocationEndpoint = 'locate-neighbourhood'
@@ -13,7 +13,7 @@ const policeApiOptions = {
 const lookupPoliceForceByPostcode = async postcode => {
   const coords = await getPostcodeLongLat(postcode)
   const policeForceName = await getPoliceForce(coords)
-  return await getPoliceForceByShortName(policeForceName)
+  return await getPoliceForceByApiCode(policeForceName)
 }
 
 const getPoliceForce = async coords => {
