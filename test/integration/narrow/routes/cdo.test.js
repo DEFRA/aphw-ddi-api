@@ -10,6 +10,7 @@ const { InvalidDataError } = require('../../../../app/errors/domain/invalidData'
 const { InvalidDateError } = require('../../../../app/errors/domain/invalidDate')
 const { buildCdoDao } = require('../../../mocks/cdo/get')
 const { portalHeader, enforcementHeader } = require('../../../mocks/jwt')
+const { auditDogCdoProgressView } = require('../../../../app/dto/auditing/view')
 
 describe('CDO endpoint', () => {
   const createServer = require('../../../../app/server')
@@ -29,7 +30,7 @@ describe('CDO endpoint', () => {
   const { getCdoService } = require('../../../../app/service/config')
 
   jest.mock('../../../../app/dto/auditing/view')
-  const { auditDogDetailsView, auditDogActivityView } = require('../../../../app/dto/auditing/view')
+  const { auditDogDetailsView, auditDogActivityView, auditDogCdoProgressView } = require('../../../../app/dto/auditing/view')
 
   beforeEach(async () => {
     jest.clearAllMocks()
@@ -422,6 +423,24 @@ describe('CDO endpoint', () => {
           }
         }
       })
+    })
+
+    test('should return an initialised manage cdo task list when called from enforcement', async () => {
+      const cdoTaskList = new CdoTaskList(buildCdo())
+      cdoRepository.getCdoTaskList.mockResolvedValue(cdoTaskList)
+      const getTaskListMock = jest.fn(_ => cdoTaskList)
+      getCdoService.mockReturnValue({
+        getTaskList: getTaskListMock
+      })
+      const options = {
+        method: 'GET',
+        url: '/cdo/ED123/manage',
+        ...enforcementHeader
+      }
+
+      const response = await server.inject(options)
+      expect(response.statusCode).toBe(200)
+      expect(auditDogCdoProgressView).toHaveBeenCalledWith(cdoTaskList, expect.anything())
     })
 
     test('should return a complete manage cdo task list', async () => {
