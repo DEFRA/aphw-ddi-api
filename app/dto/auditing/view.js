@@ -65,6 +65,11 @@ const auditDogView = async (dogEntity, user, type, subject) => {
 const auditDogDetailsView = async (dogEntity, user) => {
   await auditDogView(dogEntity, user, VIEW_DOG, 'enforcement user viewed dog details')
 }
+
+const auditDogCdoProgressView = async (dogEntity, user) => {
+  await auditDogView(dogEntity, user, VIEW_DOG, 'enforcement user viewed dog details - CDO progress')
+}
+
 const auditDogActivityView = async (dogEntity, user) => {
   await auditDogView(dogEntity, user, VIEW_DOG_ACTIVITY, 'enforcement user viewed dog activity')
 }
@@ -88,5 +93,6 @@ module.exports = {
   auditOwnerActivityView,
   auditDogDetailsView,
   auditDogActivityView,
+  auditDogCdoProgressView,
   auditSearch
 }
