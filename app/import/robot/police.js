@@ -1,7 +1,7 @@
 const wreck = require('@hapi/wreck')
 const config = require('../../config/index')
 const { getPostcodeLongLat } = require('./postcode')
-const { getPoliceForces } = require('../../repos/police-forces')
+const { getPoliceForceByShortName } = require('../../repos/police-forces')
 
 const policeBaseUrl = config.policeApi.baseUrl
 const policeLocationEndpoint = 'locate-neighbourhood'
@@ -13,7 +13,7 @@ const policeApiOptions = {
 const lookupPoliceForceByPostcode = async postcode => {
   const coords = await getPostcodeLongLat(postcode)
   const policeForceName = await getPoliceForce(coords)
-  return await matchPoliceForceByName(policeForceName)
+  return await getPoliceForceByShortName(policeForceName)
 }
 
 const getPoliceForce = async coords => {
@@ -38,18 +38,7 @@ const getPoliceForce = async coords => {
   return null
 }
 
-const matchPoliceForceByName = async (name) => {
-  if (name == null) {
-    return null
-  }
-  const policeForces = await getPoliceForces()
-
-  // Police Force name may include hyphens to separate the words, so replace all hyphens with spaces
-  return policeForces.find(x => x.name.toLowerCase().indexOf(name.replace(/-/g, ' ')) > -1)
-}
-
 module.exports = {
   lookupPoliceForceByPostcode,
-  getPoliceForce,
-  matchPoliceForceByName
+  getPoliceForce
 }

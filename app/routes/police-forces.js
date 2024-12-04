@@ -1,7 +1,7 @@
-const { getPoliceForces, addForce, deleteForce } = require('../repos/police-forces')
+const { getPoliceForces, addForce, deleteForce, getPoliceForceByShortName } = require('../repos/police-forces')
 const { createAdminItem } = require('../schema/admin/create')
 const { getCallingUser } = require('../auth/get-user')
-const { getPoliceForcesResponseSchema, policeForceSchema } = require('../schema/police-forces')
+const { getPoliceForceResponseSchema, getPoliceForcesResponseSchema, policeForceSchema } = require('../schema/police-forces')
 const { mapPoliceForceDaoToDto } = require('../dto/police-force')
 const { conflictSchema } = require('../schema/common/response/conflict')
 const { notFoundSchema } = require('../schema/common/response/not-found')
@@ -77,6 +77,25 @@ module.exports = [
       await deleteForce(policeForceId, getCallingUser(request))
 
       return h.response().code(204)
+    }
+  },
+  {
+    method: 'GET',
+    path: '/police-force-by-short-name/{shortName}',
+    options: {
+      notes: ['Get a matching Police Force using the short_name'],
+      tags: ['api'],
+      response: {
+        schema: getPoliceForceResponseSchema
+      }
+    },
+    handler: async (request, h) => {
+      const shortName = request.params.shortName
+      const policeForce = mapPoliceForceDaoToDto(await getPoliceForceByShortName(shortName))
+
+      return h.response({
+        policeForce
+      }).code(200)
     }
   }
 ]

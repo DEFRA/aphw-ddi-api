@@ -1,5 +1,3 @@
-const { lookupPoliceForceByPostcode, matchPoliceForceByName } = require('../../../../../app/import/robot/police')
-
 jest.mock('@hapi/wreck')
 const wreck = require('@hapi/wreck')
 
@@ -7,16 +5,19 @@ jest.mock('../../../../../app/import/robot/postcode')
 const { getPostcodeLongLat } = require('../../../../../app/import/robot/postcode')
 
 jest.mock('../../../../../app/repos/police-forces')
-const { getPoliceForces } = require('../../../../../app/repos/police-forces')
+const { getPoliceForceByShortName } = require('../../../../../app/repos/police-forces')
+
+const { lookupPoliceForceByPostcode } = require('../../../../../app/import/robot/police')
 
 describe('police lookup import', () => {
   beforeEach(() => {
     jest.clearAllMocks()
-    getPoliceForces.mockResolvedValue([{ name: 'Met Police' }])
+    getPoliceForceByShortName.mockResolvedValue(null)
   })
 
   describe('lookupPoliceForceByPostcode', () => {
     test('should return payload', async () => {
+      getPoliceForceByShortName.mockResolvedValue({ name: 'Met Police' })
       getPostcodeLongLat.mockResolvedValue({ lng: 123, lat: 456 })
       wreck.get.mockResolvedValue({ payload: { force: 'met-police' } })
       const result = await lookupPoliceForceByPostcode('TS1 1TS')
@@ -27,7 +28,7 @@ describe('police lookup import', () => {
 
     test('should handle error', async () => {
       wreck.get.mockImplementation(() => { throw new Error('Postcode not found') })
-      const result = await lookupPoliceForceByPostcode('TS1 1TS')
+      const result = await lookupPoliceForceByPostcode('TS1 1TS', {})
 
       expect(result).toBe(null)
     })
@@ -58,51 +59,6 @@ describe('police lookup import', () => {
 
       expect(wreck.get).toHaveBeenCalledTimes(1)
       expect(result).toBe(null)
-    })
-  })
-
-  describe('matchPoliceForceByName', () => {
-    test('should handle null name', async () => {
-      getPoliceForces.mockResolvedValue([{ name: 'Met Police' }])
-
-      const result = await matchPoliceForceByName(null)
-
-      expect(result).toBe(null)
-    })
-
-    test('should match mixed case name', async () => {
-      getPoliceForces.mockResolvedValue([
-        { name: 'Met Police' },
-        { name: 'Yorkshire Police' }
-      ])
-
-      const result = await matchPoliceForceByName('met police')
-
-      expect(result).not.toBe(null)
-      expect(result.name).toBe('Met Police')
-    })
-
-    test('should match with name with hyphens', async () => {
-      getPoliceForces.mockResolvedValue([
-        { name: 'Met Police' },
-        { name: 'Yorkshire Police' }
-      ])
-
-      const result = await matchPoliceForceByName('met-police')
-
-      expect(result).not.toBe(null)
-      expect(result.name).toBe('Met Police')
-    })
-
-    test('should not match if name doesnt exist', async () => {
-      getPoliceForces.mockResolvedValue([
-        { name: 'Met Police' },
-        { name: 'Yorkshire Police' }
-      ])
-
-      const result = await matchPoliceForceByName('pet police')
-
-      expect(result).toBe(undefined)
     })
   })
 })

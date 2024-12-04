@@ -95,6 +95,10 @@ const deleteForce = async (policeForceId, user, transaction) => {
 }
 
 const getPoliceForceByShortName = async (shortName, transaction) => {
+  if (!shortName || shortName === '') {
+    return null
+  }
+
   return sequelize.models.police_force.findOne({
     where: { short_name: shortName },
     transaction

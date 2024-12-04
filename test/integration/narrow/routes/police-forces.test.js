@@ -16,7 +16,7 @@ describe('Police force endpoint', () => {
   const { validate } = require('../../../../app/auth/token-validator')
 
   jest.mock('../../../../app/repos/police-forces')
-  const { getPoliceForces, addForce, deleteForce } = require('../../../../app/repos/police-forces')
+  const { getPoliceForces, addForce, deleteForce, getPoliceForceByShortName } = require('../../../../app/repos/police-forces')
 
   beforeEach(async () => {
     jest.clearAllMocks()
@@ -253,6 +253,54 @@ describe('Police force endpoint', () => {
       const options = {
         method: 'DELETE',
         url: '/police-forces/1',
+        ...portalHeader
+      }
+
+      const response = await server.inject(options)
+
+      expect(response.statusCode).toBe(500)
+    })
+  })
+
+  describe('GET /police-force-by-short-name', () => {
+    afterEach(() => {
+      jest.resetAllMocks()
+    })
+
+    test('route returns 200', async () => {
+      getPoliceForceByShortName.mockResolvedValue(mockForces[0])
+
+      const options = {
+        method: 'GET',
+        url: '/police-force-by-short-name/abcdef',
+        ...portalHeader
+      }
+
+      const response = await server.inject(options)
+      expect(response.statusCode).toBe(200)
+    })
+
+    test('returns force', async () => {
+      getPoliceForceByShortName.mockResolvedValue(mockForces[1])
+
+      const options = {
+        method: 'GET',
+        url: '/police-force-by-short-name/abcdef',
+        ...portalHeader
+      }
+
+      const response = await server.inject(options)
+      const { policeForce } = JSON.parse(response.payload)
+
+      expect(policeForce).toEqual({ id: 1, name: 'Northern Constabulary' })
+    })
+
+    test('route returns 500 if db error', async () => {
+      getPoliceForceByShortName.mockRejectedValue(new Error('Test error'))
+
+      const options = {
+        method: 'GET',
+        url: '/police-force-by-short-name/abcdef',
         ...portalHeader
       }
 

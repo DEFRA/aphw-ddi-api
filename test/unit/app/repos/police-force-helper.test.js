@@ -33,10 +33,13 @@ describe('Police force helper', () => {
   const { sendUpdateToAudit } = require('../../../../app/messaging/send-audit')
 
   jest.mock('../../../../app/import/robot/police')
-  const { lookupPoliceForceByPostcode, matchPoliceForceByName } = require('../../../../app/import/robot/police')
+  const { lookupPoliceForceByPostcode } = require('../../../../app/import/robot/police')
 
   jest.mock('../../../../app/repos/user-accounts')
   const { getAccount } = require('../../../../app/repos/user-accounts')
+
+  jest.mock('../../../../app/repos/police-forces')
+  const { getPoliceForceByShortName } = require('../../../../app/repos/police-forces')
 
   const { setPoliceForceOnCdos, hasForceChanged, getUsersForceList, getUsersForceGroupName } = require('../../../../app/repos/police-force-helper')
 
@@ -118,7 +121,7 @@ describe('Police force helper', () => {
       sequelize.models.registered_person.findAll.mockResolvedValue([{ dog_id: 123 }])
       sequelize.models.registration.findAll.mockResolvedValue([{ police_force_id: 20, police_force: { id: 20, name: 'Old force' } }])
       lookupPoliceForceByPostcode.mockResolvedValue({ id: 20, name: 'Old force' })
-      matchPoliceForceByName.mockResolvedValue({ id: 20, name: 'Old force' })
+      getPoliceForceByShortName.mockResolvedValue({ id: 20, name: 'Old force' })
       const res = await hasForceChanged(123, person, devUser, {})
 
       expect(res).not.toBe(null)
@@ -132,7 +135,7 @@ describe('Police force helper', () => {
       sequelize.models.registered_person.findAll.mockResolvedValue([{ dog_id: 123 }])
       sequelize.models.registration.findAll.mockResolvedValue([{ police_force_id: 20, police_force: { id: 20, name: 'Old force' } }])
       lookupPoliceForceByPostcode.mockResolvedValue({ id: 25, name: 'New force' })
-      matchPoliceForceByName.mockResolvedValue({ id: 20, name: 'Old force' })
+      getPoliceForceByShortName.mockResolvedValue({ id: 20, name: 'Old force' })
       sequelize.models.registration.findOne.mockResolvedValue({ id: 1255, police_force: 20 })
 
       const res = await hasForceChanged(12345, person, devUser, {})
@@ -150,7 +153,7 @@ describe('Police force helper', () => {
       sequelize.models.registered_person.findAll.mockResolvedValue([{ dog_id: 123 }])
       sequelize.models.registration.findAll.mockResolvedValue([{ }])
       lookupPoliceForceByPostcode.mockResolvedValue({ id: 25, name: 'New force' })
-      matchPoliceForceByName.mockResolvedValue({ id: 20, name: 'Old force' })
+      getPoliceForceByShortName.mockResolvedValue({ id: 20, name: 'Old force' })
       sequelize.models.registration.findOne.mockResolvedValue({ id: 1255, police_force: 20 })
 
       const res = await hasForceChanged(12345, person, devUser, {})
@@ -168,7 +171,7 @@ describe('Police force helper', () => {
       sequelize.models.registered_person.findAll.mockResolvedValue([{ dog_id: 123 }])
       sequelize.models.registration.findAll.mockResolvedValue([{ }])
       lookupPoliceForceByPostcode.mockResolvedValue({ id: 25, name: 'New force' })
-      matchPoliceForceByName.mockResolvedValue({ id: 30, name: 'Police scotland' })
+      getPoliceForceByShortName.mockResolvedValue({ id: 30, name: 'Police scotland' })
       sequelize.models.registration.findOne.mockResolvedValue({ id: 1255, police_force: 20 })
 
       const res = await hasForceChanged(12345, person, devUser, {})
@@ -186,7 +189,7 @@ describe('Police force helper', () => {
       sequelize.models.registered_person.findAll.mockResolvedValue([{ dog_id: 123 }])
       sequelize.models.registration.findAll.mockResolvedValue([{ }])
       lookupPoliceForceByPostcode.mockResolvedValue({ })
-      matchPoliceForceByName.mockResolvedValue({ })
+      getPoliceForceByShortName.mockResolvedValue({ })
       sequelize.models.registration.findOne.mockResolvedValue({ id: 1255, police_force: 20 })
 
       const res = await hasForceChanged(12345, person, devUser, {})
@@ -207,7 +210,7 @@ describe('Police force helper', () => {
         { police_force_id: 20, police_force: { id: 20, name: 'Old force' } }
       ])
       lookupPoliceForceByPostcode.mockResolvedValue({ id: 25, name: 'New force' })
-      matchPoliceForceByName.mockResolvedValue({ id: 20, name: 'Old force' })
+      getPoliceForceByShortName.mockResolvedValue({ id: 20, name: 'Old force' })
       sequelize.models.registration.findOne.mockResolvedValue({ id: 1255, police_force: 20 })
 
       const res = await hasForceChanged(12345, person, devUser, {})

@@ -200,12 +200,19 @@ describe('Police force repo', () => {
       })
     })
 
-    test('should return null if police force does not exist when searched by domain', async () => {
+    test('should return null if police force does not exist', async () => {
       sequelize.models.police_force.findOne.mockResolvedValueOnce(null)
 
-      const domain = 'example.com'
+      const shortName = 'test-force'
 
-      const policeForce = await getPoliceForceByShortName(domain, {})
+      const policeForce = await getPoliceForceByShortName(shortName, {})
+      expect(policeForce).toBeNull()
+    })
+
+    test('should return null if name is null', async () => {
+      const shortName = null
+
+      const policeForce = await getPoliceForceByShortName(shortName, {})
       expect(policeForce).toBeNull()
     })
   })
@@ -235,6 +242,11 @@ describe('Police force repo', () => {
 
       const policeForce = await lookupPoliceForceByEmail('some-email@bad-domain.police.uk', {})
       expect(policeForce).toBe('bad-domain.police.uk')
+    })
+
+    test('should return unknown if blank domain', async () => {
+      const policeForce = await lookupPoliceForceByEmail(undefined, {})
+      expect(policeForce).toBe('unknown')
     })
   })
 
