@@ -458,6 +458,25 @@ describe('Exemption', () => {
       expect(callback).toHaveBeenCalled()
     })
 
+    test('should not issue certificate if renewal date is undefined', () => {
+      const callback = jest.fn()
+      const exemption = new Exemption(buildExemption({
+        form2Sent: new Date(),
+        applicationPackSent: new Date(),
+        applicationFeePaid: new Date(),
+        microchipVerification: new Date(),
+        neuteringConfirmation: new Date(),
+        verificationDatesRecorded: new Date(),
+        insurance: [
+          buildCdoInsurance({
+            renewalDate: undefined,
+            company: 'Dogs Trust'
+          })
+        ]
+      }))
+      expect(() => exemption.issueCertificate(auditDate, callback)).toThrow()
+    })
+
     test('should not issue certificate given insurance date in past', () => {
       const callback = jest.fn()
       const yesterday = inXDays(-1)

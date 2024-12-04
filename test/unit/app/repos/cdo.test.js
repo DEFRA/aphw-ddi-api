@@ -647,6 +647,28 @@ describe('CDO repo', () => {
       expect(taskList.applicationPackSent.completed).toBe(true)
     })
 
+    test('should update applicationPackSent', async () => {
+      const dog = buildCdoDao({
+        registration: buildRegistrationDao({
+          save: jest.fn()
+        })
+      })
+
+      sequelize.models.dog.findAll.mockResolvedValue([dog])
+
+      const callback = jest.fn()
+      const cdoTaskList = new CdoTaskList(buildCdo())
+      expect(dog.registration.application_pack_sent).toBeNull()
+      cdoTaskList.sendApplicationPack(new Date(), callback)
+      const taskList = await saveCdoTaskList(cdoTaskList, {})
+      expect(sequelize.models.dog.findAll).toHaveBeenCalledWith(expect.objectContaining({
+        where: { index_number: 'ED300097' }
+      }))
+      expect(dog.registration.save).toHaveBeenCalled()
+      expect(callback).toHaveBeenCalled()
+      expect(taskList.applicationPackSent.completed).toBe(true)
+    })
+
     test('should update insurance details', async () => {
       const renewalDate = new Date()
 
@@ -891,6 +913,24 @@ describe('CDO repo', () => {
     })
 
     test('should handle missing model', async () => {
+      sequelize.models.dog.findAll.mockResolvedValueOnce([{ registration: null }])
+
+      const callback = jest.fn()
+
+      const cdoTaskList = new CdoTaskList(buildCdo({
+        exemption: buildExemption({
+          applicationPackSent: new Date(),
+          form2Sent: new Date()
+        })
+      }))
+      expect(cdoTaskList.verificationDateRecorded.completed).toBe(false)
+
+      cdoTaskList.verifyDates({ microchipVerification: new Date(), neuteringConfirmation: new Date() }, callback)
+
+      await expect(saveCdoTaskList(cdoTaskList, {})).rejects.toThrow('Missing model')
+    })
+
+    test('should update cdoDao fields', async () => {
       sequelize.models.dog.findAll.mockResolvedValueOnce([{ registration: null }])
 
       const callback = jest.fn()
