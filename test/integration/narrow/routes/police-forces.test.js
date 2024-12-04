@@ -295,6 +295,21 @@ describe('Police force endpoint', () => {
       expect(policeForce).toEqual({ id: 1, name: 'Northern Constabulary' })
     })
 
+    test('returns null if not found', async () => {
+      getPoliceForceByApiCode.mockResolvedValue(null)
+
+      const options = {
+        method: 'GET',
+        url: '/police-force-by-api-code/abcdef',
+        ...portalHeader
+      }
+
+      const response = await server.inject(options)
+      const { policeForce } = JSON.parse(response.payload)
+
+      expect(policeForce).toBe(null)
+    })
+
     test('route returns 500 if db error', async () => {
       getPoliceForceByApiCode.mockRejectedValue(new Error('Test error'))
 
