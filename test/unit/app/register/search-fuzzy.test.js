@@ -43,11 +43,22 @@ describe('Search repo (fuzzy)', () => {
   })
 
   test('fuzzy search should dedupe results', async () => {
+    const testRequest = {
+      ...mockRequest,
+      params: {
+        type: 'dog',
+        terms: 'john peter mark'
+      },
+      query: {
+        fuzzy: true
+      }
+    }
+
     sequelize.models.search_index.findAll.mockResolvedValue(uniqueResults)
     sequelize.models.search_match_code.findAll.mockResolvedValue(matchCodeResults)
     sequelize.models.search_tgram.findAll.mockResolvedValue(trigramResults)
 
-    const results = await search(mockRequest, devUser, 'dog', 'john mark peter', true)
+    const results = await search(testRequest, devUser)
     expect(results.results.length).toBe(3)
     expect(results.totalFound).toBe(3)
     expect(results.results[0].firstName).toBe('John')
