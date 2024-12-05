@@ -207,6 +207,7 @@ const buildRegistrationDao = (registrationPartial = {}) => ({
   non_compliance_letter_sent: null,
   deleted_at: null,
   application_pack_sent: null,
+  application_pack_processed: null,
   form_two_sent: null,
   insurance_details_recorded: null,
   microchip_number_recorded: null,

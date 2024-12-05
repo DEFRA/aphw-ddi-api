@@ -108,9 +108,9 @@ const buildCdoInsurance = (insurancePartial = {}) => ({
  * @property {string} policeForce - Name of the police force.
  * @property {Date|null} applicationFeePaid - Status of application fee payment, currently null.
  * @property {Date|null} applicationPackSent - Date application pack was sent
+ * @property {Date|null} applicationPackProcessed - Status of Application Pack Processed
  * @property {Date|null} form2Sent - Date Form Two was sent
  * @property {Date|null} applicationFeePaid - Status of application fee payment, currently null.
- * @property {Date|null} processedApplicationRecorded - Status of Application Pack Processed
  */
 
 /**
@@ -126,6 +126,7 @@ const buildExemption = (exemptionPartial = {}) => ({
   legislationOfficer: 'Sidney Lewis',
   certificateIssued: null,
   applicationFeePaid: null,
+  applicationPackProcessed: null,
   insurance: [],
   neuteringConfirmation: null,
   neuteringDeadline: null,
@@ -139,7 +140,6 @@ const buildExemption = (exemptionPartial = {}) => ({
   microchipNumberRecorded: null,
   applicationFeePaymentRecorded: null,
   verificationDatesRecorded: null,
-  applicationPackProcessed: null,
   ...exemptionPartial
 })
 
