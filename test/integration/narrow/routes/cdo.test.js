@@ -367,6 +367,13 @@ describe('CDO endpoint', () => {
             readonly: false,
             timestamp: undefined
           },
+          applicationPackProcessed: {
+            key: 'applicationPackProcessed',
+            available: false,
+            completed: false,
+            readonly: false,
+            timestamp: undefined
+          },
           insuranceDetailsRecorded: {
             key: 'insuranceDetailsRecorded',
             available: false,
@@ -447,6 +454,7 @@ describe('CDO endpoint', () => {
       const cdoTaskList = new CdoTaskList(buildCdo({
         exemption: buildExemption({
           applicationPackSent: new Date('2024-06-25'),
+          applicationPackProcessed: new Date('2024-06-25'),
           form2Sent: new Date('2024-05-24'),
           applicationFeePaid: new Date('2024-06-24'),
           neuteringConfirmation: new Date('2024-02-10'),
@@ -492,6 +500,13 @@ describe('CDO endpoint', () => {
         tasks: {
           applicationPackSent: {
             key: 'applicationPackSent',
+            available: true,
+            completed: true,
+            readonly: true,
+            timestamp: '2024-06-25T00:00:00.000Z'
+          },
+          applicationPackProcessed: {
+            key: 'applicationPackProcessed',
             available: true,
             completed: true,
             readonly: true,
