@@ -188,6 +188,33 @@ module.exports = [
   },
   {
     method: 'POST',
+    path: '/cdo/{indexNumber}/manage:processApplicationPack',
+    options: {
+      auth: { scope: scopes.internal },
+      tags: ['api'],
+      notes: ['Process Application Pack Manage CDO domain action.  Processes application pack sent event & updates the status of the processApplicationPack stage of the CDO tasklist.  Completion of this is necessary in order to perform subsequent tasks.'],
+      response: {
+        status: {
+          204: undefined,
+          409: simpleConflictSchema
+        }
+      }
+    },
+    handler: async (request, h) => {
+      const indexNumber = request.params.indexNumber
+
+      try {
+        const cdoService = ServiceProvider.getCdoService()
+        await cdoService.processApplicationPack(indexNumber, new Date(), getCallingUser(request))
+
+        return h.response().code(204)
+      } catch (e) {
+        return handleErrors(e, 'processApplicationPack', indexNumber, h)
+      }
+    }
+  },
+  {
+    method: 'POST',
     path: '/cdo/{indexNumber}/manage:recordInsuranceDetails',
     options: {
       auth: { scope: scopes.internal },
