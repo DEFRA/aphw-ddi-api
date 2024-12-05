@@ -557,6 +557,7 @@ describe('CDO endpoint', () => {
         },
         applicationFeePaid: '2024-06-24T00:00:00.000Z',
         applicationPackSent: '2024-06-25T00:00:00.000Z',
+        applicationPackProcessed: '2024-06-25T00:00:00.000Z',
         certificateIssued: '2024-06-27T00:00:00.000Z',
         form2Sent: '2024-05-24T00:00:00.000Z',
         insuranceCompany: 'Dogs R Us',
