@@ -47,6 +47,7 @@ class Exemption extends Changeable {
     this.joinedExemptionScheme = exemptionProperties.joinedExemptionScheme
     this.nonComplianceLetterSent = exemptionProperties.nonComplianceLetterSent
     this.applicationPackSent = exemptionProperties.applicationPackSent
+    this.applicationPackProcessed = exemptionProperties.applicationPackProcessed
     this._form2Sent = exemptionProperties.form2Sent
     this._insuranceDetailsRecorded = exemptionProperties.insuranceDetailsRecorded
     this._microchipNumberRecorded = exemptionProperties.microchipNumberRecorded
@@ -57,6 +58,11 @@ class Exemption extends Changeable {
   sendApplicationPack (auditDate, callback) {
     this.applicationPackSent = auditDate
     this._updates.update('applicationPackSent', auditDate, callback)
+  }
+
+  processApplicationPack (auditDate, callback) {
+    this.applicationPackProcessed = auditDate
+    this._updates.update('applicationPackProcessed', auditDate, callback)
   }
 
   get insurance () {

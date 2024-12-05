@@ -7,32 +7,21 @@ const { SequenceViolationError } = require('../../../../../app/errors/domain/seq
 const { Dog } = require('../../../../../app/data/domain')
 
 describe('Exemption', () => {
-  const exemptionProperties = {
+  const exemptionProperties = buildExemption({
     exemptionOrder: '2015',
     cdoIssued: '2023-10-10',
     cdoExpiry: '2023-12-10',
     court: 'Aberystwyth Justice Centre',
     policeForce: 'Avon and Somerset Constabulary',
     legislationOfficer: 'Sidney Lewis',
-    certificateIssued: null,
-    applicationFeePaid: null,
     insurance: [
       {
         company: 'Allianz',
         insuranceRenewal: '2024-01-01T00:00:00.000Z'
       }
     ],
-    neuteringConfirmation: null,
-    microchipVerification: null,
-    joinedExemptionScheme: '2023-12-10',
-    nonComplianceLetterSent: null,
-    applicationPackSent: null,
-    form2Sent: null,
-    insuranceDetailsRecorded: null,
-    microchipNumberRecorded: null,
-    applicationFeePaymentRecorded: null,
-    verificationDatesRecorded: null
-  }
+    joinedExemptionScheme: '2023-12-10'
+  })
 
   const thisMorning = new Date()
   thisMorning.setUTCHours(0, 0, 0, 0)
@@ -70,7 +59,8 @@ describe('Exemption', () => {
       insuranceDetailsRecorded: null,
       microchipNumberRecorded: null,
       applicationFeePaymentRecorded: null,
-      verificationDatesRecorded: null
+      verificationDatesRecorded: null,
+      applicationPackProcessed: null
     }))
     expect(exemption).toBeInstanceOf(Exemption)
   })
@@ -83,6 +73,20 @@ describe('Exemption', () => {
       expect(exemption.applicationPackSent).toEqual(expect.any(Date))
       expect(exemption.getChanges()).toEqual([{
         key: 'applicationPackSent',
+        value: auditDate,
+        callback: undefined
+      }])
+    })
+  })
+
+  describe('processApplicationPack', () => {
+    const auditDate = new Date()
+    test('should set application pack sent', () => {
+      const exemption = new Exemption(exemptionProperties)
+      exemption.processApplicationPack(auditDate)
+      expect(exemption.applicationPackProcessed).toEqual(expect.any(Date))
+      expect(exemption.getChanges()).toEqual([{
+        key: 'applicationPackProcessed',
         value: auditDate,
         callback: undefined
       }])
