@@ -56,11 +56,12 @@ class CdoTaskList {
 
   get _preCertificateStepsComplete () {
     return this.applicationPackSent.completed &&
-    this.insuranceDetailsRecorded.completed &&
-    this._preCertificateMicrochipStageComplete &&
-    this.applicationFeePaid.completed &&
-    this.form2Sent.completed &&
-    this.verificationDateRecorded.completed
+      this.applicationPackProcessed.completed &&
+      this.insuranceDetailsRecorded.completed &&
+      this._preCertificateMicrochipStageComplete &&
+      this.applicationFeePaid.completed &&
+      this.form2Sent.completed &&
+      this.verificationDateRecorded.completed
   }
 
   get cdoSummary () {
@@ -79,6 +80,7 @@ class CdoTaskList {
       id: this._cdo.dog.id,
       indexNumber: this._cdo.dog.indexNumber,
       applicationPackSent: this._cdo.exemption.applicationPackSent ?? undefined,
+      applicationPackProcessed: this._cdo.exemption.applicationPackProcessed ?? undefined,
       insuranceCompany: this._cdo.exemption.insurance[0]?.company ?? undefined,
       insuranceRenewal: this._cdo.exemption.insurance[0]?.renewalDate ?? undefined,
       microchipNumber,
@@ -106,6 +108,21 @@ class CdoTaskList {
       'applicationPackSent',
       {
         available: true,
+        completed,
+        readonly: completed
+      },
+      timestamp
+    )
+  }
+
+  get applicationPackProcessed () {
+    const timestamp = this._cdo.exemption.applicationPackProcessed ?? undefined
+    const completed = timestamp !== undefined
+
+    return new CdoTask(
+      'applicationPackProcessed',
+      {
+        available: this._actionPackStageComplete,
         completed,
         readonly: completed
       },
@@ -318,6 +335,14 @@ class CdoTaskList {
       throw new ActionAlreadyPerformedError('Application pack can only be sent once')
     }
     this._cdo.exemption.sendApplicationPack(sentDate, callback)
+  }
+
+  processApplicationPack (sentDate, callback) {
+    this._actionPackCompleteGuard()
+    if (this.applicationPackProcessed.completed) {
+      throw new ActionAlreadyPerformedError('Application pack can only be processed once')
+    }
+    this._cdo.exemption.processApplicationPack(sentDate, callback)
   }
 
   recordInsuranceDetails (company, renewalDate, callback) {
