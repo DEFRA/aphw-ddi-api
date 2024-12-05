@@ -105,14 +105,14 @@ const resultsModel = (results, totalFound) => {
   }
 }
 
-const search = async (user, type, terms, fuzzy = false, national = false) => {
+const search = async (request, user, type, terms, fuzzy = false, national = false) => {
   if (terms === null || terms === undefined) {
     return resultsModel([], 0)
   }
 
   const termsArray = cleanupSearchTerms(terms)
 
-  const policeForceIds = national ? undefined : await getUsersForceList(user)
+  const policeForceIds = national ? undefined : await getUsersForceList(user, request)
 
   const fullTextToKeep = await doFullTextSearch(termsArray, type, fuzzy, policeForceIds)
 

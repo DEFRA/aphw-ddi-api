@@ -28,6 +28,17 @@ describe('Search repo', () => {
   const { search } = require('../../../../app/search/search')
   const { sortOwnerSearch } = require('../../../../app/search/search-processors/sorting-and-grouping')
 
+  const mockRequest = {
+    server: {
+      app: {
+        cache: {
+          set: jest.fn(),
+          get: jest.fn()
+        }
+      }
+    }
+  }
+
   beforeEach(async () => {
     jest.clearAllMocks()
   })
@@ -35,7 +46,7 @@ describe('Search repo', () => {
   test('search for dogs should return empty array if no terms', async () => {
     sequelize.models.search_index.findAll.mockResolvedValue(mockUniqueResults)
 
-    const results = await search(devUser)
+    const results = await search(mockRequest, devUser)
     expect(results.results.length).toBe(0)
     expect(results.totalFound).toBe(0)
   })
@@ -43,7 +54,7 @@ describe('Search repo', () => {
   test('search for dogs should return array of unique results for standard search', async () => {
     sequelize.models.search_index.findAll.mockResolvedValue(mockUniqueResults)
 
-    const results = await search(devUser, 'dog', 'john peter mark')
+    const results = await search(mockRequest, devUser, 'dog', 'john peter mark')
     expect(results.results.length).toBe(3)
     expect(results.totalFound).toBe(3)
     expect(results.results[0].firstName).toBe('John')
@@ -57,7 +68,7 @@ describe('Search repo', () => {
   test('search for owners with many dogs should return many dogs under owner', async () => {
     sequelize.models.search_index.findAll.mockResolvedValue(mockResultsForGrouping)
 
-    const results = await search(devUser, 'owner', 'john peter mark')
+    const results = await search(mockRequest, devUser, 'owner', 'john peter mark')
     expect(results.totalFound).toBe(2)
     expect(results.results.length).toBe(2)
     expect(results.results[0].firstName).toBe('Peter')
@@ -79,7 +90,7 @@ describe('Search repo', () => {
   test('search for owner should return empty array when no owners', async () => {
     sequelize.models.search_index.findAll.mockResolvedValue([])
 
-    const results = await search(devUser, 'owner', 'term1')
+    const results = await search(mockRequest, devUser, 'owner', 'term1')
     expect(results.results.length).toBe(0)
     expect(results.totalFound).toBe(0)
   })
@@ -89,7 +100,7 @@ describe('Search repo', () => {
     sequelize.models.search_match_code.findAll.mockResolvedValue([])
     sequelize.models.search_tgram.findAll.mockResolvedValue([])
 
-    const results = await search(devUser, 'owner', 'smith')
+    const results = await search(mockRequest, devUser, 'owner', 'smith')
     expect(results.results.length).toBe(11)
     expect(results.totalFound).toBe(11)
   })
@@ -99,7 +110,7 @@ describe('Search repo', () => {
     sequelize.models.search_match_code.findAll.mockResolvedValue([])
     sequelize.models.search_tgram.findAll.mockResolvedValue([])
 
-    const results = await search(devUser, 'dog', '123451234512345', true)
+    const results = await search(mockRequest, devUser, 'dog', '123451234512345', true)
     expect(results.results.length).toBe(0)
     expect(results.totalFound).toBe(0)
   })
@@ -109,7 +120,7 @@ describe('Search repo', () => {
     sequelize.models.search_match_code.findAll.mockResolvedValue([])
     sequelize.models.search_tgram.findAll.mockResolvedValue([])
 
-    const results = await search(devUser, 'dog', '123451234512345 smith', true)
+    const results = await search(mockRequest, devUser, 'dog', '123451234512345 smith', true)
     expect(results.results.length).toBe(13)
     expect(results.totalFound).toBe(13)
   })
@@ -119,7 +130,7 @@ describe('Search repo', () => {
     sequelize.models.search_match_code.findAll.mockResolvedValue([])
     sequelize.models.search_tgram.findAll.mockResolvedValue([])
 
-    const results = await search(devUser, 'dog', '123451 smith', true)
+    const results = await search(mockRequest, devUser, 'dog', '123451 smith', true)
     expect(results.results.length).toBe(13)
     expect(results.totalFound).toBe(13)
   })

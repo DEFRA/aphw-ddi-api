@@ -27,6 +27,17 @@ describe('Search repo (fuzzy)', () => {
 
   const { search } = require('../../../../app/search/search')
 
+  const mockRequest = {
+    server: {
+      app: {
+        cache: {
+          set: jest.fn(),
+          get: jest.fn()
+        }
+      }
+    }
+  }
+
   beforeEach(async () => {
     jest.clearAllMocks()
   })
@@ -36,7 +47,7 @@ describe('Search repo (fuzzy)', () => {
     sequelize.models.search_match_code.findAll.mockResolvedValue(matchCodeResults)
     sequelize.models.search_tgram.findAll.mockResolvedValue(trigramResults)
 
-    const results = await search(devUser, 'dog', 'john mark peter', true)
+    const results = await search(mockRequest, devUser, 'dog', 'john mark peter', true)
     expect(results.results.length).toBe(3)
     expect(results.totalFound).toBe(3)
     expect(results.results[0].firstName).toBe('John')

@@ -4,6 +4,7 @@ const { getPoliceForceByApiCode } = require('../repos/police-forces')
 const { EXEMPTION } = require('../constants/event/audit-event-object-types')
 const { sendUpdateToAudit } = require('../messaging/send-audit')
 const { getAccount } = require('../repos/user-accounts')
+const { getListFromCache, saveListToCache } = require('../search/search-processors/search-police-list')
 
 const returnResult = (changed, reason, numOfDogs, policeForceName) => {
   return {
@@ -111,7 +112,7 @@ const setPoliceForceOnCdos = async (policeForce, dogIds, user, transaction) => {
   return madeChanges
 }
 
-const getUsersForceList = async (user) => {
+const getForceListFromDb = async (user) => {
   const account = await getAccount(user?.username?.toLowerCase())
   const usersMainPoliceForceId = account?.police_force_id
   if (usersMainPoliceForceId) {
@@ -126,6 +127,16 @@ const getUsersForceList = async (user) => {
     }
   }
   return usersMainPoliceForceId ? [usersMainPoliceForceId] : undefined
+}
+
+const getUsersForceList = async (user, request) => {
+  const policeIds = await getListFromCache(user, request)
+  if (policeIds) {
+    return policeIds
+  }
+
+  const policeForceIds = await getForceListFromDb(user)
+  return saveListToCache(user, request, policeForceIds)
 }
 
 const getUsersForceGroupName = async (username) => {
@@ -158,5 +169,6 @@ module.exports = {
   hasForceChanged,
   setPoliceForceOnCdos,
   getUsersForceList,
-  getUsersForceGroupName
+  getUsersForceGroupName,
+  getForceListFromDb
 }

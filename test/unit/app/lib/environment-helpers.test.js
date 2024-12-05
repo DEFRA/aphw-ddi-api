@@ -1,4 +1,4 @@
-const { getEnvironmentVariable, getEnvironmentVariableOrString } = require('../../../../app/lib/environment-helpers')
+const { getEnvironmentVariable, getEnvironmentVariableOrString, getEnvCode } = require('../../../../app/lib/environment-helpers')
 describe('environment-helpers', () => {
   const OLD_ENV = process.env
 
@@ -41,6 +41,27 @@ describe('environment-helpers', () => {
       process.env.CUSTOM_ENV_VARIABLE2 = '0'
       const customEnvVariable = getEnvironmentVariableOrString('CUSTOM_ENV_VARIABLE2')
       expect(customEnvVariable).toBe('0')
+    })
+  })
+
+  describe('getEnvCode', () => {
+    test('should return blank string if no config', () => {
+      expect(getEnvCode(undefined)).toBe('')
+      expect(getEnvCode(null)).toBe('')
+      expect(getEnvCode({})).toBe('')
+    })
+
+    test('should return blank string if config has wrong number of segments', () => {
+      expect(getEnvCode('aphw-ddi-api')).toBe('')
+      expect(getEnvCode('aphw-ddi-api-test-abc')).toBe('')
+      expect(getEnvCode('')).toBe('')
+    })
+
+    test('should return 4th element if config is correct', () => {
+      expect(getEnvCode('aphw-ddi-api-dev')).toBe('dev')
+      expect(getEnvCode('aphw-ddi-api-test')).toBe('test')
+      expect(getEnvCode('aphw-ddi-api-pre')).toBe('pre')
+      expect(getEnvCode('aphw-ddi-api-prd')).toBe('prd')
     })
   })
 })

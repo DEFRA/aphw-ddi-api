@@ -1,7 +1,7 @@
 jest.mock('../../../../app/cache')
 const { set, get } = require('../../../../app/cache')
 
-const { getEnvCode, buildSearchCacheKey, saveResultsToCacheAndGetPageOne, getPageFromCache } = require('../../../../app/search/search-processors/search-results-paginator')
+const { buildSearchCacheKey, saveResultsToCacheAndGetPageOne, getPageFromCache } = require('../../../../app/search/search-processors/search-results-paginator')
 
 const array1to30 = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30]
 
@@ -9,27 +9,6 @@ describe('Search results paginator', () => {
   beforeEach(function () {
     jest.clearAllMocks()
     set.mockResolvedValue()
-  })
-
-  describe('getEnvCode', () => {
-    test('should return blank string if no config', () => {
-      expect(getEnvCode(undefined)).toBe('')
-      expect(getEnvCode(null)).toBe('')
-      expect(getEnvCode({})).toBe('')
-    })
-
-    test('should return blank string if config has wrong number of segments', () => {
-      expect(getEnvCode('aphw-ddi-api')).toBe('')
-      expect(getEnvCode('aphw-ddi-api-test-abc')).toBe('')
-      expect(getEnvCode('')).toBe('')
-    })
-
-    test('should return 4th element if config is correct', () => {
-      expect(getEnvCode('aphw-ddi-api-dev')).toBe('dev')
-      expect(getEnvCode('aphw-ddi-api-test')).toBe('test')
-      expect(getEnvCode('aphw-ddi-api-pre')).toBe('pre')
-      expect(getEnvCode('aphw-ddi-api-prd')).toBe('prd')
-    })
   })
 
   describe('buildSearchCacheKey', () => {
