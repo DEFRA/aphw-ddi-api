@@ -105,7 +105,12 @@ const resultsModel = (results, totalFound) => {
   }
 }
 
-const search = async (request, user, type, terms, fuzzy = false, national = false) => {
+const search = async (request, user) => {
+  const terms = request.params.terms
+  const type = request.params.type
+  const fuzzy = !!request.query.fuzzy
+  const national = !!request.query.national
+
   if (terms === null || terms === undefined) {
     return resultsModel([], 0)
   }

@@ -44,14 +44,33 @@ describe('Search test', () => {
 
     test('should handle no terms', async () => {
       const terms = undefined
-      const res = await search(mockRequest, devUser, 'dog', terms)
+      const testRequest = {
+        ...mockRequest,
+        params: {
+          type: 'dog',
+          terms
+        },
+        query: {}
+      }
+      const res = await search(testRequest, devUser)
       expect(res).toEqual({ results: [], totalFound: 0 })
     })
 
     test('should handle national search', async () => {
       const terms = 'dummy'
+      const testRequest = {
+        ...mockRequest,
+        params: {
+          type: 'dog',
+          terms
+        },
+        query: {
+          fuzzy: false,
+          national: true
+        }
+      }
       sequelize.models.search_index.findAll.mockResolvedValue([])
-      const res = await search(mockRequest, devUser, 'dog', terms, false, true)
+      const res = await search(testRequest, devUser)
       expect(res).toEqual({ results: [], totalFound: 0 })
       expect(sequelize.models.search_index.findAll).toHaveBeenCalledTimes(1)
       expect(sequelize.models.search_index.findAll).toHaveBeenCalledWith({
@@ -62,9 +81,20 @@ describe('Search test', () => {
 
     test('should handle local search', async () => {
       const terms = 'dummy'
+      const testRequest = {
+        ...mockRequest,
+        params: {
+          type: 'dog',
+          terms
+        },
+        query: {
+          fuzzy: false,
+          national: false
+        }
+      }
       sequelize.models.search_index.findAll.mockResolvedValue([])
       getUsersForceList.mockResolvedValue([1])
-      const res = await search(mockRequest, devUser, 'dog', terms, false, false)
+      const res = await search(testRequest, devUser)
       expect(res).toEqual({ results: [], totalFound: 0 })
       expect(sequelize.models.search_index.findAll).toHaveBeenCalledTimes(1)
       expect(sequelize.models.search_index.findAll).toHaveBeenCalledWith({
@@ -75,11 +105,22 @@ describe('Search test', () => {
 
     test('should handle local fuzzy search', async () => {
       const terms = 'dummy'
+      const testRequest = {
+        ...mockRequest,
+        params: {
+          type: 'dog',
+          terms
+        },
+        query: {
+          fuzzy: true,
+          national: false
+        }
+      }
       sequelize.models.search_index.findAll.mockResolvedValue([])
       sequelize.models.search_match_code.findAll.mockResolvedValue([])
       sequelize.models.search_tgram.findAll.mockResolvedValue([])
       getUsersForceList.mockResolvedValue([1, 2, 3])
-      const res = await search(mockRequest, devUser, 'dog', terms, true, false)
+      const res = await search(testRequest, devUser)
       expect(res).toEqual({ results: [], totalFound: 0 })
       expect(sequelize.models.search_index.findAll).toHaveBeenCalledTimes(3)
       expect(sequelize.models.search_index.findAll).toHaveBeenNthCalledWith(1, {

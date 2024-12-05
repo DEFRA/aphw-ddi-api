@@ -345,6 +345,11 @@ const isAccountEnabled = async (username) => {
  * @param {string} username
  * @return {Promise<UserAccount>}
  */
+
+/**
+ * @param {string} username
+ * @returns {Promise<UserAccount>}
+ */
 const getAccount = async (username) => {
   return await sequelize.models.user_account.findOne({
     where: { username }
