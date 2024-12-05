@@ -38,10 +38,24 @@ describe('Police force helper', () => {
   jest.mock('../../../../app/repos/user-accounts')
   const { getAccount } = require('../../../../app/repos/user-accounts')
 
+  jest.mock('../../../../app/search/search-processors/search-police-list')
+  const { getListFromCache, saveListToCache } = require('../../../../app/search/search-processors/search-police-list')
+
   jest.mock('../../../../app/repos/police-forces')
   const { getPoliceForceByApiCode } = require('../../../../app/repos/police-forces')
 
-  const { setPoliceForceOnCdos, hasForceChanged, getUsersForceList, getUsersForceGroupName } = require('../../../../app/repos/police-force-helper')
+  const { setPoliceForceOnCdos, hasForceChanged, getUsersForceList, getUsersForceGroupName, getForceListFromDb } = require('../../../../app/repos/police-force-helper')
+
+  const mockRequest = {
+    server: {
+      app: {
+        cache: {
+          set: jest.fn(),
+          get: jest.fn()
+        }
+      }
+    }
+  }
 
   beforeEach(async () => {
     jest.clearAllMocks()
@@ -227,16 +241,32 @@ describe('Police force helper', () => {
   })
 
   describe('getUsersForceList', () => {
+    test('returns from cache if previously stored', async () => {
+      getListFromCache.mockResolvedValue([45])
+      const res = await getUsersForceList(devUser, mockRequest)
+      expect(res).toEqual([45])
+    })
+
+    test('returns from DB if not in cache', async () => {
+      getAccount.mockResolvedValue({ police_force_id: 123 })
+      getListFromCache.mockResolvedValue()
+      saveListToCache.mockResolvedValue([123])
+      const res = await getUsersForceList(devUser, mockRequest)
+      expect(res).toEqual([123])
+    })
+  })
+
+  describe('getForceListFromDb', () => {
     test('returns undefined if no police force set', async () => {
       getAccount.mockResolvedValue()
-      const res = await getUsersForceList(devUser)
+      const res = await getForceListFromDb(devUser)
       expect(res).toBe(undefined)
     })
 
     test('returns single force if force is not joined with others', async () => {
       getAccount.mockResolvedValue({ police_force_id: 123 })
       sequelize.models.police_force_group_item.findOne.mockResolvedValue()
-      const res = await getUsersForceList(devUser)
+      const res = await getForceListFromDb(devUser)
       expect(res).toEqual([123])
     })
 
@@ -248,7 +278,7 @@ describe('Police force helper', () => {
         { police_force_group_id: 12, police_force_id: 22 },
         { police_force_group_id: 12, police_force_id: 3 }
       ])
-      const res = await getUsersForceList(devUser)
+      const res = await getForceListFromDb(devUser)
       expect(res).toEqual([1, 22, 3])
     })
   })

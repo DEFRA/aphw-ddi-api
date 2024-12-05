@@ -1,15 +1,11 @@
 const { eventsTopic } = require('../../config/message')
+const { getEnvCode } = require('../../lib/environment-helpers')
 const { MINUTE } = require('../../constants/time')
 const { addMinutes } = require('../../lib/date-helpers')
 const { get, set } = require('../../cache')
 
 const resultsPerPage = 20
 const expiryPeriodInMins = 65
-
-const getEnvCode = (configItem) => {
-  const envParts = configItem ? `${configItem}`.split('-') : []
-  return envParts?.length === 4 ? envParts[3] : ''
-}
 
 const buildSearchCacheKey = (user, request) => {
   const env = getEnvCode(eventsTopic?.address)

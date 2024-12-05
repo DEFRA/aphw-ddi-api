@@ -32,7 +32,7 @@ module.exports = [{
       if (!cachedPage?.success) {
         await auditSearch(request.params.terms, request.query, user)
 
-        const results = await search(user, request.params.type, request.params.terms, !!request.query.fuzzy, !!request.query.national)
+        const results = await search(request, user)
         const pageOne = await saveResultsToCacheAndGetPageOne(user, request, results)
         return h.response(createResponse(pageOne)).code(200)
       }
