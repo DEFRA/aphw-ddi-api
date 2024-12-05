@@ -1,6 +1,7 @@
 const domain = {
   updateKeys: {
     applicationPackSent: ['applicationPackSent'],
+    applicationPackProcessed: ['applicationPackProcessed'],
     applicationFeePaid: ['applicationFeePaid'],
     applicationFeePaymentRecorded: ['applicationFeePaymentRecorded'],
     form2Sent: ['form2Sent'],
@@ -22,6 +23,7 @@ const domain = {
   },
   updateMappings: {
     applicationPackSent: 'dog.registration.application_pack_sent',
+    applicationPackProcessed: 'dog.registration.application_pack_processed',
     applicationFeePaid: 'dog.registration.application_fee_paid',
     form2Sent: 'dog.registration.form_two_sent',
     insuranceDetailsRecorded: 'dog.registration.insurance_details_recorded',

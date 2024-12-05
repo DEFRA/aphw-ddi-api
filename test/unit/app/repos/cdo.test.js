@@ -647,7 +647,7 @@ describe('CDO repo', () => {
       expect(taskList.applicationPackSent.completed).toBe(true)
     })
 
-    test('should update applicationPackSent', async () => {
+    test('should update applicationPackProcessed', async () => {
       const dog = buildCdoDao({
         registration: buildRegistrationDao({
           save: jest.fn()
@@ -657,16 +657,20 @@ describe('CDO repo', () => {
       sequelize.models.dog.findAll.mockResolvedValue([dog])
 
       const callback = jest.fn()
-      const cdoTaskList = new CdoTaskList(buildCdo())
-      expect(dog.registration.application_pack_sent).toBeNull()
-      cdoTaskList.sendApplicationPack(new Date(), callback)
+      const cdoTaskList = new CdoTaskList(buildCdo({
+        exemption: {
+          applicationPackSent: new Date()
+        }
+      }))
+      expect(dog.registration.application_pack_processed).toBeNull()
+      cdoTaskList.processApplicationPack(new Date(), callback)
       const taskList = await saveCdoTaskList(cdoTaskList, {})
       expect(sequelize.models.dog.findAll).toHaveBeenCalledWith(expect.objectContaining({
         where: { index_number: 'ED300097' }
       }))
       expect(dog.registration.save).toHaveBeenCalled()
       expect(callback).toHaveBeenCalled()
-      expect(taskList.applicationPackSent.completed).toBe(true)
+      expect(taskList.applicationPackProcessed.completed).toBe(true)
     })
 
     test('should update insurance details', async () => {
@@ -885,6 +889,7 @@ describe('CDO repo', () => {
       const cdoTaskList = new CdoTaskList(buildCdo({
         exemption: buildExemption({
           applicationPackSent: new Date(),
+          applicationPackProcessed: new Date(),
           form2Sent: new Date(),
           neuteringConfirmation: new Date(),
           microchipVerification: new Date(),
