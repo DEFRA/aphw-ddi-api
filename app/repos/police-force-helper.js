@@ -1,6 +1,6 @@
 const sequelize = require('../config/db')
 const { lookupPoliceForceByPostcode } = require('../import/robot/police')
-const { getPoliceForceByShortName } = require('../repos/police-forces')
+const { getPoliceForceByApiCode } = require('../repos/police-forces')
 const { EXEMPTION } = require('../constants/event/audit-event-object-types')
 const { sendUpdateToAudit } = require('../messaging/send-audit')
 const { getAccount } = require('../repos/user-accounts')
@@ -47,7 +47,7 @@ const hasForceChanged = async (personId, person, user, transaction) => {
     }
   }
   const newPoliceForce = person?.address?.country === 'Scotland'
-    ? await getPoliceForceByShortName('scotland')
+    ? await getPoliceForceByApiCode('scotland')
     : await lookupPoliceForceByPostcode(person?.address?.postcode)
 
   if (currentPoliceForces.length === 1 && newPoliceForce?.name === currentPoliceForces[0]) {

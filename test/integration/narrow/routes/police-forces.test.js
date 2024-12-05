@@ -16,7 +16,7 @@ describe('Police force endpoint', () => {
   const { validate } = require('../../../../app/auth/token-validator')
 
   jest.mock('../../../../app/repos/police-forces')
-  const { getPoliceForces, addForce, deleteForce, getPoliceForceByShortName } = require('../../../../app/repos/police-forces')
+  const { getPoliceForces, addForce, deleteForce, getPoliceForceByApiCode } = require('../../../../app/repos/police-forces')
 
   beforeEach(async () => {
     jest.clearAllMocks()
@@ -262,17 +262,17 @@ describe('Police force endpoint', () => {
     })
   })
 
-  describe('GET /police-force-by-short-name', () => {
+  describe('GET /police-force-by-api-code', () => {
     afterEach(() => {
       jest.resetAllMocks()
     })
 
     test('route returns 200', async () => {
-      getPoliceForceByShortName.mockResolvedValue(mockForces[0])
+      getPoliceForceByApiCode.mockResolvedValue(mockForces[0])
 
       const options = {
         method: 'GET',
-        url: '/police-force-by-short-name/abcdef',
+        url: '/police-force-by-api-code/abcdef',
         ...portalHeader
       }
 
@@ -281,11 +281,11 @@ describe('Police force endpoint', () => {
     })
 
     test('returns force', async () => {
-      getPoliceForceByShortName.mockResolvedValue(mockForces[1])
+      getPoliceForceByApiCode.mockResolvedValue(mockForces[1])
 
       const options = {
         method: 'GET',
-        url: '/police-force-by-short-name/abcdef',
+        url: '/police-force-by-api-code/abcdef',
         ...portalHeader
       }
 
@@ -295,12 +295,27 @@ describe('Police force endpoint', () => {
       expect(policeForce).toEqual({ id: 1, name: 'Northern Constabulary' })
     })
 
-    test('route returns 500 if db error', async () => {
-      getPoliceForceByShortName.mockRejectedValue(new Error('Test error'))
+    test('returns null if not found', async () => {
+      getPoliceForceByApiCode.mockResolvedValue(null)
 
       const options = {
         method: 'GET',
-        url: '/police-force-by-short-name/abcdef',
+        url: '/police-force-by-api-code/abcdef',
+        ...portalHeader
+      }
+
+      const response = await server.inject(options)
+      const { policeForce } = JSON.parse(response.payload)
+
+      expect(policeForce).toBe(null)
+    })
+
+    test('route returns 500 if db error', async () => {
+      getPoliceForceByApiCode.mockRejectedValue(new Error('Test error'))
+
+      const options = {
+        method: 'GET',
+        url: '/police-force-by-api-code/abcdef',
         ...portalHeader
       }
 

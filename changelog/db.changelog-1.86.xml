@@ -1,0 +1,191 @@
+<?xml version="1.1" encoding="utf-8" standalone="no"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog" xmlns:ext="http://www.liquibase.org/xml/ns/dbchangelog-ext" xmlns:pro="http://www.liquibase.org/xml/ns/pro" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog-ext http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-ext.xsd http://www.liquibase.org/xml/ns/pro http://www.liquibase.org/xml/ns/pro/liquibase-pro-3.9.xsd http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.9.xsd">
+  <changeSet author="J Barnsley" id="1">
+    <tagDatabase tag="v1.86.0" />
+  </changeSet>
+  <changeSet author="J Barnsley" id="2">
+    <addColumn tableName="police_force">
+      <column name="api_code" type="VARCHAR(40)">
+        <constraints nullable="true" />
+      </column>
+    </addColumn>
+  </changeSet>
+  <changeSet author="J Barnsley" id="3">
+    <update tableName="police_force">
+        <column name="api_code" value="avon-and-somerset" />
+        <where>short_name = 'avonandsomerset'</where>
+    </update>
+    <update tableName="police_force">
+        <column name="api_code" value="bedfordshire" />
+        <where>short_name = 'beds'</where>
+    </update>
+    <update tableName="police_force">
+        <column name="api_code" value="cambridgeshire" />
+        <where>short_name = 'cambs'</where>
+    </update>
+    <update tableName="police_force">
+        <column name="api_code" value="cheshire" />
+        <where>short_name = 'cheshire'</where>
+    </update>
+    <update tableName="police_force">
+        <column name="api_code" value="city-of-london" />
+        <where>short_name = 'cityoflondon'</where>
+    </update>
+    <update tableName="police_force">
+        <column name="api_code" value="cleveland" />
+        <where>short_name = 'cleveland'</where>
+    </update>
+    <update tableName="police_force">
+        <column name="api_code" value="cumbria" />
+        <where>short_name = 'cumbria'</where>
+    </update>
+    <update tableName="police_force">
+        <column name="api_code" value="derbyshire" />
+        <where>short_name = 'derbyshire'</where>
+    </update>
+    <update tableName="police_force">
+        <column name="api_code" value="devon-and-cornwall" />
+        <where>short_name = 'devonandcornwall'</where>
+    </update>
+    <update tableName="police_force">
+        <column name="api_code" value="dorset" />
+        <where>short_name = 'dorset'</where>
+    </update>
+    <update tableName="police_force">
+        <column name="api_code" value="durham" />
+        <where>short_name = 'durham'</where>
+    </update>
+    <update tableName="police_force">
+        <column name="api_code" value="dyfed-powys" />
+        <where>short_name = 'dyfed-powys'</where>
+    </update>
+    <update tableName="police_force">
+        <column name="api_code" value="essex" />
+        <where>short_name = 'essex'</where>
+    </update>
+    <update tableName="police_force">
+        <column name="api_code" value="gloucestershire" />
+        <where>short_name = 'gloucestershire'</where>
+    </update>
+    <update tableName="police_force">
+        <column name="api_code" value="greater-manchester" />
+        <where>short_name = 'gmp'</where>
+    </update>
+    <update tableName="police_force">
+        <column name="api_code" value="gwent" />
+        <where>short_name = 'gwent'</where>
+    </update>
+    <update tableName="police_force">
+        <column name="api_code" value="hampshire" />
+        <where>short_name = 'hampshire'</where>
+    </update>
+    <update tableName="police_force">
+        <column name="api_code" value="hertfordshire" />
+        <where>short_name = 'herts'</where>
+    </update>
+    <update tableName="police_force">
+        <column name="api_code" value="humberside" />
+        <where>short_name = 'humberside'</where>
+    </update>
+    <update tableName="police_force">
+        <column name="api_code" value="kent" />
+        <where>short_name = 'kent'</where>
+    </update>
+    <update tableName="police_force">
+        <column name="api_code" value="lancashire" />
+        <where>short_name = 'lancashire'</where>
+    </update>
+    <update tableName="police_force">
+        <column name="api_code" value="leicestershire" />
+        <where>short_name = 'leics'</where>
+    </update>
+    <update tableName="police_force">
+        <column name="api_code" value="lincolnshire" />
+        <where>short_name = 'lincs'</where>
+    </update>
+    <update tableName="police_force">
+        <column name="api_code" value="merseyside" />
+        <where>short_name = 'merseyside'</where>
+    </update>
+    <update tableName="police_force">
+        <column name="api_code" value="metropolitan" />
+        <where>short_name = 'met'</where>
+    </update>
+    <update tableName="police_force">
+        <column name="api_code" value="norfolk" />
+        <where>short_name = 'norfolk'</where>
+    </update>
+    <update tableName="police_force">
+        <column name="api_code" value="north-wales" />
+        <where>short_name = 'northwales'</where>
+    </update>
+    <update tableName="police_force">
+        <column name="api_code" value="north-yorkshire" />
+        <where>short_name = 'northyorkshire'</where>
+    </update>
+    <update tableName="police_force">
+        <column name="api_code" value="northamptonshire" />
+        <where>short_name = 'northants'</where>
+    </update>
+    <update tableName="police_force">
+        <column name="api_code" value="northumbria" />
+        <where>short_name = 'northumbria'</where>
+    </update>
+    <update tableName="police_force">
+        <column name="api_code" value="nottinghamshire" />
+        <where>short_name = 'notts'</where>
+    </update>
+    <update tableName="police_force">
+        <column name="api_code" value="south-wales" />
+        <where>short_name = 'south-wales'</where>
+    </update>
+    <update tableName="police_force">
+        <column name="api_code" value="south-yorkshire" />
+        <where>short_name = 'southyorkshire'</where>
+    </update>
+    <update tableName="police_force">
+        <column name="api_code" value="staffordshire" />
+        <where>short_name = 'staffordshire'</where>
+    </update>
+    <update tableName="police_force">
+        <column name="api_code" value="suffolk" />
+        <where>short_name = 'suffolk'</where>
+    </update>
+    <update tableName="police_force">
+        <column name="api_code" value="surrey" />
+        <where>short_name = 'surrey'</where>
+    </update>
+    <update tableName="police_force">
+        <column name="api_code" value="sussex" />
+        <where>short_name = 'sussex'</where>
+    </update>
+    <update tableName="police_force">
+        <column name="api_code" value="thames-valley" />
+        <where>short_name = 'thamesvalley'</where>
+    </update>
+    <update tableName="police_force">
+        <column name="api_code" value="warwickshire" />
+        <where>short_name = 'warwickshire'</where>
+    </update>
+    <update tableName="police_force">
+        <column name="api_code" value="west-mercia" />
+        <where>short_name = 'westmercia'</where>
+    </update>
+    <update tableName="police_force">
+        <column name="api_code" value="west-midlands" />
+        <where>short_name = 'westmidlands'</where>
+    </update>
+    <update tableName="police_force">
+        <column name="api_code" value="west-yorkshire" />
+        <where>short_name = 'westyorkshire'</where>
+    </update>
+    <update tableName="police_force">
+        <column name="api_code" value="wiltshire" />
+        <where>short_name = 'wiltshire'</where>
+    </update>
+    <update tableName="police_force">
+        <column name="api_code" value="scotland" />
+        <where>short_name = 'scotland'</where>
+    </update>
+  </changeSet>
+</databaseChangeLog>

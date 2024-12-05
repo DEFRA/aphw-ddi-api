@@ -5,19 +5,19 @@ jest.mock('../../../../../app/import/robot/postcode')
 const { getPostcodeLongLat } = require('../../../../../app/import/robot/postcode')
 
 jest.mock('../../../../../app/repos/police-forces')
-const { getPoliceForceByShortName } = require('../../../../../app/repos/police-forces')
+const { getPoliceForceByApiCode } = require('../../../../../app/repos/police-forces')
 
 const { lookupPoliceForceByPostcode } = require('../../../../../app/import/robot/police')
 
 describe('police lookup import', () => {
   beforeEach(() => {
     jest.clearAllMocks()
-    getPoliceForceByShortName.mockResolvedValue(null)
+    getPoliceForceByApiCode.mockResolvedValue(null)
   })
 
   describe('lookupPoliceForceByPostcode', () => {
     test('should return payload', async () => {
-      getPoliceForceByShortName.mockResolvedValue({ name: 'Met Police' })
+      getPoliceForceByApiCode.mockResolvedValue({ name: 'Met Police' })
       getPostcodeLongLat.mockResolvedValue({ lng: 123, lat: 456 })
       wreck.get.mockResolvedValue({ payload: { force: 'met-police' } })
       const result = await lookupPoliceForceByPostcode('TS1 1TS')
