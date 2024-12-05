@@ -61,6 +61,37 @@ class CdoService {
     }
   }
 
+  async processApplicationPack (cdoId, processedDate, user) {
+    const cdoTaskList = await this.cdoRepository.getCdoTaskList(cdoId)
+    const activityType = await getActivityByLabel(activities.applicationPackSent)
+
+    const processEvent = async () => {
+      await sendActivityToAudit({
+        activity: activityType.id,
+        activityType: 'processed',
+        pk: cdoId,
+        source: 'dog',
+        activityDate: processedDate,
+        targetPk: 'dog',
+        activityLabel: activities.applicationPackProcessed
+      }, user)
+    }
+
+    try {
+      await cdoTaskList.processApplicationPack(processedDate, processEvent)
+    } catch (e) {
+      console.error('Error in CdoService.processApplicationPack while updating domain model')
+      throw e
+    }
+
+    try {
+      await this.cdoRepository.saveCdoTaskList(cdoTaskList)
+    } catch (e) {
+      console.error('Error in CdoService.processApplicationPack whilst updating the aggregrate')
+      throw e
+    }
+  }
+
   /**
    * @typedef InsuranceDetails
    * @property {string} insuranceCompany
