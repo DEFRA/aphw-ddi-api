@@ -165,6 +165,7 @@ describe('cdo mappers', () => {
     test('should deserialise dates', () => {
       const registrationDao = buildRegistrationDao({
         application_pack_sent: '2024-05-01',
+        application_pack_processed: '2024-05-01',
         cdo_expiry: '2024-05-02',
         cdo_issued: '2024-05-03',
         application_fee_paid: '2024-05-05',
@@ -185,6 +186,7 @@ describe('cdo mappers', () => {
       })]
       const mappedRegistration = mapCdoDaoToExemption(registrationDao, insurance)
       expect(mappedRegistration.applicationPackSent).toEqual(new Date('2024-05-01'))
+      expect(mappedRegistration.applicationPackProcessed).toEqual(new Date('2024-05-01'))
       expect(mappedRegistration.cdoExpiry).toEqual(new Date('2024-05-02'))
       expect(mappedRegistration.cdoIssued).toEqual(new Date('2024-05-03'))
       expect(mappedRegistration.applicationFeePaid).toEqual(new Date('2024-05-05'))
