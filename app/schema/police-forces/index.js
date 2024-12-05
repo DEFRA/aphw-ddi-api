@@ -9,7 +9,7 @@ const getPoliceForcesResponseSchema = Joi.object({
 })
 
 const getPoliceForceResponseSchema = Joi.object({
-  policeForce: policeForceSchema
+  policeForce: policeForceSchema.allow(null)
 })
 
 module.exports = {

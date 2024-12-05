@@ -105,6 +105,17 @@ const getPoliceForceByShortName = async (shortName, transaction) => {
   })
 }
 
+const getPoliceForceByApiCode = async (apiCode, transaction) => {
+  if (!apiCode || apiCode === '') {
+    return null
+  }
+
+  return sequelize.models.police_force.findOne({
+    where: { api_code: apiCode },
+    transaction
+  })
+}
+
 const lookupPoliceForceByEmail = async (email) => {
   if (!email) {
     return 'unknown'
@@ -119,5 +130,6 @@ module.exports = {
   addForce,
   deleteForce,
   getPoliceForceByShortName,
+  getPoliceForceByApiCode,
   lookupPoliceForceByEmail
 }
