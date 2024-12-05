@@ -31,6 +31,7 @@ const mapTaskToTaskDto = (task) => ({
  */
 /**
  * @typedef CdoTaskListDto
+ * @property {string} indexNumber
  * @property {CdoTaskListTasksDto} tasks
  * @property {Date|undefined} applicationPackSent
  * @property {string|undefined} insuranceCompany
@@ -48,6 +49,7 @@ const mapTaskToTaskDto = (task) => ({
  * @return {CdoTaskListDto}
  */
 const mapCdoTaskListToDto = (cdoTaskList) => ({
+  indexNumber: cdoTaskList.cdoSummary.indexNumber,
   tasks: {
     applicationPackSent: mapTaskToTaskDto(cdoTaskList.applicationPackSent),
     insuranceDetailsRecorded: mapTaskToTaskDto(cdoTaskList.insuranceDetailsRecorded),

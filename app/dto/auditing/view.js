@@ -1,4 +1,4 @@
-const { VIEW_DOG, VIEW_OWNER, SEARCH, VIEW_OWNER_ACTIVITY, VIEW_DOG_ACTIVITY } = require('../../constants/event/events')
+const { VIEW_DOG, VIEW_OWNER, SEARCH, VIEW_OWNER_ACTIVITY, VIEW_DOG_ACTIVITY, VIEW_CDO_PROGRESS } = require('../../constants/event/events')
 const { v4: uuidv4 } = require('uuid')
 const { sendViewToAudit } = require('../../messaging/send-audit')
 
@@ -12,6 +12,8 @@ const determineViewAuditPk = (type, entity) => {
       return entity.person_reference
     } else if (type === SEARCH) {
       return uuidv4()
+    } else if (type === VIEW_CDO_PROGRESS) {
+      return entity.indexNumber
     }
   } catch (e) {
     console.error(`Missing parameter for view audit: ${type}`)
@@ -22,7 +24,7 @@ const determineViewAuditPk = (type, entity) => {
 /**
  *
  * @param type
- * @param {string|DogDao|RegisteredPersonDao[]} entity
+ * @param {string|DogDao|RegisteredPersonDao[]|CdoTaskListDto} entity
  * @return {{pk: (*|`${string}-${string}-${string}-${string}-${string}`|string|string)}}
  */
 const constructViewDetails = (type, entity) => {
@@ -62,9 +64,22 @@ const auditDogView = async (dogEntity, user, type, subject) => {
   }
 }
 
+const auditCdoView = async (dogEntity, user, type, subject) => {
+  if (user.origin !== 'aphw-ddi-portal') {
+    const dogDetails = constructViewDetails(type, dogEntity)
+    await sendViewToAudit(dogDetails.pk, VIEW_DOG, subject, dogDetails, user)
+    await sendViewToAudit(dogDetails.pk, type, subject, dogDetails, user)
+  }
+}
+
 const auditDogDetailsView = async (dogEntity, user) => {
   await auditDogView(dogEntity, user, VIEW_DOG, 'enforcement user viewed dog details')
 }
+
+const auditDogCdoProgressView = async (dogEntity, user) => {
+  await auditCdoView(dogEntity, user, VIEW_CDO_PROGRESS, 'enforcement user viewed dog details - CDO progress')
+}
+
 const auditDogActivityView = async (dogEntity, user) => {
   await auditDogView(dogEntity, user, VIEW_DOG_ACTIVITY, 'enforcement user viewed dog activity')
 }
@@ -88,5 +103,6 @@ module.exports = {
   auditOwnerActivityView,
   auditDogDetailsView,
   auditDogActivityView,
+  auditDogCdoProgressView,
   auditSearch
 }
