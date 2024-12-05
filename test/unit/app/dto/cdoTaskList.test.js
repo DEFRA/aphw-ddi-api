@@ -20,6 +20,7 @@ describe('mapCdoTaskListToDto', () => {
     const cdoTaskList = new CdoTaskList(cdo)
     const cdoTaskListDto = mapCdoTaskListToDto(cdoTaskList)
     const expectedDto = buildCdoTaskListDto({
+      indexNumber: 'ED300097',
       tasks: buildCdoTaskListDtoTasks({
         applicationPackSent: {
           key: 'applicationPackSent',

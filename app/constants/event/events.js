@@ -14,6 +14,7 @@ module.exports = {
   VIEW_OWNER_ACTIVITY: 'uk.gov.defra.ddi.event.external.view.owner.activity',
   VIEW_DOG: 'uk.gov.defra.ddi.event.external.view.dog',
   VIEW_DOG_ACTIVITY: 'uk.gov.defra.ddi.event.external.view.dog.activity',
+  VIEW_CDO_PROGRESS: 'uk.gov.defra.ddi.event.external.view.cdo.progress',
   CERTIFICATE_REQUESTED: 'uk.gov.defra.aphw.ddi.certificate.requested',
   activities: {
     applicationPackSent: 'Application pack',

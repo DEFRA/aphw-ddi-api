@@ -1,5 +1,6 @@
 const { buildCdoDao, buildRegisteredPersonDao, buildPersonDao, buildDogDao } = require('../../../../mocks/cdo/get')
 const { VIEW_DOG, VIEW_OWNER, SEARCH, VIEW_OWNER_ACTIVITY, VIEW_DOG_ACTIVITY } = require('../../../../../app/constants/event/events')
+const { buildCdoTaskListDto } = require('../../../../mocks/cdo/dto')
 
 describe('view audit', () => {
   jest.mock('uuid', () => ({
@@ -13,6 +14,7 @@ describe('view audit', () => {
     auditOwnerActivityView,
     auditDogDetailsView,
     auditDogActivityView,
+    auditDogCdoProgressView,
     auditSearch,
     constructViewDetails
   } = require('../../../../../app/dto/auditing/view')
@@ -238,6 +240,30 @@ describe('view audit', () => {
 
     test('should not audit a request from portal', async () => {
       await auditDogActivityView(dogEntity, {
+        username: 'dev-user@example.com',
+        displayname: 'Dev User',
+        origin: 'aphw-ddi-portal'
+      })
+      expect(sendViewToAudit).not.toHaveBeenCalled()
+    })
+  })
+
+  describe('auditDogCdoProgressView', () => {
+    test('should record a VIEW_DOG event', async () => {
+      const taskList = buildCdoTaskListDto()
+      await auditDogCdoProgressView(taskList, roboCop)
+      expect(sendViewToAudit).toHaveBeenCalledWith(
+        'ED300097',
+        VIEW_DOG,
+        'enforcement user viewed dog details - CDO progress',
+        {
+          pk: 'ED300097'
+        },
+        roboCop)
+    })
+
+    test('should not audit a request from portal', async () => {
+      await auditDogCdoProgressView(dogEntity, {
         username: 'dev-user@example.com',
         displayname: 'Dev User',
         origin: 'aphw-ddi-portal'

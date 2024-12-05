@@ -36,6 +36,7 @@ const buildCdoTaskListDtoTasks = (partialCdoTaskListDto = {}) => ({
 })
 
 const buildCdoTaskListDto = (partialCdoTaskListDto = {}) => ({
+  indexNumber: 'ED300097',
   verificationOptions: {
     dogDeclaredUnfit: false,
     neuteringBypassedUnder16: false,

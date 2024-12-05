@@ -16,7 +16,7 @@ const { SequenceViolationError } = require('../errors/domain/sequenceViolation')
 const { InvalidDataError } = require('../errors/domain/invalidData')
 const { InvalidDateError } = require('../errors/domain/invalidDate')
 const { getCdoByIndexNumberSchema } = require('../schema/cdo/response')
-const { auditDogDetailsView, auditDogActivityView } = require('../dto/auditing/view')
+const { auditDogDetailsView, auditDogActivityView, auditDogCdoProgressView } = require('../dto/auditing/view')
 const { scopes } = require('../constants/auth')
 
 /**
@@ -147,6 +147,7 @@ module.exports = [
         const cdoTaskList = await cdoService.getTaskList(indexNumber)
 
         const manageCdo = mapCdoTaskListToDto(cdoTaskList)
+        await auditDogCdoProgressView(cdoTaskList, getCallingUser(request))
 
         return h.response(manageCdo).code(200)
       } catch (e) {

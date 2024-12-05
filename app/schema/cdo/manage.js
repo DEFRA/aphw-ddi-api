@@ -46,6 +46,7 @@ const taskSchemaBuilder = (key) => Joi.object({
 }).unknown()
 
 const manageCdoResponseSchema = Joi.object({
+  indexNumber: Joi.string(),
   tasks: Joi.object({
     applicationPackSent: taskSchemaBuilder('applicationPackSent'),
     insuranceDetailsRecorded: taskSchemaBuilder('insuranceDetailsRecorded'),
