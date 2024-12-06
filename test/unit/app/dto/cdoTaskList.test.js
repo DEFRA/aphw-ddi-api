@@ -55,6 +55,7 @@ describe('mapCdoTaskListToDto', () => {
 
     expect(cdoTaskListDto).toEqual(expectedDto)
     expect(Object.hasOwn(cdoTaskListDto, 'applicationPackSent')).toBe(true)
+    expect(Object.hasOwn(cdoTaskListDto, 'applicationPackProcessed')).toBe(true)
     expect(Object.hasOwn(cdoTaskListDto, 'insuranceCompany')).toBe(true)
     expect(Object.hasOwn(cdoTaskListDto, 'insuranceRenewal')).toBe(true)
     expect(Object.hasOwn(cdoTaskListDto, 'microchipNumber')).toBe(true)
@@ -119,6 +120,7 @@ describe('mapCdoTaskListToDto', () => {
 
     const exemptionProperties = buildExemption({
       applicationPackSent: new Date('2024-06-25'),
+      applicationPackProcessed: new Date('2024-06-25'),
       form2Sent: new Date('2024-05-24'),
       applicationFeePaid: new Date('2024-06-24'),
       neuteringConfirmation: new Date('2024-02-10'),
@@ -143,6 +145,7 @@ describe('mapCdoTaskListToDto', () => {
 
     expect(cdoTaskListDto).toEqual(expect.objectContaining({
       applicationPackSent: new Date('2024-06-25'),
+      applicationPackProcessed: new Date('2024-06-25'),
       insuranceCompany: cdoTaskList.cdoSummary.insuranceCompany,
       insuranceRenewal: futureDate,
       microchipNumber: '123456789012345',

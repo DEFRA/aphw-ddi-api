@@ -367,6 +367,13 @@ describe('CDO endpoint', () => {
             readonly: false,
             timestamp: undefined
           },
+          applicationPackProcessed: {
+            key: 'applicationPackProcessed',
+            available: false,
+            completed: false,
+            readonly: false,
+            timestamp: undefined
+          },
           insuranceDetailsRecorded: {
             key: 'insuranceDetailsRecorded',
             available: false,
@@ -447,6 +454,7 @@ describe('CDO endpoint', () => {
       const cdoTaskList = new CdoTaskList(buildCdo({
         exemption: buildExemption({
           applicationPackSent: new Date('2024-06-25'),
+          applicationPackProcessed: new Date('2024-06-25'),
           form2Sent: new Date('2024-05-24'),
           applicationFeePaid: new Date('2024-06-24'),
           neuteringConfirmation: new Date('2024-02-10'),
@@ -497,6 +505,13 @@ describe('CDO endpoint', () => {
             readonly: true,
             timestamp: '2024-06-25T00:00:00.000Z'
           },
+          applicationPackProcessed: {
+            key: 'applicationPackProcessed',
+            available: true,
+            completed: true,
+            readonly: true,
+            timestamp: '2024-06-25T00:00:00.000Z'
+          },
           insuranceDetailsRecorded: {
             key: 'insuranceDetailsRecorded',
             available: true,
@@ -542,6 +557,7 @@ describe('CDO endpoint', () => {
         },
         applicationFeePaid: '2024-06-24T00:00:00.000Z',
         applicationPackSent: '2024-06-25T00:00:00.000Z',
+        applicationPackProcessed: '2024-06-25T00:00:00.000Z',
         certificateIssued: '2024-06-27T00:00:00.000Z',
         form2Sent: '2024-05-24T00:00:00.000Z',
         insuranceCompany: 'Dogs R Us',
@@ -672,6 +688,86 @@ describe('CDO endpoint', () => {
       const options = {
         method: 'POST',
         url: '/cdo/ED123/manage:sendApplicationPack',
+        ...portalHeader
+      }
+
+      const response = await server.inject(options)
+      expect(response.statusCode).toBe(500)
+    })
+  })
+
+  describe('POST /cdo/ED123/manage:processApplicationPack', () => {
+    test('should return 204', async () => {
+      const processApplicationPackMock = jest.fn()
+      getCdoService.mockReturnValue({
+        processApplicationPack: processApplicationPackMock
+      })
+      processApplicationPackMock.mockResolvedValue(undefined)
+
+      const options = {
+        method: 'POST',
+        url: '/cdo/ED123/manage:processApplicationPack',
+        ...portalHeader
+      }
+      const response = await server.inject(options)
+      expect(response.statusCode).toBe(204)
+      expect(processApplicationPackMock).toHaveBeenCalledWith('ED123', expect.any(Date), devUser)
+    })
+
+    test('should return 403 given call from enforcement', async () => {
+      validate.mockResolvedValue(mockValidateEnforcement)
+
+      const options = {
+        method: 'POST',
+        url: '/cdo/ED123/manage:processApplicationPack',
+        ...portalHeader
+      }
+      const response = await server.inject(options)
+      expect(response.statusCode).toBe(403)
+    })
+
+    test('should throw a 404 given index does not exist', async () => {
+      getCdoService.mockReturnValue({
+        processApplicationPack: async () => {
+          throw new NotFoundError('not found')
+        }
+      })
+      const options = {
+        method: 'POST',
+        url: '/cdo/ED123/manage:processApplicationPack',
+        ...portalHeader
+      }
+
+      const response = await server.inject(options)
+      expect(response.statusCode).toBe(404)
+    })
+
+    test('should throw a 409 given action already performed', async () => {
+      getCdoService.mockReturnValue({
+        processApplicationPack: async () => {
+          throw new ActionAlreadyPerformedError('not found')
+        }
+      })
+      const options = {
+        method: 'POST',
+        url: '/cdo/ED123/manage:processApplicationPack',
+        ...portalHeader
+      }
+
+      const response = await server.inject(options)
+      expect(response.statusCode).toBe(409)
+    })
+
+    test('should returns 500 given server error thrown', async () => {
+      getCdoService.mockReturnValue({
+        processApplicationPack: async () => {
+          throw new Error('cdo error')
+        }
+      })
+
+      const options = {
+        method: 'POST',
+        url: '/cdo/ED123/manage:processApplicationPack',
         ...portalHeader
       }
 

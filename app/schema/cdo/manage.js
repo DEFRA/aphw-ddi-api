@@ -49,6 +49,7 @@ const manageCdoResponseSchema = Joi.object({
   indexNumber: Joi.string(),
   tasks: Joi.object({
     applicationPackSent: taskSchemaBuilder('applicationPackSent'),
+    applicationPackProcessed: taskSchemaBuilder('applicationPackProcessed'),
     insuranceDetailsRecorded: taskSchemaBuilder('insuranceDetailsRecorded'),
     microchipNumberRecorded: taskSchemaBuilder('microchipNumberRecorded'),
     applicationFeePaid: taskSchemaBuilder('applicationFeePaid'),
@@ -64,6 +65,7 @@ const manageCdoResponseSchema = Joi.object({
     showNeuteringBypass: Joi.boolean()
   }),
   applicationPackSent: Joi.date().optional(),
+  applicationPackProcessed: Joi.date().optional(),
   insuranceCompany: Joi.string().optional(),
   insuranceRenewal: Joi.date().optional(),
   microchipNumber: Joi.string().optional(),

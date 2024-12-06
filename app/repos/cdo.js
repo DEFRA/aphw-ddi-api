@@ -116,6 +116,8 @@ const domain = require('../constants/domain')
  * @property {null|string} time_limit
  * @property {null|string} legislation_officer
  * @property {null|Date} certificate_issued
+ * @property {null|Date} application_pack_sent
+ * @property {null|Date} application_pack_processed
  * @property {null|Date} application_fee_paid
  * @property {null|Date} neutering_confirmation
  * @property {null|Date} microchip_verification
@@ -125,7 +127,6 @@ const domain = require('../constants/domain')
  * @property {null|Date} microchip_deadline
  * @property {null|Date} neutering_deadline
  * @property {null|Date} non_compliance_letter_sent
- * @property {null|Date} application_pack_sent
  * @property {null|Date} form_two_sent
  * @property {null|Date} insurance_details_recorded
  * @property {null|Date} microchip_number_recorded

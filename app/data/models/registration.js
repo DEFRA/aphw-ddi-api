@@ -107,6 +107,10 @@ module.exports = (sequelize, DataTypes) => {
       type: DataTypes.DATE,
       allowNull: true
     },
+    application_pack_processed: {
+      type: DataTypes.DATE,
+      allowNull: true
+    },
     form_two_sent: {
       type: DataTypes.DATE,
       allowNull: true

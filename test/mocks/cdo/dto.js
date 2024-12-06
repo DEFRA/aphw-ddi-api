@@ -14,6 +14,9 @@ const buildCdoTaskListDtoTasks = (partialCdoTaskListDto = {}) => ({
     key: 'applicationPackSent',
     available: true
   },
+  applicationPackProcessed: buildCdoTaskDto({
+    key: 'applicationPackProcessed'
+  }),
   insuranceDetailsRecorded: buildCdoTaskDto({
     key: 'insuranceDetailsRecorded'
   }),

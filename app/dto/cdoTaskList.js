@@ -16,6 +16,7 @@ const mapTaskToTaskDto = (task) => ({
 /**
  * @typedef CdoTaskListTasksDto
  * @property {CdoTaskDto} applicationPackSent
+ * @property {CdoTaskDto} applicationPackProcessed
  * @property {CdoTaskDto} microchipNumberRecorded
  * @property {CdoTaskDto} applicationFeePaid
  * @property {CdoTaskDto} insuranceDetailsRecorded
@@ -34,6 +35,7 @@ const mapTaskToTaskDto = (task) => ({
  * @property {string} indexNumber
  * @property {CdoTaskListTasksDto} tasks
  * @property {Date|undefined} applicationPackSent
+ * @property {Date|undefined} applicationPackProcessed
  * @property {string|undefined} insuranceCompany
  * @property {Date|undefined} insuranceRenewal
  * @property {string|undefined} microchipNumber
@@ -52,6 +54,7 @@ const mapCdoTaskListToDto = (cdoTaskList) => ({
   indexNumber: cdoTaskList.cdoSummary.indexNumber,
   tasks: {
     applicationPackSent: mapTaskToTaskDto(cdoTaskList.applicationPackSent),
+    applicationPackProcessed: mapTaskToTaskDto(cdoTaskList.applicationPackProcessed),
     insuranceDetailsRecorded: mapTaskToTaskDto(cdoTaskList.insuranceDetailsRecorded),
     microchipNumberRecorded: mapTaskToTaskDto(cdoTaskList.microchipNumberRecorded),
     applicationFeePaid: mapTaskToTaskDto(cdoTaskList.applicationFeePaid),
@@ -67,6 +70,7 @@ const mapCdoTaskListToDto = (cdoTaskList) => ({
     showNeuteringBypass: cdoTaskList.verificationOptions.showNeuteringBypass
   },
   applicationPackSent: cdoTaskList.cdoSummary.applicationPackSent,
+  applicationPackProcessed: cdoTaskList.cdoSummary.applicationPackProcessed,
   insuranceCompany: cdoTaskList.cdoSummary.insuranceCompany,
   insuranceRenewal: cdoTaskList.cdoSummary.insuranceRenewal,
   microchipNumber: cdoTaskList.cdoSummary.microchipNumber,

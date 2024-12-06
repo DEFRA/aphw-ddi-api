@@ -107,12 +107,73 @@ describe('CdoService', function () {
     })
   })
 
+  describe('processApplicationPack', () => {
+    test('should process application pack', async () => {
+      getActivityByLabel.mockResolvedValue({ id: 9, label: 'Application pack' })
+      const processedDate = new Date()
+      const cdoIndexNumber = 'ED300097'
+      const cdoTaskList = new CdoTaskList(buildCdo({
+        exemption: buildExemption({
+          applicationPackSent: new Date()
+        })
+      }))
+      mockCdoRepository.getCdoTaskList.mockResolvedValue(cdoTaskList)
+
+      await cdoService.processApplicationPack(cdoIndexNumber, processedDate, devUser)
+      expect(mockCdoRepository.getCdoTaskList).toHaveBeenCalledWith(cdoIndexNumber)
+      expect(mockCdoRepository.saveCdoTaskList).toHaveBeenCalledWith(cdoTaskList)
+      expect(cdoTaskList.getUpdates().exemption).toEqual([{
+        key: 'applicationPackProcessed',
+        value: processedDate,
+        callback: expect.any(Function)
+      }])
+      await cdoTaskList.getUpdates().exemption[0].callback()
+      expect(sendActivityToAudit).toHaveBeenCalledWith({
+        activity: 9,
+        activityType: 'processed',
+        pk: 'ED300097',
+        source: 'dog',
+        activityDate: processedDate,
+        targetPk: 'dog',
+        activityLabel: 'Application pack'
+      }, devUser)
+      sendActivityToAudit.mockClear()
+    })
+
+    test('should not process an application pack a second time', async () => {
+      const cdoIndexNumber = 'ED300097'
+      const cdoTaskList = new CdoTaskList(buildCdo({
+        exemption: buildExemption({
+          applicationPackSent: new Date('2024-05-03'),
+          applicationPackProcessed: new Date('2024-05-03')
+        })
+      }))
+      mockCdoRepository.getCdoTaskList.mockResolvedValue(cdoTaskList)
+
+      await expect(cdoService.processApplicationPack(cdoIndexNumber, new Date(), devUser)).rejects.toThrow(ActionAlreadyPerformedError)
+    })
+
+    test('should handle repo error', async () => {
+      const cdoIndexNumber = 'ED300097'
+      const cdoTaskList = new CdoTaskList(buildCdo({
+        exemption: buildExemption({
+          applicationPackSent: new Date()
+        })
+      }))
+      mockCdoRepository.getCdoTaskList.mockResolvedValue(cdoTaskList)
+      mockCdoRepository.saveCdoTaskList.mockRejectedValue(new Error('error whilst saving'))
+
+      await expect(cdoService.processApplicationPack(cdoIndexNumber, devUser)).rejects.toThrow(new Error('error whilst saving'))
+    })
+  })
+
   describe('recordInsuranceDetails', () => {
     test('should record insurance details', async () => {
       const cdoIndexNumber = 'ED300097'
       const cdoTaskList = new CdoTaskList(buildCdo({
         exemption: buildExemption({
-          applicationPackSent: new Date()
+          applicationPackSent: new Date(),
+          applicationPackProcessed: new Date()
         })
       }))
       mockCdoRepository.getCdoTaskList.mockResolvedValue(cdoTaskList)
@@ -163,7 +224,8 @@ describe('CdoService', function () {
       const cdoIndexNumber = 'ED300097'
       const cdoTaskList = new CdoTaskList(buildCdo({
         exemption: buildExemption({
-          applicationPackSent: new Date()
+          applicationPackSent: new Date(),
+          applicationPackProcessed: new Date()
         })
       }))
       mockCdoRepository.getCdoTaskList.mockResolvedValue(cdoTaskList)
@@ -207,7 +269,8 @@ describe('CdoService', function () {
       const cdoIndexNumber = 'ED300097'
       const cdoTaskList = new CdoTaskList(buildCdo({
         exemption: buildExemption({
-          applicationPackSent: new Date()
+          applicationPackSent: new Date(),
+          applicationPackProcessed: new Date()
         })
       }))
       mockCdoRepository.getCdoTaskList.mockResolvedValue(cdoTaskList)
@@ -259,7 +322,10 @@ describe('CdoService', function () {
       const sentDate = new Date()
       const cdoIndexNumber = 'ED300097'
       const cdoTaskList = new CdoTaskList(buildCdo({
-        exemption: buildExemption({ applicationPackSent: new Date() })
+        exemption: buildExemption({
+          applicationPackSent: new Date(),
+          applicationPackProcessed: new Date()
+        })
       }))
       mockCdoRepository.getCdoTaskList.mockResolvedValue(cdoTaskList)
 
@@ -288,6 +354,7 @@ describe('CdoService', function () {
       const cdoTaskList = new CdoTaskList(buildCdo({
         exemption: buildExemption({
           applicationPackSent: new Date('2024-05-03'),
+          applicationPackProcessed: new Date(),
           form2Sent: new Date()
         })
       }))
@@ -300,7 +367,8 @@ describe('CdoService', function () {
       const cdoIndexNumber = 'ED300097'
       const cdoTaskList = new CdoTaskList(buildCdo({
         exemption: buildExemption({
-          applicationPackSent: new Date()
+          applicationPackSent: new Date(),
+          applicationPackProcessed: new Date()
         })
       }))
       mockCdoRepository.getCdoTaskList.mockResolvedValue(cdoTaskList)
@@ -317,7 +385,11 @@ describe('CdoService', function () {
 
       const cdoIndexNumber = 'ED300097'
       const cdoTaskList = new CdoTaskList(buildCdo({
-        exemption: buildExemption({ applicationPackSent: new Date(), form2Sent: new Date() })
+        exemption: buildExemption({
+          applicationPackSent: new Date(),
+          applicationPackProcessed: new Date(),
+          form2Sent: new Date()
+        })
       }))
       mockCdoRepository.getCdoTaskList.mockResolvedValue(cdoTaskList)
 
@@ -364,7 +436,11 @@ describe('CdoService', function () {
 
       const cdoIndexNumber = 'ED300097'
       const cdoTaskList = new CdoTaskList(buildCdo({
-        exemption: buildExemption({ applicationPackSent: new Date(), form2Sent: new Date() }),
+        exemption: buildExemption({
+          applicationPackSent: new Date(),
+          applicationPackProcessed: new Date(),
+          form2Sent: new Date()
+        }),
         dog: buildCdoDog({ dateOfBirth: new Date() })
       }))
       mockCdoRepository.getCdoTaskList.mockResolvedValue(cdoTaskList)
@@ -413,6 +489,7 @@ describe('CdoService', function () {
       const cdoTaskList = new CdoTaskList(buildCdo({
         exemption: buildExemption({
           applicationPackSent: new Date(),
+          applicationPackProcessed: new Date(),
           form2Sent: new Date()
         })
       }))
@@ -433,6 +510,7 @@ describe('CdoService', function () {
       const cdoTaskList = new CdoTaskList(buildCdo({
         exemption: buildExemption({
           applicationPackSent: new Date(),
+          applicationPackProcessed: new Date(),
           form2Sent: new Date(),
           applicationFeePaid: new Date(),
           neuteringConfirmation: new Date(),
@@ -498,6 +576,7 @@ describe('CdoService', function () {
         exemption: buildExemption({
           exemptionOrder: '2015',
           applicationPackSent: new Date(),
+          applicationPackProcessed: new Date(),
           form2Sent: new Date(),
           applicationFeePaid: new Date(),
           neuteringConfirmation: undefined,
