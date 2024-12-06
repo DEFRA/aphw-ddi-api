@@ -44,6 +44,59 @@ const sendReportSomethingEmails = async (payload) => {
   }
 }
 
+const sendForm2EmailsFromTaskList = async (indexNumber, cdoTaskList, user) => {
+  return sendForm2Emails(
+    indexNumber,
+    cdoTaskList.dog.name,
+    cdoTaskList.dog.microchipNumber, // may need to be overridden from payload
+    false, // unfit - boolean (from payload?)
+    '02/12/2024', // microchip_date (from payload?) - as string object not date
+    '01/12/2024', // neutering date (from payload?) - as string object not date (or empty string),
+    false, // under16 (from payload)
+    'jeremy.barnsley@defra.gov.uk' // user.username
+  )
+}
+
+const sendForm2Emails = async (indexNumber, dogName, microchipNumber, unfit, microchipDate, neuteringDate, under16, username) => {
+  const baseFields = [
+    { name: 'index_number', value: indexNumber },
+    { name: 'dog_name', value: dogName },
+    { name: 'microchip_number', value: microchipNumber },
+    { name: 'unfit_to_microchip', value: unfit ? 'yes' : 'no' },
+    { name: 'microchip_date', value: microchipDate },
+    { name: 'neutering_date', value: under16 ? '' : neuteringDate },
+    { name: 'under_16_months', value: under16 ? 'yes' : 'no' }
+  ]
+  const policeForce = await lookupPoliceForceByEmail(username)
+
+  const baseCustomFields = []
+    .concat(baseFields.map(field => ({
+      name: field.name,
+      value: field.value
+    })))
+
+  const defraCustomFields = [
+    { name: 'police_force', value: policeForce },
+    { name: 'submitted_by', value: username }]
+    .concat(baseCustomFields)
+
+  const dataDefra = {
+    toAddress: config.reportSomethingEmailAddress,
+    type: emailTypes.form2SubmissionToDefra,
+    customFields: defraCustomFields
+  }
+
+  await sendEmail(dataDefra)
+
+  const dataPolice = {
+    toAddress: username,
+    type: emailTypes.form2ConfirmationToPolice,
+    customFields: baseCustomFields
+  }
+
+  await sendEmail(dataPolice)
+}
+
 const createAuditPayload = (data, pk, source, targetPk, activityId, reportType) => {
   return {
     activityId,
@@ -105,5 +158,7 @@ const createAuditsForReportSomething = async (data) => {
 
 module.exports = {
   sendReportSomethingEmails,
+  sendForm2Emails,
+  sendForm2EmailsFromTaskList,
   createAuditsForReportSomething
 }
