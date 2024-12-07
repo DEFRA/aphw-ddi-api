@@ -44,19 +44,6 @@ const sendReportSomethingEmails = async (payload) => {
   }
 }
 
-const sendForm2EmailsFromTaskList = async (indexNumber, cdoTaskList, user) => {
-  return sendForm2Emails(
-    indexNumber,
-    cdoTaskList.dog.name,
-    cdoTaskList.dog.microchipNumber, // may need to be overridden from payload
-    false, // unfit - boolean (from payload?)
-    '02/12/2024', // microchip_date (from payload?) - as string object not date
-    '01/12/2024', // neutering date (from payload?) - as string object not date (or empty string),
-    false, // under16 (from payload)
-    'jeremy.barnsley@defra.gov.uk' // user.username
-  )
-}
-
 const sendForm2Emails = async (indexNumber, dogName, microchipNumber, unfit, microchipDate, neuteringDate, under16, username) => {
   const baseFields = [
     { name: 'index_number', value: indexNumber },
@@ -159,6 +146,5 @@ const createAuditsForReportSomething = async (data) => {
 module.exports = {
   sendReportSomethingEmails,
   sendForm2Emails,
-  sendForm2EmailsFromTaskList,
   createAuditsForReportSomething
 }
