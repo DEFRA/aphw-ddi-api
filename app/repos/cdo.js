@@ -60,6 +60,17 @@ const domain = require('../constants/domain')
  */
 
 /**
+ * @typedef FormTwoDao
+ * @property {number} id
+ * @property {number} dog_id
+ * @property {number} registration_id
+ * @property {number} submitted_by_id
+ * @property {string|null} form_two_submitted
+ * @property {Date}  created_at
+ * @property {string} updated_at
+ */
+
+/**
  * @typedef InsuranceDao
  * @property {number} id
  * @property {null|string} policy_number
@@ -138,6 +149,8 @@ const domain = require('../constants/domain')
  * @property {PoliceForceDao} police_force
  * @property {CourtDao} court
  * @property {ExemptionOrderDao} exemption_order
+ * @property {ExemptionOrderDao} exemption_order
+ * @property {FormTwoDao|null} form_two
  * @property {() => void} [save]
  */
 /**

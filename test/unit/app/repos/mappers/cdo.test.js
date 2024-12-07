@@ -4,7 +4,7 @@ const {
   buildInsuranceDao,
   buildRegistrationDao,
   buildDogDao,
-  dogBreachDAOs
+  dogBreachDAOs, buildFormTwoDao
 } = require('../../../../mocks/cdo/get')
 const {
   buildCdo, buildExemption, buildCdoInsurance, NOT_COVERED_BY_INSURANCE, INSECURE_PLACE,
@@ -159,6 +159,18 @@ describe('cdo mappers', () => {
       const insurance = undefined
       expect(mapCdoDaoToExemption(exemption, insurance)).toEqual(new Exemption(buildExemption({
         insurance: undefined
+      })))
+    })
+
+    test('should map a CdoDao to an Exemption given form two is submitted', () => {
+      const exemption = buildRegistrationDao({
+        form_two: buildFormTwoDao({
+          form_two_submitted: new Date('2024-12-07')
+        })
+      })
+      expect(mapCdoDaoToExemption(exemption, undefined)).toEqual(new Exemption(buildExemption({
+        insurance: undefined,
+        form2Submitted: new Date('2024-12-07')
       })))
     })
 

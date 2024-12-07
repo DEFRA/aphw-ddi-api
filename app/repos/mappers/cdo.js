@@ -97,6 +97,9 @@ const mapDogDaoToDog = (dogDao) => {
 }
 
 const returnDateOrNull = (dateOrNull) => {
+  if (dateOrNull === undefined) {
+    return null
+  }
   return dateOrNull === null ? null : new Date(dateOrNull)
 }
 
@@ -123,6 +126,7 @@ const mapCdoDaoToExemption = (registration, insurance) => {
     applicationPackSent: returnDateOrNull(registration.application_pack_sent),
     applicationPackProcessed: returnDateOrNull(registration.application_pack_processed),
     form2Sent: returnDateOrNull(registration.form_two_sent),
+    form2Submitted: returnDateOrNull(registration.form_two?.form_two_submitted),
     insuranceDetailsRecorded: returnDateOrNull(registration.insurance_details_recorded),
     microchipNumberRecorded: returnDateOrNull(registration.microchip_number_recorded),
     applicationFeePaymentRecorded: returnDateOrNull(registration.application_fee_payment_recorded),

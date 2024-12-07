@@ -49,6 +49,7 @@ class Exemption extends Changeable {
     this.applicationPackSent = exemptionProperties.applicationPackSent
     this.applicationPackProcessed = exemptionProperties.applicationPackProcessed
     this._form2Sent = exemptionProperties.form2Sent
+    this._form2Submitted = exemptionProperties.form2Submitted
     this._insuranceDetailsRecorded = exemptionProperties.insuranceDetailsRecorded
     this._microchipNumberRecorded = exemptionProperties.microchipNumberRecorded
     this._applicationFeePaymentRecorded = exemptionProperties.applicationFeePaymentRecorded
@@ -75,6 +76,10 @@ class Exemption extends Changeable {
 
   get form2Sent () {
     return this._form2Sent
+  }
+
+  get form2Submitted () {
+    return this._form2Submitted
   }
 
   get neuteringConfirmation () {

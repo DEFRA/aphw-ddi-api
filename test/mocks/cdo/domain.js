@@ -136,6 +136,7 @@ const buildExemption = (exemptionPartial = {}) => ({
   nonComplianceLetterSent: null,
   applicationPackSent: null,
   form2Sent: null,
+  form2Submitted: null,
   insuranceDetailsRecorded: null,
   microchipNumberRecorded: null,
   applicationFeePaymentRecorded: null,
