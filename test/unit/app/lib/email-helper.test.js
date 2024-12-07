@@ -8,7 +8,8 @@ jest.mock('../../../../app/messaging/send-audit')
 const { sendActivityToAudit } = require('../../../../app/messaging/send-audit')
 
 const emailHelper = require('../../../../app/lib/email-helper')
-const { reportSomethingAudit, reportTypes } = require('../../../../app/constants/email-types')
+const { reportSomethingAudit, reportTypes, formTwoSubmissionAudit } = require('../../../../app/constants/email-types')
+const { createAuditsForFormTwo } = require('../../../../app/lib/email-helper')
 
 describe('EmailHelper test', () => {
   beforeEach(async () => {
@@ -212,6 +213,37 @@ describe('EmailHelper test', () => {
         targetPk: 'owner',
         reportType: reportTypes.somethingElse
       }))
+    })
+  })
+
+  describe('createAuditsForFormTwo', () => {
+    test('should send', async () => {
+      const details = {
+        username: 'bilbo.baggins@shire.police.me',
+        indexNumber: 'ED300100',
+        dogName: 'Pip',
+        microchipNumber: '123456789012345',
+        unfit: false,
+        microchipDate: '02/12/2024',
+        neuteringDate: '01/12/2024',
+        under16: false,
+        policeForce: 'Shire Police'
+      }
+
+      const expectedAudit = {
+        activityId: expect.any(String),
+        activity: '4',
+        activityType: 'received',
+        pk: 'ED300100',
+        source: 'dog',
+        activityDate: expect.any(Date),
+        targetPk: 'dog',
+        details,
+        activityLabel: 'Form Two submitted by Shire Police'
+      }
+      await createAuditsForFormTwo(details)
+      expect(sendActivityToAudit).toHaveBeenCalledWith(expectedAudit, { username: 'bilbo.baggins@shire.police.me', displayname: 'bilbo.baggins@shire.police.me' })
+      expect(sendActivityToAudit).toHaveBeenCalledTimes(1)
     })
   })
 

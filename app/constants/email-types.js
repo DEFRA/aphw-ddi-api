@@ -41,9 +41,16 @@ const reportSomethingAudit = {
   activityType: 'received'
 }
 
+const formTwoSubmissionAudit = {
+  id: '4',
+  label: 'Form Two',
+  activityType: 'received'
+}
+
 module.exports = {
   emailTypes,
   reportSomethingSubjectLines,
   reportSomethingAudit,
-  reportTypes
+  reportTypes,
+  formTwoSubmissionAudit
 }
