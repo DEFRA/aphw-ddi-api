@@ -218,16 +218,19 @@ describe('EmailHelper test', () => {
 
   describe('createAuditsForFormTwo', () => {
     test('should send', async () => {
+      /**
+       * @type {FormTwoAuditDetails}
+       */
       const details = {
         username: 'bilbo.baggins@shire.police.me',
         indexNumber: 'ED300100',
-        dogName: 'Pip',
-        microchipNumber: '123456789012345',
-        unfit: false,
-        microchipDate: '02/12/2024',
-        neuteringDate: '01/12/2024',
-        under16: false,
-        policeForce: 'Shire Police'
+        microchipNumber: '543210987654321',
+        microchipVerification: '03/12/2024',
+        neuteringConfirmation: '04/12/2024',
+        microchipDeadline: '',
+        dogNotNeutered: false,
+        dogNotFitForMicrochip: false,
+        policeForce: 'Shire Citizens Constabulary'
       }
 
       const expectedAudit = {
@@ -239,7 +242,7 @@ describe('EmailHelper test', () => {
         activityDate: expect.any(Date),
         targetPk: 'dog',
         details,
-        activityLabel: 'Form Two submitted by Shire Police'
+        activityLabel: 'Form Two submitted by Shire Citizens Constabulary'
       }
       await createAuditsForFormTwo(details)
       expect(sendActivityToAudit).toHaveBeenCalledWith(expectedAudit, { username: 'bilbo.baggins@shire.police.me', displayname: 'bilbo.baggins@shire.police.me' })

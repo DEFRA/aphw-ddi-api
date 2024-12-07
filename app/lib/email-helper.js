@@ -106,12 +106,12 @@ const createAuditsForReportSomething = async (data) => {
  * @typedef FormTwoAuditDetails
  * @property {string} username
  * @property {string} indexNumber
- * @property {string} dogName
  * @property {string} microchipNumber
- * @property {boolean} unfit
- * @property {string} microchipDate
- * @property {string} neuteringDate
- * @property {boolean} under16
+ * @property {string} microchipVerification
+ * @property {string} neuteringConfirmation
+ * @property {string} microchipDeadline
+ * @property {boolean} dogNotNeutered
+ * @property {boolean} dogNotFitForMicrochip
  * @property {string} policeForce
  *
  */
@@ -142,7 +142,7 @@ const createFormTwoAuditPayload = (details, pk, source, targetPk, activityId) =>
  * @returns {Promise<void>}
  */
 const createAuditsForFormTwo = async (details) => {
-  const payload = createFormTwoAuditPayload(details, details.indexNumber, 'dog', 'dog', formTwoSubmissionAudit.id)
+  const payload = createFormTwoAuditPayload(details, details.indexNumber, 'dog', 'dog', uuidv4())
   await sendActivityToAudit(payload, { username: details.username, displayname: details.username })
 }
 
