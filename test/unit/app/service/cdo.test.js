@@ -39,7 +39,8 @@ describe('CdoService', function () {
       getCdoTaskList: jest.fn(),
       getSummaryCdos: jest.fn(),
       createCdo: jest.fn(),
-      saveCdoTaskList: jest.fn()
+      saveCdoTaskList: jest.fn(),
+      submitFormTwo: jest.fn()
     }
 
     // Instantiate CdoService with the mock repository
@@ -640,6 +641,62 @@ describe('CdoService', function () {
           status: 'Exempt'
         },
         devUser)
+    })
+  })
+
+  describe('submitFormTwo', () => {
+    test('should submit form two', async () => {
+      mockCdoRepository.submitFormTwo.mockImplementation(async (_indexNumber, _cdoTaskList, _payload, _username, sendEmailCallback) => {
+        await sendEmailCallback()
+      })
+      const indexNumber = 'ED300100'
+      const cdoTaskList = new CdoTaskList(buildCdo({
+        exemption: buildExemption({
+          exemptionOrder: '2015',
+          applicationPackSent: new Date(),
+          applicationPackProcessed: new Date(),
+          form2Sent: new Date(),
+          applicationFeePaid: new Date(),
+          neuteringConfirmation: undefined,
+          microchipVerification: undefined,
+          neuteringDeadline: new Date('9999-10-01'),
+          microchipDeadline: new Date('9999-10-01'),
+          insuranceDetailsRecorded: new Date(),
+          microchipNumberRecorded: new Date(),
+          verificationDatesRecorded: new Date(),
+          insurance: [buildCdoInsurance({
+            renewalDate: new Date('9999-01-01'),
+            company: 'Dogs Trust'
+          })]
+        }),
+        dog: buildCdoDog({
+          indexNumber,
+          id: 300100,
+          microchipNumber: '123456789012345',
+          status: 'Pre-exempt',
+          dateOfBirth: new Date(),
+          name: 'Pip'
+        })
+      }))
+
+      mockCdoRepository.getCdoTaskList.mockResolvedValue(cdoTaskList)
+
+      const payload = {
+        microchipVerification: '03/12/2024',
+        neuteringConfirmation: '04/12/2024',
+        microchipDeadline: '',
+        dogNotNeutered: false,
+        dogNotFitForMicrochip: false
+      }
+      const middleEarthUser = {
+        username: 'bilbo.baggins@shire.police.me',
+        displayname: 'Bilbo Baggins'
+      }
+
+      await cdoService.submitFormTwo(indexNumber, payload, middleEarthUser)
+
+      expect(mockCdoRepository.submitFormTwo).toHaveBeenCalledWith('ED300100', cdoTaskList, payload, 'bilbo.baggins@shire.police.me', expect.any(Function))
+      expect(sendForm2Emails).toHaveBeenCalledWith('ED300100', 'Pip', '123456789012345', false, '03/12/2024', '04/12/2024', false, 'bilbo.baggins@shire.police.me')
     })
   })
 

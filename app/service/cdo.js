@@ -289,6 +289,28 @@ class CdoService {
     return sentDate
   }
 
+  async submitFormTwo (indexNumber, payload, user) {
+    /**
+     * @type {CdoTaskList}
+     */
+    const cdoTaskList = await this.cdoRepository.getCdoTaskList(indexNumber)
+    const username = user.username
+    const microchipDate = payload.dogNotFitForMicrochip ? payload.microchipDeadline : payload.microchipVerification
+
+    const sendEmailCallback = async () => sendForm2Emails(
+      indexNumber,
+      cdoTaskList.dog.name,
+      cdoTaskList.dog.microchipNumber,
+      payload.dogNotFitForMicrochip, // unfit - boolean (from payload?)
+      microchipDate, // microchip_date (from payload?) - as string object not date
+      payload.neuteringConfirmation, // neutering date (from payload?) - as string object not date (or empty string),
+      payload.dogNotNeutered, // under16 (from payload)
+      username // user.username
+    )
+
+    await this.cdoRepository.submitFormTwo(indexNumber, cdoTaskList, payload, username, sendEmailCallback)
+  }
+
   /**
    * @param indexNumber
    * @param cdoTaskList

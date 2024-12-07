@@ -1,10 +1,26 @@
 const sequelize = require('../config/db')
-const { Op } = require('sequelize')
 const { DuplicateResourceError } = require('../errors/duplicate-record')
 const { NotFoundError } = require('../errors/not-found')
 const { createAuditsForFormTwo } = require('../lib/email-helper')
+
 /**
- *
+ * @typedef SubmitFormTwoMethod
+ * @param {string} indexNumber
+ * @param {CdoTaskList} cdoTaskList
+ * @param {{
+ *     microchipVerification: string;
+ *     neuteringConfirmation: string;
+ *     microchipNumber: string;
+ *     microchipDeadline: string;
+ *     dogNotNeutered: boolean;
+ *     dogNotFitForMicrochip: boolean;
+ * }} payload
+ * @param {string} username
+ * @param {() => any} callbackFn
+ * @param [transaction]
+ * @return {Promise<void>}
+ */
+/**
  * @param {string} indexNumber
  * @param {CdoTaskList} cdoTaskList
  * @param {{

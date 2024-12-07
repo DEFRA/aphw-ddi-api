@@ -14,6 +14,7 @@ const { CdoTaskList } = require('../data/domain')
 const { createOrUpdateInsuranceWithCommand } = require('./insurance')
 const { updateMicrochipKey } = require('./microchip')
 const domain = require('../constants/domain')
+const { submitFormTwo } = require('./formTwo')
 
 /**
  * @typedef DogBreedDao
@@ -558,7 +559,8 @@ const saveCdoTaskList = async (cdoTaskList, transaction) => {
  *    createCdo: CreateCdo,
  *    getCdoModel: GetCdoModel,
  *    getCdoTaskList: GetCdoTaskList,
- *    saveCdoTaskList: SaveCdoTaskList
+ *    saveCdoTaskList: SaveCdoTaskList,
+ *    submitFormTwo: SubmitFormTwoMethod
  * }} CdoRepository
  */
 /**
@@ -571,5 +573,6 @@ module.exports = {
   getAllCdos,
   getCdoModel,
   getCdoTaskList,
-  saveCdoTaskList
+  saveCdoTaskList,
+  submitFormTwo
 }
