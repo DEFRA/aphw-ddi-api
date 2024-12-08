@@ -8,7 +8,7 @@ jest.mock('../../../../app/messaging/send-audit')
 const { sendActivityToAudit } = require('../../../../app/messaging/send-audit')
 
 const emailHelper = require('../../../../app/lib/email-helper')
-const { reportSomethingAudit, reportTypes, formTwoSubmissionAudit } = require('../../../../app/constants/email-types')
+const { reportSomethingAudit, reportTypes } = require('../../../../app/constants/email-types')
 const { createAuditsForFormTwo } = require('../../../../app/lib/email-helper')
 
 describe('EmailHelper test', () => {
