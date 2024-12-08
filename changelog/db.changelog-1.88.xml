@@ -1,0 +1,33 @@
+<?xml version="1.1" encoding="utf-8" standalone="no"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog" xmlns:ext="http://www.liquibase.org/xml/ns/dbchangelog-ext" xmlns:pro="http://www.liquibase.org/xml/ns/pro" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog-ext http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-ext.xsd http://www.liquibase.org/xml/ns/pro http://www.liquibase.org/xml/ns/pro/liquibase-pro-3.9.xsd http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.9.xsd">
+  <changeSet author="C Cole" id="1">
+    <tagDatabase tag="v1.87.0" />
+  </changeSet>
+  <changeSet author="C Cole" id="2">
+    <createTable tableName="form_two">
+      <column autoIncrement="true" name="id" type="INTEGER">
+        <constraints nullable="false" primaryKey="true" primaryKeyName="form_two_pkey" />
+      </column>
+      <column name="dog_id" type="INTEGER">
+        <constraints nullable="false" unique="true" uniqueConstraintName="form_two_dog_ukey" />
+      </column>
+      <column name="registration_id" type="INTEGER">
+        <constraints nullable="false" unique="true" uniqueConstraintName="form_two_registration_ukey" />
+      </column>
+      <column name="form_two_submitted" type="date">
+        <constraints nullable="true" />
+      </column>
+      <column name="submitted_by_id" type="INTEGER">
+        <constraints nullable="false" />
+      </column>
+      <column name="deleted_at" type="TIMESTAMP WITH TIME ZONE" />
+      <column name="created_at" type="TIMESTAMP WITH TIME ZONE" />
+      <column name="updated_at" type="TIMESTAMP WITH TIME ZONE" />
+    </createTable>
+  </changeSet>
+  <changeSet author="C Cole" id="3">
+    <addForeignKeyConstraint baseColumnNames="dog_id" baseTableName="form_two" constraintName="fk_form_two_dog" referencedColumnNames="id" referencedTableName="dog" />
+    <addForeignKeyConstraint baseColumnNames="registration_id" baseTableName="form_two" constraintName="fk_form_two_registration" referencedColumnNames="id" referencedTableName="registration" />
+    <addForeignKeyConstraint baseColumnNames="submitted_by_id" baseTableName="form_two" constraintName="fk_form_two_submitted_by" referencedColumnNames="id" referencedTableName="user_account" />
+  </changeSet>
+</databaseChangeLog>

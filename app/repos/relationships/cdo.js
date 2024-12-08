@@ -29,20 +29,26 @@ const cdoRelationship = sequelize => [
   {
     model: sequelize.models.registration,
     as: 'registration',
-    include: [{
-      model: sequelize.models.police_force,
-      as: 'police_force',
-      paranoid: false
-    },
-    {
-      model: sequelize.models.court,
-      as: 'court',
-      paranoid: false
-    },
-    {
-      model: sequelize.models.exemption_order,
-      as: 'exemption_order'
-    }]
+    include: [
+      {
+        model: sequelize.models.police_force,
+        as: 'police_force',
+        paranoid: false
+      },
+      {
+        model: sequelize.models.court,
+        as: 'court',
+        paranoid: false
+      },
+      {
+        model: sequelize.models.exemption_order,
+        as: 'exemption_order'
+      },
+      {
+        model: sequelize.models.form_two,
+        as: 'form_two'
+      }
+    ]
   },
   {
     model: sequelize.models.insurance,

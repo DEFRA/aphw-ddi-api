@@ -77,6 +77,7 @@ const mapCdoTaskListToDto = (cdoTaskList) => ({
   microchipNumber2: cdoTaskList.cdoSummary.microchipNumber2,
   applicationFeePaid: cdoTaskList.cdoSummary.applicationFeePaid,
   form2Sent: cdoTaskList.cdoSummary.form2Sent,
+  form2Submitted: cdoTaskList.cdoSummary.form2Submitted,
   neuteringConfirmation: cdoTaskList.cdoSummary.neuteringConfirmation,
   microchipVerification: cdoTaskList.cdoSummary.microchipVerification,
   microchipDeadline: cdoTaskList.cdoSummary.microchipDeadline,

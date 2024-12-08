@@ -90,6 +90,7 @@ value.cacheConfig = cacheConfig
  *  port: string;
  *  robotSheetName: string;
  *  enforcementUrl: string;
+ *  reportSomethingEmailAddress: string
  *  serviceName: string;
  *  env: string;
  *  overnightExportBatchSize: string;

@@ -1,4 +1,5 @@
 const Joi = require('joi')
+const { formatDate } = require('../../lib/date-helpers')
 
 const recordInsuranceDetailsSchema = Joi.object({
   insuranceCompany: Joi.string().allow('').required(),
@@ -72,6 +73,7 @@ const manageCdoResponseSchema = Joi.object({
   microchipNumber2: Joi.string().optional(),
   applicationFeePaid: Joi.date().optional(),
   form2Sent: Joi.date().optional(),
+  form2Submitted: Joi.date().optional(),
   cdoSummary: Joi.object({
     dog: Joi.object({
       name: Joi.string().allow('').allow(null).optional()
@@ -102,6 +104,22 @@ const issueCertificateResponseSchema = Joi.object({
   certificateIssued: Joi.date()
 })
 
+const verifyDate = Joi.date().iso().custom((value, _) => {
+  if (isNaN(value)) {
+    return ''
+  }
+  return formatDate(value)
+})
+
+const submitFormTwoSchema = Joi.object({
+  microchipNumber: Joi.alternatives().try(Joi.string().valid('').optional().default(''), Joi.string().min(15).required()),
+  neuteringConfirmation: Joi.alternatives().conditional('dogNotNeutered', { is: true, then: Joi.any().custom(_ => ''), otherwise: verifyDate }),
+  microchipVerification: Joi.alternatives().conditional('dogNotFitForMicrochip', { is: true, then: Joi.any().custom(_ => ''), otherwise: verifyDate }),
+  microchipDeadline: Joi.alternatives().conditional('dogNotFitForMicrochip', { is: true, then: verifyDate, otherwise: Joi.valid('').default('') }),
+  dogNotNeutered: Joi.boolean().default(false),
+  dogNotFitForMicrochip: Joi.boolean().default(false)
+})
+
 module.exports = {
   recordInsuranceDetailsSchema,
   recordInsuranceDetailsResponseSchema,
@@ -113,5 +131,6 @@ module.exports = {
   manageCdoResponseSchema,
   simpleConflictSchema,
   recordMicrochipNumberConflictSchema,
-  issueCertificateResponseSchema
+  issueCertificateResponseSchema,
+  submitFormTwoSchema
 }

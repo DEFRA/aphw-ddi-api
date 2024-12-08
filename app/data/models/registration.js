@@ -201,6 +201,11 @@ module.exports = (sequelize, DataTypes) => {
       as: 'status',
       foreignKey: 'status_id'
     })
+
+    registration.hasOne(models.form_two, {
+      as: 'form_two',
+      foreignKey: 'registration_id'
+    })
   }
 
   return registration

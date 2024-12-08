@@ -1,5 +1,5 @@
 const { buildPersonAddressDao } = require('./get')
-const { Cdo, Person, Dog, Exemption, CdoTask } = require('../../../app/data/domain')
+const { Cdo, Person, Dog, Exemption, CdoTask, CdoTaskList } = require('../../../app/data/domain')
 const { BreachCategory } = require('../../../app/data/domain')
 
 /**
@@ -110,6 +110,7 @@ const buildCdoInsurance = (insurancePartial = {}) => ({
  * @property {Date|null} applicationPackSent - Date application pack was sent
  * @property {Date|null} applicationPackProcessed - Status of Application Pack Processed
  * @property {Date|null} form2Sent - Date Form Two was sent
+ * @property {Date|null} form2Submitted - Date Form Two was submitted
  * @property {Date|null} applicationFeePaid - Status of application fee payment, currently null.
  */
 
@@ -136,6 +137,7 @@ const buildExemption = (exemptionPartial = {}) => ({
   nonComplianceLetterSent: null,
   applicationPackSent: null,
   form2Sent: null,
+  form2Submitted: null,
   insuranceDetailsRecorded: null,
   microchipNumberRecorded: null,
   applicationFeePaymentRecorded: null,
@@ -156,6 +158,12 @@ const buildCdo = (cdoPartial = {}) => {
   const exemption = new Exemption(exemptionProps)
   return new Cdo(person, dog, exemption)
 }
+
+/**
+ * @param {{ person?: Partial<PersonParams>; dog?: Partial<CdoDogParams>; exemption?: Partial<Exemption>;  }} cdoPartial
+ * @returns {CdoTaskList}
+ */
+const buildCdoTaskList = (cdoPartial = {}) => new CdoTaskList(buildCdo(cdoPartial))
 
 const buildTask = (cdoTask = {}) => {
   return new CdoTask(
@@ -238,6 +246,7 @@ module.exports = {
   buildCdoInsurance,
   buildExemption,
   buildCdo,
+  buildCdoTaskList,
   buildTask,
   allBreaches,
   NOT_COVERED_BY_INSURANCE,

@@ -87,6 +87,7 @@ class CdoTaskList {
       microchipNumber2,
       applicationFeePaid: this._cdo.exemption.applicationFeePaid ?? undefined,
       form2Sent: this._cdo.exemption.form2Sent ?? undefined,
+      form2Submitted: this._cdo.exemption.form2Submitted ?? undefined,
       neuteringConfirmation: this._cdo.exemption.neuteringConfirmation ?? undefined,
       neuteringDeadline: this._cdo.exemption.neuteringDeadline ?? undefined,
       microchipVerification: this._cdo.exemption.microchipVerification ?? undefined,

@@ -134,6 +134,11 @@ module.exports = (sequelize, DataTypes) => {
       as: 'dog_microchips',
       foreignKey: 'dog_id'
     })
+
+    dog.hasOne(models.form_two, {
+      as: 'form_two',
+      foreignKey: 'dog_id'
+    })
   }
 
   return dog
