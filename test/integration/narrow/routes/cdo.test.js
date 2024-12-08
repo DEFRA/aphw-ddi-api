@@ -1299,6 +1299,180 @@ describe('CDO endpoint', () => {
     })
   })
 
+  describe('POST /cdo/ED123/manage:submitForm2', () => {
+    test('should return 204', async () => {
+      const submitForm2Mock = jest.fn()
+      getCdoService.mockReturnValue({
+        submitFormTwo: submitForm2Mock
+      })
+      submitForm2Mock.mockResolvedValue(undefined)
+
+      const expectedPayload = {
+        microchipNumber: '123456789012358',
+        microchipVerification: '01/10/2024',
+        dogNotFitForMicrochip: false,
+        microchipDeadline: '',
+        neuteringConfirmation: '01/10/2024',
+        dogNotNeutered: false
+      }
+
+      const options = {
+        method: 'POST',
+        url: '/cdo/ED123/manage:submitFormTwo',
+        payload: {
+          microchipNumber: '123456789012358',
+          microchipVerification: { year: '2024', month: '10', day: '1' },
+          dogNotFitForMicrochip: false,
+          neuteringConfirmation: { year: '2024', month: '10', day: '1' },
+          dogNotNeutered: false
+        },
+        ...portalHeader
+      }
+      const response = await server.inject(options)
+      expect(response.statusCode).toBe(204)
+      expect(submitForm2Mock).toHaveBeenCalledWith('ED123', expectedPayload, devUser)
+    })
+
+    test('should return 204 given different call', async () => {
+      const submitForm2Mock = jest.fn()
+      getCdoService.mockReturnValue({
+        submitFormTwo: submitForm2Mock
+      })
+      submitForm2Mock.mockResolvedValue(undefined)
+
+      const expectedPayload = {
+        microchipNumber: '123456789012358',
+        microchipVerification: '',
+        dogNotFitForMicrochip: true,
+        microchipDeadline: '01/10/2024',
+        neuteringConfirmation: '',
+        dogNotNeutered: true
+      }
+
+      const options = {
+        method: 'POST',
+        url: '/cdo/ED123/manage:submitFormTwo',
+        payload: {
+          microchipNumber: '123456789012358',
+          microchipVerification: { year: '', month: '', day: '' },
+          microchipDeadline: { year: '2024', month: '10', day: '1' },
+          dogNotFitForMicrochip: true,
+          neuteringConfirmation: { year: '', month: '', day: '' },
+          dogNotNeutered: true
+        },
+        ...portalHeader
+      }
+      const response = await server.inject(options)
+      expect(response.statusCode).toBe(204)
+      expect(submitForm2Mock).toHaveBeenCalledWith('ED123', expectedPayload, devUser)
+    })
+
+    // test('should return 403 given call from enforcement', async () => {
+    //   validate.mockResolvedValue(mockValidateEnforcement)
+    //
+    //   const options = {
+    //     method: 'POST',
+    //     url: '/cdo/ED123/manage:sendForm2',
+    //     ...enforcementHeader
+    //   }
+    //   const response = await server.inject(options)
+    //   expect(response.statusCode).toBe(403)
+    // })
+    //
+    test('should throw a 404 given index does not exist', async () => {
+      getCdoService.mockReturnValue({
+        submitFormTwo: async () => {
+          throw new NotFoundError('not found')
+        }
+      })
+      const options = {
+        method: 'POST',
+        url: '/cdo/ED123/manage:submitFormTwo',
+        payload: {
+          microchipNumber: '123456789012358',
+          microchipVerification: { year: '2024', month: '10', day: '1' },
+          dogNotFitForMicrochip: false,
+          neuteringConfirmation: { day: '2024', month: '10', year: '1' },
+          dogNotNeutered: false
+        },
+        ...enforcementHeader
+      }
+
+      const response = await server.inject(options)
+      expect(response.statusCode).toBe(404)
+    })
+
+    test('should throw a 409 given action already performed', async () => {
+      getCdoService.mockReturnValue({
+        submitFormTwo: async () => {
+          throw new ActionAlreadyPerformedError('action repeated')
+        }
+      })
+      const options = {
+        method: 'POST',
+        url: '/cdo/ED123/manage:submitFormTwo',
+        payload: {
+          microchipNumber: '123456789012358',
+          microchipVerification: { year: '2024', month: '10', day: '1' },
+          dogNotFitForMicrochip: false,
+          neuteringConfirmation: { day: '2024', month: '10', year: '1' },
+          dogNotNeutered: false
+        },
+        ...enforcementHeader
+      }
+
+      const response = await server.inject(options)
+      expect(response.statusCode).toBe(409)
+    })
+
+    test('should throw a 409 given action performed out of sequence', async () => {
+      getCdoService.mockReturnValue({
+        submitFormTwo: async () => {
+          throw new SequenceViolationError('Application pack must be sent before performing this action')
+        }
+      })
+      const options = {
+        method: 'POST',
+        url: '/cdo/ED123/manage:submitFormTwo',
+        payload: {
+          microchipNumber: '123456789012358',
+          microchipVerification: { year: '2024', month: '10', day: '1' },
+          dogNotFitForMicrochip: false,
+          neuteringConfirmation: { day: '2024', month: '10', year: '1' },
+          dogNotNeutered: false
+        },
+        ...enforcementHeader
+      }
+
+      const response = await server.inject(options)
+      expect(response.statusCode).toBe(409)
+    })
+
+    test('should returns 500 given server error thrown', async () => {
+      getCdoService.mockReturnValue({
+        submitFormTwo: async () => {
+          throw new Error('cdo error')
+        }
+      })
+
+      const options = {
+        method: 'POST',
+        url: '/cdo/ED123/manage:submitFormTwo',
+        payload: {
+          microchipNumber: '123456789012358',
+          microchipVerification: { year: '2024', month: '10', day: '1' },
+          dogNotFitForMicrochip: false,
+          neuteringConfirmation: { day: '2024', month: '10', year: '1' },
+          dogNotNeutered: false
+        },
+        ...enforcementHeader
+      }
+
+      const response = await server.inject(options)
+      expect(response.statusCode).toBe(500)
+    })
+  })
+
   describe('POST /cdo/ED123/manage:verifyDates', () => {
     test('should return 201', async () => {
       const verifyDatesMock = jest.fn()
