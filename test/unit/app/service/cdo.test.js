@@ -695,7 +695,7 @@ describe('CdoService', function () {
 
       await cdoService.submitFormTwo(indexNumber, payload, middleEarthUser)
 
-      expect(mockCdoRepository.submitFormTwo).toHaveBeenCalledWith('ED300100', cdoTaskList, payload, 'bilbo.baggins@shire.police.me', expect.any(Function))
+      expect(mockCdoRepository.submitFormTwo).toHaveBeenCalledWith('ED300100', cdoTaskList, payload, expect.objectContaining({ username: 'bilbo.baggins@shire.police.me' }), expect.any(Function))
       expect(sendForm2Emails).toHaveBeenCalledWith('ED300100', 'Pip', '123456789012345', false, '03/12/2024', '04/12/2024', false, 'bilbo.baggins@shire.police.me')
     })
   })
