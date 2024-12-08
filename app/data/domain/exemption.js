@@ -23,6 +23,7 @@ const { InvalidDataError } = require('../../errors/domain/invalidData')
  * @property {Date|null} nonComplianceLetterSent
  * @property {Date|null} applicationPackSent
  * @property {Date|null} form2Sent
+ * @property {Date|null} form2Submitted
  * @property {Date|null} insuranceDetailsRecorded
  * @property {Date|null} microchipNumberRecorded
  * @property {Date|null} applicationFeePaymentRecorded

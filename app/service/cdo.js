@@ -299,7 +299,7 @@ class CdoService {
     const sendEmailCallback = async () => sendForm2Emails(
       indexNumber,
       cdoTaskList.dog.name,
-      cdoTaskList.dog.microchipNumber,
+      payload.microchipNumber,
       payload.dogNotFitForMicrochip, // unfit - boolean (from payload?)
       microchipDate, // microchip_date (from payload?) - as string object not date
       payload.neuteringConfirmation, // neutering date (from payload?) - as string object not date (or empty string),

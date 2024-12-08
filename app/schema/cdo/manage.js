@@ -73,6 +73,7 @@ const manageCdoResponseSchema = Joi.object({
   microchipNumber2: Joi.string().optional(),
   applicationFeePaid: Joi.date().optional(),
   form2Sent: Joi.date().optional(),
+  form2Submitted: Joi.date().optional(),
   cdoSummary: Joi.object({
     dog: Joi.object({
       name: Joi.string().allow('').allow(null).optional()
@@ -103,16 +104,11 @@ const issueCertificateResponseSchema = Joi.object({
   certificateIssued: Joi.date()
 })
 
-const verifyDate = Joi.object({
-  year: Joi.number().allow(null).allow(''),
-  month: Joi.number().allow(null).allow(''),
-  day: Joi.number().allow(null).allow('')
-}).custom((value, _) => {
-  const date = new Date(value.year, value.month - 1, value.day)
-  if (isNaN(date)) {
+const verifyDate = Joi.date().iso().custom((value, _) => {
+  if (isNaN(value)) {
     return ''
   }
-  return formatDate(date)
+  return formatDate(value)
 })
 
 const submitFormTwoSchema = Joi.object({

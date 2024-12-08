@@ -433,7 +433,11 @@ describe('CDO endpoint', () => {
     })
 
     test('should return an initialised manage cdo task list when called from enforcement', async () => {
-      const cdoTaskList = new CdoTaskList(buildCdo())
+      const cdoTaskList = new CdoTaskList(buildCdo({
+        exemption: buildExemption({
+          form2Submitted: new Date('2024-12-06')
+        })
+      }))
       cdoRepository.getCdoTaskList.mockResolvedValue(cdoTaskList)
       const getTaskListMock = jest.fn(_ => cdoTaskList)
       getCdoService.mockReturnValue({
@@ -446,8 +450,13 @@ describe('CDO endpoint', () => {
       }
 
       const response = await server.inject(options)
+      const payload = JSON.parse(response.payload)
       expect(response.statusCode).toBe(200)
+
       expect(auditDogCdoProgressView).toHaveBeenCalledWith(cdoTaskList, expect.anything())
+      expect(payload).toEqual(expect.objectContaining({
+        form2Submitted: '2024-12-06T00:00:00.000Z'
+      }))
     })
 
     test('should return a complete manage cdo task list', async () => {
@@ -1321,9 +1330,9 @@ describe('CDO endpoint', () => {
         url: '/cdo/ED123/manage:submitFormTwo',
         payload: {
           microchipNumber: '123456789012358',
-          microchipVerification: { year: '2024', month: '10', day: '1' },
+          microchipVerification: '2024-10-01T00:00:00.000Z',
           dogNotFitForMicrochip: false,
-          neuteringConfirmation: { year: '2024', month: '10', day: '1' },
+          neuteringConfirmation: '2024-10-01T00:00:00.000Z',
           dogNotNeutered: false
         },
         ...portalHeader
@@ -1355,7 +1364,7 @@ describe('CDO endpoint', () => {
         payload: {
           microchipNumber: '123456789012358',
           microchipVerification: { year: '', month: '', day: '' },
-          microchipDeadline: { year: '2024', month: '10', day: '1' },
+          microchipDeadline: '2024-10-01T00:00:00.000Z',
           dogNotFitForMicrochip: true,
           neuteringConfirmation: { year: '', month: '', day: '' },
           dogNotNeutered: true
@@ -1390,9 +1399,9 @@ describe('CDO endpoint', () => {
         url: '/cdo/ED123/manage:submitFormTwo',
         payload: {
           microchipNumber: '123456789012358',
-          microchipVerification: { year: '2024', month: '10', day: '1' },
+          microchipVerification: '2024-10-01T00:00:00.000Z',
           dogNotFitForMicrochip: false,
-          neuteringConfirmation: { day: '2024', month: '10', year: '1' },
+          neuteringConfirmation: '2024-10-01T00:00:00.000Z',
           dogNotNeutered: false
         },
         ...enforcementHeader
@@ -1413,9 +1422,9 @@ describe('CDO endpoint', () => {
         url: '/cdo/ED123/manage:submitFormTwo',
         payload: {
           microchipNumber: '123456789012358',
-          microchipVerification: { year: '2024', month: '10', day: '1' },
+          microchipVerification: '2024-10-01T00:00:00.000Z',
           dogNotFitForMicrochip: false,
-          neuteringConfirmation: { day: '2024', month: '10', year: '1' },
+          neuteringConfirmation: '2024-10-01T00:00:00.000Z',
           dogNotNeutered: false
         },
         ...enforcementHeader
@@ -1436,9 +1445,9 @@ describe('CDO endpoint', () => {
         url: '/cdo/ED123/manage:submitFormTwo',
         payload: {
           microchipNumber: '123456789012358',
-          microchipVerification: { year: '2024', month: '10', day: '1' },
+          microchipVerification: '2024-10-01T00:00:00.000Z',
           dogNotFitForMicrochip: false,
-          neuteringConfirmation: { day: '2024', month: '10', year: '1' },
+          neuteringConfirmation: '2024-10-01T00:00:00.000Z',
           dogNotNeutered: false
         },
         ...enforcementHeader
@@ -1460,9 +1469,9 @@ describe('CDO endpoint', () => {
         url: '/cdo/ED123/manage:submitFormTwo',
         payload: {
           microchipNumber: '123456789012358',
-          microchipVerification: { year: '2024', month: '10', day: '1' },
+          microchipVerification: '2024-10-01T00:00:00.000Z',
           dogNotFitForMicrochip: false,
-          neuteringConfirmation: { day: '2024', month: '10', year: '1' },
+          neuteringConfirmation: '2024-10-01T00:00:00.000Z',
           dogNotNeutered: false
         },
         ...enforcementHeader

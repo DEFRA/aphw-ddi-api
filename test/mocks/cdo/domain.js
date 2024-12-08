@@ -110,6 +110,7 @@ const buildCdoInsurance = (insurancePartial = {}) => ({
  * @property {Date|null} applicationPackSent - Date application pack was sent
  * @property {Date|null} applicationPackProcessed - Status of Application Pack Processed
  * @property {Date|null} form2Sent - Date Form Two was sent
+ * @property {Date|null} form2Submitted - Date Form Two was submitted
  * @property {Date|null} applicationFeePaid - Status of application fee payment, currently null.
  */
 
