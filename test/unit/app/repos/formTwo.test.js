@@ -18,6 +18,9 @@ describe('formTwo', () => {
       },
       user_account: {
         findOne: jest.fn()
+      },
+      police_force: {
+        findOne: jest.fn()
       }
     },
     fn: jest.fn(),
@@ -107,6 +110,7 @@ describe('formTwo', () => {
         transaction: {}
       })
       expect(sequelize.models.user_account.findOne).toHaveBeenCalledWith({
+        include: [{ as: 'police_force', model: expect.anything() }],
         where: { username: 'bilbo.baggins@shire.police.me' },
         transaction: {}
       })
