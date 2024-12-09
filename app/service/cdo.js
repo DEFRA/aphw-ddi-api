@@ -9,6 +9,7 @@ const { activities } = require('../constants/event/events')
 const { stripTime } = require('../dto/dto-helper')
 const { EXEMPTION, DOG } = require('../constants/event/audit-event-object-types')
 const { microchipExists } = require('../repos/microchip')
+const { sendForm2Emails } = require('../lib/email-helper')
 
 /**
  * @param {CdoRepository} cdoRepository
@@ -286,6 +287,27 @@ class CdoService {
     await this.cdoRepository.saveCdoTaskList(cdoTaskList)
 
     return sentDate
+  }
+
+  async submitFormTwo (indexNumber, payload, user) {
+    /**
+     * @type {CdoTaskList}
+     */
+    const cdoTaskList = await this.cdoRepository.getCdoTaskList(indexNumber)
+    const microchipDate = payload.dogNotFitForMicrochip ? payload.microchipDeadline : payload.microchipVerification
+
+    const sendEmailCallback = async () => sendForm2Emails(
+      indexNumber,
+      cdoTaskList.dog.name,
+      payload.microchipNumber,
+      payload.dogNotFitForMicrochip,
+      microchipDate,
+      payload.neuteringConfirmation,
+      payload.dogNotNeutered,
+      user.username
+    )
+
+    await this.cdoRepository.submitFormTwo(indexNumber, cdoTaskList, payload, user, sendEmailCallback)
   }
 }
 

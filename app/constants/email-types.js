@@ -3,7 +3,9 @@ const emailTypes = {
   generalError: 'general-error',
   feedback: 'user-feedback',
   userInvite: 'user-invite',
-  reportSomething: 'report-something'
+  reportSomething: 'report-something',
+  form2SubmissionToDefra: 'form2-submission-to-defra',
+  form2ConfirmationToPolice: 'form2-confirmation-to-police'
 }
 
 const reportSomethingSubjectLines = {
@@ -39,9 +41,16 @@ const reportSomethingAudit = {
   activityType: 'received'
 }
 
+const formTwoSubmissionAudit = {
+  id: '4',
+  label: 'Form Two',
+  activityType: 'received'
+}
+
 module.exports = {
   emailTypes,
   reportSomethingSubjectLines,
   reportSomethingAudit,
-  reportTypes
+  reportTypes,
+  formTwoSubmissionAudit
 }

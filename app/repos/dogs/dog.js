@@ -601,7 +601,13 @@ const purgeDogByIndexNumber = async (indexNumber, user, transaction) => {
       {
         model: sequelize.models.registration,
         as: 'registrations',
-        paranoid: false
+        paranoid: false,
+        include: [
+          {
+            model: sequelize.models.form_two,
+            as: 'form_two'
+          }
+        ]
       },
       {
         model: sequelize.models.registered_person,
@@ -649,6 +655,7 @@ const purgeDogByIndexNumber = async (indexNumber, user, transaction) => {
   }
 
   for (const registration of dogAggregate.registrations) {
+    await registration.form_two.destroy({ transaction })
     await registration.destroy({ force: true, transaction })
   }
 

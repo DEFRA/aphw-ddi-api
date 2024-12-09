@@ -1,5 +1,5 @@
 const config = require('../config/index')
-const { emailTypes, reportSomethingSubjectLines, reportSomethingAudit, reportTypes } = require('../constants/email-types')
+const { emailTypes, reportSomethingSubjectLines, reportSomethingAudit, reportTypes, formTwoSubmissionAudit } = require('../constants/email-types')
 const { lookupPoliceForceByEmail } = require('../repos/police-forces')
 const { sendEmail } = require('../messaging/send-email')
 const { sendActivityToAudit } = require('../messaging/send-audit')
@@ -102,8 +102,93 @@ const createAuditsForReportSomething = async (data) => {
     await sendActivityToAudit(payload, { username: data.username, displayname: data.username })
   }
 }
+/**
+ * @typedef FormTwoAuditDetails
+ * @property {string} username
+ * @property {string} indexNumber
+ * @property {string} microchipNumber
+ * @property {string} microchipVerification
+ * @property {string} neuteringConfirmation
+ * @property {string} microchipDeadline
+ * @property {boolean} dogNotNeutered
+ * @property {boolean} dogNotFitForMicrochip
+ * @property {string} policeForce
+ *
+ */
+/**
+ * @param {FormTwoAuditDetails} details
+ * @param {string} pk
+ * @param {string} source
+ * @param {string} targetPk
+ * @param {string} activityId
+ * @returns {{activityId, activityDate: Date, activity: string, targetPk: string, details, pk, source, activityType: string, activityLabel: string}}
+ */
+const createFormTwoAuditPayload = (details, pk, source, targetPk, activityId) => {
+  return {
+    activityId,
+    activity: formTwoSubmissionAudit.id,
+    activityType: formTwoSubmissionAudit.activityType,
+    pk,
+    source,
+    activityDate: new Date(),
+    targetPk,
+    details,
+    activityLabel: `${formTwoSubmissionAudit.label} submitted by ${details.policeForce}`
+  }
+}
+
+/**
+ * @param {FormTwoAuditDetails} details
+ * @returns {Promise<void>}
+ */
+const createAuditsForFormTwo = async (details) => {
+  const payload = createFormTwoAuditPayload(details, details.indexNumber, 'dog', 'dog', uuidv4())
+  await sendActivityToAudit(payload, { username: details.username, displayname: details.username })
+}
+
+const sendForm2Emails = async (indexNumber, dogName, microchipNumber, unfit, microchipDate, neuteringDate, under16, username) => {
+  const baseFields = [
+    { name: 'index_number', value: indexNumber },
+    { name: 'dog_name', value: dogName },
+    { name: 'microchip_number', value: microchipNumber ?? '' },
+    { name: 'unfit_to_microchip', value: unfit ? 'yes' : 'no' },
+    { name: 'microchip_date', value: microchipDate },
+    { name: 'neutering_date', value: under16 ? '' : neuteringDate },
+    { name: 'under_16_months', value: under16 ? 'yes' : 'no' }
+  ]
+  const policeForce = await lookupPoliceForceByEmail(username)
+
+  const baseCustomFields = []
+    .concat(baseFields.map(field => ({
+      name: field.name,
+      value: field.value
+    })))
+
+  const defraCustomFields = [
+    { name: 'police_force', value: policeForce },
+    { name: 'submitted_by', value: username }]
+    .concat(baseCustomFields)
+
+  const dataDefra = {
+    toAddress: config.reportSomethingEmailAddress,
+    type: emailTypes.form2SubmissionToDefra,
+    customFields: defraCustomFields
+  }
+
+  await sendEmail(dataDefra)
+
+  const dataPolice = {
+    toAddress: username,
+    type: emailTypes.form2ConfirmationToPolice,
+    customFields: baseCustomFields
+  }
+
+  await sendEmail(dataPolice)
+}
 
 module.exports = {
   sendReportSomethingEmails,
-  createAuditsForReportSomething
+  sendForm2Emails,
+  createAuditsForReportSomething,
+  createAuditsForFormTwo
 }
