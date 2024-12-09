@@ -7,14 +7,6 @@ module.exports = (sequelize, DataTypes) => {
       allowNull: false,
       primaryKey: true
     },
-    dog_id: {
-      type: DataTypes.INTEGER,
-      allowNull: false,
-      references: {
-        model: 'dog',
-        key: 'id'
-      }
-    },
     registration_id: {
       type: DataTypes.INTEGER,
       allowNull: false,
@@ -27,13 +19,9 @@ module.exports = (sequelize, DataTypes) => {
       type: DataTypes.DATE,
       allowNull: true
     },
-    submitted_by_id: {
-      type: DataTypes.INTEGER,
-      allowNull: false,
-      references: {
-        model: 'user_account',
-        key: 'id'
-      }
+    submitted_by: {
+      type: DataTypes.STRING(250),
+      allowNull: false
     },
     created_at: {
       type: DataTypes.DATE,
@@ -59,13 +47,6 @@ module.exports = (sequelize, DataTypes) => {
         ]
       },
       {
-        name: 'form_two_dog_ukey',
-        unique: true,
-        fields: [
-          { name: 'dog_id' }
-        ]
-      },
-      {
         name: 'form_two_registration_ukey',
         unique: true,
         fields: [
@@ -76,17 +57,9 @@ module.exports = (sequelize, DataTypes) => {
   })
 
   formTwo.associate = models => {
-    formTwo.belongsTo(models.dog, {
-      as: 'dog',
-      foreignKey: 'dog_id'
-    })
     formTwo.belongsTo(models.registration, {
       as: 'registration',
       foreignKey: 'registration_id'
-    })
-    formTwo.belongsTo(models.user_account, {
-      as: 'submitted_by',
-      foreignKey: 'submitted_by_id'
     })
   }
 

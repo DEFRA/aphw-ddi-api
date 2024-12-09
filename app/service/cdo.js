@@ -300,37 +300,14 @@ class CdoService {
       indexNumber,
       cdoTaskList.dog.name,
       payload.microchipNumber,
-      payload.dogNotFitForMicrochip, // unfit - boolean (from payload?)
-      microchipDate, // microchip_date (from payload?) - as string object not date
-      payload.neuteringConfirmation, // neutering date (from payload?) - as string object not date (or empty string),
-      payload.dogNotNeutered, // under16 (from payload)
-      user.username // user.username
+      payload.dogNotFitForMicrochip,
+      microchipDate,
+      payload.neuteringConfirmation,
+      payload.dogNotNeutered,
+      user.username
     )
 
     await this.cdoRepository.submitFormTwo(indexNumber, cdoTaskList, payload, user, sendEmailCallback)
-  }
-
-  /**
-   * @param indexNumber
-   * @param cdoTaskList
-   * @param {{ microchipVerification: string; neuteringConfirmation: string; microchipDeadline: string; dogNotNeutered: boolean; dogNotFitForMicrochip: boolean }} payload
-   * @param {{ username; string }} user
-   * @returns {Promise<void>}
-   * @private
-   */
-  async _sendForm2EmailsFromTaskList (indexNumber, cdoTaskList, payload, { username }) {
-    const microchipDate = payload.dogNotFitForMicrochip ? payload.microchipDeadline : payload.microchipVerification
-
-    return sendForm2Emails(
-      indexNumber,
-      cdoTaskList.dog.name,
-      cdoTaskList.dog.microchipNumber,
-      payload.dogNotFitForMicrochip, // unfit - boolean (from payload?)
-      microchipDate, // microchip_date (from payload?) - as string object not date
-      payload.neuteringConfirmation, // neutering date (from payload?) - as string object not date (or empty string),
-      payload.dogNotNeutered, // under16 (from payload)
-      username // user.username
-    )
   }
 }
 

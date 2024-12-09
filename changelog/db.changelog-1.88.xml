@@ -8,16 +8,13 @@
       <column autoIncrement="true" name="id" type="INTEGER">
         <constraints nullable="false" primaryKey="true" primaryKeyName="form_two_pkey" />
       </column>
-      <column name="dog_id" type="INTEGER">
-        <constraints nullable="false" unique="true" uniqueConstraintName="form_two_dog_ukey" />
-      </column>
       <column name="registration_id" type="INTEGER">
         <constraints nullable="false" unique="true" uniqueConstraintName="form_two_registration_ukey" />
       </column>
       <column name="form_two_submitted" type="date">
         <constraints nullable="true" />
       </column>
-      <column name="submitted_by_id" type="INTEGER">
+      <column name="submitted_by" type="VARCHAR(250)">
         <constraints nullable="false" />
       </column>
       <column name="deleted_at" type="TIMESTAMP WITH TIME ZONE" />
@@ -26,8 +23,6 @@
     </createTable>
   </changeSet>
   <changeSet author="C Cole" id="3">
-    <addForeignKeyConstraint baseColumnNames="dog_id" baseTableName="form_two" constraintName="fk_form_two_dog" referencedColumnNames="id" referencedTableName="dog" />
     <addForeignKeyConstraint baseColumnNames="registration_id" baseTableName="form_two" constraintName="fk_form_two_registration" referencedColumnNames="id" referencedTableName="registration" />
-    <addForeignKeyConstraint baseColumnNames="submitted_by_id" baseTableName="form_two" constraintName="fk_form_two_submitted_by" referencedColumnNames="id" referencedTableName="user_account" />
   </changeSet>
 </databaseChangeLog>

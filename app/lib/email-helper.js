@@ -150,7 +150,7 @@ const sendForm2Emails = async (indexNumber, dogName, microchipNumber, unfit, mic
   const baseFields = [
     { name: 'index_number', value: indexNumber },
     { name: 'dog_name', value: dogName },
-    { name: 'microchip_number', value: microchipNumber },
+    { name: 'microchip_number', value: microchipNumber ?? '' },
     { name: 'unfit_to_microchip', value: unfit ? 'yes' : 'no' },
     { name: 'microchip_date', value: microchipDate },
     { name: 'neutering_date', value: under16 ? '' : neuteringDate },

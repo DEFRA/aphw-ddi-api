@@ -354,7 +354,7 @@ module.exports = [
     method: 'POST',
     path: '/cdo/{indexNumber}/manage:submitFormTwo',
     options: {
-      // auth: { scope: scopes.internal },
+      auth: { scope: [scopes.enforcement] },
       tags: ['api'],
       notes: ['Submit Form Two Manage CDO domain action.  Submits Form Two from Enforcement to send email'],
       response: {

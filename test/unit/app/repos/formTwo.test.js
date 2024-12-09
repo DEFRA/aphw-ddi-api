@@ -98,7 +98,8 @@ describe('formTwo', () => {
 
       expect(callback).toHaveBeenCalled()
       expect(sequelize.models.form_two.findOne).toHaveBeenCalledWith({
-        where: { dog_id: 300100 },
+        include: [{ as: 'registration', model: expect.anything() }],
+        where: { '$registration.dog_id$': 300100 },
         transaction: {}
       })
       expect(sequelize.models.registration.findOne).toHaveBeenCalledWith({
@@ -110,9 +111,8 @@ describe('formTwo', () => {
         transaction: {}
       })
       expect(sequelize.models.form_two.create).toHaveBeenCalledWith({
-        dog_id: 300100,
         registration_id: 97,
-        submitted_by_id: 5,
+        submitted_by: 'bilbo.baggins@shire.police.me',
         form_two_submitted: expect.any(Date)
       }, { transaction: {} })
       expect(createAuditsForFormTwo).toHaveBeenCalledWith(expectedAudit)

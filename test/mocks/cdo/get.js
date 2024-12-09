@@ -187,7 +187,7 @@ const buildFormTwoDao = (formTwoPartial = {}) => ({
   form_two_submitted: new Date('2024-12-07T00:00:00.000Z'),
   id: 1,
   registration_id: 97,
-  submitted_by_id: 1,
+  submitted_by: 'bilbo.baggins@shire.police.me',
   updated_at: new Date('2024-12-07T00:00:00.000Z'),
   ...formTwoPartial
 })

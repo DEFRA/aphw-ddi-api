@@ -43,7 +43,11 @@ const submitFormTwo = async (indexNumber, cdoTaskList, payload, { username }, ca
   const dogId = parseInt(indexNumber.replace('ED', ''))
 
   const formTwo = await sequelize.models.form_two.findOne({
-    where: { dog_id: dogId },
+    include: [{
+      model: sequelize.models.registration,
+      as: 'registration'
+    }],
+    where: { '$registration.dog_id$': dogId },
     transaction
   })
 
@@ -68,10 +72,9 @@ const submitFormTwo = async (indexNumber, cdoTaskList, payload, { username }, ca
   }
 
   await sequelize.models.form_two.create({
-    dog_id: dogId,
     registration_id: registration.id,
     form_two_submitted: new Date(),
-    submitted_by_id: userAccount.id
+    submitted_by: username
   }, { transaction })
 
   await createAuditsForFormTwo({

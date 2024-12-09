@@ -1309,7 +1309,12 @@ describe('CDO endpoint', () => {
   })
 
   describe('POST /cdo/ED123/manage:submitForm2', () => {
+    beforeEach(() => {
+      validate.mockResolvedValue(mockValidateEnforcement)
+    })
+
     test('should return 204', async () => {
+      validate.mockResolvedValue(mockValidateEnforcement)
       const submitForm2Mock = jest.fn()
       getCdoService.mockReturnValue({
         submitFormTwo: submitForm2Mock
@@ -1335,7 +1340,7 @@ describe('CDO endpoint', () => {
           neuteringConfirmation: '2024-10-01T00:00:00.000Z',
           dogNotNeutered: false
         },
-        ...portalHeader
+        ...enforcementHeader
       }
       const response = await server.inject(options)
       expect(response.statusCode).toBe(204)
@@ -1369,25 +1374,25 @@ describe('CDO endpoint', () => {
           neuteringConfirmation: { year: '', month: '', day: '' },
           dogNotNeutered: true
         },
-        ...portalHeader
+        ...enforcementHeader
       }
       const response = await server.inject(options)
       expect(response.statusCode).toBe(204)
       expect(submitForm2Mock).toHaveBeenCalledWith('ED123', expectedPayload, devUser)
     })
 
-    // test('should return 403 given call from enforcement', async () => {
-    //   validate.mockResolvedValue(mockValidateEnforcement)
-    //
-    //   const options = {
-    //     method: 'POST',
-    //     url: '/cdo/ED123/manage:sendForm2',
-    //     ...enforcementHeader
-    //   }
-    //   const response = await server.inject(options)
-    //   expect(response.statusCode).toBe(403)
-    // })
-    //
+    test('should return 403 given call from portal', async () => {
+      validate.mockResolvedValue(mockValidateEnforcement)
+
+      const options = {
+        method: 'POST',
+        url: '/cdo/ED123/manage:sendForm2',
+        ...enforcementHeader
+      }
+      const response = await server.inject(options)
+      expect(response.statusCode).toBe(403)
+    })
+
     test('should throw a 404 given index does not exist', async () => {
       getCdoService.mockReturnValue({
         submitFormTwo: async () => {

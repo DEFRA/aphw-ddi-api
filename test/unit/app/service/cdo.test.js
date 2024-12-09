@@ -1,4 +1,4 @@
-const { buildCdo, buildExemption, buildCdoInsurance, buildCdoDog, buildCdoTaskList } = require('../../../mocks/cdo/domain')
+const { buildCdo, buildExemption, buildCdoInsurance, buildCdoDog } = require('../../../mocks/cdo/domain')
 const { CdoTaskList } = require('../../../../app/data/domain')
 const { devUser } = require('../../../mocks/auth')
 const { ActionAlreadyPerformedError } = require('../../../../app/errors/domain/actionAlreadyPerformed')
@@ -697,44 +697,6 @@ describe('CdoService', function () {
 
       expect(mockCdoRepository.submitFormTwo).toHaveBeenCalledWith('ED300100', cdoTaskList, payload, expect.objectContaining({ username: 'bilbo.baggins@shire.police.me' }), expect.any(Function))
       expect(sendForm2Emails).toHaveBeenCalledWith('ED300100', 'Pip', '223456789012345', false, '03/12/2024', '04/12/2024', false, 'bilbo.baggins@shire.police.me')
-    })
-  })
-
-  describe('_sendForm2EmailsFromTaskList', () => {
-    const middleEarthUser = {
-      username: 'bilbo.baggins@shire.police.me',
-      displayname: 'Bilbo Baggins'
-    }
-    const cdoTaskList = buildCdoTaskList({
-      dog: buildCdoDog({
-        indexNumber: 'ED300100',
-        microchipNumber: '223456789012345',
-        name: 'Pip'
-      })
-    })
-
-    test('should get fields and call sendForm2Emails', async () => {
-      const payload = {
-        microchipVerification: '03/12/2024',
-        neuteringConfirmation: '04/12/2024',
-        microchipDeadline: '',
-        dogNotNeutered: false,
-        dogNotFitForMicrochip: false
-      }
-      await cdoService._sendForm2EmailsFromTaskList('ED300100', cdoTaskList, payload, middleEarthUser)
-      expect(sendForm2Emails).toHaveBeenCalledWith('ED300100', 'Pip', '223456789012345', false, '03/12/2024', '04/12/2024', false, 'bilbo.baggins@shire.police.me')
-    })
-
-    test('should get fields and call sendForm2Emails given dog not neutered and dog not fit for microchip', async () => {
-      const payload = {
-        microchipVerification: '',
-        neuteringConfirmation: '',
-        microchipDeadline: '03/12/2024',
-        dogNotNeutered: true,
-        dogNotFitForMicrochip: true
-      }
-      await cdoService._sendForm2EmailsFromTaskList('ED300100', cdoTaskList, payload, middleEarthUser)
-      expect(sendForm2Emails).toHaveBeenCalledWith('ED300100', 'Pip', '223456789012345', true, '03/12/2024', '', true, 'bilbo.baggins@shire.police.me')
     })
   })
 })

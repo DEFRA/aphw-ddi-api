@@ -86,10 +86,6 @@ module.exports = (sequelize, DataTypes) => {
       as: 'police_force',
       foreignKey: 'police_force_id'
     })
-    userAccount.hasMany(models.form_two, {
-      as: 'form_two',
-      foreignKey: 'submitted_by_id'
-    })
   }
 
   return userAccount

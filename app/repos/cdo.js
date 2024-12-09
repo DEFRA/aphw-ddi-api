@@ -65,7 +65,7 @@ const { submitFormTwo } = require('./formTwo')
  * @property {number} id
  * @property {number} dog_id
  * @property {number} registration_id
- * @property {number} submitted_by_id
+ * @property {string} submitted_by
  * @property {string|null} form_two_submitted
  * @property {Date}  created_at
  * @property {string} updated_at
