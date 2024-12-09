@@ -64,6 +64,10 @@ const submitFormTwo = async (indexNumber, cdoTaskList, payload, { username }, ca
   }
 
   const userAccount = await sequelize.models.user_account.findOne({
+    include: [{
+      model: sequelize.models.police_force,
+      as: 'police_force'
+    }],
     where: { username },
     transaction
   })
