@@ -50,7 +50,10 @@ describe('Dog repo', () => {
         findByPk: jest.fn(),
         findAll: jest.fn(),
         create: jest.fn(),
-        destroy: jest.fn()
+        destroy: jest.fn(),
+        form_two: {
+          destroy: jest.fn()
+        }
       },
       registered_person: {
         create: jest.fn(),
@@ -818,6 +821,7 @@ describe('Dog repo', () => {
       const mockRegisteredPersonDestroy = jest.fn()
       const mockInsuranceDestroy = jest.fn()
       const mockDogBreachDestroy = jest.fn()
+      const mockFormTwoDestroy = jest.fn()
 
       const mockDogAggregrate = {
         id: 123,
@@ -827,7 +831,10 @@ describe('Dog repo', () => {
           id: 1,
           cdoIssued: '2020-01-01',
           cdoExpiry: '2020-02-01',
-          destroy: mockRegistrationDestroy
+          destroy: mockRegistrationDestroy,
+          form_two: {
+            destroy: mockFormTwoDestroy
+          }
         }],
         registered_person: [{
           destroy: mockRegisteredPersonDestroy
@@ -852,6 +859,7 @@ describe('Dog repo', () => {
         where: { index_number: 'ED123' },
         paranoid: false
       }))
+      expect(mockFormTwoDestroy).toHaveBeenCalledWith({ transaction: {} })
       expect(mockRegistrationDestroy).toHaveBeenCalledWith({ force: true, transaction: {} })
       expect(mockRegisteredPersonDestroy).toHaveBeenCalledWith({ force: true, transaction: {} })
       expect(mockMicrochipDestroy).toHaveBeenCalledWith({ force: true, transaction: {} })

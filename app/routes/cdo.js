@@ -10,7 +10,7 @@ const {
   recordInsuranceDetailsSchema, recordInsuranceDetailsResponseSchema, recordMicrochipNumberSchema,
   recordMicrochipNumberResponseSchema, recordApplicationFeeSchema, verifyDatesSchema, manageCdoResponseSchema,
   recordMicrochipNumberConflictSchema,
-  simpleConflictSchema, issueCertificateResponseSchema, verifyDatesSchemaResponse
+  simpleConflictSchema, issueCertificateResponseSchema, verifyDatesSchemaResponse, submitFormTwoSchema
 } = require('../schema/cdo/manage')
 const { SequenceViolationError } = require('../errors/domain/sequenceViolation')
 const { InvalidDataError } = require('../errors/domain/invalidData')
@@ -347,6 +347,43 @@ module.exports = [
         return h.response().code(204)
       } catch (e) {
         return handleErrors(e, 'sendForm2', indexNumber, h)
+      }
+    }
+  },
+  {
+    method: 'POST',
+    path: '/cdo/{indexNumber}/manage:submitFormTwo',
+    options: {
+      auth: { scope: [scopes.enforcement] },
+      tags: ['api'],
+      notes: ['Submit Form Two Manage CDO domain action.  Submits Form Two from Enforcement to send email'],
+      response: {
+        status: {
+          204: undefined,
+          409: simpleConflictSchema
+        }
+      },
+      validate: {
+        payload: submitFormTwoSchema,
+        failAction: (request, h, err) => {
+          console.error(err)
+
+          return h.response({ errors: err.details.map(e => e.message) }).code(400).takeover()
+        }
+      }
+    },
+    handler: async (request, h) => {
+      const indexNumber = request.params.indexNumber
+
+      try {
+        const cdoService = ServiceProvider.getCdoService()
+        const user = getCallingUser(request)
+
+        await cdoService.submitFormTwo(indexNumber, request.payload, user)
+
+        return h.response().code(204)
+      } catch (e) {
+        return handleErrors(e, 'submitFormTwo', indexNumber, h)
       }
     }
   },

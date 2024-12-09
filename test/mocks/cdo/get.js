@@ -180,6 +180,18 @@ const buildExemptionOrderDao = (exemptionOrderPartial = {}) => ({
   ...exemptionOrder2015,
   ...exemptionOrderPartial
 })
+
+const buildFormTwoDao = (formTwoPartial = {}) => ({
+  created_at: new Date('2024-12-07T00:00:00.000Z'),
+  dog_id: 300097,
+  form_two_submitted: new Date('2024-12-07T00:00:00.000Z'),
+  id: 1,
+  registration_id: 97,
+  submitted_by: 'bilbo.baggins@shire.police.me',
+  updated_at: new Date('2024-12-07T00:00:00.000Z'),
+  ...formTwoPartial
+})
+
 /**
  * @param {RegistrationDao} registrationPartial
  * @return {RegistrationDao}
@@ -218,6 +230,7 @@ const buildRegistrationDao = (registrationPartial = {}) => ({
   police_force: buildPoliceForceDao(),
   court: buildCourtDao(),
   exemption_order: buildExemptionOrderDao(),
+  form_two: null,
   ...registrationPartial
 })
 
@@ -490,6 +503,7 @@ module.exports = {
   buildInsuranceDao,
   insurance,
   buildCdoDao,
+  buildFormTwoDao,
   cdo,
   buildDogDao,
   dogBreachDAOs,
