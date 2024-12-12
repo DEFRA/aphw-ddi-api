@@ -6,6 +6,8 @@ const { addDays } = require('../lib/date-helpers')
 const { registrationRelationship } = require('./overnight-relationships')
 const ServiceProvider = require('../service/config')
 
+const gracePeriodInDays = 28
+
 const findExpired = async (currentStatus, today, t) => {
   const dogs2023 = await dbFindAll(sequelize.models.registration, {
     where: {
@@ -22,12 +24,12 @@ const findExpired = async (currentStatus, today, t) => {
     transaction: t
   })
 
-  const todayPlus28Days = addDays(today, 28)
+  const todayPlusGracePeriod = addDays(today, gracePeriodInDays)
 
   const dogs2015Xlbs = await dbFindAll(sequelize.models.registration, {
     where: {
       neutering_deadline: {
-        [Op.lt]: todayPlus28Days
+        [Op.lt]: todayPlusGracePeriod
       },
       neutering_confirmation: {
         [Op.eq]: null
