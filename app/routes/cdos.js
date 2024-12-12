@@ -1,4 +1,4 @@
-const { getSummaryCdos } = require('../repos/cdo')
+const { getSummaryCdos, getCdoCounts } = require('../repos/cdo')
 const { mapSummaryCdoDaoToDto } = require('../repos/mappers/cdo')
 const { getCdosQuerySchema, getCdosResponseSchema } = require('../schema/cdos/get')
 const { scopes } = require('../constants/auth')
@@ -53,10 +53,12 @@ module.exports = [
           }
 
           const summaryCdos = await getSummaryCdos(filter, sort)
+          const counts = await getCdoCounts()
 
-          const summaryCdosDto = summaryCdos.map(mapSummaryCdoDaoToDto)
+          const summaryCdosDto = summaryCdos.cdos.map(mapSummaryCdoDaoToDto)
+          const count = summaryCdos.count
 
-          return h.response({ cdos: summaryCdosDto }).code(200)
+          return h.response({ cdos: summaryCdosDto, count, counts }).code(200)
         } catch (e) {
           console.log('Error retrieving cdos:', e)
           throw e
