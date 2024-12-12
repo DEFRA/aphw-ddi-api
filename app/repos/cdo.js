@@ -408,6 +408,40 @@ const summaryCdoInclude = () => ([
   }
 ])
 
+const summaryCdoCountInclude = () => ([
+  {
+    model: sequelize.models.status,
+    as: 'status'
+  },
+  {
+    model: sequelize.models.registration,
+    as: 'registration'
+  }
+])
+
+const cdoExpiryFilter = withinDays => {
+  const day = 24 * 60 * 60 * 1000
+  const withinMilliseconds = withinDays * day
+  const now = new Date()
+  now.setUTCHours(0, 0, 0, 0)
+  const withinDaysDate = new Date(now.getTime() + withinMilliseconds)
+
+  return {
+    [Op.lte]: withinDaysDate
+  }
+}
+
+const cdoStatusFilter = statusList => {
+  return statusList.map(status => statuses[status])
+}
+
+const cdoNonComplianceFilter = nonComplianceLetterSent => {
+  const operation = nonComplianceLetterSent === false ? Op.is : Op.not
+
+  return {
+    [operation]: null
+  }
+}
 /**
  * @param {SummaryCdoFilter} [filter]
  * @param {CdoSort} [sort]
@@ -417,28 +451,15 @@ const getSummaryCdos = async (filter, sort) => {
   const where = {}
 
   if (filter.status) {
-    const statusArray = filter.status.map(status => statuses[status])
-    where['$status.status$'] = statusArray
+    where['$status.status$'] = cdoStatusFilter(filter.status)
   }
 
   if (filter.withinDays) {
-    const day = 24 * 60 * 60 * 1000
-    const withinMilliseconds = filter.withinDays * day
-    const now = new Date()
-    now.setUTCHours(0, 0, 0, 0)
-    const withinDaysDate = new Date(now.getTime() + withinMilliseconds)
-
-    where['$registration.cdo_expiry$'] = {
-      [Op.lte]: withinDaysDate
-    }
+    where['$registration.cdo_expiry$'] = cdoExpiryFilter(filter.withinDays)
   }
 
   if (filter.nonComplianceLetterSent !== undefined) {
-    const operation = filter.nonComplianceLetterSent === false ? Op.is : Op.not
-
-    where['$registration.non_compliance_letter_sent$'] = {
-      [operation]: null
-    }
+    where['$registration.non_compliance_letter_sent$'] = cdoNonComplianceFilter(filter.nonComplianceLetterSent)
   }
 
   const genericQueryFields = {
@@ -457,13 +478,51 @@ const getSummaryCdos = async (filter, sort) => {
     order
   })
 
-  const count = await sequelize.models.dog.count(genericQueryFields)
+  const count = await sequelize.models.dog.count({
+    where,
+    include: summaryCdoCountInclude()
+  })
 
   return { count, cdos }
 }
+
 /**
- *
+ * @typedef CdoCount
  */
+
+const getCdoCount = where => {
+  return sequelize.models.dog.count({
+    where,
+    include: summaryCdoInclude()
+  })
+}
+
+/**
+ * @return {Promise<CdoCount>}
+ */
+const getCdoCounts = async () => {
+  const total = await getCdoCount({
+    '$status.status$': cdoStatusFilter(['PreExempt'])
+  })
+  const within30 = await getCdoCount({
+    '$status.status$': cdoStatusFilter(['PreExempt']),
+    '$registration.cdo_expiry$': cdoExpiryFilter(30)
+  })
+  const nonComplianceLetterNotSent = await getCdoCount({
+    '$status.status$': cdoStatusFilter(['Failed']),
+    '$registration.non_compliance_letter_sent$': cdoNonComplianceFilter(false)
+  })
+
+  return {
+    preExempt: {
+      total,
+      within30
+    },
+    failed: {
+      nonComplianceLetterNotSent
+    }
+  }
+}
 
 /**
  * @typedef GetCdoModel
@@ -566,22 +625,6 @@ const saveCdoTaskList = async (cdoTaskList, transaction) => {
 
   return getCdoTaskList(cdoTaskList.cdoSummary.indexNumber, transaction)
 }
-/**
- * @typedef CdoCount
- */
-/**
- * @param {SummaryCdoFilter} filter
- * @return {Promise<CdoCount>}
- */
-const getCdoCounts = async filter => ({
-  preExempt: {
-    total: 0,
-    within30: 0
-  },
-  failed: {
-    nonComplianceLetterNotSent: 0
-  }
-})
 
 /**
  * @typedef {{

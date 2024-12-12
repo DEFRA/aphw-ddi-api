@@ -1,6 +1,5 @@
 const { mockValidate, mockValidateEnforcement } = require('../../../mocks/auth')
 const { portalHeader, enforcementHeader } = require('../../../mocks/jwt')
-const { getSummaryCdos, getCdoCounts } = require('../../../../app/repos/cdo')
 
 describe('CDO endpoint', () => {
   const createServer = require('../../../../app/server')

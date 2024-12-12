@@ -9,6 +9,7 @@ const {
 const { Cdo, CdoTaskList } = require('../../../../app/data/domain')
 const { buildCdo, buildExemption, buildCdoDog } = require('../../../mocks/cdo/domain')
 const sequelize = require('../../../../app/config/db')
+const { Op } = require('sequelize')
 
 describe('CDO repo', () => {
   const mockTransaction = jest.fn()
@@ -50,7 +51,7 @@ describe('CDO repo', () => {
   jest.mock('../../../../app/repos/microchip')
   const { updateMicrochipKey } = require('../../../../app/repos/microchip')
 
-  const { createCdo, getCdo, getAllCdos, getSummaryCdos, getCdoModel, getCdoTaskList, saveCdoTaskList } = require('../../../../app/repos/cdo')
+  const { createCdo, getCdo, getAllCdos, getSummaryCdos, getCdoCounts, getCdoModel, getCdoTaskList, saveCdoTaskList } = require('../../../../app/repos/cdo')
 
   beforeEach(async () => {
     jest.clearAllMocks()
@@ -628,6 +629,49 @@ describe('CDO repo', () => {
             [Op.not]: null
           }
         }
+      })
+    })
+  })
+
+  describe('getCdoCounts', () => {
+    test('should return counts given no cached values', async () => {
+      sequelize.models.dog.count.mockResolvedValueOnce(3)
+      sequelize.models.dog.count.mockResolvedValueOnce(2)
+      sequelize.models.dog.count.mockResolvedValueOnce(1)
+
+      const res = await getCdoCounts()
+      expect(res).toEqual({
+        preExempt: {
+          total: 3,
+          within30: 2
+        },
+        failed: {
+          nonComplianceLetterNotSent: 1
+        }
+      })
+      expect(sequelize.models.dog.count).toHaveBeenNthCalledWith(1, {
+        where: {
+          '$status.status$': ['Pre-exempt']
+        },
+        include: expect.anything()
+      })
+      expect(sequelize.models.dog.count).toHaveBeenNthCalledWith(2, {
+        where: {
+          '$status.status$': ['Pre-exempt'],
+          '$registration.cdo_expiry$': {
+            [Op.lte]: expect.any(Date)
+          }
+        },
+        include: expect.anything()
+      })
+      expect(sequelize.models.dog.count).toHaveBeenNthCalledWith(3, {
+        where: {
+          '$status.status$': ['Failed'],
+          '$registration.non_compliance_letter_sent$': {
+            [Op.is]: null
+          }
+        },
+        include: expect.anything()
       })
     })
   })
