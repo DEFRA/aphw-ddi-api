@@ -366,16 +366,52 @@ const getSortOrder = (sort) => {
 
   return order
 }
-
+/**
+ * @typedef SummaryCdoFilter
+ * @type {CdoStatus[]} [status]
+ * @type {number} [withinDays]
+ * @type {boolean} [nonComplianceLetterSent]
+ */
 /**
  * @typedef GetSummaryCdos
- * @param {{ status?: CdoStatus[]; withinDays?: number; nonComplianceLetterSent?: boolean }} [filter]
+ * @param {SummaryCdoFilter} [filter]
  * @param {CdoSort} [sort]
- * @return {Promise<SummaryCdo[]>}
+ * @return {Promise<{ count: number; cdos: SummaryCdo[] }>}
  */
 
+const summaryCdoInclude = () => ([
+  {
+    model: sequelize.models.registered_person,
+    as: 'registered_person',
+    attributes: { exclude: ['created_at', 'updated_at', 'deleted_at', 'person_id', 'dog_id', 'person_type_id'] },
+    include: [{
+      model: sequelize.models.person,
+      as: 'person',
+      attributes: ['id', 'first_name', 'last_name', 'person_reference']
+    }]
+  },
+  {
+    model: sequelize.models.status,
+    as: 'status'
+  },
+  {
+    model: sequelize.models.registration,
+    as: 'registration',
+    attributes: ['id', 'cdo_expiry', 'joined_exemption_scheme', 'non_compliance_letter_sent'],
+    include: [
+      {
+        model: sequelize.models.police_force,
+        as: 'police_force',
+        paranoid: false
+      }
+    ]
+  }
+])
+
 /**
- * @type {GetSummaryCdos}
+ * @param {SummaryCdoFilter} [filter]
+ * @param {CdoSort} [sort]
+ * @return {Promise<{ count: number; cdos: SummaryCdo[] }>}
  */
 const getSummaryCdos = async (filter, sort) => {
   const where = {}
@@ -405,46 +441,25 @@ const getSummaryCdos = async (filter, sort) => {
     }
   }
 
+  const genericQueryFields = {
+    where,
+    include: summaryCdoInclude()
+  }
+
   const order = getSortOrder(sort)
 
   const cdos = await sequelize.models.dog.findAll({
+    ...genericQueryFields,
     attributes: [
       'id', 'index_number', 'status_id',
       [sequelize.fn('COALESCE', sequelize.col(policeForceCol), 'ZZZZZZ'), 'police_force_aggregrate']
     ],
-    where,
-    include: [
-      {
-        model: sequelize.models.registered_person,
-        as: 'registered_person',
-        attributes: { exclude: ['created_at', 'updated_at', 'deleted_at', 'person_id', 'dog_id', 'person_type_id'] },
-        include: [{
-          model: sequelize.models.person,
-          as: 'person',
-          attributes: ['id', 'first_name', 'last_name', 'person_reference']
-        }]
-      },
-      {
-        model: sequelize.models.status,
-        as: 'status'
-      },
-      {
-        model: sequelize.models.registration,
-        as: 'registration',
-        attributes: ['id', 'cdo_expiry', 'joined_exemption_scheme', 'non_compliance_letter_sent'],
-        include: [
-          {
-            model: sequelize.models.police_force,
-            as: 'police_force',
-            paranoid: false
-          }
-        ]
-      }
-    ],
     order
   })
 
-  return cdos
+  const count = await sequelize.models.dog.count(genericQueryFields)
+
+  return { count, cdos }
 }
 /**
  *
@@ -552,9 +567,27 @@ const saveCdoTaskList = async (cdoTaskList, transaction) => {
   return getCdoTaskList(cdoTaskList.cdoSummary.indexNumber, transaction)
 }
 /**
+ * @typedef CdoCount
+ */
+/**
+ * @param {SummaryCdoFilter} filter
+ * @return {Promise<CdoCount>}
+ */
+const getCdoCounts = async filter => ({
+  preExempt: {
+    total: 0,
+    within30: 0
+  },
+  failed: {
+    nonComplianceLetterNotSent: 0
+  }
+})
+
+/**
  * @typedef {{
  *    getCdo: GetCdo,
  *    getSummaryCdos: GetSummaryCdos,
+ *    getCdoCounts: () => Promise<CdoCount>
  *    getAllCdos: GetAllCdos,
  *    createCdo: CreateCdo,
  *    getCdoModel: GetCdoModel,
@@ -570,6 +603,7 @@ module.exports = {
   createCdo,
   getCdo,
   getSummaryCdos,
+  getCdoCounts,
   getAllCdos,
   getCdoModel,
   getCdoTaskList,
