@@ -55,7 +55,7 @@ describe('ExpiredNeuteringDeadline test', () => {
     test('should handle some rows given a date prior to deadline expiry', async () => {
       dbFindAll.mockResolvedValue(mockOvernightRowsWithNeuteringDeadline)
       const today = new Date('2024-10-01')
-      const todayPlus28Days = new Date('2024-10-29')
+      const todayMinus28Days = new Date('2024-09-03')
       const res = await setExpiredNeuteringDeadlineToInBreach(today)
 
       expect(dbFindAll).toHaveBeenNthCalledWith(1, undefined, expect.objectContaining({
@@ -69,7 +69,7 @@ describe('ExpiredNeuteringDeadline test', () => {
       expect(dbFindAll).toHaveBeenNthCalledWith(2, undefined, expect.objectContaining({
         where: expect.objectContaining({
           neutering_deadline: {
-            [Op.lt]: todayPlus28Days
+            [Op.lt]: todayMinus28Days
           }
         })
       }))
@@ -82,7 +82,7 @@ describe('ExpiredNeuteringDeadline test', () => {
       dbFindAll.mockResolvedValue(mockOvernightRowsWithNeuteringDeadline.filter(row => row.dog.status.status === 'In breach'))
       dbFindOne.mockResolvedValue({ id: 12 })
       const today = new Date('2025-01-01')
-      const todayPlus28Days = new Date('2025-01-29')
+      const todayMinus28Days = new Date('2024-12-04')
       const res = await addBreachReasonToExpiredNeuteringDeadline(today)
 
       expect(dbFindAll).toHaveBeenNthCalledWith(1, undefined, expect.objectContaining({
@@ -96,7 +96,7 @@ describe('ExpiredNeuteringDeadline test', () => {
       expect(dbFindAll).toHaveBeenNthCalledWith(2, undefined, expect.objectContaining({
         where: expect.objectContaining({
           neutering_deadline: {
-            [Op.lt]: todayPlus28Days
+            [Op.lt]: todayMinus28Days
           }
         })
       }))
@@ -105,7 +105,7 @@ describe('ExpiredNeuteringDeadline test', () => {
 
     test('should handle some rows given date after for some and before for some', async () => {
       const today = new Date('2024-10-17')
-      const todayPlus28Days = new Date('2024-11-14')
+      const todayMinus28Days = new Date('2024-09-19')
       dbFindAll.mockResolvedValue(mockOvernightRowsWithNeuteringDeadline.filter(row => row.dog.status.status === 'In breach' && new Date(row.dog.exemption.neutering_deadline) < today))
       dbFindOne.mockResolvedValue({ id: 12 })
       const res = await addBreachReasonToExpiredNeuteringDeadline(today)
@@ -121,7 +121,7 @@ describe('ExpiredNeuteringDeadline test', () => {
       expect(dbFindAll).toHaveBeenNthCalledWith(2, undefined, expect.objectContaining({
         where: expect.objectContaining({
           neutering_deadline: {
-            [Op.lt]: todayPlus28Days
+            [Op.lt]: todayMinus28Days
           }
         })
       }))
