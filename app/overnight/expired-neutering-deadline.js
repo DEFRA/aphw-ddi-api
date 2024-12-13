@@ -24,12 +24,12 @@ const findExpired = async (currentStatus, today, t) => {
     transaction: t
   })
 
-  const todayPlusGracePeriod = addDays(today, gracePeriodInDays)
+  const todayMinusGracePeriod = addDays(today, -gracePeriodInDays)
 
   const dogs2015Xlbs = await dbFindAll(sequelize.models.registration, {
     where: {
       neutering_deadline: {
-        [Op.lt]: todayPlusGracePeriod
+        [Op.lt]: todayMinusGracePeriod
       },
       neutering_confirmation: {
         [Op.eq]: null
