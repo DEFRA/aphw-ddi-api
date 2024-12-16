@@ -5,6 +5,7 @@ const getCdosQuerySchema = Joi.object({
   status: Joi.array().items(Joi.string()).single(),
   sortKey: Joi.string().valid('cdoExpiry', 'joinedExemptionScheme', 'indexNumber', 'policeForce', 'owner'),
   nonComplianceLetterSent: Joi.boolean(),
+  noCache: Joi.boolean().default(false),
   sortOrder: Joi.string().valid('ASC', 'DESC')
 }).or('withinDays', 'status')
 

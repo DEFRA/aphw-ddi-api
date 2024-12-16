@@ -8,8 +8,6 @@ const {
 } = require('../../../mocks/cdo/get')
 const { Cdo, CdoTaskList } = require('../../../../app/data/domain')
 const { buildCdo, buildExemption, buildCdoDog } = require('../../../mocks/cdo/domain')
-const sequelize = require('../../../../app/config/db')
-const { Op } = require('sequelize')
 
 describe('CDO repo', () => {
   const mockTransaction = jest.fn()
@@ -51,7 +49,10 @@ describe('CDO repo', () => {
   jest.mock('../../../../app/repos/microchip')
   const { updateMicrochipKey } = require('../../../../app/repos/microchip')
 
-  const { createCdo, getCdo, getAllCdos, getSummaryCdos, getCdoCounts, getCdoModel, getCdoTaskList, saveCdoTaskList } = require('../../../../app/repos/cdo')
+  jest.mock('../../../../app/cache')
+  const { set: setCache, get: getCache } = require('../../../../app/cache')
+
+  const { createCdo, getCdo, getAllCdos, getCdoCountCacheKey, getSummaryCdos, getCdoCounts, getCdoModel, getCdoTaskList, saveCdoTaskList } = require('../../../../app/repos/cdo')
 
   beforeEach(async () => {
     jest.clearAllMocks()
@@ -328,6 +329,30 @@ describe('CDO repo', () => {
     })
   })
 
+  describe('getCdoCountCacheKey', () => {
+    test('should correctly give cache key', () => {
+      const statusOnly = {
+        '$status.status$': ['Pre-exempt']
+      }
+      const exemptDate = {
+        '$status.status$': ['Pre-exempt'],
+        '$registration.cdo_expiry$': {
+          [Op.lte]: new Date('2024-12-12T00:00:00.000Z')
+        }
+      }
+      const failed = {
+        '$status.status$': ['Failed'],
+        '$registration.non_compliance_letter_sent$': {
+          [Op.is]: null
+        }
+      }
+      expect(getCdoCountCacheKey({})).toBe('manage-cdo-count')
+      expect(getCdoCountCacheKey(statusOnly)).toBe('manage-cdo-count|status-pre-exempt')
+      expect(getCdoCountCacheKey(exemptDate)).toBe('manage-cdo-count|status-pre-exempt|expiry-2024-12-12T00:00:00.000Z')
+      expect(getCdoCountCacheKey(failed)).toBe('manage-cdo-count|status-failed|non-compliance-false')
+    })
+  })
+
   describe('getSummaryCdos', () => {
     const preExempt1 = {
       id: 300013,
@@ -390,6 +415,11 @@ describe('CDO repo', () => {
       }
     }
     const expectedAttributes = ['id', 'index_number', 'status_id', expect.any(Array)]
+    const cacheObject = {
+      get: jest.fn(),
+      set: jest.fn(),
+      drop: jest.fn()
+    }
 
     beforeEach(() => {
       sequelize.models.dog.count.mockResolvedValue(0)
@@ -411,7 +441,7 @@ describe('CDO repo', () => {
       sequelize.models.dog.count.mockResolvedValue(2)
       sequelize.col.mockReturnValue('registration.cdo_expiry')
 
-      const res = await getSummaryCdos({ status: ['PreExempt'] })
+      const res = await getSummaryCdos({ status: ['PreExempt'] }, undefined, cacheObject)
       expect(res).toEqual(expectedResponse)
       expect(sequelize.models.dog.findAll).toHaveBeenCalledWith({
         attributes: expectedAttributes,
@@ -428,6 +458,7 @@ describe('CDO repo', () => {
         }
       })
       expect(sequelize.col).toHaveBeenCalledWith('registration.cdo_expiry')
+      expect(setCache).toHaveBeenCalledWith(cacheObject, 'manage-cdo-count|status-pre-exempt', 2, 60 * 60 * 1000)
     })
 
     test('should sort', async () => {
@@ -634,12 +665,17 @@ describe('CDO repo', () => {
   })
 
   describe('getCdoCounts', () => {
-    test('should return counts given no cached values', async () => {
+    test('should return counts from DB given no cached values', async () => {
+      const cacheObj = { get: jest.fn(), set: jest.fn(), drop: jest.fn() }
+      const in30Days = new Date()
+      in30Days.setUTCHours(0, 0, 0, 0)
+      in30Days.setUTCDate(in30Days.getUTCDate() + 30)
+
       sequelize.models.dog.count.mockResolvedValueOnce(3)
       sequelize.models.dog.count.mockResolvedValueOnce(2)
       sequelize.models.dog.count.mockResolvedValueOnce(1)
 
-      const res = await getCdoCounts()
+      const res = await getCdoCounts(cacheObj)
       expect(res).toEqual({
         preExempt: {
           total: 3,
@@ -673,6 +709,64 @@ describe('CDO repo', () => {
         },
         include: expect.anything()
       })
+      expect(setCache).toHaveBeenNthCalledWith(1, cacheObj, 'manage-cdo-count|status-pre-exempt', 3)
+      expect(setCache).toHaveBeenNthCalledWith(2, cacheObj, `manage-cdo-count|status-pre-exempt|expiry-${in30Days.toISOString()}`, 2)
+      expect(setCache).toHaveBeenNthCalledWith(3, cacheObj, 'manage-cdo-count|status-failed|non-compliance-false', 1)
+    })
+
+    test('should return counts from DB given cached set to false', async () => {
+      const cacheObj = { get: jest.fn(), set: jest.fn(), drop: jest.fn() }
+      sequelize.models.dog.count.mockResolvedValueOnce(3)
+      sequelize.models.dog.count.mockResolvedValueOnce(2)
+      sequelize.models.dog.count.mockResolvedValueOnce(1)
+
+      getCache.mockResolvedValueOnce(1)
+      getCache.mockResolvedValueOnce(3)
+      getCache.mockResolvedValueOnce(2)
+
+      const res = await getCdoCounts(cacheObj, false)
+      expect(res).toEqual({
+        preExempt: {
+          total: 3,
+          within30: 2
+        },
+        failed: {
+          nonComplianceLetterNotSent: 1
+        }
+      })
+      expect(sequelize.models.dog.count).toHaveBeenCalledTimes(3)
+
+      expect(getCache).not.toHaveBeenCalled()
+    })
+
+    test('should return counts from cache given cached values', async () => {
+      const cacheObj = { get: jest.fn(), set: jest.fn(), drop: jest.fn() }
+      sequelize.models.dog.count.mockResolvedValueOnce(3)
+      sequelize.models.dog.count.mockResolvedValueOnce(2)
+      sequelize.models.dog.count.mockResolvedValueOnce(1)
+
+      getCache.mockResolvedValueOnce(1)
+      getCache.mockResolvedValueOnce(3)
+      getCache.mockResolvedValueOnce(2)
+
+      const res = await getCdoCounts(cacheObj)
+      expect(res).toEqual({
+        preExempt: {
+          total: 1,
+          within30: 3
+        },
+        failed: {
+          nonComplianceLetterNotSent: 2
+        }
+      })
+      expect(sequelize.models.dog.count).not.toHaveBeenCalled()
+
+      const in30Days = new Date()
+      in30Days.setUTCHours(0, 0, 0, 0)
+      in30Days.setUTCDate(in30Days.getUTCDate() + 30)
+      expect(getCache).toHaveBeenNthCalledWith(1, cacheObj, 'manage-cdo-count|status-pre-exempt')
+      expect(getCache).toHaveBeenNthCalledWith(2, cacheObj, `manage-cdo-count|status-pre-exempt|expiry-${in30Days.toISOString()}`)
+      expect(getCache).toHaveBeenNthCalledWith(3, cacheObj, 'manage-cdo-count|status-failed|non-compliance-false')
     })
   })
 

@@ -8,6 +8,9 @@ describe('CDO endpoint', () => {
   jest.mock('../../../../app/repos/cdo')
   const { getSummaryCdos, getCdoCounts } = require('../../../../app/repos/cdo')
 
+  jest.mock('../../../../app/cache/get-cache')
+  const getCache = require('../../../../app/cache/get-cache')
+
   jest.mock('../../../../app/auth/token-validator')
   const { validate } = require('../../../../app/auth/token-validator')
 
@@ -15,6 +18,7 @@ describe('CDO endpoint', () => {
     validate.mockResolvedValue(mockValidate)
     server = await createServer()
     await server.initialize()
+    getCache.mockReturnValue({})
   })
 
   afterEach(() => {
@@ -22,6 +26,13 @@ describe('CDO endpoint', () => {
   })
 
   test('GET /cdos route returns 200', async () => {
+    const cacheObject = {
+      get: jest.fn(),
+      set: jest.fn(),
+      drop: jest.fn()
+    }
+    getCache.mockReturnValue(cacheObject)
+
     const expectedCdos = [
       {
         person: {
@@ -114,8 +125,116 @@ describe('CDO endpoint', () => {
     const response = await server.inject(options)
     const { payload } = response
     expect(response.statusCode).toBe(200)
-    expect(getSummaryCdos).toHaveBeenCalledWith(expectedFilter, undefined)
+    expect(getSummaryCdos).toHaveBeenCalledWith(expectedFilter, undefined, cacheObject)
     expect(JSON.parse(payload)).toEqual(expectedPayload)
+    expect(getCache).toHaveBeenCalled()
+    expect(getCdoCounts).toHaveBeenCalledWith(cacheObject, false)
+  })
+
+  test('GET /cdos route returns 200 given noCache called', async () => {
+    const cacheObject = {
+      get: jest.fn(),
+      set: jest.fn(),
+      drop: jest.fn()
+    }
+    getCache.mockReturnValue(cacheObject)
+
+    const expectedCdos = [
+      {
+        person: {
+          id: 10,
+          firstName: 'Scott',
+          lastName: 'Pilgrim',
+          personReference: 'P-1234-5678'
+        },
+        dog: {
+          id: 300013,
+          dogReference: 'ED300013',
+          status: 'Pre-exempt'
+        },
+        exemption: {
+          policeForce: 'Cheshire Constabulary',
+          cdoExpiry: '2024-03-01',
+          joinedExemptionScheme: null,
+          nonComplianceLetterSent: '2024-04-01'
+        }
+      }
+    ]
+    getSummaryCdos.mockResolvedValue({
+      count: 1,
+      cdos: [
+        {
+          id: 300013,
+          index_number: 'ED300013',
+          status_id: 5,
+          registered_person: [
+            {
+              id: 13,
+              person: {
+                id: 10,
+                first_name: 'Scott',
+                last_name: 'Pilgrim',
+                person_reference: 'P-1234-5678'
+              }
+            }
+          ],
+          status: {
+            id: 5,
+            status: 'Pre-exempt',
+            status_type: 'STANDARD'
+          },
+          registration: {
+            id: 13,
+            cdo_expiry: '2024-03-01',
+            joined_exemption_scheme: null,
+            non_compliance_letter_sent: '2024-04-01',
+            police_force: {
+              id: 5,
+              name: 'Cheshire Constabulary'
+            }
+          }
+        }
+      ]
+    })
+    getCdoCounts.mockResolvedValue({
+      preExempt: {
+        total: 1,
+        within30: 1
+      },
+      failed: {
+        nonComplianceLetterNotSent: 10
+      }
+    })
+
+    const options = {
+      method: 'GET',
+      url: '/cdos?status=PreExempt&noCache=true',
+      ...portalHeader
+    }
+
+    const expectedFilter = { status: ['PreExempt'] }
+
+    const expectedPayload = {
+      cdos: expectedCdos,
+      count: 1,
+      counts: {
+        preExempt: {
+          total: 1,
+          within30: 1
+        },
+        failed: {
+          nonComplianceLetterNotSent: 10
+        }
+      }
+    }
+
+    const response = await server.inject(options)
+    const { payload } = response
+    expect(response.statusCode).toBe(200)
+    expect(getSummaryCdos).toHaveBeenCalledWith(expectedFilter, undefined, cacheObject)
+    expect(JSON.parse(payload)).toEqual(expectedPayload)
+    expect(getCache).toHaveBeenCalled()
+    expect(getCdoCounts).toHaveBeenCalledWith(cacheObject, true)
   })
 
   test('GET /cdos route returns 200 given police force is missing', async () => {
@@ -232,7 +351,7 @@ describe('CDO endpoint', () => {
 
     const response = await server.inject(options)
     expect(response.statusCode).toBe(200)
-    expect(getSummaryCdos).toHaveBeenCalledWith(expectedFilter, undefined)
+    expect(getSummaryCdos).toHaveBeenCalledWith(expectedFilter, undefined, {})
   })
 
   test('GET /cdos route returns 200 given withinDays filter applied', async () => {
@@ -259,7 +378,7 @@ describe('CDO endpoint', () => {
 
     const response = await server.inject(options)
     expect(response.statusCode).toBe(200)
-    expect(getSummaryCdos).toHaveBeenCalledWith(expectedFilter, undefined)
+    expect(getSummaryCdos).toHaveBeenCalledWith(expectedFilter, undefined, {})
   })
 
   test('GET /cdos route returns 200 given nonComplianceLetterSent false filter applied', async () => {
@@ -286,7 +405,7 @@ describe('CDO endpoint', () => {
 
     const response = await server.inject(options)
     expect(response.statusCode).toBe(200)
-    expect(getSummaryCdos).toHaveBeenCalledWith(expectedFilter, undefined)
+    expect(getSummaryCdos).toHaveBeenCalledWith(expectedFilter, undefined, {})
   })
 
   test('GET /cdos route returns 200 given sorting requested', async () => {
@@ -314,7 +433,7 @@ describe('CDO endpoint', () => {
 
     const response = await server.inject(options)
     expect(response.statusCode).toBe(200)
-    expect(getSummaryCdos).toHaveBeenCalledWith(expectedFilter, expectedOrdering)
+    expect(getSummaryCdos).toHaveBeenCalledWith(expectedFilter, expectedOrdering, {})
   })
 
   test('should return 403 given call from enforcement', async () => {
