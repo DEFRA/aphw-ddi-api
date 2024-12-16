@@ -655,7 +655,9 @@ const purgeDogByIndexNumber = async (indexNumber, user, transaction) => {
   }
 
   for (const registration of dogAggregate.registrations) {
-    await registration.form_two.destroy({ transaction })
+    if (registration.form_two !== null) {
+      await registration.form_two.destroy({ transaction })
+    }
     await registration.destroy({ force: true, transaction })
   }
 
