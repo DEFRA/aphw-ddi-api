@@ -5,10 +5,21 @@ const getCdosQuerySchema = Joi.object({
   status: Joi.array().items(Joi.string()).single(),
   sortKey: Joi.string().valid('cdoExpiry', 'joinedExemptionScheme', 'indexNumber', 'policeForce', 'owner'),
   nonComplianceLetterSent: Joi.boolean(),
+  noCache: Joi.boolean().default(false),
   sortOrder: Joi.string().valid('ASC', 'DESC')
 }).or('withinDays', 'status')
 
 const getCdosResponseSchema = Joi.object({
+  counts: Joi.object({
+    preExempt: Joi.object({
+      total: Joi.number().required(),
+      within30: Joi.number().required()
+    }).required(),
+    failed: Joi.object({
+      nonComplianceLetterNotSent: Joi.number().required()
+    }).required()
+  }),
+  count: Joi.number().required(),
   cdos: Joi.array().items(Joi.object({
     person: Joi.object({
       id: Joi.number().required(),

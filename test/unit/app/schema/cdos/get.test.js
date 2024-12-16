@@ -10,7 +10,8 @@ describe('cdos - GET schema', () => {
       const validation = getCdosQuerySchema.validate(queryParams, { abortEarly: false })
       const expectedQueryParams = {
         status: ['PreExempt'],
-        withinDays: 30
+        withinDays: 30,
+        noCache: false
       }
 
       expect(validation).toEqual({ value: expectedQueryParams })
@@ -24,7 +25,8 @@ describe('cdos - GET schema', () => {
 
       const validation = getCdosQuerySchema.validate(queryParams, { abortEarly: false })
       const expectedQueryParams = {
-        status: ['PreExempt']
+        status: ['PreExempt'],
+        noCache: false
       }
 
       expect(validation).toEqual({ value: expectedQueryParams })
@@ -40,7 +42,8 @@ describe('cdos - GET schema', () => {
       const validation = getCdosQuerySchema.validate(queryParams, { abortEarly: false })
       const expectedQueryParams = {
         status: ['Failed'],
-        nonComplianceLetterSent: true
+        nonComplianceLetterSent: true,
+        noCache: false
       }
 
       expect(validation).toEqual({ value: expectedQueryParams })
@@ -56,7 +59,8 @@ describe('cdos - GET schema', () => {
       const validation = getCdosQuerySchema.validate(queryParams, { abortEarly: false })
       const expectedQueryParams = {
         status: ['PreExempt', 'InterimExempt'],
-        withinDays: 30
+        withinDays: 30,
+        noCache: false
       }
 
       expect(validation).toEqual({ value: expectedQueryParams })
@@ -70,7 +74,8 @@ describe('cdos - GET schema', () => {
 
       const validation = getCdosQuerySchema.validate(queryParams, { abortEarly: false })
       const expectedQueryParams = {
-        withinDays: 30
+        withinDays: 30,
+        noCache: false
       }
 
       expect(validation).toEqual({ value: expectedQueryParams })
@@ -88,7 +93,8 @@ describe('cdos - GET schema', () => {
       const expectedQueryParams = {
         status: ['InterimExempt'],
         sortKey: 'joinedExemptionScheme',
-        sortOrder: 'DESC'
+        sortOrder: 'DESC',
+        noCache: false
       }
 
       expect(validation).toEqual({ value: expectedQueryParams })
@@ -106,7 +112,8 @@ describe('cdos - GET schema', () => {
       const expectedQueryParams = {
         status: ['PreExempt'],
         sortKey: 'policeForce',
-        sortOrder: 'DESC'
+        sortOrder: 'DESC',
+        noCache: false
       }
 
       expect(validation).toEqual({ value: expectedQueryParams })
@@ -122,7 +129,8 @@ describe('cdos - GET schema', () => {
       const validation = getCdosQuerySchema.validate(queryParams, { abortEarly: false })
       const expectedQueryParams = {
         status: ['PreExempt'],
-        sortKey: 'owner'
+        sortKey: 'owner',
+        noCache: false
       }
 
       expect(validation).toEqual({ value: expectedQueryParams })
@@ -138,7 +146,24 @@ describe('cdos - GET schema', () => {
       const validation = getCdosQuerySchema.validate(queryParams, { abortEarly: false })
       const expectedQueryParams = {
         status: ['PreExempt'],
-        sortKey: 'indexNumber'
+        sortKey: 'indexNumber',
+        noCache: false
+      }
+
+      expect(validation).toEqual({ value: expectedQueryParams })
+      expect(validation.error).not.toBeDefined()
+    })
+
+    test('should validate given no cache set', () => {
+      const queryParams = {
+        status: 'PreExempt',
+        noCache: true
+      }
+
+      const validation = getCdosQuerySchema.validate(queryParams, { abortEarly: false })
+      const expectedQueryParams = {
+        status: ['PreExempt'],
+        noCache: true
       }
 
       expect(validation).toEqual({ value: expectedQueryParams })
@@ -209,7 +234,17 @@ describe('cdos - GET schema', () => {
               nonComplianceLetterSent: '2024-03-10'
             }
           }
-        ]
+        ],
+        count: 1,
+        counts: {
+          preExempt: {
+            total: 1,
+            within30: 0
+          },
+          failed: {
+            nonComplianceLetterNotSent: 0
+          }
+        }
       }
 
       const validation = getCdosResponseSchema.validate(response, { abortEarly: false })
@@ -234,7 +269,17 @@ describe('cdos - GET schema', () => {
               nonComplianceLetterSent: '2024-03-10'
             }
           }
-        ]
+        ],
+        count: 1,
+        counts: {
+          preExempt: {
+            total: 1,
+            within30: 0
+          },
+          failed: {
+            nonComplianceLetterNotSent: 0
+          }
+        }
       }
 
       expect(validation).toEqual({ value: expectedResponseValues })
@@ -263,7 +308,17 @@ describe('cdos - GET schema', () => {
               nonComplianceLetterSent: null
             }
           }
-        ]
+        ],
+        count: 1,
+        counts: {
+          preExempt: {
+            total: 1,
+            within30: 0
+          },
+          failed: {
+            nonComplianceLetterNotSent: 0
+          }
+        }
       }
 
       const validation = getCdosResponseSchema.validate(response, { abortEarly: false })
@@ -288,7 +343,17 @@ describe('cdos - GET schema', () => {
               nonComplianceLetterSent: null
             }
           }
-        ]
+        ],
+        count: 1,
+        counts: {
+          preExempt: {
+            total: 1,
+            within30: 0
+          },
+          failed: {
+            nonComplianceLetterNotSent: 0
+          }
+        }
       }
 
       expect(validation).toEqual({ value: expectedResponseValues })
@@ -321,7 +386,17 @@ describe('cdos - GET schema', () => {
               nonComplianceLetterSent: null
             }
           }
-        ]
+        ],
+        count: 1,
+        counts: {
+          preExempt: {
+            total: 1,
+            within30: 0
+          },
+          failed: {
+            nonComplianceLetterNotSent: 0
+          }
+        }
       }
 
       const validation = getCdosResponseSchema.validate(response, { abortEarly: false })
@@ -350,7 +425,17 @@ describe('cdos - GET schema', () => {
               nonComplianceLetterSent: null
             }
           }
-        ]
+        ],
+        count: 1,
+        counts: {
+          preExempt: {
+            total: 1,
+            within30: 0
+          },
+          failed: {
+            nonComplianceLetterNotSent: 0
+          }
+        }
       }
 
       expect(validation).toEqual({ value: expectedResponseValues })
@@ -359,7 +444,17 @@ describe('cdos - GET schema', () => {
 
     test('should validate with no results returned', () => {
       const response = {
-        cdos: []
+        cdos: [],
+        count: 0,
+        counts: {
+          preExempt: {
+            total: 0,
+            within30: 0
+          },
+          failed: {
+            nonComplianceLetterNotSent: 0
+          }
+        }
       }
 
       const validation = getCdosResponseSchema.validate(response, { abortEarly: false })
@@ -371,7 +466,7 @@ describe('cdos - GET schema', () => {
       const response = {}
 
       const validation = getCdosResponseSchema.validate(response, { abortEarly: false })
-      expect(validation.error.message).toEqual('"cdos" is required')
+      expect(validation.error.message).toEqual('"count" is required. "cdos" is required')
     })
   })
 })

@@ -1,7 +1,8 @@
-const { getSummaryCdos } = require('../repos/cdo')
+const { getSummaryCdos, getCdoCounts } = require('../repos/cdo')
 const { mapSummaryCdoDaoToDto } = require('../repos/mappers/cdo')
 const { getCdosQuerySchema, getCdosResponseSchema } = require('../schema/cdos/get')
 const { scopes } = require('../constants/auth')
+const getCache = require('../cache/get-cache')
 
 module.exports = [
   {
@@ -34,7 +35,8 @@ module.exports = [
             withinDays,
             nonComplianceLetterSent,
             sortKey: key,
-            sortOrder: order
+            sortOrder: order,
+            noCache
           } = request.query
 
           /**
@@ -52,11 +54,14 @@ module.exports = [
             sort = { key, order }
           }
 
-          const summaryCdos = await getSummaryCdos(filter, sort)
+          const cache = getCache(request)
+          const summaryCdos = await getSummaryCdos(filter, sort, cache)
+          const counts = await getCdoCounts(cache, noCache)
 
-          const summaryCdosDto = summaryCdos.map(mapSummaryCdoDaoToDto)
+          const summaryCdosDto = summaryCdos.cdos.map(mapSummaryCdoDaoToDto)
+          const count = summaryCdos.count
 
-          return h.response({ cdos: summaryCdosDto }).code(200)
+          return h.response({ cdos: summaryCdosDto, count, counts }).code(200)
         } catch (e) {
           console.log('Error retrieving cdos:', e)
           throw e

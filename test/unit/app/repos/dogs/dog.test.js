@@ -869,6 +869,61 @@ describe('Dog repo', () => {
       expect(mockDogDestroy).toHaveBeenCalledWith({ force: true, transaction: {} })
       expect(sendPermanentDeleteToAudit).toHaveBeenCalledWith('dog', mockDogAggregrate, devUser)
     })
+
+    test('should delete a dog given dog is found with no form_two', async () => {
+      const mockDogDestroy = jest.fn()
+      const mockMicrochipDestroy = jest.fn()
+      const mockDogMicrochipDestroy = jest.fn()
+      const mockRegistrationDestroy = jest.fn()
+      const mockRegisteredPersonDestroy = jest.fn()
+      const mockInsuranceDestroy = jest.fn()
+      const mockDogBreachDestroy = jest.fn()
+      const mockFormTwoDestroy = jest.fn()
+
+      const mockDogAggregrate = {
+        id: 123,
+        breed: 'Breed 1',
+        name: 'Bruno',
+        registrations: [{
+          id: 1,
+          cdoIssued: '2020-01-01',
+          cdoExpiry: '2020-02-01',
+          destroy: mockRegistrationDestroy,
+          form_two: null
+        }],
+        registered_person: [{
+          destroy: mockRegisteredPersonDestroy
+        }],
+        dog_breaches: [
+          buildDogBreachDao({
+            destroy: mockDogBreachDestroy
+          })
+        ],
+        dog_microchips: [
+          { microchip: { microchip_number: 123456789012345, destroy: mockMicrochipDestroy }, destroy: mockDogMicrochipDestroy },
+          { microchip: { microchip_number: 112345678901234, destroy: mockMicrochipDestroy }, destroy: mockDogMicrochipDestroy }
+        ],
+        insurance: [{ id: 6, policy_number: null, company_id: 1, renewal_date: '2020-06-01T00:00:00.000Z', dog_id: 300088, destroy: mockInsuranceDestroy }],
+        destroy: mockDogDestroy
+      }
+      sequelize.models.dog.findOne.mockResolvedValue(mockDogAggregrate)
+
+      await purgeDogByIndexNumber('ED123', devUser, {})
+
+      expect(sequelize.models.dog.findOne).toBeCalledWith(expect.objectContaining({
+        where: { index_number: 'ED123' },
+        paranoid: false
+      }))
+      expect(mockFormTwoDestroy).not.toHaveBeenCalled()
+      expect(mockRegistrationDestroy).toHaveBeenCalledWith({ force: true, transaction: {} })
+      expect(mockRegisteredPersonDestroy).toHaveBeenCalledWith({ force: true, transaction: {} })
+      expect(mockMicrochipDestroy).toHaveBeenCalledWith({ force: true, transaction: {} })
+      expect(mockDogMicrochipDestroy).toHaveBeenCalledWith({ force: true, transaction: {} })
+      expect(mockInsuranceDestroy).toHaveBeenCalledWith({ force: true, transaction: {} })
+      expect(mockDogBreachDestroy).toHaveBeenCalledWith({ force: true, transaction: {} })
+      expect(mockDogDestroy).toHaveBeenCalledWith({ force: true, transaction: {} })
+      expect(sendPermanentDeleteToAudit).toHaveBeenCalledWith('dog', mockDogAggregrate, devUser)
+    })
   })
 
   describe('switchOwnerIfNecessary', () => {

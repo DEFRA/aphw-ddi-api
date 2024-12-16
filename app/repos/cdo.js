@@ -15,6 +15,7 @@ const { createOrUpdateInsuranceWithCommand } = require('./insurance')
 const { updateMicrochipKey } = require('./microchip')
 const domain = require('../constants/domain')
 const { submitFormTwo } = require('./formTwo')
+const { set, get } = require('../cache')
 
 /**
  * @typedef DogBreedDao
@@ -367,88 +368,191 @@ const getSortOrder = (sort) => {
   return order
 }
 
+const summaryCdoInclude = () => ([
+  {
+    model: sequelize.models.registered_person,
+    as: 'registered_person',
+    attributes: { exclude: ['created_at', 'updated_at', 'deleted_at', 'person_id', 'dog_id', 'person_type_id'] },
+    include: [{
+      model: sequelize.models.person,
+      as: 'person',
+      attributes: ['id', 'first_name', 'last_name', 'person_reference']
+    }]
+  },
+  {
+    model: sequelize.models.status,
+    as: 'status'
+  },
+  {
+    model: sequelize.models.registration,
+    as: 'registration',
+    attributes: ['id', 'cdo_expiry', 'joined_exemption_scheme', 'non_compliance_letter_sent'],
+    include: [
+      {
+        model: sequelize.models.police_force,
+        as: 'police_force',
+        paranoid: false
+      }
+    ]
+  }
+])
+
+const cdoExpiryFilter = withinDays => {
+  const day = 24 * 60 * 60 * 1000
+  const withinMilliseconds = withinDays * day
+  const now = new Date()
+  now.setUTCHours(0, 0, 0, 0)
+  const withinDaysDate = new Date(now.getTime() + withinMilliseconds)
+
+  return {
+    [Op.lte]: withinDaysDate
+  }
+}
+
+const cdoStatusFilter = statusList => {
+  return statusList.map(status => statuses[status])
+}
+
+const cdoNonComplianceFilter = nonComplianceLetterSent => {
+  const operation = nonComplianceLetterSent === false ? Op.is : Op.not
+
+  return {
+    [operation]: null
+  }
+}
+
+const getCdoCountCacheKey = where => {
+  const keys = ['manage-cdo-count']
+
+  const statusList = where['$status.status$']
+  const cdoExpiry = where['$registration.cdo_expiry$']?.[Op.lte]
+  const nonCompliance = where['$registration.non_compliance_letter_sent$']
+
+  for (const status of (statusList || [])) {
+    keys.push(`status-${status.toLowerCase()}`)
+  }
+
+  if (cdoExpiry) {
+    keys.push(`expiry-${cdoExpiry.toISOString()}`)
+  }
+
+  if (nonCompliance !== undefined) {
+    const nonComplianceLetterSent = nonCompliance[Op.is] === undefined
+    keys.push(`non-compliance-${nonComplianceLetterSent}`)
+  }
+
+  return keys.join('|')
+}
+/**
+ * @typedef SummaryCdoFilter
+ * @type {CdoStatus[]} [status]
+ * @type {number} [withinDays]
+ * @type {boolean} [nonComplianceLetterSent]
+ */
 /**
  * @typedef GetSummaryCdos
- * @param {{ status?: CdoStatus[]; withinDays?: number; nonComplianceLetterSent?: boolean }} [filter]
+ * @param {SummaryCdoFilter} [filter]
  * @param {CdoSort} [sort]
- * @return {Promise<SummaryCdo[]>}
+ * @return {Promise<{ count: number; cdos: SummaryCdo[] }>}
  */
 
 /**
- * @type {GetSummaryCdos}
+ * @param {SummaryCdoFilter} [filter]
+ * @param {CdoSort} [sort]
+ * @param cache
+ * @return {Promise<{ count: number; cdos: SummaryCdo[] }>}
  */
-const getSummaryCdos = async (filter, sort) => {
+const getSummaryCdos = async (filter, sort, cache) => {
   const where = {}
 
   if (filter.status) {
-    const statusArray = filter.status.map(status => statuses[status])
-    where['$status.status$'] = statusArray
+    where['$status.status$'] = cdoStatusFilter(filter.status)
   }
 
   if (filter.withinDays) {
-    const day = 24 * 60 * 60 * 1000
-    const withinMilliseconds = filter.withinDays * day
-    const now = new Date()
-    now.setUTCHours(0, 0, 0, 0)
-    const withinDaysDate = new Date(now.getTime() + withinMilliseconds)
-
-    where['$registration.cdo_expiry$'] = {
-      [Op.lte]: withinDaysDate
-    }
+    where['$registration.cdo_expiry$'] = cdoExpiryFilter(filter.withinDays)
   }
 
   if (filter.nonComplianceLetterSent !== undefined) {
-    const operation = filter.nonComplianceLetterSent === false ? Op.is : Op.not
+    where['$registration.non_compliance_letter_sent$'] = cdoNonComplianceFilter(filter.nonComplianceLetterSent)
+  }
 
-    where['$registration.non_compliance_letter_sent$'] = {
-      [operation]: null
-    }
+  const genericQueryFields = {
+    where,
+    include: summaryCdoInclude()
   }
 
   const order = getSortOrder(sort)
 
   const cdos = await sequelize.models.dog.findAll({
+    ...genericQueryFields,
     attributes: [
       'id', 'index_number', 'status_id',
       [sequelize.fn('COALESCE', sequelize.col(policeForceCol), 'ZZZZZZ'), 'police_force_aggregrate']
     ],
-    where,
-    include: [
-      {
-        model: sequelize.models.registered_person,
-        as: 'registered_person',
-        attributes: { exclude: ['created_at', 'updated_at', 'deleted_at', 'person_id', 'dog_id', 'person_type_id'] },
-        include: [{
-          model: sequelize.models.person,
-          as: 'person',
-          attributes: ['id', 'first_name', 'last_name', 'person_reference']
-        }]
-      },
-      {
-        model: sequelize.models.status,
-        as: 'status'
-      },
-      {
-        model: sequelize.models.registration,
-        as: 'registration',
-        attributes: ['id', 'cdo_expiry', 'joined_exemption_scheme', 'non_compliance_letter_sent'],
-        include: [
-          {
-            model: sequelize.models.police_force,
-            as: 'police_force',
-            paranoid: false
-          }
-        ]
-      }
-    ],
     order
   })
 
-  return cdos
+  const count = cdos.length
+
+  await set(cache, getCdoCountCacheKey(where), count, 60 * 60 * 1000)
+
+  return { count, cdos }
 }
+
 /**
- *
+ * @param where
+ * @param cache
+ * @param {boolean} [useCached]
+ * @return {Promise<number>}
  */
+const getCdoCount = async (where, cache, useCached) => {
+  const cacheKey = getCdoCountCacheKey(where)
+
+  if (useCached) {
+    const cachedValue = await get(cache, cacheKey)
+
+    if (cachedValue) {
+      return cachedValue
+    }
+  }
+
+  const count = await sequelize.models.dog.count({
+    where,
+    include: summaryCdoInclude()
+  })
+
+  await set(cache, cacheKey, count)
+
+  return count
+}
+
+/**
+ * @return {Promise<CdoCount>}
+ */
+const getCdoCounts = async (cache, useCached = true) => {
+  const total = await getCdoCount({
+    '$status.status$': cdoStatusFilter(['PreExempt'])
+  }, cache, useCached)
+  const within30 = await getCdoCount({
+    '$status.status$': cdoStatusFilter(['PreExempt']),
+    '$registration.cdo_expiry$': cdoExpiryFilter(30)
+  }, cache, useCached)
+  const nonComplianceLetterNotSent = await getCdoCount({
+    '$status.status$': cdoStatusFilter(['Failed']),
+    '$registration.non_compliance_letter_sent$': cdoNonComplianceFilter(false)
+  }, cache, useCached)
+
+  return {
+    preExempt: {
+      total,
+      within30
+    },
+    failed: {
+      nonComplianceLetterNotSent
+    }
+  }
+}
 
 /**
  * @typedef GetCdoModel
@@ -551,10 +655,12 @@ const saveCdoTaskList = async (cdoTaskList, transaction) => {
 
   return getCdoTaskList(cdoTaskList.cdoSummary.indexNumber, transaction)
 }
+
 /**
  * @typedef {{
  *    getCdo: GetCdo,
  *    getSummaryCdos: GetSummaryCdos,
+ *    getCdoCounts: () => Promise<CdoCount>
  *    getAllCdos: GetAllCdos,
  *    createCdo: CreateCdo,
  *    getCdoModel: GetCdoModel,
@@ -569,7 +675,9 @@ const saveCdoTaskList = async (cdoTaskList, transaction) => {
 module.exports = {
   createCdo,
   getCdo,
+  getCdoCountCacheKey,
   getSummaryCdos,
+  getCdoCounts,
   getAllCdos,
   getCdoModel,
   getCdoTaskList,
