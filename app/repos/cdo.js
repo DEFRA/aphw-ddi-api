@@ -506,7 +506,7 @@ const getSummaryCdos = async (filter, sort, cache) => {
  * @param {boolean} [useCached]
  * @return {Promise<number>}
  */
-const getCdoCount = async (where, cache, useCached = true) => {
+const getCdoCount = async (where, cache, useCached) => {
   const cacheKey = getCdoCountCacheKey(where)
 
   if (useCached) {
