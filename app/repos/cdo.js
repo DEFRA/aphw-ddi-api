@@ -397,17 +397,6 @@ const summaryCdoInclude = () => ([
   }
 ])
 
-const summaryCdoCountInclude = () => ([
-  {
-    model: sequelize.models.status,
-    as: 'status'
-  },
-  {
-    model: sequelize.models.registration,
-    as: 'registration'
-  }
-])
-
 const cdoExpiryFilter = withinDays => {
   const day = 24 * 60 * 60 * 1000
   const withinMilliseconds = withinDays * day
@@ -504,10 +493,8 @@ const getSummaryCdos = async (filter, sort, cache) => {
     order
   })
 
-  const count = await sequelize.models.dog.count({
-    where,
-    include: summaryCdoCountInclude()
-  })
+  const count = cdos.length
+
   await set(cache, getCdoCountCacheKey(where), count, 60 * 60 * 1000)
 
   return { count, cdos }

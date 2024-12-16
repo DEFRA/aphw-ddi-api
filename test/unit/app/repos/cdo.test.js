@@ -451,12 +451,6 @@ describe('CDO repo', () => {
           '$status.status$': ['Pre-exempt']
         }
       })
-      expect(sequelize.models.dog.count).toHaveBeenCalledWith({
-        include: expect.any(Array),
-        where: {
-          '$status.status$': ['Pre-exempt']
-        }
-      })
       expect(sequelize.col).toHaveBeenCalledWith('registration.cdo_expiry')
       expect(setCache).toHaveBeenCalledWith(cacheObject, 'manage-cdo-count|status-pre-exempt', 2, 60 * 60 * 1000)
     })
