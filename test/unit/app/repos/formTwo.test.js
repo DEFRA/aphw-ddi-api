@@ -81,7 +81,7 @@ describe('formTwo', () => {
       expect(sequelize.transaction).toHaveBeenCalledTimes(1)
     })
 
-    test('should submit a form two', async () => {
+    test('should submit a form 2', async () => {
       /**
        * @type {FormTwoAuditDetails}
        */
@@ -122,11 +122,11 @@ describe('formTwo', () => {
       expect(createAuditsForFormTwo).toHaveBeenCalledWith(expectedAudit)
     })
 
-    test('should throw if a form two already exists', async () => {
+    test('should throw if a form 2 already exists', async () => {
       sequelize.models.form_two.findOne.mockResolvedValue({
         id: 1
       })
-      await expect(submitFormTwo('ED300100', cdoTaskList, defaultPayload, middleEarthUser, callback, {})).rejects.toThrow(new DuplicateResourceError('Form Two already submitted'))
+      await expect(submitFormTwo('ED300100', cdoTaskList, defaultPayload, middleEarthUser, callback, {})).rejects.toThrow(new DuplicateResourceError('Form 2 already submitted'))
     })
     test('should throw if registration is not found', async () => {
       sequelize.models.registration.findOne.mockResolvedValue(null)

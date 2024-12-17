@@ -242,7 +242,7 @@ describe('EmailHelper test', () => {
         activityDate: expect.any(Date),
         targetPk: 'dog',
         details,
-        activityLabel: 'Form Two submitted by Shire Citizens Constabulary'
+        activityLabel: 'Form 2 from Shire Citizens Constabulary'
       }
       await createAuditsForFormTwo(details)
       expect(sendActivityToAudit).toHaveBeenCalledWith(expectedAudit, { username: 'bilbo.baggins@shire.police.me', displayname: 'bilbo.baggins@shire.police.me' })

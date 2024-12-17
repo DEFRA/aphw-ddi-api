@@ -43,7 +43,7 @@ const reportSomethingAudit = {
 
 const formTwoSubmissionAudit = {
   id: '4',
-  label: 'Form Two',
+  label: 'Form 2',
   activityType: 'received'
 }
 

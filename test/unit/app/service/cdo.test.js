@@ -339,18 +339,8 @@ describe('CdoService', function () {
       expect(cdoTaskList.getUpdates().exemption).toEqual([{
         key: 'form2Sent',
         value: sentDate,
-        callback: expect.any(Function)
+        callback: null
       }])
-      await cdoTaskList.getUpdates().exemption[0].callback()
-      expect(sendActivityToAudit).toHaveBeenCalledWith({
-        activity: 10,
-        activityType: 'sent',
-        pk: 'ED300097',
-        source: 'dog',
-        activityDate: sentDate,
-        targetPk: 'dog',
-        activityLabel: 'Form 2'
-      }, devUser)
     })
 
     test('should not send Form 2 a second time', async () => {
@@ -644,7 +634,7 @@ describe('CdoService', function () {
   })
 
   describe('submitFormTwo', () => {
-    test('should submit form two', async () => {
+    test('should submit form 2', async () => {
       mockCdoRepository.submitFormTwo.mockImplementation(async (_indexNumber, _cdoTaskList, _payload, _username, sendEmailCallback) => {
         await sendEmailCallback()
       })

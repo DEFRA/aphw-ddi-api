@@ -133,7 +133,7 @@ const createFormTwoAuditPayload = (details, pk, source, targetPk, activityId) =>
     activityDate: new Date(),
     targetPk,
     details,
-    activityLabel: `${formTwoSubmissionAudit.label} submitted by ${details.policeForce}`
+    activityLabel: `${formTwoSubmissionAudit.label} from ${details.policeForce}`
   }
 }
 

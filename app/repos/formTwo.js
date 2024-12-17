@@ -52,7 +52,7 @@ const submitFormTwo = async (indexNumber, cdoTaskList, payload, { username }, ca
   })
 
   if (formTwo) {
-    throw new DuplicateResourceError('Form Two already submitted')
+    throw new DuplicateResourceError('Form 2 already submitted')
   }
 
   const registration = await sequelize.models.registration.findOne({

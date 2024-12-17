@@ -189,19 +189,8 @@ class CdoService {
 
   async sendForm2 (cdoIndexNumber, sentDate, user) {
     const cdoTaskList = await this.cdoRepository.getCdoTaskList(cdoIndexNumber)
-    const activityType = await getActivityByLabel(activities.applicationPackSent)
 
-    const callback = async () => {
-      await sendActivityToAudit({
-        activity: activityType.id,
-        activityType: 'sent',
-        pk: cdoIndexNumber,
-        source: 'dog',
-        activityDate: sentDate,
-        targetPk: 'dog',
-        activityLabel: activities.form2Sent
-      }, user)
-    }
+    const callback = null
 
     cdoTaskList.sendForm2(sentDate, callback)
 
