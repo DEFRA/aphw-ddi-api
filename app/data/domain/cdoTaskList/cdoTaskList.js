@@ -1,7 +1,7 @@
 const CdoTask = require('./cdoTask')
-const { ActionAlreadyPerformedError } = require('../../errors/domain/actionAlreadyPerformed')
-const { SequenceViolationError } = require('../../errors/domain/sequenceViolation')
-const { dateTodayOrInFuture } = require('../../lib/date-helpers')
+const { ActionAlreadyPerformedError } = require('../../../errors/domain/actionAlreadyPerformed')
+const { SequenceViolationError } = require('../../../errors/domain/sequenceViolation')
+const { dateTodayOrInFuture } = require('../../../lib/date-helpers')
 
 class CdoTaskList {
   /**

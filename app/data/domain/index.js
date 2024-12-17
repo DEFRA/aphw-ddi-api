@@ -1,5 +1,5 @@
 const Cdo = require('./cdo')
-const CdoTask = require('./cdoTask')
+const CdoTask = require('./cdoTaskList/cdoTask')
 const CdoTaskList = require('./cdoTaskList')
 const Dog = require('./dog')
 const Exemption = require('./exemption')
