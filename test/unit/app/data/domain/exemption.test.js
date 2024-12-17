@@ -44,6 +44,8 @@ describe('Exemption', () => {
       legislationOfficer: 'Sidney Lewis',
       certificateIssued: null,
       applicationFeePaid: null,
+      insuranceCompany: 'Allianz',
+      insuranceRenewal: '2024-01-01T00:00:00.000Z',
       insurance: [
         {
           company: 'Allianz',
@@ -63,6 +65,12 @@ describe('Exemption', () => {
       applicationPackProcessed: null
     }))
     expect(exemption).toBeInstanceOf(Exemption)
+  })
+
+  test('should create a new exemption', () => {
+    const exemption = new Exemption(buildExemption({}))
+    expect(exemption.insuranceCompany).toBeUndefined()
+    expect(exemption.insuranceRenewal).toBeUndefined()
   })
 
   describe('sendApplicationPack', () => {
