@@ -123,7 +123,7 @@ const createAuditsForReportSomething = async (data) => {
  * @param {string} activityId
  * @returns {{activityId, activityDate: Date, activity: string, targetPk: string, details, pk, source, activityType: string, activityLabel: string}}
  */
-const createFormTwoAuditPayload = (details, pk, source, targetPk, activityId) => {
+const createSubmitFormTwoAuditPayload = (details, pk, source, targetPk, activityId) => {
   return {
     activityId,
     activity: formTwoSubmissionAudit.id,
@@ -141,8 +141,8 @@ const createFormTwoAuditPayload = (details, pk, source, targetPk, activityId) =>
  * @param {FormTwoAuditDetails} details
  * @returns {Promise<void>}
  */
-const createAuditsForFormTwo = async (details) => {
-  const payload = createFormTwoAuditPayload(details, details.indexNumber, 'dog', 'dog', uuidv4())
+const createAuditsForSubmitFormTwo = async (details) => {
+  const payload = createSubmitFormTwoAuditPayload(details, details.indexNumber, 'dog', 'dog', uuidv4())
   await sendActivityToAudit(payload, { username: details.username, displayname: details.username })
 }
 
@@ -193,5 +193,5 @@ module.exports = {
   sendReportSomethingEmails,
   sendForm2Emails,
   createAuditsForReportSomething,
-  createAuditsForFormTwo
+  createAuditsForSubmitFormTwo
 }

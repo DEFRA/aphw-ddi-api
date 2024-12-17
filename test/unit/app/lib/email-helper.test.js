@@ -9,7 +9,7 @@ const { sendActivityToAudit } = require('../../../../app/messaging/send-audit')
 
 const emailHelper = require('../../../../app/lib/email-helper')
 const { reportSomethingAudit, reportTypes } = require('../../../../app/constants/email-types')
-const { createAuditsForFormTwo } = require('../../../../app/lib/email-helper')
+const { createAuditsForSubmitFormTwo } = require('../../../../app/lib/email-helper')
 
 describe('EmailHelper test', () => {
   beforeEach(async () => {
@@ -216,7 +216,7 @@ describe('EmailHelper test', () => {
     })
   })
 
-  describe('createAuditsForFormTwo', () => {
+  describe('createAuditsForSubmitFormTwo', () => {
     test('should send', async () => {
       /**
        * @type {FormTwoAuditDetails}
@@ -244,7 +244,7 @@ describe('EmailHelper test', () => {
         details,
         activityLabel: 'Form 2 from Shire Citizens Constabulary'
       }
-      await createAuditsForFormTwo(details)
+      await createAuditsForSubmitFormTwo(details)
       expect(sendActivityToAudit).toHaveBeenCalledWith(expectedAudit, { username: 'bilbo.baggins@shire.police.me', displayname: 'bilbo.baggins@shire.police.me' })
       expect(sendActivityToAudit).toHaveBeenCalledTimes(1)
     })

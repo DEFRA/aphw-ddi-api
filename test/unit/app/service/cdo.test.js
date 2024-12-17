@@ -339,8 +339,18 @@ describe('CdoService', function () {
       expect(cdoTaskList.getUpdates().exemption).toEqual([{
         key: 'form2Sent',
         value: sentDate,
-        callback: null
+        callback: expect.any(Function)
       }])
+      await cdoTaskList.getUpdates().exemption[0].callback()
+      expect(sendActivityToAudit).toHaveBeenCalledWith({
+        activity: 10,
+        activityType: 'sent',
+        pk: 'ED300097',
+        source: 'dog',
+        activityDate: sentDate,
+        targetPk: 'dog',
+        activityLabel: 'Form 2'
+      }, devUser)
     })
 
     test('should not send Form 2 a second time', async () => {

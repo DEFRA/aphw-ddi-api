@@ -189,8 +189,19 @@ class CdoService {
 
   async sendForm2 (cdoIndexNumber, sentDate, user) {
     const cdoTaskList = await this.cdoRepository.getCdoTaskList(cdoIndexNumber)
+    const activityType = await getActivityByLabel(activities.applicationPackSent)
 
-    const callback = null
+    const callback = async () => {
+      await sendActivityToAudit({
+        activity: activityType.id,
+        activityType: 'sent',
+        pk: cdoIndexNumber,
+        source: 'dog',
+        activityDate: sentDate,
+        targetPk: 'dog',
+        activityLabel: activities.form2Sent
+      }, user)
+    }
 
     cdoTaskList.sendForm2(sentDate, callback)
 
@@ -277,6 +288,19 @@ class CdoService {
 
     return sentDate
   }
+  /**
+   * Submit Form 2 (police officer)
+   * @param {string} indexNumber
+   * @param {{
+   *   microchipNumber: string,
+   *   neuteringConfirmation: Date | undefined,
+   *   microchipVerification: Date | undefined,
+   *   microchipDeadline: Date | undefined,
+   *   dogNotNeutered: boolean,
+   *   dogNotFitForMicrochip: boolean
+   * }} payload
+   * @param {User} user
+   */
 
   async submitFormTwo (indexNumber, payload, user) {
     /**

@@ -31,7 +31,7 @@ describe('formTwo', () => {
   const callback = jest.fn()
 
   jest.mock('../../../../app/lib/email-helper')
-  const { createAuditsForFormTwo } = require('../../../../app/lib/email-helper')
+  const { createAuditsForSubmitFormTwo } = require('../../../../app/lib/email-helper')
 
   const { submitFormTwo } = require('../../../../app/repos/formTwo')
 
@@ -119,7 +119,7 @@ describe('formTwo', () => {
         submitted_by: 'bilbo.baggins@shire.police.me',
         form_two_submitted: expect.any(Date)
       }, { transaction: {} })
-      expect(createAuditsForFormTwo).toHaveBeenCalledWith(expectedAudit)
+      expect(createAuditsForSubmitFormTwo).toHaveBeenCalledWith(expectedAudit)
     })
 
     test('should throw if a form 2 already exists', async () => {
