@@ -1,12 +1,13 @@
-const { buildExemption } = require('../../../../mocks/cdo/domain')
+const { buildExemption, buildCdoInsurance } = require('../../../../mocks/cdo/domain')
 const { Exemption } = require('../../../../../app/data/domain')
-const { ApplicationPackProcessedRule, ApplicationPackSentRule } = require('../../../../../app/data/domain/cdoTaskList/rules')
+const { ApplicationPackProcessedRule, ApplicationPackSentRule, InsuranceDetailsRule } = require('../../../../../app/data/domain/cdoTaskList/rules')
 describe('CdoTaskList rules', () => {
+  const exemptionDefaultProperties = buildExemption({})
+  const exemptionDefault = new Exemption(exemptionDefaultProperties)
+
   describe('ApplicationPackSentRule', () => {
-    test('should show applicationPackSent in default state', () => {
-      const exemptionProperties = buildExemption({})
-      const exemption = new Exemption(exemptionProperties)
-      const processedRule = new ApplicationPackSentRule(exemption)
+    test('should be available by default', () => {
+      const processedRule = new ApplicationPackSentRule(exemptionDefault)
       expect(processedRule.key).toBe('applicationPackSent')
       expect(processedRule.available).toBe(true)
       expect(processedRule.completed).toBe(false)
@@ -29,9 +30,7 @@ describe('CdoTaskList rules', () => {
 
   describe('ApplicationPackProcessedRule', () => {
     test('should show us unavailable by default', () => {
-      const exemptionProperties = buildExemption({})
-      const exemption = new Exemption(exemptionProperties)
-      const processedRule = new ApplicationPackProcessedRule(exemption, new ApplicationPackSentRule(exemption))
+      const processedRule = new ApplicationPackProcessedRule(exemptionDefault, new ApplicationPackSentRule(exemptionDefault))
       expect(processedRule.available).toBe(false)
       expect(processedRule.completed).toBe(false)
       expect(processedRule.readonly).toBe(false)
@@ -63,6 +62,94 @@ describe('CdoTaskList rules', () => {
       expect(processedRule.completed).toBe(true)
       expect(processedRule.readonly).toBe(true)
       expect(processedRule.timestamp).toEqual(applicationPackProcessed)
+    })
+  })
+
+  describe('InsuranceDetailsRule', () => {
+    test('should show us unavailable by default', () => {
+      const processedRule = new InsuranceDetailsRule(exemptionDefault, new ApplicationPackSentRule(exemptionDefault))
+      expect(processedRule.key).toBe('insuranceDetailsRecorded')
+      expect(processedRule.available).toBe(false)
+      expect(processedRule.completed).toBe(false)
+      expect(processedRule.readonly).toBe(false)
+      expect(processedRule.timestamp).toBeUndefined()
+    })
+
+    test('should not show as complete given insurance renewal date is in the past', () => {
+      const yesterday = new Date()
+      yesterday.setDate(yesterday.getDate() - 1)
+
+      const exemptionProperties = buildExemption({
+        applicationPackSent: new Date('2024-06-25'),
+        insuranceDetailsRecorded: yesterday,
+        insurance: [buildCdoInsurance({
+          company: 'Dogs R Us',
+          insuranceRenewal: yesterday
+        })]
+      })
+      const processedRule = new InsuranceDetailsRule(exemptionProperties, new ApplicationPackSentRule(exemptionProperties))
+      expect(processedRule.available).toBe(true)
+      expect(processedRule.completed).toBe(false)
+      expect(processedRule.readonly).toBe(false)
+      expect(processedRule.timestamp).toBeUndefined()
+    })
+
+    test('should not show as complete given insurance renewal date is null', () => {
+      const tomorrow = new Date()
+      tomorrow.setDate(tomorrow.getDate() + 100)
+
+      const exemptionProperties = buildExemption({
+        applicationPackSent: new Date('2024-06-25'),
+        insuranceDetailsRecorded: null,
+        insurance: [buildCdoInsurance({
+          company: 'Dogs R Us',
+          insuranceRenewal: tomorrow
+        })]
+      })
+      const processedRule = new InsuranceDetailsRule(exemptionProperties, new ApplicationPackSentRule(exemptionProperties))
+      expect(processedRule.available).toBe(true)
+      expect(processedRule.completed).toBe(false)
+      expect(processedRule.readonly).toBe(false)
+      expect(processedRule.timestamp).toBeUndefined()
+    })
+
+    test('should not show as complete given insurance company not set', () => {
+      const tomorrow = new Date()
+      tomorrow.setDate(tomorrow.getDate() + 100)
+
+      const exemptionProperties = buildExemption({
+        applicationPackSent: new Date('2024-06-25'),
+        insuranceDetailsRecorded: null,
+        insurance: [{
+          renewalDate: tomorrow
+        }]
+      })
+      const processedRule = new InsuranceDetailsRule(exemptionProperties, new ApplicationPackSentRule(exemptionProperties))
+      expect(processedRule.available).toBe(true)
+      expect(processedRule.completed).toBe(false)
+      expect(processedRule.readonly).toBe(false)
+      expect(processedRule.timestamp).toBeUndefined()
+    })
+
+    test('should show as complete given insurance renewal date is today', () => {
+      const today = new Date()
+      today.setHours(0)
+      today.setMinutes(0)
+      today.setMilliseconds(0)
+
+      const exemptionProperties = buildExemption({
+        applicationPackSent: new Date('2024-06-25'),
+        insuranceDetailsRecorded: new Date('2024-08-07'),
+        insurance: [buildCdoInsurance({
+          company: 'Dogs R Us',
+          renewalDate: today
+        })]
+      })
+      const processedRule = new InsuranceDetailsRule(exemptionProperties, new ApplicationPackSentRule(exemptionProperties))
+      expect(processedRule.available).toBe(true)
+      expect(processedRule.completed).toBe(true)
+      expect(processedRule.readonly).toBe(false)
+      expect(processedRule.timestamp).toEqual(new Date('2024-08-07'))
     })
   })
 })

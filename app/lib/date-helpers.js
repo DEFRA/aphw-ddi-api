@@ -60,6 +60,8 @@ const compareDates = (date, compareFn) => {
 const dateTodayOrInFuture = (date) => compareDates(date, dateMoreThanOrEqual)
 const dateTodayOrInPast = (date) => compareDates(date, dateLessThanOrEqual)
 
+const dateIsADate = (date) => date instanceof Date
+
 module.exports = {
   formatDate,
   formatDateAsUTCNoTime,
@@ -69,5 +71,6 @@ module.exports = {
   addMonths,
   dateTodayOrInFuture,
   dateTodayOrInPast,
-  stripTime
+  stripTime,
+  dateIsADate
 }

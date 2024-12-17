@@ -1,7 +1,8 @@
 /* istanbul ignore file */
 
 export interface CdoTaskRuleInterface {
-  get available()
-  get completed()
-  get timestamp()
+  get available(): boolean
+  get completed(): boolean
+  get readonly(): boolean
+  get timestamp(): Date|undefined
 }
