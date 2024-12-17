@@ -149,8 +149,8 @@ const createAuditsForFormTwo = async (details) => {
 const sendForm2Emails = async (indexNumber, dogName, microchipNumber, unfit, microchipDate, neuteringDate, under16, username) => {
   const baseFields = [
     { name: 'index_number', value: indexNumber },
-    { name: 'dog_name', value: dogName },
-    { name: 'microchip_number', value: microchipNumber ?? '' },
+    { name: 'dog_name', value: dogName && dogName !== '' ? dogName : 'Not received' },
+    { name: 'microchip_number', value: microchipNumber && microchipNumber !== '' ? microchipNumber : 'Not received' },
     { name: 'unfit_to_microchip', value: unfit ? 'yes' : 'no' },
     { name: 'microchip_date', value: microchipDate },
     { name: 'neutering_date', value: under16 ? '' : neuteringDate },
@@ -177,10 +177,13 @@ const sendForm2Emails = async (indexNumber, dogName, microchipNumber, unfit, mic
 
   await sendEmail(dataDefra)
 
+  const policeCustomFields = []
+    .concat(baseCustomFields)
+
   const dataPolice = {
     toAddress: username,
     type: emailTypes.form2ConfirmationToPolice,
-    customFields: baseCustomFields
+    customFields: policeCustomFields
   }
 
   await sendEmail(dataPolice)
