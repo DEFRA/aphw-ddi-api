@@ -76,7 +76,7 @@ class Exemption extends Changeable {
   }
 
   get insuranceRenewal () {
-    return this._insurance[0]?.insuranceRenewal ?? undefined
+    return this._insurance[0]?.renewalDate ?? undefined
   }
 
   get applicationFeePaid () {

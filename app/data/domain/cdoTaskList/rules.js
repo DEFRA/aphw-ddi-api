@@ -78,10 +78,13 @@ class InsuranceDetailsRule extends CdoTaskListRule {
   }
 
   get completed () {
-    const insuranceRenewal = this._cdo.exemption.insuranceRenewal
-    const insuranceCompanyIsSet = this._cdo.exemption.insuranceCompany !== undefined
+    const insuranceRenewal = this._exemption.insuranceRenewal
+    const insuranceCompanyIsSet = this._exemption.insuranceCompany !== undefined
 
-    return dateIsADate(insuranceRenewal) && insuranceCompanyIsSet && dateTodayOrInFuture(insuranceRenewal)
+    return dateIsADate(insuranceRenewal) &&
+        dateIsADate(this._exemption.insuranceDetailsRecorded) &&
+        insuranceCompanyIsSet &&
+        dateTodayOrInFuture(insuranceRenewal)
   }
 
   get timestamp () {
@@ -96,8 +99,42 @@ class InsuranceDetailsRule extends CdoTaskListRule {
   }
 }
 
+/**
+ * @implements {CdoTaskRuleInterface}
+ */
+class ApplicationFeePaymentRule extends CdoTaskListRule {
+  /**
+   * @param exemption
+   * @param {ApplicationPackSentRule} applicationPackSent
+   */
+  constructor (exemption, applicationPackSent) {
+    super('applicationFeePaid', exemption)
+    this._applicationPackSent = applicationPackSent
+  }
+
+  get available () {
+    return this._applicationPackSent.completed
+  }
+
+  get completed () {
+    return dateIsADate(this._exemption.applicationFeePaid)
+  }
+
+  get readonly () {
+    return false
+  }
+
+  get timestamp () {
+    if (this.completed) {
+      return this._exemption.applicationFeePaid
+    }
+    return undefined
+  }
+}
+
 module.exports = {
   ApplicationPackSentRule,
   ApplicationPackProcessedRule,
-  InsuranceDetailsRule
+  InsuranceDetailsRule,
+  ApplicationFeePaymentRule
 }

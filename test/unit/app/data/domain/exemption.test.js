@@ -49,7 +49,7 @@ describe('Exemption', () => {
       insurance: [
         {
           company: 'Allianz',
-          insuranceRenewal: '2024-01-01T00:00:00.000Z'
+          renewalDate: '2024-01-01T00:00:00.000Z'
         }
       ],
       neuteringConfirmation: null,
