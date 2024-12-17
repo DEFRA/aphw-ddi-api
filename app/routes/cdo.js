@@ -356,7 +356,7 @@ module.exports = [
     options: {
       auth: { scope: [scopes.enforcement] },
       tags: ['api'],
-      notes: ['Submit Form Two Manage CDO domain action.  Submits Form Two from Enforcement to send email'],
+      notes: ['Submit Form 2 Manage CDO domain action.  Submits Form 2 from Enforcement to send email'],
       response: {
         status: {
           204: undefined,

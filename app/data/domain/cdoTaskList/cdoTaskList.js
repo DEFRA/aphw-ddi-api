@@ -368,7 +368,7 @@ class CdoTaskList {
     this._actionPackCompleteGuard()
 
     if (this.form2Sent.completed) {
-      throw new ActionAlreadyPerformedError('Form Two can only be sent once')
+      throw new ActionAlreadyPerformedError('Form 2 can only be sent once')
     }
 
     this._cdo.exemption.sendForm2(sentDate, callback)

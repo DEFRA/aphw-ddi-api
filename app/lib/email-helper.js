@@ -123,7 +123,7 @@ const createAuditsForReportSomething = async (data) => {
  * @param {string} activityId
  * @returns {{activityId, activityDate: Date, activity: string, targetPk: string, details, pk, source, activityType: string, activityLabel: string}}
  */
-const createFormTwoAuditPayload = (details, pk, source, targetPk, activityId) => {
+const createSubmitFormTwoAuditPayload = (details, pk, source, targetPk, activityId) => {
   return {
     activityId,
     activity: formTwoSubmissionAudit.id,
@@ -133,7 +133,7 @@ const createFormTwoAuditPayload = (details, pk, source, targetPk, activityId) =>
     activityDate: new Date(),
     targetPk,
     details,
-    activityLabel: `${formTwoSubmissionAudit.label} submitted by ${details.policeForce}`
+    activityLabel: `${formTwoSubmissionAudit.label} from ${details.policeForce}`
   }
 }
 
@@ -141,16 +141,16 @@ const createFormTwoAuditPayload = (details, pk, source, targetPk, activityId) =>
  * @param {FormTwoAuditDetails} details
  * @returns {Promise<void>}
  */
-const createAuditsForFormTwo = async (details) => {
-  const payload = createFormTwoAuditPayload(details, details.indexNumber, 'dog', 'dog', uuidv4())
+const createAuditsForSubmitFormTwo = async (details) => {
+  const payload = createSubmitFormTwoAuditPayload(details, details.indexNumber, 'dog', 'dog', uuidv4())
   await sendActivityToAudit(payload, { username: details.username, displayname: details.username })
 }
 
 const sendForm2Emails = async (indexNumber, dogName, microchipNumber, unfit, microchipDate, neuteringDate, under16, username) => {
   const baseFields = [
     { name: 'index_number', value: indexNumber },
-    { name: 'dog_name', value: dogName },
-    { name: 'microchip_number', value: microchipNumber ?? '' },
+    { name: 'dog_name', value: dogName && dogName !== '' ? dogName : 'Not received' },
+    { name: 'microchip_number', value: microchipNumber && microchipNumber !== '' ? microchipNumber : 'Not received' },
     { name: 'unfit_to_microchip', value: unfit ? 'yes' : 'no' },
     { name: 'microchip_date', value: microchipDate },
     { name: 'neutering_date', value: under16 ? '' : neuteringDate },
@@ -177,10 +177,13 @@ const sendForm2Emails = async (indexNumber, dogName, microchipNumber, unfit, mic
 
   await sendEmail(dataDefra)
 
+  const policeCustomFields = []
+    .concat(baseCustomFields)
+
   const dataPolice = {
     toAddress: username,
     type: emailTypes.form2ConfirmationToPolice,
-    customFields: baseCustomFields
+    customFields: policeCustomFields
   }
 
   await sendEmail(dataPolice)
@@ -190,5 +193,5 @@ module.exports = {
   sendReportSomethingEmails,
   sendForm2Emails,
   createAuditsForReportSomething,
-  createAuditsForFormTwo
+  createAuditsForSubmitFormTwo
 }

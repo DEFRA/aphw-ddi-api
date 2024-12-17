@@ -9,7 +9,7 @@ const { sendActivityToAudit } = require('../../../../app/messaging/send-audit')
 
 const emailHelper = require('../../../../app/lib/email-helper')
 const { reportSomethingAudit, reportTypes } = require('../../../../app/constants/email-types')
-const { createAuditsForFormTwo } = require('../../../../app/lib/email-helper')
+const { createAuditsForSubmitFormTwo } = require('../../../../app/lib/email-helper')
 
 describe('EmailHelper test', () => {
   beforeEach(async () => {
@@ -216,7 +216,7 @@ describe('EmailHelper test', () => {
     })
   })
 
-  describe('createAuditsForFormTwo', () => {
+  describe('createAuditsForSubmitFormTwo', () => {
     test('should send', async () => {
       /**
        * @type {FormTwoAuditDetails}
@@ -242,9 +242,9 @@ describe('EmailHelper test', () => {
         activityDate: expect.any(Date),
         targetPk: 'dog',
         details,
-        activityLabel: 'Form Two submitted by Shire Citizens Constabulary'
+        activityLabel: 'Form 2 from Shire Citizens Constabulary'
       }
-      await createAuditsForFormTwo(details)
+      await createAuditsForSubmitFormTwo(details)
       expect(sendActivityToAudit).toHaveBeenCalledWith(expectedAudit, { username: 'bilbo.baggins@shire.police.me', displayname: 'bilbo.baggins@shire.police.me' })
       expect(sendActivityToAudit).toHaveBeenCalledTimes(1)
     })
@@ -302,7 +302,7 @@ describe('EmailHelper test', () => {
       lookupPoliceForceByEmail.mockResolvedValue('Shire Citizens Police')
       const indexNumber = 'ED300100'
       const dogName = 'Pip'
-      const microchipNumber = ''
+      const microchipNumber = '123451234512345'
       const unfit = true
       const microchipDate = '02/12/2024'
       const neuteringDate = ''
@@ -329,5 +329,69 @@ describe('EmailHelper test', () => {
       expect(lookupPoliceForceByEmail).toHaveBeenCalledWith(username)
       expect(sendEmail).toHaveBeenNthCalledWith(1, expectedDataDefra)
     })
+  })
+
+  test('should send emails when missing fields', async () => {
+    lookupPoliceForceByEmail.mockResolvedValue('Shire Citizens Police')
+    const indexNumber = 'ED300100'
+    const dogName = null
+    const microchipNumber = null
+    const unfit = true
+    const microchipDate = '02/12/2024'
+    const neuteringDate = ''
+    const under16 = true
+    const username = 'bilbo.baggins@shire.police.me'
+
+    const expectedDataDefra = {
+      toAddress: 'report-something@here.com',
+      type: 'form2-submission-to-defra',
+      customFields: [
+        { name: 'police_force', value: 'Shire Citizens Police' },
+        { name: 'submitted_by', value: username },
+        { name: 'index_number', value: indexNumber },
+        { name: 'dog_name', value: 'Not received' },
+        { name: 'microchip_number', value: 'Not received' },
+        { name: 'unfit_to_microchip', value: 'yes' },
+        { name: 'microchip_date', value: microchipDate },
+        { name: 'neutering_date', value: '' },
+        { name: 'under_16_months', value: 'yes' }
+      ]
+    }
+
+    await emailHelper.sendForm2Emails(indexNumber, dogName, microchipNumber, unfit, microchipDate, neuteringDate, under16, username)
+    expect(lookupPoliceForceByEmail).toHaveBeenCalledWith(username)
+    expect(sendEmail).toHaveBeenNthCalledWith(1, expectedDataDefra)
+  })
+
+  test('should send emails with blank fields', async () => {
+    lookupPoliceForceByEmail.mockResolvedValue('Shire Citizens Police')
+    const indexNumber = 'ED300100'
+    const dogName = ''
+    const microchipNumber = ''
+    const unfit = true
+    const microchipDate = '02/12/2024'
+    const neuteringDate = ''
+    const under16 = true
+    const username = 'bilbo.baggins@shire.police.me'
+
+    const expectedDataDefra = {
+      toAddress: 'report-something@here.com',
+      type: 'form2-submission-to-defra',
+      customFields: [
+        { name: 'police_force', value: 'Shire Citizens Police' },
+        { name: 'submitted_by', value: username },
+        { name: 'index_number', value: indexNumber },
+        { name: 'dog_name', value: 'Not received' },
+        { name: 'microchip_number', value: 'Not received' },
+        { name: 'unfit_to_microchip', value: 'yes' },
+        { name: 'microchip_date', value: microchipDate },
+        { name: 'neutering_date', value: '' },
+        { name: 'under_16_months', value: 'yes' }
+      ]
+    }
+
+    await emailHelper.sendForm2Emails(indexNumber, dogName, microchipNumber, unfit, microchipDate, neuteringDate, under16, username)
+    expect(lookupPoliceForceByEmail).toHaveBeenCalledWith(username)
+    expect(sendEmail).toHaveBeenNthCalledWith(1, expectedDataDefra)
   })
 })

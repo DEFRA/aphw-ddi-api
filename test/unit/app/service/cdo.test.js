@@ -644,7 +644,7 @@ describe('CdoService', function () {
   })
 
   describe('submitFormTwo', () => {
-    test('should submit form two', async () => {
+    test('should submit form 2', async () => {
       mockCdoRepository.submitFormTwo.mockImplementation(async (_indexNumber, _cdoTaskList, _payload, _username, sendEmailCallback) => {
         await sendEmailCallback()
       })
