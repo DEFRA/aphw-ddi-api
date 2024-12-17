@@ -67,7 +67,8 @@ describe('Dog repo', () => {
       insurance: {
         findOne: jest.fn(),
         findAll: jest.fn(),
-        create: jest.fn()
+        create: jest.fn(),
+        destroy: jest.fn()
       },
       dog_microchip: {
         findAll: jest.fn(),
@@ -476,6 +477,99 @@ describe('Dog repo', () => {
         force: true
       })
       expect(sequelize.models.registration.create).toHaveBeenCalledTimes(1)
+
+      delete result[0].save
+
+      expect(result).toContainEqual({
+        id: 1,
+        breed: 'Breed 1',
+        name: 'Dog 1',
+        existingDog: true,
+        indexNumber: 'ED1',
+        microchipNumber: '12345',
+        registered_person: [{
+          person: { person_reference: 'P-123' }
+        }],
+        registration: {
+          id: 1,
+          cdoIssued: '2020-01-01',
+          cdoExpiry: '2020-02-01',
+          insurance_details_recorded: '2024-01-01'
+        },
+        status_id: 2
+      })
+    })
+
+    test('createDogs should reset insurance for existing dog / registration when 2023 to 2015', async () => {
+      const dogSave = jest.fn()
+
+      const mockExistingDog = {
+        id: 1,
+        breed: 'Breed 1',
+        name: 'Dog 1',
+        indexNumber: 'ED1',
+        save: dogSave,
+        registered_person: [{
+          person: {
+            person_reference: 'P-123'
+          }
+        }],
+        registration: {
+          exemption_order: {
+            exemption_order: '2023'
+          }
+        }
+      }
+
+      const mockRegistration = {
+        id: 1,
+        cdoIssued: '2020-01-01',
+        cdoExpiry: '2020-02-01',
+        insurance_details_recorded: '2024-01-01'
+      }
+
+      sequelize.models.dog.findOne.mockResolvedValue(mockExistingDog)
+      sequelize.models.dog.findByPk.mockResolvedValue(mockExistingDog)
+
+      sequelize.models.registration.findByPk.mockResolvedValue(mockRegistration)
+      sequelize.models.registration.create.mockResolvedValue({ id: 123 })
+
+      const enforcement = {
+        policeForce: '1',
+        court: '1'
+      }
+
+      const owners = [{ id: 1, person_reference: 'P-123', ...mockCdoPayload.owner }]
+      const dogs = [{
+        breed: 'Breed 1',
+        name: 'Dog 1',
+        indexNumber: 'ED1',
+        cdoIssued: '2020-01-01',
+        cdoExpiry: '2020-02-01',
+        status: 'Status 1',
+        source: 'UI',
+        microchipNumber: '12345'
+      }]
+
+      const result = await createDogs(dogs, owners, enforcement, {})
+
+      expect(result).toHaveLength(1)
+
+      expect(sequelize.models.dog.create).not.toHaveBeenCalled()
+      expect(dogSave).toHaveBeenCalledTimes(1)
+      expect(sequelize.models.registration.destroy).toHaveBeenCalledTimes(1)
+      expect(sequelize.models.dog_breach.destroy).toHaveBeenCalledTimes(1)
+      expect(sequelize.models.dog_breach.destroy).toHaveBeenCalledWith({
+        where: { dog_id: 1 },
+        transaction: {},
+        force: true
+      })
+      expect(sequelize.models.registration.create).toHaveBeenCalledTimes(1)
+      expect(sequelize.models.insurance.destroy).toHaveBeenCalledTimes(1)
+      expect(sequelize.models.insurance.destroy).toHaveBeenCalledWith({
+        where: { dog_id: 1 },
+        transaction: {}
+      })
 
       delete result[0].save
 

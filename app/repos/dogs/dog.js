@@ -130,7 +130,10 @@ const createDogs = async (dogs, owners, enforcement, transaction) => {
       const dogResult = await refreshDogData(dogEntity.id, transaction)
       dogResult.existingDog = existingDog
 
-      const exemptionOrder = await getExemptionOrder(determineExemptionOrder(dog, owners))
+      const exemptionOrderNumber = determineExemptionOrder(dog, owners)
+      const exemptionOrder = await getExemptionOrder(exemptionOrderNumber)
+
+      dog.resetInsurance = exemptionOrderNumber === '2015' && existingDog && dogEntity.registration?.exemption_order?.exemption_order === '2023'
 
       const registrationEntity = await createRegistration(dogEntity, dog, enforcement, exemptionOrder, transaction)
 
@@ -201,6 +204,14 @@ const handleInsuranceAndMicrochipAndRegPerson = async (dogEntity, dog, dogResult
     }
   } else {
     dogResult = await switchOwnerIfNecessary(dogEntity, owners, dogResult, transaction)
+    if (dog.resetInsurance) {
+      await sequelize.models.insurance.destroy({
+        where: {
+          dog_id: dogEntity.id
+        },
+        transaction
+      })
+    }
   }
   dogResult.microchipNumber = dog.microchipNumber
 }
@@ -452,7 +463,11 @@ const getDogByIndexNumber = async (indexNumber, t) => {
     include: [
       {
         model: sequelize.models.registration,
-        as: 'registration'
+        as: 'registration',
+        include: [{
+          model: sequelize.models.exemption_order,
+          as: 'exemption_order'
+        }]
       },
       {
         model: sequelize.models.registered_person,
