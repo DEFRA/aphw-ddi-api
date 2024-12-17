@@ -907,7 +907,7 @@ describe('CdoTaskList', () => {
       })
 
       test('should fail if sendForm2  has already been sent', () => {
-        expect(() => cdoTaskList.sendForm2(new Date(), transactionCallback)).toThrow(new ActionAlreadyPerformedError('Form Two can only be sent once'))
+        expect(() => cdoTaskList.sendForm2(new Date(), transactionCallback)).toThrow(new ActionAlreadyPerformedError('Form 2 can only be sent once'))
       })
     })
 

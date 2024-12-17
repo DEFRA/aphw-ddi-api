@@ -202,7 +202,7 @@ describe('Exemption', () => {
   describe('sendForm2', () => {
     const auditDate = new Date()
 
-    test('should set form two as sent', () => {
+    test('should set form 2 as sent', () => {
       const callback = jest.fn()
       const exemption = new Exemption({ ...exemptionProperties, form2Sent: null })
       exemption.sendForm2(auditDate, callback)

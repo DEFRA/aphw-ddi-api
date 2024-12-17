@@ -31,7 +31,7 @@ describe('formTwo', () => {
   const callback = jest.fn()
 
   jest.mock('../../../../app/lib/email-helper')
-  const { createAuditsForFormTwo } = require('../../../../app/lib/email-helper')
+  const { createAuditsForSubmitFormTwo } = require('../../../../app/lib/email-helper')
 
   const { submitFormTwo } = require('../../../../app/repos/formTwo')
 
@@ -81,7 +81,7 @@ describe('formTwo', () => {
       expect(sequelize.transaction).toHaveBeenCalledTimes(1)
     })
 
-    test('should submit a form two', async () => {
+    test('should submit a form 2', async () => {
       /**
        * @type {FormTwoAuditDetails}
        */
@@ -119,14 +119,14 @@ describe('formTwo', () => {
         submitted_by: 'bilbo.baggins@shire.police.me',
         form_two_submitted: expect.any(Date)
       }, { transaction: {} })
-      expect(createAuditsForFormTwo).toHaveBeenCalledWith(expectedAudit)
+      expect(createAuditsForSubmitFormTwo).toHaveBeenCalledWith(expectedAudit)
     })
 
-    test('should throw if a form two already exists', async () => {
+    test('should throw if a form 2 already exists', async () => {
       sequelize.models.form_two.findOne.mockResolvedValue({
         id: 1
       })
-      await expect(submitFormTwo('ED300100', cdoTaskList, defaultPayload, middleEarthUser, callback, {})).rejects.toThrow(new DuplicateResourceError('Form Two already submitted'))
+      await expect(submitFormTwo('ED300100', cdoTaskList, defaultPayload, middleEarthUser, callback, {})).rejects.toThrow(new DuplicateResourceError('Form 2 already submitted'))
     })
     test('should throw if registration is not found', async () => {
       sequelize.models.registration.findOne.mockResolvedValue(null)

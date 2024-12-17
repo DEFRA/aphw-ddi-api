@@ -1,7 +1,7 @@
 const sequelize = require('../config/db')
 const { DuplicateResourceError } = require('../errors/duplicate-record')
 const { NotFoundError } = require('../errors/not-found')
-const { createAuditsForFormTwo } = require('../lib/email-helper')
+const { createAuditsForSubmitFormTwo } = require('../lib/email-helper')
 
 /**
  * @typedef SubmitFormTwoMethod
@@ -52,7 +52,7 @@ const submitFormTwo = async (indexNumber, cdoTaskList, payload, { username }, ca
   })
 
   if (formTwo) {
-    throw new DuplicateResourceError('Form Two already submitted')
+    throw new DuplicateResourceError('Form 2 already submitted')
   }
 
   const registration = await sequelize.models.registration.findOne({
@@ -81,7 +81,7 @@ const submitFormTwo = async (indexNumber, cdoTaskList, payload, { username }, ca
     submitted_by: username
   }, { transaction })
 
-  await createAuditsForFormTwo({
+  await createAuditsForSubmitFormTwo({
     indexNumber,
     microchipVerification: payload.microchipVerification,
     neuteringConfirmation: payload.neuteringConfirmation,

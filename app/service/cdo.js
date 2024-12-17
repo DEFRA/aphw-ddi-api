@@ -288,6 +288,19 @@ class CdoService {
 
     return sentDate
   }
+  /**
+   * Submit Form 2 (police officer)
+   * @param {string} indexNumber
+   * @param {{
+   *   microchipNumber: string,
+   *   neuteringConfirmation: Date | undefined,
+   *   microchipVerification: Date | undefined,
+   *   microchipDeadline: Date | undefined,
+   *   dogNotNeutered: boolean,
+   *   dogNotFitForMicrochip: boolean
+   * }} payload
+   * @param {User} user
+   */
 
   async submitFormTwo (indexNumber, payload, user) {
     /**

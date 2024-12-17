@@ -162,7 +162,7 @@ describe('cdo mappers', () => {
       })))
     })
 
-    test('should map a CdoDao to an Exemption given form two is submitted', () => {
+    test('should map a CdoDao to an Exemption given form 2 is submitted', () => {
       const exemption = buildRegistrationDao({
         form_two: buildFormTwoDao({
           form_two_submitted: new Date('2024-12-07')
