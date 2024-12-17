@@ -1,9 +1,17 @@
-const { buildExemption, buildCdoInsurance } = require('../../../../mocks/cdo/domain')
-const { Exemption } = require('../../../../../app/data/domain')
-const { ApplicationPackProcessedRule, ApplicationPackSentRule, InsuranceDetailsRule, ApplicationFeePaymentRule } = require('../../../../../app/data/domain/cdoTaskList/rules')
+const { buildExemption, buildCdoInsurance, buildCdoDog, buildCdo } = require('../../../../mocks/cdo/domain')
+const { Exemption, CdoTaskList, Dog } = require('../../../../../app/data/domain')
+const { ApplicationPackProcessedRule, ApplicationPackSentRule, InsuranceDetailsRule, ApplicationFeePaymentRule, FormTwoSentRule, VerificationDatesRecordedRule } = require('../../../../../app/data/domain/cdoTaskList/rules')
+const { inXDays } = require('../../../../time-helper')
 describe('CdoTaskList rules', () => {
   const exemptionDefaultProperties = buildExemption({})
   const exemptionDefault = new Exemption(exemptionDefaultProperties)
+  const thisMorning = new Date()
+  thisMorning.setHours(0, 0, 0, 0)
+  const in60Days = inXDays(60)
+
+  const tomorrow = new Date()
+  tomorrow.setUTCDate(tomorrow.getDate() + 1)
+  tomorrow.setUTCHours(0, 0, 0, 0)
 
   describe('ApplicationPackSentRule', () => {
     test('should be available by default', () => {
@@ -190,6 +198,133 @@ describe('CdoTaskList rules', () => {
       expect(processedRule.completed).toBe(true)
       expect(processedRule.readonly).toBe(false)
       expect(processedRule.timestamp).toEqual(applicationFeePaid)
+    })
+  })
+
+  describe('FormTwoSentRule', () => {
+    test('should show us unavailable by default', () => {
+      const processedRule = new FormTwoSentRule(exemptionDefault, new ApplicationPackSentRule(exemptionDefault))
+      expect(processedRule.key).toBe('form2Sent')
+      expect(processedRule.available).toBe(false)
+      expect(processedRule.completed).toBe(false)
+      expect(processedRule.readonly).toBe(false)
+      expect(processedRule.timestamp).toBeUndefined()
+    })
+
+    test('should show us available once application pack is sent', () => {
+      const exemption = new Exemption(buildExemption({
+        applicationPackSent: new Date('2024-12-17')
+      }))
+      const processedRule = new FormTwoSentRule(exemption, new ApplicationPackSentRule(exemption))
+      expect(processedRule.key).toBe('form2Sent')
+      expect(processedRule.available).toBe(true)
+      expect(processedRule.completed).toBe(false)
+      expect(processedRule.readonly).toBe(false)
+      expect(processedRule.timestamp).toBeUndefined()
+    })
+
+    test('should show as complete once form two sent complete', () => {
+      const form2Sent = new Date('2024-12-17')
+      const exemption = new Exemption(buildExemption({
+        applicationPackSent: new Date('2024-12-16'),
+        form2Sent
+      }))
+      const processedRule = new FormTwoSentRule(exemption, new ApplicationPackSentRule(exemption))
+      expect(processedRule.key).toBe('form2Sent')
+      expect(processedRule.available).toBe(true)
+      expect(processedRule.completed).toBe(true)
+      expect(processedRule.readonly).toBe(true)
+      expect(processedRule.timestamp).toEqual(form2Sent)
+    })
+  })
+
+  describe('VerificationDatesRecordedRule', () => {
+    const defaultDog = new Dog(buildCdoDog())
+    test('should show as unavailable by default', () => {
+      const processedRule = new VerificationDatesRecordedRule(exemptionDefault, defaultDog, new ApplicationPackSentRule(exemptionDefault), new FormTwoSentRule(exemptionDefault))
+      expect(processedRule.key).toBe('verificationDateRecorded')
+      expect(processedRule.available).toBe(false)
+      expect(processedRule.completed).toBe(false)
+      expect(processedRule.readonly).toBe(false)
+      expect(processedRule.timestamp).toBeUndefined()
+    })
+
+    test('should show as available if form2 has been sent', () => {
+      const exemption = new Exemption(buildExemption({
+        applicationPackSent: new Date('2024-12-15'),
+        form2Sent: new Date('2024-12-16')
+      }))
+      const processedRule = new VerificationDatesRecordedRule(exemption, defaultDog, new ApplicationPackSentRule(exemption), new FormTwoSentRule(exemption))
+      expect(processedRule.key).toBe('verificationDateRecorded')
+      expect(processedRule.available).toBe(true)
+      expect(processedRule.completed).toBe(false)
+      expect(processedRule.readonly).toBe(false)
+      expect(processedRule.timestamp).toBeUndefined()
+    })
+
+    test('should show as incomplete given microchipVerification complete but neuteringConfirmation not', () => {
+      const exemptionProperties = buildExemption({
+        applicationPackSent: new Date('2024-06-25'),
+        form2Sent: new Date('2024-05-24'),
+        applicationFeePaid: new Date('2024-06-24'),
+        microchipVerification: new Date('2024-03-09'),
+        insurance: [buildCdoInsurance({
+          company: 'Dogs R Us',
+          insuranceRenewal: in60Days
+        })]
+      })
+      const exemption = new Exemption(exemptionProperties)
+      const processedRule = new VerificationDatesRecordedRule(exemption, defaultDog, new ApplicationPackSentRule(exemption), new FormTwoSentRule(exemption))
+      expect(processedRule.available).toBe(true)
+      expect(processedRule.completed).toBe(false)
+      expect(processedRule.readonly).toBe(false)
+      expect(processedRule.timestamp).toBeUndefined()
+    })
+
+    test('should show as incomplete given neuteringConfirmation complete but microchipVerification not', () => {
+      const exemptionProperties = buildExemption({
+        applicationPackSent: new Date('2024-06-25'),
+        form2Sent: new Date('2024-05-24'),
+        applicationFeePaid: new Date('2024-06-24'),
+        neuteringConfirmation: new Date('2024-02-10'),
+        insurance: [buildCdoInsurance({
+          company: 'Dogs R Us',
+          insuranceRenewal: in60Days
+        })]
+      })
+      const dogProperties = buildCdoDog({
+        microchipNumber: '123456789012345'
+      })
+      const dog = new Dog(dogProperties)
+      const exemption = new Exemption(exemptionProperties)
+      const processedRule = new VerificationDatesRecordedRule(exemption, dog, new ApplicationPackSentRule(exemption), new FormTwoSentRule(exemption))
+
+      expect(processedRule.available).toBe(true)
+      expect(processedRule.completed).toBe(false)
+      expect(processedRule.readonly).toBe(false)
+      expect(processedRule.timestamp).toBeUndefined()
+    })
+
+    test('should show as complete if verification dates have been recorded', () => {
+      const verificationDatesRecorded = new Date('2024-12-17')
+      const exemption = new Exemption(buildExemption({
+        applicationPackSent: new Date('2024-12-15'),
+        form2Sent: new Date('2024-12-16'),
+        microchipVerification: new Date('2024-12-16'),
+        neuteringConfirmation: new Date('2024-12-16'),
+        verificationDatesRecorded
+      }))
+      const dogProperties = buildCdoDog({
+        microchipNumber: '123456789012345'
+      })
+      const dog = new Dog(dogProperties)
+
+      const processedRule = new VerificationDatesRecordedRule(exemption, dog, new ApplicationPackSentRule(exemption), new FormTwoSentRule(exemption))
+      expect(processedRule.key).toBe('verificationDateRecorded')
+      expect(processedRule.available).toBe(true)
+      expect(processedRule.completed).toBe(true)
+      expect(processedRule.readonly).toBe(false)
+      expect(processedRule.timestamp).toEqual(verificationDatesRecorded)
     })
   })
 })
