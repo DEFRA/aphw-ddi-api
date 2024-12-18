@@ -1,0 +1,21 @@
+<?xml version="1.1" encoding="utf-8" standalone="no"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog" xmlns:ext="http://www.liquibase.org/xml/ns/dbchangelog-ext" xmlns:pro="http://www.liquibase.org/xml/ns/pro" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog-ext http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-ext.xsd http://www.liquibase.org/xml/ns/pro http://www.liquibase.org/xml/ns/pro/liquibase-pro-3.9.xsd http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.9.xsd">
+  <changeSet author="J Barnsley" id="1">
+    <tagDatabase tag="v1.89.0" />
+  </changeSet>
+  <changeSet author="J Barnsley" id="2">
+    <insert tableName="police_force_group">
+      <column name="display_text" value="Hampshire Constabulary and Thames Valley Police" />
+    </insert>
+  </changeSet>
+  <changeSet author="J Barnsley" id="3">
+    <insert tableName="police_force_group_item">
+      <column name="police_force_group_id" value="6" />
+      <column name="police_force_id" value="21" />
+    </insert>
+    <insert tableName="police_force_group_item">
+      <column name="police_force_group_id" value="6" />
+      <column name="police_force_id" value="46" />
+    </insert>
+  </changeSet>
+</databaseChangeLog>
