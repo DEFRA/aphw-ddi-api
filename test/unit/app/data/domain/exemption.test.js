@@ -17,7 +17,7 @@ describe('Exemption', () => {
     insurance: [
       {
         company: 'Allianz',
-        insuranceRenewal: '2024-01-01T00:00:00.000Z'
+        renewalDate: '2024-01-01T00:00:00.000Z'
       }
     ],
     joinedExemptionScheme: '2023-12-10'
@@ -34,7 +34,6 @@ describe('Exemption', () => {
 
   test('should create an exemption', () => {
     const exemption = new Exemption(exemptionProperties)
-
     expect(exemption).toEqual(expect.objectContaining({
       exemptionOrder: '2015',
       cdoIssued: '2023-10-10',

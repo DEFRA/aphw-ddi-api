@@ -1,7 +1,10 @@
 const CdoTask = require('./cdoTask')
 const { ActionAlreadyPerformedError } = require('../../../errors/domain/actionAlreadyPerformed')
 const { SequenceViolationError } = require('../../../errors/domain/sequenceViolation')
-const { dateTodayOrInFuture } = require('../../../lib/date-helpers')
+const {
+  ApplicationPackSentRule, ApplicationPackProcessedRule, InsuranceDetailsRule, ApplicationFeePaymentRule,
+  FormTwoSentRule, VerificationDatesRecordedRule
+} = require('./rules')
 
 class CdoTaskList {
   /**
@@ -9,6 +12,21 @@ class CdoTaskList {
    */
   constructor (cdo) {
     this._cdo = cdo
+    const applicationPackSentRule = new ApplicationPackSentRule(this._cdo.exemption, this._cdo.dog)
+    const applicationPackProcessedRule = new ApplicationPackProcessedRule(this._cdo.exemption, applicationPackSentRule)
+    const insuranceDetailsRule = new InsuranceDetailsRule(this._cdo.exemption, applicationPackSentRule)
+    const applicationFeePaymentRule = new ApplicationFeePaymentRule(this._cdo.exemption, applicationPackSentRule)
+    const formTwoSentRule = new FormTwoSentRule(this._cdo.exemption, applicationPackSentRule)
+    const verificationDatesRecordedRule = new VerificationDatesRecordedRule(this._cdo.exemption, this._cdo.dog, applicationPackSentRule, formTwoSentRule)
+
+    this.rules = {
+      applicationPackSentRule,
+      applicationPackProcessedRule,
+      insuranceDetailsRule,
+      applicationFeePaymentRule,
+      formTwoSentRule,
+      verificationDatesRecordedRule
+    }
   }
 
   static dateStageComplete (stage) {
@@ -28,11 +46,11 @@ class CdoTaskList {
   }
 
   get _actionPackStageComplete () {
-    return this.applicationPackSent.completed
+    return this.rules.applicationPackSentRule.completed
   }
 
   get _form2StageComplete () {
-    return this.form2Sent.completed
+    return this.rules.formTwoSentRule.completed
   }
 
   _actionPackCompleteGuard () {
@@ -102,55 +120,15 @@ class CdoTaskList {
   }
 
   get applicationPackSent () {
-    const timestamp = this._cdo.exemption.applicationPackSent ?? undefined
-    const completed = timestamp !== undefined
-
-    return new CdoTask(
-      'applicationPackSent',
-      {
-        available: true,
-        completed,
-        readonly: completed
-      },
-      timestamp
-    )
+    return this.rules.applicationPackSentRule
   }
 
   get applicationPackProcessed () {
-    const timestamp = this._cdo.exemption.applicationPackProcessed ?? undefined
-    const completed = timestamp !== undefined
-
-    return new CdoTask(
-      'applicationPackProcessed',
-      {
-        available: this._actionPackStageComplete,
-        completed,
-        readonly: completed
-      },
-      timestamp
-    )
+    return this.rules.applicationPackProcessedRule
   }
 
   get insuranceDetailsRecorded () {
-    const completed =
-      this.cdoSummary.insuranceCompany !== undefined &&
-      CdoTaskList.dateStageComplete(this.cdoSummary.insuranceRenewal) &&
-      dateTodayOrInFuture(this.cdoSummary.insuranceRenewal)
-
-    let timestamp
-
-    if (completed) {
-      timestamp = this._cdo.exemption.insuranceDetailsRecorded
-    }
-
-    return new CdoTask(
-      'insuranceDetailsRecorded',
-      {
-        available: this._actionPackStageComplete,
-        completed
-      },
-      timestamp
-    )
+    return this.rules.insuranceDetailsRule
   }
 
   get microchipNumberRecorded () {
@@ -173,106 +151,23 @@ class CdoTaskList {
   }
 
   get applicationFeePaid () {
-    let timestamp
-    const completed = CdoTaskList.dateStageComplete(this.cdoSummary.applicationFeePaid)
-
-    if (completed) {
-      timestamp = this._cdo.exemption.applicationFeePaymentRecorded
-    }
-    return new CdoTask(
-      'applicationFeePaid',
-      {
-        available: this._actionPackStageComplete,
-        completed: CdoTaskList.dateStageComplete(this.cdoSummary.applicationFeePaid)
-      },
-      timestamp
-    )
+    return this.rules.applicationFeePaymentRule
   }
 
   get form2Sent () {
-    const completed = CdoTaskList.dateStageComplete(this.cdoSummary.form2Sent)
-    return new CdoTask(
-      'form2Sent',
-      {
-        available: this._actionPackStageComplete,
-        completed,
-        readonly: completed
-      },
-      this.cdoSummary.form2Sent
-    )
+    return this.rules.formTwoSentRule
   }
 
   get neuteringRulesPassed () {
-    if (this.exemption.exemptionOrder !== '2015') {
-      return false
-    }
-
-    if (!CdoTaskList.dateStageComplete(this._cdo.exemption.verificationDatesRecorded)) {
-      return false
-    }
-
-    if (this._cdo.dog.breed !== 'XL Bully') {
-      return false
-    }
-
-    // Date of Birth must be less than 16 months ago
-    if (!this._cdo.dog.youngerThanSixteenMonthsAtDate(this._cdo.exemption.cdoIssued)) {
-      return false
-    }
-
-    if (!CdoTaskList.dateStageComplete(this._cdo.exemption.neuteringDeadline)) {
-      return false
-    }
-
-    // Neutering deadline > today
-    return Date.now() < this._cdo.exemption.neuteringDeadline
+    return this.rules.verificationDatesRecordedRule.neuteringRulesPassed
   }
 
   get microchipRulesPassed () {
-    if (this.exemption.exemptionOrder !== '2015') {
-      return false
-    }
-
-    if (!CdoTaskList.dateStageComplete(this._cdo.exemption.verificationDatesRecorded)) {
-      return false
-    }
-
-    if (!CdoTaskList.dateStageComplete(this._cdo.exemption.microchipDeadline)) {
-      return false
-    }
-
-    // Microchip deadline > yesterday
-    return Date.now() < this._cdo.exemption.microchipDeadline.getTime()
+    return this.rules.verificationDatesRecordedRule.microchipRulesPassed
   }
 
   get verificationDateRecorded () {
-    let timestamp
-    let completed
-
-    let neuteringRulesPassed = this.neuteringRulesPassed
-    let microchipRulesPassed = this.microchipRulesPassed
-
-    if (CdoTaskList.dateStageComplete(this.cdoSummary.microchipVerification)) {
-      microchipRulesPassed = true
-    }
-
-    if (CdoTaskList.dateStageComplete(this.cdoSummary.neuteringConfirmation)) {
-      neuteringRulesPassed = true
-    }
-
-    if (neuteringRulesPassed && microchipRulesPassed) {
-      completed = true
-      timestamp = this._cdo.exemption.verificationDatesRecorded
-    }
-
-    return new CdoTask(
-      'verificationDateRecorded',
-      {
-        available: this.form2Sent.completed,
-        completed
-      },
-      timestamp
-    )
+    return this.rules.verificationDatesRecordedRule
   }
 
   get verificationOptions () {

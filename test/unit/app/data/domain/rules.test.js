@@ -1,10 +1,11 @@
-const { buildExemption, buildCdoInsurance, buildCdoDog, buildCdo } = require('../../../../mocks/cdo/domain')
-const { Exemption, CdoTaskList, Dog } = require('../../../../../app/data/domain')
+const { buildExemption, buildCdoInsurance, buildCdoDog } = require('../../../../mocks/cdo/domain')
+const { Exemption, Dog } = require('../../../../../app/data/domain')
 const { ApplicationPackProcessedRule, ApplicationPackSentRule, InsuranceDetailsRule, ApplicationFeePaymentRule, FormTwoSentRule, VerificationDatesRecordedRule } = require('../../../../../app/data/domain/cdoTaskList/rules')
 const { inXDays } = require('../../../../time-helper')
 describe('CdoTaskList rules', () => {
   const exemptionDefaultProperties = buildExemption({})
   const exemptionDefault = new Exemption(exemptionDefaultProperties)
+  const today = new Date()
   const thisMorning = new Date()
   thisMorning.setHours(0, 0, 0, 0)
   const in60Days = inXDays(60)
@@ -12,6 +13,44 @@ describe('CdoTaskList rules', () => {
   const tomorrow = new Date()
   tomorrow.setUTCDate(tomorrow.getDate() + 1)
   tomorrow.setUTCHours(0, 0, 0, 0)
+
+  const sixteenMonthsAgo = new Date(today)
+  sixteenMonthsAgo.setUTCHours(0, 0, 0, 0)
+  sixteenMonthsAgo.setUTCMonth(today.getMonth() - 16)
+
+  const lessThanSixteenMonthsAgo = new Date(sixteenMonthsAgo)
+  lessThanSixteenMonthsAgo.setUTCDate(lessThanSixteenMonthsAgo.getUTCDate() + 1)
+
+  const inTheFuture = new Date(today)
+  inTheFuture.setUTCFullYear(inTheFuture.getUTCFullYear() + 1)
+
+  const build6thSiExemption = exemptionPartial => {
+    return buildExemption({
+      exemptionOrder: '2015',
+      applicationPackSent: new Date('2024-06-25'),
+      applicationPackProcessed: new Date('2024-06-25'),
+      form2Sent: new Date('2024-05-24'),
+      applicationFeePaid: new Date('2024-06-24'),
+      neuteringConfirmation: new Date('2024-03-09'),
+      microchipVerification: new Date('2024-03-09'),
+      insuranceDetailsRecorded: new Date('2024-08-07'),
+      microchipNumberRecorded: undefined,
+      verificationDatesRecorded: new Date('2024-08-07'),
+      insurance: [buildCdoInsurance({
+        company: 'Dogs R Us',
+        renewalDate: new Date('2025-06-25')
+      })],
+      ...exemptionPartial
+    })
+  }
+
+  const build6thSiDog = dogPartial => {
+    return buildCdoDog({
+      dateOfBirth: lessThanSixteenMonthsAgo,
+      breed: 'XL Bully',
+      ...dogPartial
+    })
+  }
 
   describe('ApplicationPackSentRule', () => {
     test('should be available by default', () => {
@@ -143,18 +182,13 @@ describe('CdoTaskList rules', () => {
     })
 
     test('should show as complete given insurance renewal date is today', () => {
-      const today = new Date()
-      today.setUTCHours(0)
-      today.setUTCMinutes(0)
-      today.setUTCMilliseconds(0)
-
       const insuranceDetailsRecorded = new Date('2024-08-07')
       const exemptionProperties = buildExemption({
         applicationPackSent: new Date('2024-06-25'),
         insuranceDetailsRecorded,
         insurance: [buildCdoInsurance({
           company: 'Dogs R Us',
-          renewalDate: today
+          renewalDate: thisMorning
         })]
       })
       const exemption = new Exemption(exemptionProperties)
@@ -325,6 +359,51 @@ describe('CdoTaskList rules', () => {
       expect(processedRule.completed).toBe(true)
       expect(processedRule.readonly).toBe(false)
       expect(processedRule.timestamp).toEqual(verificationDatesRecorded)
+    })
+
+    describe('neuteringRulesPassed', () => {
+      const dog6thSi = new Dog(build6thSiDog())
+
+      test('should pass if deadline is tomorrow', () => {
+        const exemption = new Exemption(build6thSiExemption({
+          neuteringConfirmation: undefined,
+          neuteringDeadline: tomorrow
+        }))
+
+        const processedRule = new VerificationDatesRecordedRule(exemption, dog6thSi, new ApplicationPackSentRule(exemption), new FormTwoSentRule(exemption))
+        expect(processedRule.neuteringRulesPassed).toBe(true)
+      })
+
+      test('should not pass if deadline is today', () => {
+        const exemption = new Exemption(build6thSiExemption({
+          neuteringConfirmation: undefined,
+          neuteringDeadline: today
+        }))
+        const processedRule = new VerificationDatesRecordedRule(exemption, dog6thSi, new ApplicationPackSentRule(exemption), new FormTwoSentRule(exemption))
+        expect(processedRule.neuteringRulesPassed).toBe(false)
+      })
+    })
+
+    describe('microchipRulesPassed', () => {
+      const dog6thSi = new Dog(build6thSiDog())
+
+      test('should pass if deadline is tomorrow', () => {
+        const exemption = new Exemption(build6thSiExemption({
+          microchipVerification: undefined,
+          microchipDeadline: tomorrow
+        }))
+        const processedRule = new VerificationDatesRecordedRule(exemption, dog6thSi, new ApplicationPackSentRule(exemption), new FormTwoSentRule(exemption))
+        expect(processedRule.microchipRulesPassed).toBe(true)
+      })
+
+      test('should not pass if deadline is today', () => {
+        const exemption = new Exemption(build6thSiExemption({
+          microchipVerification: undefined,
+          microchipDeadline: today
+        }))
+        const processedRule = new VerificationDatesRecordedRule(exemption, dog6thSi, new ApplicationPackSentRule(exemption), new FormTwoSentRule(exemption))
+        expect(processedRule.microchipRulesPassed).toBe(false)
+      })
     })
   })
 })

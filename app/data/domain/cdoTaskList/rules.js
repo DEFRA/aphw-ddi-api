@@ -171,14 +171,16 @@ class FormTwoSentRule extends CdoTaskListRule {
  */
 class VerificationDatesRecordedRule extends CdoTaskListRule {
   /**
-   * @param exemption
+   * @param {Exemption} exemption
+   * @param {Dog} dog
    * @param {ApplicationPackSentRule} applicationPackSent
    * @param {FormTwoSentRule} form2Sent
    */
-  constructor (exemption, applicationPackSent, form2Sent) {
+  constructor (exemption, dog, applicationPackSent, form2Sent) {
     super('verificationDateRecorded', exemption)
     this._applicationPackSent = applicationPackSent
     this._form2Sent = form2Sent
+    this._dog = dog
   }
 
   get available () {
@@ -186,11 +188,46 @@ class VerificationDatesRecordedRule extends CdoTaskListRule {
   }
 
   get neuteringRulesPassed () {
-    return false
+    if (this._exemption.exemptionOrder !== '2015') {
+      return false
+    }
+
+    if (!dateIsADate(this._exemption.verificationDatesRecorded)) {
+      return false
+    }
+
+    if (this._dog.breed !== 'XL Bully') {
+      return false
+    }
+
+    // Date of Birth must be less than 16 months ago
+    if (!this._dog.youngerThanSixteenMonthsAtDate(this._exemption.cdoIssued)) {
+      return false
+    }
+
+    if (!dateIsADate(this._exemption.neuteringDeadline)) {
+      return false
+    }
+
+    // Neutering deadline > today
+    return Date.now() < this._exemption.neuteringDeadline
   }
 
   get microchipRulesPassed () {
-    return false
+    if (this._exemption.exemptionOrder !== '2015') {
+      return false
+    }
+
+    if (!dateIsADate(this._exemption.verificationDatesRecorded)) {
+      return false
+    }
+
+    if (!dateIsADate(this._exemption.microchipDeadline)) {
+      return false
+    }
+
+    // Microchip deadline > yesterday
+    return Date.now() < this._exemption.microchipDeadline.getTime()
   }
 
   get completed () {

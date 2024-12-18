@@ -176,6 +176,57 @@ const buildTask = (cdoTask = {}) => {
     cdoTask.timestamp
   )
 }
+
+/**
+ * @param expect
+ * @param cdoTask
+ * @param key
+ * @param completed
+ * @param available
+ * @param readonly
+ * @param timestamp
+ */
+const checkTask = (expect, cdoTask, { key, completed = false, available = false, readonly = false, timestamp = undefined }) => {
+  expect(cdoTask.key).toBe(key)
+  expect(cdoTask.completed).toBe(completed)
+  expect(cdoTask.available).toBe(available)
+  expect(cdoTask.readonly).toBe(readonly)
+  expect(cdoTask.timestamp).toEqual(timestamp)
+}
+
+/**
+ * @implements {CdoTaskRuleInterface}
+ */
+class DummyRule {
+  constructor (key, {
+    available,
+    completed,
+    readonly
+  }, timestamp) {
+    this.key = key
+    this._available = available
+    this._completed = completed
+    this._readonly = readonly
+    this._timestamp = timestamp
+  }
+
+  get available () {
+    return this._available ?? false
+  }
+
+  get completed () {
+    return this._completed ?? false
+  }
+
+  get readonly () {
+    return this._readonly ?? false
+  }
+
+  get timestamp () {
+    return this._timestamp ?? undefined
+  }
+}
+
 const NOT_COVERED_BY_INSURANCE = new BreachCategory({
   id: 1,
   label: 'dog not covered by third party insurance',
@@ -258,5 +309,7 @@ module.exports = {
   MICROCHIP_NOT_READ_BY_POLICE,
   NO_CHANGE_OF_REG_ADDRESS,
   DOG_DEATH_NOT_REPORTED,
-  DOG_EXPORT_NOT_REPORTED
+  DOG_EXPORT_NOT_REPORTED,
+  DummyRule,
+  checkTask
 }
