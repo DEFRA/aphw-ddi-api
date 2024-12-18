@@ -349,7 +349,7 @@ describe('CdoService', function () {
         source: 'dog',
         activityDate: sentDate,
         targetPk: 'dog',
-        activityLabel: 'Form 2'
+        activityLabel: 'Form 2 from Avon and Somerset Constabulary'
       }, devUser)
     })
 
