@@ -209,6 +209,7 @@ const { set, get } = require('../cache')
  * @property {SummaryRegistrationDao} registration
  * @property {StatusDao} status
  */
+
 /**
  * @typedef CreateCdo
  * @param data
@@ -380,8 +381,21 @@ const summaryCdoInclude = () => ([
     }]
   },
   {
+    model: sequelize.models.dog_breed,
+    as: 'dog_breed'
+  },
+  {
     model: sequelize.models.status,
     as: 'status'
+  },
+  {
+    model: sequelize.models.insurance,
+    as: 'insurance',
+    include: {
+      model: sequelize.models.insurance_company,
+      as: 'company',
+      paranoid: false
+    }
   },
   {
     model: sequelize.models.registration,
@@ -392,8 +406,24 @@ const summaryCdoInclude = () => ([
         model: sequelize.models.police_force,
         as: 'police_force',
         paranoid: false
+      },
+      {
+        model: sequelize.models.exemption_order,
+        as: 'exemption_order'
+      },
+      {
+        model: sequelize.models.form_two,
+        as: 'form_two'
       }
     ]
+  },
+  {
+    model: sequelize.models.dog_microchip,
+    as: 'dog_microchips',
+    include: [{
+      model: sequelize.models.microchip,
+      as: 'microchip'
+    }]
   }
 ])
 
@@ -530,18 +560,18 @@ const getCdoCount = async (where, cache, useCached) => {
 /**
  * @return {Promise<CdoCount>}
  */
-const getCdoCounts = async (cache, useCached = true) => {
+const getCdoCounts = async (cache, noCache = false) => {
   const total = await getCdoCount({
     '$status.status$': cdoStatusFilter(['PreExempt'])
-  }, cache, useCached)
+  }, cache, !noCache)
   const within30 = await getCdoCount({
     '$status.status$': cdoStatusFilter(['PreExempt']),
     '$registration.cdo_expiry$': cdoExpiryFilter(30)
-  }, cache, useCached)
+  }, cache, !noCache)
   const nonComplianceLetterNotSent = await getCdoCount({
     '$status.status$': cdoStatusFilter(['Failed']),
     '$registration.non_compliance_letter_sent$': cdoNonComplianceFilter(false)
-  }, cache, useCached)
+  }, cache, !noCache)
 
   return {
     preExempt: {

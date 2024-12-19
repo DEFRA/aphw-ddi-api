@@ -1,5 +1,5 @@
 const { CdoTaskList, Cdo, CdoTask } = require('../../../../../app/data/domain')
-const { buildCdo, buildExemption, buildTask, buildCdoInsurance, buildCdoDog } = require('../../../../mocks/cdo/domain')
+const { buildCdo, buildExemption, buildTask, buildCdoInsurance, buildCdoDog, checkTask } = require('../../../../mocks/cdo/domain')
 const { ActionAlreadyPerformedError } = require('../../../../../app/errors/domain/actionAlreadyPerformed')
 const { SequenceViolationError } = require('../../../../../app/errors/domain/sequenceViolation')
 const { inXDays } = require('../../../../time-helper')
@@ -125,34 +125,36 @@ describe('CdoTaskList', () => {
         dog: buildCdoDog({ microchipNumber: '', microchipNumber2: '' })
       })
       const cdoTaskList = new CdoTaskList(cdo)
-      expect(cdoTaskList.applicationPackSent).toEqual(new CdoTask('applicationPackSent', {
-        available: true,
-        completed: true,
-        readonly: true
-      }, new Date('2024-06-25')))
-      expect(cdoTaskList.applicationPackProcessed).toEqual(buildTask({
+      expect(cdoTaskList.applicationPackSent.key).toBe('applicationPackSent')
+      expect(cdoTaskList.applicationPackSent.completed).toBe(true)
+      expect(cdoTaskList.applicationPackSent.available).toBe(true)
+      expect(cdoTaskList.applicationPackSent.readonly).toBe(true)
+      expect(cdoTaskList.applicationPackSent.timestamp).toEqual(new Date('2024-06-25'))
+      checkTask(expect, cdoTaskList.applicationPackProcessed, {
         key: 'applicationPackProcessed',
         available: true
-      }))
-      expect(cdoTaskList.insuranceDetailsRecorded).toEqual(buildTask({
+      })
+      checkTask(expect, cdoTaskList.insuranceDetailsRecorded, {
         key: 'insuranceDetailsRecorded',
         available: true
-      }))
-      expect(cdoTaskList.microchipNumberRecorded).toEqual(buildTask({
+      })
+      checkTask(expect, cdoTaskList.microchipNumberRecorded, {
         key: 'microchipNumberRecorded',
         available: true
-      }))
-      expect(cdoTaskList.applicationFeePaid).toEqual(buildTask({
+      })
+      checkTask(expect, cdoTaskList.applicationFeePaid, {
         key: 'applicationFeePaid',
         available: true
-      }))
-      expect(cdoTaskList.form2Sent).toEqual(buildTask({
+      })
+      checkTask(expect, cdoTaskList.form2Sent, {
         key: 'form2Sent',
         available: true
-      }))
-      expect(cdoTaskList.verificationDateRecorded).toEqual(buildTask({
-        key: 'verificationDateRecorded'
-      }))
+      })
+      expect(cdoTaskList.verificationDateRecorded.key).toBe('verificationDateRecorded')
+      expect(cdoTaskList.verificationDateRecorded.available).toBe(false)
+      expect(cdoTaskList.verificationDateRecorded.completed).toBe(false)
+      expect(cdoTaskList.verificationDateRecorded.readonly).toBe(false)
+      expect(cdoTaskList.verificationDateRecorded.timestamp).toBe(undefined)
       expect(cdoTaskList.certificateIssued).toEqual(buildTask({
         key: 'certificateIssued'
       }))
@@ -621,12 +623,14 @@ describe('CdoTaskList', () => {
         exemption: exemptionProperties
       })
       const cdoTaskList = new CdoTaskList(cdo)
-      expect(cdoTaskList.applicationPackSent).toEqual(new CdoTask('applicationPackSent', {
+      checkTask(expect, cdoTaskList.applicationPackSent, {
+        key: 'applicationPackSent',
         available: true,
         completed: true,
-        readonly: true
-      }, new Date('2024-06-25')))
-      expect(cdoTaskList.applicationPackProcessed).toEqual(new CdoTask('applicationPackProcessed', {
+        readonly: true,
+        timestamp: new Date('2024-06-25')
+      })
+      checkTask(expect, cdoTaskList.applicationPackProcessed, new CdoTask('applicationPackProcessed', {
         available: true,
         completed: true,
         readonly: true
@@ -645,13 +649,13 @@ describe('CdoTaskList', () => {
         readonly: false,
         timestamp: expect.any(Date)
       }))
-      expect(cdoTaskList.applicationFeePaid).toEqual(expect.objectContaining({
+      checkTask(expect, cdoTaskList.applicationFeePaid, {
         key: 'applicationFeePaid',
         available: true,
         completed: true,
         readonly: false,
-        timestamp: new Date('2024-08-07')
-      }))
+        timestamp: new Date('2024-06-24')
+      })
 
       expect(cdoTaskList.form2Sent).toEqual(expect.objectContaining({
         key: 'form2Sent',
@@ -1181,14 +1185,10 @@ describe('CdoTaskList', () => {
             microchipVerification: undefined
           }
         })
-        expect(cdoTaskList.verificationDateRecorded).toEqual(new CdoTask(
-          'verificationDateRecorded',
-          {
-            available: true,
-            completed: false
-          },
-          undefined
-        ))
+        expect(cdoTaskList.verificationDateRecorded.available).toBe(true)
+        expect(cdoTaskList.verificationDateRecorded.completed).toBe(false)
+        expect(cdoTaskList.verificationDateRecorded.timestamp).toBe(undefined)
+        expect(cdoTaskList.verificationDateRecorded.readonly).toBe(false)
       })
     })
 

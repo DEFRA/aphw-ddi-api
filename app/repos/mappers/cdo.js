@@ -24,10 +24,34 @@
  * @property {SummaryDogDto} dog
  * @property {SummaryExemptionDto} exemption
  */
+/**
+ * @typedef SummaryTaskDto
+ * @property {string} key
+ * @property {boolean} insuranceDetailsRule
+ * @property {boolean} applicationFeePaymentRule
+ * @property {boolean} formTwoSentRule
+ * @property {boolean} verificationDatesRecordedRule
+ */
+
+/**
+ * @typedef SummaryCdoDtoWithTaskList
+ * @property {SummaryPersonDto} person
+ * @property {SummaryDogDto} dog
+ * @property {SummaryExemptionDto} exemption
+ * @protected {SummaryTaskDto[]} taskList
+ */
 
 const { Person, Cdo, Dog, Exemption } = require('../../data/domain')
 const { getMicrochip } = require('../../dto/dto-helper')
 const { mapDogBreachDaoToBreachCategory } = require('./dog')
+const {
+  ApplicationPackSentRule,
+  ApplicationPackProcessedRule,
+  InsuranceDetailsRule,
+  ApplicationFeePaymentRule,
+  FormTwoSentRule,
+  VerificationDatesRecordedRule
+} = require('../../data/domain/cdoTaskList/rules')
 /**
  * @param {SummaryCdo} summaryCdo
  * @return {SummaryCdoDto}
@@ -55,6 +79,50 @@ const mapSummaryCdoDaoToDto = (summaryCdo) => {
       joinedExemptionScheme: registration.joined_exemption_scheme,
       nonComplianceLetterSent: registration.non_compliance_letter_sent
     }
+  }
+}
+
+/**
+ * @param {SummaryCdo} summaryCdo
+ * @return {SummaryCdoDto}
+ */
+const mapSummaryCdoDaoToDtoWithTasks = (summaryCdo) => {
+  const { registration } = summaryCdo
+
+  const dogModel = mapDogDaoToDog(summaryCdo)
+  const exemptionModel = mapCdoDaoToExemption(registration, summaryCdo.insurance)
+
+  const applicationPackSentRule = new ApplicationPackSentRule(exemptionModel)
+  const applicationPackProcessedRule = new ApplicationPackProcessedRule(exemptionModel, applicationPackSentRule)
+  const insuranceDetailsRule = new InsuranceDetailsRule(exemptionModel, applicationPackSentRule)
+  const applicationFeePaymentRule = new ApplicationFeePaymentRule(exemptionModel, applicationPackSentRule)
+  const formTwoSentRule = new FormTwoSentRule(exemptionModel, applicationPackSentRule)
+  const verificationDatesRecordedRule = new VerificationDatesRecordedRule(exemptionModel, dogModel, applicationPackSentRule, formTwoSentRule)
+
+  const taskList = [
+    applicationPackSentRule,
+    applicationPackProcessedRule,
+    insuranceDetailsRule,
+    applicationFeePaymentRule,
+    formTwoSentRule,
+    verificationDatesRecordedRule
+  ].map(({
+    key,
+    timestamp,
+    completed,
+    available,
+    readonly
+  }) => ({
+    key,
+    timestamp: timestamp?.toISOString(),
+    completed,
+    available,
+    readonly
+  }))
+
+  return {
+    ...mapSummaryCdoDaoToDto(summaryCdo),
+    taskList
   }
 }
 
@@ -143,6 +211,7 @@ const mapCdoDaoToCdo = (cdoDao) => {
 }
 module.exports = {
   mapSummaryCdoDaoToDto,
+  mapSummaryCdoDaoToDtoWithTasks,
   mapCdoDaoToCdo,
   mapCdoDaoToExemption,
   mapDogDaoToDog

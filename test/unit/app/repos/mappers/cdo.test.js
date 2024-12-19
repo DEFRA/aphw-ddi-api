@@ -1,16 +1,18 @@
-const { mapSummaryCdoDaoToDto, mapCdoDaoToCdo, mapCdoDaoToExemption, mapDogDaoToDog } = require('../../../../../app/repos/mappers/cdo')
+const { mapSummaryCdoDaoToDto, mapCdoDaoToCdo, mapCdoDaoToExemption, mapDogDaoToDog, mapSummaryCdoDaoToDtoWithTasks } = require('../../../../../app/repos/mappers/cdo')
 const {
   buildCdoDao,
   buildInsuranceDao,
   buildRegistrationDao,
   buildDogDao,
-  dogBreachDAOs, buildFormTwoDao
+  dogBreachDAOs, buildFormTwoDao, buildSummaryRegistrationDao, buildSummaryCdoDao, buildDogMicrochipDao,
+  buildInsuranceCompanyDao
 } = require('../../../../mocks/cdo/get')
 const {
   buildCdo, buildExemption, buildCdoInsurance, NOT_COVERED_BY_INSURANCE, INSECURE_PLACE,
   AWAY_FROM_ADDR_30_DAYS_IN_YR
 } = require('../../../../mocks/cdo/domain')
 const { Exemption } = require('../../../../../app/data/domain')
+const { buildCdoTaskDto } = require('../../../../mocks/cdo/dto')
 
 describe('cdo mappers', () => {
   describe('mapSummaryCdoDaoToDto', () => {
@@ -131,6 +133,283 @@ describe('cdo mappers', () => {
       }
 
       const mappedValues = mapSummaryCdoDaoToDto(summaryCdoDao)
+      expect(mappedValues).toEqual(expectedSummaryCdoDto)
+    })
+  })
+
+  describe('mapSummaryCdoDaoToDtoWithTasks', () => {
+    test('should map a summary cdo to a dto', () => {
+      /**
+       * @type {SummaryCdo}
+       */
+      const summaryCdoDao = buildSummaryCdoDao({
+        id: 300013,
+        index_number: 'ED300013',
+        status_id: 5,
+        registered_person: [
+          {
+            id: 13,
+            person: {
+              id: 10,
+              first_name: 'Scott',
+              last_name: 'Pilgrim',
+              person_reference: 'P-1234-5678'
+            }
+          }
+        ],
+        status: {
+          id: 5,
+          status: 'Pre-exempt',
+          status_type: 'STANDARD'
+        },
+        registration: buildSummaryRegistrationDao({
+          id: 13,
+          cdo_expiry: '2024-03-01',
+          joined_exemption_scheme: '2023-11-01',
+          non_compliance_letter_sent: '2023-11-01',
+          police_force: {
+            id: 5,
+            name: 'Cheshire Constabulary'
+          }
+        })
+      })
+
+      const expectedSummaryCdoDto = {
+        person: {
+          id: 10,
+          firstName: 'Scott',
+          lastName: 'Pilgrim',
+          personReference: 'P-1234-5678'
+        },
+        dog: {
+          id: 300013,
+          dogReference: 'ED300013',
+          status: 'Pre-exempt'
+        },
+        exemption: {
+          policeForce: 'Cheshire Constabulary',
+          cdoExpiry: '2024-03-01',
+          joinedExemptionScheme: '2023-11-01',
+          nonComplianceLetterSent: '2023-11-01'
+        }
+      }
+
+      const expectedTaskList = [
+        buildCdoTaskDto({
+          key: 'applicationPackSent',
+          available: true,
+          completed: false,
+          readonly: false,
+          timestamp: undefined
+        }),
+        buildCdoTaskDto({
+          key: 'applicationPackProcessed'
+        }),
+        buildCdoTaskDto({
+          key: 'insuranceDetailsRecorded'
+        }),
+        buildCdoTaskDto({
+          key: 'applicationFeePaid'
+        }),
+        buildCdoTaskDto({
+          key: 'form2Sent'
+        }),
+        buildCdoTaskDto({
+          key: 'verificationDateRecorded'
+        })
+      ]
+
+      const mappedValues = mapSummaryCdoDaoToDtoWithTasks(summaryCdoDao)
+      expect(mappedValues).toEqual(expect.objectContaining(expectedSummaryCdoDto))
+      expect(mappedValues.exemption).toEqual(expectedSummaryCdoDto.exemption)
+      expect(mappedValues.person).toEqual(expectedSummaryCdoDto.person)
+      expect(mappedValues.dog).toEqual(expectedSummaryCdoDto.dog)
+      expect(mappedValues.taskList).toEqual(expectedTaskList)
+    })
+
+    test('should map a summary cdo with some null values to a dto', () => {
+      /**
+       * @type {SummaryCdo}
+       */
+      const summaryCdoDao = buildSummaryCdoDao({
+        id: 300013,
+        index_number: 'ED300013',
+        status_id: 5,
+        registered_person: [
+          {
+            id: 13,
+            person: {
+              id: 10,
+              first_name: 'Scott',
+              last_name: 'Pilgrim',
+              person_reference: 'P-1234-5678'
+            }
+          }
+        ],
+        status: {
+          id: 5,
+          status: 'Pre-exempt',
+          status_type: 'STANDARD'
+        },
+        registration: buildSummaryRegistrationDao({
+          id: 13,
+          cdo_expiry: null,
+          joined_exemption_scheme: null,
+          non_compliance_letter_sent: null,
+          police_force: {
+            id: 5,
+            name: 'Cheshire Constabulary'
+          }
+        })
+      })
+      const expectedSummaryCdoDto = {
+        person: {
+          id: 10,
+          firstName: 'Scott',
+          lastName: 'Pilgrim',
+          personReference: 'P-1234-5678'
+        },
+        dog: {
+          id: 300013,
+          dogReference: 'ED300013',
+          status: 'Pre-exempt'
+
+        },
+        exemption: {
+          policeForce: 'Cheshire Constabulary',
+          cdoExpiry: null,
+          joinedExemptionScheme: null,
+          nonComplianceLetterSent: null
+        },
+        taskList: expect.any(Array)
+      }
+
+      const mappedValues = mapSummaryCdoDaoToDtoWithTasks(summaryCdoDao)
+      expect(mappedValues).toEqual(expectedSummaryCdoDto)
+    })
+
+    test('should map a summary cdo with tasks to do', () => {
+      /**
+       * @type {SummaryCdo}
+       */
+      const summaryCdoDao = buildSummaryCdoDao({
+        id: 300013,
+        index_number: 'ED300013',
+        status_id: 5,
+        dog_microchips: [
+          buildDogMicrochipDao({
+            microchip: '123456789012345'
+          })
+        ],
+        registered_person: [
+          {
+            id: 13,
+            person: {
+              id: 10,
+              first_name: 'Scott',
+              last_name: 'Pilgrim',
+              person_reference: 'P-1234-5678'
+            }
+          }
+        ],
+        insurance: [
+          buildInsuranceDao({
+            renewal_date: new Date('9999-12-19'),
+            company: buildInsuranceCompanyDao({
+              company_name: 'Dog\'s Trust'
+            })
+          })
+        ],
+        status: {
+          id: 5,
+          status: 'Pre-exempt',
+          status_type: 'STANDARD'
+        },
+        registration: buildSummaryRegistrationDao({
+          id: 13,
+          cdo_expiry: '2024-03-01',
+          joined_exemption_scheme: '2023-11-01',
+          non_compliance_letter_sent: '2023-11-01',
+          application_pack_sent: new Date('2024-12-19'),
+          application_pack_processed: new Date('2024-12-19'),
+          form_two_sent: new Date('2024-12-19'),
+          insurance_details_recorded: new Date('2024-12-19'),
+          microchip_number_recorded: new Date('2024-12-19'),
+          microchip_verification: new Date('2024-12-19'),
+          neutering_confirmation: new Date('2024-12-19'),
+          verification_dates_recorded: new Date('2024-12-19'),
+          application_fee_paid: new Date('2024-12-19'),
+          application_fee_payment_recorded: new Date('2024-12-19'),
+          police_force: {
+            id: 5,
+            name: 'Cheshire Constabulary'
+          }
+        })
+      })
+
+      const expectedSummaryCdoDto = {
+        person: {
+          id: 10,
+          firstName: 'Scott',
+          lastName: 'Pilgrim',
+          personReference: 'P-1234-5678'
+        },
+        dog: {
+          id: 300013,
+          dogReference: 'ED300013',
+          status: 'Pre-exempt'
+        },
+        exemption: {
+          policeForce: 'Cheshire Constabulary',
+          cdoExpiry: '2024-03-01',
+          joinedExemptionScheme: '2023-11-01',
+          nonComplianceLetterSent: '2023-11-01'
+        },
+        taskList: [
+          buildCdoTaskDto({
+            key: 'applicationPackSent',
+            available: true,
+            completed: true,
+            readonly: true,
+            timestamp: '2024-12-19T00:00:00.000Z'
+          }),
+          buildCdoTaskDto({
+            key: 'applicationPackProcessed',
+            available: true,
+            completed: true,
+            readonly: true,
+            timestamp: '2024-12-19T00:00:00.000Z'
+          }),
+          buildCdoTaskDto({
+            key: 'insuranceDetailsRecorded',
+            available: true,
+            completed: true,
+            timestamp: '2024-12-19T00:00:00.000Z'
+          }),
+          buildCdoTaskDto({
+            key: 'applicationFeePaid',
+            available: true,
+            completed: true,
+            timestamp: '2024-12-19T00:00:00.000Z'
+          }),
+          buildCdoTaskDto({
+            key: 'form2Sent',
+            available: true,
+            completed: true,
+            readonly: true,
+            timestamp: '2024-12-19T00:00:00.000Z'
+          }),
+          buildCdoTaskDto({
+            key: 'verificationDateRecorded',
+            completed: true,
+            available: true,
+            timestamp: '2024-12-19T00:00:00.000Z'
+          })
+        ]
+
+      }
+
+      const mappedValues = mapSummaryCdoDaoToDtoWithTasks(summaryCdoDao)
       expect(mappedValues).toEqual(expectedSummaryCdoDto)
     })
   })

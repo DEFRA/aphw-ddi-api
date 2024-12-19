@@ -237,6 +237,28 @@ const buildRegistrationDao = (registrationPartial = {}) => ({
 const registration = buildRegistrationDao()
 
 /**
+ * @typedef {Omit<RegistrationDao, 'court'>} SummaryRegistrationDao
+ */
+/**
+ *
+ * @param {Partial<SummaryRegistrationDao>} summaryRegistrationCdo
+ * @return {SummaryRegistrationDao}
+ */
+const buildSummaryRegistrationDao = (summaryRegistrationCdo) => {
+  return {
+    id: 5,
+    cdo_expiry: '2024-04-19',
+    joined_exemption_scheme: null,
+    non_compliance_letter_sent: null,
+    police_force: buildPoliceForceDao(),
+    exemption_order: buildExemptionOrderDao(),
+    insurance: [],
+    form_two: null,
+    ...summaryRegistrationCdo
+  }
+}
+
+/**
  * @param {MicrochipDao} microchipPartial
  * @return {MicrochipDao}
  */
@@ -470,6 +492,41 @@ const buildDogDao = (dogDao = {}) => ({
   dog_breaches: [],
   ...dogDao
 })
+/**
+ * @typedef {Omit<DogDao, 'dog_breaches'> & { registration: SummaryRegistrationDao }} SummaryCdoDao
+ */
+/**
+ * @param {Partial<SummaryCdoDao>} summaryCdoDao
+ * @return {SummaryCdoDao}
+ */
+const buildSummaryCdoDao = (summaryCdoDao = {}) => ({
+  id: 300097,
+  dog_reference: '5270aad5-77d1-47ce-b41d-99a6e8f6e5fe',
+  index_number: 'ED300097',
+  dog_breed_id: 1,
+  status_id: 4,
+  name: 'Rex300',
+  birth_date: null,
+  death_date: null,
+  tattoo: null,
+  colour: null,
+  sex: null,
+  exported_date: null,
+  stolen_date: null,
+  untraceable_date: null,
+  created_at: '2024-06-24T09:12:07.814Z',
+  deleted_at: null,
+  updated_at: '2024-06-24T09:12:07.885Z',
+  registered_person: [
+    buildRegisteredPersonDao()
+  ],
+  registration: buildSummaryRegistrationDao(),
+  dog_breed: buildDogBreedDao(),
+  status: buildStatusDao(),
+  insurance: [],
+  dog_microchips: [],
+  ...summaryCdoDao
+})
 
 module.exports = {
   buildCountryDao,
@@ -512,5 +569,7 @@ module.exports = {
   buildBreachCategoryDao,
   NOT_COVERED_BY_INSURANCE,
   INSECURE_PLACE,
-  AWAY_FROM_ADDR_30_DAYS_IN_YR
+  AWAY_FROM_ADDR_30_DAYS_IN_YR,
+  buildSummaryRegistrationDao,
+  buildSummaryCdoDao
 }

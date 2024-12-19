@@ -1,5 +1,10 @@
 const { buildBreachCategoryDao } = require('./get')
 const { BreachCategory } = require('../../../app/data/domain')
+
+/**
+ * @param {Partial<CdoTaskDto>} partialTaskDto
+ * @return {CdoTaskDto}
+ */
 const buildCdoTaskDto = (partialTaskDto) => ({
   key: 'insuranceDetailsRecorded',
   available: false,
@@ -84,6 +89,7 @@ const buildDogDto = (partialDogDto) => ({
 })
 
 module.exports = {
+  buildCdoTaskDto,
   buildCdoTaskListDto,
   buildCdoTaskListDtoTasks,
   buildBreachDto,

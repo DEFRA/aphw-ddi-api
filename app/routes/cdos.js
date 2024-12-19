@@ -1,5 +1,5 @@
 const { getSummaryCdos, getCdoCounts } = require('../repos/cdo')
-const { mapSummaryCdoDaoToDto } = require('../repos/mappers/cdo')
+const { mapSummaryCdoDaoToDto, mapSummaryCdoDaoToDtoWithTasks } = require('../repos/mappers/cdo')
 const { getCdosQuerySchema, getCdosResponseSchema } = require('../schema/cdos/get')
 const { scopes } = require('../constants/auth')
 const getCache = require('../cache/get-cache')
@@ -58,7 +58,9 @@ module.exports = [
           const summaryCdos = await getSummaryCdos(filter, sort, cache)
           const counts = await getCdoCounts(cache, noCache)
 
-          const summaryCdosDto = summaryCdos.cdos.map(mapSummaryCdoDaoToDto)
+          const summaryMapper = request.query.showTasks ? mapSummaryCdoDaoToDtoWithTasks : mapSummaryCdoDaoToDto
+
+          const summaryCdosDto = summaryCdos.cdos.map(summaryMapper)
           const count = summaryCdos.count
 
           return h.response({ cdos: summaryCdosDto, count, counts }).code(200)

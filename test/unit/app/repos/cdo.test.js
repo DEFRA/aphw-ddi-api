@@ -669,7 +669,7 @@ describe('CDO repo', () => {
       sequelize.models.dog.count.mockResolvedValueOnce(2)
       sequelize.models.dog.count.mockResolvedValueOnce(1)
 
-      const res = await getCdoCounts(cacheObj)
+      const res = await getCdoCounts(cacheObj, false)
       expect(res).toEqual({
         preExempt: {
           total: 3,
@@ -708,7 +708,7 @@ describe('CDO repo', () => {
       expect(setCache).toHaveBeenNthCalledWith(3, cacheObj, 'manage-cdo-count|status-failed|non-compliance-false', 1)
     })
 
-    test('should return counts from DB given cached set to false', async () => {
+    test('should return counts from DB given noCached set to true', async () => {
       const cacheObj = { get: jest.fn(), set: jest.fn(), drop: jest.fn() }
       sequelize.models.dog.count.mockResolvedValueOnce(3)
       sequelize.models.dog.count.mockResolvedValueOnce(2)
@@ -718,7 +718,7 @@ describe('CDO repo', () => {
       getCache.mockResolvedValueOnce(3)
       getCache.mockResolvedValueOnce(2)
 
-      const res = await getCdoCounts(cacheObj, false)
+      const res = await getCdoCounts(cacheObj, true)
       expect(res).toEqual({
         preExempt: {
           total: 3,
@@ -761,6 +761,28 @@ describe('CDO repo', () => {
       expect(getCache).toHaveBeenNthCalledWith(1, cacheObj, 'manage-cdo-count|status-pre-exempt')
       expect(getCache).toHaveBeenNthCalledWith(2, cacheObj, `manage-cdo-count|status-pre-exempt|expiry-${in30Days.toISOString()}`)
       expect(getCache).toHaveBeenNthCalledWith(3, cacheObj, 'manage-cdo-count|status-failed|non-compliance-false')
+    })
+
+    test('should return counts from cache given noCached set to false', async () => {
+      const cacheObj = { get: jest.fn(), set: jest.fn(), drop: jest.fn() }
+      sequelize.models.dog.count.mockResolvedValueOnce(3)
+      sequelize.models.dog.count.mockResolvedValueOnce(2)
+      sequelize.models.dog.count.mockResolvedValueOnce(1)
+
+      getCache.mockResolvedValueOnce(1)
+      getCache.mockResolvedValueOnce(3)
+      getCache.mockResolvedValueOnce(2)
+
+      const res = await getCdoCounts(cacheObj, false)
+      expect(res).toEqual({
+        preExempt: {
+          total: 1,
+          within30: 3
+        },
+        failed: {
+          nonComplianceLetterNotSent: 2
+        }
+      })
     })
   })
 

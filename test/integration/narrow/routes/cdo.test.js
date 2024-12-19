@@ -469,6 +469,7 @@ describe('CDO endpoint', () => {
           neuteringConfirmation: new Date('2024-02-10'),
           microchipVerification: new Date('2024-03-09'),
           microchipDeadline: new Date('2024-03-09'),
+          insuranceDetailsRecorded: new Date('2024-03-09'),
           insurance: [buildCdoInsurance({
             company: 'Dogs R Us',
             renewalDate: new Date('9999-10-10')
@@ -526,7 +527,7 @@ describe('CDO endpoint', () => {
             available: true,
             completed: true,
             readonly: false,
-            timestamp: null
+            timestamp: '2024-03-09T00:00:00.000Z'
           },
           microchipNumberRecorded: {
             key: 'microchipNumberRecorded',
@@ -540,7 +541,7 @@ describe('CDO endpoint', () => {
             available: true,
             completed: true,
             readonly: false,
-            timestamp: null
+            timestamp: '2024-06-24T00:00:00.000Z'
           },
           form2Sent: {
             key: 'form2Sent',

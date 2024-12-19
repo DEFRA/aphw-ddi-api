@@ -6,7 +6,8 @@ const getCdosQuerySchema = Joi.object({
   sortKey: Joi.string().valid('cdoExpiry', 'joinedExemptionScheme', 'indexNumber', 'policeForce', 'owner'),
   nonComplianceLetterSent: Joi.boolean(),
   noCache: Joi.boolean().default(false),
-  sortOrder: Joi.string().valid('ASC', 'DESC')
+  sortOrder: Joi.string().valid('ASC', 'DESC'),
+  showTasks: Joi.boolean().truthy('Y').default(false)
 }).or('withinDays', 'status')
 
 const getCdosResponseSchema = Joi.object({
@@ -37,7 +38,8 @@ const getCdosResponseSchema = Joi.object({
       cdoExpiry: Joi.string().allow(null).required(),
       joinedExemptionScheme: Joi.string().allow(null).required(),
       nonComplianceLetterSent: Joi.string().allow(null).required()
-    }).unknown().required()
+    }).unknown().required(),
+    taskList: Joi.array().optional()
   })).required()
 }).unknown()
 
