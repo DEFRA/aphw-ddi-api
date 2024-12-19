@@ -151,7 +151,7 @@ describe('CdoTaskList', () => {
         available: true
       })
       expect(cdoTaskList.verificationDateRecorded.key).toBe('verificationDateRecorded')
-      expect(cdoTaskList.verificationDateRecorded.available).toBe(false)
+      expect(cdoTaskList.verificationDateRecorded.available).toBe(true)
       expect(cdoTaskList.verificationDateRecorded.completed).toBe(false)
       expect(cdoTaskList.verificationDateRecorded.readonly).toBe(false)
       expect(cdoTaskList.verificationDateRecorded.timestamp).toBe(undefined)
@@ -178,10 +178,9 @@ describe('CdoTaskList', () => {
       })
     })
 
-    test('should show task list with record dates available given send form 2 has been recorded', () => {
+    test('should show task list with record dates available given application pack has been recorded', () => {
       const exemptionProperties = buildExemption({
-        applicationPackSent: new Date('2024-06-25'),
-        form2Sent: new Date('2024-06-25')
+        applicationPackSent: new Date('2024-06-25')
       })
       const cdo = buildCdo({
         exemption: exemptionProperties
@@ -196,14 +195,6 @@ describe('CdoTaskList', () => {
         timestamp: undefined
       }))
 
-      expect(cdoTaskList.form2Sent).toEqual(expect.objectContaining({
-        key: 'form2Sent',
-        available: true,
-        completed: true,
-        readonly: true,
-        timestamp: new Date('2024-06-25')
-      }))
-
       expect(cdoTaskList.certificateIssued).toEqual(expect.objectContaining({
         key: 'certificateIssued',
         available: false,
@@ -213,7 +204,7 @@ describe('CdoTaskList', () => {
       }))
     })
 
-    test('should show task list with record dates unavailable given send form 2 has not been recorded', () => {
+    test('should show task list with record dates available irrespective of send form 2 has not been recorded', () => {
       const exemptionProperties = buildExemption({
         applicationPackSent: new Date('2024-06-25'),
         applicationFeePaid: new Date('2024-06-24'),
@@ -233,7 +224,7 @@ describe('CdoTaskList', () => {
 
       expect(cdoTaskList.verificationDateRecorded).toEqual(expect.objectContaining({
         key: 'verificationDateRecorded',
-        available: false,
+        available: true,
         completed: false,
         readonly: false,
         timestamp: undefined

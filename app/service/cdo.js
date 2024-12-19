@@ -247,6 +247,11 @@ class CdoService {
       await sendUpdateToAudit(EXEMPTION, preAudit, postAudit, user)
     }
 
+    // Complete 'Request Form 2' if not yet completed
+    if (!cdoTaskList._form2StageComplete) {
+      cdoTaskList.sendForm2(new Date())
+    }
+
     cdoTaskList.verifyDates({
       microchipVerification: verificationDates.microchipVerification,
       neuteringConfirmation: verificationDates.neuteringConfirmation,
