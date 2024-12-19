@@ -61,6 +61,7 @@ describe('CDO endpoint', () => {
           id: 300013,
           index_number: 'ED300013',
           status_id: 5,
+          dog_breed: { id: 2, breed: 'XL Bully' },
           registered_person: [
             {
               id: 13,
@@ -80,6 +81,7 @@ describe('CDO endpoint', () => {
           registration: {
             id: 13,
             cdo_expiry: '2024-03-01',
+            exemption_order: { id: 2, exemption_order: '2015', active: true },
             joined_exemption_scheme: null,
             non_compliance_letter_sent: '2024-04-01',
             police_force: {
@@ -167,6 +169,9 @@ describe('CDO endpoint', () => {
           id: 300013,
           index_number: 'ED300013',
           status_id: 5,
+          dog_breed: { id: 2, breed: 'XL Bully', active: true },
+          dog_microchips: [],
+          insurance: [],
           registered_person: [
             {
               id: 13,
@@ -186,6 +191,8 @@ describe('CDO endpoint', () => {
           registration: {
             id: 13,
             cdo_expiry: '2024-03-01',
+            form_two: null,
+            exemption_order: { id: 1, exemption_order: '2015', active: true },
             joined_exemption_scheme: null,
             non_compliance_letter_sent: '2024-04-01',
             police_force: {
@@ -282,9 +289,11 @@ describe('CDO endpoint', () => {
             status: 'Pre-exempt',
             status_type: 'STANDARD'
           },
+          dog_breed: { id: 2, breed: 'XL Bully' },
           registration: {
             id: 13,
             cdo_expiry: '2024-03-01',
+            exemption_order: { id: 2, exemption_order: '2015', active: true },
             joined_exemption_scheme: null,
             non_compliance_letter_sent: '2024-04-01',
             police_force: null
@@ -485,6 +494,7 @@ describe('CDO endpoint', () => {
           registration: {
             id: 13,
             cdo_expiry: '2024-03-01',
+            exemption_order: { id: 2, exemption_order: '2015', active: true },
             joined_exemption_scheme: null,
             police_force: {
               id: 5,

@@ -13,6 +13,7 @@ class CdoTaskListRule {
 
 /**
  * @implements {CdoTaskRuleInterface}
+ * @extends {CdoTaskListRule}
  */
 class ApplicationPackSentRule extends CdoTaskListRule {
   constructor (exemption) {
