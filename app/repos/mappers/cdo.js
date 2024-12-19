@@ -87,9 +87,7 @@ const mapSummaryCdoDaoToDto = (summaryCdo) => {
  * @return {SummaryCdoDto}
  */
 const mapSummaryCdoDaoToDtoWithTasks = (summaryCdo) => {
-  const { registered_person: registeredPersons, registration } = summaryCdo
-  const [registeredPerson] = registeredPersons
-  const person = registeredPerson.person
+  const { registration } = summaryCdo
 
   const dogModel = mapDogDaoToDog(summaryCdo)
   const exemptionModel = mapCdoDaoToExemption(registration, summaryCdo.insurance)
@@ -101,16 +99,14 @@ const mapSummaryCdoDaoToDtoWithTasks = (summaryCdo) => {
   const formTwoSentRule = new FormTwoSentRule(exemptionModel, applicationPackSentRule)
   const verificationDatesRecordedRule = new VerificationDatesRecordedRule(exemptionModel, dogModel, applicationPackSentRule, formTwoSentRule)
 
-  const taskListRules = [
+  const taskList = [
     applicationPackSentRule,
     applicationPackProcessedRule,
     insuranceDetailsRule,
     applicationFeePaymentRule,
     formTwoSentRule,
     verificationDatesRecordedRule
-  ]
-
-  const taskList = taskListRules.map(({
+  ].map(({
     key,
     timestamp,
     completed,
@@ -118,30 +114,14 @@ const mapSummaryCdoDaoToDtoWithTasks = (summaryCdo) => {
     readonly
   }) => ({
     key,
-    timestamp: timestamp && timestamp.toISOString(),
+    timestamp: timestamp?.toISOString(),
     completed,
     available,
     readonly
   }))
 
   return {
-    person: {
-      id: person.id,
-      firstName: person.first_name,
-      lastName: person.last_name,
-      personReference: person.person_reference
-    },
-    dog: {
-      id: summaryCdo.id,
-      status: summaryCdo.status.status,
-      dogReference: summaryCdo.index_number
-    },
-    exemption: {
-      policeForce: registration.police_force?.name ?? null,
-      cdoExpiry: registration.cdo_expiry,
-      joinedExemptionScheme: registration.joined_exemption_scheme,
-      nonComplianceLetterSent: registration.non_compliance_letter_sent
-    },
+    ...mapSummaryCdoDaoToDto(summaryCdo),
     taskList
   }
 }
