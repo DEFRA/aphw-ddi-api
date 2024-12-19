@@ -349,7 +349,40 @@ describe('CdoService', function () {
         source: 'dog',
         activityDate: sentDate,
         targetPk: 'dog',
-        activityLabel: 'Form 2'
+        activityLabel: 'Form 2 from Avon and Somerset Constabulary'
+      }, devUser)
+    })
+
+    test('should send Form 2 even if police force is missing', async () => {
+      getActivityByLabel.mockResolvedValue({ id: 10, label: 'Form 2' })
+      const sentDate = new Date()
+      const cdoIndexNumber = 'ED300097'
+      const cdoTaskList = new CdoTaskList(buildCdo({
+        exemption: buildExemption({
+          applicationPackSent: new Date(),
+          applicationPackProcessed: new Date(),
+          policeForce: undefined
+        })
+      }))
+      mockCdoRepository.getCdoTaskList.mockResolvedValue(cdoTaskList)
+
+      await cdoService.sendForm2(cdoIndexNumber, sentDate, devUser)
+      expect(mockCdoRepository.getCdoTaskList).toHaveBeenCalledWith(cdoIndexNumber)
+      expect(mockCdoRepository.saveCdoTaskList).toHaveBeenCalledWith(cdoTaskList)
+      expect(cdoTaskList.getUpdates().exemption).toEqual([{
+        key: 'form2Sent',
+        value: sentDate,
+        callback: expect.any(Function)
+      }])
+      await cdoTaskList.getUpdates().exemption[0].callback()
+      expect(sendActivityToAudit).toHaveBeenCalledWith({
+        activity: 10,
+        activityType: 'sent',
+        pk: 'ED300097',
+        source: 'dog',
+        activityDate: sentDate,
+        targetPk: 'dog',
+        activityLabel: 'Form 2 from Unknown force'
       }, devUser)
     })
 

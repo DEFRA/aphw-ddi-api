@@ -191,6 +191,8 @@ class CdoService {
     const cdoTaskList = await this.cdoRepository.getCdoTaskList(cdoIndexNumber)
     const activityType = await getActivityByLabel(activities.applicationPackSent)
 
+    const policeForceName = cdoTaskList.exemption.policeForce ?? 'Unknown force'
+
     const callback = async () => {
       await sendActivityToAudit({
         activity: activityType.id,
@@ -199,7 +201,7 @@ class CdoService {
         source: 'dog',
         activityDate: sentDate,
         targetPk: 'dog',
-        activityLabel: activities.form2Sent
+        activityLabel: `${activities.form2Sent} from ${policeForceName}`
       }, user)
     }
 
