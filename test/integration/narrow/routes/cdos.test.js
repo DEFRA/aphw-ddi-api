@@ -1,5 +1,7 @@
 const { mockValidate, mockValidateEnforcement } = require('../../../mocks/auth')
 const { portalHeader, enforcementHeader } = require('../../../mocks/jwt')
+const { buildSummaryCdoDao, buildSummaryRegistrationDao, buildStatusDao } = require('../../../mocks/cdo/get')
+const { buildCdoTaskDto } = require('../../../mocks/cdo/dto')
 
 describe('CDO endpoint', () => {
   const createServer = require('../../../../app/server')
@@ -388,6 +390,96 @@ describe('CDO endpoint', () => {
     const response = await server.inject(options)
     expect(response.statusCode).toBe(200)
     expect(getSummaryCdos).toHaveBeenCalledWith(expectedFilter, undefined, {})
+  })
+
+  test('GET /cdos route returns 200 given tasklist requested applied', async () => {
+    getSummaryCdos.mockResolvedValue(buildSummaryCdoDao({
+      count: 3,
+      cdos: [
+        buildSummaryCdoDao(),
+        buildSummaryCdoDao(),
+        buildSummaryCdoDao({
+          id: 300014,
+          index_number: 'ED300014',
+          status_id: 5,
+          status: buildStatusDao({
+            id: 5,
+            status: 'Pre-exempt',
+            status_type: 'STANDARD'
+          }),
+          registration: buildSummaryRegistrationDao({
+            id: 13,
+            cdo_expiry: '2024-03-01',
+            joined_exemption_scheme: '2023-11-01',
+            application_pack_sent: new Date('2024-12-19'),
+            application_pack_processed: new Date('2024-12-19'),
+            form_two_sent: new Date('2024-12-19')
+          })
+        })
+      ]
+    }))
+    getCdoCounts.mockResolvedValue({
+      preExempt: {
+        total: 3,
+        within30: 3
+      },
+      failed: {
+        nonComplianceLetterNotSent: 0
+      }
+    })
+    const options = {
+      method: 'GET',
+      url: '/cdos?status=PreExempt&withinDays=30&showTasks=Y',
+      ...portalHeader
+    }
+
+    const expectedFilter = { withinDays: 30, status: ['PreExempt'] }
+
+    const response = await server.inject(options)
+    const payload = JSON.parse(response.payload)
+    expect(response.statusCode).toBe(200)
+    expect(getSummaryCdos).toHaveBeenCalledWith(expectedFilter, undefined, {})
+    expect(payload.cdos[2]).toEqual({
+      person: expect.anything(),
+      dog: expect.anything(),
+      exemption: expect.anything(),
+      taskList: [
+        buildCdoTaskDto({
+          key: 'applicationPackSent',
+          available: true,
+          completed: true,
+          readonly: true,
+          timestamp: '2024-12-19T00:00:00.000Z'
+        }),
+        buildCdoTaskDto({
+          key: 'applicationPackProcessed',
+          available: true,
+          completed: true,
+          readonly: true,
+          timestamp: '2024-12-19T00:00:00.000Z'
+        }),
+        buildCdoTaskDto({
+          key: 'insuranceDetailsRecorded',
+          available: true
+        }),
+        buildCdoTaskDto({
+          key: 'applicationFeePaid',
+          available: true
+        }),
+        buildCdoTaskDto({
+          key: 'form2Sent',
+          available: true,
+          completed: true,
+          readonly: true,
+          timestamp: '2024-12-19T00:00:00.000Z'
+        }),
+        buildCdoTaskDto({
+          key: 'verificationDateRecorded',
+          completed: false,
+          available: true
+        })
+      ]
+    })
   })
 
   test('GET /cdos route returns 200 given nonComplianceLetterSent false filter applied', async () => {
