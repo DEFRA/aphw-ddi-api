@@ -11,6 +11,7 @@ describe('cdos - GET schema', () => {
       const expectedQueryParams = {
         status: ['PreExempt'],
         withinDays: 30,
+        showTasks: false,
         noCache: false
       }
 
@@ -26,7 +27,8 @@ describe('cdos - GET schema', () => {
       const validation = getCdosQuerySchema.validate(queryParams, { abortEarly: false })
       const expectedQueryParams = {
         status: ['PreExempt'],
-        noCache: false
+        noCache: false,
+        showTasks: false
       }
 
       expect(validation).toEqual({ value: expectedQueryParams })
@@ -43,7 +45,8 @@ describe('cdos - GET schema', () => {
       const expectedQueryParams = {
         status: ['Failed'],
         nonComplianceLetterSent: true,
-        noCache: false
+        noCache: false,
+        showTasks: false
       }
 
       expect(validation).toEqual({ value: expectedQueryParams })
@@ -53,14 +56,16 @@ describe('cdos - GET schema', () => {
     test('should validate if array of status is passed', () => {
       const queryParams = {
         status: ['PreExempt', 'InterimExempt'],
-        withinDays: '30'
+        withinDays: '30',
+        showTasks: false
       }
 
       const validation = getCdosQuerySchema.validate(queryParams, { abortEarly: false })
       const expectedQueryParams = {
         status: ['PreExempt', 'InterimExempt'],
         withinDays: 30,
-        noCache: false
+        noCache: false,
+        showTasks: false
       }
 
       expect(validation).toEqual({ value: expectedQueryParams })
@@ -75,7 +80,8 @@ describe('cdos - GET schema', () => {
       const validation = getCdosQuerySchema.validate(queryParams, { abortEarly: false })
       const expectedQueryParams = {
         withinDays: 30,
-        noCache: false
+        noCache: false,
+        showTasks: false
       }
 
       expect(validation).toEqual({ value: expectedQueryParams })
@@ -94,7 +100,8 @@ describe('cdos - GET schema', () => {
         status: ['InterimExempt'],
         sortKey: 'joinedExemptionScheme',
         sortOrder: 'DESC',
-        noCache: false
+        noCache: false,
+        showTasks: false
       }
 
       expect(validation).toEqual({ value: expectedQueryParams })
@@ -113,7 +120,8 @@ describe('cdos - GET schema', () => {
         status: ['PreExempt'],
         sortKey: 'policeForce',
         sortOrder: 'DESC',
-        noCache: false
+        noCache: false,
+        showTasks: false
       }
 
       expect(validation).toEqual({ value: expectedQueryParams })
@@ -130,7 +138,8 @@ describe('cdos - GET schema', () => {
       const expectedQueryParams = {
         status: ['PreExempt'],
         sortKey: 'owner',
-        noCache: false
+        noCache: false,
+        showTasks: false
       }
 
       expect(validation).toEqual({ value: expectedQueryParams })
@@ -147,23 +156,26 @@ describe('cdos - GET schema', () => {
       const expectedQueryParams = {
         status: ['PreExempt'],
         sortKey: 'indexNumber',
-        noCache: false
+        noCache: false,
+        showTasks: false
       }
 
       expect(validation).toEqual({ value: expectedQueryParams })
       expect(validation.error).not.toBeDefined()
     })
 
-    test('should validate given no cache set', () => {
+    test('should validate given no cache set and showTasks=Y ', () => {
       const queryParams = {
         status: 'PreExempt',
-        noCache: true
+        noCache: true,
+        showTasks: 'Y'
       }
 
       const validation = getCdosQuerySchema.validate(queryParams, { abortEarly: false })
       const expectedQueryParams = {
         status: ['PreExempt'],
-        noCache: true
+        noCache: true,
+        showTasks: true
       }
 
       expect(validation).toEqual({ value: expectedQueryParams })
