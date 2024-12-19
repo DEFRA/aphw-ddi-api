@@ -560,18 +560,18 @@ const getCdoCount = async (where, cache, useCached) => {
 /**
  * @return {Promise<CdoCount>}
  */
-const getCdoCounts = async (cache, useCached = true) => {
+const getCdoCounts = async (cache, noCache = false) => {
   const total = await getCdoCount({
     '$status.status$': cdoStatusFilter(['PreExempt'])
-  }, cache, useCached)
+  }, cache, !noCache)
   const within30 = await getCdoCount({
     '$status.status$': cdoStatusFilter(['PreExempt']),
     '$registration.cdo_expiry$': cdoExpiryFilter(30)
-  }, cache, useCached)
+  }, cache, !noCache)
   const nonComplianceLetterNotSent = await getCdoCount({
     '$status.status$': cdoStatusFilter(['Failed']),
     '$registration.non_compliance_letter_sent$': cdoNonComplianceFilter(false)
-  }, cache, useCached)
+  }, cache, !noCache)
 
   return {
     preExempt: {
