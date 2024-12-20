@@ -525,7 +525,7 @@ const getSummaryCdos = async (filter, sort, cache) => {
 
   const count = cdos.length
   const cacheKey = getCdoCountCacheKey(where)
-  console.log('~~~~~~ Chris Debug ~~~~~~ getSummaryCdos', 'CacheKey', cacheKey, 'count', count)
+
   await drop(cache, cacheKey)
   await set(cache, cacheKey, count, 60 * 60 * 1000)
 
@@ -539,24 +539,22 @@ const getSummaryCdos = async (filter, sort, cache) => {
  * @return {Promise<number>}
  */
 const getCdoCount = async (where, cache, useCached) => {
-  console.log('~~~~~~ Chris Debug ~~~~~~ getCdoCount', 'UseCached', useCached)
   const cacheKey = getCdoCountCacheKey(where)
-  console.log('~~~~~~ Chris Debug ~~~~~~ getCdoCount', 'CacheKey', cacheKey)
+
   if (useCached) {
-    console.log('~~~~~~ Chris Debug ~~~~~~ getCdoCount using cache', '')
     const cachedValue = await get(cache, cacheKey)
-    console.log('~~~~~~ Chris Debug ~~~~~~ getCdoCount', 'CachedValue', cachedValue)
+
     if (cachedValue) {
-      console.log('~~~~~~ Chris Debug ~~~~~~ getCdoCount  returning cached value', 'CachedValue', cachedValue)
       return cachedValue
     }
   }
 
   const count = await sequelize.models.dog.count({
     where,
+    distinct: true, // needed as count does not automatically de-dupe like findAll does
+    col: 'id',
     include: summaryCdoInclude()
   })
-  console.log(`~~~~~~ Chris Debug ~~~~~~ getCdoCount got result from DB ${cacheKey}`, 'Count', count)
 
   await drop(cache, cacheKey)
   await set(cache, cacheKey, count, 60 * 60 * 1000)
@@ -568,7 +566,6 @@ const getCdoCount = async (where, cache, useCached) => {
  * @return {Promise<CdoCount>}
  */
 const getCdoCounts = async (cache, noCache = false) => {
-  console.log('~~~~~~ Chris Debug ~~~~~~ getoCdoCounts', 'NoCache', noCache)
   const total = await getCdoCount({
     '$status.status$': cdoStatusFilter(['PreExempt'])
   }, cache, !noCache)
@@ -580,8 +577,6 @@ const getCdoCounts = async (cache, noCache = false) => {
     '$status.status$': cdoStatusFilter(['Failed']),
     '$registration.non_compliance_letter_sent$': cdoNonComplianceFilter(false)
   }, cache, !noCache)
-
-  console.log('~~~~~~ Chris Debug ~~~~~~ getCdoCounts final counts', 'Total, within30, nonComplianceLetterNotSent', total, within30, nonComplianceLetterNotSent)
 
   return {
     preExempt: {

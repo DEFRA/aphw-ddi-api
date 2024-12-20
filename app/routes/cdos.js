@@ -55,7 +55,7 @@ module.exports = [
           }
 
           const cache = getCache(request)
-          console.log('~~~~~~ Chris Debug ~~~~~~ Starting request', 'NoCache', noCache)
+
           const summaryCdos = await getSummaryCdos(filter, sort, cache)
           const counts = await getCdoCounts(cache, noCache)
 
@@ -64,7 +64,6 @@ module.exports = [
           const summaryCdosDto = summaryCdos.cdos.map(summaryMapper)
           const count = summaryCdos.count
 
-          console.log('~~~~~~ Chris Debug ~~~~~~ GET /cdos end call', 'Counts, count', counts, count)
           return h.response({ cdos: summaryCdosDto, count, counts }).code(200)
         } catch (e) {
           console.log('Error retrieving cdos:', e)
