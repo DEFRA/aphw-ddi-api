@@ -64,6 +64,7 @@ module.exports = [
           const summaryCdosDto = summaryCdos.cdos.map(summaryMapper)
           const count = summaryCdos.count
 
+          console.log('~~~~~~ Chris Debug ~~~~~~ GET /cdos end call', 'Counts, count', counts, count)
           return h.response({ cdos: summaryCdosDto, count, counts }).code(200)
         } catch (e) {
           console.log('Error retrieving cdos:', e)

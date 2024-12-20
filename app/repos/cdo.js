@@ -539,14 +539,15 @@ const getSummaryCdos = async (filter, sort, cache) => {
  * @return {Promise<number>}
  */
 const getCdoCount = async (where, cache, useCached) => {
-  console.log('~~~~~~ Chris Debug ~~~~~~ ', 'UseCached', useCached)
+  console.log('~~~~~~ Chris Debug ~~~~~~ getCdoCount', 'UseCached', useCached)
   const cacheKey = getCdoCountCacheKey(where)
   console.log('~~~~~~ Chris Debug ~~~~~~ getCdoCount', 'CacheKey', cacheKey)
   if (useCached) {
-    console.log('~~~~~~ Chris Debug ~~~~~~ using cache', '')
+    console.log('~~~~~~ Chris Debug ~~~~~~ getCdoCount using cache', '')
     const cachedValue = await get(cache, cacheKey)
-    console.log('~~~~~~ Chris Debug ~~~~~~ ', 'CachedValue', cachedValue)
+    console.log('~~~~~~ Chris Debug ~~~~~~ getCdoCount', 'CachedValue', cachedValue)
     if (cachedValue) {
+      console.log('~~~~~~ Chris Debug ~~~~~~ getCdoCount  returning cached value', 'CachedValue', cachedValue)
       return cachedValue
     }
   }
@@ -555,6 +556,7 @@ const getCdoCount = async (where, cache, useCached) => {
     where,
     include: summaryCdoInclude()
   })
+  console.log(`~~~~~~ Chris Debug ~~~~~~ getCdoCount got result from DB ${cacheKey}`, 'Count', count)
 
   await drop(cache, cacheKey)
   await set(cache, cacheKey, count, 60 * 60 * 1000)
@@ -578,6 +580,8 @@ const getCdoCounts = async (cache, noCache = false) => {
     '$status.status$': cdoStatusFilter(['Failed']),
     '$registration.non_compliance_letter_sent$': cdoNonComplianceFilter(false)
   }, cache, !noCache)
+
+  console.log('~~~~~~ Chris Debug ~~~~~~ getCdoCounts final counts', 'Total, within30, nonComplianceLetterNotSent', total, within30, nonComplianceLetterNotSent)
 
   return {
     preExempt: {
