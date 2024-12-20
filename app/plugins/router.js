@@ -1,6 +1,7 @@
 require('../data')
 
 const routes = [].concat(
+  require('../routes/attachments'),
   require('../routes/countries'),
   require('../routes/counties'),
   require('../routes/dog'),
