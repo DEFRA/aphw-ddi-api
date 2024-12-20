@@ -15,7 +15,7 @@ const { createOrUpdateInsuranceWithCommand } = require('./insurance')
 const { updateMicrochipKey } = require('./microchip')
 const domain = require('../constants/domain')
 const { submitFormTwo } = require('./formTwo')
-const { set, get } = require('../cache')
+const { set, get, drop } = require('../cache')
 
 /**
  * @typedef DogBreedDao
@@ -524,8 +524,10 @@ const getSummaryCdos = async (filter, sort, cache) => {
   })
 
   const count = cdos.length
-
-  await set(cache, getCdoCountCacheKey(where), count, 60 * 60 * 1000)
+  const cacheKey = getCdoCountCacheKey(where)
+  console.log('~~~~~~ Chris Debug ~~~~~~ getSummaryCdos', 'CacheKey', cacheKey, 'count', count)
+  await drop(cache, cacheKey)
+  await set(cache, cacheKey, count, 60 * 60 * 1000)
 
   return { count, cdos }
 }
@@ -537,11 +539,13 @@ const getSummaryCdos = async (filter, sort, cache) => {
  * @return {Promise<number>}
  */
 const getCdoCount = async (where, cache, useCached) => {
+  console.log('~~~~~~ Chris Debug ~~~~~~ ', 'UseCached', useCached)
   const cacheKey = getCdoCountCacheKey(where)
-
+  console.log('~~~~~~ Chris Debug ~~~~~~ getCdoCount', 'CacheKey', cacheKey)
   if (useCached) {
+    console.log('~~~~~~ Chris Debug ~~~~~~ using cache', '')
     const cachedValue = await get(cache, cacheKey)
-
+    console.log('~~~~~~ Chris Debug ~~~~~~ ', 'CachedValue', cachedValue)
     if (cachedValue) {
       return cachedValue
     }
@@ -552,7 +556,8 @@ const getCdoCount = async (where, cache, useCached) => {
     include: summaryCdoInclude()
   })
 
-  await set(cache, cacheKey, count)
+  await drop(cache, cacheKey)
+  await set(cache, cacheKey, count, 60 * 60 * 1000)
 
   return count
 }
@@ -561,6 +566,7 @@ const getCdoCount = async (where, cache, useCached) => {
  * @return {Promise<CdoCount>}
  */
 const getCdoCounts = async (cache, noCache = false) => {
+  console.log('~~~~~~ Chris Debug ~~~~~~ getoCdoCounts', 'NoCache', noCache)
   const total = await getCdoCount({
     '$status.status$': cdoStatusFilter(['PreExempt'])
   }, cache, !noCache)
