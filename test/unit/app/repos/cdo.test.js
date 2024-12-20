@@ -703,9 +703,9 @@ describe('CDO repo', () => {
         },
         include: expect.anything()
       })
-      expect(setCache).toHaveBeenNthCalledWith(1, cacheObj, 'manage-cdo-count|status-pre-exempt', 3)
-      expect(setCache).toHaveBeenNthCalledWith(2, cacheObj, `manage-cdo-count|status-pre-exempt|expiry-${in30Days.toISOString()}`, 2)
-      expect(setCache).toHaveBeenNthCalledWith(3, cacheObj, 'manage-cdo-count|status-failed|non-compliance-false', 1)
+      expect(setCache).toHaveBeenNthCalledWith(1, cacheObj, 'manage-cdo-count|status-pre-exempt', 3, 3600000)
+      expect(setCache).toHaveBeenNthCalledWith(2, cacheObj, `manage-cdo-count|status-pre-exempt|expiry-${in30Days.toISOString()}`, 2, 3600000)
+      expect(setCache).toHaveBeenNthCalledWith(3, cacheObj, 'manage-cdo-count|status-failed|non-compliance-false', 1, 3600000)
     })
 
     test('should return counts from DB given noCached set to true', async () => {

@@ -55,6 +55,7 @@ module.exports = [
           }
 
           const cache = getCache(request)
+          console.log('~~~~~~ Chris Debug ~~~~~~ Starting request', 'NoCache', noCache)
           const summaryCdos = await getSummaryCdos(filter, sort, cache)
           const counts = await getCdoCounts(cache, noCache)
 
