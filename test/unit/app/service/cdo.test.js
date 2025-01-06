@@ -521,6 +521,60 @@ describe('CdoService', function () {
         }, devUser)
     })
 
+    test('should verifyDates but complete the Request Form 2 if not yet completed', async () => {
+      const microchipVerification = new Date('2024-07-03')
+      const neuteringConfirmation = new Date('2024-07-03')
+
+      const cdoIndexNumber = 'ED300097'
+      const cdoTaskList = new CdoTaskList(buildCdo({
+        exemption: buildExemption({
+          applicationPackSent: new Date(),
+          applicationPackProcessed: new Date()
+        })
+      }))
+      mockCdoRepository.getCdoTaskList.mockResolvedValue(cdoTaskList)
+
+      await cdoService.verifyDates(cdoIndexNumber, {
+        microchipVerification,
+        neuteringConfirmation
+      }, devUser)
+      expect(mockCdoRepository.getCdoTaskList).toHaveBeenCalledWith(cdoIndexNumber)
+      expect(mockCdoRepository.saveCdoTaskList).toHaveBeenCalledWith(cdoTaskList)
+      expect(cdoTaskList.getUpdates().exemption).toEqual([{
+        key: 'form2Sent',
+        value: expect.any(Date),
+        callback: undefined
+      },
+      {
+        key: 'verificationDateRecorded',
+        value: {
+          microchipVerification,
+          neuteringConfirmation,
+          microchipDeadline: null,
+          neuteringDeadline: null,
+          verificationDatesRecorded: expect.any(Date)
+        },
+        callback: expect.any(Function)
+      }])
+      await cdoTaskList.getUpdates().exemption[1].callback()
+      expect(sendUpdateToAudit).toHaveBeenCalledWith(
+        'exemption',
+        {
+          index_number: 'ED300097',
+          neutering_confirmation: null,
+          microchip_verification: null,
+          neutering_deadline: null,
+          microchip_deadline: null
+        },
+        {
+          index_number: 'ED300097',
+          neutering_confirmation: neuteringConfirmation,
+          microchip_verification: microchipVerification,
+          neutering_deadline: null,
+          microchip_deadline: null
+        }, devUser)
+    })
+
     test('should handle repo error', async () => {
       const cdoIndexNumber = 'ED300097'
       const cdoTaskList = new CdoTaskList(buildCdo({

@@ -185,7 +185,7 @@ class VerificationDatesRecordedRule extends CdoTaskListRule {
   }
 
   get available () {
-    return this._form2Sent.completed
+    return this._applicationPackSent.completed
   }
 
   get neuteringRulesPassed () {

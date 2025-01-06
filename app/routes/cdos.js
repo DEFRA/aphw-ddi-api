@@ -55,6 +55,7 @@ module.exports = [
           }
 
           const cache = getCache(request)
+
           const summaryCdos = await getSummaryCdos(filter, sort, cache)
           const counts = await getCdoCounts(cache, noCache)
 

@@ -683,7 +683,9 @@ describe('CDO repo', () => {
         where: {
           '$status.status$': ['Pre-exempt']
         },
-        include: expect.anything()
+        include: expect.anything(),
+        col: 'id',
+        distinct: true
       })
       expect(sequelize.models.dog.count).toHaveBeenNthCalledWith(2, {
         where: {
@@ -692,7 +694,9 @@ describe('CDO repo', () => {
             [Op.lte]: expect.any(Date)
           }
         },
-        include: expect.anything()
+        include: expect.anything(),
+        col: 'id',
+        distinct: true
       })
       expect(sequelize.models.dog.count).toHaveBeenNthCalledWith(3, {
         where: {
@@ -701,11 +705,13 @@ describe('CDO repo', () => {
             [Op.is]: null
           }
         },
-        include: expect.anything()
+        include: expect.anything(),
+        col: 'id',
+        distinct: true
       })
-      expect(setCache).toHaveBeenNthCalledWith(1, cacheObj, 'manage-cdo-count|status-pre-exempt', 3)
-      expect(setCache).toHaveBeenNthCalledWith(2, cacheObj, `manage-cdo-count|status-pre-exempt|expiry-${in30Days.toISOString()}`, 2)
-      expect(setCache).toHaveBeenNthCalledWith(3, cacheObj, 'manage-cdo-count|status-failed|non-compliance-false', 1)
+      expect(setCache).toHaveBeenNthCalledWith(1, cacheObj, 'manage-cdo-count|status-pre-exempt', 3, 3600000)
+      expect(setCache).toHaveBeenNthCalledWith(2, cacheObj, `manage-cdo-count|status-pre-exempt|expiry-${in30Days.toISOString()}`, 2, 3600000)
+      expect(setCache).toHaveBeenNthCalledWith(3, cacheObj, 'manage-cdo-count|status-failed|non-compliance-false', 1, 3600000)
     })
 
     test('should return counts from DB given noCached set to true', async () => {
