@@ -1,7 +1,6 @@
-const wreck = require('@hapi/wreck')
-const config = require('../config/index')
 const { testAttachmentResponseSchema, testAttachmentRequestSchema } = require('../schema/attachments')
 const { scopes } = require('../constants/auth')
+const { populateTemplate } = require('../proxy/documents')
 
 module.exports = [
   {
@@ -25,8 +24,8 @@ module.exports = [
         }
       },
       handler: async (request, h) => {
-        const options = { payload: request.payload }
-        await wreck.post(`${config.ddiDocumentsApi.baseUrl}/populate-template`, options)
+        // const options = { payload: request.payload }
+        // await populateTemplate(options)
 
         return h.response({
           status: 'ok',
