@@ -15,7 +15,7 @@ const { createOrUpdateInsuranceWithCommand } = require('./insurance')
 const { updateMicrochipKey } = require('./microchip')
 const domain = require('../constants/domain')
 const { submitFormTwo } = require('./formTwo')
-const { set, get } = require('../cache')
+const { set, get, drop } = require('../cache')
 
 /**
  * @typedef DogBreedDao
@@ -524,8 +524,10 @@ const getSummaryCdos = async (filter, sort, cache) => {
   })
 
   const count = cdos.length
+  const cacheKey = getCdoCountCacheKey(where)
 
-  await set(cache, getCdoCountCacheKey(where), count, 60 * 60 * 1000)
+  await drop(cache, cacheKey)
+  await set(cache, cacheKey, count, 60 * 60 * 1000)
 
   return { count, cdos }
 }
@@ -549,10 +551,13 @@ const getCdoCount = async (where, cache, useCached) => {
 
   const count = await sequelize.models.dog.count({
     where,
+    distinct: true, // needed as count does not automatically de-dupe like findAll does
+    col: 'id',
     include: summaryCdoInclude()
   })
 
-  await set(cache, cacheKey, count)
+  await drop(cache, cacheKey)
+  await set(cache, cacheKey, count, 60 * 60 * 1000)
 
   return count
 }
