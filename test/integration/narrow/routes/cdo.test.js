@@ -1,7 +1,7 @@
 const { payload: mockCreatePayload, payloadWithPersonReference: mockCreateWithRefPayload } = require('../../../mocks/cdo/create')
 const { NotFoundError } = require('../../../../app/errors/not-found')
 const { CdoTaskList } = require('../../../../app/data/domain')
-const { buildCdo, buildCdoDog, buildExemption, buildCdoInsurance } = require('../../../mocks/cdo/domain')
+const { buildCdo, buildCdoDog, buildExemption, buildCdoInsurance, buildCdoPerson, buildCdoPersonContactDetails } = require('../../../mocks/cdo/domain')
 const { ActionAlreadyPerformedError } = require('../../../../app/errors/domain/actionAlreadyPerformed')
 const { devUser, mockValidate, mockValidateEnforcement } = require('../../../mocks/auth')
 const { SequenceViolationError } = require('../../../../app/errors/domain/sequenceViolation')
@@ -334,7 +334,13 @@ describe('CDO endpoint', () => {
 
   describe('GET /cdo/ED123/manage', () => {
     test('should return an initialised manage cdo task list', async () => {
-      const cdoTaskList = new CdoTaskList(buildCdo())
+      const cdoTaskList = new CdoTaskList(buildCdo({
+        person: buildCdoPerson({
+          contactDetails: buildCdoPersonContactDetails({
+            email: 'alex@carter.co.uk'
+          })
+        })
+      }))
       cdoRepository.getCdoTaskList.mockResolvedValue(cdoTaskList)
       const getTaskListMock = jest.fn(_ => cdoTaskList)
       getCdoService.mockReturnValue({
@@ -426,7 +432,12 @@ describe('CDO endpoint', () => {
           },
           person: {
             firstName: 'Alex',
-            lastName: 'Carter'
+            lastName: 'Carter',
+            email: 'alex@carter.co.uk',
+            addressLine1: '300 Anywhere St',
+            addressLine2: 'Anywhere Estate',
+            town: 'City of London',
+            postcode: 'S1 1AA'
           }
         }
       })
@@ -586,7 +597,11 @@ describe('CDO endpoint', () => {
           },
           person: {
             firstName: 'Alex',
-            lastName: 'Carter'
+            lastName: 'Carter',
+            addressLine1: '300 Anywhere St',
+            addressLine2: 'Anywhere Estate',
+            postcode: 'S1 1AA',
+            town: 'City of London'
           }
         }
       })

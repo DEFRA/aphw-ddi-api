@@ -1,5 +1,5 @@
 const { buildPersonAddressDao } = require('./get')
-const { Cdo, ContactDetails, Person, Dog, Exemption, CdoTask, CdoTaskList } = require('../../../app/data/domain')
+const { Cdo, ContactDetails, Person, Dog, Exemption, CdoTask, CdoTaskList, Address } = require('../../../app/data/domain')
 const { BreachCategory } = require('../../../app/data/domain')
 
 /**
@@ -16,14 +16,22 @@ const { BreachCategory } = require('../../../app/data/domain')
  */
 
 /**
- * @param {Partial<{email: string}>} cdoPersonContactPartial
- * @return {{email: string}}
+ * @param {Partial<{email: string, address: Address }>} cdoPersonContactPartial
+ * @return {ContactDetails}
  */
 const buildCdoPersonContactDetails = (cdoPersonContactPartial = {}) => {
-  return {
-    email: 'alex@carter.co.uk',
-    ...cdoPersonContactPartial
-  }
+  const email = Object.hasOwn(cdoPersonContactPartial, 'email') ? cdoPersonContactPartial.email : 'alex@carter.co.uk'
+  const address =
+      Object.hasOwn(cdoPersonContactPartial, 'address')
+        ? cdoPersonContactPartial.address
+        : new Address({
+          addressLine1: '300 Anywhere St',
+          addressLine2: 'Anywhere Estate',
+          town: 'City of London',
+          postcode: 'S1 1AA'
+        })
+
+  return new ContactDetails(email, address)
 }
 
 /**
@@ -40,7 +48,9 @@ const buildCdoPerson = (cdoPersonPartial = {}) => ({
     buildPersonAddressDao()
   ],
   person_contacts: [],
-  contactDetails: new ContactDetails(),
+  contactDetails: buildCdoPersonContactDetails({
+    email: undefined
+  }),
   organisationName: null,
   ...cdoPersonPartial
 })

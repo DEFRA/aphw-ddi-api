@@ -112,7 +112,11 @@ describe('CdoTaskList', () => {
         certificateIssued: undefined,
         ownerFirstName: 'Alex',
         ownerLastName: 'Carter',
-        status: 'Pre-exempt'
+        status: 'Pre-exempt',
+        addressLine1: '300 Anywhere St',
+        addressLine2: 'Anywhere Estate',
+        postcode: 'S1 1AA',
+        town: 'City of London'
       })
     })
 
@@ -174,7 +178,11 @@ describe('CdoTaskList', () => {
         neuteringConfirmation: undefined,
         microchipVerification: undefined,
         certificateIssued: undefined,
-        status: 'Interim exempt'
+        status: 'Interim exempt',
+        addressLine1: '300 Anywhere St',
+        addressLine2: 'Anywhere Estate',
+        postcode: 'S1 1AA',
+        town: 'City of London'
       })
     })
 
@@ -691,7 +699,11 @@ describe('CdoTaskList', () => {
         microchipVerification: new Date('2024-03-09'),
         microchipDeadline: new Date('2024-08-07'),
         certificateIssued: new Date('2024-06-27'),
-        status: 'Interim exempt'
+        status: 'Interim exempt',
+        addressLine1: '300 Anywhere St',
+        addressLine2: 'Anywhere Estate',
+        postcode: 'S1 1AA',
+        town: 'City of London'
       })
     })
   })

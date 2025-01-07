@@ -115,7 +115,12 @@ class CdoTaskList {
       dogName: this._cdo.dog.name,
       cdoExpiry: this._cdo.exemption.cdoExpiry,
       ownerFirstName: this._cdo.person.firstName,
-      ownerLastName: this._cdo.person.lastName
+      ownerLastName: this._cdo.person.lastName,
+      ownerEmail: this._cdo.person.contactDetails.email,
+      addressLine1: this._cdo.person.contactDetails.addressLine1,
+      addressLine2: this._cdo.person.contactDetails.addressLine2,
+      town: this._cdo.person.contactDetails.town,
+      postcode: this._cdo.person.contactDetails.postcode
     }
   }
 

@@ -80,7 +80,12 @@ const manageCdoResponseSchema = Joi.object({
     }).optional(),
     person: Joi.object({
       firstName: Joi.string().allow('').allow(null).optional(),
-      lastName: Joi.string().allow('').allow(null).optional()
+      lastName: Joi.string().allow('').allow(null).optional(),
+      email: Joi.string().optional(),
+      addressLine1: Joi.string().optional(),
+      addressLine2: Joi.string().optional(),
+      town: Joi.string().optional(),
+      postcode: Joi.string().optional()
     }).optional(),
     exemption: Joi.object({
       cdoExpiry: Joi.date().optional(),

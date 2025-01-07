@@ -12,7 +12,8 @@ const {
   buildRegistrationDao,
   buildDogDao,
   dogBreachDAOs, buildFormTwoDao, buildSummaryRegistrationDao, buildSummaryCdoDao, buildDogMicrochipDao,
-  buildInsuranceCompanyDao, buildPersonDao, buildContactDao
+  buildInsuranceCompanyDao, buildPersonDao, buildContactDao, buildContactContactDao, buildPersonAddressDao,
+  buildAddressDao
 } = require('../../../../mocks/cdo/get')
 const {
   buildCdo, buildExemption, buildCdoInsurance, NOT_COVERED_BY_INSURANCE, INSECURE_PLACE,
@@ -424,104 +425,55 @@ describe('cdo mappers', () => {
   describe('mapPersonContactsToContactDetails', () => {
     test('should map contacts', () => {
       const personContacts = [
-        {
-          id: 300307,
-          person_id: 100145,
-          contact_id: 300307,
-          created_at: '2025-01-07T12:52:54.823Z',
-          deleted_at: null,
-          updated_at: '2025-01-07T12:52:54.997Z',
-          contact: {
-            id: 300307,
+        buildContactDao({
+          contact: buildContactContactDao({
             contact: 'sherlock@holmes1.co.uk',
-            contact_type_id: 2,
-            created_at: '2025-01-07T12:52:54.823Z',
-            deleted_at: null,
-            updated_at: '2025-01-07T12:52:54.993Z',
             contact_type: { id: 2, contact_type: 'Email' }
-          }
-        },
-        {
-          id: 300307,
-          person_id: 100145,
-          contact_id: 300307,
-          created_at: '2025-01-07T12:52:54.823Z',
-          deleted_at: null,
-          updated_at: '2025-01-07T12:52:54.997Z',
+          })
+        }),
+        buildContactDao({
           contact: undefined
-        },
-        {
-          id: 300308,
-          person_id: 100145,
-          contact_id: 300308,
-          created_at: '2025-01-07T12:52:54.823Z',
-          deleted_at: null,
-          updated_at: '2025-01-07T12:52:55.005Z',
-          contact: {
-            id: 300308,
+        }),
+        buildContactDao({
+          contact: buildContactContactDao({
             contact: '',
-            contact_type_id: 1,
-            created_at: '2025-01-07T12:52:54.823Z',
-            deleted_at: null,
-            updated_at: '2025-01-07T12:52:55.003Z',
             contact_type: { id: 1, contact_type: 'Phone' }
-          }
-        },
-        {
-          id: 300309,
-          person_id: 100145,
-          contact_id: 300309,
-          created_at: '2025-01-07T12:52:54.823Z',
-          deleted_at: null,
-          updated_at: '2025-01-07T12:52:55.016Z',
-          contact: {
-            id: 300309,
+          })
+        }),
+        buildContactDao({
+          contact: buildContactContactDao({
             contact: '',
-            contact_type_id: 3,
-            created_at: '2025-01-07T12:52:54.823Z',
-            deleted_at: null,
-            updated_at: '2025-01-07T12:52:55.011Z',
             contact_type: { id: 3, contact_type: 'SecondaryPhone' }
-          }
-        },
-        {
-          id: 300310,
-          person_id: 100145,
-          contact_id: 300310,
-          created_at: '2025-01-07T13:05:12.500Z',
-          deleted_at: null,
-          updated_at: '2025-01-07T13:05:12.674Z',
-          contact: {
-            id: 300310,
+          })
+        }),
+        buildContactDao({
+          contact: buildContactContactDao({
             contact: 'sherlock2@holmes.co.uk',
-            contact_type_id: 2,
-            created_at: '2025-01-07T13:05:12.500Z',
-            deleted_at: null,
-            updated_at: '2025-01-07T13:05:12.668Z',
             contact_type: { id: 2, contact_type: 'Email' }
-          }
-        },
-        {
-          id: 300311,
-          person_id: 100145,
-          contact_id: 300311,
-          created_at: '2025-01-07T13:05:21.533Z',
-          deleted_at: null,
-          updated_at: '2025-01-07T13:05:21.669Z',
-          contact: {
-            id: 300311,
+          })
+        }),
+        buildContactDao({
+          contact: buildContactContactDao({
             contact: 'sherlock@holmes.co.uk',
-            contact_type_id: 2,
-            created_at: '2025-01-07T13:05:21.533Z',
-            deleted_at: null,
-            updated_at: '2025-01-07T13:05:21.666Z',
             contact_type: { id: 2, contact_type: 'Email' }
-          }
-        }]
-      const contactDetails = mapPersonContactsToContactDetails(personContacts)
+          })
+        })]
+      const addresses = [buildPersonAddressDao({
+        address: buildAddressDao({
+          address_line_1: '300 Anywhere St',
+          address_line_2: 'Anywhere Estate',
+          town: 'City of London',
+          postcode: 'S1 1AA'
+        })
+      })]
+      const contactDetails = mapPersonContactsToContactDetails(personContacts, addresses)
       expect(contactDetails).toBeInstanceOf(ContactDetails)
       expect(contactDetails.phone).toBe(undefined)
       expect(contactDetails.email).toBe('sherlock@holmes.co.uk')
+      expect(contactDetails.addressLine1).toBe('300 Anywhere St')
+      expect(contactDetails.addressLine2).toBe('Anywhere Estate')
+      expect(contactDetails.town).toBe('City of London')
+      expect(contactDetails.postcode).toBe('S1 1AA')
     })
 
     test('should map null contacts', () => {
@@ -541,12 +493,17 @@ describe('cdo mappers', () => {
         person_contacts: personContacts,
         contactDetails: buildCdoPersonContactDetails({
           email: 'alex@carter.co.uk'
+
         })
 
       }))
       const person = mapCdoPersonToPerson(personDao)
       expect(person).toEqual(expectedPerson)
       expect(person.contactDetails.email).toEqual('alex@carter.co.uk')
+      expect(person.contactDetails.addressLine1).toEqual('300 Anywhere St')
+      expect(person.contactDetails.addressLine2).toEqual('Anywhere Estate')
+      expect(person.contactDetails.town).toEqual('City of London')
+      expect(person.contactDetails.postcode).toEqual('S1 1AA')
     })
   })
 
