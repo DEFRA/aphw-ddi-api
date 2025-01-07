@@ -7,6 +7,7 @@ function Person (personProperties) {
   this.addresses = personProperties.addresses
   this.person_contacts = personProperties.person_contacts
   this.organisationName = personProperties.organisationName
+  this.contactDetails = personProperties.contactDetails
 }
 
 module.exports = Person

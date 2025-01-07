@@ -4,6 +4,7 @@ const Dog = require('./dog')
 const Exemption = require('./exemption')
 const Person = require('./person')
 const BreachCategory = require('./breachCategory')
+const ContactDetails = require('./contactDetails')
 
 module.exports = {
   Cdo,
@@ -12,5 +13,6 @@ module.exports = {
   Dog,
   Exemption,
   Person,
+  ContactDetails,
   BreachCategory
 }

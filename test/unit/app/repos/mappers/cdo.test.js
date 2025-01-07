@@ -1,17 +1,24 @@
-const { mapSummaryCdoDaoToDto, mapCdoDaoToCdo, mapCdoDaoToExemption, mapDogDaoToDog, mapSummaryCdoDaoToDtoWithTasks } = require('../../../../../app/repos/mappers/cdo')
+const {
+  mapPersonContactsToContactDetails,
+  mapSummaryCdoDaoToDto,
+  mapCdoDaoToCdo,
+  mapCdoDaoToExemption,
+  mapDogDaoToDog,
+  mapSummaryCdoDaoToDtoWithTasks, mapCdoPersonToPerson
+} = require('../../../../../app/repos/mappers/cdo')
 const {
   buildCdoDao,
   buildInsuranceDao,
   buildRegistrationDao,
   buildDogDao,
   dogBreachDAOs, buildFormTwoDao, buildSummaryRegistrationDao, buildSummaryCdoDao, buildDogMicrochipDao,
-  buildInsuranceCompanyDao
+  buildInsuranceCompanyDao, buildPersonDao, buildContactDao
 } = require('../../../../mocks/cdo/get')
 const {
   buildCdo, buildExemption, buildCdoInsurance, NOT_COVERED_BY_INSURANCE, INSECURE_PLACE,
-  AWAY_FROM_ADDR_30_DAYS_IN_YR
+  AWAY_FROM_ADDR_30_DAYS_IN_YR, buildCdoPerson, buildCdoPersonContactDetails
 } = require('../../../../mocks/cdo/domain')
-const { Exemption } = require('../../../../../app/data/domain')
+const { Exemption, ContactDetails, Person } = require('../../../../../app/data/domain')
 const { buildCdoTaskDto } = require('../../../../mocks/cdo/dto')
 
 describe('cdo mappers', () => {
@@ -414,6 +421,135 @@ describe('cdo mappers', () => {
     })
   })
 
+  describe('mapPersonContactsToContactDetails', () => {
+    test('should map contacts', () => {
+      const personContacts = [
+        {
+          id: 300307,
+          person_id: 100145,
+          contact_id: 300307,
+          created_at: '2025-01-07T12:52:54.823Z',
+          deleted_at: null,
+          updated_at: '2025-01-07T12:52:54.997Z',
+          contact: {
+            id: 300307,
+            contact: 'sherlock@holmes1.co.uk',
+            contact_type_id: 2,
+            created_at: '2025-01-07T12:52:54.823Z',
+            deleted_at: null,
+            updated_at: '2025-01-07T12:52:54.993Z',
+            contact_type: { id: 2, contact_type: 'Email' }
+          }
+        },
+        {
+          id: 300307,
+          person_id: 100145,
+          contact_id: 300307,
+          created_at: '2025-01-07T12:52:54.823Z',
+          deleted_at: null,
+          updated_at: '2025-01-07T12:52:54.997Z',
+          contact: undefined
+        },
+        {
+          id: 300308,
+          person_id: 100145,
+          contact_id: 300308,
+          created_at: '2025-01-07T12:52:54.823Z',
+          deleted_at: null,
+          updated_at: '2025-01-07T12:52:55.005Z',
+          contact: {
+            id: 300308,
+            contact: '',
+            contact_type_id: 1,
+            created_at: '2025-01-07T12:52:54.823Z',
+            deleted_at: null,
+            updated_at: '2025-01-07T12:52:55.003Z',
+            contact_type: { id: 1, contact_type: 'Phone' }
+          }
+        },
+        {
+          id: 300309,
+          person_id: 100145,
+          contact_id: 300309,
+          created_at: '2025-01-07T12:52:54.823Z',
+          deleted_at: null,
+          updated_at: '2025-01-07T12:52:55.016Z',
+          contact: {
+            id: 300309,
+            contact: '',
+            contact_type_id: 3,
+            created_at: '2025-01-07T12:52:54.823Z',
+            deleted_at: null,
+            updated_at: '2025-01-07T12:52:55.011Z',
+            contact_type: { id: 3, contact_type: 'SecondaryPhone' }
+          }
+        },
+        {
+          id: 300310,
+          person_id: 100145,
+          contact_id: 300310,
+          created_at: '2025-01-07T13:05:12.500Z',
+          deleted_at: null,
+          updated_at: '2025-01-07T13:05:12.674Z',
+          contact: {
+            id: 300310,
+            contact: 'sherlock2@holmes.co.uk',
+            contact_type_id: 2,
+            created_at: '2025-01-07T13:05:12.500Z',
+            deleted_at: null,
+            updated_at: '2025-01-07T13:05:12.668Z',
+            contact_type: { id: 2, contact_type: 'Email' }
+          }
+        },
+        {
+          id: 300311,
+          person_id: 100145,
+          contact_id: 300311,
+          created_at: '2025-01-07T13:05:21.533Z',
+          deleted_at: null,
+          updated_at: '2025-01-07T13:05:21.669Z',
+          contact: {
+            id: 300311,
+            contact: 'sherlock@holmes.co.uk',
+            contact_type_id: 2,
+            created_at: '2025-01-07T13:05:21.533Z',
+            deleted_at: null,
+            updated_at: '2025-01-07T13:05:21.666Z',
+            contact_type: { id: 2, contact_type: 'Email' }
+          }
+        }]
+      const contactDetails = mapPersonContactsToContactDetails(personContacts)
+      expect(contactDetails).toBeInstanceOf(ContactDetails)
+      expect(contactDetails.phone).toBe(undefined)
+      expect(contactDetails.email).toBe('sherlock@holmes.co.uk')
+    })
+
+    test('should map null contacts', () => {
+      const personContacts = []
+      const contactDetails = mapPersonContactsToContactDetails(personContacts)
+      expect(contactDetails).toBeInstanceOf(ContactDetails)
+    })
+  })
+
+  describe('mapCdoPersonToPerson', () => {
+    test('should map a cdo person to a person', () => {
+      const personContacts = [buildContactDao()]
+      const personDao = buildPersonDao({
+        person_contacts: personContacts
+      })
+      const expectedPerson = new Person(buildCdoPerson({
+        person_contacts: personContacts,
+        contactDetails: buildCdoPersonContactDetails({
+          email: 'alex@carter.co.uk'
+        })
+
+      }))
+      const person = mapCdoPersonToPerson(personDao)
+      expect(person).toEqual(expectedPerson)
+      expect(person.contactDetails.email).toEqual('alex@carter.co.uk')
+    })
+  })
+
   describe('mapCdoDaoToExemption', () => {
     test('should map a CdoDao to an Exemption', () => {
       const exemption = buildRegistrationDao()
@@ -501,6 +637,7 @@ describe('cdo mappers', () => {
       const expectedCdo = buildCdo()
       expect(mapCdoDaoToCdo(cdoDao)).toEqual(expectedCdo)
     })
+
     test('should map a CdoDao to a model with insurance', () => {
       const cdoDao = buildCdoDao({
         insurance: [

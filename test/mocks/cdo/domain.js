@@ -1,5 +1,5 @@
 const { buildPersonAddressDao } = require('./get')
-const { Cdo, Person, Dog, Exemption, CdoTask, CdoTaskList } = require('../../../app/data/domain')
+const { Cdo, ContactDetails, Person, Dog, Exemption, CdoTask, CdoTaskList } = require('../../../app/data/domain')
 const { BreachCategory } = require('../../../app/data/domain')
 
 /**
@@ -12,7 +12,19 @@ const { BreachCategory } = require('../../../app/data/domain')
  * @property {PersonAddressDao[]} addresses
  * @property {string} person_contacts
  * @property {string} organisationName
+ * @property {ContactDetails} contactDetails
  */
+
+/**
+ * @param {Partial<{email: string}>} cdoPersonContactPartial
+ * @return {{email: string}}
+ */
+const buildCdoPersonContactDetails = (cdoPersonContactPartial = {}) => {
+  return {
+    email: 'alex@carter.co.uk',
+    ...cdoPersonContactPartial
+  }
+}
 
 /**
  * @param {Partial<PersonParams>} cdoPersonPartial
@@ -28,6 +40,7 @@ const buildCdoPerson = (cdoPersonPartial = {}) => ({
     buildPersonAddressDao()
   ],
   person_contacts: [],
+  contactDetails: new ContactDetails(),
   organisationName: null,
   ...cdoPersonPartial
 })
@@ -292,6 +305,7 @@ const allBreaches = [
 ]
 
 module.exports = {
+  buildCdoPersonContactDetails,
   buildCdoPerson,
   buildCdoDog,
   buildCdoInsurance,

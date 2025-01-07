@@ -41,7 +41,7 @@
  * @protected {SummaryTaskDto[]} taskList
  */
 
-const { Person, Cdo, Dog, Exemption } = require('../../data/domain')
+const { Person, Cdo, Dog, Exemption, ContactDetails } = require('../../data/domain')
 const { getMicrochip } = require('../../dto/dto-helper')
 const { mapDogBreachDaoToBreachCategory } = require('./dog')
 const {
@@ -126,6 +126,20 @@ const mapSummaryCdoDaoToDtoWithTasks = (summaryCdo) => {
   }
 }
 
+/**
+ * @param {PersonContactDao[]} personContactsDao
+ * @return {ContactDetails}
+ */
+const mapPersonContactsToContactDetails = (personContactsDao) => {
+  const email = personContactsDao.reduce((email, contact) => {
+    if (contact.contact?.contact_type.contact_type === 'Email') {
+      return contact.contact.contact
+    }
+    return email
+  }, undefined)
+  return new ContactDetails(email)
+}
+
 const mapCdoPersonToPerson = (person) => {
   const params = {
     id: person.id,
@@ -135,7 +149,8 @@ const mapCdoPersonToPerson = (person) => {
     dateOfBirth: person.birth_date,
     addresses: person.addresses,
     person_contacts: person.person_contacts,
-    organisationName: person.organisation?.organisation_name ?? null
+    organisationName: person.organisation?.organisation_name ?? null,
+    contactDetails: mapPersonContactsToContactDetails(person.person_contacts)
   }
 
   return new Person(params)
@@ -212,7 +227,9 @@ const mapCdoDaoToCdo = (cdoDao) => {
 module.exports = {
   mapSummaryCdoDaoToDto,
   mapSummaryCdoDaoToDtoWithTasks,
+  mapCdoPersonToPerson,
   mapCdoDaoToCdo,
   mapCdoDaoToExemption,
-  mapDogDaoToDog
+  mapDogDaoToDog,
+  mapPersonContactsToContactDetails
 }
