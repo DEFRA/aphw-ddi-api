@@ -22,7 +22,6 @@ const uploadsContainer = blobServiceClient.getContainerClient(config.uploadsCont
 const attachmentsContainer = blobServiceClient.getContainerClient(config.attachmentsContainer)
 
 const initialiseContainers = async () => {
-  console.log('InitialiseCOntainers', config.createContainers)
   if (config.createContainers) {
     console.log('Making sure blob containers exist')
     await uploadsContainer.createIfNotExists()
