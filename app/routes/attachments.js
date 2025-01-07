@@ -24,8 +24,8 @@ module.exports = [
         }
       },
       handler: async (request, h) => {
-        // const options = { payload: request.payload }
-        // await populateTemplate(options)
+        const options = { payload: request.payload }
+        await populateTemplate(options)
 
         return h.response({
           status: 'ok',
