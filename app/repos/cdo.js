@@ -400,7 +400,6 @@ const summaryCdoInclude = () => ([
   {
     model: sequelize.models.registration,
     as: 'registration',
-    attributes: ['id', 'cdo_expiry', 'joined_exemption_scheme', 'non_compliance_letter_sent'],
     include: [
       {
         model: sequelize.models.police_force,
