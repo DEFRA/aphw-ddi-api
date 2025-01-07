@@ -1,7 +1,8 @@
 const schemaDebug = (schema, payload) => {
-  const { error, ...all } = schema.validate(payload)
-  console.log('~~~~~~ Chris Debug ~~~~~~ ', 'All', all)
+  const { error } = schema.validate(payload)
+
   if (error) {
+    console.log('Payload failed schema validation', payload)
     console.error('Schema validation failed', error)
   }
 }
