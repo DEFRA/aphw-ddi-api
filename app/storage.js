@@ -18,12 +18,14 @@ if (config.useConnectionStr) {
   blobServiceClient = new BlobServiceClient(uri, new DefaultAzureCredential())
 }
 
-const container = blobServiceClient.getContainerClient(config.container)
+const uploadsContainer = blobServiceClient.getContainerClient(config.uploadsContainer)
+const attachmentsContainer = blobServiceClient.getContainerClient(config.attachmentsContainer)
 
 const initialiseContainers = async () => {
   if (config.createContainers) {
     console.log('Making sure blob containers exist')
-    await container.createIfNotExists()
+    await uploadsContainer.createIfNotExists()
+    await attachmentsContainer.createIfNotExists()
     console.log('Containers ready')
   }
   foldersInitialised ?? await initialiseFolders()
@@ -33,27 +35,31 @@ const initialiseContainers = async () => {
 const initialiseFolders = async () => {
   console.log('Making sure folders exist')
   const placeHolderText = 'Placeholder'
-  const inboundClient = container.getBlockBlobClient('default.txt')
+  const inboundClient = uploadsContainer.getBlockBlobClient('default.txt')
   await inboundClient.upload(placeHolderText, placeHolderText.length)
   foldersInitialised = true
   console.log('Folders ready')
 }
 
-const downloadBlob = async (filename) => {
-  containersInitialised ?? await initialiseContainers()
-  return await container.getBlockBlobClient(filename).downloadToBuffer()
+const getContainer = (containerName) => {
+  return containerName === config.uploadsContainer ? uploadsContainer : attachmentsContainer
 }
 
-const getBlob = async (filename) => {
+const downloadBlob = async (filename, containerName = config.uploadsContainer) => {
   containersInitialised ?? await initialiseContainers()
-  return container.getBlockBlobClient(filename)
+  return await getContainer(containerName).getBlockBlobClient(filename).downloadToBuffer()
 }
 
-const getInboundFileList = async () => {
+const getBlob = async (filename, containerName = config.uploadsContainer) => {
+  containersInitialised ?? await initialiseContainers()
+  return getContainer(containerName).getBlockBlobClient(filename)
+}
+
+const getInboundFileList = async (containerName = config.uploadsContainer) => {
   containersInitialised ?? await initialiseContainers()
 
   const fileList = []
-  for await (const file of container.listBlobsFlat()) {
+  for await (const file of getContainer(containerName).listBlobsFlat()) {
     if (!file.name.endsWith('/default.txt')) {
       fileList.push(file.name)
     }
@@ -62,14 +68,14 @@ const getInboundFileList = async () => {
   return fileList
 }
 
-const getInboundFileDetails = async (filename) => {
-  const blob = await getBlob(filename)
+const getInboundFileDetails = async (filename, containerName = config.uploadsContainer) => {
+  const blob = await getBlob(filename, containerName)
   return blob.getProperties()
 }
 
-const uploadInboundFile = async (stream, filename) => {
+const uploadInboundFile = async (stream, filename, containerName = config.uploadsContainer) => {
   containersInitialised ?? await initialiseContainers()
-  const blockBlobClient = await getBlob(filename)
+  const blockBlobClient = await getBlob(filename, containerName)
   await blockBlobClient.uploadStream(stream,
     uploadOptions.bufferSize, uploadOptions.maxBuffers)
 
