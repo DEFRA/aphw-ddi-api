@@ -18,6 +18,7 @@ module.exports = {
   CERTIFICATE_REQUESTED: 'uk.gov.defra.aphw.ddi.certificate.requested',
   activities: {
     applicationPackSent: 'Application pack',
+    applicationPackEmailed: 'Application pack',
     applicationPackProcessed: 'Application pack',
     form2Sent: 'Form 2'
   }
