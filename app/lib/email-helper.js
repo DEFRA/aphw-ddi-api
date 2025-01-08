@@ -4,6 +4,8 @@ const { lookupPoliceForceByEmail } = require('../repos/police-forces')
 const { sendEmail } = require('../messaging/send-email')
 const { sendActivityToAudit } = require('../messaging/send-audit')
 const { v4: uuidv4 } = require('uuid')
+const { populateTemplate } = require('../proxy/documents')
+const { getLiveTemplate } = require('../storage/utilities')
 
 const sendReportSomethingEmails = async (payload) => {
   const userField = payload?.fields.find(x => x.name === 'ReportedBy')
@@ -189,10 +191,46 @@ const sendForm2Emails = async (indexNumber, dogName, microchipNumber, unfit, mic
   await sendEmail(dataPolice)
 }
 
-const emailApplicationPack = (indexNumber, { dogName }, { firstName, lastName, email }) => {
-  console.log('indexNumber', indexNumber)
-  console.log('dogName', dogName)
-  console.log('ownerDetails', { firstName, lastName, email })
+const emailApplicationPack = async (person, dog, _user) => {
+  const { name, indexNumber } = dog
+  const { firstName, lastName, email } = person
+
+  const dogName = name && name !== '' ? name : 'Your dog'
+
+  const templateData = {
+    fileInfo: {
+      filename: await getLiveTemplate(emailTypes.sendApplicationPack),
+      fileGuid: uuidv4(),
+      saveFile: true
+    },
+    fieldData: {
+      ddi_index_number: indexNumber
+    }
+  }
+
+  await populateTemplate(templateData)
+
+  const customFields = [
+    { name: 'dog_name', value: dogName },
+    { name: 'dog_name_with_apostrophy', value: `${dogName}'s` },
+    { name: 'owner_name', value: `${firstName} ${lastName}` },
+    { name: 'index_number', value: indexNumber },
+    { name: 'file_key_to_attach', value: 'link_to_file' },
+    { name: 'filename_for_display', value: `Defra application pack for ${dogName} ${indexNumber}.pdf` },
+    { name: 'link_to_file', value: `temp-populations/${templateData.fileInfo.fileGuid}.pdf` }
+  ]
+
+  const emailData = {
+    toAddress: email,
+    type: emailTypes.sendApplicationPack,
+    customFields
+  }
+
+  await sendEmail(emailData)
+
+  return {
+    emailAddress: email
+  }
 }
 
 const postApplicationPack = (indexNumber, { dogName }, ownerDetails) => {

@@ -5,7 +5,8 @@ const emailTypes = {
   userInvite: 'user-invite',
   reportSomething: 'report-something',
   form2SubmissionToDefra: 'form2-submission-to-defra',
-  form2ConfirmationToPolice: 'form2-confirmation-to-police'
+  form2ConfirmationToPolice: 'form2-confirmation-to-police',
+  sendApplicationPack: 'send-application-pack'
 }
 
 const reportSomethingSubjectLines = {
