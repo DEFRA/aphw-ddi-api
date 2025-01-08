@@ -248,6 +248,10 @@ class CdoTaskList {
     this._cdo.exemption.sendApplicationPack(sentDate, callback)
   }
 
+  postApplicationPack (sentDate, callback) {
+    this._cdo.exemption.sendApplicationPack(sentDate, callback)
+  }
+
   processApplicationPack (sentDate, callback) {
     this._actionPackCompleteGuard()
     if (this.applicationPackProcessed.completed) {

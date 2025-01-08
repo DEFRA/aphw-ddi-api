@@ -19,6 +19,7 @@ module.exports = {
   activities: {
     applicationPackSent: 'Application pack',
     applicationPackEmailed: 'Application pack',
+    applicationPackPosted: 'Application pack',
     applicationPackProcessed: 'Application pack',
     form2Sent: 'Form 2'
   }

@@ -1,4 +1,4 @@
-const { buildCdo, buildExemption, buildCdoInsurance, buildCdoDog, buildCdoPerson } = require('../../../mocks/cdo/domain')
+const { buildCdo, buildExemption, buildCdoInsurance, buildCdoDog, buildCdoPerson, buildCdoPersonContactDetails } = require('../../../mocks/cdo/domain')
 const { CdoTaskList, Cdo, Person, Dog, Exemption } = require('../../../../app/data/domain')
 const { devUser } = require('../../../mocks/auth')
 const { ActionAlreadyPerformedError } = require('../../../../app/errors/domain/actionAlreadyPerformed')
@@ -24,7 +24,7 @@ describe('CdoService', function () {
   const { microchipExists } = require('../../../../app/repos/microchip')
 
   jest.mock('../../../../app/lib/email-helper')
-  const { sendForm2Emails, emailApplicationPack } = require('../../../../app/lib/email-helper')
+  const { sendForm2Emails, emailApplicationPack, postApplicationPack } = require('../../../../app/lib/email-helper')
 
   const { CdoService } = require('../../../../app/service/cdo')
 
@@ -185,17 +185,6 @@ describe('CdoService', function () {
       }])
       await cdoTaskList.getUpdates().exemption[0].callback()
       expect(emailApplicationPack).toHaveBeenCalledWith(person, dog, devUser)
-      // TODO: This will probably change
-      expect(sendActivityToAudit).toHaveBeenCalledWith({
-        activity: 9,
-        activityType: 'sent',
-        pk: 'ED300097',
-        source: 'dog',
-        activityDate: sentDate,
-        targetPk: 'dog',
-        activityLabel: 'Application pack'
-      }, devUser)
-
       expect(updatePersonEmail).toHaveBeenCalledWith('P-1234-56', 'garrymcfadyen@hotmail.com', devUser)
       sendActivityToAudit.mockClear()
     })
@@ -207,6 +196,72 @@ describe('CdoService', function () {
       mockCdoRepository.saveCdoTaskList.mockRejectedValue(new Error('error whilst saving'))
 
       await expect(cdoService.emailApplicationPack(cdoIndexNumber, sentDate, devUser)).rejects.toThrow(new Error('error whilst saving'))
+    })
+  })
+
+  describe('postApplicationPack', () => {
+    const sentDate = new Date()
+    const cdoIndexNumber = 'ED300097'
+
+    // TODO: this will probably change
+    const applicationPackPostedEventLabel = { id: 9, label: 'Application pack' }
+    getActivityByLabel.mockResolvedValue(applicationPackPostedEventLabel)
+
+    test('should post application pack', async () => {
+      const person = new Person(buildCdoPerson({
+        personReference: 'P-1234-56',
+        firstName: 'Garry',
+        lastName: 'McFadyen',
+        contactDetails: buildCdoPersonContactDetails({
+          address: {
+            addressLine1: '122 Common Road',
+            addressLine2: null,
+            postcode: 'TN39 4JB',
+            town: 'Bexhill-on-Sea',
+            country: 'England'
+          }
+        })
+      }))
+      const dog = new Dog(buildCdoDog())
+      const exemption = new Exemption(buildExemption())
+      const cdo = new Cdo(person, dog, exemption)
+      const cdoTaskList = new CdoTaskList(cdo)
+
+      mockCdoRepository.getCdoTaskList.mockResolvedValue(cdoTaskList)
+
+      await cdoService.postApplicationPack(cdoIndexNumber, sentDate, devUser)
+
+      expect(getActivityByLabel).toHaveBeenCalledWith(activities.applicationPackPosted)
+      expect(mockCdoRepository.getCdoTaskList).toHaveBeenCalledWith(cdoIndexNumber)
+      expect(mockCdoRepository.saveCdoTaskList).toHaveBeenCalledWith(cdoTaskList)
+      expect(cdoTaskList.getUpdates().exemption).toEqual([{
+        key: 'applicationPackSent',
+        value: sentDate,
+        callback: expect.any(Function)
+      }])
+      await cdoTaskList.getUpdates().exemption[0].callback()
+      // TODO: This will probably change
+      expect(sendActivityToAudit).toHaveBeenCalledWith({
+        activity: 9,
+        activityType: 'sent',
+        pk: 'ED300097',
+        source: 'dog',
+        activityDate: sentDate,
+        targetPk: 'dog',
+        activityLabel: 'Application pack'
+      }, devUser)
+
+      expect(postApplicationPack).toHaveBeenCalledWith(person, dog, devUser)
+      sendActivityToAudit.mockClear()
+    })
+
+    test('should handle repo error', async () => {
+      const cdoIndexNumber = 'ED300097'
+      const cdoTaskList = new CdoTaskList(buildCdo())
+      mockCdoRepository.getCdoTaskList.mockResolvedValue(cdoTaskList)
+      mockCdoRepository.saveCdoTaskList.mockRejectedValue(new Error('error whilst saving'))
+
+      await expect(cdoService.postApplicationPack(cdoIndexNumber, sentDate, devUser)).rejects.toThrow(new Error('error whilst saving'))
     })
   })
 
