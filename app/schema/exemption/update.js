@@ -31,6 +31,7 @@ const payloadSchema2015NonXlb = exemption.append({
 })
 
 const payloadSchema2023 = exemption.append({
+  neuteringDeadline: Joi.date().iso().optional(),
   microchipDeadline: Joi.date().iso().optional(),
   typedByDlo: Joi.date().iso().optional(),
   withdrawn: Joi.date().iso().optional()

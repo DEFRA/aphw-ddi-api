@@ -137,6 +137,7 @@ const updateRegistration = (registration, data, policeForce) => {
 
 const handleOrderSpecificFields = (registration, data) => {
   if (registration.exemption_order.exemption_order === '2023') {
+    registration.neutering_deadline = data.neuteringDeadline ?? null
     registration.microchip_deadline = data.microchipDeadline ?? null
     registration.typed_by_dlo = data.typedByDlo ?? null
     registration.withdrawn = data.withdrawn ?? null
