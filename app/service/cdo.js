@@ -9,7 +9,8 @@ const { activities } = require('../constants/event/events')
 const { stripTime } = require('../dto/dto-helper')
 const { EXEMPTION, DOG } = require('../constants/event/audit-event-object-types')
 const { microchipExists } = require('../repos/microchip')
-const { sendForm2Emails } = require('../lib/email-helper')
+const { sendForm2Emails, emailApplicationPack, postApplicationPack } = require('../lib/email-helper')
+const { updatePersonEmail } = require('../repos/people')
 
 /**
  * @param {CdoRepository} cdoRepository
@@ -58,6 +59,71 @@ class CdoService {
       await this.cdoRepository.saveCdoTaskList(cdoTaskList)
     } catch (e) {
       console.error('Error in CdoService.sendApplicationPack whilst updating the aggregrate')
+      throw e
+    }
+  }
+
+  async emailApplicationPack (cdoId, email, sentDate, user) {
+    const cdoTaskList = await this.cdoRepository.getCdoTaskList(cdoId)
+    const activityType = await getActivityByLabel(activities.applicationPackEmailed)
+
+    if (!cdoTaskList.person.contactDetails.email) {
+      await updatePersonEmail(cdoTaskList.person.personReference, email, user)
+      cdoTaskList.person.contactDetails.email = email
+    }
+
+    const emailActivityCallback = async () => {
+      if (cdoTaskList.person) {
+        await emailApplicationPack(cdoTaskList.person, cdoTaskList.dog, user)
+      }
+
+      await sendActivityToAudit({
+        activity: activityType.id,
+        activityType: 'sent',
+        pk: cdoId,
+        source: 'dog',
+        activityDate: sentDate,
+        targetPk: 'dog',
+        activityLabel: activities.applicationPackSent
+      }, user)
+
+      // await updatePersonEmail(cdoTaskList.person.personReference, email)
+    }
+
+    await cdoTaskList.emailApplicationPack(sentDate, emailActivityCallback)
+
+    try {
+      return await this.cdoRepository.saveCdoTaskList(cdoTaskList)
+    } catch (e) {
+      console.error('Error in CdoService.emailApplicationPack whilst updating the aggregrate')
+      throw e
+    }
+  }
+
+  async postApplicationPack (cdoId, sentDate, user) {
+    const cdoTaskList = await this.cdoRepository.getCdoTaskList(cdoId)
+    const activityType = await getActivityByLabel(activities.applicationPackEmailed)
+
+    const postApplicationPackCallback = async () => {
+      await postApplicationPack(cdoTaskList.person, cdoTaskList.dog, user)
+
+      await sendActivityToAudit({
+        activity: activityType.id,
+        activityType: 'sent',
+        pk: cdoId,
+        source: 'dog',
+        activityDate: sentDate,
+        targetPk: 'dog',
+        activityLabel: activities.applicationPackSent
+      }, user)
+    }
+
+    await cdoTaskList.postApplicationPack(sentDate, postApplicationPackCallback)
+
+    try {
+      return await this.cdoRepository.saveCdoTaskList(cdoTaskList)
+    } catch (e) {
+      console.error('Error in CdoService.postApplicationPack whilst updating the aggregrate')
       throw e
     }
   }

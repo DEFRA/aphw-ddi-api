@@ -755,7 +755,7 @@ describe('CDO endpoint', () => {
       }
       const response = await server.inject(options)
       expect(response.statusCode).toBe(200)
-      expect(emailApplicationPackMock).toHaveBeenCalledWith('ED123', 'garrymcfadyen@hotmail.com', devUser)
+      expect(emailApplicationPackMock).toHaveBeenCalledWith('ED123', 'garrymcfadyen@hotmail.com', expect.any(Date), devUser)
       expect(JSON.parse(response.payload)).toEqual({
         email: 'garrymcfadyen@hotmail.com'
       })

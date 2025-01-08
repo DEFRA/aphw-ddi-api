@@ -19,8 +19,6 @@ const { InvalidDateError } = require('../errors/domain/invalidDate')
 const { getCdoByIndexNumberSchema } = require('../schema/cdo/response')
 const { auditDogDetailsView, auditDogActivityView, auditDogCdoProgressView } = require('../dto/auditing/view')
 const { scopes } = require('../constants/auth')
-const { schemaDebug } = require('../lib/log-helpers')
-const { cdo } = require('../../test/mocks/cdo/get')
 
 /**
  * @param e
@@ -246,7 +244,7 @@ module.exports = [
         /**
          * @type {CdoTaskList}
          */
-        const cdoTaskList = await cdoService.emailApplicationPack(indexNumber, email, getCallingUser(request))
+        const cdoTaskList = await cdoService.emailApplicationPack(indexNumber, email, new Date(), getCallingUser(request))
 
         return h.response({
           email: cdoTaskList.cdoSummary.ownerEmail

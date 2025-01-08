@@ -37,10 +37,16 @@ class CdoTaskList {
     return this._cdo.exemption
   }
 
+  /**
+   * @return {Person}
+   */
   get person () {
     return this._cdo.person
   }
 
+  /**
+   * @return {Dog}
+   */
   get dog () {
     return this._cdo.dog
   }
@@ -235,6 +241,14 @@ class CdoTaskList {
     if (this.applicationPackSent.completed) {
       throw new ActionAlreadyPerformedError('Application pack can only be sent once')
     }
+    this._cdo.exemption.sendApplicationPack(sentDate, callback)
+  }
+
+  emailApplicationPack (sentDate, callback) {
+    this._cdo.exemption.sendApplicationPack(sentDate, callback)
+  }
+
+  postApplicationPack (sentDate, callback) {
     this._cdo.exemption.sendApplicationPack(sentDate, callback)
   }
 
