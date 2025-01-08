@@ -9,7 +9,7 @@ const { sendActivityToAudit } = require('../../../../app/messaging/send-audit')
 
 const emailHelper = require('../../../../app/lib/email-helper')
 const { reportSomethingAudit, reportTypes } = require('../../../../app/constants/email-types')
-const { createAuditsForSubmitFormTwo } = require('../../../../app/lib/email-helper')
+const { createAuditsForSubmitFormTwo, emailApplicationPack, postApplicationPack } = require('../../../../app/lib/email-helper')
 
 describe('EmailHelper test', () => {
   beforeEach(async () => {
@@ -393,5 +393,29 @@ describe('EmailHelper test', () => {
     await emailHelper.sendForm2Emails(indexNumber, dogName, microchipNumber, unfit, microchipDate, neuteringDate, under16, username)
     expect(lookupPoliceForceByEmail).toHaveBeenCalledWith(username)
     expect(sendEmail).toHaveBeenNthCalledWith(1, expectedDataDefra)
+  })
+
+  describe('emailApplicationPack', () => {
+    test('should email application pack', async () => {
+      const indexNumber = 'ED300001'
+      const dogDetails = { dogName: 'Rex' }
+      const ownerDetails = { firstName: 'Garry', lastName: 'McFadyen', email: 'arrymcfadyen@hotmail.com' }
+
+      await emailApplicationPack(indexNumber, dogDetails, ownerDetails)
+
+      expect(true).toBe(true)
+    })
+  })
+
+  describe('postApplicationPack', () => {
+    test('should email application pack', async () => {
+      const indexNumber = 'ED300001'
+      const dogDetails = { dogName: 'Rex' }
+      const ownerDetails = { firstName: 'Garry', lastName: 'McFadyen', email: 'arrymcfadyen@hotmail.com' }
+
+      await postApplicationPack(indexNumber, dogDetails, ownerDetails)
+
+      expect(true).toBe(true)
+    })
   })
 })

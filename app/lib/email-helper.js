@@ -189,9 +189,24 @@ const sendForm2Emails = async (indexNumber, dogName, microchipNumber, unfit, mic
   await sendEmail(dataPolice)
 }
 
+const emailApplicationPack = (indexNumber, { dogName }, { firstName, lastName, email }) => {
+  console.log('indexNumber', indexNumber)
+  console.log('dogName', dogName)
+  console.log('ownerDetails', { firstName, lastName, email })
+}
+
+const postApplicationPack = (indexNumber, { dogName }, ownerDetails) => {
+  const { firstName, lastName, email, addressLine1, addressLine2, town, postcode } = ownerDetails
+  console.log('indexNumber', indexNumber)
+  console.log('dogName', dogName)
+  console.log('ownerDetails', { firstName, lastName, email, addressLine1, addressLine2, town, postcode })
+}
+
 module.exports = {
   sendReportSomethingEmails,
   sendForm2Emails,
   createAuditsForReportSomething,
-  createAuditsForSubmitFormTwo
+  createAuditsForSubmitFormTwo,
+  emailApplicationPack,
+  postApplicationPack
 }
