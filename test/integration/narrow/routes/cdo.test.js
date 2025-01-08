@@ -1,6 +1,6 @@
 const { payload: mockCreatePayload, payloadWithPersonReference: mockCreateWithRefPayload } = require('../../../mocks/cdo/create')
 const { NotFoundError } = require('../../../../app/errors/not-found')
-const { CdoTaskList } = require('../../../../app/data/domain')
+const { CdoTaskList, Address } = require('../../../../app/data/domain')
 const { buildCdo, buildCdoDog, buildExemption, buildCdoInsurance, buildCdoPerson, buildCdoPersonContactDetails } = require('../../../mocks/cdo/domain')
 const { ActionAlreadyPerformedError } = require('../../../../app/errors/domain/actionAlreadyPerformed')
 const { devUser, mockValidate, mockValidateEnforcement } = require('../../../mocks/auth')
@@ -10,6 +10,8 @@ const { InvalidDataError } = require('../../../../app/errors/domain/invalidData'
 const { InvalidDateError } = require('../../../../app/errors/domain/invalidDate')
 const { buildCdoDao } = require('../../../mocks/cdo/get')
 const { portalHeader, enforcementHeader } = require('../../../mocks/jwt')
+const { getCdoService } = require('../../../../app/service/config')
+const { validate } = require('../../../../app/auth/token-validator')
 
 describe('CDO endpoint', () => {
   const createServer = require('../../../../app/server')
@@ -713,6 +715,197 @@ describe('CDO endpoint', () => {
       const options = {
         method: 'POST',
         url: '/cdo/ED123/manage:sendApplicationPack',
+        ...portalHeader
+      }
+
+      const response = await server.inject(options)
+      expect(response.statusCode).toBe(500)
+    })
+  })
+
+  describe('POST /cdo/ED123/manage:emailApplicationPack', () => {
+    test('should return 200', async () => {
+      const emailApplicationPackMock = jest.fn()
+      getCdoService.mockReturnValue({
+        emailApplicationPack: emailApplicationPackMock
+      })
+      emailApplicationPackMock.mockResolvedValue(new CdoTaskList(buildCdo({
+        person: buildCdoPerson({
+          firstName: 'Garry',
+          lastName: 'McFadyen',
+          contactDetails: buildCdoPersonContactDetails({
+            email: 'garrymcfadyen@hotmail.com',
+            address: new Address({
+              addressLine1: '122 Common Road',
+              addressLine2: null,
+              town: 'Bexhill-on-Sea',
+              postcode: 'TN39 4JB'
+            })
+          })
+        })
+      })))
+
+      const options = {
+        method: 'POST',
+        url: '/cdo/ED123/manage:emailApplicationPack',
+        payload: {
+          email: 'garrymcfadyen@hotmail.com'
+        },
+        ...portalHeader
+      }
+      const response = await server.inject(options)
+      expect(response.statusCode).toBe(200)
+      expect(emailApplicationPackMock).toHaveBeenCalledWith('ED123', 'garrymcfadyen@hotmail.com', devUser)
+      expect(JSON.parse(response.payload)).toEqual({
+        email: 'garrymcfadyen@hotmail.com'
+      })
+    })
+
+    test('should return 403 given call from enforcement', async () => {
+      validate.mockResolvedValue(mockValidateEnforcement)
+
+      const options = {
+        method: 'POST',
+        url: '/cdo/ED123/manage:emailApplicationPack',
+        payload: {
+          email: 'garrymcfadyen@hotmail.com'
+        },
+        ...portalHeader
+      }
+      const response = await server.inject(options)
+      expect(response.statusCode).toBe(403)
+    })
+
+    test('should throw a 400 given empty payload', async () => {
+      const options = {
+        method: 'POST',
+        url: '/cdo/ED123/manage:emailApplicationPack',
+        payload: {},
+        ...portalHeader
+      }
+
+      const response = await server.inject(options)
+      expect(response.statusCode).toBe(400)
+    })
+
+    test('should throw a 404 given index does not exist', async () => {
+      getCdoService.mockReturnValue({
+        emailApplicationPack: async () => {
+          throw new NotFoundError('not found')
+        }
+      })
+      const options = {
+        method: 'POST',
+        url: '/cdo/ED123/manage:emailApplicationPack',
+        payload: {
+          email: 'garrymcfadyen@hotmail.com'
+        },
+        ...portalHeader
+      }
+
+      const response = await server.inject(options)
+      expect(response.statusCode).toBe(404)
+    })
+
+    test('should returns 500 given server error thrown', async () => {
+      getCdoService.mockReturnValue({
+        emailApplicationPack: async () => {
+          throw new Error('cdo error')
+        }
+      })
+
+      const options = {
+        method: 'POST',
+        url: '/cdo/ED123/manage:emailApplicationPack',
+        payload: {
+          email: 'garrymcfadyen@hotmail.com'
+        },
+        ...portalHeader
+      }
+
+      const response = await server.inject(options)
+      expect(response.statusCode).toBe(500)
+    })
+  })
+
+  describe('POST /cdo/ED123/manage:postApplicationPack', () => {
+    test('should return 200', async () => {
+      const postApplicationPackMock = jest.fn()
+      getCdoService.mockReturnValue({
+        postApplicationPack: postApplicationPackMock
+      })
+      postApplicationPackMock.mockResolvedValue(new CdoTaskList(buildCdo({
+        person: buildCdoPerson({
+          firstName: 'Garry',
+          lastName: 'McFadyen',
+          contactDetails: buildCdoPersonContactDetails({
+            email: undefined,
+            address: new Address({
+              addressLine1: '122 Common Road',
+              addressLine2: null,
+              town: 'Bexhill-on-Sea',
+              postcode: 'TN39 4JB'
+            })
+          })
+        })
+      })))
+
+      const options = {
+        method: 'POST',
+        url: '/cdo/ED123/manage:postApplicationPack',
+        ...portalHeader
+      }
+      const response = await server.inject(options)
+      expect(response.statusCode).toBe(200)
+      expect(postApplicationPackMock).toHaveBeenCalledWith('ED123', expect.any(Date), devUser)
+      expect(JSON.parse(response.payload)).toEqual({
+        firstName: 'Garry',
+        lastName: 'McFadyen',
+        addressLine1: '122 Common Road',
+        addressLine2: null,
+        town: 'Bexhill-on-Sea',
+        postcode: 'TN39 4JB'
+      })
+    })
+
+    test('should return 403 given call from enforcement', async () => {
+      validate.mockResolvedValue(mockValidateEnforcement)
+
+      const options = {
+        method: 'POST',
+        url: '/cdo/ED123/manage:postApplicationPack',
+        ...portalHeader
+      }
+      const response = await server.inject(options)
+      expect(response.statusCode).toBe(403)
+    })
+
+    test('should throw a 404 given index does not exist', async () => {
+      getCdoService.mockReturnValue({
+        postApplicationPack: async () => {
+          throw new NotFoundError('not found')
+        }
+      })
+      const options = {
+        method: 'POST',
+        url: '/cdo/ED123/manage:postApplicationPack',
+        ...portalHeader
+      }
+
+      const response = await server.inject(options)
+      expect(response.statusCode).toBe(404)
+    })
+
+    test('should returns 500 given server error thrown', async () => {
+      getCdoService.mockReturnValue({
+        postApplicationPack: async () => {
+          throw new Error('cdo error')
+        }
+      })
+
+      const options = {
+        method: 'POST',
+        url: '/cdo/ED123/manage:postApplicationPack',
         ...portalHeader
       }
 

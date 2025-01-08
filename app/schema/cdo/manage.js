@@ -1,6 +1,10 @@
 const Joi = require('joi')
 const { formatDate } = require('../../lib/date-helpers')
 
+const emailApplicationPackPayloadSchema = Joi.object({
+  email: Joi.string().allow('').required()
+}).required()
+
 const recordInsuranceDetailsSchema = Joi.object({
   insuranceCompany: Joi.string().allow('').required(),
   insuranceRenewal: Joi.date().required().when('insuranceCompany', { is: '', then: Joi.valid(null).required(), otherwise: Joi.date().required() })
@@ -125,7 +129,21 @@ const submitFormTwoSchema = Joi.object({
   dogNotFitForMicrochip: Joi.boolean().default(false)
 })
 
+const emailApplicationPackResponseSchema = Joi.object({
+  email: Joi.string().required()
+})
+
+const postApplicationPackResponseSchema = Joi.object({
+  firstName: Joi.string().allow('').required(),
+  lastName: Joi.string().allow('').required(),
+  addressLine1: Joi.string().allow('').allow(null).required(),
+  addressLine2: Joi.string().allow('').allow(null).required(),
+  town: Joi.string().allow('').allow(null).required(),
+  postcode: Joi.string().allow('').allow(null).required()
+}).required()
+
 module.exports = {
+  emailApplicationPackPayloadSchema,
   recordInsuranceDetailsSchema,
   recordInsuranceDetailsResponseSchema,
   recordMicrochipNumberSchema,
@@ -137,5 +155,7 @@ module.exports = {
   simpleConflictSchema,
   recordMicrochipNumberConflictSchema,
   issueCertificateResponseSchema,
-  submitFormTwoSchema
+  submitFormTwoSchema,
+  emailApplicationPackResponseSchema,
+  postApplicationPackResponseSchema
 }
