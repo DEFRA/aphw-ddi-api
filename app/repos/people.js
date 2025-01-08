@@ -591,6 +591,12 @@ const purgePersonByReferenceNumber = async (reference, user, transaction) => {
   await sendPermanentDeleteToAudit(PERSON, person, user)
 }
 
+const updatePersonEmail = (personReference, email, user, transaction) => {
+  console.log('personReference', personReference, 'email', email, 'user', user, 'transaction', transaction)
+
+  return new Error('To be implemented')
+}
+
 module.exports = {
   createPeople,
   getPersonByReference,
@@ -600,5 +606,6 @@ module.exports = {
   updatePersonFields,
   getOwnerOfDog,
   deletePerson,
-  purgePersonByReferenceNumber
+  purgePersonByReferenceNumber,
+  updatePersonEmail
 }
