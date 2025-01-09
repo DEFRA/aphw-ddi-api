@@ -85,7 +85,7 @@ const manageCdoResponseSchema = Joi.object({
     person: Joi.object({
       firstName: Joi.string().allow('').allow(null).optional(),
       lastName: Joi.string().allow('').allow(null).optional(),
-      email: Joi.string().allow(null).optional(),
+      email: Joi.string().allow(null).allow('').optional(),
       addressLine1: Joi.string().allow('').allow(null).optional(),
       addressLine2: Joi.string().allow('').allow(null).optional(),
       town: Joi.string().allow(null).optional(),
