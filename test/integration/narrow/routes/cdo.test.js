@@ -10,8 +10,6 @@ const { InvalidDataError } = require('../../../../app/errors/domain/invalidData'
 const { InvalidDateError } = require('../../../../app/errors/domain/invalidDate')
 const { buildCdoDao } = require('../../../mocks/cdo/get')
 const { portalHeader, enforcementHeader } = require('../../../mocks/jwt')
-const { getCdoService } = require('../../../../app/service/config')
-const { validate } = require('../../../../app/auth/token-validator')
 
 describe('CDO endpoint', () => {
   const createServer = require('../../../../app/server')

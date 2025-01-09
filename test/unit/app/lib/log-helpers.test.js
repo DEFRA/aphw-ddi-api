@@ -6,14 +6,14 @@ describe('log-helpers', () => {
   describe('schemaDebug', () => {
     const schema = Joi.object({ test: Joi.boolean().required() }).required()
 
-    it('should do nothing if schema is valid', () => {
+    test('should do nothing if schema is valid', () => {
       const logSpy = jest.spyOn(global.console, 'error')
       schemaDebug(schema, { test: true })
       expect(logSpy).not.toHaveBeenCalled()
       logSpy.mockRestore()
     })
 
-    it('should log an error is schema is invalid', () => {
+    test('should log an error is schema is invalid', () => {
       const logSpy = jest.spyOn(global.console, 'error')
       schemaDebug(schema, {})
       expect(logSpy).toHaveBeenCalledWith('Schema validation failed', new ValidationError('"test" is required'))
