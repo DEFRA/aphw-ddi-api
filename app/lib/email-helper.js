@@ -233,7 +233,7 @@ const emailApplicationPack = async (person, dog, _user) => {
   }
 }
 
-const postApplicationPack = (indexNumber, { dogName }, ownerDetails) => {
+const postApplicationPack = async (indexNumber, { dogName }, ownerDetails) => {
   const { firstName, lastName, email, addressLine1, addressLine2, town, postcode } = ownerDetails
   console.log('indexNumber', indexNumber)
   console.log('dogName', dogName)

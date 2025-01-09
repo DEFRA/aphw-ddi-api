@@ -73,9 +73,7 @@ class CdoService {
     }
 
     const emailActivityCallback = async () => {
-      if (cdoTaskList.person) {
-        await emailApplicationPack(cdoTaskList.person, cdoTaskList.dog, user)
-      }
+      await emailApplicationPack(cdoTaskList.person, cdoTaskList.dog, user)
 
       await sendActivityToAudit({
         activity: activityType.id,
