@@ -134,6 +134,29 @@ const createPeople = async (owners, transaction) => {
  * @property {number} address_id
  * @property {AddressDao} address
  */
+
+/**
+ * @typedef PersonContactContactDao
+ * @property {number} id - 300097,
+ * @property {string} contact - 'alex@carter.co.uk',
+ * @property {number} contact_type_id - 2,
+ * @property {null|Date} created_at - '2025-01-07T12:52:54.823Z',
+ * @property {null|Date} deleted_at - null,
+ * @property {null|Date} updated_at - '2025-01-07T12:52:54.993Z',
+ * @property {{id: number; contact_type: 'Email'|'Phone'}}  contact_type
+ *
+ */
+
+/**
+ * @typedef PersonContactDao
+ * @property {number} id - e.g. 300308,
+ * @property {number} person_id - e.g. 100145,
+ * @property {number} contact_id - e.g. 300308,
+ * @property {null|Date} created_at - e.g. '2025-01-07T12:52:54.823Z',
+ * @property {null|Date} deleted_at - e.g. null,
+ * @property {null|Date} updated_at - e.g. '2025-01-07T12:52:55.005Z',
+ * @property {PersonContactContactDao} contact
+ */
 /**
  * @typedef PersonDao
  * @property {number} id
@@ -142,7 +165,7 @@ const createPeople = async (owners, transaction) => {
  * @property {string} person_reference
  * @property {string} birth_date
  * @property {PersonAddressDao[]} addresses
- * @property {unknown[]} person_contacts
+ * @property {PersonContactDao[]} person_contacts
  */
 /**
  * @typedef SummmaryPersonDao
@@ -568,6 +591,12 @@ const purgePersonByReferenceNumber = async (reference, user, transaction) => {
   await sendPermanentDeleteToAudit(PERSON, person, user)
 }
 
+const updatePersonEmail = async (personReference, email, user, transaction) => {
+  console.log('personReference', personReference, 'email', email, 'user', user, 'transaction', transaction)
+
+  return new Error('To be implemented')
+}
+
 module.exports = {
   createPeople,
   getPersonByReference,
@@ -577,5 +606,6 @@ module.exports = {
   updatePersonFields,
   getOwnerOfDog,
   deletePerson,
-  purgePersonByReferenceNumber
+  purgePersonByReferenceNumber,
+  updatePersonEmail
 }

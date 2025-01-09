@@ -1,17 +1,25 @@
-const { mapSummaryCdoDaoToDto, mapCdoDaoToCdo, mapCdoDaoToExemption, mapDogDaoToDog, mapSummaryCdoDaoToDtoWithTasks } = require('../../../../../app/repos/mappers/cdo')
+const {
+  mapPersonContactsToContactDetails,
+  mapSummaryCdoDaoToDto,
+  mapCdoDaoToCdo,
+  mapCdoDaoToExemption,
+  mapDogDaoToDog,
+  mapSummaryCdoDaoToDtoWithTasks, mapCdoPersonToPerson
+} = require('../../../../../app/repos/mappers/cdo')
 const {
   buildCdoDao,
   buildInsuranceDao,
   buildRegistrationDao,
   buildDogDao,
   dogBreachDAOs, buildFormTwoDao, buildSummaryRegistrationDao, buildSummaryCdoDao, buildDogMicrochipDao,
-  buildInsuranceCompanyDao
+  buildInsuranceCompanyDao, buildPersonDao, buildContactDao, buildContactContactDao, buildPersonAddressDao,
+  buildAddressDao
 } = require('../../../../mocks/cdo/get')
 const {
   buildCdo, buildExemption, buildCdoInsurance, NOT_COVERED_BY_INSURANCE, INSECURE_PLACE,
-  AWAY_FROM_ADDR_30_DAYS_IN_YR
+  AWAY_FROM_ADDR_30_DAYS_IN_YR, buildCdoPerson, buildCdoPersonContactDetails
 } = require('../../../../mocks/cdo/domain')
-const { Exemption } = require('../../../../../app/data/domain')
+const { Exemption, ContactDetails, Person } = require('../../../../../app/data/domain')
 const { buildCdoTaskDto } = require('../../../../mocks/cdo/dto')
 
 describe('cdo mappers', () => {
@@ -414,6 +422,91 @@ describe('cdo mappers', () => {
     })
   })
 
+  describe('mapPersonContactsToContactDetails', () => {
+    test('should map contacts', () => {
+      const personContacts = [
+        buildContactDao({
+          contact: buildContactContactDao({
+            contact: 'sherlock@holmes1.co.uk',
+            contact_type: { id: 2, contact_type: 'Email' }
+          })
+        }),
+        buildContactDao({
+          contact: undefined
+        }),
+        buildContactDao({
+          contact: buildContactContactDao({
+            contact: '',
+            contact_type: { id: 1, contact_type: 'Phone' }
+          })
+        }),
+        buildContactDao({
+          contact: buildContactContactDao({
+            contact: '',
+            contact_type: { id: 3, contact_type: 'SecondaryPhone' }
+          })
+        }),
+        buildContactDao({
+          contact: buildContactContactDao({
+            contact: 'sherlock2@holmes.co.uk',
+            contact_type: { id: 2, contact_type: 'Email' }
+          })
+        }),
+        buildContactDao({
+          contact: buildContactContactDao({
+            contact: 'sherlock@holmes.co.uk',
+            contact_type: { id: 2, contact_type: 'Email' }
+          })
+        })]
+      const addresses = [buildPersonAddressDao({
+        address: buildAddressDao({
+          address_line_1: '300 Anywhere St',
+          address_line_2: 'Anywhere Estate',
+          town: 'City of London',
+          postcode: 'S1 1AA'
+        })
+      })]
+      const contactDetails = mapPersonContactsToContactDetails(personContacts, addresses)
+      expect(contactDetails).toBeInstanceOf(ContactDetails)
+      expect(contactDetails.phone).toBe(undefined)
+      expect(contactDetails.email).toBe('sherlock@holmes.co.uk')
+      expect(contactDetails.addressLine1).toBe('300 Anywhere St')
+      expect(contactDetails.addressLine2).toBe('Anywhere Estate')
+      expect(contactDetails.town).toBe('City of London')
+      expect(contactDetails.postcode).toBe('S1 1AA')
+    })
+
+    test('should map null contacts', () => {
+      const personContacts = []
+      const contactDetails = mapPersonContactsToContactDetails(personContacts)
+      expect(contactDetails).toBeInstanceOf(ContactDetails)
+    })
+  })
+
+  describe('mapCdoPersonToPerson', () => {
+    test('should map a cdo person to a person', () => {
+      const personContacts = [buildContactDao()]
+      const personDao = buildPersonDao({
+        person_contacts: personContacts
+      })
+      const expectedPerson = new Person(buildCdoPerson({
+        person_contacts: personContacts,
+        contactDetails: buildCdoPersonContactDetails({
+          email: 'alex@carter.co.uk'
+
+        })
+
+      }))
+      const person = mapCdoPersonToPerson(personDao)
+      expect(person).toEqual(expectedPerson)
+      expect(person.contactDetails.email).toEqual('alex@carter.co.uk')
+      expect(person.contactDetails.addressLine1).toEqual('300 Anywhere St')
+      expect(person.contactDetails.addressLine2).toEqual('Anywhere Estate')
+      expect(person.contactDetails.town).toEqual('City of London')
+      expect(person.contactDetails.postcode).toEqual('S1 1AA')
+    })
+  })
+
   describe('mapCdoDaoToExemption', () => {
     test('should map a CdoDao to an Exemption', () => {
       const exemption = buildRegistrationDao()
@@ -501,6 +594,7 @@ describe('cdo mappers', () => {
       const expectedCdo = buildCdo()
       expect(mapCdoDaoToCdo(cdoDao)).toEqual(expectedCdo)
     })
+
     test('should map a CdoDao to a model with insurance', () => {
       const cdoDao = buildCdoDao({
         insurance: [

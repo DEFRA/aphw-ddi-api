@@ -10,7 +10,8 @@ const {
   recordInsuranceDetailsSchema, recordInsuranceDetailsResponseSchema, recordMicrochipNumberSchema,
   recordMicrochipNumberResponseSchema, recordApplicationFeeSchema, verifyDatesSchema, manageCdoResponseSchema,
   recordMicrochipNumberConflictSchema,
-  simpleConflictSchema, issueCertificateResponseSchema, verifyDatesSchemaResponse, submitFormTwoSchema
+  simpleConflictSchema, issueCertificateResponseSchema, verifyDatesSchemaResponse, submitFormTwoSchema,
+  emailApplicationPackResponseSchema, emailApplicationPackPayloadSchema, postApplicationPackResponseSchema
 } = require('../schema/cdo/manage')
 const { SequenceViolationError } = require('../errors/domain/sequenceViolation')
 const { InvalidDataError } = require('../errors/domain/invalidData')
@@ -210,6 +211,82 @@ module.exports = [
         return h.response().code(204)
       } catch (e) {
         return handleErrors(e, 'processApplicationPack', indexNumber, h)
+      }
+    }
+  },
+  {
+    method: 'POST',
+    path: '/cdo/{indexNumber}/manage:emailApplicationPack',
+    options: {
+      auth: { scope: scopes.internal },
+      tags: ['api'],
+      notes: ['Email Application Pack Manage CDO domain action.  Emails application pack via Govuk Notify and Publishes application pack sent event & updates the status of the sendApplicationPack stage of the CDO tasklist.  Completion of this is necessary in order to perform subsequent tasks.'],
+      validate: {
+        payload: emailApplicationPackPayloadSchema,
+        failAction: (request, h, err) => {
+          console.error(err)
+
+          return h.response({ errors: err.details.map(e => e.message) }).code(400).takeover()
+        }
+      },
+      response: {
+        status: {
+          200: emailApplicationPackResponseSchema
+        }
+      }
+    },
+    handler: async (request, h) => {
+      const indexNumber = request.params.indexNumber
+      const email = request.payload.email
+
+      try {
+        const cdoService = ServiceProvider.getCdoService()
+        /**
+         * @type {CdoTaskList}
+         */
+        const cdoTaskList = await cdoService.emailApplicationPack(indexNumber, email, new Date(), getCallingUser(request))
+
+        return h.response({
+          email: cdoTaskList.cdoSummary.ownerEmail
+        }).code(200)
+      } catch (e) {
+        return handleErrors(e, 'emailApplicationPack', indexNumber, h)
+      }
+    }
+  },
+  {
+    method: 'POST',
+    path: '/cdo/{indexNumber}/manage:postApplicationPack',
+    options: {
+      auth: { scope: scopes.internal },
+      tags: ['api'],
+      notes: ['Post Application Pack Manage CDO domain action.  Posts application pack via Govuk Notify and Publishes application pack sent event & updates the status of the sendApplicationPack stage of the CDO tasklist.  Completion of this is necessary in order to perform subsequent tasks.'],
+      response: {
+        status: {
+          200: postApplicationPackResponseSchema
+        }
+      }
+    },
+    handler: async (request, h) => {
+      const indexNumber = request.params.indexNumber
+
+      try {
+        const cdoService = ServiceProvider.getCdoService()
+        /**
+         * @type {CdoTaskList}
+         */
+        const cdoTaskList = await cdoService.postApplicationPack(indexNumber, new Date(), getCallingUser(request))
+
+        return h.response({
+          firstName: cdoTaskList.cdoSummary.ownerFirstName,
+          lastName: cdoTaskList.cdoSummary.ownerLastName,
+          addressLine1: cdoTaskList.cdoSummary.addressLine1,
+          addressLine2: cdoTaskList.cdoSummary.addressLine2,
+          town: cdoTaskList.cdoSummary.town,
+          postcode: cdoTaskList.cdoSummary.postcode
+        }).code(200)
+      } catch (e) {
+        return handleErrors(e, 'postApplicationPack', indexNumber, h)
       }
     }
   },

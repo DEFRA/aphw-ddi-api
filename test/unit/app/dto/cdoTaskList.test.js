@@ -1,4 +1,4 @@
-const { buildCdo, buildExemption, buildCdoInsurance, buildCdoDog, buildCdoPerson } = require('../../../mocks/cdo/domain')
+const { buildCdo, buildExemption, buildCdoInsurance, buildCdoDog, buildCdoPerson, buildCdoPersonContactDetails } = require('../../../mocks/cdo/domain')
 const { CdoTaskList } = require('../../../../app/data/domain')
 const { mapCdoTaskListToDto } = require('../../../../app/dto/cdoTaskList')
 const { buildCdoTaskListDto, buildCdoTaskListDtoTasks } = require('../../../mocks/cdo/dto')
@@ -8,7 +8,10 @@ describe('mapCdoTaskListToDto', () => {
     const cdo = buildCdo({
       person: buildCdoPerson({
         firstName: 'Alex',
-        lastName: 'Carter'
+        lastName: 'Carter',
+        contactDetails: buildCdoPersonContactDetails({
+          email: 'alex@carter.co.uk'
+        })
       }),
       dog: buildCdoDog({
         name: 'Rex'
@@ -45,7 +48,12 @@ describe('mapCdoTaskListToDto', () => {
         },
         person: {
           firstName: 'Alex',
-          lastName: 'Carter'
+          lastName: 'Carter',
+          email: 'alex@carter.co.uk',
+          addressLine1: '300 Anywhere St',
+          addressLine2: 'Anywhere Estate',
+          town: 'City of London',
+          postcode: 'S1 1AA'
         },
         exemption: {
           cdoExpiry: new Date('9999-10-10')
@@ -104,7 +112,12 @@ describe('mapCdoTaskListToDto', () => {
         },
         person: {
           firstName: 'Alex',
-          lastName: 'Carter'
+          lastName: 'Carter',
+          addressLine1: '300 Anywhere St',
+          addressLine2: 'Anywhere Estate',
+          email: undefined,
+          postcode: 'S1 1AA',
+          town: 'City of London'
         },
         exemption: {
           cdoExpiry: new Date('2023-12-10')

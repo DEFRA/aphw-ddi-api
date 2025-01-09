@@ -78,7 +78,7 @@ describe('People repo', () => {
   jest.mock('../../../../app/repos/search-index')
   const { updateSearchIndexPerson } = require('../../../../app/repos/search-index')
 
-  const { createPeople, getPersonByReference, getPersonAndDogsByReference, getPersonAndDogsByIndex, updatePerson, getOwnerOfDog, updatePersonFields, deletePerson, purgePersonByReferenceNumber } = require('../../../../app/repos/people')
+  const { createPeople, getPersonByReference, getPersonAndDogsByReference, getPersonAndDogsByIndex, updatePerson, getOwnerOfDog, updatePersonFields, deletePerson, purgePersonByReferenceNumber, updatePersonEmail } = require('../../../../app/repos/people')
 
   beforeEach(async () => {
     jest.clearAllMocks()
@@ -1409,6 +1409,15 @@ describe('People repo', () => {
           message: '{"actioningUser":{"username":"dummy-user","displayname":"Dummy User"},"operation":"permanently deleted person","deleted":{"personReference":"P-123"}}'
         }
       })
+    })
+  })
+
+  describe('updatePersonEmail', () => {
+    test('should update a person email', async () => {
+      const personReference = 'P-DA08-8028'
+      const email = 'garrymcfadyen@hotmail.com'
+      const person = await updatePersonEmail(personReference, email, dummyUser, {})
+      expect(person).toEqual(new Error('To be implemented'))
     })
   })
 })

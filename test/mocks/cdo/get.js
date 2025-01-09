@@ -31,6 +31,42 @@ const buildAddressDao = (addressPartial = {}) => ({
 })
 
 const address = buildAddressDao()
+/**
+ * @typedef {{contact_type: {contact_type: string, id: number}, updated_at: string, contact_type_id: number, contact: string, created_at: string, id: number, deleted_at: null}} ContactContactDao
+ */
+
+/**
+ * @param {Partial<PersonContactContactDao>} personContactContactPartial
+ * @return {PersonContactContactDao}
+ */
+const buildContactContactDao = (personContactContactPartial = {}) => ({
+  id: 300097,
+  contact: 'alex@carter.co.uk',
+  contact_type_id: 2,
+  created_at: new Date('2025-01-07T12:52:54.823Z'),
+  deleted_at: null,
+  updated_at: new Date('2025-01-07T12:52:54.993Z'),
+  contact_type: {
+    id: 2,
+    contact_type: 'Email'
+  },
+  ...personContactContactPartial
+})
+
+/**
+ * @param personContactPartial
+ * @return {PersonContactDao}
+ */
+const buildContactDao = (personContactPartial = {}) => ({
+  id: 300097,
+  person_id: 90,
+  contact_id: 300097,
+  created_at: new Date('2025-01-07T12:52:54.823Z'),
+  deleted_at: null,
+  updated_at: new Date('2025-01-07T12:52:54.997Z'),
+  contact: buildContactContactDao(),
+  ...personContactPartial
+})
 
 /**
  * @param {Partial<PersonAddressDao>} personAddress
@@ -535,6 +571,8 @@ module.exports = {
   address,
   buildPersonAddressDao,
   personAddress,
+  buildContactDao,
+  buildContactContactDao,
   buildPersonDao,
   person,
   buildRegisteredPersonDao,

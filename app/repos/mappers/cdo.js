@@ -41,7 +41,7 @@
  * @protected {SummaryTaskDto[]} taskList
  */
 
-const { Person, Cdo, Dog, Exemption } = require('../../data/domain')
+const { Person, Cdo, Dog, Exemption, ContactDetails, Address } = require('../../data/domain')
 const { getMicrochip } = require('../../dto/dto-helper')
 const { mapDogBreachDaoToBreachCategory } = require('./dog')
 const {
@@ -126,6 +126,46 @@ const mapSummaryCdoDaoToDtoWithTasks = (summaryCdo) => {
   }
 }
 
+/**
+ * @param {PersonContactDao[]} personContactsDao
+ * @param {PersonAddressDao[]} personAddresses
+ * @return {ContactDetails}
+ */
+const mapPersonContactsToContactDetails = (personContactsDao, personAddresses = []) => {
+  const [addressDao = { address: {} }] = personAddresses
+  const {
+    address_line_1: addressLine1,
+    address_line_2: addressLine2,
+    town,
+    postcode
+  } = addressDao.address
+
+  const address = new Address({
+    addressLine1,
+    addressLine2,
+    town,
+    postcode
+  })
+
+  /**
+   * @param {string|undefined} emailString
+   * @param {PersonContactDao} contact
+   * @return {string|undefined}
+   */
+  const reducer = (emailString, contact) => {
+    if (contact.contact?.contact_type.contact_type === 'Email') {
+      return contact.contact.contact
+    }
+    return emailString
+  }
+
+  /**
+   * @type {string|undefined}
+   */
+  const email = personContactsDao.reduce(reducer, undefined)
+  return new ContactDetails(email, address)
+}
+
 const mapCdoPersonToPerson = (person) => {
   const params = {
     id: person.id,
@@ -135,7 +175,8 @@ const mapCdoPersonToPerson = (person) => {
     dateOfBirth: person.birth_date,
     addresses: person.addresses,
     person_contacts: person.person_contacts,
-    organisationName: person.organisation?.organisation_name ?? null
+    organisationName: person.organisation?.organisation_name ?? null,
+    contactDetails: mapPersonContactsToContactDetails(person.person_contacts, person.addresses)
   }
 
   return new Person(params)
@@ -212,7 +253,9 @@ const mapCdoDaoToCdo = (cdoDao) => {
 module.exports = {
   mapSummaryCdoDaoToDto,
   mapSummaryCdoDaoToDtoWithTasks,
+  mapCdoPersonToPerson,
   mapCdoDaoToCdo,
   mapCdoDaoToExemption,
-  mapDogDaoToDog
+  mapDogDaoToDog,
+  mapPersonContactsToContactDetails
 }

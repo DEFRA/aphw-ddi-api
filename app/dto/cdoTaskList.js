@@ -88,7 +88,12 @@ const mapCdoTaskListToDto = (cdoTaskList) => ({
     },
     person: {
       firstName: cdoTaskList.cdoSummary.ownerFirstName,
-      lastName: cdoTaskList.cdoSummary.ownerLastName
+      lastName: cdoTaskList.cdoSummary.ownerLastName,
+      email: cdoTaskList.cdoSummary.ownerEmail,
+      addressLine1: cdoTaskList.cdoSummary.addressLine1,
+      addressLine2: cdoTaskList.cdoSummary.addressLine2,
+      town: cdoTaskList.cdoSummary.town,
+      postcode: cdoTaskList.cdoSummary.postcode
     },
     dog: {
       name: cdoTaskList.cdoSummary.dogName

@@ -1,6 +1,24 @@
-const { recordInsuranceDetailsSchema } = require('../../../../../app/schema/cdo/manage')
+const { recordInsuranceDetailsSchema, emailApplicationPackPayloadSchema } = require('../../../../../app/schema/cdo/manage')
 
 describe('Manage CDO application', () => {
+  describe('emailApplicationPackPayloadSchema', () => {
+    test('should not validate if payload is empty', () => {
+      const request = {}
+      const validation = emailApplicationPackPayloadSchema.validate(request, { abortEarly: false })
+
+      expect(validation.error.message).toEqual('"email" is required')
+    })
+
+    test('should not validate if email is empty', () => {
+      const request = {
+        email: ''
+      }
+      const validation = emailApplicationPackPayloadSchema.validate(request, { abortEarly: false })
+
+      expect(validation.error.message).toEqual('"email" is not allowed to be empty')
+    })
+  })
+
   describe('recordInsuranceDetailsSchema', () => {
     test('should not validate given no filters are passed', () => {
       const request = {}

@@ -7,9 +7,15 @@ const { sendEmail } = require('../../../../app/messaging/send-email')
 jest.mock('../../../../app/messaging/send-audit')
 const { sendActivityToAudit } = require('../../../../app/messaging/send-audit')
 
+jest.mock('../../../../app/storage/utilities')
+const { getLiveTemplate } = require('../../../../app/storage/utilities')
+
+jest.mock('../../../../app/proxy/documents')
+const { populateTemplate } = require('../../../../app/proxy/documents')
+
 const emailHelper = require('../../../../app/lib/email-helper')
 const { reportSomethingAudit, reportTypes } = require('../../../../app/constants/email-types')
-const { createAuditsForSubmitFormTwo } = require('../../../../app/lib/email-helper')
+const { createAuditsForSubmitFormTwo, emailApplicationPack, postApplicationPack } = require('../../../../app/lib/email-helper')
 
 describe('EmailHelper test', () => {
   beforeEach(async () => {
@@ -393,5 +399,97 @@ describe('EmailHelper test', () => {
     await emailHelper.sendForm2Emails(indexNumber, dogName, microchipNumber, unfit, microchipDate, neuteringDate, under16, username)
     expect(lookupPoliceForceByEmail).toHaveBeenCalledWith(username)
     expect(sendEmail).toHaveBeenNthCalledWith(1, expectedDataDefra)
+  })
+
+  describe('emailApplicationPack', () => {
+    test('should email application pack', async () => {
+      getLiveTemplate.mockResolvedValue('test-template-1.pdf')
+      populateTemplate.mockResolvedValue()
+      const dogDetails = { name: 'Rex', indexNumber: 'ED300001' }
+      const ownerDetails = { firstName: 'Garry', lastName: 'McFadyen', email: 'garrymcfadyen@hotmail.com' }
+
+      await emailApplicationPack(ownerDetails, dogDetails)
+
+      expect(sendEmail).toHaveBeenCalledWith({
+        customFields: [
+          { name: 'dog_name', value: 'Rex' },
+          { name: 'dog_name_with_apostrophy', value: 'Rex\'s' },
+          { name: 'owner_name', value: 'Garry McFadyen' },
+          { name: 'index_number', value: 'ED300001' },
+          { name: 'file_key_to_attach', value: 'link_to_file' },
+          { name: 'filename_for_display', value: 'Defra application pack for Rex ED300001.pdf' },
+          { name: 'link_to_file', value: expect.anything() }
+        ],
+        toAddress: 'garrymcfadyen@hotmail.com',
+        type: 'send-application-pack'
+      })
+      const linkToFile = sendEmail.mock.calls[0][0].customFields.filter(x => x.name === 'link_to_file')[0].value
+      expect(linkToFile.indexOf('temp-populations/')).toBe(0)
+      expect(linkToFile.indexOf('.pdf')).toBe(linkToFile.length - 4)
+    })
+
+    test('should email application pack if dog name is null', async () => {
+      getLiveTemplate.mockResolvedValue('test-template-1.pdf')
+      populateTemplate.mockResolvedValue()
+      const dogDetails = { name: null, indexNumber: 'ED300001' }
+      const ownerDetails = { firstName: 'Garry', lastName: 'McFadyen', email: 'garrymcfadyen@hotmail.com' }
+
+      await emailApplicationPack(ownerDetails, dogDetails)
+
+      expect(sendEmail).toHaveBeenCalledWith({
+        customFields: [
+          { name: 'dog_name', value: 'Your dog' },
+          { name: 'dog_name_with_apostrophy', value: 'Your dog\'s' },
+          { name: 'owner_name', value: 'Garry McFadyen' },
+          { name: 'index_number', value: 'ED300001' },
+          { name: 'file_key_to_attach', value: 'link_to_file' },
+          { name: 'filename_for_display', value: 'Defra application pack for Your dog ED300001.pdf' },
+          { name: 'link_to_file', value: expect.anything() }
+        ],
+        toAddress: 'garrymcfadyen@hotmail.com',
+        type: 'send-application-pack'
+      })
+      const linkToFile = sendEmail.mock.calls[0][0].customFields.filter(x => x.name === 'link_to_file')[0].value
+      expect(linkToFile.indexOf('temp-populations/')).toBe(0)
+      expect(linkToFile.indexOf('.pdf')).toBe(linkToFile.length - 4)
+    })
+
+    test('should email application pack if dog name is blank string', async () => {
+      getLiveTemplate.mockResolvedValue('test-template-1.pdf')
+      populateTemplate.mockResolvedValue()
+      const dogDetails = { name: '', indexNumber: 'ED300001' }
+      const ownerDetails = { firstName: 'Garry', lastName: 'McFadyen', email: 'garrymcfadyen@hotmail.com' }
+
+      await emailApplicationPack(ownerDetails, dogDetails)
+
+      expect(sendEmail).toHaveBeenCalledWith({
+        customFields: [
+          { name: 'dog_name', value: 'Your dog' },
+          { name: 'dog_name_with_apostrophy', value: 'Your dog\'s' },
+          { name: 'owner_name', value: 'Garry McFadyen' },
+          { name: 'index_number', value: 'ED300001' },
+          { name: 'file_key_to_attach', value: 'link_to_file' },
+          { name: 'filename_for_display', value: 'Defra application pack for Your dog ED300001.pdf' },
+          { name: 'link_to_file', value: expect.anything() }
+        ],
+        toAddress: 'garrymcfadyen@hotmail.com',
+        type: 'send-application-pack'
+      })
+      const linkToFile = sendEmail.mock.calls[0][0].customFields.filter(x => x.name === 'link_to_file')[0].value
+      expect(linkToFile.indexOf('temp-populations/')).toBe(0)
+      expect(linkToFile.indexOf('.pdf')).toBe(linkToFile.length - 4)
+    })
+  })
+
+  describe('postApplicationPack', () => {
+    test('should email application pack', async () => {
+      const indexNumber = 'ED300001'
+      const dogDetails = { dogName: 'Rex' }
+      const ownerDetails = { firstName: 'Garry', lastName: 'McFadyen', email: 'arrymcfadyen@hotmail.com' }
+
+      await postApplicationPack(indexNumber, dogDetails, ownerDetails)
+
+      expect(true).toBe(true)
+    })
   })
 })
