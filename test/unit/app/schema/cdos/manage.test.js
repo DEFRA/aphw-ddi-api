@@ -9,13 +9,13 @@ describe('Manage CDO application', () => {
       expect(validation.error.message).toEqual('"email" is required')
     })
 
-    test('should validate if email is empty', () => {
+    test('should not validate if email is empty', () => {
       const request = {
         email: ''
       }
       const validation = emailApplicationPackPayloadSchema.validate(request, { abortEarly: false })
 
-      expect(validation.error).toBeUndefined()
+      expect(validation.error.message).toEqual('"email" is not allowed to be empty')
     })
   })
 

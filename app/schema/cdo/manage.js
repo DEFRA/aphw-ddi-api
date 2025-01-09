@@ -2,7 +2,7 @@ const Joi = require('joi')
 const { formatDate } = require('../../lib/date-helpers')
 
 const emailApplicationPackPayloadSchema = Joi.object({
-  email: Joi.string().allow('').required()
+  email: Joi.string().required()
 }).required()
 
 const recordInsuranceDetailsSchema = Joi.object({
