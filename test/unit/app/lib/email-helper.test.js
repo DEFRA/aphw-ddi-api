@@ -16,6 +16,8 @@ const { populateTemplate } = require('../../../../app/proxy/documents')
 const emailHelper = require('../../../../app/lib/email-helper')
 const { reportSomethingAudit, reportTypes } = require('../../../../app/constants/email-types')
 const { createAuditsForSubmitFormTwo, emailApplicationPack, postApplicationPack } = require('../../../../app/lib/email-helper')
+const { Person, Dog } = require('../../../../app/data/domain')
+const { buildCdoPerson, buildCdoPersonContactDetails, buildCdoDog } = require('../../../mocks/cdo/domain')
 
 describe('EmailHelper test', () => {
   beforeEach(async () => {
@@ -402,13 +404,20 @@ describe('EmailHelper test', () => {
   })
 
   describe('emailApplicationPack', () => {
+    const owner = new Person(buildCdoPerson({
+      firstName: 'Garry',
+      lastName: 'McFadyen',
+      contactDetails: buildCdoPersonContactDetails({
+        email: 'garrymcfadyen@hotmail.com'
+      })
+    }))
+
     test('should email application pack', async () => {
       getLiveTemplate.mockResolvedValue('test-template-1.pdf')
       populateTemplate.mockResolvedValue()
-      const dogDetails = { name: 'Rex', indexNumber: 'ED300001' }
-      const ownerDetails = { firstName: 'Garry', lastName: 'McFadyen', email: 'garrymcfadyen@hotmail.com' }
+      const dog = new Dog(buildCdoDog({ name: 'Rex', indexNumber: 'ED300001' }))
 
-      await emailApplicationPack(ownerDetails, dogDetails)
+      await emailApplicationPack(owner, dog)
 
       expect(sendEmail).toHaveBeenCalledWith({
         customFields: [
@@ -431,10 +440,9 @@ describe('EmailHelper test', () => {
     test('should email application pack if dog name is null', async () => {
       getLiveTemplate.mockResolvedValue('test-template-1.pdf')
       populateTemplate.mockResolvedValue()
-      const dogDetails = { name: null, indexNumber: 'ED300001' }
-      const ownerDetails = { firstName: 'Garry', lastName: 'McFadyen', email: 'garrymcfadyen@hotmail.com' }
+      const dog = new Dog(buildCdoDog({ name: null, indexNumber: 'ED300001' }))
 
-      await emailApplicationPack(ownerDetails, dogDetails)
+      await emailApplicationPack(owner, dog)
 
       expect(sendEmail).toHaveBeenCalledWith({
         customFields: [
@@ -457,10 +465,9 @@ describe('EmailHelper test', () => {
     test('should email application pack if dog name is blank string', async () => {
       getLiveTemplate.mockResolvedValue('test-template-1.pdf')
       populateTemplate.mockResolvedValue()
-      const dogDetails = { name: '', indexNumber: 'ED300001' }
-      const ownerDetails = { firstName: 'Garry', lastName: 'McFadyen', email: 'garrymcfadyen@hotmail.com' }
+      const dog = new Dog(buildCdoDog({ name: '', indexNumber: 'ED300001' }))
 
-      await emailApplicationPack(ownerDetails, dogDetails)
+      await emailApplicationPack(owner, dog)
 
       expect(sendEmail).toHaveBeenCalledWith({
         customFields: [
