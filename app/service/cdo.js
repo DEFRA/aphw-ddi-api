@@ -63,11 +63,11 @@ class CdoService {
     }
   }
 
-  async emailApplicationPack (cdoId, email, sentDate, user) {
+  async emailApplicationPack (cdoId, email, updateEmail, sentDate, user) {
     const cdoTaskList = await this.cdoRepository.getCdoTaskList(cdoId)
     const activityType = await getActivityByLabel(activities.applicationPackEmailed)
 
-    if (!cdoTaskList.person.contactDetails.email) {
+    if (updateEmail) {
       await updatePersonEmail(cdoTaskList.person.personReference, email, user)
       cdoTaskList.person.contactDetails.email = email
     }
