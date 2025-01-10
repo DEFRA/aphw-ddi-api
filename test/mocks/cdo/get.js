@@ -54,7 +54,7 @@ const buildContactContactDao = (personContactContactPartial = {}) => ({
 })
 
 /**
- * @param personContactPartial
+ * @param {Partial<PersonContactDao>} personContactPartial
  * @return {PersonContactDao}
  */
 const buildContactDao = (personContactPartial = {}) => ({

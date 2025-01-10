@@ -191,9 +191,16 @@ const sendForm2Emails = async (indexNumber, dogName, microchipNumber, unfit, mic
   await sendEmail(dataPolice)
 }
 
+/**
+ * @param {Person} person
+ * @param {Dog} dog
+ * @param [_user]
+ * @return {Promise<{emailAddress: *}>}
+ */
 const emailApplicationPack = async (person, dog, _user) => {
   const { name, indexNumber } = dog
-  const { firstName, lastName, email } = person
+  const { firstName, lastName } = person
+  const { email } = person.contactDetails
 
   const dogName = name && name !== '' ? name : 'Your dog'
 

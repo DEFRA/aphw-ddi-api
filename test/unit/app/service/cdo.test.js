@@ -137,7 +137,7 @@ describe('CdoService', function () {
 
       mockCdoRepository.getCdoTaskList.mockResolvedValue(cdoTaskList)
 
-      await cdoService.emailApplicationPack(cdoIndexNumber, 'garrymcfadyen@hotmail.com', sentDate, devUser)
+      await cdoService.emailApplicationPack(cdoIndexNumber, 'garrymcfadyen@hotmail.com', false, sentDate, devUser)
       expect(getActivityByLabel).toHaveBeenCalledWith(activities.applicationPackEmailed)
       expect(mockCdoRepository.getCdoTaskList).toHaveBeenCalledWith(cdoIndexNumber)
       expect(mockCdoRepository.saveCdoTaskList).toHaveBeenCalledWith(cdoTaskList)
@@ -163,6 +163,35 @@ describe('CdoService', function () {
       sendActivityToAudit.mockClear()
     })
 
+    test('should email application pack and update email given updateEmail email', async () => {
+      const person = new Person(buildCdoPerson({
+        personReference: 'P-1234-56',
+        contactDetails: {
+          email: 'garrymcfadyen@hotmail.com'
+        }
+      }))
+      const dog = new Dog(buildCdoDog())
+      const exemption = new Exemption(buildExemption())
+      const cdo = new Cdo(person, dog, exemption)
+      const cdoTaskList = new CdoTaskList(cdo)
+
+      mockCdoRepository.getCdoTaskList.mockResolvedValue(cdoTaskList)
+
+      await cdoService.emailApplicationPack(cdoIndexNumber, 'garrymcfadyen@hotmail.com', true, sentDate, devUser)
+      expect(getActivityByLabel).toHaveBeenCalledWith(activities.applicationPackEmailed)
+      expect(mockCdoRepository.getCdoTaskList).toHaveBeenCalledWith(cdoIndexNumber)
+      expect(mockCdoRepository.saveCdoTaskList).toHaveBeenCalledWith(cdoTaskList)
+      expect(cdoTaskList.getUpdates().exemption).toEqual([{
+        key: 'applicationPackSent',
+        value: sentDate,
+        callback: expect.any(Function)
+      }])
+      await cdoTaskList.getUpdates().exemption[0].callback()
+      expect(emailApplicationPack).toHaveBeenCalledWith(person, dog, devUser)
+      expect(updatePersonEmail).toHaveBeenCalledWith('P-1234-56', 'garrymcfadyen@hotmail.com', devUser)
+      sendActivityToAudit.mockClear()
+    })
+
     test('should email application pack and update email given empty email', async () => {
       const person = new Person(buildCdoPerson({
         personReference: 'P-1234-56'
@@ -174,7 +203,7 @@ describe('CdoService', function () {
 
       mockCdoRepository.getCdoTaskList.mockResolvedValue(cdoTaskList)
 
-      await cdoService.emailApplicationPack(cdoIndexNumber, 'garrymcfadyen@hotmail.com', sentDate, devUser)
+      await cdoService.emailApplicationPack(cdoIndexNumber, 'garrymcfadyen@hotmail.com', true, sentDate, devUser)
       expect(getActivityByLabel).toHaveBeenCalledWith(activities.applicationPackEmailed)
       expect(mockCdoRepository.getCdoTaskList).toHaveBeenCalledWith(cdoIndexNumber)
       expect(mockCdoRepository.saveCdoTaskList).toHaveBeenCalledWith(cdoTaskList)

@@ -238,13 +238,14 @@ module.exports = [
     handler: async (request, h) => {
       const indexNumber = request.params.indexNumber
       const email = request.payload.email
+      const updateEmail = request.payload.updateEmail
 
       try {
         const cdoService = ServiceProvider.getCdoService()
         /**
          * @type {CdoTaskList}
          */
-        const cdoTaskList = await cdoService.emailApplicationPack(indexNumber, email, new Date(), getCallingUser(request))
+        const cdoTaskList = await cdoService.emailApplicationPack(indexNumber, email, updateEmail, new Date(), getCallingUser(request))
 
         return h.response({
           email: cdoTaskList.cdoSummary.ownerEmail
