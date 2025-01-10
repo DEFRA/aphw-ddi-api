@@ -753,7 +753,45 @@ describe('CDO endpoint', () => {
       }
       const response = await server.inject(options)
       expect(response.statusCode).toBe(200)
-      expect(emailApplicationPackMock).toHaveBeenCalledWith('ED123', 'garrymcfadyen@hotmail.com', expect.any(Date), devUser)
+      expect(emailApplicationPackMock).toHaveBeenCalledWith('ED123', 'garrymcfadyen@hotmail.com', false, expect.any(Date), devUser)
+      expect(JSON.parse(response.payload)).toEqual({
+        email: 'garrymcfadyen@hotmail.com'
+      })
+    })
+
+    test('should return 200 and update email given email update requested', async () => {
+      const emailApplicationPackMock = jest.fn()
+      getCdoService.mockReturnValue({
+        emailApplicationPack: emailApplicationPackMock
+      })
+      emailApplicationPackMock.mockResolvedValue(new CdoTaskList(buildCdo({
+        person: buildCdoPerson({
+          firstName: 'Garry',
+          lastName: 'McFadyen',
+          contactDetails: buildCdoPersonContactDetails({
+            email: 'garrymcfadyen@hotmail.com',
+            address: new Address({
+              addressLine1: '122 Common Road',
+              addressLine2: null,
+              town: 'Bexhill-on-Sea',
+              postcode: 'TN39 4JB'
+            })
+          })
+        })
+      })))
+
+      const options = {
+        method: 'POST',
+        url: '/cdo/ED123/manage:emailApplicationPack',
+        payload: {
+          email: 'garrymcfadyen2@hotmail.com',
+          updateEmail: true
+        },
+        ...portalHeader
+      }
+      const response = await server.inject(options)
+      expect(response.statusCode).toBe(200)
+      expect(emailApplicationPackMock).toHaveBeenCalledWith('ED123', 'garrymcfadyen2@hotmail.com', true, expect.any(Date), devUser)
       expect(JSON.parse(response.payload)).toEqual({
         email: 'garrymcfadyen@hotmail.com'
       })
