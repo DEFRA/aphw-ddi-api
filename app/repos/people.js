@@ -591,10 +591,24 @@ const purgePersonByReferenceNumber = async (reference, user, transaction) => {
   await sendPermanentDeleteToAudit(PERSON, person, user)
 }
 
+/**
+ * @param {string} personReference
+ * @param {string} email
+ * @param user
+ * @param transaction
+ * @return {Promise<*|Error>}
+ */
 const updatePersonEmail = async (personReference, email, user, transaction) => {
-  console.log('personReference', personReference, 'email', email, 'user', user, 'transaction', transaction)
+  if (!transaction) {
+    return await sequelize.transaction(async (t) => updatePersonEmail(personReference, email, user, t))
+  }
+  const existing = await getPersonByReference(personReference, transaction)
 
-  return new Error('To be implemented')
+  const preChangedPersonDto = deepClone(personDto(existing, true))
+
+  await updateContact(existing, 'Email', email, transaction)
+  const updatedPerson = await getPersonByReference(personReference, transaction)
+  await sendUpdateToAudit(PERSON, preChangedPersonDto, personDto(updatedPerson, true), user)
 }
 
 module.exports = {

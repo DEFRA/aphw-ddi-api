@@ -84,8 +84,6 @@ class CdoService {
         targetPk: 'dog',
         activityLabel: activities.applicationPackSent
       }, user)
-
-      // await updatePersonEmail(cdoTaskList.person.personReference, email)
     }
 
     await cdoTaskList.emailApplicationPack(sentDate, emailActivityCallback)

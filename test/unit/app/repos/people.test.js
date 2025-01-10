@@ -4,6 +4,10 @@ const { owner: mockEnhancedOwner } = require('../../../mocks/cdo/create-enhanced
 
 jest.mock('../../../../app/messaging/send-event')
 const { sendEvent } = require('../../../../app/messaging/send-event')
+const {
+  buildPersonDao, buildAddressDao, buildPersonAddressDao, buildCountryDao, buildContactDao,
+  buildContactContactDao
+} = require('../../../mocks/cdo/get')
 
 const dummyUser = {
   username: 'dummy-user',
@@ -1413,11 +1417,120 @@ describe('People repo', () => {
   })
 
   describe('updatePersonEmail', () => {
-    test('should update a person email', async () => {
-      const personReference = 'P-DA08-8028'
-      const email = 'garrymcfadyen@hotmail.com'
-      const person = await updatePersonEmail(personReference, email, dummyUser, {})
-      expect(person).toEqual(new Error('To be implemented'))
+    const personDaoProperties = {
+      id: 1,
+      first_name: 'First',
+      last_name: 'Last',
+      person_contacts: [],
+      person_reference: '1234',
+      addresses: [
+        buildPersonAddressDao({
+          id: 1,
+          address: buildAddressDao({
+            id: 1,
+            address_line_1: 'Address 1',
+            address_line_2: 'Address 2',
+            town: 'Town',
+            postcode: 'Postcode',
+            country: buildCountryDao({
+              id: 1,
+              country: 'England'
+            })
+          })
+        })
+      ]
+    }
+    const personWithUpdatedEmail = buildPersonDao({
+      ...personDaoProperties,
+      person_contacts: [
+        buildContactDao({
+          id: 2,
+          contact: buildContactContactDao({
+            contact_type_id: 2,
+            contact: 'garrymcfadyen@hotmail.com'
+          })
+        })
+      ]
+    })
+
+    sequelize.models.contact.create.mockResolvedValue({
+      id: 2,
+      contact: 'garrymcfadyen@hotmail.com'
+    })
+
+    sequelize.models.person_contact.create.mockResolvedValue({
+      id: 2,
+      person_id: 1,
+      contact_id: 2
+    })
+
+    const personReference = 'P-DA08-8028'
+    const email = 'garrymcfadyen@hotmail.com'
+
+    test('should start a new transaction', async () => {
+      const personResponse = buildPersonDao(personDaoProperties)
+      sequelize.models.person.findAll.mockResolvedValue([personResponse])
+
+      await updatePersonEmail(personReference, email, dummyUser)
+      expect(sequelize.transaction.mock.calls[0][0]).toBeInstanceOf(Function)
+    })
+
+    test('should update a person email given no email exists', async () => {
+      const personResponse = buildPersonDao(personDaoProperties)
+      sequelize.models.person.findAll.mockResolvedValueOnce([personResponse])
+      sequelize.models.person.findAll.mockResolvedValueOnce([personWithUpdatedEmail])
+
+      await updatePersonEmail(personReference, email, dummyUser, {})
+      expect(sequelize.models.person.findAll).toHaveBeenCalledWith(expect.objectContaining({
+        where: { person_reference: personReference }
+      }))
+      expect(sequelize.models.contact.create).toHaveBeenCalledWith(expect.objectContaining({
+        contact: email
+      }), { transaction: {} })
+      expect(sequelize.models.person_contact.create).toHaveBeenCalledWith({
+        person_id: 1,
+        contact_id: 2
+      }, { transaction: {} })
+      expect(sendEvent).toHaveBeenCalledWith({
+        id: expect.any(String),
+        partitionKey: '1234',
+        source: 'aphw-ddi-portal',
+        subject: 'DDI Update person',
+        type: 'uk.gov.defra.ddi.event.update',
+        data: {
+          message: '{"actioningUser":{"username":"dummy-user","displayname":"Dummy User"},"operation":"updated person","changes":{"added":[],"removed":[],"edited":[["contacts/email",null,"garrymcfadyen@hotmail.com"]]}}'
+        }
+      })
+    })
+
+    test('should update a person email given email exists', async () => {
+      const personResponse = buildPersonDao({
+        ...personDaoProperties,
+        person_contacts: [
+          buildContactDao({
+            id: 2,
+            contact: buildContactContactDao({
+              contact_type_id: 2,
+              contact: 'garrymcfadyen_old@hotmail.com'
+            })
+          })
+        ]
+      })
+      sequelize.models.person.findAll.mockResolvedValue([personResponse])
+      await updatePersonEmail(personReference, email, dummyUser, {})
+      expect(sequelize.models.person.findAll).toHaveBeenCalledWith(expect.objectContaining({
+        where: { person_reference: personReference }
+      }))
+      expect(sequelize.models.person.findAll).toHaveBeenCalledWith(expect.objectContaining({
+        where: { person_reference: personReference }
+      }))
+      expect(sequelize.models.contact.create).toHaveBeenCalledWith(expect.objectContaining({
+        contact: email
+      }), { transaction: {} })
+      expect(sequelize.models.person_contact.create).toHaveBeenCalledWith({
+        person_id: 1,
+        contact_id: 2
+      }, { transaction: {} })
     })
   })
 })
