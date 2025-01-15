@@ -241,10 +241,12 @@ const updateSearchIndexPerson = async (person, transaction) => {
         name: indexRow.json.dogName,
         microchip_number: indexRow.json.microchipNumber,
         microchip_number2: indexRow.json.microchipNumber2,
-        status: indexRow.json.dogStatus
+        status: indexRow.json.dogStatus,
+        subStatus: indexRow.json.dogStatus === statuses.Inactive ? indexRow.json.dogSubStatus : null
       }
       indexRow.search = buildIndexColumn(partialPerson, partialDog)
       indexRow.json = buildJsonColumn(partialPerson, partialDog)
+
       await indexRow.save({ transaction })
 
       await updateMatchCodesPerPerson(person.id, indexRow, transaction)
