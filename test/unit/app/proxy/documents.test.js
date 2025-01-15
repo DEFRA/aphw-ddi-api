@@ -13,6 +13,6 @@ describe('Documents proxy', () => {
     await populateTemplate({ name: 'test1' })
 
     expect(wreck.post.mock.calls[0][0]).toContain('/populate-template')
-    expect(wreck.post.mock.calls[0][1]).toEqual({ payload: { name: 'test1' } })
+    expect(wreck.post.mock.calls[0][1]).toEqual({ name: 'test1' })
   })
 })

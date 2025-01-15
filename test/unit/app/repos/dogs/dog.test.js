@@ -83,6 +83,9 @@ describe('Dog repo', () => {
       },
       dog_breach: {
         destroy: jest.fn()
+      },
+      search_tgram: {
+        destroy: jest.fn()
       }
     },
     col: jest.fn(),
@@ -953,7 +956,7 @@ describe('Dog repo', () => {
         where: { index_number: 'ED123' },
         paranoid: false
       }))
-      expect(mockFormTwoDestroy).toHaveBeenCalledWith({ transaction: {} })
+      expect(mockFormTwoDestroy).toHaveBeenCalledWith({ force: true, transaction: {} })
       expect(mockRegistrationDestroy).toHaveBeenCalledWith({ force: true, transaction: {} })
       expect(mockRegisteredPersonDestroy).toHaveBeenCalledWith({ force: true, transaction: {} })
       expect(mockMicrochipDestroy).toHaveBeenCalledWith({ force: true, transaction: {} })

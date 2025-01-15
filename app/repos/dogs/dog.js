@@ -671,7 +671,7 @@ const purgeDogByIndexNumber = async (indexNumber, user, transaction) => {
 
   for (const registration of dogAggregate.registrations) {
     if (registration.form_two !== null) {
-      await registration.form_two.destroy({ transaction })
+      await registration.form_two.destroy({ force: true, transaction })
     }
     await registration.destroy({ force: true, transaction })
   }
@@ -679,6 +679,14 @@ const purgeDogByIndexNumber = async (indexNumber, user, transaction) => {
   for (const dogBreach of dogAggregate.dog_breaches) {
     await dogBreach.destroy({ force: true, transaction })
   }
+
+  await sequelize.models.search_tgram.destroy({
+    where: {
+      dog_id: dogAggregate.id
+    },
+    force: true,
+    transaction
+  })
 
   await dogAggregate.destroy({ force: true, transaction })
 

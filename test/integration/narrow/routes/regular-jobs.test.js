@@ -12,13 +12,9 @@ describe('Regular jobs endpoint', () => {
   jest.mock('../../../../app/auth/token-validator')
   const { validate } = require('../../../../app/auth/token-validator')
 
-  jest.mock('../../../../app/lib/email-helper')
-  const { emailApplicationPack } = require('../../../../app/lib/email-helper')
-
   beforeEach(async () => {
     jest.clearAllMocks()
     validate.mockResolvedValue(mockValidate)
-    emailApplicationPack.mockResolvedValue()
     server = await createServer()
     await server.initialize()
   })
