@@ -25,7 +25,7 @@ describe('Search repo', () => {
   jest.mock('../../../../app/repos/search-match-codes')
   const { updateMatchCodesPerPerson } = require('../../../../app/repos/search-match-codes')
 
-  const { updateSearchIndexDog, addPeopleOnlyIfNoDogsLeft } = require('../../../../app/repos/search-index')
+  const { updateSearchIndexDog, updateSearchIndexPerson, addPeopleOnlyIfNoDogsLeft } = require('../../../../app/repos/search-index')
 
   beforeEach(async () => {
     jest.clearAllMocks()
@@ -35,7 +35,16 @@ describe('Search repo', () => {
     test('should handle sub-status', async () => {
       const mockSave = jest.fn()
       sequelize.models.search_index.findAll.mockResolvedValue([
-        { dog_id: 1, person_id: 1, search: '12345', json: '{ dogName: \'Bruno\' }', save: mockSave }
+        {
+          dog_id: 1,
+          person_id: 1,
+          search: '12345',
+          json: {
+            dogName: 'Bruno',
+            dogStatus: 'Inactive'
+          },
+          save: mockSave
+        }
       ])
 
       const dog = {
@@ -79,6 +88,65 @@ describe('Search repo', () => {
         search: undefined
       }
       expect(updateTrigramsPerDogOrPerson).toHaveBeenCalledWith(1, 'dog', expectDogCall, {})
+    })
+  })
+
+  describe('UpdateSearchIndexPerson', () => {
+    test('should handle sub-status', async () => {
+      const mockSave = jest.fn()
+      sequelize.models.search_index.findAll.mockResolvedValue([
+        {
+          dog_id: 1,
+          person_id: 1,
+          search: '12345',
+          json: {
+            dogIndex: 'ED123',
+            dogName: 'Bruno',
+            dogStatus: 'Inactive',
+            dogSubStatus: 'dead',
+            firstName: 'John',
+            lastName: 'Smith'
+          },
+          save: mockSave
+        }
+      ])
+
+      const person = {
+        id: 1,
+        firstName: 'Peter',
+        lastName: 'Smith',
+        address: {}
+      }
+
+      await updateSearchIndexPerson(person, {})
+
+      expect(mockSave).toHaveBeenCalledTimes(1)
+      const expectPersonCall = {
+        dog_id: 1,
+        person_id: 1,
+        search: undefined,
+        json: {
+          firstName: 'Peter',
+          lastName: 'Smith',
+          email: undefined,
+          organisationName: undefined,
+          address: {
+            address_line_1: undefined,
+            address_line_2: undefined,
+            postcode: undefined,
+            town: undefined
+          },
+          dogIndex: 'ED123',
+          dogName: 'Bruno',
+          dogStatus: 'Inactive',
+          microchipNumber: undefined,
+          microchipNumber2: undefined,
+          personReference: undefined,
+          dogSubStatus: 'dead'
+        },
+        save: expect.anything()
+      }
+      expect(updateTrigramsPerDogOrPerson).toHaveBeenCalledWith(1, 'person', expectPersonCall, {})
     })
   })
 
