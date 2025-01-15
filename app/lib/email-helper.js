@@ -215,7 +215,7 @@ const emailApplicationPack = async (person, dog, _user) => {
     }
   }
 
-  await populateTemplate(templateData)
+  await populateTemplate({ payload: templateData })
 
   const customFields = [
     { name: 'dog_name', value: dogName },

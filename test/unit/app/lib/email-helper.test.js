@@ -435,6 +435,18 @@ describe('EmailHelper test', () => {
       const linkToFile = sendEmail.mock.calls[0][0].customFields.filter(x => x.name === 'link_to_file')[0].value
       expect(linkToFile.indexOf('temp-populations/')).toBe(0)
       expect(linkToFile.indexOf('.pdf')).toBe(linkToFile.length - 4)
+      expect(populateTemplate).toHaveBeenCalledWith({
+        payload: {
+          fileInfo: {
+            filename: 'test-template-1.pdf',
+            fileGuid: expect.any(String),
+            saveFile: true
+          },
+          fieldData: {
+            ddi_index_number: 'ED300001'
+          }
+        }
+      })
     })
 
     test('should email application pack if dog name is null', async () => {
