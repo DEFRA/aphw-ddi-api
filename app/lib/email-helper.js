@@ -2,6 +2,7 @@ const config = require('../config/index')
 const { emailTypes, reportSomethingSubjectLines, reportSomethingAudit, reportTypes, formTwoSubmissionAudit } = require('../constants/email-types')
 const { lookupPoliceForceByEmail } = require('../repos/police-forces')
 const { formatToGds } = require('../lib/date-helpers')
+const { shuffleAddress } = require('../lib/address-helper')
 const { sendEmail } = require('../messaging/send-email')
 const { sendActivityToAudit } = require('../messaging/send-audit')
 const { v4: uuidv4 } = require('uuid')
@@ -247,6 +248,8 @@ const postApplicationPack = async (person, dog, _user) => {
 
   const dogName = name && name !== '' ? name : 'Your dog'
 
+  const address = shuffleAddress(contactDetails)
+
   const templateData = {
     fileInfo: {
       filename: await getLiveTemplate(emailTypes.postApplicationPack),
@@ -257,10 +260,10 @@ const postApplicationPack = async (person, dog, _user) => {
       ddi_index_number: indexNumber,
       ddi_dog_name: dogName,
       ddi_owner_name: `${firstName} ${lastName}`,
-      ddi_address_line_1: contactDetails?.addressLine1,
-      ddi_address_line_2: contactDetails?.addressLine2,
-      ddi_town: contactDetails?.town,
-      ddi_postcode: contactDetails?.postcode,
+      ddi_address_line_1: address.addressLine1,
+      ddi_address_line_2: address.addressLine2,
+      ddi_town: address.town,
+      ddi_postcode: address.postcode,
       ddi_todays_date: formatToGds(new Date())
     }
   }
