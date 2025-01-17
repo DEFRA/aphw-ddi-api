@@ -7,7 +7,8 @@ const schema = Joi.object({
     username: Joi.string(),
     password: Joi.string(),
     useCredentialChain: Joi.bool().default(false),
-    appInsights: Joi.object()
+    appInsights: Joi.object(),
+    managedIdentityClientId: Joi.string().optional()
   },
   eventsTopic: {
     address: Joi.string()
@@ -30,7 +31,8 @@ const config = {
   },
   notificationsTopic: {
     address: process.env.NOTIFICATIONS_TOPIC_ADDRESS
-  }
+  },
+  managedIdentityClientId: process.env.AZURE_CLIENT_ID
 }
 
 const result = schema.validate(config, {

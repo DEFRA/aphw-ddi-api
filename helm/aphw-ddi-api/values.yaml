@@ -90,4 +90,4 @@ ingress:
   endpoint: aphw-ddi-api
   server: example.com
 
-aadPodIdentity: true
+workloadIdentity: true
