@@ -156,7 +156,7 @@ describe('CdoService', function () {
         source: 'dog',
         activityDate: sentDate,
         targetPk: 'dog',
-        activityLabel: 'Application pack'
+        activityLabel: 'Application pack sent to garrymcfadyen@hotmail.com'
       }, devUser)
 
       expect(updatePersonEmail).not.toHaveBeenCalled()
@@ -277,7 +277,7 @@ describe('CdoService', function () {
         source: 'dog',
         activityDate: sentDate,
         targetPk: 'dog',
-        activityLabel: 'Application pack'
+        activityLabel: 'Application pack sent to 122 Common Road, Bexhill-on-Sea, TN39 4JB'
       }, devUser)
 
       expect(postApplicationPack).toHaveBeenCalledWith(person, dog, devUser)

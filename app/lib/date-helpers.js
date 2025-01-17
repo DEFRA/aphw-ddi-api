@@ -8,6 +8,14 @@ const formatDateAsUTCNoTime = (date) => {
   return format(date, 'yyyy-MM-dd')
 }
 
+const formatToGds = date => {
+  if (date === null || date === undefined) {
+    return date
+  }
+
+  return format(new Date(date), 'dd MMMM yyyy')
+}
+
 const stripTime = date => {
   const dateToStrip = new Date(date)
   dateToStrip.setUTCHours(0, 0, 0, 0)
@@ -65,6 +73,7 @@ const dateIsADate = (date) => date instanceof Date
 module.exports = {
   formatDate,
   formatDateAsUTCNoTime,
+  formatToGds,
   addDays,
   addYears,
   addMinutes,
