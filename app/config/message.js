@@ -15,7 +15,8 @@ const schema = Joi.object({
   },
   notificationsTopic: {
     address: Joi.string()
-  }
+  },
+  managedIdentityClientId: Joi.string().optional()
 })
 
 const config = {
