@@ -1,26 +1,17 @@
 const { blobServiceClient } = require('./get-blob-client')
 const storageConfig = require('../config/storage')
 
-const maxPageSize = 100
-
-const listOptions = {
-  includeMetadata: false,
-  includeSnapshots: false
-}
-
 const getLiveTemplate = async (emailType) => {
   const container = blobServiceClient.getContainerClient(storageConfig.attachmentsContainer)
 
   await container.createIfNotExists()
 
   const files = []
-  for await (const response of container.listBlobsFlat(listOptions).byPage({ maxPageSize })) {
-    if (response.segment.blobItems) {
-      for (const blob of response.segment.blobItems) {
-        const filename = blob.name
-        if (!filename.endsWith('.draft.pdf') && filename.endsWith('.pdf') && filename.indexOf('/') === -1) {
-          files.push(filename)
-        }
+  for await (const item of container.listBlobsByHierarchy('/', { prefix: `${emailType}/` })) {
+    const filename = item.name
+    if (filename.startsWith(`${emailType}/`)) {
+      if (!filename.endsWith('.draft.pdf') && filename.endsWith('.pdf')) {
+        files.push(filename)
       }
     }
   }

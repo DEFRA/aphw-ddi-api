@@ -11,6 +11,7 @@ const { EXEMPTION, DOG } = require('../constants/event/audit-event-object-types'
 const { microchipExists } = require('../repos/microchip')
 const { sendForm2Emails, emailApplicationPack, postApplicationPack } = require('../lib/email-helper')
 const { updatePersonEmail } = require('../repos/people')
+const { buildAddressStringAlternate } = require('../lib/address-helper')
 
 /**
  * @param {CdoRepository} cdoRepository
@@ -82,7 +83,7 @@ class CdoService {
         source: 'dog',
         activityDate: sentDate,
         targetPk: 'dog',
-        activityLabel: activities.applicationPackSent
+        activityLabel: `${activities.applicationPackSent} sent to ${cdoTaskList.person.contactDetails.email}`
       }, user)
     }
 
@@ -110,7 +111,7 @@ class CdoService {
         source: 'dog',
         activityDate: sentDate,
         targetPk: 'dog',
-        activityLabel: activities.applicationPackSent
+        activityLabel: `${activities.applicationPackSent} sent to ${buildAddressStringAlternate(cdoTaskList.person.contactDetails)}`
       }, user)
     }
 
