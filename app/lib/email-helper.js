@@ -1,6 +1,7 @@
 const config = require('../config/index')
 const { emailTypes, reportSomethingSubjectLines, reportSomethingAudit, reportTypes, formTwoSubmissionAudit } = require('../constants/email-types')
 const { lookupPoliceForceByEmail } = require('../repos/police-forces')
+const { formatToGds } = require('../lib/date-helpers')
 const { sendEmail } = require('../messaging/send-email')
 const { sendActivityToAudit } = require('../messaging/send-audit')
 const { v4: uuidv4 } = require('uuid')
@@ -206,7 +207,7 @@ const emailApplicationPack = async (person, dog, _user) => {
 
   const templateData = {
     fileInfo: {
-      filename: await getLiveTemplate(emailTypes.sendApplicationPack),
+      filename: await getLiveTemplate(emailTypes.emailApplicationPack),
       fileGuid: uuidv4(),
       saveFile: true
     },
@@ -229,7 +230,7 @@ const emailApplicationPack = async (person, dog, _user) => {
 
   const emailData = {
     toAddress: email,
-    type: emailTypes.sendApplicationPack,
+    type: emailTypes.emailApplicationPack,
     customFields
   }
 
@@ -240,11 +241,46 @@ const emailApplicationPack = async (person, dog, _user) => {
   }
 }
 
-const postApplicationPack = async (indexNumber, { dogName }, ownerDetails) => {
-  const { firstName, lastName, email, addressLine1, addressLine2, town, postcode } = ownerDetails
-  console.log('indexNumber', indexNumber)
-  console.log('dogName', dogName)
-  console.log('ownerDetails', { firstName, lastName, email, addressLine1, addressLine2, town, postcode })
+const postApplicationPack = async (person, dog, _user) => {
+  const { name, indexNumber } = dog
+  const { firstName, lastName, contactDetails } = person
+
+  const dogName = name && name !== '' ? name : 'Your dog'
+
+  const templateData = {
+    fileInfo: {
+      filename: await getLiveTemplate(emailTypes.postApplicationPack),
+      fileGuid: uuidv4(),
+      saveFile: true
+    },
+    fieldData: {
+      ddi_index_number: indexNumber,
+      ddi_dog_name: dogName,
+      ddi_owner_name: `${firstName} ${lastName}`,
+      ddi_address_line_1: contactDetails?.addressLine1,
+      ddi_address_line_2: contactDetails?.addressLine2,
+      ddi_town: contactDetails?.town,
+      ddi_postcode: contactDetails?.postcode,
+      ddi_todays_date: formatToGds(new Date())
+    }
+  }
+
+  await populateTemplate({ payload: templateData })
+
+  const customFields = [
+    { name: 'index_number', value: indexNumber },
+    { name: 'file_key_to_attach', value: 'link_to_file' },
+    { name: 'filename_for_display', value: `Defra application pack for ${dogName} ${indexNumber}.pdf` },
+    { name: 'link_to_file', value: `temp-populations/${templateData.fileInfo.fileGuid}.pdf` }
+  ]
+
+  const letterData = {
+    toAddress: 'not-applicable-as-posting-letter',
+    type: emailTypes.postApplicationPack,
+    customFields
+  }
+
+  await sendEmail(letterData)
 }
 
 module.exports = {

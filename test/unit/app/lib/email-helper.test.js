@@ -430,7 +430,7 @@ describe('EmailHelper test', () => {
           { name: 'link_to_file', value: expect.anything() }
         ],
         toAddress: 'garrymcfadyen@hotmail.com',
-        type: 'send-application-pack'
+        type: 'email-application-pack'
       })
       const linkToFile = sendEmail.mock.calls[0][0].customFields.filter(x => x.name === 'link_to_file')[0].value
       expect(linkToFile.indexOf('temp-populations/')).toBe(0)
@@ -467,7 +467,7 @@ describe('EmailHelper test', () => {
           { name: 'link_to_file', value: expect.anything() }
         ],
         toAddress: 'garrymcfadyen@hotmail.com',
-        type: 'send-application-pack'
+        type: 'email-application-pack'
       })
       const linkToFile = sendEmail.mock.calls[0][0].customFields.filter(x => x.name === 'link_to_file')[0].value
       expect(linkToFile.indexOf('temp-populations/')).toBe(0)
@@ -492,7 +492,7 @@ describe('EmailHelper test', () => {
           { name: 'link_to_file', value: expect.anything() }
         ],
         toAddress: 'garrymcfadyen@hotmail.com',
-        type: 'send-application-pack'
+        type: 'email-application-pack'
       })
       const linkToFile = sendEmail.mock.calls[0][0].customFields.filter(x => x.name === 'link_to_file')[0].value
       expect(linkToFile.indexOf('temp-populations/')).toBe(0)
@@ -504,7 +504,7 @@ describe('EmailHelper test', () => {
     test('should email application pack', async () => {
       const indexNumber = 'ED300001'
       const dogDetails = { dogName: 'Rex' }
-      const ownerDetails = { firstName: 'Garry', lastName: 'McFadyen', email: 'arrymcfadyen@hotmail.com' }
+      const ownerDetails = { firstName: 'Garry', lastName: 'McFadyen', email: 'arrymcfadyen@hotmail.com', contactDetails: {} }
 
       await postApplicationPack(indexNumber, dogDetails, ownerDetails)
 

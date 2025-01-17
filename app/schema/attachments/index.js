@@ -8,6 +8,13 @@ const testAttachmentRequestSchema = Joi.object({
   }),
   fieldData: Joi.object({
     ddi_index_number: Joi.string().required(),
+    ddi_dog_name: Joi.string().optional().allow('').allow(null),
+    ddi_owner_name: Joi.string().optional().allow('').allow(null),
+    ddi_address_line_1: Joi.string().optional().allow('').allow(null),
+    ddi_address_line_2: Joi.string().optional().allow('').allow(null),
+    ddi_town: Joi.string().optional().allow('').allow(null),
+    ddi_postcode: Joi.string().optional().allow('').allow(null),
+    ddi_todays_date: Joi.string().optional().allow('').allow(null),
     submitButton: Joi.string().allow('').allow(null).strip()
   })
 }).required()

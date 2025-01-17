@@ -1,4 +1,4 @@
-const { addYears, dateTodayOrInFuture, addMinutes } = require('../../../../app/lib/date-helpers')
+const { addYears, dateTodayOrInFuture, addMinutes, formatToGds } = require('../../../../app/lib/date-helpers')
 
 describe('DateHelpers test', () => {
   describe('addYears', () => {
@@ -36,6 +36,20 @@ describe('DateHelpers test', () => {
       const date = new Date()
       date.setDate(date.getDate() - 1)
       expect(dateTodayOrInFuture(date)).toBe(false)
+    })
+  })
+
+  describe('formatToGds', () => {
+    test('should handle null dates', () => {
+      expect(formatToGds(null)).toBe(null)
+    })
+
+    test('should handle undefined dates', () => {
+      expect(formatToGds(undefined)).toBe(undefined)
+    })
+
+    test('should handle a typical date', () => {
+      expect(formatToGds(new Date(2001, 5, 8))).toBe('08 June 2001')
     })
   })
 })
