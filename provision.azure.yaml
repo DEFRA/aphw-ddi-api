@@ -1,0 +1,26 @@
+resources:
+  identity: aphw-ddi-api
+  queues:
+    - name: aphw-ddi-notifications
+      role: sender
+      maxSize: 5120
+      duplicateDetection: false
+      messageTimeToLive: P14D
+      session: false
+      partitioning: false
+      lockDuration: PT30S
+  postgreSql:
+    name: aphw-ddi-api
+    extensions:
+      - name: pg_trgm
+  topics:
+    - name: aphw-ddi-events
+      role: sender
+      maxSize: 5120
+      duplicateDetection: true
+      messageTimeToLive: P100D
+      Partitioning: false
+      attachedOperations: true
+      supportOrdering: true
+      autoDeleteOnIdle: "P10675199DT2H48M5.4775807S"
+      express: false
