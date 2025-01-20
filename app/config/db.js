@@ -10,7 +10,7 @@ const MAX_CONNECTIONS = 20
 const hooks = {
   beforeConnect: async (cfg) => {
     if (isProd()) {
-      const credential = new DefaultAzureCredential({ managedIdentityClientId: process.env.AZURE_CLIENT_ID })
+      const credential = new DefaultAzureCredential()
       const accessToken = await credential.getToken('https://ossrdbms-aad.database.windows.net', { requestOptions: { timeout: 1000 } })
       cfg.password = accessToken.token
     }
