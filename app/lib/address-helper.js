@@ -40,39 +40,32 @@ const buildAddressForSearchResults = (address) => {
   return buildAddressString(address)
 }
 
-const shuffleAddress = (address) => {
+const preparePostalNameAndAddress = (person) => {
+  const { firstName, lastName, contactDetails } = person
   const addrParts = []
-  if (address?.addressLine1 && address?.addressLine1 !== '') {
-    addrParts.push(address.addressLine1)
+
+  if ((firstName && firstName !== '') || (lastName && lastName !== '')) {
+    addrParts.push(`${firstName ?? ''} ${lastName ?? ''}`.trim())
   }
-  if (address?.addressLine2 && address?.addressLine2 !== '') {
-    addrParts.push(address.addressLine2)
+  if (contactDetails?.addressLine1 && contactDetails?.addressLine1 !== '') {
+    addrParts.push(contactDetails.addressLine1)
   }
-  if (address?.town && address?.town !== '') {
-    addrParts.push(address.town)
+  if (contactDetails?.addressLine2 && contactDetails?.addressLine2 !== '') {
+    addrParts.push(contactDetails.addressLine2)
   }
-  if (address?.postcode && address?.postcode !== '') {
-    addrParts.push(address.postcode)
+  if (contactDetails?.town && contactDetails?.town !== '') {
+    addrParts.push(contactDetails.town)
+  }
+  if (contactDetails?.postcode && contactDetails?.postcode !== '') {
+    addrParts.push(contactDetails.postcode)
   }
 
-  if (addrParts.length < 4) {
-    const blankRowsRequired = 4 - addrParts.length
-    for (let i = 0; i < blankRowsRequired; i++) {
-      addrParts.push('')
-    }
-  }
-
-  return {
-    addressLine1: addrParts[0],
-    addressLine2: addrParts[1],
-    town: addrParts[2],
-    postcode: addrParts[3]
-  }
+  return addrParts.join('\n')
 }
 
 module.exports = {
   buildAddressString,
   buildAddressStringAlternate,
   buildAddressForSearchResults,
-  shuffleAddress
+  preparePostalNameAndAddress
 }

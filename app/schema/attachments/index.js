@@ -11,6 +11,7 @@ const testAttachmentRequestSchema = Joi.object({
     ddi_index_number: Joi.string().required(),
     ddi_dog_name: Joi.string().optional().allow('').allow(null),
     ddi_owner_name: Joi.string().optional().allow('').allow(null),
+    ddi_postal_name_and_address: Joi.string().optional().allow('').allow(null),
     ddi_address_line_1: Joi.string().optional().allow('').allow(null),
     ddi_address_line_2: Joi.string().optional().allow('').allow(null),
     ddi_town: Joi.string().optional().allow('').allow(null),
