@@ -1,0 +1,3 @@
+---
+container.eventsTopicAddress: queue:aphw-ddi-events
+container.notificationsTopicAddress: queue:aphw-ddi-notifications

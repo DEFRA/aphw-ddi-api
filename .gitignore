@@ -9,3 +9,4 @@ helm/**/*.lock
 .DS_Store
 *.pem
 *.base64
+*.sql
