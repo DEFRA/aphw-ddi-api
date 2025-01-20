@@ -1,3 +1,4 @@
+const { getBearerTokenProvider } = require('@azure/identity')
 describe('db config', () => {
   const OLD_ENV = process.env
 
@@ -6,6 +7,9 @@ describe('db config', () => {
     return {
       DefaultAzureCredential: jest.fn().mockImplementation(() => {
         return { getToken: () => { return { token: 'tok123' } } }
+      }),
+      getBearerTokenProvider: jest.fn().mockImplementation(() => {
+        return Promise.resolve('password')
       })
     }
   })
@@ -55,7 +59,7 @@ describe('db config', () => {
       },
       host: 'aphw-ddi-api',
       logging: false,
-      password: 'password',
+      password: Promise.resolve('password'),
       pool: {
         max: 20,
         min: 5
