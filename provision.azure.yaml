@@ -1,0 +1,13 @@
+resources:
+  identity: aphw-ddi-api
+  queues:
+    - name: aphw-ddi-notifications
+      role: sender
+  postgreSql:
+    name: aphw-ddi-api
+    extensions:
+      - name: pg_trgm
+  topics:
+    - name: aphw-ddi-events
+      role: sender
+      duplicateDetection: true
