@@ -1,4 +1,3 @@
-const { getBearerTokenProvider } = require('@azure/identity')
 describe('db config', () => {
   const OLD_ENV = process.env
 
