@@ -254,6 +254,7 @@ const postApplicationPack = async (person, dog, _user) => {
     fileInfo: {
       filename: await getLiveTemplate(emailTypes.postApplicationPack),
       fileGuid: uuidv4(),
+      flattenPDF: true,
       saveFile: true
     },
     fieldData: {
