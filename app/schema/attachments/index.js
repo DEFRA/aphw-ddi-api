@@ -4,6 +4,7 @@ const testAttachmentRequestSchema = Joi.object({
   fileInfo: Joi.object({
     filename: Joi.string().required(),
     fileGuid: Joi.string().allow('').allow(null).optional(),
+    flattenPdf: Joi.boolean().default(false),
     saveFile: Joi.boolean().default(false)
   }),
   fieldData: Joi.object({
