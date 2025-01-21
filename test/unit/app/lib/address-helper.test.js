@@ -59,6 +59,14 @@ describe('AddressHelper test', () => {
         postcode: 'postcode'
       })).toEqual('addr1, postcode')
     })
+    test('should build short address 2', () => {
+      expect(buildAddressStringAlternate({
+        addressLine1: null,
+        addressLine2: 'addr2',
+        town: 'town',
+        postcode: null
+      })).toEqual('addr2, town')
+    })
   })
 
   describe('preparePostalNameAndAddress test', () => {
@@ -95,6 +103,16 @@ describe('AddressHelper test', () => {
           postcode: 'postcode'
         }
       })).toEqual('Smith\naddr1\naddr2\ntown\npostcode')
+    })
+    test('should build even if all of name missing', () => {
+      expect(preparePostalNameAndAddress({
+        contactDetails: {
+          addressLine1: 'addr1',
+          addressLine2: 'addr2',
+          town: 'town',
+          postcode: 'postcode'
+        }
+      })).toEqual('addr1\naddr2\ntown\npostcode')
     })
     test('should build address when missing 1 line', () => {
       expect(preparePostalNameAndAddress({
