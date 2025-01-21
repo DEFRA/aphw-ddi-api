@@ -1,18 +1,13 @@
 describe('db config', () => {
   const OLD_ENV = process.env
-
   require('@azure/identity')
   jest.mock('@azure/identity', () => {
     return {
       DefaultAzureCredential: jest.fn().mockImplementation(() => {
         return { getToken: () => { return { token: 'tok123' } } }
-      }),
-      getBearerTokenProvider: jest.fn().mockImplementation(() => {
-        return Promise.resolve('password')
       })
     }
   })
-
   const mockSequelizeCall = jest.fn()
   require('sequelize')
   jest.mock('sequelize', () => {
@@ -23,17 +18,14 @@ describe('db config', () => {
       })
     }
   })
-
   beforeEach(() => {
     jest.resetModules() // Most important - it clears the cache
     jest.resetAllMocks() // Most important - it clears the cache
     process.env = { ...OLD_ENV } // Make a copy
   })
-
   afterAll(() => {
     process.env = OLD_ENV // Restore old environment
   })
-
   test('should call Sequelize with correct config', () => {
     process.env.POSTGRES_DB = 'myDB'
     process.env.POSTGRES_USERNAME = 'username'
@@ -58,7 +50,7 @@ describe('db config', () => {
       },
       host: 'aphw-ddi-api',
       logging: false,
-      password: Promise.resolve('password'),
+      password: 'password',
       pool: {
         max: 20,
         min: 5
