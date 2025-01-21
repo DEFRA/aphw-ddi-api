@@ -1,6 +1,20 @@
-const { buildAddressString, buildAddressStringAlternate, shuffleAddress } = require('../../../../app/lib/address-helper')
+const { isStringSupplied, buildAddressString, buildAddressStringAlternate, preparePostalNameAndAddress } = require('../../../../app/lib/address-helper')
 
 describe('AddressHelper test', () => {
+  describe('isStringSupplied test', () => {
+    test('should handle null', () => {
+      expect(isStringSupplied(null)).toBeFalsy()
+    })
+    test('should handle undefined', () => {
+      expect(isStringSupplied(undefined)).toBeFalsy()
+    })
+    test('should handle blank string', () => {
+      expect(isStringSupplied('')).toBeFalsy()
+    })
+    test('should handle normal string', () => {
+      expect(isStringSupplied('abc')).toBeTruthy()
+    })
+  })
   describe('buildAddressString test', () => {
     test('should build address', () => {
       expect(buildAddressString({
@@ -45,47 +59,81 @@ describe('AddressHelper test', () => {
         postcode: 'postcode'
       })).toEqual('addr1, postcode')
     })
+    test('should build short address 2', () => {
+      expect(buildAddressStringAlternate({
+        addressLine1: null,
+        addressLine2: 'addr2',
+        town: 'town',
+        postcode: null
+      })).toEqual('addr2, town')
+    })
   })
 
-  describe('shuffleAddress test', () => {
+  describe('preparePostalNameAndAddress test', () => {
     test('should build address with all parts', () => {
-      expect(shuffleAddress({
-        addressLine1: 'addr1',
-        addressLine2: 'addr2',
-        town: 'town',
-        postcode: 'postcode'
-      })).toEqual({
-        addressLine1: 'addr1',
-        addressLine2: 'addr2',
-        town: 'town',
-        postcode: 'postcode'
-      })
+      expect(preparePostalNameAndAddress({
+        firstName: 'John',
+        lastName: 'Smith',
+        contactDetails: {
+          addressLine1: 'addr1',
+          addressLine2: 'addr2',
+          town: 'town',
+          postcode: 'postcode'
+        }
+      })).toEqual('John Smith\naddr1\naddr2\ntown\npostcode')
+    })
+    test('should build name even if only first name', () => {
+      expect(preparePostalNameAndAddress({
+        firstName: 'John',
+        contactDetails: {
+          addressLine1: 'addr1',
+          addressLine2: 'addr2',
+          town: 'town',
+          postcode: 'postcode'
+        }
+      })).toEqual('John\naddr1\naddr2\ntown\npostcode')
+    })
+    test('should build name even if only last name', () => {
+      expect(preparePostalNameAndAddress({
+        lastName: 'Smith',
+        contactDetails: {
+          addressLine1: 'addr1',
+          addressLine2: 'addr2',
+          town: 'town',
+          postcode: 'postcode'
+        }
+      })).toEqual('Smith\naddr1\naddr2\ntown\npostcode')
+    })
+    test('should build even if all of name missing', () => {
+      expect(preparePostalNameAndAddress({
+        contactDetails: {
+          addressLine1: 'addr1',
+          addressLine2: 'addr2',
+          town: 'town',
+          postcode: 'postcode'
+        }
+      })).toEqual('addr1\naddr2\ntown\npostcode')
     })
     test('should build address when missing 1 line', () => {
-      expect(shuffleAddress({
-        addressLine1: 'addr1',
-        addressLine2: '',
-        town: 'town',
-        postcode: 'postcode'
-      })).toEqual({
-        addressLine1: 'addr1',
-        addressLine2: 'town',
-        town: 'postcode',
-        postcode: ''
-      })
+      expect(preparePostalNameAndAddress({
+        firstName: 'John',
+        lastName: 'Smith',
+        contactDetails: {
+          addressLine1: 'addr1',
+          town: 'town',
+          postcode: 'postcode'
+        }
+      })).toEqual('John Smith\naddr1\ntown\npostcode')
     })
     test('should build address when missing 2 lines', () => {
-      expect(shuffleAddress({
-        addressLine1: 'addr1',
-        addressLine2: '',
-        town: '',
-        postcode: 'postcode'
-      })).toEqual({
-        addressLine1: 'addr1',
-        addressLine2: 'postcode',
-        town: '',
-        postcode: ''
-      })
+      expect(preparePostalNameAndAddress({
+        firstName: 'John',
+        lastName: 'Smith',
+        contactDetails: {
+          addressLine1: 'addr1',
+          postcode: 'postcode'
+        }
+      })).toEqual('John Smith\naddr1\npostcode')
     })
   })
 })

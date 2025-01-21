@@ -1,5 +1,5 @@
 const { Sequelize } = require('sequelize')
-const { DefaultAzureCredential, getBearerTokenProvider } = require('@azure/identity')
+const { DefaultAzureCredential } = require('@azure/identity')
 
 const isProd = () => {
   return process.env.NODE_ENV === 'production'
@@ -10,12 +10,9 @@ const MAX_CONNECTIONS = 20
 const hooks = {
   beforeConnect: async (cfg) => {
     if (isProd()) {
-      const credential = new DefaultAzureCredential({ managedIdentityClientId: process.env.AZURE_CLIENT_ID })
-      const tokenProvider = getBearerTokenProvider(
-        credential,
-        'https://ossrdbms-aad.database.windows.net/.default'
-      )
-      cfg.password = tokenProvider
+      const credential = new DefaultAzureCredential()
+      const accessToken = await credential.getToken('https://ossrdbms-aad.database.windows.net', { requestOptions: { timeout: 1000 } })
+      cfg.password = accessToken.token
     }
   }
 }

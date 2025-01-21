@@ -5,5 +5,5 @@ name: aphw-ddi-api
 version: 1.0.0
 dependencies:
 - name: ffc-helm-library
-  version: 4.7.2
+  version: 4.0.0
   repository: https://raw.githubusercontent.com/defra/ffc-helm-repository/master/

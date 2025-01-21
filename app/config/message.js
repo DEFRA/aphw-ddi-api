@@ -14,8 +14,7 @@ const schema = Joi.object({
   },
   notificationsTopic: {
     address: Joi.string()
-  },
-  managedIdentityClientId: Joi.string().optional()
+  }
 })
 
 const config = {
@@ -31,8 +30,7 @@ const config = {
   },
   notificationsTopic: {
     address: process.env.NOTIFICATIONS_TOPIC_ADDRESS
-  },
-  managedIdentityClientId: process.env.AZURE_CLIENT_ID
+  }
 }
 
 const result = schema.validate(config, {
