@@ -1,6 +1,20 @@
-const { buildAddressString, buildAddressStringAlternate, preparePostalNameAndAddress } = require('../../../../app/lib/address-helper')
+const { isStringSupplied, buildAddressString, buildAddressStringAlternate, preparePostalNameAndAddress } = require('../../../../app/lib/address-helper')
 
 describe('AddressHelper test', () => {
+  describe('isStringSupplied test', () => {
+    test('should handle null', () => {
+      expect(isStringSupplied(null)).toBeFalsy()
+    })
+    test('should handle undefined', () => {
+      expect(isStringSupplied(undefined)).toBeFalsy()
+    })
+    test('should handle blank string', () => {
+      expect(isStringSupplied('')).toBeFalsy()
+    })
+    test('should handle normal string', () => {
+      expect(isStringSupplied('abc')).toBeTruthy()
+    })
+  })
   describe('buildAddressString test', () => {
     test('should build address', () => {
       expect(buildAddressString({
