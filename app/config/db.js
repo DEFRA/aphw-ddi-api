@@ -1,5 +1,5 @@
 const { Sequelize } = require('sequelize')
-const { DefaultAzureCredential } = require('@azure/identity')
+const { DefaultAzureCredential, getBearerTokenProvider } = require('@azure/identity')
 
 const isProd = () => {
   return process.env.NODE_ENV === 'production'
