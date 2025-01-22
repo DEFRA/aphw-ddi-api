@@ -101,14 +101,9 @@ module.exports = [
     handler: async (request, h) => {
       const indexNumber = request.params.indexNumber
       try {
-        const user = getCallingUser(request)
-        console.log('JB user', user)
         const dogService = ServiceProvider.getDogService()
-        const dog = await dogService.withdrawDog(indexNumber)
 
-        if (dog === null) {
-          return h.response().code(404)
-        }
+        await dogService.withdrawDog(indexNumber, getCallingUser(request))
 
         return h.response().code(200)
       } catch (e) {
