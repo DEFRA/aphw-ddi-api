@@ -10,6 +10,7 @@ const { importDogSchema, updateDogSchema } = require('../schema/dogs/response')
 const { putDogPayloadSchema } = require('../schema/dogs/put')
 const { dogOwnerResponseSchema, dogOwnerQuerySchema } = require('../schema/person/dog-owner')
 const { scopes } = require('../constants/auth')
+const ServiceProvider = require('../service/config')
 
 module.exports = [
   {
@@ -80,6 +81,38 @@ module.exports = [
         return h.response({ owner }).code(200)
       } catch (e) {
         console.log('Error in GET /dog-owner', e)
+        throw e
+      }
+    }
+  },
+  {
+    method: 'POST',
+    path: '/dog/withdraw/{indexNumber}',
+    options: {
+      tags: ['api'],
+      notes: ['Withdraw a dog from the index'],
+      response: {
+        status: {
+          204: undefined,
+          404: undefined
+        }
+      }
+    },
+    handler: async (request, h) => {
+      const indexNumber = request.params.indexNumber
+      try {
+        const user = getCallingUser(request)
+        console.log('JB user', user)
+        const dogService = ServiceProvider.getDogService()
+        const dog = await dogService.withdrawDog(indexNumber)
+
+        if (dog === null) {
+          return h.response().code(404)
+        }
+
+        return h.response().code(200)
+      } catch (e) {
+        console.log('Error in POST /dog/withdraw', e)
         throw e
       }
     }

@@ -66,6 +66,11 @@ class DogService {
 
     return changedDog
   }
+
+  async withdrawDog (indexNumber) {
+    const dog = await this._dogRepository.getDogByIndexNumber(indexNumber)
+    console.log('JB dog', dog)
+  }
 }
 
 module.exports = { DogService }
