@@ -458,12 +458,12 @@ describe('EmailHelper test', () => {
 
       expect(sendEmail).toHaveBeenCalledWith({
         customFields: [
-          { name: 'dog_name', value: 'Your dog' },
+          { name: 'dog_name', value: 'your dog' },
           { name: 'dog_name_with_apostrophy', value: 'Your dog\'s' },
           { name: 'owner_name', value: 'Garry McFadyen' },
           { name: 'index_number', value: 'ED300001' },
           { name: 'file_key_to_attach', value: 'link_to_file' },
-          { name: 'filename_for_display', value: 'Defra application pack for Your dog ED300001.pdf' },
+          { name: 'filename_for_display', value: 'Defra application pack for your dog ED300001.pdf' },
           { name: 'link_to_file', value: expect.anything() }
         ],
         toAddress: 'garrymcfadyen@hotmail.com',
@@ -483,12 +483,12 @@ describe('EmailHelper test', () => {
 
       expect(sendEmail).toHaveBeenCalledWith({
         customFields: [
-          { name: 'dog_name', value: 'Your dog' },
+          { name: 'dog_name', value: 'your dog' },
           { name: 'dog_name_with_apostrophy', value: 'Your dog\'s' },
           { name: 'owner_name', value: 'Garry McFadyen' },
           { name: 'index_number', value: 'ED300001' },
           { name: 'file_key_to_attach', value: 'link_to_file' },
-          { name: 'filename_for_display', value: 'Defra application pack for Your dog ED300001.pdf' },
+          { name: 'filename_for_display', value: 'Defra application pack for your dog ED300001.pdf' },
           { name: 'link_to_file', value: expect.anything() }
         ],
         toAddress: 'garrymcfadyen@hotmail.com',
