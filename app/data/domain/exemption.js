@@ -45,6 +45,7 @@ class Exemption extends Changeable {
     this._neuteringConfirmation = exemptionProperties.neuteringConfirmation
     this._microchipVerification = exemptionProperties.microchipVerification
     this._microchipDeadline = exemptionProperties.microchipDeadline
+    this._withdrawn = exemptionProperties.withdrawn
     this.joinedExemptionScheme = exemptionProperties.joinedExemptionScheme
     this.nonComplianceLetterSent = exemptionProperties.nonComplianceLetterSent
     this.applicationPackSent = exemptionProperties.applicationPackSent
@@ -125,6 +126,10 @@ class Exemption extends Changeable {
 
   get verificationDatesRecorded () {
     return this._verificationDatesRecorded
+  }
+
+  get withdrawn () {
+    return this._withdrawn
   }
 
   _checkIfInsuranceIsValid () {

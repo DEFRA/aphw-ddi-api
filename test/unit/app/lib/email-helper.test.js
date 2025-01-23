@@ -15,9 +15,9 @@ const { populateTemplate } = require('../../../../app/proxy/documents')
 
 const emailHelper = require('../../../../app/lib/email-helper')
 const { reportSomethingAudit, reportTypes } = require('../../../../app/constants/email-types')
-const { createAuditsForSubmitFormTwo, emailApplicationPack, postApplicationPack } = require('../../../../app/lib/email-helper')
-const { Person, Dog } = require('../../../../app/data/domain')
-const { buildCdoPerson, buildCdoPersonContactDetails, buildCdoDog } = require('../../../mocks/cdo/domain')
+const { createAuditsForSubmitFormTwo, emailApplicationPack, postApplicationPack, emailWithdrawalConfirmation } = require('../../../../app/lib/email-helper')
+const { Person, Dog, Exemption } = require('../../../../app/data/domain')
+const { buildCdoPerson, buildCdoPersonContactDetails, buildCdoDog, buildExemption } = require('../../../mocks/cdo/domain')
 
 describe('EmailHelper test', () => {
   beforeEach(async () => {
@@ -541,6 +541,71 @@ describe('EmailHelper test', () => {
       const linkToFile = sendEmail.mock.calls[0][0].customFields.filter(x => x.name === 'link_to_file')[0].value
       expect(linkToFile.indexOf('temp-populations/')).toBe(0)
       expect(linkToFile.indexOf('.pdf')).toBe(linkToFile.length - 4)
+    })
+  })
+
+  describe('emailWithdrawalConfirmation', () => {
+    const owner = new Person(buildCdoPerson({
+      firstName: 'Garry',
+      lastName: 'McFadyen',
+      contactDetails: buildCdoPersonContactDetails({
+        email: 'garrymcfadyen@hotmail.com'
+      })
+    }))
+    const exemption = new Exemption(buildExemption({
+      withdrawn: new Date('2025-02-02')
+    }))
+
+    test('should email withdrawal confirmation', async () => {
+      const dog = new Dog(buildCdoDog({ name: 'Rex', indexNumber: 'ED300001' }))
+
+      const response = await emailWithdrawalConfirmation(exemption, owner, dog)
+
+      expect(sendEmail).toHaveBeenCalledWith({
+        customFields: [
+          { name: 'dog_name', value: 'Rex' },
+          { name: 'index_number', value: 'ED300001' },
+          { name: 'owner_name', value: 'Garry McFadyen' },
+          { name: 'date_of_withdrawal', value: '02 February 2025' }
+        ],
+        toAddress: 'garrymcfadyen@hotmail.com',
+        type: 'withdrawal-confirmation'
+      })
+      expect(response.emailAddress).toBe('garrymcfadyen@hotmail.com')
+    })
+
+    test('should email application pack if dog name is null', async () => {
+      const dog = new Dog(buildCdoDog({ name: null, indexNumber: 'ED300001' }))
+
+      await emailWithdrawalConfirmation(exemption, owner, dog)
+
+      expect(sendEmail).toHaveBeenCalledWith({
+        customFields: [
+          { name: 'dog_name', value: 'your dog' },
+          { name: 'index_number', value: 'ED300001' },
+          { name: 'owner_name', value: 'Garry McFadyen' },
+          { name: 'date_of_withdrawal', value: '02 February 2025' }
+        ],
+        toAddress: 'garrymcfadyen@hotmail.com',
+        type: 'withdrawal-confirmation'
+      })
+    })
+
+    test('should email application pack if dog name is blank string', async () => {
+      const dog = new Dog(buildCdoDog({ name: '', indexNumber: 'ED300001' }))
+
+      await emailWithdrawalConfirmation(exemption, owner, dog)
+
+      expect(sendEmail).toHaveBeenCalledWith({
+        customFields: [
+          { name: 'dog_name', value: 'your dog' },
+          { name: 'index_number', value: 'ED300001' },
+          { name: 'owner_name', value: 'Garry McFadyen' },
+          { name: 'date_of_withdrawal', value: '02 February 2025' }
+        ],
+        toAddress: 'garrymcfadyen@hotmail.com',
+        type: 'withdrawal-confirmation'
+      })
     })
   })
 })

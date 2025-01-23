@@ -288,7 +288,40 @@ const postApplicationPack = async (person, dog, _user) => {
   await sendEmail(letterData)
 }
 
+/**
+ * @param {Exemption} exemption
+ * @param {Person} person
+ * @param {Dog} dog
+ * @param [_user]
+ * @return {Promise<{emailAddress: *}>}
+ */
+const emailWithdrawalConfirmation = async (exemption, person, dog, _user) => {
+  const { indexNumber } = dog
+  const { firstName, lastName } = person
+  const { email } = person.contactDetails
+
+  const customFields = [
+    { name: 'dog_name', value: dog.name && dog.name !== '' ? dog.name : 'your dog' },
+    { name: 'index_number', value: indexNumber },
+    { name: 'owner_name', value: `${firstName} ${lastName}` },
+    { name: 'date_of_withdrawal', value: formatToGds(exemption.withdrawn) }
+  ]
+
+  const emailData = {
+    toAddress: email,
+    type: emailTypes.withdrawalConfirmation,
+    customFields
+  }
+
+  await sendEmail(emailData)
+
+  return {
+    emailAddress: email
+  }
+}
+
 module.exports = {
+  emailWithdrawalConfirmation,
   sendReportSomethingEmails,
   sendForm2Emails,
   createAuditsForReportSomething,

@@ -7,7 +7,8 @@ const emailTypes = {
   form2SubmissionToDefra: 'form2-submission-to-defra',
   form2ConfirmationToPolice: 'form2-confirmation-to-police',
   emailApplicationPack: 'email-application-pack',
-  postApplicationPack: 'post-application-pack'
+  postApplicationPack: 'post-application-pack',
+  withdrawalConfirmation: 'withdrawal-confirmation'
 }
 
 const reportSomethingSubjectLines = {
