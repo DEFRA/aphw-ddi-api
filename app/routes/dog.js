@@ -89,6 +89,7 @@ module.exports = [
     method: 'POST',
     path: '/dog/withdraw/{indexNumber}',
     options: {
+      auth: { scope: scopes.internal },
       tags: ['api'],
       notes: ['Withdraw a dog from the index'],
       response: {
