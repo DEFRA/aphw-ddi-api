@@ -24,7 +24,8 @@ const {
   saveDog,
   saveDogFields,
   getDogModel,
-  determineExemptionOrder
+  determineExemptionOrder,
+  saveDogExemption
 } = require('./dog')
 
 const {
@@ -57,5 +58,6 @@ module.exports = {
   saveDog,
   saveDogFields,
   getDogModel,
-  determineExemptionOrder
+  determineExemptionOrder,
+  saveDogExemption
 }

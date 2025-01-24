@@ -1,10 +1,10 @@
-const { differenceInCalendarMonths } = require('date-fns')
 const { sendUpdateToAudit } = require('../messaging/send-audit')
 const { DOG } = require('../constants/event/audit-event-object-types')
 const { statuses } = require('../constants/statuses')
 const { mapDogDaoToDog } = require('../repos/mappers/cdo')
 const { NotFoundError } = require('../errors/not-found')
 const { EXEMPTION } = require('../constants/event/audit-event-object-types')
+const { deepClone } = require('../lib/deep-clone')
 
 class DogService {
   constructor (dogRepository, breachesRepository) {
@@ -70,50 +70,22 @@ class DogService {
     return changedDog
   }
 
-  canDogBeWithdrawn (dog) {
-    const now = new Date()
-    const dob = dog.birth_date ? new Date(dog.birth_date) : now
-    return dog.registration.exemption_order.exemption_order === '2023' && differenceInCalendarMonths(now, dob) > 18
-  }
-
   async withdrawDog (indexNumber, user) {
-    const dog = await this._dogRepository.getDogByIndexNumber(indexNumber)
+    const dog = await this._dogRepository.getDogModel(indexNumber)
 
-    if (!dog) {
+    if (dog === undefined) {
       throw new NotFoundError(`Dog ${indexNumber} not found`)
     }
+    const preAudit = deepClone({ index_number: indexNumber, status: dog.status, withdrawn: dog.exemption.withdrawn })
 
-    if (!this.canDogBeWithdrawn(dog)) {
-      throw new Error(`Dog ${indexNumber} is not valid for withdrawal`)
-    }
-
-    const preAudit = { index_number: indexNumber, status: dog.status.status, withdrawn: dog.registration.withdrawn }
-
-    const shouldChangeStatus = dog.status.status !== statuses.Withdrawn
-
-    const shouldSetDate = !dog.registration.withdrawn
-
-    if (shouldChangeStatus) {
-      const statusList = await this._dogRepository.getCachedStatuses()
-      dog.status_id = statusList.filter(x => x.status === statuses.Withdrawn)[0].id
-    }
-
-    if (shouldSetDate) {
-      dog.registration.withdrawn = new Date()
-    }
-
-    if (shouldChangeStatus) {
-      await dog.save()
-    }
-
-    if (shouldSetDate) {
-      await dog.registration.save()
-    }
-
-    if (shouldChangeStatus || shouldSetDate) {
-      const postAudit = { index_number: indexNumber, status: statuses.Withdrawn, withdrawn: dog.registration.withdrawn }
+    const callback = async () => {
+      const postAudit = { index_number: indexNumber, status: dog.status, withdrawn: dog.exemption.withdrawn }
       await sendUpdateToAudit(EXEMPTION, preAudit, postAudit, user)
     }
+
+    dog.withdrawDog(callback)
+
+    await this._dogRepository.saveDog(dog)
   }
 }
 

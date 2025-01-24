@@ -805,7 +805,32 @@ const saveDogFields = async (dog, dogDao, transaction) => {
     }
   }
 }
+/**
+ * @param {import('../../data/domain/exemption')} exemption
+ * @param registrationDao
+ * @param [transaction]
+ * @return {Promise<undefined>}
+ */
+const saveDogExemption = async (exemption, registrationDao, transaction) => {
+  if (!transaction) {
+    return await sequelize.transaction(async (t) => saveDogExemption(exemption, registrationDao, t))
+  }
 
+  const updates = exemption.getChanges()
+
+  for (const update of updates) {
+    if (update.key === 'withdrawn') {
+      registrationDao.withdrawn = update.value
+      await registrationDao.save({ transaction })
+    } else if (update.key !== 'callback') {
+      throw new Error('Not implemented')
+    }
+
+    if (update.callback) {
+      await update.callback()
+    }
+  }
+}
 /**
  * @param {import('../../data/domain/dog')} dog
  * @param transaction
@@ -818,6 +843,10 @@ const saveDog = async (dog, transaction) => {
 
   const dogDao = await getDogByIndexNumber(dog.indexNumber, transaction)
 
+  if (dog.exemption?.getChanges().length) {
+    await saveDogExemption(dog.exemption, dogDao.registration, transaction)
+  }
+
   await saveDogFields(dog, dogDao, transaction)
 }
 
@@ -826,13 +855,14 @@ const getDogModel = async (indexNumber, t) => {
   if (!dogDao) {
     return undefined
   }
-  return mapDogDaoToDog(dogDao)
+  return mapDogDaoToDog(dogDao, true)
 }
 
 module.exports = {
   getBreeds,
   getStatuses,
   getCachedStatuses,
+  saveDogExemption,
   createDogs,
   addImportedDog,
   updateDog,

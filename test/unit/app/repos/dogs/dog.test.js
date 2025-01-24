@@ -16,9 +16,9 @@ const { removeDogFromSearchIndex } = require('../../../../../app/repos/search-in
 
 jest.mock('../../../../../app/messaging/send-audit')
 const { sendDeleteToAudit, sendPermanentDeleteToAudit } = require('../../../../../app/messaging/send-audit')
-const { buildDogDao, buildDogBreachDao } = require('../../../../mocks/cdo/get')
-const { Dog } = require('../../../../../app/data/domain')
-const { buildCdoDog, allBreaches } = require('../../../../mocks/cdo/domain')
+const { buildDogDao, buildDogBreachDao, buildRegistrationDao } = require('../../../../mocks/cdo/get')
+const { Dog, Exemption } = require('../../../../../app/data/domain')
+const { buildCdoDog, allBreaches, buildExemption } = require('../../../../mocks/cdo/domain')
 
 jest.mock('../../../../../app/repos/breaches')
 const { setBreaches } = require('../../../../../app/repos/breaches')
@@ -97,7 +97,7 @@ describe('Dog repo', () => {
 
   const sequelize = require('../../../../../app/config/db')
 
-  const { getBreeds, getStatuses, getCachedStatuses, createDogs, addImportedDog, getDogByIndexNumber, getAllDogIds, updateDog, updateStatus, updateDogFields, deleteDogByIndexNumber, switchOwnerIfNecessary, buildSwitchedOwner, constructStatusList, constructDbSort, getOldDogs, generateClausesForOr, customSort, purgeDogByIndexNumber, saveDog, getDogModel, updateBreaches, determineExemptionOrder } = require('../../../../../app/repos/dogs')
+  const { getBreeds, getStatuses, getCachedStatuses, createDogs, addImportedDog, getDogByIndexNumber, getAllDogIds, updateDog, updateStatus, updateDogFields, deleteDogByIndexNumber, switchOwnerIfNecessary, buildSwitchedOwner, constructStatusList, constructDbSort, getOldDogs, generateClausesForOr, customSort, purgeDogByIndexNumber, saveDog, getDogModel, updateBreaches, determineExemptionOrder, saveDogExemption } = require('../../../../../app/repos/dogs')
 
   beforeEach(async () => {
     jest.clearAllMocks()
@@ -1303,15 +1303,101 @@ describe('Dog repo', () => {
 
       await expect(saveDog(dog, {})).rejects.toThrow(new Error('Not implemented'))
     })
+
+    test('should handle exemption changes', async () => {
+      const registrationDao = buildRegistrationDao({
+        save: jest.fn()
+      })
+      const dogDao = buildDogDao({
+        registration: registrationDao,
+        save: jest.fn()
+      })
+      const exemption = new Exemption(buildExemption({
+        exemptionOrder: '2023'
+      }))
+      const dog = new Dog(buildCdoDog({
+        exemption,
+        dateOfBirth: new Date('2023-07-22')
+      }))
+      const cb = jest.fn()
+      dog.withdrawDog(cb)
+      sequelize.models.dog.findOne.mockResolvedValue(dogDao)
+
+      await saveDog(dog, {})
+      expect(dogDao.status_id).toBe(6)
+      expect(dogDao.save).toHaveBeenCalledWith({ transaction: {} })
+    })
+  })
+
+  describe('saveDogExemption', () => {
+    test('should save an exemption', async () => {
+      await saveDogExemption(new Exemption(buildExemption({})), buildRegistrationDao())
+      expect(sequelize.transaction).toHaveBeenCalledTimes(1)
+    })
+
+    test('should update fields', async () => {
+      const registrationDao = buildRegistrationDao({
+        withdrawn: undefined,
+        save: jest.fn()
+      })
+      const withdrawnDate = new Date()
+      const exemption = new Exemption(buildExemption({
+        exemptionOrder: '2023',
+        withdrawn: undefined
+      }))
+      const cb = jest.fn()
+      exemption.setWithdrawn(withdrawnDate, cb)
+      await saveDogExemption(exemption, registrationDao, {})
+      expect(registrationDao.save).toHaveBeenCalled()
+      expect(registrationDao.withdrawn).toEqual(withdrawnDate)
+      expect(cb).toHaveBeenCalled()
+    })
+
+    test('should fail if undefined property', async () => {
+      const registrationDao = buildRegistrationDao({})
+
+      const exemption = new Exemption(buildExemption({
+        exemptionOrder: '2023',
+        withdrawn: undefined
+      }))
+      exemption.getChanges = () => [{
+        key: 'unknown key'
+      }]
+
+      await expect(saveDogExemption(exemption, registrationDao, {})).rejects.toThrow(new Error('Not implemented'))
+    })
+
+    test('should fail if undefined property', async () => {
+      const registrationDao = buildRegistrationDao({})
+      const callback = jest.fn()
+      const exemption = new Exemption(buildExemption({
+        exemptionOrder: '2023',
+        withdrawn: undefined
+      }))
+      exemption.getChanges = () => [{
+        key: 'callback',
+        callback
+      }]
+      await saveDogExemption(exemption, registrationDao, {})
+      expect(callback).toHaveBeenCalled()
+    })
   })
 
   describe('getDogModel', () => {
     test('should get dog model', async () => {
-      const dog = buildDogDao()
-      sequelize.models.dog.findOne.mockResolvedValue(dog)
+      const dogDao = buildDogDao({
+        registration: buildRegistrationDao()
+      })
+      const exemption = new Exemption(buildExemption())
+      sequelize.models.dog.findOne.mockResolvedValue(dogDao)
+      const expectedDog = new Dog(buildCdoDog({
+        exemption
+      }))
       const res = await getDogModel('ED123', {})
+
       expect(sequelize.models.dog.findOne).toHaveBeenCalledTimes(1)
-      expect(res).toEqual(new Dog(buildCdoDog()))
+      expect(res).not.toBeUndefined()
+      expect(res).toEqual(expectedDog)
     })
 
     test('should return null if not found', async () => {

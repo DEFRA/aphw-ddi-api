@@ -103,7 +103,6 @@ module.exports = [
       const indexNumber = request.params.indexNumber
       try {
         const dogService = ServiceProvider.getDogService()
-
         await dogService.withdrawDog(indexNumber, getCallingUser(request))
 
         return h.response().code(200)
@@ -250,7 +249,7 @@ module.exports = [
       notes: ['Soft deletes a batch of dogs by dog index number'],
       validate: {
         payload: deleteDogsPayloadSchema,
-        failAction: (request, h, error) => {
+        failAction: (request, h, _error) => {
           return h.response().code(400).takeover()
         }
       },
