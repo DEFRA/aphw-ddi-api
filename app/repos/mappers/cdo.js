@@ -223,7 +223,6 @@ const mapCdoDaoToExemption = (registration, insurance) => {
     court: registration.court?.name,
     policeForce: registration?.police_force?.name,
     legislationOfficer: registration.legislation_officer,
-    withdrawn: registration.withdrawn,
     certificateIssued: returnDateOrNull(registration.certificate_issued),
     applicationFeePaid: returnDateOrNull(registration.application_fee_paid),
     insurance: insurance?.sort((a, b) => a.id - b.id).map(i => ({
