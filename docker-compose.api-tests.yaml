@@ -72,6 +72,7 @@ services:
       USER_FEEDBACK_EMAIL_ADDRESS: ${USER_FEEDBACK_EMAIL_ADDRESS:-dummy@example.com}
       ENFORCEMENT_URL: ${ENFORCEMENT_URL}
       REPORT_SOMETHING_EMAIL_ADDRESS: ${REPORT_SOMETHING_EMAIL_ADDRESS:-report@example.com}
+      DDI_DOCUMENTS_BASE_URL: ${DDI_DOCUMENTS_BASE_URL:-http://host.docker.internal:3008}
 
   aphw-ddi-api-postgres-api-tests:
     image: postgres:11.22-alpine
