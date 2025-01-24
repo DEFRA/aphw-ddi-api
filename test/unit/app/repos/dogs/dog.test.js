@@ -1313,6 +1313,12 @@ describe('Dog repo', () => {
       expect(sequelize.models.dog.findOne).toHaveBeenCalledTimes(1)
       expect(res).toEqual(new Dog(buildCdoDog()))
     })
+
+    test('should return null if not found', async () => {
+      sequelize.models.dog.findOne.mockResolvedValue(null)
+      const res = await getDogModel('ED123', {})
+      expect(res).toBeUndefined()
+    })
   })
 
   describe('determineExemptionOrder', () => {

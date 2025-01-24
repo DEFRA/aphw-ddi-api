@@ -823,6 +823,9 @@ const saveDog = async (dog, transaction) => {
 
 const getDogModel = async (indexNumber, t) => {
   const dogDao = await getDogByIndexNumber(indexNumber, t)
+  if (!dogDao) {
+    return undefined
+  }
   return mapDogDaoToDog(dogDao)
 }
 
