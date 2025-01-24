@@ -664,6 +664,23 @@ describe('Dog endpoint', () => {
       const response = await server.inject(options)
       expect(response.statusCode).toBe(403)
     })
+
+    test('should throw if error withdrawing dog', async () => {
+      const withdrawDogMock = jest.fn()
+      getDogService.mockReturnValue({
+        withdrawDog: withdrawDogMock
+      })
+      withdrawDogMock.mockImplementation(() => { throw new Error('Invalid dog') })
+
+      const options = {
+        method: 'POST',
+        url: '/dog/withdraw/ED123',
+        payload: { },
+        ...portalHeader
+      }
+      const response = await server.inject(options)
+      expect(response.statusCode).toBe(500)
+    })
   })
 
   afterEach(async () => {
