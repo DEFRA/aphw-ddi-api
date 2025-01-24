@@ -3,7 +3,7 @@ const { InvalidDateError } = require('../../errors/domain/invalidDate')
 const { IncompleteDataError } = require('../../errors/domain/incompleteData')
 const { Changeable } = require('./changeable')
 const { InvalidDataError } = require('../../errors/domain/invalidData')
-
+const { ExemptionActionNotAllowedException } = require('../../errors/domain/exemptionActionNotAllowedException')
 /**
  * @param exemptionProperties
  * @constructor
@@ -375,6 +375,21 @@ class Exemption extends Changeable {
     const timestamp = new Date()
     this._microchipNumberRecorded = timestamp
     this._updates.update('microchipNumberRecorded', timestamp)
+  }
+
+  /**
+   * @param {Date} timestamp
+   * @param {Function} [cb]
+   */
+  setWithdrawn (timestamp, cb) {
+    if (this.exemptionOrder !== '2023') {
+      throw new ExemptionActionNotAllowedException('Only a 2023 Dog can be withdrawn')
+    }
+
+    if (!this._withdrawn) {
+      this._withdrawn = timestamp
+      this._updates.update('withdrawn', timestamp, cb)
+    }
   }
 }
 module.exports = Exemption
