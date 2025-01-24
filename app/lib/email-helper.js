@@ -204,7 +204,8 @@ const emailApplicationPack = async (person, dog, _user) => {
   const { firstName, lastName } = person
   const { email } = person.contactDetails
 
-  const dogName = name && name !== '' ? name : 'Your dog'
+  const dogName = name && name !== '' ? name : 'your dog'
+  const dogNameWithApostrophy = name && name !== '' ? `${name}'s` : 'Your dog\'s'
 
   const templateData = {
     fileInfo: {
@@ -221,7 +222,7 @@ const emailApplicationPack = async (person, dog, _user) => {
 
   const customFields = [
     { name: 'dog_name', value: dogName },
-    { name: 'dog_name_with_apostrophy', value: `${dogName}'s` },
+    { name: 'dog_name_with_apostrophy', value: dogNameWithApostrophy },
     { name: 'owner_name', value: `${firstName} ${lastName}` },
     { name: 'index_number', value: indexNumber },
     { name: 'file_key_to_attach', value: 'link_to_file' },
@@ -288,7 +289,40 @@ const postApplicationPack = async (person, dog, _user) => {
   await sendEmail(letterData)
 }
 
+/**
+ * @param {Exemption} exemption
+ * @param {Person} person
+ * @param {Dog} dog
+ * @param [_user]
+ * @return {Promise<{emailAddress: *}>}
+ */
+const emailWithdrawalConfirmation = async (exemption, person, dog, _user) => {
+  const { indexNumber } = dog
+  const { firstName, lastName } = person
+  const { email } = person.contactDetails
+
+  const customFields = [
+    { name: 'dog_name', value: dog.name && dog.name !== '' ? dog.name : 'your dog' },
+    { name: 'index_number', value: indexNumber },
+    { name: 'owner_name', value: `${firstName} ${lastName}` },
+    { name: 'date_of_withdrawal', value: formatToGds(exemption.withdrawn) }
+  ]
+
+  const emailData = {
+    toAddress: email,
+    type: emailTypes.withdrawalConfirmation,
+    customFields
+  }
+
+  await sendEmail(emailData)
+
+  return {
+    emailAddress: email
+  }
+}
+
 module.exports = {
+  emailWithdrawalConfirmation,
   sendReportSomethingEmails,
   sendForm2Emails,
   createAuditsForReportSomething,

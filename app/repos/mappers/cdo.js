@@ -182,7 +182,7 @@ const mapCdoPersonToPerson = (person) => {
   return new Person(params)
 }
 
-const mapDogDaoToDog = (dogDao) => {
+const mapDogDaoToDog = (dogDao, includeRegistration = false) => {
   const dogProperties = {
     id: dogDao.id,
     dogReference: dogDao.dog_reference,
@@ -201,6 +201,9 @@ const mapDogDaoToDog = (dogDao) => {
     microchipNumber: getMicrochip(dogDao, 1),
     microchipNumber2: getMicrochip(dogDao, 2),
     dogBreaches: dogDao.dog_breaches?.map(mapDogBreachDaoToBreachCategory)
+  }
+  if (includeRegistration) {
+    dogProperties.exemption = mapCdoDaoToExemption(dogDao.registration)
   }
   return new Dog(dogProperties)
 }
@@ -239,7 +242,8 @@ const mapCdoDaoToExemption = (registration, insurance) => {
     insuranceDetailsRecorded: returnDateOrNull(registration.insurance_details_recorded),
     microchipNumberRecorded: returnDateOrNull(registration.microchip_number_recorded),
     applicationFeePaymentRecorded: returnDateOrNull(registration.application_fee_payment_recorded),
-    verificationDatesRecorded: returnDateOrNull(registration.verification_dates_recorded)
+    verificationDatesRecorded: returnDateOrNull(registration.verification_dates_recorded),
+    withdrawn: returnDateOrNull(registration.withdrawn)
   }
   return new Exemption(exemptionProperties)
 }

@@ -10,6 +10,7 @@ const { importDogSchema, updateDogSchema } = require('../schema/dogs/response')
 const { putDogPayloadSchema } = require('../schema/dogs/put')
 const { dogOwnerResponseSchema, dogOwnerQuerySchema } = require('../schema/person/dog-owner')
 const { scopes } = require('../constants/auth')
+const ServiceProvider = require('../service/config')
 
 module.exports = [
   {
@@ -80,6 +81,33 @@ module.exports = [
         return h.response({ owner }).code(200)
       } catch (e) {
         console.log('Error in GET /dog-owner', e)
+        throw e
+      }
+    }
+  },
+  {
+    method: 'POST',
+    path: '/dog/withdraw/{indexNumber}',
+    options: {
+      auth: { scope: scopes.internal },
+      tags: ['api'],
+      notes: ['Withdraw a dog from the index'],
+      response: {
+        status: {
+          204: undefined,
+          404: undefined
+        }
+      }
+    },
+    handler: async (request, h) => {
+      const indexNumber = request.params.indexNumber
+      try {
+        const dogService = ServiceProvider.getDogService()
+        await dogService.withdrawDog(indexNumber, getCallingUser(request))
+
+        return h.response().code(200)
+      } catch (e) {
+        console.log('Error in POST /dog/withdraw', e)
         throw e
       }
     }
@@ -221,7 +249,7 @@ module.exports = [
       notes: ['Soft deletes a batch of dogs by dog index number'],
       validate: {
         payload: deleteDogsPayloadSchema,
-        failAction: (request, h, error) => {
+        failAction: (request, h, _error) => {
           return h.response().code(400).takeover()
         }
       },

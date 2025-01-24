@@ -70,6 +70,7 @@ const buildCdoPerson = (cdoPersonPartial = {}) => ({
  *  colour: string|null,
  *  name: string|null,
  *  id: number,
+ *  exemption?: Exemption
  *  dateUntraceable: null|Date,
  *  status: string,
  *  dogBreaches: BreachCategory[]
@@ -97,6 +98,7 @@ const buildCdoDog = (cdoDogPartial = {}) => ({
   dateUntraceable: null,
   microchipNumber: null,
   microchipNumber2: null,
+  exemption: undefined,
   dogBreaches: [],
   ...cdoDogPartial
 })
@@ -123,6 +125,7 @@ const buildCdoInsurance = (insurancePartial = {}) => ({
  * @property {Date|null} microchipVerification - Microchip verification status, currently null.
  * @property {Date|null} microchipDeadline - Microchip verification status, currently null.
  * @property {Date|null} neuteringConfirmation - Neutering confirmation status, currently null.
+ * @property {Date|null} withdrawn - Neutering confirmation status, currently null.
  * @property {string} court - Name of the court.
  * @property {Date|null} nonComplianceLetterSent - Status of non-compliance letter sent, currently null.
  * @property {Date|null} certificateIssued - Status of certificate issued, currently null.
@@ -151,6 +154,7 @@ const buildExemption = (exemptionPartial = {}) => ({
   certificateIssued: null,
   applicationFeePaid: null,
   applicationPackProcessed: null,
+  withdrawn: null,
   insurance: [],
   neuteringConfirmation: null,
   neuteringDeadline: null,

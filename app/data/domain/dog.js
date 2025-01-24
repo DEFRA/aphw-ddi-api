@@ -2,6 +2,8 @@ const { Changeable } = require('./changeable')
 const { DuplicateResourceError } = require('../../errors/duplicate-record')
 const { InvalidDataError } = require('../../errors/domain/invalidData')
 const { statuses } = require('../../constants/statuses')
+const { DogActionNotAllowedException } = require('../../errors/domain/dogActionNotAllowedException')
+const { addMonths } = require('../../lib/date-helpers')
 /**
  * @property {number} id
  * @property {string|null} dogReference = dogProperties.dogReference
@@ -18,6 +20,8 @@ const { statuses } = require('../../constants/statuses')
  * @property {Date|null} dateUntraceable = dogProperties.dateUntraceable
  * @property {string|null} microchipNumber2 = dogProperties.microchipNumber2
  * @property {BreachCategory[]} breaches = dogProperties.breaches
+ * @property {Exemption} [exemption] = dogProperties.exemption
+ * @property {DogStatus} dogStatus
  */
 class Dog extends Changeable {
   constructor (dogProperties) {
@@ -39,6 +43,10 @@ class Dog extends Changeable {
     this._microchipNumber = dogProperties.microchipNumber
     this.microchipNumber2 = dogProperties.microchipNumber2
     this._breaches = dogProperties.dogBreaches
+
+    if (dogProperties.exemption) {
+      this.exemption = dogProperties.exemption
+    }
   }
 
   /**
@@ -69,6 +77,9 @@ class Dog extends Changeable {
     this._microchipNumber = microchipNumber1
   }
 
+  /**
+   * @return {DogStatus}
+   */
   get status () {
     return this._status
   }
@@ -108,6 +119,27 @@ class Dog extends Changeable {
     }
 
     return this.dateOfBirth.getTime() > sixteenMonths.getTime()
+  }
+
+  /**
+   * @param {Function} cb
+   */
+  withdrawDog (cb) {
+    if (!this.exemption) {
+      throw new DogActionNotAllowedException('Exemption not found')
+    }
+    if (this.exemption.exemptionOrder !== '2023' || !this.dateOfBirth) {
+      throw new DogActionNotAllowedException(`Dog ${this.indexNumber} is not valid for withdrawal`)
+    }
+
+    const now = new Date()
+    if (this.dateOfBirth >= addMonths(now, -18)) {
+      throw new DogActionNotAllowedException(`Dog ${this.indexNumber} is not valid for withdrawal`)
+    }
+    if (this.status !== statuses.Withdrawn) {
+      this.setStatus(statuses.Withdrawn, cb)
+    }
+    this.exemption.setWithdrawn(now)
   }
 }
 
