@@ -70,6 +70,7 @@ const buildCdoPerson = (cdoPersonPartial = {}) => ({
  *  colour: string|null,
  *  name: string|null,
  *  id: number,
+ *  exemption?: Exemption
  *  dateUntraceable: null|Date,
  *  status: string,
  *  dogBreaches: BreachCategory[]

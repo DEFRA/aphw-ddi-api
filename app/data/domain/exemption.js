@@ -40,7 +40,7 @@ class Exemption extends Changeable {
     this.legislationOfficer = exemptionProperties.legislationOfficer
     this._certificateIssued = exemptionProperties.certificateIssued
     this._applicationFeePaid = exemptionProperties.applicationFeePaid
-    this._insurance = exemptionProperties.insurance
+    this._insurance = exemptionProperties.insurance ?? []
     this._neuteringDeadline = exemptionProperties.neuteringDeadline
     this._neuteringConfirmation = exemptionProperties.neuteringConfirmation
     this._microchipVerification = exemptionProperties.microchipVerification
@@ -73,11 +73,11 @@ class Exemption extends Changeable {
   }
 
   get insuranceCompany () {
-    return this._insurance[0]?.company ?? undefined
+    return this._insurance?.[0]?.company ?? undefined
   }
 
   get insuranceRenewal () {
-    return this._insurance[0]?.renewalDate ?? undefined
+    return this._insurance?.[0]?.renewalDate ?? undefined
   }
 
   get applicationFeePaid () {

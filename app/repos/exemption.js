@@ -175,38 +175,11 @@ const handleCourt = async (registration, data, cdo) => {
     registration.court_id = court.id
   }
 }
-/**
- * @param {import('../data/domain/exemption')} exemption
- * @param registrationDao
- * @param [transaction]
- * @return {Promise<undefined>}
- */
-const saveExemption = async (exemption, registrationDao, transaction) => {
-  if (!transaction) {
-    return await sequelize.transaction(async (t) => saveExemption(exemption, registrationDao, t))
-  }
-
-  const updates = exemption.getChanges()
-
-  for (const update of updates) {
-    if (update.key === 'withdrawn') {
-      registrationDao.withdrawn = update.value
-      await registrationDao.save({ transaction })
-    } else if (update.key !== 'callback') {
-      throw new Error('Not implemented')
-    }
-
-    if (update.callback) {
-      await update.callback()
-    }
-  }
-}
 
 module.exports = {
   updateExemption,
   setDefaults,
   autoChangeStatus,
   canSetExemptDueToInsuranceRenewal,
-  updateRegistration,
-  saveExemption
+  updateRegistration
 }
