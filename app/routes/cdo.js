@@ -522,7 +522,7 @@ module.exports = [
 
         try {
           const cdoService = ServiceProvider.getCdoService()
-          const certificateId = await cdoService.issueCertificate(indexNumber, new Date(), getCallingUser(request))
+          const certificateId = await cdoService.issueCertificate(indexNumber, new Date(), getCallingUser(request), request.payload)
 
           return h.response({
             certificateIssued: certificateId

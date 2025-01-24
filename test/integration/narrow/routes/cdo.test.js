@@ -1950,7 +1950,8 @@ describe('CDO endpoint', () => {
       const options = {
         method: 'POST',
         url: '/cdo/ED123/manage:issueCertificate',
-        ...portalHeader
+        ...portalHeader,
+        payload: { certificateId: '123', email: 'me@here.com' }
       }
       const response = await server.inject(options)
       const payload = JSON.parse(response.payload)
@@ -1958,7 +1959,7 @@ describe('CDO endpoint', () => {
       expect(payload).toEqual({
         certificateIssued: new Date('2024-07-30').toISOString()
       })
-      expect(issueCertificateMock).toHaveBeenCalledWith('ED123', expect.any(Date), devUser)
+      expect(issueCertificateMock).toHaveBeenCalledWith('ED123', expect.any(Date), devUser, { certificateId: '123', email: 'me@here.com' })
     })
 
     test('should return 403 given call from enforcement', async () => {

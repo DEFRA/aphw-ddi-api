@@ -8,7 +8,9 @@ const emailTypes = {
   form2ConfirmationToPolice: 'form2-confirmation-to-police',
   emailApplicationPack: 'email-application-pack',
   postApplicationPack: 'post-application-pack',
-  withdrawalConfirmation: 'withdrawal-confirmation'
+  withdrawalConfirmation: 'withdrawal-confirmation',
+  emailFirstCertificate: 'email-first-certificate',
+  emailReplacementCertificate: 'email-replacement-certificate'
 }
 
 const reportSomethingSubjectLines = {

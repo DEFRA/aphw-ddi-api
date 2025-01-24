@@ -290,6 +290,49 @@ const postApplicationPack = async (person, dog, _user) => {
 }
 
 /**
+ * @param {Person} person
+ * @param {Dog} dog
+ * @param {string} filename
+ * @param [_user]
+ * @return {Promise<{emailAddress: *}>}
+ */
+const sendCertificateByEmail = async (person, dog, certificateGuid, email, isFirstCertificate, _user) => {
+  const { name, indexNumber } = dog
+  const { firstName, lastName } = person
+
+  const dogName = name && name !== '' ? name : 'your dog'
+  const dogNameInitcap = name && name !== '' ? name : 'Your dog'
+  const yourDogAndName = name && name !== '' ? `your dog ${name}` : 'your dog'
+
+  const customFields = [
+    { name: 'dog_name', value: dogName },
+    { name: 'owner_name', value: `${firstName} ${lastName}` },
+    { name: 'index_number', value: indexNumber },
+    { name: 'file_key_to_attach', value: 'link_to_file' },
+    { name: 'filename_for_display', value: `Defra certificate of exemption for ${dogName} ${indexNumber}.pdf` },
+    { name: 'link_to_file', value: `${indexNumber}/${certificateGuid}.pdf` },
+    { name: 'blob_container', value: 'certificates' }
+  ]
+
+  if (isFirstCertificate) {
+    customFields.push({ name: 'dog_name_initcap', value: dogNameInitcap })
+    customFields.push({ name: 'your_dog_and_name', value: yourDogAndName })
+  }
+
+  const emailData = {
+    toAddress: email,
+    type: isFirstCertificate ? emailTypes.emailFirstCertificate : emailTypes.emailReplacementCertificate,
+    customFields
+  }
+
+  await sendEmail(emailData)
+
+  return {
+    emailAddress: email
+  }
+}
+
+/**
  * @param {Exemption} exemption
  * @param {Person} person
  * @param {Dog} dog
@@ -328,5 +371,6 @@ module.exports = {
   createAuditsForReportSomething,
   createAuditsForSubmitFormTwo,
   emailApplicationPack,
-  postApplicationPack
+  postApplicationPack,
+  sendCertificateByEmail
 }

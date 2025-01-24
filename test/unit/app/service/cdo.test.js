@@ -806,7 +806,7 @@ describe('CdoService', function () {
       mockCdoRepository.getCdoTaskList.mockResolvedValue(cdoTaskList)
       mockCdoRepository.saveCdoTaskList.mockResolvedValue(cdoTaskList)
 
-      const result = await cdoService.issueCertificate(cdoIndexNumber, sentDate, devUser)
+      const result = await cdoService.issueCertificate(cdoIndexNumber, sentDate, devUser, { sendOption: 'email' })
 
       expect(mockCdoRepository.getCdoTaskList).toHaveBeenCalledWith(cdoIndexNumber)
       expect(mockCdoRepository.saveCdoTaskList).toHaveBeenCalledWith(cdoTaskList)
@@ -875,7 +875,7 @@ describe('CdoService', function () {
       mockCdoRepository.getCdoTaskList.mockResolvedValue(cdoTaskList)
       mockCdoRepository.saveCdoTaskList.mockResolvedValue(cdoTaskList)
 
-      const result = await cdoService.issueCertificate(cdoIndexNumber, sentDate, devUser)
+      const result = await cdoService.issueCertificate(cdoIndexNumber, sentDate, devUser, { sendOption: 'email' })
 
       expect(mockCdoRepository.getCdoTaskList).toHaveBeenCalledWith(cdoIndexNumber)
       expect(mockCdoRepository.saveCdoTaskList).toHaveBeenCalledWith(cdoTaskList)
