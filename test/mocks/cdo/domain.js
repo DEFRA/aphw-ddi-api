@@ -97,6 +97,7 @@ const buildCdoDog = (cdoDogPartial = {}) => ({
   dateUntraceable: null,
   microchipNumber: null,
   microchipNumber2: null,
+  exemption: undefined,
   dogBreaches: [],
   ...cdoDogPartial
 })
