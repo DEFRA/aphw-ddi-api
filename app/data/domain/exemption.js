@@ -3,7 +3,7 @@ const { InvalidDateError } = require('../../errors/domain/invalidDate')
 const { IncompleteDataError } = require('../../errors/domain/incompleteData')
 const { Changeable } = require('./changeable')
 const { InvalidDataError } = require('../../errors/domain/invalidData')
-
+const { ExemptionActionNotAllowedException } = require('../../errors/domain/exemptionActionNotAllowedException')
 /**
  * @param exemptionProperties
  * @constructor
@@ -40,11 +40,12 @@ class Exemption extends Changeable {
     this.legislationOfficer = exemptionProperties.legislationOfficer
     this._certificateIssued = exemptionProperties.certificateIssued
     this._applicationFeePaid = exemptionProperties.applicationFeePaid
-    this._insurance = exemptionProperties.insurance
+    this._insurance = exemptionProperties.insurance ?? []
     this._neuteringDeadline = exemptionProperties.neuteringDeadline
     this._neuteringConfirmation = exemptionProperties.neuteringConfirmation
     this._microchipVerification = exemptionProperties.microchipVerification
     this._microchipDeadline = exemptionProperties.microchipDeadline
+    this._withdrawn = exemptionProperties.withdrawn
     this.joinedExemptionScheme = exemptionProperties.joinedExemptionScheme
     this.nonComplianceLetterSent = exemptionProperties.nonComplianceLetterSent
     this.applicationPackSent = exemptionProperties.applicationPackSent
@@ -72,11 +73,11 @@ class Exemption extends Changeable {
   }
 
   get insuranceCompany () {
-    return this._insurance[0]?.company ?? undefined
+    return this._insurance?.[0]?.company ?? undefined
   }
 
   get insuranceRenewal () {
-    return this._insurance[0]?.renewalDate ?? undefined
+    return this._insurance?.[0]?.renewalDate ?? undefined
   }
 
   get applicationFeePaid () {
@@ -125,6 +126,10 @@ class Exemption extends Changeable {
 
   get verificationDatesRecorded () {
     return this._verificationDatesRecorded
+  }
+
+  get withdrawn () {
+    return this._withdrawn
   }
 
   _checkIfInsuranceIsValid () {
@@ -370,6 +375,21 @@ class Exemption extends Changeable {
     const timestamp = new Date()
     this._microchipNumberRecorded = timestamp
     this._updates.update('microchipNumberRecorded', timestamp)
+  }
+
+  /**
+   * @param {Date} timestamp
+   * @param {Function} [cb]
+   */
+  setWithdrawn (timestamp, cb) {
+    if (this.exemptionOrder !== '2023') {
+      throw new ExemptionActionNotAllowedException('Only a 2023 Dog can be withdrawn')
+    }
+
+    if (!this._withdrawn) {
+      this._withdrawn = timestamp
+      this._updates.update('withdrawn', timestamp, cb)
+    }
   }
 }
 module.exports = Exemption

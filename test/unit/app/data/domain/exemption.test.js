@@ -5,6 +5,7 @@ const { IncompleteDataError } = require('../../../../../app/errors/domain/incomp
 const { buildExemption, buildCdoInsurance, buildCdoDog } = require('../../../../mocks/cdo/domain')
 const { SequenceViolationError } = require('../../../../../app/errors/domain/sequenceViolation')
 const { Dog } = require('../../../../../app/data/domain')
+const { ExemptionActionNotAllowedException } = require('../../../../../app/errors/domain/exemptionActionNotAllowedException')
 
 describe('Exemption', () => {
   const exemptionProperties = buildExemption({
@@ -656,6 +657,43 @@ describe('Exemption', () => {
       const exemption = new Exemption(verifyDatesProperties)
 
       expect(exemption.verificationComplete).toBe(false)
+    })
+  })
+
+  describe('setWithdrawn', () => {
+    test('should set withdrawn if no withdrawal date exists', () => {
+      const exemption = new Exemption(buildExemption({
+        exemptionOrder: '2023',
+        withdrawn: undefined
+      }))
+      const timestamp = new Date()
+      exemption.setWithdrawn(timestamp)
+      expect(exemption.getChanges()).toEqual([
+        {
+          key: 'withdrawn',
+          value: expect.any(Date)
+        }
+      ])
+      expect(exemption.withdrawn).toEqual(timestamp)
+    })
+
+    test('should allow action but not update withdrawn date if no withdrawal date exists', () => {
+      const withdrawn = new Date('2025-01-23')
+      const exemption = new Exemption(buildExemption({
+        exemptionOrder: '2023',
+        withdrawn
+      }))
+
+      exemption.setWithdrawn(new Date())
+      expect(exemption.getChanges().length).toBe(0)
+      expect(exemption.withdrawn).toEqual(withdrawn)
+    })
+
+    test('should not withdraw a non-2023 dog', () => {
+      const exemption = new Exemption(buildExemption({
+        exemptionOrder: '2015'
+      }))
+      expect(() => exemption.setWithdrawn(new Date())).toThrow(new ExemptionActionNotAllowedException('Only a 2023 Dog can be withdrawn'))
     })
   })
 })

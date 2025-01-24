@@ -1,8 +1,10 @@
-const { Dog, BreachCategory } = require('../../../../../app/data/domain')
-const { buildCdoDog } = require('../../../../mocks/cdo/domain')
+const { Dog, BreachCategory, Exemption } = require('../../../../../app/data/domain')
+const { buildCdoDog, buildExemption } = require('../../../../mocks/cdo/domain')
 const { DuplicateResourceError } = require('../../../../../app/errors/duplicate-record')
 const { InvalidDataError } = require('../../../../../app/errors/domain/invalidData')
 const { allBreaches } = require('../../../../mocks/cdo/domain')
+const { DogActionNotAllowedException } = require('../../../../../app/errors/domain/dogActionNotAllowedException')
+const { addMonths } = require('../../../../../app/lib/date-helpers')
 
 describe('Dog', () => {
   test('should create a dog', () => {
@@ -47,6 +49,17 @@ describe('Dog', () => {
     expect(dog.status).toBe('Interim exempt')
     expect(dog.breaches).toEqual([])
     expect(dog).toBeInstanceOf(Dog)
+    expect(dog.exemption).toBeUndefined()
+  })
+
+  test('should create a dog with exemption', () => {
+    const exemption = new Exemption(buildExemption({
+      exemptionOrder: '2013'
+    }))
+    const dog = new Dog(buildCdoDog({
+      exemption
+    }))
+    expect(dog.exemption.exemptionOrder).toBe('2013')
   })
 
   describe('setMicrochipNumber', () => {
@@ -204,6 +217,111 @@ describe('Dog', () => {
 
       const dog = new Dog(dogProperties)
       expect(dog.youngerThanSixteenMonthsAtDate(thisMorning)).toBe(undefined)
+    })
+  })
+
+  describe('withdrawDog', () => {
+    const cb = jest.fn()
+
+    beforeEach(() => {
+      jest.clearAllMocks()
+    })
+
+    test('should change status and set date if Dog has not already been withdrawn', () => {
+      const exemption = new Exemption(buildExemption({
+        exemptionOrder: '2023'
+      }))
+      const dog = new Dog(buildCdoDog({
+        dateOfBirth: new Date('2023-07-22'),
+        status: 'Interim exempt',
+        exemption,
+        indexNumber: 'ED3000002'
+      }))
+      expect(dog.exemption.withdrawn).toBeNull()
+      expect(dog.status).toBe('Interim exempt')
+      dog.withdrawDog(cb)
+      expect(dog.status).toBe('Withdrawn')
+      expect(dog.exemption.withdrawn).toBeInstanceOf(Date)
+      expect(dog.getChanges()).toEqual([
+        {
+          key: 'status',
+          value: 'Withdrawn',
+          callback: cb
+        }
+      ])
+      expect(dog.exemption.getChanges()).toEqual([
+        {
+          key: 'withdrawn',
+          value: expect.any(Date)
+        }
+      ])
+    })
+
+    test('should allow withdrawal but not update if dog has already been withdrawn', () => {
+      const withdrawn = new Date('2025-01-23')
+      const exemption = new Exemption(buildExemption({
+        exemptionOrder: '2023',
+        withdrawn
+      }))
+      const dog = new Dog(buildCdoDog({
+        dateOfBirth: new Date('2023-07-22'),
+        status: 'Withdrawn',
+        exemption,
+        indexNumber: 'ED3000002'
+      }))
+      dog.withdrawDog(cb)
+      expect(dog.exemption.withdrawn).toEqual(withdrawn)
+      expect(dog.status).toBe('Withdrawn')
+      expect(dog.getChanges().length).toBe(0)
+    })
+    test('should not withdraw dog if exemption does not exist', () => {
+      const dog = new Dog(buildCdoDog({}))
+
+      expect(() => dog.withdrawDog(cb)).toThrow(new DogActionNotAllowedException('Exemption not found'))
+      expect(cb).not.toHaveBeenCalled()
+    })
+    test('should not withdraw dog if dog is not 2013 dog', () => {
+      const exemption = new Exemption(buildExemption({
+        exemptionOrder: '2015'
+      }))
+      const dog = new Dog(buildCdoDog({
+        exemption,
+        indexNumber: 'ED3000002',
+        dateOfBirth: new Date('2023-07-23')
+      }))
+
+      expect(() => dog.withdrawDog(cb)).toThrow(new DogActionNotAllowedException('Dog ED3000002 is not valid for withdrawal'))
+      expect(cb).not.toHaveBeenCalled()
+    })
+    test('should not withdraw dog if no DOB exists', () => {
+      const exemption = new Exemption(buildExemption({
+        exemptionOrder: '2023'
+      }))
+      const dog = new Dog(buildCdoDog({
+        dateOfBirth: undefined,
+        exemption,
+        indexNumber: 'ED3000002'
+      }))
+
+      expect(() => dog.withdrawDog(() => {})).toThrow(new DogActionNotAllowedException('Dog ED3000002 is not valid for withdrawal'))
+      expect(cb).not.toHaveBeenCalled()
+    })
+
+    test('should not withdraw dog if dog is 2013 dog but is younger than 18 months', () => {
+      const exemption = new Exemption(buildExemption({
+        exemptionOrder: '2023'
+      }))
+      const lessThanEighteenMonthsAgo = addMonths(new Date(), -18)
+      lessThanEighteenMonthsAgo.setUTCDate(lessThanEighteenMonthsAgo.getDate() + 1)
+
+      const dog = new Dog(buildCdoDog({
+        exemption,
+        indexNumber: 'ED3000002',
+        dateOfBirth: lessThanEighteenMonthsAgo
+      }))
+
+      expect(() => dog.withdrawDog(cb)).toThrow(new DogActionNotAllowedException('Dog ED3000002 is not valid for withdrawal'))
+      expect(cb).not.toHaveBeenCalled()
     })
   })
 })

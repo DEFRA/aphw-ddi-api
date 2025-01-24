@@ -20,6 +20,9 @@ describe('Dog endpoint', () => {
   jest.mock('../../../../app/repos/people')
   const { getOwnerOfDog, getPersonAndDogsByIndex } = require('../../../../app/repos/people')
 
+  jest.mock('../../../../app/service/config')
+  const { getDogService } = require('../../../../app/service/config')
+
   jest.mock('../../../../app/auth/token-validator')
   const { validate } = require('../../../../app/auth/token-validator')
 
@@ -621,6 +624,62 @@ describe('Dog endpoint', () => {
       const response = await server.inject(options)
 
       expect(response.statusCode).toBe(400)
+    })
+  })
+
+  describe('POST /dog/withdraw', () => {
+    test('POST /dog route returns 200 with valid dog', async () => {
+      const withdrawDogMock = jest.fn()
+      getDogService.mockReturnValue({
+        withdrawDog: withdrawDogMock
+      })
+      withdrawDogMock.mockResolvedValue(undefined)
+
+      const options = {
+        method: 'POST',
+        url: '/dog/withdraw/ED123',
+        payload: {},
+        ...portalHeader
+      }
+
+      const response = await server.inject(options)
+
+      expect(response.statusCode).toBe(200)
+    })
+
+    test('should return 403 given call from enforcement', async () => {
+      const withdrawDogMock = jest.fn()
+      getDogService.mockReturnValue({
+        withdrawDog: withdrawDogMock
+      })
+      withdrawDogMock.mockResolvedValue(undefined)
+      validate.mockResolvedValue(mockValidateEnforcement)
+
+      const options = {
+        method: 'POST',
+        url: '/dog/withdraw/ED123',
+        payload: { },
+        ...enforcementHeader
+      }
+      const response = await server.inject(options)
+      expect(response.statusCode).toBe(403)
+    })
+
+    test('should throw if error withdrawing dog', async () => {
+      const withdrawDogMock = jest.fn()
+      getDogService.mockReturnValue({
+        withdrawDog: withdrawDogMock
+      })
+      withdrawDogMock.mockImplementation(() => { throw new Error('Invalid dog') })
+
+      const options = {
+        method: 'POST',
+        url: '/dog/withdraw/ED123',
+        payload: { },
+        ...portalHeader
+      }
+      const response = await server.inject(options)
+      expect(response.statusCode).toBe(500)
     })
   })
 

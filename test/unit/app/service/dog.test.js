@@ -1,7 +1,10 @@
 const { devUser } = require('../../../mocks/auth')
-const { Dog, BreachCategory } = require('../../../../app/data/domain')
-const { buildCdoDog } = require('../../../mocks/cdo/domain')
+const { Dog, BreachCategory, Exemption } = require('../../../../app/data/domain')
+const { buildCdoDog, buildExemption } = require('../../../mocks/cdo/domain')
 const { allBreachDAOs, buildDogDao } = require('../../../mocks/cdo/get')
+const { NotFoundError } = require('../../../../app/errors/not-found')
+const { DogActionNotAllowedException } = require('../../../../app/errors/domain/dogActionNotAllowedException')
+const { EXEMPTION } = require('../../../../app/constants/event/audit-event-object-types')
 
 describe('DogService', function () {
   let mockDogRepository
@@ -252,6 +255,45 @@ describe('DogService', function () {
           ]
         },
         devUser)
+    })
+  })
+
+  describe('withdrawDog', () => {
+    test('should withdraw dog', async () => {
+      const exemption = new Exemption(buildExemption({
+        exemptionOrder: '2023'
+      }))
+      const dog = new Dog(buildCdoDog({
+        indexNumber: 'ED300001',
+        exemption,
+        dateOfBirth: new Date('2023-07-22'),
+        status: 'Interim Exempt'
+      }))
+      const expectedPreAudit = { index_number: 'ED300001', status: 'Interim Exempt', withdrawn: null }
+      const expectedPostAudit = { index_number: 'ED300001', status: 'Withdrawn', withdrawn: expect.any(Date) }
+      mockDogRepository.getDogModel.mockResolvedValue(dog)
+      const dogService = new DogService(mockDogRepository, mockBreachesRepository)
+      await dogService.withdrawDog('ED300001', devUser)
+      await dog.getChanges()[0].callback()
+      expect(mockDogRepository.saveDog).toHaveBeenCalledWith(dog)
+      expect(sendUpdateToAudit).toHaveBeenCalledWith(EXEMPTION, expectedPreAudit, expectedPostAudit, devUser)
+    })
+    test('should error is dog not found', async () => {
+      mockDogRepository.getDogModel.mockResolvedValue(undefined)
+      const dogService = new DogService(mockDogRepository, mockBreachesRepository)
+      await expect(dogService.withdrawDog('ED300000', devUser)).rejects.toThrow(new NotFoundError('Dog ED300000 not found'))
+    })
+
+    test('should error if dog not valid', async () => {
+      const exemption = new Exemption(buildExemption({ exemptionOrder: '2023' }))
+      const dog = new Dog(buildCdoDog({
+        exemption,
+        dateOfBirth: new Date()
+      }))
+      mockDogRepository.getDogModel.mockResolvedValue(dog)
+      const dogService = new DogService(mockDogRepository, mockBreachesRepository)
+
+      await expect(dogService.withdrawDog('ED300097', devUser)).rejects.toThrow(new DogActionNotAllowedException('Dog ED300097 is not valid for withdrawal'))
     })
   })
 })

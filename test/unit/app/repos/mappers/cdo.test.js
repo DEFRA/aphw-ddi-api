@@ -646,5 +646,18 @@ describe('cdo mappers', () => {
       const dog = mapDogDaoToDog(dogDao)
       expect(dog.breaches).toEqual(expectedBreachCategories)
     })
+
+    test('should map registration to Dog.exemption', () => {
+      const dogDao = buildDogDao({
+        birth_date: '2024-10-11',
+        death_date: '2024-10-11',
+        exported_date: '2024-10-11',
+        stolen_date: '2024-10-11',
+        untraceable_date: '2024-10-11',
+        registration: buildRegistrationDao()
+      })
+      const dog = mapDogDaoToDog(dogDao, true)
+      expect(dog.exemption).toBeInstanceOf(Exemption)
+    })
   })
 })
