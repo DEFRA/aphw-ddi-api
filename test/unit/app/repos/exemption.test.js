@@ -1,4 +1,7 @@
 const { deepClone } = require('../../../../app/lib/deep-clone')
+const { Exemption } = require('../../../../app/data/domain')
+const { buildExemption } = require('../../../mocks/cdo/domain')
+const { buildRegistrationDao } = require('../../../mocks/cdo/get')
 const dummyUser = {
   username: 'dummy-user',
   displayname: 'Dummy User'
@@ -29,7 +32,7 @@ describe('Exemption repo', () => {
   jest.mock('../../../../app/messaging/send-event')
   const { sendEvent } = require('../../../../app/messaging/send-event')
 
-  const { updateExemption, autoChangeStatus, setDefaults, canSetExemptDueToInsuranceRenewal, updateRegistration } = require('../../../../app/repos/exemption')
+  const { updateExemption, autoChangeStatus, setDefaults, canSetExemptDueToInsuranceRenewal, updateRegistration, saveExemption } = require('../../../../app/repos/exemption')
 
   beforeEach(async () => {
     jest.clearAllMocks()
@@ -1092,6 +1095,60 @@ describe('Exemption repo', () => {
         ]
       }
       expect(canSetExemptDueToInsuranceRenewal(data, cdo)).toBeTruthy()
+    })
+  })
+
+  describe('saveExemption', () => {
+    test('should save an exemption', async () => {
+      await saveExemption(new Exemption(buildExemption({})), buildRegistrationDao())
+      expect(sequelize.transaction).toHaveBeenCalledTimes(1)
+    })
+
+    test('should update fields', async () => {
+      const registrationDao = buildRegistrationDao({
+        withdrawn: undefined,
+        save: jest.fn()
+      })
+      const withdrawnDate = new Date()
+      const exemption = new Exemption(buildExemption({
+        exemptionOrder: '2023',
+        withdrawn: undefined
+      }))
+      const cb = jest.fn()
+      exemption.setWithdrawn(withdrawnDate, cb)
+      await saveExemption(exemption, registrationDao, {})
+      expect(registrationDao.save).toHaveBeenCalled()
+      expect(registrationDao.withdrawn).toEqual(withdrawnDate)
+      expect(cb).toHaveBeenCalled()
+    })
+
+    test('should fail if undefined property', async () => {
+      const registrationDao = buildRegistrationDao({})
+
+      const exemption = new Exemption(buildExemption({
+        exemptionOrder: '2023',
+        withdrawn: undefined
+      }))
+      exemption.getChanges = () => [{
+        key: 'unknown key'
+      }]
+
+      await expect(saveExemption(exemption, registrationDao, {})).rejects.toThrow(new Error('Not implemented'))
+    })
+
+    test('should fail if undefined property', async () => {
+      const registrationDao = buildRegistrationDao({})
+      const callback = jest.fn()
+      const exemption = new Exemption(buildExemption({
+        exemptionOrder: '2023',
+        withdrawn: undefined
+      }))
+      exemption.getChanges = () => [{
+        key: 'callback',
+        callback
+      }]
+      await saveExemption(exemption, registrationDao, {})
+      expect(callback).toHaveBeenCalled()
     })
   })
 })
