@@ -1,4 +1,4 @@
-const { Dog, BreachCategory, Exemption } = require('../../../../../app/data/domain')
+const { Dog, BreachCategory, Exemption, Person } = require('../../../../../app/data/domain')
 const { buildCdoDog, buildExemption } = require('../../../../mocks/cdo/domain')
 const { DuplicateResourceError } = require('../../../../../app/errors/duplicate-record')
 const { InvalidDataError } = require('../../../../../app/errors/domain/invalidData')
@@ -60,6 +60,16 @@ describe('Dog', () => {
       exemption
     }))
     expect(dog.exemption.exemptionOrder).toBe('2013')
+  })
+
+  test('should create a dog with a person', () => {
+    const person = new Person({
+      firstName: 'Joe'
+    })
+    const dog = new Dog(buildCdoDog({
+      person
+    }))
+    expect(dog.person.firstName).toBe('Joe')
   })
 
   describe('setMicrochipNumber', () => {
