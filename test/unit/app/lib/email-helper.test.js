@@ -608,8 +608,8 @@ describe('EmailHelper test', () => {
       })
     })
   })
-  
-   describe('sendCertificateByEmail', () => {
+
+  describe('sendCertificateByEmail', () => {
     const owner = new Person(buildCdoPerson({
       firstName: 'Garry',
       lastName: 'McFadyen',
