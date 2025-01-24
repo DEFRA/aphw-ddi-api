@@ -5,7 +5,6 @@ const { InvalidDataError } = require('../../../../../app/errors/domain/invalidDa
 const { allBreaches } = require('../../../../mocks/cdo/domain')
 const { DogActionNotAllowedException } = require('../../../../../app/errors/domain/dogActionNotAllowedException')
 const { addMonths } = require('../../../../../app/lib/date-helpers')
-const { statuses } = require('../../../../mocks/statuses')
 
 describe('Dog', () => {
   test('should create a dog', () => {

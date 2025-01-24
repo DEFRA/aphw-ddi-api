@@ -3,7 +3,6 @@ const { DuplicateResourceError } = require('../../errors/duplicate-record')
 const { InvalidDataError } = require('../../errors/domain/invalidData')
 const { statuses } = require('../../constants/statuses')
 const { DogActionNotAllowedException } = require('../../errors/domain/dogActionNotAllowedException')
-const { differenceInCalendarMonths } = require('date-fns')
 const { addMonths } = require('../../lib/date-helpers')
 /**
  * @property {number} id
