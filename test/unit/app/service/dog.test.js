@@ -275,7 +275,6 @@ describe('DogService', function () {
       const dogService = new DogService(mockDogRepository, mockBreachesRepository)
       await dogService.withdrawDog('ED300001', devUser)
       await dog.getChanges()[0].callback()
-      console.log('~~~~~~ Chris Debug ~~~~~~ ', 'Dog', dog.getChanges())
       expect(mockDogRepository.saveDog).toHaveBeenCalledWith(dog)
       expect(sendUpdateToAudit).toHaveBeenCalledWith(EXEMPTION, expectedPreAudit, expectedPostAudit, devUser)
     })
