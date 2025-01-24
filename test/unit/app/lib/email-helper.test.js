@@ -15,7 +15,7 @@ const { populateTemplate } = require('../../../../app/proxy/documents')
 
 const emailHelper = require('../../../../app/lib/email-helper')
 const { reportSomethingAudit, reportTypes } = require('../../../../app/constants/email-types')
-const { createAuditsForSubmitFormTwo, emailApplicationPack, postApplicationPack } = require('../../../../app/lib/email-helper')
+const { createAuditsForSubmitFormTwo, emailApplicationPack, postApplicationPack, sendCertificateByEmail } = require('../../../../app/lib/email-helper')
 const { Person, Dog } = require('../../../../app/data/domain')
 const { buildCdoPerson, buildCdoPersonContactDetails, buildCdoDog } = require('../../../mocks/cdo/domain')
 
@@ -541,6 +541,110 @@ describe('EmailHelper test', () => {
       const linkToFile = sendEmail.mock.calls[0][0].customFields.filter(x => x.name === 'link_to_file')[0].value
       expect(linkToFile.indexOf('temp-populations/')).toBe(0)
       expect(linkToFile.indexOf('.pdf')).toBe(linkToFile.length - 4)
+    })
+  })
+
+  describe('sendCertificateByEmail', () => {
+    const owner = new Person(buildCdoPerson({
+      firstName: 'Garry',
+      lastName: 'McFadyen',
+      contactDetails: buildCdoPersonContactDetails({
+        email: 'garrymcfadyen@hotmail.com'
+      })
+    }))
+
+    test('should email first certificate', async () => {
+      const dog = new Dog(buildCdoDog({ name: 'Rex', indexNumber: 'ED300001' }))
+
+      await sendCertificateByEmail(owner, dog, 'certificate-guid', 'garrymcfadyen@hotmail.com', true)
+
+      expect(sendEmail).toHaveBeenCalledWith({
+        customFields: [
+          { name: 'dog_name', value: 'Rex' },
+          { name: 'owner_name', value: 'Garry McFadyen' },
+          { name: 'index_number', value: 'ED300001' },
+          { name: 'file_key_to_attach', value: 'link_to_file' },
+          { name: 'filename_for_display', value: 'Defra certificate of exemption for Rex ED300001.pdf' },
+          { name: 'link_to_file', value: `${dog.indexNumber}/certificate-guid.pdf` },
+          { name: 'blob_container', value: 'certificates' },
+          { name: 'dog_name_initcap', value: 'Rex' },
+          { name: 'your_dog_and_name', value: 'your dog Rex' }
+        ],
+        toAddress: 'garrymcfadyen@hotmail.com',
+        type: 'email-first-certificate'
+      })
+      const linkToFile = sendEmail.mock.calls[0][0].customFields.filter(x => x.name === 'link_to_file')[0].value
+      expect(linkToFile).toBe('ED300001/certificate-guid.pdf')
+    })
+
+    test('should email first certificate if dog name is null', async () => {
+      const dog = new Dog(buildCdoDog({ name: null, indexNumber: 'ED300001' }))
+
+      await sendCertificateByEmail(owner, dog, 'certificate-guid', 'garrymcfadyen@hotmail.com', true)
+
+      expect(sendEmail).toHaveBeenCalledWith({
+        customFields: [
+          { name: 'dog_name', value: 'your dog' },
+          { name: 'owner_name', value: 'Garry McFadyen' },
+          { name: 'index_number', value: 'ED300001' },
+          { name: 'file_key_to_attach', value: 'link_to_file' },
+          { name: 'filename_for_display', value: 'Defra certificate of exemption for your dog ED300001.pdf' },
+          { name: 'link_to_file', value: `${dog.indexNumber}/certificate-guid.pdf` },
+          { name: 'blob_container', value: 'certificates' },
+          { name: 'dog_name_initcap', value: 'Your dog' },
+          { name: 'your_dog_and_name', value: 'your dog' }
+        ],
+        toAddress: 'garrymcfadyen@hotmail.com',
+        type: 'email-first-certificate'
+      })
+      const linkToFile = sendEmail.mock.calls[0][0].customFields.filter(x => x.name === 'link_to_file')[0].value
+      expect(linkToFile).toBe('ED300001/certificate-guid.pdf')
+    })
+
+    test('should email first certificate if dog name is blank string', async () => {
+      const dog = new Dog(buildCdoDog({ name: '', indexNumber: 'ED300001' }))
+
+      await sendCertificateByEmail(owner, dog, 'certificate-guid', 'garrymcfadyen@hotmail.com', true)
+
+      expect(sendEmail).toHaveBeenCalledWith({
+        customFields: [
+          { name: 'dog_name', value: 'your dog' },
+          { name: 'owner_name', value: 'Garry McFadyen' },
+          { name: 'index_number', value: 'ED300001' },
+          { name: 'file_key_to_attach', value: 'link_to_file' },
+          { name: 'filename_for_display', value: 'Defra certificate of exemption for your dog ED300001.pdf' },
+          { name: 'link_to_file', value: `${dog.indexNumber}/certificate-guid.pdf` },
+          { name: 'blob_container', value: 'certificates' },
+          { name: 'dog_name_initcap', value: 'Your dog' },
+          { name: 'your_dog_and_name', value: 'your dog' }
+        ],
+        toAddress: 'garrymcfadyen@hotmail.com',
+        type: 'email-first-certificate'
+      })
+      const linkToFile = sendEmail.mock.calls[0][0].customFields.filter(x => x.name === 'link_to_file')[0].value
+      expect(linkToFile).toBe('ED300001/certificate-guid.pdf')
+    })
+
+    test('should email replacement certificate', async () => {
+      const dog = new Dog(buildCdoDog({ name: 'Rex', indexNumber: 'ED300001' }))
+
+      await sendCertificateByEmail(owner, dog, 'certificate-guid', 'garrymcfadyen@hotmail.com', false)
+
+      expect(sendEmail).toHaveBeenCalledWith({
+        customFields: [
+          { name: 'dog_name', value: 'Rex' },
+          { name: 'owner_name', value: 'Garry McFadyen' },
+          { name: 'index_number', value: 'ED300001' },
+          { name: 'file_key_to_attach', value: 'link_to_file' },
+          { name: 'filename_for_display', value: 'Defra certificate of exemption for Rex ED300001.pdf' },
+          { name: 'link_to_file', value: `${dog.indexNumber}/certificate-guid.pdf` },
+          { name: 'blob_container', value: 'certificates' }
+        ],
+        toAddress: 'garrymcfadyen@hotmail.com',
+        type: 'email-replacement-certificate'
+      })
+      const linkToFile = sendEmail.mock.calls[0][0].customFields.filter(x => x.name === 'link_to_file')[0].value
+      expect(linkToFile).toBe('ED300001/certificate-guid.pdf')
     })
   })
 })

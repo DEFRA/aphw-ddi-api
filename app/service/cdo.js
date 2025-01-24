@@ -9,7 +9,7 @@ const { activities } = require('../constants/event/events')
 const { stripTime } = require('../dto/dto-helper')
 const { EXEMPTION, DOG } = require('../constants/event/audit-event-object-types')
 const { microchipExists } = require('../repos/microchip')
-const { sendForm2Emails, emailApplicationPack, postApplicationPack } = require('../lib/email-helper')
+const { sendForm2Emails, emailApplicationPack, postApplicationPack, sendCertificateByEmail } = require('../lib/email-helper')
 const { updatePersonEmail } = require('../repos/people')
 const { buildAddressStringAlternate } = require('../lib/address-helper')
 
@@ -326,7 +326,7 @@ class CdoService {
     return this.cdoRepository.saveCdoTaskList(cdoTaskList)
   }
 
-  async issueCertificate (cdoIndexNumber, sentDate, user) {
+  async issueCertificate (cdoIndexNumber, sentDate, user, payload) {
     const cdoTaskList = await this.cdoRepository.getCdoTaskList(cdoIndexNumber)
 
     const preAuditExemption = {
@@ -350,6 +350,10 @@ class CdoService {
     const callback = async () => {
       await sendUpdateToAudit(EXEMPTION, preAuditExemption, postAuditExemption, user)
       await sendUpdateToAudit(DOG, preAuditDog, postAuditDog, user)
+      const { sendOption, email, certificateId, firstCertificate } = payload
+      if (sendOption === 'email') {
+        await sendCertificateByEmail(cdoTaskList.person, cdoTaskList.dog, certificateId, email, !!firstCertificate)
+      }
     }
 
     cdoTaskList.issueCertificate(sentDate, callback)
