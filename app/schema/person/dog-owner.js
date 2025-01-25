@@ -44,7 +44,12 @@ const dogOwnerQuerySchema = Joi.object({
   includeDogs: Joi.boolean().optional()
 })
 
+const dogWithdrawalPayloadSchema = Joi.object({
+  emailToUpdate: Joi.string().email().optional()
+})
+
 module.exports = {
   dogOwnerResponseSchema,
-  dogOwnerQuerySchema
+  dogOwnerQuerySchema,
+  dogWithdrawalPayloadSchema
 }

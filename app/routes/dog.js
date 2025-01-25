@@ -8,7 +8,7 @@ const { deleteDogsPayloadSchema } = require('../schema/dogs/delete')
 const { deleteResponseSchema } = require('../schema/shared/delete')
 const { importDogSchema, updateDogSchema } = require('../schema/dogs/response')
 const { putDogPayloadSchema } = require('../schema/dogs/put')
-const { dogOwnerResponseSchema, dogOwnerQuerySchema } = require('../schema/person/dog-owner')
+const { dogOwnerResponseSchema, dogOwnerQuerySchema, dogWithdrawalPayloadSchema } = require('../schema/person/dog-owner')
 const { scopes } = require('../constants/auth')
 const ServiceProvider = require('../service/config')
 
@@ -97,13 +97,20 @@ module.exports = [
           204: undefined,
           404: undefined
         }
+      },
+      validate: {
+        payload: dogWithdrawalPayloadSchema
       }
     },
     handler: async (request, h) => {
       const indexNumber = request.params.indexNumber
       try {
         const dogService = ServiceProvider.getDogService()
-        await dogService.withdrawDog(indexNumber, getCallingUser(request))
+        await dogService.withdrawDog({
+          indexNumber,
+          email: request.payload.emailToUpdate,
+          user: getCallingUser(request)
+        })
 
         return h.response().code(200)
       } catch (e) {

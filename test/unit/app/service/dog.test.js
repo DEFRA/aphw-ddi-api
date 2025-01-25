@@ -16,6 +16,9 @@ describe('DogService', function () {
   jest.mock('../../../../app/messaging/send-audit')
   const { sendUpdateToAudit } = require('../../../../app/messaging/send-audit')
 
+  jest.mock('../../../../app/repos/people')
+  const { updatePersonEmail } = require('../../../../app/repos/people')
+
   jest.mock('../../../../app/lib/email-helper')
   const { emailWithdrawalConfirmation } = require('../../../../app/lib/email-helper')
 
@@ -278,7 +281,10 @@ describe('DogService', function () {
       const expectedPostAudit = { index_number: 'ED300001', status: 'Withdrawn', withdrawn: expect.any(Date) }
       mockDogRepository.getDogModel.mockResolvedValue(dog)
       const dogService = new DogService(mockDogRepository, mockBreachesRepository)
-      await dogService.withdrawDog('ED300001', devUser)
+      await dogService.withdrawDog({
+        indexNumber: 'ED300001',
+        user: devUser
+      })
       await dog.getChanges()[0].callback()
       await mockDogRepository.saveDog.mock.calls[0][1]()
 
@@ -286,10 +292,35 @@ describe('DogService', function () {
       expect(sendUpdateToAudit).toHaveBeenCalledWith(EXEMPTION, expectedPreAudit, expectedPostAudit, devUser)
       expect(emailWithdrawalConfirmation).toHaveBeenCalledWith(exemption, person, dog)
     })
+
+    test('should withdraw dog and update email', async () => {
+      const exemption = new Exemption(buildExemption({
+        exemptionOrder: '2023'
+      }))
+      const person = new Person(buildCdoPerson({
+        personReference: 'P-8AD0-561A'
+      }))
+      const dog = new Dog(buildCdoDog({
+        indexNumber: 'ED300001',
+        exemption,
+        person,
+        dateOfBirth: new Date('2023-07-22'),
+        status: 'Interim Exempt'
+      }))
+      mockDogRepository.getDogModel.mockResolvedValue(dog)
+      const dogService = new DogService(mockDogRepository, mockBreachesRepository)
+      await dogService.withdrawDog({
+        indexNumber: 'ED300001',
+        user: devUser,
+        email: 'garrymcfadyen@hotmail.com'
+      })
+      expect(updatePersonEmail).toHaveBeenCalledWith('P-8AD0-561A', 'garrymcfadyen@hotmail.com', devUser)
+      expect(person.contactDetails.email).toBe('garrymcfadyen@hotmail.com')
+    })
     test('should error is dog not found', async () => {
       mockDogRepository.getDogModel.mockResolvedValue(undefined)
       const dogService = new DogService(mockDogRepository, mockBreachesRepository)
-      await expect(dogService.withdrawDog('ED300000', devUser)).rejects.toThrow(new NotFoundError('Dog ED300000 not found'))
+      await expect(dogService.withdrawDog({ indexNumber: 'ED300000', user: devUser })).rejects.toThrow(new NotFoundError('Dog ED300000 not found'))
     })
 
     test('should error if dog not valid', async () => {
@@ -301,7 +332,7 @@ describe('DogService', function () {
       mockDogRepository.getDogModel.mockResolvedValue(dog)
       const dogService = new DogService(mockDogRepository, mockBreachesRepository)
 
-      await expect(dogService.withdrawDog('ED300097', devUser)).rejects.toThrow(new DogActionNotAllowedException('Dog ED300097 is not valid for withdrawal'))
+      await expect(dogService.withdrawDog({ indexNumber: 'ED300097', user: devUser })).rejects.toThrow(new DogActionNotAllowedException('Dog ED300097 is not valid for withdrawal'))
     })
   })
 })
