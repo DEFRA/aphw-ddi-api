@@ -17,8 +17,8 @@ const { removeDogFromSearchIndex } = require('../../../../../app/repos/search-in
 jest.mock('../../../../../app/messaging/send-audit')
 const { sendDeleteToAudit, sendPermanentDeleteToAudit } = require('../../../../../app/messaging/send-audit')
 const { buildDogDao, buildDogBreachDao, buildRegistrationDao } = require('../../../../mocks/cdo/get')
-const { Dog, Exemption } = require('../../../../../app/data/domain')
-const { buildCdoDog, allBreaches, buildExemption } = require('../../../../mocks/cdo/domain')
+const { Dog, Exemption, Person } = require('../../../../../app/data/domain')
+const { buildCdoDog, allBreaches, buildExemption, buildCdoPerson } = require('../../../../mocks/cdo/domain')
 
 jest.mock('../../../../../app/repos/breaches')
 const { setBreaches } = require('../../../../../app/repos/breaches')
@@ -1391,9 +1391,11 @@ describe('Dog repo', () => {
         registration: buildRegistrationDao()
       })
       const exemption = new Exemption(buildExemption())
+      const person = new Person(buildCdoPerson())
       sequelize.models.dog.findOne.mockResolvedValue(dogDao)
       const expectedDog = new Dog(buildCdoDog({
-        exemption
+        exemption,
+        person
       }))
       const res = await getDogModel('ED123', {})
 

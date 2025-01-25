@@ -595,7 +595,7 @@ const purgePersonByReferenceNumber = async (reference, user, transaction) => {
  * @param {string} personReference
  * @param {string} email
  * @param user
- * @param transaction
+ * @param [transaction]
  * @return {Promise<*|Error>}
  */
 const updatePersonEmail = async (personReference, email, user, transaction) => {

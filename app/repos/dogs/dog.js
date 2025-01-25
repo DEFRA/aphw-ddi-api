@@ -860,6 +860,11 @@ const saveDog = async (dog, callBack, transaction) => {
   }
 }
 
+/**
+ * @param {string} indexNumber
+ * @param t
+ * @return {Promise<Dog|undefined>}
+ */
 const getDogModel = async (indexNumber, t) => {
   const dogDao = await getDogByIndexNumber(indexNumber, t)
   if (!dogDao) {

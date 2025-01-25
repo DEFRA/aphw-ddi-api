@@ -99,6 +99,7 @@ const buildCdoDog = (cdoDogPartial = {}) => ({
   microchipNumber: null,
   microchipNumber2: null,
   exemption: undefined,
+  person: undefined,
   dogBreaches: [],
   ...cdoDogPartial
 })
