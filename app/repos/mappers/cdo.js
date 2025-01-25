@@ -152,7 +152,7 @@ const mapPersonContactsToContactDetails = (personContactsDao, personAddresses = 
    * @param {PersonContactDao} contact
    * @return {string|undefined}
    */
-  const reducer = (emailString, contact) => {
+  const emailReducer = (emailString, contact) => {
     if (contact.contact?.contact_type.contact_type === 'Email') {
       return contact.contact.contact
     }
@@ -162,7 +162,7 @@ const mapPersonContactsToContactDetails = (personContactsDao, personAddresses = 
   /**
    * @type {string|undefined}
    */
-  const email = personContactsDao.reduce(reducer, undefined)
+  const email = personContactsDao.reduce(emailReducer, undefined)
   return new ContactDetails(email, address)
 }
 
@@ -205,8 +205,10 @@ const mapDogDaoToDog = (dogDao, includeChildren = false) => {
   if (dogDao.registration && includeChildren) {
     dogProperties.exemption = mapCdoDaoToExemption(dogDao.registration)
   }
-  if (dogDao.person && includeChildren) {
-    dogProperties.person = mapCdoPersonToPerson(dogDao.person)
+  const person = dogDao.registered_person?.[0]?.person
+
+  if (person && includeChildren) {
+    dogProperties.person = mapCdoPersonToPerson(person)
   }
   return new Dog(dogProperties)
 }

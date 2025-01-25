@@ -472,39 +472,44 @@ const getDogByIndexNumber = async (indexNumber, t) => {
       {
         model: sequelize.models.registered_person,
         as: 'registered_person',
-        include: [{
-          model: sequelize.models.person,
-          as: 'person',
-          include: [{
-            model: sequelize.models.person_address,
-            as: 'addresses',
-            include: [{
-              model: sequelize.models.address,
-              as: 'address',
-              include: [{
-                attribute: ['country'],
-                model: sequelize.models.country,
-                as: 'country'
-              }]
-            }]
+        include: [
+          {
+            model: sequelize.models.person,
+            as: 'person',
+            include: [
+              {
+                model: sequelize.models.person_address,
+                as: 'addresses',
+                include: [{
+                  model: sequelize.models.address,
+                  as: 'address',
+                  include: [{
+                    attribute: ['country'],
+                    model: sequelize.models.country,
+                    as: 'country'
+                  }]
+                }]
+              },
+              {
+                model: sequelize.models.person_contact,
+                as: 'person_contacts',
+                separate: true, // workaround to prevent 'contact_type_id' being truncated to 'contact_type_i'
+                include: [{
+                  model: sequelize.models.contact,
+                  as: 'contact',
+                  include: [{
+                    model: sequelize.models.contact_type,
+                    as: 'contact_type'
+                  }]
+                }]
+              }
+            ]
           },
           {
-            model: sequelize.models.person_contact,
-            as: 'person_contacts',
-            include: [{
-              model: sequelize.models.contact,
-              as: 'contact',
-              include: [{
-                model: sequelize.models.contact_type,
-                as: 'contact_type'
-              }]
-            }]
-          }]
-        },
-        {
-          model: sequelize.models.person_type,
-          as: 'person_type'
-        }]
+            model: sequelize.models.person_type,
+            as: 'person_type'
+          }
+        ]
       },
       {
         model: sequelize.models.dog_breed,
@@ -833,12 +838,13 @@ const saveDogExemption = async (exemption, registrationDao, transaction) => {
 }
 /**
  * @param {import('../../data/domain/dog')} dog
- * @param transaction
+ * @param {Function} [callBack]
+ * @param [transaction]
  * @return {Promise<*|undefined>}
  */
-const saveDog = async (dog, transaction) => {
+const saveDog = async (dog, callBack, transaction) => {
   if (!transaction) {
-    return await sequelize.transaction(async (t) => saveDog(dog, t))
+    return await sequelize.transaction(async (t) => saveDog(dog, callBack, t))
   }
 
   const dogDao = await getDogByIndexNumber(dog.indexNumber, transaction)
@@ -848,6 +854,10 @@ const saveDog = async (dog, transaction) => {
   }
 
   await saveDogFields(dog, dogDao, transaction)
+
+  if (callBack) {
+    await callBack()
+  }
 }
 
 const getDogModel = async (indexNumber, t) => {

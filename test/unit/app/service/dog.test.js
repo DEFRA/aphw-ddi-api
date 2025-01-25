@@ -1,6 +1,6 @@
 const { devUser } = require('../../../mocks/auth')
-const { Dog, BreachCategory, Exemption } = require('../../../../app/data/domain')
-const { buildCdoDog, buildExemption } = require('../../../mocks/cdo/domain')
+const { Dog, BreachCategory, Exemption, Person } = require('../../../../app/data/domain')
+const { buildCdoDog, buildExemption, buildCdoPerson } = require('../../../mocks/cdo/domain')
 const { allBreachDAOs, buildDogDao } = require('../../../mocks/cdo/get')
 const { NotFoundError } = require('../../../../app/errors/not-found')
 const { DogActionNotAllowedException } = require('../../../../app/errors/domain/dogActionNotAllowedException')
@@ -15,6 +15,9 @@ describe('DogService', function () {
 
   jest.mock('../../../../app/messaging/send-audit')
   const { sendUpdateToAudit } = require('../../../../app/messaging/send-audit')
+
+  jest.mock('../../../../app/lib/email-helper')
+  const { emailWithdrawalConfirmation } = require('../../../../app/lib/email-helper')
 
   beforeEach(function () {
     jest.clearAllMocks()
@@ -81,7 +84,7 @@ describe('DogService', function () {
       await dog.getChanges()[1].callback()
       expect(mockDogRepository.getDogModel).toHaveBeenCalledWith('ED300097')
       expect(mockBreachesRepository.getBreachCategories).toHaveBeenCalled()
-      expect(mockDogRepository.saveDog).toHaveBeenCalledWith(dog, undefined)
+      expect(mockDogRepository.saveDog).toHaveBeenCalledWith(dog, undefined, undefined)
       expect(dog.getChanges()).toEqual([
         {
           key: 'dogBreaches',
@@ -263,9 +266,11 @@ describe('DogService', function () {
       const exemption = new Exemption(buildExemption({
         exemptionOrder: '2023'
       }))
+      const person = new Person(buildCdoPerson())
       const dog = new Dog(buildCdoDog({
         indexNumber: 'ED300001',
         exemption,
+        person,
         dateOfBirth: new Date('2023-07-22'),
         status: 'Interim Exempt'
       }))
@@ -275,8 +280,11 @@ describe('DogService', function () {
       const dogService = new DogService(mockDogRepository, mockBreachesRepository)
       await dogService.withdrawDog('ED300001', devUser)
       await dog.getChanges()[0].callback()
-      expect(mockDogRepository.saveDog).toHaveBeenCalledWith(dog)
+      await mockDogRepository.saveDog.mock.calls[0][1]()
+
+      expect(mockDogRepository.saveDog).toHaveBeenCalledWith(dog, expect.any(Function))
       expect(sendUpdateToAudit).toHaveBeenCalledWith(EXEMPTION, expectedPreAudit, expectedPostAudit, devUser)
+      expect(emailWithdrawalConfirmation).toHaveBeenCalledWith(exemption, person, dog)
     })
     test('should error is dog not found', async () => {
       mockDogRepository.getDogModel.mockResolvedValue(undefined)

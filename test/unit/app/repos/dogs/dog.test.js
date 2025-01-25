@@ -1274,7 +1274,7 @@ describe('Dog repo', () => {
       const callback = jest.fn()
       dog.setBreaches(breaches, allBreaches, callback)
 
-      await saveDog(dog, {})
+      await saveDog(dog, undefined, {})
       expect(sequelize.models.dog.findOne).toHaveBeenCalledWith(expect.objectContaining({
         where: { index_number: indexNumber }
       }))
@@ -1301,7 +1301,7 @@ describe('Dog repo', () => {
         callback: undefined
       })
 
-      await expect(saveDog(dog, {})).rejects.toThrow(new Error('Not implemented'))
+      await expect(saveDog(dog, undefined, {})).rejects.toThrow(new Error('Not implemented'))
     })
 
     test('should handle exemption changes', async () => {
@@ -1320,12 +1320,14 @@ describe('Dog repo', () => {
         dateOfBirth: new Date('2023-07-22')
       }))
       const cb = jest.fn()
+      const cb2 = jest.fn()
       dog.withdrawDog(cb)
       sequelize.models.dog.findOne.mockResolvedValue(dogDao)
 
-      await saveDog(dog, {})
+      await saveDog(dog, cb2, {})
       expect(dogDao.status_id).toBe(6)
       expect(dogDao.save).toHaveBeenCalledWith({ transaction: {} })
+      expect(cb).toHaveBeenCalled()
     })
   })
 

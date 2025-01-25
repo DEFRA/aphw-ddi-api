@@ -5,6 +5,7 @@ const { mapDogDaoToDog } = require('../repos/mappers/cdo')
 const { NotFoundError } = require('../errors/not-found')
 const { EXEMPTION } = require('../constants/event/audit-event-object-types')
 const { deepClone } = require('../lib/deep-clone')
+const { emailWithdrawalConfirmation } = require('../lib/email-helper')
 
 class DogService {
   constructor (dogRepository, breachesRepository) {
@@ -51,7 +52,7 @@ class DogService {
 
     const changedDog = this._prepareBreaches(dog, dogBreaches, allDogBreaches, user)
 
-    await this._dogRepository.saveDog(changedDog, transaction)
+    await this._dogRepository.saveDog(changedDog, undefined, transaction)
 
     return this._dogRepository.getDogModel(dogIndex, transaction)
   }
@@ -83,9 +84,13 @@ class DogService {
       await sendUpdateToAudit(EXEMPTION, preAudit, postAudit, user)
     }
 
+    const callbackTwo = async () => {
+      await emailWithdrawalConfirmation(dog.exemption, dog.person, dog)
+    }
+
     dog.withdrawDog(callback)
 
-    await this._dogRepository.saveDog(dog)
+    await this._dogRepository.saveDog(dog, callbackTwo)
   }
 }
 
