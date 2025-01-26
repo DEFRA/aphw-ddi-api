@@ -640,7 +640,10 @@ describe('Dog endpoint', () => {
       const options = {
         method: 'POST',
         url: '/dog/withdraw/ED123',
-        payload: {},
+        payload: {
+          indexNumber: 'ED400146',
+          withdrawOption: 'email'
+        },
         ...portalHeader
       }
 
@@ -649,7 +652,35 @@ describe('Dog endpoint', () => {
       expect(response.statusCode).toBe(200)
       expect(withdrawDogMock).toHaveBeenCalledWith({
         indexNumber: 'ED123',
-        user: internalUser
+        user: internalUser,
+        withdrawOption: 'email'
+      })
+    })
+
+    test('POST /dog route returns 200 given postal', async () => {
+      const withdrawDogMock = jest.fn()
+      getDogService.mockReturnValue({
+        withdrawDog: withdrawDogMock
+      })
+      withdrawDogMock.mockResolvedValue(undefined)
+
+      const options = {
+        method: 'POST',
+        url: '/dog/withdraw/ED123',
+        payload: {
+          indexNumber: 'ED400146',
+          withdrawOption: 'post'
+        },
+        ...portalHeader
+      }
+
+      const response = await server.inject(options)
+
+      expect(response.statusCode).toBe(200)
+      expect(withdrawDogMock).toHaveBeenCalledWith({
+        indexNumber: 'ED123',
+        user: internalUser,
+        withdrawOption: 'post'
       })
     })
 
@@ -664,7 +695,10 @@ describe('Dog endpoint', () => {
         method: 'POST',
         url: '/dog/withdraw/ED123',
         payload: {
-          emailToUpdate: 'garrymcfadyen@hotmail.com'
+          indexNumber: 'ED400146',
+          withdrawOption: 'email',
+          email: 'garrymcfadyen@hotmail.com',
+          updateEmail: 'true'
         },
         ...portalHeader
       }
@@ -675,8 +709,28 @@ describe('Dog endpoint', () => {
       expect(withdrawDogMock).toHaveBeenCalledWith({
         indexNumber: 'ED123',
         email: 'garrymcfadyen@hotmail.com',
-        user: internalUser
+        user: internalUser,
+        withdrawOption: 'email'
       })
+    })
+
+    test('POST /dog route returns 400 with invalid payload', async () => {
+      const withdrawDogMock = jest.fn()
+      getDogService.mockReturnValue({
+        withdrawDog: withdrawDogMock
+      })
+      withdrawDogMock.mockResolvedValue(undefined)
+
+      const options = {
+        method: 'POST',
+        url: '/dog/withdraw/ED123',
+        payload: {},
+        ...portalHeader
+      }
+
+      const response = await server.inject(options)
+
+      expect(response.statusCode).toBe(400)
     })
 
     test('should return 403 given call from enforcement', async () => {
@@ -690,7 +744,10 @@ describe('Dog endpoint', () => {
       const options = {
         method: 'POST',
         url: '/dog/withdraw/ED123',
-        payload: { },
+        payload: {
+          indexNumber: 'ED400146',
+          withdrawOption: 'email'
+        },
         ...enforcementHeader
       }
       const response = await server.inject(options)
@@ -707,7 +764,10 @@ describe('Dog endpoint', () => {
       const options = {
         method: 'POST',
         url: '/dog/withdraw/ED123',
-        payload: { },
+        payload: {
+          indexNumber: 'ED400146',
+          withdrawOption: 'email'
+        },
         ...portalHeader
       }
       const response = await server.inject(options)

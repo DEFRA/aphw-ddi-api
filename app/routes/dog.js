@@ -108,7 +108,8 @@ module.exports = [
         const dogService = ServiceProvider.getDogService()
         await dogService.withdrawDog({
           indexNumber,
-          email: request.payload.emailToUpdate,
+          withdrawOption: request.payload.withdrawOption,
+          email: request.payload.email,
           user: getCallingUser(request)
         })
 

@@ -45,7 +45,16 @@ const dogOwnerQuerySchema = Joi.object({
 })
 
 const dogWithdrawalPayloadSchema = Joi.object({
-  emailToUpdate: Joi.string().email().optional()
+  updateEmail: Joi.boolean().default(false),
+  email: Joi.alternatives().conditional('updateEmail',
+    {
+      is: true,
+      then: Joi.string().email().required(),
+      otherwise: Joi.forbidden()
+    }
+  ),
+  indexNumber: Joi.string(),
+  withdrawOption: Joi.string().allow('email', 'post').required()
 })
 
 module.exports = {

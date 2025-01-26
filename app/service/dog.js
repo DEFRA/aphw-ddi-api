@@ -76,9 +76,10 @@ class DogService {
    * @param {string} indexNumber
    * @param user
    * @param {string} [email]
+   * @param {'email'|'post'} withdrawOption
    * @return {Promise<void>}
    */
-  async withdrawDog ({ indexNumber, user, email }) {
+  async withdrawDog ({ indexNumber, user, email, withdrawOption }) {
     /**
      * @type {Dog}
      */
@@ -100,8 +101,12 @@ class DogService {
       await sendUpdateToAudit(EXEMPTION, preAudit, postAudit, user)
     }
 
-    const callbackTwo = async () => {
-      await emailWithdrawalConfirmation(dog.exemption, dog.person, dog)
+    let callbackTwo
+
+    if (withdrawOption === 'email') {
+      callbackTwo = async () => {
+        await emailWithdrawalConfirmation(dog.exemption, dog.person, dog)
+      }
     }
 
     dog.withdrawDog(callback)
