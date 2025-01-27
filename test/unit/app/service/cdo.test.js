@@ -3,8 +3,6 @@ const { CdoTaskList, Cdo, Person, Dog, Exemption } = require('../../../../app/da
 const { devUser } = require('../../../mocks/auth')
 const { ActionAlreadyPerformedError } = require('../../../../app/errors/domain/actionAlreadyPerformed')
 const { activities } = require('../../../../app/constants/event/events')
-const { sendActivityToAudit } = require('../../../../app/messaging/send-audit')
-const { sendCertificateByEmail } = require('../../../../app/lib/email-helper')
 
 describe('CdoService', function () {
   /**
