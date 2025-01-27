@@ -1,4 +1,4 @@
-const { sendUpdateToAudit } = require('../messaging/send-audit')
+const { sendUpdateToAudit, sendActivityToAudit } = require('../messaging/send-audit')
 const { DOG } = require('../constants/event/audit-event-object-types')
 const { statuses } = require('../constants/statuses')
 const { mapDogDaoToDog } = require('../repos/mappers/cdo')
@@ -106,6 +106,15 @@ class DogService {
     if (withdrawOption === 'email') {
       callbackTwo = async () => {
         await emailWithdrawalConfirmation(dog.exemption, dog.person, dog)
+        await sendActivityToAudit({
+          activity: 0,
+          activityType: 'sent',
+          pk: indexNumber,
+          source: 'dog',
+          activityDate: new Date(),
+          targetPk: 'dog',
+          activityLabel: `Confirmation of withdrawal sent to ${dog.person.contactDetails.email}`
+        }, user)
       }
     }
 
