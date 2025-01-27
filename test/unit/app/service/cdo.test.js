@@ -24,7 +24,7 @@ describe('CdoService', function () {
   const { microchipExists } = require('../../../../app/repos/microchip')
 
   jest.mock('../../../../app/lib/email-helper')
-  const { sendForm2Emails, emailApplicationPack, postApplicationPack } = require('../../../../app/lib/email-helper')
+  const { sendForm2Emails, emailApplicationPack, postApplicationPack, sendCertificateByEmail } = require('../../../../app/lib/email-helper')
 
   const { CdoService } = require('../../../../app/service/cdo')
 
@@ -778,7 +778,44 @@ describe('CdoService', function () {
   })
 
   describe('issueCertificate', () => {
-    test('should issue certificate', async () => {
+    test('should issue certificate by post', async () => {
+      const sentDate = new Date()
+      const cdoIndexNumber = 'ED300097'
+      const cdoTaskList = new CdoTaskList(buildCdo({
+        person: buildCdoPerson({
+          personReference: 'P-8AD0-561A'
+        }),
+        exemption: buildExemption({
+          applicationPackSent: new Date(),
+          applicationPackProcessed: new Date(),
+          form2Sent: new Date(),
+          applicationFeePaid: new Date(),
+          neuteringConfirmation: new Date(),
+          microchipVerification: new Date(),
+          insuranceDetailsRecorded: new Date(),
+          microchipNumberRecorded: new Date(),
+          verificationDatesRecorded: new Date(),
+          insurance: [buildCdoInsurance({
+            renewalDate: new Date('9999-01-01'),
+            company: 'Dogs Trust'
+          })]
+        }),
+        dog: buildCdoDog({
+          microchipNumber: '123456789012345',
+          status: 'Pre-exempt'
+        })
+      }))
+
+      mockCdoRepository.getCdoTaskList.mockResolvedValue(cdoTaskList)
+      mockCdoRepository.saveCdoTaskList.mockResolvedValue(cdoTaskList)
+
+      await cdoService.issueCertificate(cdoIndexNumber, sentDate, devUser, { sendOption: 'post' })
+
+      expect(updatePersonEmail).not.toHaveBeenCalled()
+      expect(sendCertificateByEmail).not.toHaveBeenCalled()
+    })
+
+    test('should issue certificate by email', async () => {
       const sentDate = new Date()
       const cdoIndexNumber = 'ED300097'
       const cdoTaskList = new CdoTaskList(buildCdo({
@@ -806,7 +843,7 @@ describe('CdoService', function () {
       mockCdoRepository.getCdoTaskList.mockResolvedValue(cdoTaskList)
       mockCdoRepository.saveCdoTaskList.mockResolvedValue(cdoTaskList)
 
-      const result = await cdoService.issueCertificate(cdoIndexNumber, sentDate, devUser, { sendOption: 'email' })
+      const result = await cdoService.issueCertificate(cdoIndexNumber, sentDate, devUser, { sendOption: 'email', email: 'me@test.com', certificateId: 'abc-123' })
 
       expect(mockCdoRepository.getCdoTaskList).toHaveBeenCalledWith(cdoIndexNumber)
       expect(mockCdoRepository.saveCdoTaskList).toHaveBeenCalledWith(cdoTaskList)
@@ -841,6 +878,46 @@ describe('CdoService', function () {
           status: 'Exempt'
         },
         devUser)
+
+      expect(updatePersonEmail).not.toHaveBeenCalled()
+      expect(sendCertificateByEmail).toHaveBeenCalledWith(cdoTaskList.person, cdoTaskList.dog, 'abc-123', 'me@test.com', false)
+    })
+
+    test('should issue certificate and create a new email', async () => {
+      const sentDate = new Date()
+      const cdoIndexNumber = 'ED300097'
+      const cdoTaskList = new CdoTaskList(buildCdo({
+        person: buildCdoPerson({
+          personReference: 'P-8AD0-561A'
+        }),
+        exemption: buildExemption({
+          applicationPackSent: new Date(),
+          applicationPackProcessed: new Date(),
+          form2Sent: new Date(),
+          applicationFeePaid: new Date(),
+          neuteringConfirmation: new Date(),
+          microchipVerification: new Date(),
+          insuranceDetailsRecorded: new Date(),
+          microchipNumberRecorded: new Date(),
+          verificationDatesRecorded: new Date(),
+          insurance: [buildCdoInsurance({
+            renewalDate: new Date('9999-01-01'),
+            company: 'Dogs Trust'
+          })]
+        }),
+        dog: buildCdoDog({
+          microchipNumber: '123456789012345',
+          status: 'Pre-exempt'
+        })
+      }))
+
+      mockCdoRepository.getCdoTaskList.mockResolvedValue(cdoTaskList)
+      mockCdoRepository.saveCdoTaskList.mockResolvedValue(cdoTaskList)
+
+      await cdoService.issueCertificate(cdoIndexNumber, sentDate, devUser, { sendOption: 'email', email: 'garrymcfadyen@hotmail.com', updateEmail: true })
+
+      expect(updatePersonEmail).toHaveBeenCalledWith('P-8AD0-561A', 'garrymcfadyen@hotmail.com', devUser)
+      expect(cdoTaskList.person.contactDetails.email).toBe('garrymcfadyen@hotmail.com')
     })
 
     test('should issue certificate given only microchip and neutering deadlines set', async () => {

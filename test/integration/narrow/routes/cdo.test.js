@@ -1962,6 +1962,26 @@ describe('CDO endpoint', () => {
       expect(issueCertificateMock).toHaveBeenCalledWith('ED123', expect.any(Date), devUser, { certificateId: '123', email: 'me@here.com' })
     })
 
+    test('should return 201 and update email', async () => {
+      const issueCertificateMock = jest.fn()
+
+      getCdoService.mockReturnValue({
+        issueCertificate: issueCertificateMock
+      })
+
+      issueCertificateMock.mockResolvedValue(new Date('2024-07-30'))
+
+      const options = {
+        method: 'POST',
+        url: '/cdo/ED123/manage:issueCertificate',
+        ...portalHeader,
+        payload: { certificateId: '123', email: 'me@here.com', updateEmail: true }
+      }
+      const response = await server.inject(options)
+      expect(response.statusCode).toBe(201)
+      expect(issueCertificateMock).toHaveBeenCalledWith('ED123', expect.any(Date), devUser, { certificateId: '123', email: 'me@here.com', updateEmail: true })
+    })
+
     test('should return 403 given call from enforcement', async () => {
       validate.mockResolvedValue(mockValidateEnforcement)
 
