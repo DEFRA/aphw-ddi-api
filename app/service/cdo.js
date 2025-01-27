@@ -326,8 +326,21 @@ class CdoService {
     return this.cdoRepository.saveCdoTaskList(cdoTaskList)
   }
 
+  /**
+   * @param cdoIndexNumber
+   * @param sentDate
+   * @param user
+   * @param payload
+   * @return {Promise<*>}
+   */
   async issueCertificate (cdoIndexNumber, sentDate, user, payload) {
     const cdoTaskList = await this.cdoRepository.getCdoTaskList(cdoIndexNumber)
+    const { updateEmail, email } = payload
+
+    if (updateEmail) {
+      await updatePersonEmail(cdoTaskList.person.personReference, email, user)
+      cdoTaskList.person.contactDetails.email = email
+    }
 
     const preAuditExemption = {
       index_number: cdoIndexNumber,
@@ -350,7 +363,7 @@ class CdoService {
     const callback = async () => {
       await sendUpdateToAudit(EXEMPTION, preAuditExemption, postAuditExemption, user)
       await sendUpdateToAudit(DOG, preAuditDog, postAuditDog, user)
-      const { sendOption, email, certificateId, firstCertificate } = payload
+      const { sendOption, certificateId, firstCertificate } = payload
       if (sendOption === 'email') {
         await sendCertificateByEmail(cdoTaskList.person, cdoTaskList.dog, certificateId, email, !!firstCertificate)
       }
