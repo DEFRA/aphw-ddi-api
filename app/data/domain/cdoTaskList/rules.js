@@ -1,4 +1,5 @@
 const { dateTodayOrInFuture, dateIsADate } = require('../../../lib/date-helpers')
+const { statuses } = require('../../../constants/statuses')
 
 class CdoTaskListRule {
   /**
@@ -258,11 +259,38 @@ class VerificationDatesRecordedRule extends CdoTaskListRule {
   }
 }
 
+/**
+ * @implements {CdoTaskRuleInterface}
+ */
+class SendReplacementCertificateRule extends CdoTaskListRule {
+  constructor (exemption, dog) {
+    super('certificateIssued', exemption)
+    this._dog = dog
+  }
+
+  get available () {
+    return this._dog.status === statuses.InterimExempt && this.completed
+  }
+
+  get completed () {
+    return this.timestamp instanceof Date
+  }
+
+  get readonly () {
+    return false
+  }
+
+  get timestamp () {
+    return this._exemption.certificateIssued ?? undefined
+  }
+}
+
 module.exports = {
   ApplicationPackSentRule,
   ApplicationPackProcessedRule,
   InsuranceDetailsRule,
   ApplicationFeePaymentRule,
   FormTwoSentRule,
-  VerificationDatesRecordedRule
+  VerificationDatesRecordedRule,
+  SendReplacementCertificateRule
 }
