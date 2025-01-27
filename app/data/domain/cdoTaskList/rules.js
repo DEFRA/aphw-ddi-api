@@ -269,7 +269,7 @@ class SendReplacementCertificateRule extends CdoTaskListRule {
   }
 
   get available () {
-    return this._dog.status === statuses.InterimExempt && this.completed
+    return this._dog.status === statuses.Exempt && this.completed
   }
 
   get completed () {

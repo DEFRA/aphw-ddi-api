@@ -407,10 +407,10 @@ describe('CdoTaskList rules', () => {
     })
   })
 
-  describe('ResendCertificateRule', () => {
+  describe('SendReplacementCertificateRule', () => {
     test('should allow certificate to be sent', () => {
       const dog = buildCdoDog({
-        status: 'Interim exempt'
+        status: 'Exempt'
       })
       const certificateIssued = new Date()
       const exemption = buildExemption({
