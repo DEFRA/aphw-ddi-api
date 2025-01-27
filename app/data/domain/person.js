@@ -1,4 +1,19 @@
+/**
+ * @typedef PersonProperties
+ * @property id
+ * @property personReference
+ * @property firstName
+ * @property lastName
+ * @property dateOfBirth
+ * @property addresses
+ * @property person_contacts
+ * @property organisationName
+ * @property contactDetails
+ */
 class Person {
+  /**
+   * @param {PersonProperties} personProperties
+   */
   constructor (personProperties) {
     this.id = personProperties.id
     this.personReference = personProperties.personReference

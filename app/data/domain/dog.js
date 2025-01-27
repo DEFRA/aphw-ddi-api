@@ -21,6 +21,7 @@ const { addMonths } = require('../../lib/date-helpers')
  * @property {string|null} microchipNumber2 = dogProperties.microchipNumber2
  * @property {BreachCategory[]} breaches = dogProperties.breaches
  * @property {Exemption} [exemption] = dogProperties.exemption
+ * @property {Person} [person] = dogProperties.person
  * @property {DogStatus} dogStatus
  */
 class Dog extends Changeable {
@@ -46,6 +47,10 @@ class Dog extends Changeable {
 
     if (dogProperties.exemption) {
       this.exemption = dogProperties.exemption
+    }
+
+    if (dogProperties.person) {
+      this.person = dogProperties.person
     }
   }
 
@@ -128,7 +133,12 @@ class Dog extends Changeable {
     if (!this.exemption) {
       throw new DogActionNotAllowedException('Exemption not found')
     }
-    if (this.exemption.exemptionOrder !== '2023' || !this.dateOfBirth) {
+    if (this.exemption.exemptionOrder !== '2023') {
+      console.error('Only 2023 dogs can be withdrawn')
+      throw new DogActionNotAllowedException(`Dog ${this.indexNumber} is not valid for withdrawal`)
+    }
+    if (!this.dateOfBirth) {
+      console.error('Only dogs with DOB may be withdrawn')
       throw new DogActionNotAllowedException(`Dog ${this.indexNumber} is not valid for withdrawal`)
     }
 

@@ -1,6 +1,6 @@
 const { devUser } = require('../../../mocks/auth')
-const { Dog, BreachCategory, Exemption } = require('../../../../app/data/domain')
-const { buildCdoDog, buildExemption } = require('../../../mocks/cdo/domain')
+const { Dog, BreachCategory, Exemption, Person } = require('../../../../app/data/domain')
+const { buildCdoDog, buildExemption, buildCdoPerson } = require('../../../mocks/cdo/domain')
 const { allBreachDAOs, buildDogDao } = require('../../../mocks/cdo/get')
 const { NotFoundError } = require('../../../../app/errors/not-found')
 const { DogActionNotAllowedException } = require('../../../../app/errors/domain/dogActionNotAllowedException')
@@ -15,6 +15,12 @@ describe('DogService', function () {
 
   jest.mock('../../../../app/messaging/send-audit')
   const { sendUpdateToAudit } = require('../../../../app/messaging/send-audit')
+
+  jest.mock('../../../../app/repos/people')
+  const { updatePersonEmail } = require('../../../../app/repos/people')
+
+  jest.mock('../../../../app/lib/email-helper')
+  const { emailWithdrawalConfirmation } = require('../../../../app/lib/email-helper')
 
   beforeEach(function () {
     jest.clearAllMocks()
@@ -81,7 +87,7 @@ describe('DogService', function () {
       await dog.getChanges()[1].callback()
       expect(mockDogRepository.getDogModel).toHaveBeenCalledWith('ED300097')
       expect(mockBreachesRepository.getBreachCategories).toHaveBeenCalled()
-      expect(mockDogRepository.saveDog).toHaveBeenCalledWith(dog, undefined)
+      expect(mockDogRepository.saveDog).toHaveBeenCalledWith(dog, undefined, undefined)
       expect(dog.getChanges()).toEqual([
         {
           key: 'dogBreaches',
@@ -259,13 +265,38 @@ describe('DogService', function () {
   })
 
   describe('withdrawDog', () => {
-    test('should withdraw dog', async () => {
+    test('should withdraw dog by post', async () => {
       const exemption = new Exemption(buildExemption({
         exemptionOrder: '2023'
       }))
+      const person = new Person(buildCdoPerson())
       const dog = new Dog(buildCdoDog({
         indexNumber: 'ED300001',
         exemption,
+        person,
+        dateOfBirth: new Date('2023-07-22'),
+        status: 'Interim Exempt'
+      }))
+      mockDogRepository.getDogModel.mockResolvedValue(dog)
+      const dogService = new DogService(mockDogRepository, mockBreachesRepository)
+      await dogService.withdrawDog({
+        indexNumber: 'ED300001',
+        user: devUser,
+        withdrawOption: 'post'
+      })
+
+      expect(mockDogRepository.saveDog).toHaveBeenCalledWith(dog, undefined)
+    })
+
+    test('should withdraw dog by email', async () => {
+      const exemption = new Exemption(buildExemption({
+        exemptionOrder: '2023'
+      }))
+      const person = new Person(buildCdoPerson())
+      const dog = new Dog(buildCdoDog({
+        indexNumber: 'ED300001',
+        exemption,
+        person,
         dateOfBirth: new Date('2023-07-22'),
         status: 'Interim Exempt'
       }))
@@ -273,15 +304,48 @@ describe('DogService', function () {
       const expectedPostAudit = { index_number: 'ED300001', status: 'Withdrawn', withdrawn: expect.any(Date) }
       mockDogRepository.getDogModel.mockResolvedValue(dog)
       const dogService = new DogService(mockDogRepository, mockBreachesRepository)
-      await dogService.withdrawDog('ED300001', devUser)
+      await dogService.withdrawDog({
+        indexNumber: 'ED300001',
+        user: devUser,
+        withdrawOption: 'email'
+      })
       await dog.getChanges()[0].callback()
-      expect(mockDogRepository.saveDog).toHaveBeenCalledWith(dog)
+      await mockDogRepository.saveDog.mock.calls[0][1]()
+
+      expect(mockDogRepository.saveDog).toHaveBeenCalledWith(dog, expect.any(Function))
       expect(sendUpdateToAudit).toHaveBeenCalledWith(EXEMPTION, expectedPreAudit, expectedPostAudit, devUser)
+      expect(emailWithdrawalConfirmation).toHaveBeenCalledWith(exemption, person, dog)
+    })
+
+    test('should withdraw dog and update email', async () => {
+      const exemption = new Exemption(buildExemption({
+        exemptionOrder: '2023'
+      }))
+      const person = new Person(buildCdoPerson({
+        personReference: 'P-8AD0-561A'
+      }))
+      const dog = new Dog(buildCdoDog({
+        indexNumber: 'ED300001',
+        exemption,
+        person,
+        dateOfBirth: new Date('2023-07-22'),
+        status: 'Interim Exempt'
+      }))
+      mockDogRepository.getDogModel.mockResolvedValue(dog)
+      const dogService = new DogService(mockDogRepository, mockBreachesRepository)
+      await dogService.withdrawDog({
+        indexNumber: 'ED300001',
+        user: devUser,
+        email: 'garrymcfadyen@hotmail.com',
+        withdrawOption: 'email'
+      })
+      expect(updatePersonEmail).toHaveBeenCalledWith('P-8AD0-561A', 'garrymcfadyen@hotmail.com', devUser)
+      expect(person.contactDetails.email).toBe('garrymcfadyen@hotmail.com')
     })
     test('should error is dog not found', async () => {
       mockDogRepository.getDogModel.mockResolvedValue(undefined)
       const dogService = new DogService(mockDogRepository, mockBreachesRepository)
-      await expect(dogService.withdrawDog('ED300000', devUser)).rejects.toThrow(new NotFoundError('Dog ED300000 not found'))
+      await expect(dogService.withdrawDog({ indexNumber: 'ED300000', user: devUser, withdrawOption: 'email' })).rejects.toThrow(new NotFoundError('Dog ED300000 not found'))
     })
 
     test('should error if dog not valid', async () => {
@@ -293,7 +357,7 @@ describe('DogService', function () {
       mockDogRepository.getDogModel.mockResolvedValue(dog)
       const dogService = new DogService(mockDogRepository, mockBreachesRepository)
 
-      await expect(dogService.withdrawDog('ED300097', devUser)).rejects.toThrow(new DogActionNotAllowedException('Dog ED300097 is not valid for withdrawal'))
+      await expect(dogService.withdrawDog({ indexNumber: 'ED300097', user: devUser, withdrawOption: 'email' })).rejects.toThrow(new DogActionNotAllowedException('Dog ED300097 is not valid for withdrawal'))
     })
   })
 })

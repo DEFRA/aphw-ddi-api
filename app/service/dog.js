@@ -5,6 +5,8 @@ const { mapDogDaoToDog } = require('../repos/mappers/cdo')
 const { NotFoundError } = require('../errors/not-found')
 const { EXEMPTION } = require('../constants/event/audit-event-object-types')
 const { deepClone } = require('../lib/deep-clone')
+const { emailWithdrawalConfirmation } = require('../lib/email-helper')
+const { updatePersonEmail } = require('../repos/people')
 
 class DogService {
   constructor (dogRepository, breachesRepository) {
@@ -51,7 +53,7 @@ class DogService {
 
     const changedDog = this._prepareBreaches(dog, dogBreaches, allDogBreaches, user)
 
-    await this._dogRepository.saveDog(changedDog, transaction)
+    await this._dogRepository.saveDog(changedDog, undefined, transaction)
 
     return this._dogRepository.getDogModel(dogIndex, transaction)
   }
@@ -70,12 +72,28 @@ class DogService {
     return changedDog
   }
 
-  async withdrawDog (indexNumber, user) {
+  /**
+   * @param {string} indexNumber
+   * @param user
+   * @param {string} [email]
+   * @param {'email'|'post'} withdrawOption
+   * @return {Promise<void>}
+   */
+  async withdrawDog ({ indexNumber, user, email, withdrawOption }) {
+    /**
+     * @type {Dog}
+     */
     const dog = await this._dogRepository.getDogModel(indexNumber)
 
     if (dog === undefined) {
       throw new NotFoundError(`Dog ${indexNumber} not found`)
     }
+
+    if (email) {
+      await updatePersonEmail(dog.person.personReference, email, user)
+      dog.person.contactDetails.email = email
+    }
+
     const preAudit = deepClone({ index_number: indexNumber, status: dog.status, withdrawn: dog.exemption.withdrawn })
 
     const callback = async () => {
@@ -83,9 +101,17 @@ class DogService {
       await sendUpdateToAudit(EXEMPTION, preAudit, postAudit, user)
     }
 
+    let callbackTwo
+
+    if (withdrawOption === 'email') {
+      callbackTwo = async () => {
+        await emailWithdrawalConfirmation(dog.exemption, dog.person, dog)
+      }
+    }
+
     dog.withdrawDog(callback)
 
-    await this._dogRepository.saveDog(dog)
+    await this._dogRepository.saveDog(dog, callbackTwo)
   }
 }
 

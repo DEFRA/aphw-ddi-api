@@ -3,6 +3,11 @@ const { buildDogDao, buildRegistrationDao } = require('../../../mocks/cdo/get')
 const { mockValidate, mockValidateEnforcement, mockValidateStandard } = require('../../../mocks/auth')
 const { portalHeader, enforcementHeader, portalStandardHeader } = require('../../../mocks/jwt')
 
+const internalUser = {
+  username: 'internal-user',
+  displayname: 'User, Internal'
+}
+
 describe('Dog endpoint', () => {
   const createServer = require('../../../../app/server')
   let server
@@ -531,10 +536,7 @@ describe('Dog endpoint', () => {
   describe('POST /dogs:batch-delete', () => {
     test('should return a 200 with list of deleted persons', async () => {
       const expectedDogs = ['ED300006', 'ED300053']
-      const expectedUser = {
-        username: 'internal-user',
-        displayname: 'User, Internal'
-      }
+
       deleteDogs.mockResolvedValue({
         count: {
           failed: 0,
@@ -545,7 +547,7 @@ describe('Dog endpoint', () => {
           success: expectedDogs
         }
       })
-      getCallingUser.mockReturnValue(expectedUser)
+      getCallingUser.mockReturnValue(internalUser)
       const options = {
         method: 'POST',
         url: '/dogs:batch-delete',
@@ -559,7 +561,7 @@ describe('Dog endpoint', () => {
       const payload = JSON.parse(response.payload)
       expect(response.statusCode).toBe(200)
       expect(payload.deleted.success).toEqual(expectedDogs)
-      expect(deleteDogs).toHaveBeenCalledWith(expectedDogs, expectedUser)
+      expect(deleteDogs).toHaveBeenCalledWith(expectedDogs, internalUser)
     })
 
     test('should return 403 given call from enforcement', async () => {
@@ -638,13 +640,97 @@ describe('Dog endpoint', () => {
       const options = {
         method: 'POST',
         url: '/dog/withdraw/ED123',
-        payload: {},
+        payload: {
+          indexNumber: 'ED400146',
+          withdrawOption: 'email'
+        },
         ...portalHeader
       }
 
       const response = await server.inject(options)
 
       expect(response.statusCode).toBe(200)
+      expect(withdrawDogMock).toHaveBeenCalledWith({
+        indexNumber: 'ED123',
+        user: internalUser,
+        withdrawOption: 'email'
+      })
+    })
+
+    test('POST /dog route returns 200 given postal', async () => {
+      const withdrawDogMock = jest.fn()
+      getDogService.mockReturnValue({
+        withdrawDog: withdrawDogMock
+      })
+      withdrawDogMock.mockResolvedValue(undefined)
+
+      const options = {
+        method: 'POST',
+        url: '/dog/withdraw/ED123',
+        payload: {
+          indexNumber: 'ED400146',
+          withdrawOption: 'post'
+        },
+        ...portalHeader
+      }
+
+      const response = await server.inject(options)
+
+      expect(response.statusCode).toBe(200)
+      expect(withdrawDogMock).toHaveBeenCalledWith({
+        indexNumber: 'ED123',
+        user: internalUser,
+        withdrawOption: 'post'
+      })
+    })
+
+    test('POST /dog route returns 200 with valid dog and update email', async () => {
+      const withdrawDogMock = jest.fn()
+      getDogService.mockReturnValue({
+        withdrawDog: withdrawDogMock
+      })
+      withdrawDogMock.mockResolvedValue(undefined)
+
+      const options = {
+        method: 'POST',
+        url: '/dog/withdraw/ED123',
+        payload: {
+          indexNumber: 'ED400146',
+          withdrawOption: 'email',
+          email: 'garrymcfadyen@hotmail.com',
+          updateEmail: 'true'
+        },
+        ...portalHeader
+      }
+
+      const response = await server.inject(options)
+
+      expect(response.statusCode).toBe(200)
+      expect(withdrawDogMock).toHaveBeenCalledWith({
+        indexNumber: 'ED123',
+        email: 'garrymcfadyen@hotmail.com',
+        user: internalUser,
+        withdrawOption: 'email'
+      })
+    })
+
+    test('POST /dog route returns 400 with invalid payload', async () => {
+      const withdrawDogMock = jest.fn()
+      getDogService.mockReturnValue({
+        withdrawDog: withdrawDogMock
+      })
+      withdrawDogMock.mockResolvedValue(undefined)
+
+      const options = {
+        method: 'POST',
+        url: '/dog/withdraw/ED123',
+        payload: {},
+        ...portalHeader
+      }
+
+      const response = await server.inject(options)
+
+      expect(response.statusCode).toBe(400)
     })
 
     test('should return 403 given call from enforcement', async () => {
@@ -658,7 +744,10 @@ describe('Dog endpoint', () => {
       const options = {
         method: 'POST',
         url: '/dog/withdraw/ED123',
-        payload: { },
+        payload: {
+          indexNumber: 'ED400146',
+          withdrawOption: 'email'
+        },
         ...enforcementHeader
       }
       const response = await server.inject(options)
@@ -675,7 +764,10 @@ describe('Dog endpoint', () => {
       const options = {
         method: 'POST',
         url: '/dog/withdraw/ED123',
-        payload: { },
+        payload: {
+          indexNumber: 'ED400146',
+          withdrawOption: 'email'
+        },
         ...portalHeader
       }
       const response = await server.inject(options)

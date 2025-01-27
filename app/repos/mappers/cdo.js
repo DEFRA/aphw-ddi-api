@@ -152,7 +152,7 @@ const mapPersonContactsToContactDetails = (personContactsDao, personAddresses = 
    * @param {PersonContactDao} contact
    * @return {string|undefined}
    */
-  const reducer = (emailString, contact) => {
+  const emailReducer = (emailString, contact) => {
     if (contact.contact?.contact_type.contact_type === 'Email') {
       return contact.contact.contact
     }
@@ -162,7 +162,7 @@ const mapPersonContactsToContactDetails = (personContactsDao, personAddresses = 
   /**
    * @type {string|undefined}
    */
-  const email = personContactsDao.reduce(reducer, undefined)
+  const email = personContactsDao.reduce(emailReducer, undefined)
   return new ContactDetails(email, address)
 }
 
@@ -182,7 +182,7 @@ const mapCdoPersonToPerson = (person) => {
   return new Person(params)
 }
 
-const mapDogDaoToDog = (dogDao, includeRegistration = false) => {
+const mapDogDaoToDog = (dogDao, includeChildren = false) => {
   const dogProperties = {
     id: dogDao.id,
     dogReference: dogDao.dog_reference,
@@ -202,8 +202,13 @@ const mapDogDaoToDog = (dogDao, includeRegistration = false) => {
     microchipNumber2: getMicrochip(dogDao, 2),
     dogBreaches: dogDao.dog_breaches?.map(mapDogBreachDaoToBreachCategory)
   }
-  if (includeRegistration) {
+  if (dogDao.registration && includeChildren) {
     dogProperties.exemption = mapCdoDaoToExemption(dogDao.registration)
+  }
+  const person = dogDao.registered_person?.[0]?.person
+
+  if (person && includeChildren) {
+    dogProperties.person = mapCdoPersonToPerson(person)
   }
   return new Dog(dogProperties)
 }

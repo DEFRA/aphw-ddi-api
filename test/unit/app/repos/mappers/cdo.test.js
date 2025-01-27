@@ -13,7 +13,7 @@ const {
   buildDogDao,
   dogBreachDAOs, buildFormTwoDao, buildSummaryRegistrationDao, buildSummaryCdoDao, buildDogMicrochipDao,
   buildInsuranceCompanyDao, buildPersonDao, buildContactDao, buildContactContactDao, buildPersonAddressDao,
-  buildAddressDao
+  buildAddressDao, buildRegisteredPersonDao
 } = require('../../../../mocks/cdo/get')
 const {
   buildCdo, buildExemption, buildCdoInsurance, NOT_COVERED_BY_INSURANCE, INSECURE_PLACE,
@@ -654,10 +654,24 @@ describe('cdo mappers', () => {
         exported_date: '2024-10-11',
         stolen_date: '2024-10-11',
         untraceable_date: '2024-10-11',
-        registration: buildRegistrationDao()
+        registration: buildRegistrationDao(),
+        registered_person: []
       })
       const dog = mapDogDaoToDog(dogDao, true)
       expect(dog.exemption).toBeInstanceOf(Exemption)
+    })
+
+    test('should map person to Dog.person', () => {
+      const dogDao = buildDogDao({
+        birth_date: '2024-10-11',
+        death_date: '2024-10-11',
+        exported_date: '2024-10-11',
+        stolen_date: '2024-10-11',
+        untraceable_date: '2024-10-11',
+        registered_person: [buildRegisteredPersonDao()]
+      })
+      const dog = mapDogDaoToDog(dogDao, true)
+      expect(dog.person).toBeInstanceOf(Person)
     })
   })
 })
