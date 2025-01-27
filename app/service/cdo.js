@@ -33,37 +33,6 @@ class CdoService {
     return this.cdoRepository.getCdoTaskList(cdoId)
   }
 
-  async sendApplicationPack (cdoId, sentDate, user) {
-    const cdoTaskList = await this.cdoRepository.getCdoTaskList(cdoId)
-    const activityType = await getActivityByLabel(activities.applicationPackSent)
-
-    const sendEvent = async () => {
-      await sendActivityToAudit({
-        activity: activityType.id,
-        activityType: 'sent',
-        pk: cdoId,
-        source: 'dog',
-        activityDate: sentDate,
-        targetPk: 'dog',
-        activityLabel: activities.applicationPackSent
-      }, user)
-    }
-
-    try {
-      await cdoTaskList.sendApplicationPack(sentDate, sendEvent)
-    } catch (e) {
-      console.error('Error in CdoService.sendApplicationPack while updating domain model')
-      throw e
-    }
-
-    try {
-      await this.cdoRepository.saveCdoTaskList(cdoTaskList)
-    } catch (e) {
-      console.error('Error in CdoService.sendApplicationPack whilst updating the aggregrate')
-      throw e
-    }
-  }
-
   async emailApplicationPack (cdoId, email, updateEmail, sentDate, user) {
     const cdoTaskList = await this.cdoRepository.getCdoTaskList(cdoId)
     const activityType = await getActivityByLabel(activities.applicationPackEmailed)

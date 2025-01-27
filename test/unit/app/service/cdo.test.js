@@ -64,57 +64,6 @@ describe('CdoService', function () {
     })
   })
 
-  describe('sendApplicationPack', () => {
-    test('should send application pack', async () => {
-      getActivityByLabel.mockResolvedValue({ id: 9, label: 'Application pack' })
-      const sentDate = new Date()
-      const cdoIndexNumber = 'ED300097'
-      const cdoTaskList = new CdoTaskList(buildCdo())
-      mockCdoRepository.getCdoTaskList.mockResolvedValue(cdoTaskList)
-
-      await cdoService.sendApplicationPack(cdoIndexNumber, sentDate, devUser)
-      expect(mockCdoRepository.getCdoTaskList).toHaveBeenCalledWith(cdoIndexNumber)
-      expect(mockCdoRepository.saveCdoTaskList).toHaveBeenCalledWith(cdoTaskList)
-      expect(cdoTaskList.getUpdates().exemption).toEqual([{
-        key: 'applicationPackSent',
-        value: sentDate,
-        callback: expect.any(Function)
-      }])
-      await cdoTaskList.getUpdates().exemption[0].callback()
-      expect(sendActivityToAudit).toHaveBeenCalledWith({
-        activity: 9,
-        activityType: 'sent',
-        pk: 'ED300097',
-        source: 'dog',
-        activityDate: sentDate,
-        targetPk: 'dog',
-        activityLabel: 'Application pack'
-      }, devUser)
-      sendActivityToAudit.mockClear()
-    })
-
-    test('should not send application pack a second time', async () => {
-      const cdoIndexNumber = 'ED300097'
-      const cdoTaskList = new CdoTaskList(buildCdo({
-        exemption: buildExemption({
-          applicationPackSent: new Date('2024-05-03')
-        })
-      }))
-      mockCdoRepository.getCdoTaskList.mockResolvedValue(cdoTaskList)
-
-      await expect(cdoService.sendApplicationPack(cdoIndexNumber, new Date(), devUser)).rejects.toThrow(ActionAlreadyPerformedError)
-    })
-
-    test('should handle repo error', async () => {
-      const cdoIndexNumber = 'ED300097'
-      const cdoTaskList = new CdoTaskList(buildCdo())
-      mockCdoRepository.getCdoTaskList.mockResolvedValue(cdoTaskList)
-      mockCdoRepository.saveCdoTaskList.mockRejectedValue(new Error('error whilst saving'))
-
-      await expect(cdoService.sendApplicationPack(cdoIndexNumber, devUser)).rejects.toThrow(new Error('error whilst saving'))
-    })
-  })
-
   describe('emailApplicationPack', () => {
     const sentDate = new Date()
     const cdoIndexNumber = 'ED300097'

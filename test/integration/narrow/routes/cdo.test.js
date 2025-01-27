@@ -641,86 +641,6 @@ describe('CDO endpoint', () => {
     })
   })
 
-  describe('POST /cdo/ED123/manage:sendApplicationPack', () => {
-    test('should return 204', async () => {
-      const sendApplicationPackMock = jest.fn()
-      getCdoService.mockReturnValue({
-        sendApplicationPack: sendApplicationPackMock
-      })
-      sendApplicationPackMock.mockResolvedValue(undefined)
-
-      const options = {
-        method: 'POST',
-        url: '/cdo/ED123/manage:sendApplicationPack',
-        ...portalHeader
-      }
-      const response = await server.inject(options)
-      expect(response.statusCode).toBe(204)
-      expect(sendApplicationPackMock).toHaveBeenCalledWith('ED123', expect.any(Date), devUser)
-    })
-
-    test('should return 403 given call from enforcement', async () => {
-      validate.mockResolvedValue(mockValidateEnforcement)
-
-      const options = {
-        method: 'POST',
-        url: '/cdo/ED123/manage:sendApplicationPack',
-        ...portalHeader
-      }
-      const response = await server.inject(options)
-      expect(response.statusCode).toBe(403)
-    })
-
-    test('should throw a 404 given index does not exist', async () => {
-      getCdoService.mockReturnValue({
-        sendApplicationPack: async () => {
-          throw new NotFoundError('not found')
-        }
-      })
-      const options = {
-        method: 'POST',
-        url: '/cdo/ED123/manage:sendApplicationPack',
-        ...portalHeader
-      }
-
-      const response = await server.inject(options)
-      expect(response.statusCode).toBe(404)
-    })
-
-    test('should throw a 409 given action already performed', async () => {
-      getCdoService.mockReturnValue({
-        sendApplicationPack: async () => {
-          throw new ActionAlreadyPerformedError('not found')
-        }
-      })
-      const options = {
-        method: 'POST',
-        url: '/cdo/ED123/manage:sendApplicationPack',
-        ...portalHeader
-      }
-
-      const response = await server.inject(options)
-      expect(response.statusCode).toBe(409)
-    })
-
-    test('should returns 500 given server error thrown', async () => {
-      getCdoService.mockReturnValue({
-        sendApplicationPack: async () => {
-          throw new Error('cdo error')
-        }
-      })
-
-      const options = {
-        method: 'POST',
-        url: '/cdo/ED123/manage:sendApplicationPack',
-        ...portalHeader
-      }
-
-      const response = await server.inject(options)
-      expect(response.statusCode).toBe(500)
-    })
-  })
-
   describe('POST /cdo/ED123/manage:emailApplicationPack', () => {
     test('should return 200', async () => {
       const emailApplicationPackMock = jest.fn()
@@ -1884,6 +1804,7 @@ describe('CDO endpoint', () => {
           throw new InvalidDateError('Date must be today or in the past')
         }
       })
+
       const options = {
         method: 'POST',
         url: '/cdo/ED123/manage:verifyDates',
