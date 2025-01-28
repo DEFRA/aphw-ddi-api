@@ -33,37 +33,6 @@ class CdoService {
     return this.cdoRepository.getCdoTaskList(cdoId)
   }
 
-  async sendApplicationPack (cdoId, sentDate, user) {
-    const cdoTaskList = await this.cdoRepository.getCdoTaskList(cdoId)
-    const activityType = await getActivityByLabel(activities.applicationPackSent)
-
-    const sendEvent = async () => {
-      await sendActivityToAudit({
-        activity: activityType.id,
-        activityType: 'sent',
-        pk: cdoId,
-        source: 'dog',
-        activityDate: sentDate,
-        targetPk: 'dog',
-        activityLabel: activities.applicationPackSent
-      }, user)
-    }
-
-    try {
-      await cdoTaskList.sendApplicationPack(sentDate, sendEvent)
-    } catch (e) {
-      console.error('Error in CdoService.sendApplicationPack while updating domain model')
-      throw e
-    }
-
-    try {
-      await this.cdoRepository.saveCdoTaskList(cdoTaskList)
-    } catch (e) {
-      console.error('Error in CdoService.sendApplicationPack whilst updating the aggregrate')
-      throw e
-    }
-  }
-
   async emailApplicationPack (cdoId, email, updateEmail, sentDate, user) {
     const cdoTaskList = await this.cdoRepository.getCdoTaskList(cdoId)
     const activityType = await getActivityByLabel(activities.applicationPackEmailed)
@@ -326,23 +295,7 @@ class CdoService {
     return this.cdoRepository.saveCdoTaskList(cdoTaskList)
   }
 
-  /**
-   * @param cdoIndexNumber
-   * @param sentDate
-   * @param user
-   * @param payload
-   * @return {Promise<*>}
-   */
-  async issueCertificate (cdoIndexNumber, sentDate, user, payload) {
-    const cdoTaskList = await this.cdoRepository.getCdoTaskList(cdoIndexNumber)
-
-    const { updateEmail, email } = payload
-
-    if (updateEmail) {
-      await updatePersonEmail(cdoTaskList.person.personReference, email, user)
-      cdoTaskList.person.contactDetails.email = email
-    }
-
+  async issueFirstCertificate (cdoTaskList, cdoIndexNumber, sentDate, user, emailCallback) {
     const preAuditExemption = {
       index_number: cdoIndexNumber,
       certificate_issued: cdoTaskList.cdoSummary.certificateIssued
@@ -364,8 +317,45 @@ class CdoService {
     const callback = async () => {
       await sendUpdateToAudit(EXEMPTION, preAuditExemption, postAuditExemption, user)
       await sendUpdateToAudit(DOG, preAuditDog, postAuditDog, user)
-      const { sendOption, certificateId, firstCertificate } = payload
-      if (sendOption === 'email') {
+      await emailCallback()
+    }
+
+    cdoTaskList.issueCertificate(sentDate, callback)
+
+    await this.cdoRepository.saveCdoTaskList(cdoTaskList)
+
+    return sentDate
+  }
+
+  async sendReplacementCertificate (cdoTaskList, emailCallback) {
+    const callback = async () => {
+      await emailCallback()
+    }
+
+    return cdoTaskList.sendReplacementCertificate(callback)
+  }
+
+  /**
+   * @param cdoIndexNumber
+   * @param sentDate
+   * @param user
+   * @param payload
+   * @return {Promise<*>}
+   */
+  async issueCertificate (cdoIndexNumber, sentDate, user, payload) {
+    const cdoTaskList = await this.cdoRepository.getCdoTaskList(cdoIndexNumber)
+
+    const { updateEmail, email, firstCertificate, certificateId, sendOption } = payload
+
+    if (updateEmail) {
+      await updatePersonEmail(cdoTaskList.person.personReference, email, user)
+      cdoTaskList.person.contactDetails.email = email
+    }
+
+    let emailCallback = () => {}
+
+    if (sendOption === 'email') {
+      emailCallback = async () => {
         await sendCertificateByEmail(cdoTaskList.person, cdoTaskList.dog, certificateId, email, !!firstCertificate)
         await sendActivityToAudit({
           activity: 0,
@@ -379,11 +369,11 @@ class CdoService {
       }
     }
 
-    cdoTaskList.issueCertificate(sentDate, callback)
+    if (!firstCertificate) {
+      return this.sendReplacementCertificate(cdoTaskList, emailCallback)
+    }
 
-    await this.cdoRepository.saveCdoTaskList(cdoTaskList)
-
-    return sentDate
+    return this.issueFirstCertificate(cdoTaskList, cdoIndexNumber, sentDate, user, emailCallback)
   }
   /**
    * Submit Form 2 (police officer)

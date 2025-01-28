@@ -64,57 +64,6 @@ describe('CdoService', function () {
     })
   })
 
-  describe('sendApplicationPack', () => {
-    test('should send application pack', async () => {
-      getActivityByLabel.mockResolvedValue({ id: 9, label: 'Application pack' })
-      const sentDate = new Date()
-      const cdoIndexNumber = 'ED300097'
-      const cdoTaskList = new CdoTaskList(buildCdo())
-      mockCdoRepository.getCdoTaskList.mockResolvedValue(cdoTaskList)
-
-      await cdoService.sendApplicationPack(cdoIndexNumber, sentDate, devUser)
-      expect(mockCdoRepository.getCdoTaskList).toHaveBeenCalledWith(cdoIndexNumber)
-      expect(mockCdoRepository.saveCdoTaskList).toHaveBeenCalledWith(cdoTaskList)
-      expect(cdoTaskList.getUpdates().exemption).toEqual([{
-        key: 'applicationPackSent',
-        value: sentDate,
-        callback: expect.any(Function)
-      }])
-      await cdoTaskList.getUpdates().exemption[0].callback()
-      expect(sendActivityToAudit).toHaveBeenCalledWith({
-        activity: 9,
-        activityType: 'sent',
-        pk: 'ED300097',
-        source: 'dog',
-        activityDate: sentDate,
-        targetPk: 'dog',
-        activityLabel: 'Application pack'
-      }, devUser)
-      sendActivityToAudit.mockClear()
-    })
-
-    test('should not send application pack a second time', async () => {
-      const cdoIndexNumber = 'ED300097'
-      const cdoTaskList = new CdoTaskList(buildCdo({
-        exemption: buildExemption({
-          applicationPackSent: new Date('2024-05-03')
-        })
-      }))
-      mockCdoRepository.getCdoTaskList.mockResolvedValue(cdoTaskList)
-
-      await expect(cdoService.sendApplicationPack(cdoIndexNumber, new Date(), devUser)).rejects.toThrow(ActionAlreadyPerformedError)
-    })
-
-    test('should handle repo error', async () => {
-      const cdoIndexNumber = 'ED300097'
-      const cdoTaskList = new CdoTaskList(buildCdo())
-      mockCdoRepository.getCdoTaskList.mockResolvedValue(cdoTaskList)
-      mockCdoRepository.saveCdoTaskList.mockRejectedValue(new Error('error whilst saving'))
-
-      await expect(cdoService.sendApplicationPack(cdoIndexNumber, devUser)).rejects.toThrow(new Error('error whilst saving'))
-    })
-  })
-
   describe('emailApplicationPack', () => {
     const sentDate = new Date()
     const cdoIndexNumber = 'ED300097'
@@ -809,7 +758,7 @@ describe('CdoService', function () {
       mockCdoRepository.getCdoTaskList.mockResolvedValue(cdoTaskList)
       mockCdoRepository.saveCdoTaskList.mockResolvedValue(cdoTaskList)
 
-      await cdoService.issueCertificate(cdoIndexNumber, sentDate, devUser, { sendOption: 'post' })
+      await cdoService.issueCertificate(cdoIndexNumber, sentDate, devUser, { sendOption: 'post', firstCertificate: true })
 
       expect(updatePersonEmail).not.toHaveBeenCalled()
       expect(sendCertificateByEmail).not.toHaveBeenCalled()
@@ -843,7 +792,7 @@ describe('CdoService', function () {
       mockCdoRepository.getCdoTaskList.mockResolvedValue(cdoTaskList)
       mockCdoRepository.saveCdoTaskList.mockResolvedValue(cdoTaskList)
 
-      const result = await cdoService.issueCertificate(cdoIndexNumber, sentDate, devUser, { sendOption: 'email', email: 'me@test.com', certificateId: 'abc-123' })
+      const result = await cdoService.issueCertificate(cdoIndexNumber, sentDate, devUser, { sendOption: 'email', email: 'me@test.com', certificateId: 'abc-123', firstCertificate: true })
 
       expect(mockCdoRepository.getCdoTaskList).toHaveBeenCalledWith(cdoIndexNumber)
       expect(mockCdoRepository.saveCdoTaskList).toHaveBeenCalledWith(cdoTaskList)
@@ -880,7 +829,77 @@ describe('CdoService', function () {
         devUser)
 
       expect(updatePersonEmail).not.toHaveBeenCalled()
+      expect(sendCertificateByEmail).toHaveBeenCalledWith(cdoTaskList.person, cdoTaskList.dog, 'abc-123', 'me@test.com', true)
+    })
+
+    test('should send replacement certificate by email given not firstCertificate', async () => {
+      const sentDate = new Date()
+      const cdoIndexNumber = 'ED300097'
+      const certificateIssued = new Date('2025-01-26')
+      const cdoTaskList = new CdoTaskList(buildCdo({
+        exemption: buildExemption({
+          applicationPackSent: new Date(),
+          applicationPackProcessed: new Date(),
+          form2Sent: new Date(),
+          applicationFeePaid: new Date(),
+          certificateIssued,
+          neuteringConfirmation: new Date(),
+          microchipVerification: new Date(),
+          insuranceDetailsRecorded: new Date(),
+          microchipNumberRecorded: new Date(),
+          verificationDatesRecorded: new Date(),
+          insurance: [buildCdoInsurance({
+            renewalDate: new Date('9999-01-01'),
+            company: 'Dogs Trust'
+          })]
+        }),
+        dog: buildCdoDog({
+          microchipNumber: '123456789012345',
+          status: 'Exempt'
+        })
+      }))
+
+      mockCdoRepository.getCdoTaskList.mockResolvedValue(cdoTaskList)
+
+      const result = await cdoService.issueCertificate(cdoIndexNumber, sentDate, devUser, { sendOption: 'email', email: 'me@test.com', certificateId: 'abc-123', firstCertificate: false })
+
+      expect(mockCdoRepository.saveCdoTaskList).not.toHaveBeenCalled()
+      expect(result).toBe(certificateIssued)
+      expect(cdoTaskList.getUpdates().exemption).toEqual([])
+      expect(cdoTaskList.getUpdates().dog).toEqual([])
+      expect(sendActivityToAudit).toHaveBeenCalledWith({
+        activity: 0,
+        activityType: 'sent',
+        pk: 'ED300097',
+        source: 'dog',
+        activityDate: expect.any(Date),
+        targetPk: 'dog',
+        activityLabel: 'Certificate sent to me@test.com'
+      }, devUser)
+
       expect(sendCertificateByEmail).toHaveBeenCalledWith(cdoTaskList.person, cdoTaskList.dog, 'abc-123', 'me@test.com', false)
+      expect(sendUpdateToAudit).not.toHaveBeenCalledWith(
+        'exemption',
+        {
+          index_number: 'ED300097',
+          certificate_issued: expect.anything()
+        },
+        {
+          index_number: 'ED300097',
+          certificate_issued: expect.anything()
+        },
+        devUser)
+      expect(sendUpdateToAudit).not.toHaveBeenCalledWith(
+        'dog',
+        {
+          index_number: 'ED300097',
+          status: expect.anything()
+        },
+        {
+          index_number: 'ED300097',
+          status: expect.anything()
+        },
+        devUser)
     })
 
     test('should issue certificate and create a new email', async () => {
@@ -914,7 +933,7 @@ describe('CdoService', function () {
       mockCdoRepository.getCdoTaskList.mockResolvedValue(cdoTaskList)
       mockCdoRepository.saveCdoTaskList.mockResolvedValue(cdoTaskList)
 
-      await cdoService.issueCertificate(cdoIndexNumber, sentDate, devUser, { sendOption: 'email', email: 'garrymcfadyen@hotmail.com', updateEmail: true })
+      await cdoService.issueCertificate(cdoIndexNumber, sentDate, devUser, { sendOption: 'email', email: 'garrymcfadyen@hotmail.com', updateEmail: true, firstCertificate: true })
 
       expect(updatePersonEmail).toHaveBeenCalledWith('P-8AD0-561A', 'garrymcfadyen@hotmail.com', devUser)
       expect(cdoTaskList.person.contactDetails.email).toBe('garrymcfadyen@hotmail.com')
@@ -952,7 +971,7 @@ describe('CdoService', function () {
       mockCdoRepository.getCdoTaskList.mockResolvedValue(cdoTaskList)
       mockCdoRepository.saveCdoTaskList.mockResolvedValue(cdoTaskList)
 
-      const result = await cdoService.issueCertificate(cdoIndexNumber, sentDate, devUser, { sendOption: 'email' })
+      const result = await cdoService.issueCertificate(cdoIndexNumber, sentDate, devUser, { sendOption: 'email', firstCertificate: true })
 
       expect(mockCdoRepository.getCdoTaskList).toHaveBeenCalledWith(cdoIndexNumber)
       expect(mockCdoRepository.saveCdoTaskList).toHaveBeenCalledWith(cdoTaskList)

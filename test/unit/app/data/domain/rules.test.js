@@ -1,6 +1,6 @@
 const { buildExemption, buildCdoInsurance, buildCdoDog } = require('../../../../mocks/cdo/domain')
 const { Exemption, Dog } = require('../../../../../app/data/domain')
-const { ApplicationPackProcessedRule, ApplicationPackSentRule, InsuranceDetailsRule, ApplicationFeePaymentRule, FormTwoSentRule, VerificationDatesRecordedRule } = require('../../../../../app/data/domain/cdoTaskList/rules')
+const { ApplicationPackProcessedRule, ApplicationPackSentRule, InsuranceDetailsRule, ApplicationFeePaymentRule, FormTwoSentRule, VerificationDatesRecordedRule, SendReplacementCertificateRule } = require('../../../../../app/data/domain/cdoTaskList/rules')
 const { inXDays } = require('../../../../time-helper')
 describe('CdoTaskList rules', () => {
   const exemptionDefaultProperties = buildExemption({})
@@ -404,6 +404,50 @@ describe('CdoTaskList rules', () => {
         const processedRule = new VerificationDatesRecordedRule(exemption, dog6thSi, new ApplicationPackSentRule(exemption), new FormTwoSentRule(exemption))
         expect(processedRule.microchipRulesPassed).toBe(false)
       })
+    })
+  })
+
+  describe('SendReplacementCertificateRule', () => {
+    test('should allow certificate to be sent', () => {
+      const dog = buildCdoDog({
+        status: 'Exempt'
+      })
+      const certificateIssued = new Date()
+      const exemption = buildExemption({
+        certificateIssued
+      })
+      const resendCertificateRule = new SendReplacementCertificateRule(exemption, dog)
+      expect(resendCertificateRule.completed).toBe(true)
+      expect(resendCertificateRule.available).toBe(true)
+      expect(resendCertificateRule.readonly).toBe(false)
+      expect(resendCertificateRule.timestamp).toBe(certificateIssued)
+    })
+
+    test('should not allow certificate to be resent if status is not Interim Exempt', () => {
+      const dog = buildCdoDog({
+        status: 'Failed'
+      })
+      const certificateIssued = new Date()
+      const exemption = buildExemption({
+        certificateIssued
+      })
+      const resendCertificateRule = new SendReplacementCertificateRule(exemption, dog)
+      expect(resendCertificateRule.completed).toBe(true)
+      expect(resendCertificateRule.available).toBe(false)
+      expect(resendCertificateRule.timestamp).toBe(certificateIssued)
+    })
+
+    test('should not allow certificate to be resent if it has not been sent', () => {
+      const dog = buildCdoDog({
+        status: 'Interim exempt'
+      })
+      const exemption = buildExemption({
+        certificateIssued: undefined
+      })
+      const resendCertificateRule = new SendReplacementCertificateRule(exemption, dog)
+      expect(resendCertificateRule.completed).toBe(false)
+      expect(resendCertificateRule.available).toBe(false)
+      expect(resendCertificateRule.timestamp).toBe(undefined)
     })
   })
 })

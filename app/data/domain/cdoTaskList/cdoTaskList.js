@@ -3,7 +3,7 @@ const { ActionAlreadyPerformedError } = require('../../../errors/domain/actionAl
 const { SequenceViolationError } = require('../../../errors/domain/sequenceViolation')
 const {
   ApplicationPackSentRule, ApplicationPackProcessedRule, InsuranceDetailsRule, ApplicationFeePaymentRule,
-  FormTwoSentRule, VerificationDatesRecordedRule
+  FormTwoSentRule, VerificationDatesRecordedRule, SendReplacementCertificateRule
 } = require('./rules')
 
 class CdoTaskList {
@@ -18,6 +18,7 @@ class CdoTaskList {
     const applicationFeePaymentRule = new ApplicationFeePaymentRule(this._cdo.exemption, applicationPackSentRule)
     const formTwoSentRule = new FormTwoSentRule(this._cdo.exemption, applicationPackSentRule)
     const verificationDatesRecordedRule = new VerificationDatesRecordedRule(this._cdo.exemption, this._cdo.dog, applicationPackSentRule, formTwoSentRule)
+    const sendReplacementCertificateRule = new SendReplacementCertificateRule(this._cdo.exemption, this._cdo.dog)
 
     this.rules = {
       applicationPackSentRule,
@@ -25,7 +26,8 @@ class CdoTaskList {
       insuranceDetailsRule,
       applicationFeePaymentRule,
       formTwoSentRule,
-      verificationDatesRecordedRule
+      verificationDatesRecordedRule,
+      sendReplacementCertificateRule
     }
   }
 
@@ -324,6 +326,17 @@ class CdoTaskList {
     }
     this._cdo.exemption.issueCertificate(certificateIssued)
     this._cdo.dog.setStatus('Exempt', callback)
+  }
+
+  async sendReplacementCertificate (callback) {
+    const sendReplacementCertificateRule = this.rules.sendReplacementCertificateRule
+    if (!sendReplacementCertificateRule.available) {
+      throw new SequenceViolationError('Replacement certificate cannot be sent until certificate has been issued')
+    }
+
+    await callback()
+
+    return sendReplacementCertificateRule.timestamp
   }
 
   getUpdates () {

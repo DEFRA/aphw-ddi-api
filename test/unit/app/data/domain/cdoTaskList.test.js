@@ -715,13 +715,14 @@ describe('CdoTaskList', () => {
     let dogSteps = 0
     let transactionNumber = 0
 
-    test('should not permit recording of Insurance Details before application pack is sent', () => {
+    test('should not permit recording of Insurance Details before application pack is sent', async () => {
       expect(() => cdoTaskList.processApplicationPack(new Date(), transactionCallback)).toThrow(new SequenceViolationError('Application pack must be sent before performing this action'))
       expect(() => cdoTaskList.recordInsuranceDetails(dogsTrustCompany, inXDays(60), transactionCallback)).toThrow(new SequenceViolationError('Application pack must be sent before performing this action'))
       expect(() => cdoTaskList.recordMicrochipNumber('123456789012345', null, transactionCallback)).toThrow(new SequenceViolationError('Application pack must be sent before performing this action'))
       expect(() => cdoTaskList.recordApplicationFee(new Date('2024-07-04'), transactionCallback)).toThrow(new SequenceViolationError('Application pack must be sent before performing this action'))
       expect(() => cdoTaskList.sendForm2(new Date('2024-07-04'), transactionCallback)).toThrow(new SequenceViolationError('Application pack must be sent before performing this action'))
       expect(() => cdoTaskList.verifyDates({ microchipVerification: new Date('2024-07-04'), neuteringConfirmation: new Date('2024-07-04') }, transactionCallback)).toThrow(new SequenceViolationError('Application pack must be sent before performing this action'))
+      await expect(cdoTaskList.sendReplacementCertificate(transactionCallback)).rejects.toThrow(new SequenceViolationError('Replacement certificate cannot be sent until certificate has been issued'))
 
       expect(cdoTaskList.insuranceDetailsRecorded.completed).toBe(false)
       expect(cdoTaskList.cdoSummary.insuranceCompany).toBeUndefined()
@@ -954,6 +955,14 @@ describe('CdoTaskList', () => {
         expect(cdoTaskList.cdoSummary.certificateIssued).toEqual(certificateIssued)
         cdoTaskList.getUpdates().exemption[0].callback()
         expect(transactionCallback).toHaveBeenCalledTimes(++transactionNumber)
+      })
+    })
+
+    describe('sendReplacementCertificate', () => {
+      test('should send replacement certificate', async () => {
+        const date = await cdoTaskList.sendReplacementCertificate(transactionCallback)
+        expect(transactionCallback).toHaveBeenCalledTimes(++transactionNumber)
+        expect(date).toBeInstanceOf(Date)
       })
     })
 
