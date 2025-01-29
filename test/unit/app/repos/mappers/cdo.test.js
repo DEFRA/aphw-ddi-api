@@ -427,12 +427,13 @@ describe('cdo mappers', () => {
       const personContacts = [
         buildContactDao({
           contact: buildContactContactDao({
+            id: 2,
             contact: 'sherlock@holmes1.co.uk',
             contact_type: { id: 2, contact_type: 'Email' }
           })
         }),
         buildContactDao({
-          contact: undefined
+          contact: null
         }),
         buildContactDao({
           contact: buildContactContactDao({
@@ -448,13 +449,15 @@ describe('cdo mappers', () => {
         }),
         buildContactDao({
           contact: buildContactContactDao({
-            contact: 'sherlock2@holmes.co.uk',
+            id: 3,
+            contact: 'sherlock@holmes.co.uk',
             contact_type: { id: 2, contact_type: 'Email' }
           })
         }),
         buildContactDao({
           contact: buildContactContactDao({
-            contact: 'sherlock@holmes.co.uk',
+            id: 1,
+            contact: 'sherlock2@holmes.co.uk',
             contact_type: { id: 2, contact_type: 'Email' }
           })
         })]
@@ -480,6 +483,7 @@ describe('cdo mappers', () => {
       const personContacts = []
       const contactDetails = mapPersonContactsToContactDetails(personContacts)
       expect(contactDetails).toBeInstanceOf(ContactDetails)
+      expect(contactDetails.email).toBeUndefined()
     })
   })
 

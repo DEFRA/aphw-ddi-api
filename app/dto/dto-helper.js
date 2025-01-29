@@ -34,7 +34,7 @@ const extractEmail = (contacts) => {
     return ''
   }
 
-  const email = contacts.filter(x => x.contact.contact_type.contact_type === 'Email').sort(propertyComparatorDesc('contact', 'id')).map(y => y.contact.contact)
+  const email = contacts.filter(x => x.contact?.contact_type.contact_type === 'Email').sort(propertyComparatorDesc('contact', 'id')).map(y => y.contact.contact)
 
   return email.length > 0 ? email[0] : null
 }
