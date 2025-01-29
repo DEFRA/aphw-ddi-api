@@ -75,7 +75,7 @@ services:
       DDI_DOCUMENTS_BASE_URL: ${DDI_DOCUMENTS_BASE_URL:-http://host.docker.internal:3008}
 
   aphw-ddi-api-postgres-api-tests:
-    image: postgres:11.22-alpine
+    image: postgres:16.4-alpine
     ports:
       - "5432:5432"
     environment:
