@@ -150,7 +150,7 @@ const mapPersonContactsToContactDetails = (personContactsDao, personAddresses = 
   /**
    * @type {string|undefined}
    */
-  const email = extractEmail(personContactsDao)
+  const email = extractEmail(personContactsDao) || undefined
   return new ContactDetails(email, address)
 }
 

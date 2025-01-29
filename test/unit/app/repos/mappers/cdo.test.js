@@ -483,6 +483,7 @@ describe('cdo mappers', () => {
       const personContacts = []
       const contactDetails = mapPersonContactsToContactDetails(personContacts)
       expect(contactDetails).toBeInstanceOf(ContactDetails)
+      expect(contactDetails.email).toBeUndefined()
     })
   })
 
