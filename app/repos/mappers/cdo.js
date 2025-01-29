@@ -42,7 +42,7 @@
  */
 
 const { Person, Cdo, Dog, Exemption, ContactDetails, Address } = require('../../data/domain')
-const { getMicrochip } = require('../../dto/dto-helper')
+const { getMicrochip, extractEmail } = require('../../dto/dto-helper')
 const { mapDogBreachDaoToBreachCategory } = require('./dog')
 const {
   ApplicationPackSentRule,
@@ -148,21 +148,9 @@ const mapPersonContactsToContactDetails = (personContactsDao, personAddresses = 
   })
 
   /**
-   * @param {string|undefined} emailString
-   * @param {PersonContactDao} contact
-   * @return {string|undefined}
-   */
-  const emailReducer = (emailString, contact) => {
-    if (contact.contact?.contact_type.contact_type === 'Email') {
-      return contact.contact.contact
-    }
-    return emailString
-  }
-
-  /**
    * @type {string|undefined}
    */
-  const email = personContactsDao.reduce(emailReducer, undefined)
+  const email = extractEmail(personContactsDao)
   return new ContactDetails(email, address)
 }
 
