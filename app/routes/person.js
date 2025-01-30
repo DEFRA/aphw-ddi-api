@@ -1,4 +1,3 @@
-
 const Joi = require('joi')
 const { getCallingUser } = require('../auth/get-user')
 const { getPersonByReference, getPersonAndDogsByReference, updatePerson, deletePerson } = require('../repos/people')
@@ -17,7 +16,7 @@ module.exports = [
         params: Joi.object({
           reference: Joi.string().required()
         }),
-        failAction: (request, h, error) => {
+        failAction: (request, h, _error) => {
           return h.response().code(400).takeover()
         }
       },
@@ -50,7 +49,7 @@ module.exports = [
       tags: ['api'],
       validate: {
         payload: updateSchema,
-        failAction: (request, h, error) => {
+        failAction: (request, h, _error) => {
           return h.response().code(400).takeover()
         }
       },
@@ -81,7 +80,7 @@ module.exports = [
       tags: ['api'],
       validate: {
         payload: updateSchema,
-        failAction: (request, h, error) => {
+        failAction: (request, h, _error) => {
           return h.response().code(400).takeover()
         }
       },
@@ -116,7 +115,7 @@ module.exports = [
         params: Joi.object({
           reference: Joi.string().required()
         }),
-        failAction: (request, h, error) => {
+        failAction: (request, h, _error) => {
           return h.response().code(400).takeover()
         }
       },

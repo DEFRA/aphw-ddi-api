@@ -1,4 +1,3 @@
-
 describe('auth-server', () => {
   describe('getUserInfo', () => {
     jest.mock('@hapi/wreck')
