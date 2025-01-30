@@ -1,4 +1,3 @@
-
 const isCacheObject = requestOrCache =>
   requestOrCache.set instanceof Function &&
   requestOrCache.get instanceof Function &&

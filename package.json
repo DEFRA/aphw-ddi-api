@@ -1,6 +1,6 @@
 {
   "name": "aphw-ddi-api",
-  "version": "0.85.1",
+  "version": "0.85.2",
   "description": "API to manage CRUD / query functions for dangerous dogs register",
   "homepage": "https://github.com/DEFRA/aphw-ddi-api",
   "main": "app/index.js",
@@ -58,7 +58,7 @@
     "jest-junit": "14.0.1",
     "jest-when": "^3.6.0",
     "nodemon": "^3.0.1",
-    "standard": "17.0.0"
+    "standard": "17.1.2"
   },
   "standard": {
     "globals": [

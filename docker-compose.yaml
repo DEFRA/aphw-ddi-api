@@ -47,7 +47,7 @@ services:
       REDIS_PORT: ${REDIS_PORT:-6379}
 
   aphw-ddi-api-postgres:
-    image: postgres:11.22-alpine
+    image: postgres:16.4-alpine
     environment:
       POSTGRES_DB: aphw-ddi
       POSTGRES_USERNAME: postgres
