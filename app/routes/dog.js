@@ -113,7 +113,7 @@ module.exports = [
           user: getCallingUser(request)
         })
 
-        return h.response().code(200)
+        return h.response().code(204)
       } catch (e) {
         console.log('Error in POST /dog/withdraw', e)
         throw e

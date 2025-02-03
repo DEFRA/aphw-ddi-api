@@ -10,3 +10,4 @@ helm/**/*.lock
 *.pem
 *.base64
 *.sql
+!test/seed/*.sql
