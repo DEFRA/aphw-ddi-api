@@ -19,12 +19,13 @@ services:
     environment:
       <<: [ *common-migration, *common-postgres ]
     entrypoint: >
-      sh -c "/scripts/migration/database-up"
+      sh -c "/scripts/migration/database-up-seed-api-tests"
     depends_on:
       - aphw-ddi-api-postgres-api-tests
     volumes:
       - ./changelog:/liquibase/changelog
       - ./scripts:/scripts
+      - ./test/seed:/scripts/seed
   aphw-ddi-api:
     build:
       target: development
