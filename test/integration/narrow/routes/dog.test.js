@@ -649,7 +649,7 @@ describe('Dog endpoint', () => {
 
       const response = await server.inject(options)
 
-      expect(response.statusCode).toBe(200)
+      expect(response.statusCode).toBe(204)
       expect(withdrawDogMock).toHaveBeenCalledWith({
         indexNumber: 'ED123',
         user: internalUser,
@@ -676,7 +676,7 @@ describe('Dog endpoint', () => {
 
       const response = await server.inject(options)
 
-      expect(response.statusCode).toBe(200)
+      expect(response.statusCode).toBe(204)
       expect(withdrawDogMock).toHaveBeenCalledWith({
         indexNumber: 'ED123',
         user: internalUser,
@@ -705,7 +705,7 @@ describe('Dog endpoint', () => {
 
       const response = await server.inject(options)
 
-      expect(response.statusCode).toBe(200)
+      expect(response.statusCode).toBe(204)
       expect(withdrawDogMock).toHaveBeenCalledWith({
         indexNumber: 'ED123',
         email: 'garrymcfadyen@hotmail.com',
