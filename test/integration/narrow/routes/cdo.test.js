@@ -1473,7 +1473,7 @@ describe('CDO endpoint', () => {
     })
   })
 
-  describe('POST /cdo/ED123/manage:submitForm2', () => {
+  describe('POST /cdo/ED123/manage:submitFormTwo', () => {
     beforeEach(() => {
       validate.mockResolvedValue(mockValidateEnforcement)
     })
@@ -1544,6 +1544,29 @@ describe('CDO endpoint', () => {
       const response = await server.inject(options)
       expect(response.statusCode).toBe(204)
       expect(submitForm2Mock).toHaveBeenCalledWith('ED123', expectedPayload, devUser)
+    })
+
+    test('should return 400 for invalid payload', async () => {
+      validate.mockResolvedValue(mockValidateEnforcement)
+      const submitForm2Mock = jest.fn()
+      getCdoService.mockReturnValue({
+        submitFormTwo: submitForm2Mock
+      })
+      submitForm2Mock.mockResolvedValue(undefined)
+
+      const options = {
+        method: 'POST',
+        url: '/cdo/ED123/manage:submitFormTwo',
+        payload: {
+          microchipNumber: '123456789012358',
+          dogNotFitForMicrochip: false,
+          neuteringConfirmation: 'bad-date',
+          dogNotNeutered: false
+        },
+        ...enforcementHeader
+      }
+      const response = await server.inject(options)
+      expect(response.statusCode).toBe(400)
     })
 
     test('should return 403 given call from portal', async () => {

@@ -115,9 +115,6 @@ const issueCertificateResponseSchema = Joi.object({
 })
 
 const verifyDate = Joi.date().iso().custom((value, _) => {
-  if (isNaN(value)) {
-    return ''
-  }
   return formatDate(value)
 })
 
