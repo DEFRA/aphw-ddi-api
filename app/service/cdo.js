@@ -14,6 +14,11 @@ const { updatePersonEmail } = require('../repos/people')
 const { buildAddressStringAlternate } = require('../lib/address-helper')
 
 /**
+ * @callback sendEmailAsync
+ * @returns {Promise<void>} - A promise that resolves when the operation is complete, without returning any value.
+ */
+
+/**
  * @param {CdoRepository} cdoRepository
  * @constructor
  * @property {CdoService.GetTaskList} getTaskList
@@ -295,6 +300,14 @@ class CdoService {
     return this.cdoRepository.saveCdoTaskList(cdoTaskList)
   }
 
+  /**
+   * @param cdoTaskList
+   * @param cdoIndexNumber
+   * @param {Date} sentDate
+   * @param user
+   * @param {Function} emailCallback
+   * @return {Promise<Date>}
+   */
   async issueFirstCertificate (cdoTaskList, cdoIndexNumber, sentDate, user, emailCallback) {
     const preAuditExemption = {
       index_number: cdoIndexNumber,
@@ -327,6 +340,11 @@ class CdoService {
     return sentDate
   }
 
+  /**
+   * @param cdoTaskList
+   * @param {Function} emailCallback
+   * @return {Promise<*|Date>}
+   */
   async sendReplacementCertificate (cdoTaskList, emailCallback) {
     const callback = async () => {
       await emailCallback()
@@ -339,8 +357,8 @@ class CdoService {
    * @param cdoIndexNumber
    * @param sentDate
    * @param user
-   * @param payload
-   * @return {Promise<*>}
+   * @param {sendEmailAsync} payload
+   * @return {Promise<Date>}
    */
   async issueCertificate (cdoIndexNumber, sentDate, user, payload) {
     const cdoTaskList = await this.cdoRepository.getCdoTaskList(cdoIndexNumber)
@@ -352,7 +370,10 @@ class CdoService {
       cdoTaskList.person.contactDetails.email = email
     }
 
-    let emailCallback = () => {}
+    /**
+     * @return {Promise<void>}
+     */
+    let emailCallback = async () => {}
 
     if (sendOption === 'email') {
       emailCallback = async () => {

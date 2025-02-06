@@ -328,6 +328,10 @@ class CdoTaskList {
     this._cdo.dog.setStatus('Exempt', callback)
   }
 
+  /**
+   * @param {Function} callback
+   * @return {Promise<Date>}
+   */
   async sendReplacementCertificate (callback) {
     const sendReplacementCertificateRule = this.rules.sendReplacementCertificateRule
     if (!sendReplacementCertificateRule.available) {
