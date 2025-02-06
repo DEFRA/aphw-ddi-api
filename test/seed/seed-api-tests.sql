@@ -1,4 +1,3 @@
-SET processed_date = '2025-02-01';
 INSERT INTO public.dog (id, dog_breed_id, status_id, name, birth_date, tattoo, colour, sex, dog_reference, index_number, death_date, exported_date, stolen_date, untraceable_date, deleted_at, created_at, updated_at) values (100001, 1, 7, 'Zaya', '2019-05-12', null, 'Lilac and white', 'Male', '46754363-3b12-4cce-a366-0b969022096f', 'ED100001', null, null, null, null, null, NOW(), NOW());
 INSERT INTO public.microchip (microchip_number, deleted_at, created_at, updated_at) values ('125478963245879', null, NOW(), NOW());
 INSERT INTO public.dog_microchip (dog_id, microchip_id, deleted_at, created_at, updated_at) values (100001, 1, null, NOW(), NOW());
