@@ -532,7 +532,7 @@ describe('CdoTaskList', () => {
         verificationDatesRecorded: new Date('2024-08-07'),
         insurance: [buildCdoInsurance({
           company: 'Dogs R Us',
-          renewalDate: new Date('2025-06-25')
+          renewalDate: new Date('2026-08-25')
         })]
       })
       const dogProperties = buildCdoDog({
@@ -565,7 +565,7 @@ describe('CdoTaskList', () => {
         verificationDatesRecorded: new Date('2024-08-07'),
         insurance: [buildCdoInsurance({
           company: 'Dogs R Us',
-          renewalDate: new Date('2025-06-25')
+          renewalDate: new Date('2026-08-25')
         })]
       })
       const dogProperties = buildCdoDog({
@@ -1009,7 +1009,7 @@ describe('CdoTaskList', () => {
         verificationDatesRecorded: new Date('2024-08-07'),
         insurance: [buildCdoInsurance({
           company: 'Dogs R Us',
-          renewalDate: new Date('2025-06-25')
+          renewalDate: new Date('2026-08-25')
         })],
         ...exemptionPartial
       })
@@ -1454,7 +1454,7 @@ describe('CdoTaskList', () => {
           verificationDatesRecorded: new Date('2024-08-07'),
           insurance: [buildCdoInsurance({
             company: 'Dogs R Us',
-            renewalDate: new Date('2025-06-25')
+            renewalDate: new Date('2026-08-25')
           })]
         })
         const dogProperties = buildCdoDog({
