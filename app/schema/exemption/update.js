@@ -43,7 +43,8 @@ const fullExemptionPayloadSchema = exemption.append({
   neuteringDeadline: Joi.date().iso().optional(),
   microchipDeadline: Joi.date().iso().optional(),
   typedByDlo: Joi.date().iso().optional(),
-  withdrawn: Joi.date().iso().optional()})
+  withdrawn: Joi.date().iso().optional()
+})
 
 const validatePayload = async (payload) => {
   let schema = exemption
