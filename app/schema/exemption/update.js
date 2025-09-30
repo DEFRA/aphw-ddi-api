@@ -18,7 +18,9 @@ const exemption = Joi.object({
   insurance: Joi.object({
     company: Joi.string().optional(),
     renewalDate: Joi.date().iso().required()
-  }).optional()
+  }).optional(),
+  insurance_spotcheck_date: Joi.date().iso().optional()
+
 })
 
 const payloadSchema2015Xlb = exemption.append({
@@ -41,8 +43,7 @@ const fullExemptionPayloadSchema = exemption.append({
   neuteringDeadline: Joi.date().iso().optional(),
   microchipDeadline: Joi.date().iso().optional(),
   typedByDlo: Joi.date().iso().optional(),
-  withdrawn: Joi.date().iso().optional()
-})
+  withdrawn: Joi.date().iso().optional()})
 
 const validatePayload = async (payload) => {
   let schema = exemption

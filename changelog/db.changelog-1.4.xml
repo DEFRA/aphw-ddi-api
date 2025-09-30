@@ -59,4 +59,20 @@
   <changeSet author="Shaun Fitzsimons" id="1">
     <tagDatabase tag="v1.4.0" />
   </changeSet>
+
+  <changeSet author="Aakash Sharma" id="5">
+  <preConditions onFail="MARK_RAN">
+    <not>
+      <columnExists tableName="dog" columnName="insurance_spotcheck_date"/>
+    </not>
+  </preConditions>
+
+  <addColumn tableName="dog">
+    <column name="insurance_spotcheck_date" type="DATE">
+      <constraints nullable="true"/>
+    </column>
+  </addColumn>
+
+</changeSet>
+
 </databaseChangeLog>

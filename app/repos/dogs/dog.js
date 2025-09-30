@@ -448,6 +448,9 @@ const autoChangeStatus = (dbDog, payload, statuses) => {
       (!dbDog.untraceable_date && payload.dateUntraceable)) {
     dbDog.status_id = statuses.filter(x => x.status === constants.statuses.Inactive)[0].id
   } else {
+    if (payload.status === 'Insurance Spot Check') {
+      dbDog.insurance_spotcheck_date = new Date()
+    }
     dbDog.status_id = payload.status ? statuses.filter(x => x.status === payload.status)[0].id : dbDog.status_id
   }
 }
@@ -538,7 +541,6 @@ const getDogByIndexNumber = async (indexNumber, t) => {
     ],
     transaction: t
   })
-
   return dog
 }
 
