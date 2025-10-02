@@ -51,7 +51,8 @@ describe('Exemption repo', () => {
         applicationFeePaid: '2020-03-01',
         neuteringConfirmation: '2020-04-01',
         microchipVerification: '2020-04-01',
-        exemptionSchemeJoin: '2020-05-01'
+        exemptionSchemeJoin: '2020-05-01',
+        insurance_spotcheck_date: '2025-10-01'
       }
 
       const registration = {
