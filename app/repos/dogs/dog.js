@@ -441,38 +441,17 @@ const updateDogFields = (dbDog, payload, breeds, statuses) => {
   dbDog.untraceable_date = payload.dateUntraceable
 }
 
-const TERMINAL_DATE_KEYS = [
-  ['death_date', 'dateOfDeath'],
-  ['exported_date', 'dateExported'],
-  ['stolen_date', 'dateStolen'],
-  ['untraceable_date', 'dateUntraceable']
-]
-const toStatusMap = (statuses) =>
-  statuses.reduce((acc, s) => {
-    acc[s.status] = s.id
-    return acc
-  }, {})
-
-const hasNewTerminalDate = (dbDog, payload) =>
-  TERMINAL_DATE_KEYS.some(([dbKey, payloadKey]) => !dbDog[dbKey] && payload[payloadKey])
-
 const autoChangeStatus = (dbDog, payload, statuses) => {
-  const statusMap = toStatusMap(statuses)
-
-  if (hasNewTerminalDate(dbDog, payload)) {
-    const inactiveId = statusMap[constants.statuses.Inactive]
-    if (inactiveId != null) {
-      dbDog.status_id = inactiveId
+  if ((!dbDog.death_date && payload.dateOfDeath) ||
+      (!dbDog.exported_date && payload.dateExported) ||
+      (!dbDog.stolen_date && payload.dateStolen) ||
+      (!dbDog.untraceable_date && payload.dateUntraceable)) {
+    dbDog.status_id = statuses.filter(x => x.status === constants.statuses.Inactive)[0].id
+  } else {
+    if (payload.status === 'Insurance Spot Check') {
+      dbDog.insurance_spotcheck_date = new Date()
     }
-    return
-  }
-
-  if (payload.status === 'Insurance Spot Check') {
-    dbDog.insurance_spotcheck_date = new Date()
-  }
-
-  if (payload.status && statusMap[payload.status] != null) {
-    dbDog.status_id = statusMap[payload.status]
+    dbDog.status_id = payload.status ? statuses.filter(x => x.status === payload.status)[0].id : dbDog.status_id
   }
 }
 
