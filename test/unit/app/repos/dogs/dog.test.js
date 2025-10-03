@@ -135,7 +135,7 @@ describe('Dog repo', () => {
     test('getStatuses should return statuses', async () => {
       const statuses = await getStatuses()
 
-      expect(statuses).toHaveLength(7)
+      expect(statuses).toHaveLength(8)
       expect(statuses).toContainEqual({ id: 1, status: 'Interim exempt' })
       expect(statuses).toContainEqual({ id: 2, status: 'Pre-exempt' })
       expect(statuses).toContainEqual({ id: 3, status: 'Exempt' })
