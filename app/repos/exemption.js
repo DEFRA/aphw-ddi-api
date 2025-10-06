@@ -29,7 +29,10 @@ const updateExemption = async (data, user, transaction) => {
 
     const registration = cdo.registration
     const previousRegistration = deepClone(registration)
-
+    if (data.insurance_spotcheck_date) {
+      cdo.insurance_spotcheck_date = data.insurance_spotcheck_date
+      cdo.save({ transaction })
+    }
     updateRegistration(registration, data, policeForce)
 
     handleOrderSpecificFields(registration, data)

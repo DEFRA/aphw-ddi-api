@@ -45,7 +45,11 @@ const getPersons = async (queryParams, options = {}, transaction) => {
 
       if (dbColumnKey !== 'birth_date') {
         whereObject[dbColumnKey] = sequelize.where(
-          sequelize.fn('lower', sequelize.col(dbColumnKey)), `${query.toLowerCase()}`)
+          sequelize.fn('LOWER', sequelize.col(dbColumnKey)),
+          {
+            [Op.like]: `%${query.toLowerCase()}%`
+          }
+        )
       } else {
         whereObject[dbColumnKey] = {
           [Op.or]: {

@@ -182,7 +182,8 @@ const cdoViewDto = (data) => {
       dateUntraceable: data.untraceable_date,
       microchipNumber: getMicrochip(data, 1),
       microchipNumber2: getMicrochip(data, 2),
-      breaches: data.dog_breaches.map(mapDogBreachDaoToBreachDto)
+      breaches: data.dog_breaches.map(mapDogBreachDaoToBreachDto),
+      insurance_spotcheck_date: data.insurance_spotcheck_date
     },
     exemption: {
       exemptionOrder: data.registration.exemption_order.exemption_order,

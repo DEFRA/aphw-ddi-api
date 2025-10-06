@@ -33,4 +33,11 @@
       <column name="status_type" value="STANDARD" />
     </insert>
   </changeSet>
+  <changeSet  author="Aakash Sharma" id="3">
+    <insert tableName="status">
+      <column name="status" value="Insurance Spot Check" />
+      <column name="status_type" value="STANDARD" />
+    </insert>
+  </changeSet>
+
 </databaseChangeLog>

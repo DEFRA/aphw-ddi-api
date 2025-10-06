@@ -75,6 +75,10 @@ module.exports = (sequelize, DataTypes) => {
     deleted_at: {
       type: DataTypes.DATE,
       allowNull: true
+    },
+    insurance_spotcheck_date: {
+      type: DataTypes.DATEONLY,
+      allowNull: true
     }
   }, {
     sequelize,

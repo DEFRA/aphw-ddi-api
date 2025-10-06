@@ -439,6 +439,9 @@ const updateDogFields = (dbDog, payload, breeds, statuses) => {
   dbDog.exported_date = payload.dateExported
   dbDog.stolen_date = payload.dateStolen
   dbDog.untraceable_date = payload.dateUntraceable
+  if (payload.status === 'Insurance Spot Check') {
+    dbDog.insurance_spotcheck_date = new Date()
+  }
 }
 
 const autoChangeStatus = (dbDog, payload, statuses) => {
@@ -493,7 +496,7 @@ const getDogByIndexNumber = async (indexNumber, t) => {
               {
                 model: sequelize.models.person_contact,
                 as: 'person_contacts',
-                separate: true, // workaround to prevent 'contact_type_id' being truncated to 'contact_type_i'
+                separate: true, // workaround to prevent 'contact_type_id' being truncated to 'contact_type_i '
                 include: [{
                   model: sequelize.models.contact,
                   as: 'contact',
@@ -538,7 +541,6 @@ const getDogByIndexNumber = async (indexNumber, t) => {
     ],
     transaction: t
   })
-
   return dog
 }
 

@@ -22,7 +22,8 @@ const constants = {
     Failed: 'Failed',
     InBreach: 'In breach',
     Withdrawn: 'Withdrawn',
-    Inactive: 'Inactive'
+    Inactive: 'Inactive',
+    Insurancespotcheck: 'Insurance Spot Check'
   },
   inactiveSubStatuses: {
     Dead: 'dead',

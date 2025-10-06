@@ -26,7 +26,12 @@ const statuses = [
   {
     id: 7,
     status: 'Inactive'
+  },
+  {
+    id: 11,
+    status: 'Insurance Spot Check'
   }
+
 ]
 
 module.exports = {

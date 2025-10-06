@@ -135,7 +135,7 @@ describe('Dog repo', () => {
     test('getStatuses should return statuses', async () => {
       const statuses = await getStatuses()
 
-      expect(statuses).toHaveLength(7)
+      expect(statuses).toHaveLength(8)
       expect(statuses).toContainEqual({ id: 1, status: 'Interim exempt' })
       expect(statuses).toContainEqual({ id: 2, status: 'Pre-exempt' })
       expect(statuses).toContainEqual({ id: 3, status: 'Exempt' })
@@ -705,6 +705,30 @@ describe('Dog repo', () => {
       expect(dbDog.colour).toBe('colour')
       expect(dbDog.sex).toBe('Male')
       expect(dbDog.status_id).toBe(3)
+    })
+
+    test('updateDogFields should update fields when status in Insurance spot check', async () => {
+      const dbDog = {}
+      const breeds = [
+        { breed: 'breed1', id: 123 }
+      ]
+      const payload = {
+        breed: 'breed1',
+        name: 'dog name',
+        dateOfBirth: new Date(2000, 1, 1),
+        tattoo: 'tattoo',
+        colour: 'colour',
+        sex: 'Male',
+        status: 'Insurance Spot Check'
+      }
+      updateDogFields(dbDog, payload, breeds, await getStatuses())
+      expect(dbDog.dog_breed_id).toBe(123)
+      expect(dbDog.name).toBe('dog name')
+      expect(dbDog.birth_date).toEqual(new Date(2000, 1, 1))
+      expect(dbDog.tattoo).toBe('tattoo')
+      expect(dbDog.colour).toBe('colour')
+      expect(dbDog.sex).toBe('Male')
+      expect(dbDog.status_id).toBe(11)
     })
   })
 
