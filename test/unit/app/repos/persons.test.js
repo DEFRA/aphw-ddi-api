@@ -293,8 +293,8 @@ describe('Persons repo', () => {
     test('getPersons should handle personIds filter', async () => {
       sequelize.models.person.findAll.mockResolvedValue([])
       sequelize.models.search_match_code.findAll.mockResolvedValue([])
-      const personIds = [1, 2, 3]
-      await getPersons({ personIds })
+      require('../../../../app/repos/search-match-codes').fuzzySearch = jest.fn().mockResolvedValue([1, 2])
+      await getPersons({ firstName: 'John' })
       expect(sequelize.models.person.findAll).toBeCalled()
     })
   })
