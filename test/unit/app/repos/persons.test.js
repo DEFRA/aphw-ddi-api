@@ -290,6 +290,13 @@ describe('Persons repo', () => {
 
       await expect(getPersons({})).rejects.toThrow('Test error')
     })
+    test('getPersons should handle personIds filter', async () => {
+      sequelize.models.person.findAll.mockResolvedValue([])
+      sequelize.models.search_match_code.findAll.mockResolvedValue([])
+      const personIds = [1, 2, 3]
+      await getPersons({ personIds })
+      expect(sequelize.models.person.findAll).toBeCalled()
+    })
   })
 
   describe('deletePersons', () => {

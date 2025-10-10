@@ -44,9 +44,7 @@ const getPersons = async (queryParams, options = {}, transaction) => {
     if (query) {
       const dbColumnKey = dtoToModelMapping[key]
       if (dbColumnKey !== 'birth_date') {
-        if (query) {
-          terms.push(query)
-        }
+        terms.push(query)
         whereObject[dbColumnKey] = sequelize.where(
           sequelize.fn('lower', sequelize.col(dbColumnKey)),
           {
