@@ -38,7 +38,10 @@ describe('Persons repo', () => {
     transaction: jest.fn(),
     fn: jest.fn(),
     where: jest.fn(),
-    literal: jest.fn()
+    literal: jest.fn(),
+    search_match_code: {
+      findAll: jest.fn()
+    }
   }))
 
   const sequelize = require('../../../../app/config/db')
