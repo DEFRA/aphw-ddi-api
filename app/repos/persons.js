@@ -2,6 +2,7 @@ const sequelize = require('../config/db')
 const { Op } = require('sequelize')
 const { personRelationship } = require('./relationships/person')
 const { deletePerson } = require('./people')
+const { fuzzySearch } = require('./search-match-codes')
 /**
  * @typedef GetPersonsFilter
  * @property {string} [firstName]
@@ -37,15 +38,17 @@ const getPersons = async (queryParams, options = {}, transaction) => {
   /**
    * @type {{first_name?: string, last_name?: string, birth_date?: string}}
    */
+  const terms = []
   const where = Object.keys(dtoToModelMapping).reduce((whereObject, key) => {
     const query = queryParams[key]
-
     if (query) {
       const dbColumnKey = dtoToModelMapping[key]
-
       if (dbColumnKey !== 'birth_date') {
+        if (query) {
+          terms.push(query)
+        }
         whereObject[dbColumnKey] = sequelize.where(
-          sequelize.fn('LOWER', sequelize.col(dbColumnKey)),
+          sequelize.fn('lower', sequelize.col(dbColumnKey)),
           {
             [Op.like]: `%${query.toLowerCase()}%`
           }
@@ -62,6 +65,21 @@ const getPersons = async (queryParams, options = {}, transaction) => {
 
     return whereObject
   }, {})
+
+  const personIds = await fuzzySearch(terms)
+  if (personIds && personIds.length > 0) {
+    const nameFilters = { ...where }
+    delete nameFilters.id
+    where[Op.or] = [
+      nameFilters,
+      { id: { [Op.in]: personIds } }
+    ]
+    Object.keys(where).forEach(key => {
+      if (key !== Op.or) {
+        delete where[key]
+      }
+    })
+  }
 
   const optionalIncludes = []
 
