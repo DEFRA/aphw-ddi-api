@@ -32,6 +32,9 @@ describe('Persons repo', () => {
       },
       contact: {
         create: jest.fn()
+      },
+      search_match_code: {
+        findAll: jest.fn()
       }
     },
     col: jest.fn(),
@@ -68,6 +71,7 @@ describe('Persons repo', () => {
     when(getCountry).calledWith('Wales').mockResolvedValue({ id: 2 })
 
     sequelize.models.person.findAll.mockResolvedValue([])
+    sequelize.models.search_match_code.findAll.mockResolvedValue([])
     sendEvent.mockResolvedValue()
   })
 
@@ -285,6 +289,13 @@ describe('Persons repo', () => {
       sequelize.models.person.findAll.mockRejectedValue(new Error('Test error'))
 
       await expect(getPersons({})).rejects.toThrow('Test error')
+    })
+    test('getPersons should handle personIds filter', async () => {
+      sequelize.models.person.findAll.mockResolvedValue([])
+      sequelize.models.search_match_code.findAll.mockResolvedValue([])
+      require('../../../../app/repos/search-match-codes').fuzzySearch = jest.fn().mockResolvedValue([1, 2])
+      await getPersons({ firstName: 'John' })
+      expect(sequelize.models.person.findAll).toBeCalled()
     })
   })
 
