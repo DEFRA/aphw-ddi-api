@@ -32,16 +32,16 @@ describe('Persons repo', () => {
       },
       contact: {
         create: jest.fn()
+      },
+      search_match_code: {
+        findAll: jest.fn()
       }
     },
     col: jest.fn(),
     transaction: jest.fn(),
     fn: jest.fn(),
     where: jest.fn(),
-    literal: jest.fn(),
-    search_match_code: {
-      findAll: jest.fn()
-    }
+    literal: jest.fn()
   }))
 
   const sequelize = require('../../../../app/config/db')
@@ -71,6 +71,7 @@ describe('Persons repo', () => {
     when(getCountry).calledWith('Wales').mockResolvedValue({ id: 2 })
 
     sequelize.models.person.findAll.mockResolvedValue([])
+    sequelize.models.search_match_code.findAll.mockResolvedValue([])
     sendEvent.mockResolvedValue()
   })
 
