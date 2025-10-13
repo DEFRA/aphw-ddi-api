@@ -34,12 +34,8 @@ const dtoToModelMapping = {
  * @param {GetPersonsOptions} [options]
  * @param [transaction]
  */
-const getPersons = async (queryParams, options = {}, transaction) => {
-  /**
-   * @type {{first_name?: string, last_name?: string, birth_date?: string}}
-   */
-  const terms = []
-  const where = Object.keys(dtoToModelMapping).reduce((whereObject, key) => {
+function buildWhereClause (queryParams, terms) {
+  return Object.keys(dtoToModelMapping).reduce((whereObject, key) => {
     const query = queryParams[key]
     if (query) {
       const dbColumnKey = dtoToModelMapping[key]
@@ -60,12 +56,11 @@ const getPersons = async (queryParams, options = {}, transaction) => {
         }
       }
     }
-
     return whereObject
   }, {})
+}
 
-  const personIds = await fuzzySearch(terms)
-
+function applyFuzzySearch (where, personIds) {
   if (personIds && personIds.length > 0) {
     const nameFilters = { ...where }
     delete nameFilters.id
@@ -79,31 +74,25 @@ const getPersons = async (queryParams, options = {}, transaction) => {
       }
     })
   }
+}
 
+function buildOptionalIncludes (queryParams, where) {
   const optionalIncludes = []
-
   if (queryParams.orphaned) {
     optionalIncludes.push({
       model: sequelize.models.registered_person,
       as: 'registered_people'
     })
-
     where['$registered_people.dog_id$'] = {
       [Op.is]: null
     }
   }
+  return optionalIncludes
+}
 
-  const mappedOptions = {
-    subQuery: false
-  }
-
-  if (options.limit !== -1) {
-    mappedOptions.limit = options.limit ?? MAX_RESULTS
-  }
-
+function buildOrder (options) {
   const order = []
   const sortOrder = options.sortOrder ?? 'ASC'
-
   if (options.sortKey === 'owner') {
     order.push([sequelize.col('last_name'), sortOrder])
     order.push([sequelize.col('first_name'), sortOrder])
@@ -112,7 +101,25 @@ const getPersons = async (queryParams, options = {}, transaction) => {
   } else if (options.sortKey === 'address') {
     order.push([sequelize.col('addresses.address.address_line_1'), sortOrder])
   }
+  return order
+}
 
+function buildOptions (options) {
+  const mappedOptions = { subQuery: false }
+  if (options.limit !== -1) {
+    mappedOptions.limit = options.limit ?? MAX_RESULTS
+  }
+  return mappedOptions
+}
+
+const getPersons = async (queryParams, options = {}, transaction) => {
+  const terms = []
+  const where = buildWhereClause(queryParams, terms)
+  const personIds = await fuzzySearch(terms)
+  applyFuzzySearch(where, personIds)
+  const optionalIncludes = buildOptionalIncludes(queryParams, where)
+  const mappedOptions = buildOptions(options)
+  const order = buildOrder(options)
   try {
     return await sequelize.models.person.findAll({
       where,
