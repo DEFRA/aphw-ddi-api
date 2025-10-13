@@ -65,6 +65,7 @@ const getPersons = async (queryParams, options = {}, transaction) => {
   }, {})
 
   const personIds = await fuzzySearch(terms)
+
   if (personIds && personIds.length > 0) {
     const nameFilters = { ...where }
     delete nameFilters.id
