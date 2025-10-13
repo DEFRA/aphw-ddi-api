@@ -32,6 +32,9 @@ describe('Persons repo', () => {
       },
       contact: {
         create: jest.fn()
+      },
+      search_match_code: {
+        findAll: jest.fn()
       }
     },
     col: jest.fn(),
@@ -39,6 +42,9 @@ describe('Persons repo', () => {
     fn: jest.fn(),
     where: jest.fn(),
     literal: jest.fn()
+  }))
+  jest.mock('../../../../app/repos/search-match-codes', () => ({
+    fuzzySearch: jest.fn().mockResolvedValue([1, 2])
   }))
 
   const sequelize = require('../../../../app/config/db')
@@ -59,6 +65,8 @@ describe('Persons repo', () => {
 
   beforeEach(async () => {
     jest.clearAllMocks()
+    const searchMatchCodes = require('../../../../app/repos/search-match-codes')
+    jest.spyOn(searchMatchCodes, 'fuzzySearch').mockResolvedValue([])
 
     when(getContactType).calledWith('Phone').mockResolvedValue({ id: 1 })
     when(getContactType).calledWith('Email').mockResolvedValue({ id: 2 })
@@ -68,6 +76,7 @@ describe('Persons repo', () => {
     when(getCountry).calledWith('Wales').mockResolvedValue({ id: 2 })
 
     sequelize.models.person.findAll.mockResolvedValue([])
+    sequelize.models.search_match_code.findAll.mockResolvedValue([])
     sendEvent.mockResolvedValue()
   })
 
@@ -285,6 +294,14 @@ describe('Persons repo', () => {
       sequelize.models.person.findAll.mockRejectedValue(new Error('Test error'))
 
       await expect(getPersons({})).rejects.toThrow('Test error')
+    })
+    test('getPersons should handle personIds filter', async () => {
+      const searchMatchCodes = require('../../../../app/repos/search-match-codes')
+      searchMatchCodes.fuzzySearch.mockResolvedValue([1, 2])
+      sequelize.models.person.findAll.mockResolvedValue([])
+      sequelize.models.search_match_code.findAll.mockResolvedValue([])
+      await getPersons({ firstName: 'John' })
+      expect(sequelize.models.person.findAll).toBeCalled()
     })
   })
 
