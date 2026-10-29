@@ -1,0 +1,68 @@
+name: '$(Build.SourceBranchName)$(System.PullRequest.SourceBranch)$(Rev:.r)'
+
+trigger:
+  - main
+  - feature/*
+  - release/*
+
+pr:
+  - main
+  - releases/*
+
+parameters:
+  - name: prDeployment
+    type: boolean
+    default: true
+  - name: branchDeployment
+    type: boolean
+    default: true
+  - name: snd2Deployment
+    type: boolean
+    default: true
+  - name: snd1Deployment
+    type: boolean
+    default: false
+
+resources:
+  repositories:
+    - repository: templates
+      endpoint: DEFRA
+      type: github
+      name: defra/fcp-pipeline-common
+      # ref: branch-name
+
+extends:
+  template: fcp-common-pipeline.yaml@templates
+  parameters:
+    appFrameworkType: nodejs
+    prDeployment: ${{ parameters.prDeployment }}
+    branchDeployment: ${{ parameters.branchDeployment }}
+    sndDeployment: ${{ parameters.snd2Deployment }}
+    snd1Deployment: ${{ parameters.snd1Deployment }}
+    variableGroupName: aphw-ddi-api-env-var
+    pr_params:
+      container.azureStorageAccountName: $(snd2_container_azureStorageAccountName)
+      container.reportSomethingEmailAddress: $(snd2_container_reportSomethingEmailAddress)
+      container.userFeedbackEmailAddress: $(snd2_container_userFeedbackEmailAddress)
+    snd2_params:
+      container.azureStorageAccountName: $(snd2_container_azureStorageAccountName)
+      container.reportSomethingEmailAddress: $(snd2_container_reportSomethingEmailAddress)
+      container.userFeedbackEmailAddress: $(snd2_container_userFeedbackEmailAddress)
+    dev_params:
+      container.azureStorageAccountName: $(dev_container_azureStorageAccountName)
+      container.reportSomethingEmailAddress: $(dev_container_reportSomethingEmailAddress)
+      container.userFeedbackEmailAddress: $(dev_container_userFeedbackEmailAddress)
+    test_params:
+      container.azureStorageAccountName: $(test_container_azureStorageAccountName)
+      container.reportSomethingEmailAddress: $(test_container_reportSomethingEmailAddress)
+      container.userFeedbackEmailAddress: $(test_container_userFeedbackEmailAddress)
+    pre_params:
+      container.azureStorageAccountName: $(pre_container_azureStorageAccountName)
+      container.reportSomethingEmailAddress: $(pre_container_reportSomethingEmailAddress)
+      container.userFeedbackEmailAddress: $(pre_container_userFeedbackEmailAddress)
+    prd_params:
+      container.azureStorageAccountName: $(prd_container_azureStorageAccountName)
+      container.reportSomethingEmailAddress: $(prd_container_reportSomethingEmailAddress)
+      container.userFeedbackEmailAddress: $(prd_container_userFeedbackEmailAddress)
+    enableServiceNowChangeCreationDev: false
+    enableServiceNowChangeCreation: true

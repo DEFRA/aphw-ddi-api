@@ -1,1 +1,54 @@
 ---
+environment: production
+environmentCode: test
+container:
+  authServerUrl: https://oidc.integration.account.gov.uk
+  messageQueueHost: DEVFFCINFSB1001.servicebus.windows.net
+  osPlacesBaseUrl: https://api.os.uk/search/places/v1
+  policeApiBaseUrl: https://data.police.uk/api
+  redisHostname: DEVFFCINFRD1001.redis.cache.windows.net
+  redisPort: 6380
+  eventsTopicAddress: aphw-ddi-events
+  notificationsTopicAddress: aphw-ddi-notifications
+  certificateRequestQueue: aphw-ddi-certificate-request
+  ddiDocumentsBaseUrl: http://aphw-ddi-documents.aphw-ddi-test
+  enforcementUrl: https://aphw-ddi-enforcement-test.azure.defra.cloud/
+ingress:
+  server: azure.defra.cloud
+  endpoint: aphw-ddi-api-test
+secretProviderClass:
+  azure:
+    keyvaultName: DEVFFCINFKV1001
+    objects:
+      - objectName: devtest-ffcahwr-appInsights-connectionString
+        objectType: secret
+      - objectName: DEV-aphw-ddi-os-places-key
+        objectType: secret
+      - objectName: TEST-aphw-ddi-portal-jwt-public-key
+        objectType: secret
+      - objectName: TEST-aphw-ddi-enforcement-jwt-public-key
+        objectType: secret
+      - objectName: TEST-aphw-ddi-api-jwt-public-key
+        objectType: secret
+      - objectName: TEST-aphw-ddi-api-jwt-private-key
+        objectType: secret
+      - objectName: dev-redisPassword
+        objectType: secret
+  secretObjects:
+    - secretName: aphw-ddi-api
+      type: Opaque
+      data:
+        - objectName: devtest-ffcahwr-appInsights-connectionString
+          key: APPLICATIONINSIGHTS_CONNECTION_STRING
+        - objectName: DEV-aphw-ddi-os-places-key
+          key: OS_PLACES_API_KEY
+        - objectName: TEST-aphw-ddi-portal-jwt-public-key
+          key: PORTAL_PUBLIC_KEY
+        - objectName: TEST-aphw-ddi-enforcement-jwt-public-key
+          key: ENFORCEMENT_PUBLIC_KEY
+        - objectName: TEST-aphw-ddi-api-jwt-public-key
+          key: API_PUBLIC_KEY
+        - objectName: TEST-aphw-ddi-api-jwt-private-key
+          key: API_PRIVATE_KEY
+        - objectName: dev-redisPassword
+          key: REDIS_PASSWORD
