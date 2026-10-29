@@ -84,7 +84,7 @@ describe('Persons repo', () => {
     test('getPersons should use a transaction if one is passed', async () => {
       const transaction = jest.fn()
       await getPersons({}, {}, transaction)
-      expect(sequelize.models.person.findAll).toBeCalledWith(expect.objectContaining({
+      expect(sequelize.models.person.findAll).toHaveBeenCalledWith(expect.objectContaining({
         transaction
       }))
     })
@@ -138,7 +138,7 @@ describe('Persons repo', () => {
         }
       ])
 
-      expect(sequelize.models.person.findAll).toBeCalledWith(expect.objectContaining({
+      expect(sequelize.models.person.findAll).toHaveBeenCalledWith(expect.objectContaining({
         limit: 20,
         where: {}
       }))
@@ -173,7 +173,7 @@ describe('Persons repo', () => {
         dateOfBirth: '2000-01-01'
       }, { limit: 30 })
 
-      expect(sequelize.models.person.findAll).toBeCalledWith(expect.objectContaining({
+      expect(sequelize.models.person.findAll).toHaveBeenCalledWith(expect.objectContaining({
         limit: 30
       }))
     })
@@ -188,7 +188,7 @@ describe('Persons repo', () => {
 
       expect(sequelize.col.mock.calls[0]).toEqual(['last_name'])
       expect(sequelize.col.mock.calls[1]).toEqual(['first_name'])
-      expect(sequelize.models.person.findAll).toBeCalledWith(expect.objectContaining({
+      expect(sequelize.models.person.findAll).toHaveBeenCalledWith(expect.objectContaining({
         order: [
           ['last_name', 'ASC'],
           ['first_name', 'ASC']
@@ -206,7 +206,7 @@ describe('Persons repo', () => {
 
       expect(sequelize.col.mock.calls[0]).toEqual(['last_name'])
       expect(sequelize.col.mock.calls[1]).toEqual(['first_name'])
-      expect(sequelize.models.person.findAll).toBeCalledWith(expect.objectContaining({
+      expect(sequelize.models.person.findAll).toHaveBeenCalledWith(expect.objectContaining({
         order: [
           ['last_name', 'DESC'],
           ['first_name', 'DESC']
@@ -223,7 +223,7 @@ describe('Persons repo', () => {
       }, { sortKey: 'birthDate', sortOrder: 'DESC' })
 
       expect(sequelize.col.mock.calls[0]).toEqual(['birth_date'])
-      expect(sequelize.models.person.findAll).toBeCalledWith(expect.objectContaining({
+      expect(sequelize.models.person.findAll).toHaveBeenCalledWith(expect.objectContaining({
         order: [
           ['birth_date', 'DESC']
         ]
@@ -239,7 +239,7 @@ describe('Persons repo', () => {
       }, { sortKey: 'address', sortOrder: 'DESC' })
 
       expect(sequelize.col.mock.calls[0]).toEqual(['addresses.address.address_line_1'])
-      expect(sequelize.models.person.findAll).toBeCalledWith(expect.objectContaining({
+      expect(sequelize.models.person.findAll).toHaveBeenCalledWith(expect.objectContaining({
         order: [
           ['addresses.address.address_line_1', 'DESC']
         ]
@@ -273,7 +273,7 @@ describe('Persons repo', () => {
         orphaned: true
       }, { limit: -1 })
 
-      expect(sequelize.models.person.findAll).toBeCalledWith(expect.objectContaining({
+      expect(sequelize.models.person.findAll).toHaveBeenCalledWith(expect.objectContaining({
         include: expect.arrayContaining([expect.objectContaining({
           model: sequelize.models.registered_person,
           as: 'registered_people'
@@ -301,7 +301,7 @@ describe('Persons repo', () => {
       sequelize.models.person.findAll.mockResolvedValue([])
       sequelize.models.search_match_code.findAll.mockResolvedValue([])
       await getPersons({ firstName: 'John' })
-      expect(sequelize.models.person.findAll).toBeCalled()
+      expect(sequelize.models.person.findAll).toHaveBeenCalled()
     })
   })
 
