@@ -899,8 +899,8 @@ describe('Dog repo', () => {
 
       await deleteDogByIndexNumber('ED123', devUser, {})
 
-      expect(removeDogFromSearchIndex).toBeCalledWith(mockDogAggregrate, {})
-      expect(sequelize.models.dog.findOne).toBeCalledWith(expect.objectContaining({
+      expect(removeDogFromSearchIndex).toHaveBeenCalledWith(mockDogAggregrate, {})
+      expect(sequelize.models.dog.findOne).toHaveBeenCalledWith(expect.objectContaining({
         where: { index_number: 'ED123' }
       }))
       expect(mockRegistrationDestroy).toHaveBeenCalledTimes(1)
@@ -976,7 +976,7 @@ describe('Dog repo', () => {
 
       await purgeDogByIndexNumber('ED123', devUser, {})
 
-      expect(sequelize.models.dog.findOne).toBeCalledWith(expect.objectContaining({
+      expect(sequelize.models.dog.findOne).toHaveBeenCalledWith(expect.objectContaining({
         where: { index_number: 'ED123' },
         paranoid: false
       }))
@@ -1031,7 +1031,7 @@ describe('Dog repo', () => {
 
       await purgeDogByIndexNumber('ED123', devUser, {})
 
-      expect(sequelize.models.dog.findOne).toBeCalledWith(expect.objectContaining({
+      expect(sequelize.models.dog.findOne).toHaveBeenCalledWith(expect.objectContaining({
         where: { index_number: 'ED123' },
         paranoid: false
       }))

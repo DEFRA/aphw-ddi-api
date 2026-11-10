@@ -24,6 +24,6 @@ describe('drop cache', () => {
       await getCacheValue(cache, key)
     }
 
-    await expect(wrapper).rejects.toThrowError(new Error('No cache value for key'))
+    await expect(wrapper).rejects.toThrow(new Error('No cache value for key'))
   })
 })

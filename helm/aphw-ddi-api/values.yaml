@@ -16,11 +16,10 @@ azureIdentity:
   resourceID: not-a-real-resourceID
 
 containerConfigMap:
-  name: aphw-ddi-api-config-map
+  name: aphw-ddi-api
 
 containerSecret:
-  name: aphw-ddi-api-container-secret
-  type: Opaque
+  name: aphw-ddi-api
 
 deployment:
   replicas: 1
@@ -36,21 +35,15 @@ container:
   limitCpu: 500m
   port: 3000
   messageQueueHost: namespace.servicebus.windows.net
-  azureStorageConnectionString: dummy
   azureStorageUseConnectionString: false
   azureStorageAccountName: dummy
   azureStorageCreateContainers: false
   robotSheetName: Passed
   osPlacesBaseUrl: os-places-api-base-url
-  osPlacesApiKey: os-places-api-key
   policeApiBaseUrl: police-api-base-url
   ddiDocumentsBaseUrl: ddi-documents-base-url
   eventsTopicAddress: aphw-ddi-events
   notificationsTopicAddress: aphw-ddi-notifications
-  publicKeyPortal: dummy
-  publicKeyEnforcement: dummy
-  jwtPrivateKey: dummygit
-  publicKeyApi: dummy
   authServerUrl: auth-server-url
   certificateRequestQueue: aphw-ddi-certificate-request
   overnightJobCrontab: 5 4 * * *
@@ -60,7 +53,6 @@ container:
   enforcementUrl: dummy
   redisHostname: dummy
   redisPort: 6379
-  redisPassword: dummy
 
 postgresService:
   postgresDb: dangerous_dogs_index
@@ -91,3 +83,40 @@ ingress:
   server: example.com
 
 workloadIdentity: true
+
+secretProviderClass:
+  azure:
+    keyvaultName: SNDFFCINFKV2001
+    objects:
+      - objectName: snd2-aphw-appinsights-connectionString
+        objectType: secret
+      - objectName: snd2-aphw-ddi-os-places-key
+        objectType: secret
+      - objectName: snd2-aphw-ddi-portal-jwt-public-key
+        objectType: secret
+      - objectName: snd2-aphw-ddi-enforcement-jwt-public-key
+        objectType: secret
+      - objectName: snd2-aphw-ddi-api-jwt-public-key
+        objectType: secret
+      - objectName: snd2-aphw-ddi-api-jwt-private-key
+        objectType: secret
+      - objectName: snd2-redisPassword
+        objectType: secret
+  secretObjects:
+    - secretName: aphw-ddi-api
+      type: Opaque
+      data:
+        - objectName: snd2-aphw-appinsights-connectionString
+          key: APPLICATIONINSIGHTS_CONNECTION_STRING
+        - objectName: snd2-aphw-ddi-os-places-key
+          key: OS_PLACES_API_KEY
+        - objectName: snd2-aphw-ddi-portal-jwt-public-key
+          key: PORTAL_PUBLIC_KEY
+        - objectName: snd2-aphw-ddi-enforcement-jwt-public-key
+          key: ENFORCEMENT_PUBLIC_KEY
+        - objectName: snd2-aphw-ddi-api-jwt-public-key
+          key: API_PUBLIC_KEY
+        - objectName: snd2-aphw-ddi-api-jwt-private-key
+          key: API_PRIVATE_KEY
+        - objectName: snd2-redisPassword
+          key: REDIS_PASSWORD

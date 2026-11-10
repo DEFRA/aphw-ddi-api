@@ -15,9 +15,12 @@ services:
       - ./jest.config.js:/home/node/jest.config.js
       - ./package.json:/home/node/package.json
     depends_on:
-        - aphw-ddi-api-azurite
+      - aphw-ddi-api-azurite
     environment:
       AZURE_STORAGE_CONNECTION_STRING: "DefaultEndpointsProtocol=http;AccountName=devstoreaccount1;AccountKey=Eby8vdM02xNOcqFlqUwJPLlmEtlCDXJ1OUzFT50uSRZ6IFsuFq2UVErCz4I6tq/K1SZFPTOtr/KBHBeksoGMGw==;BlobEndpoint=http://aphw-ddi-api-azurite:10000/devstoreaccount1"
+      MESSAGE_QUEUE_HOST: ${MESSAGE_QUEUE_HOST:-test.servicebus.windows.net}
+      MESSAGE_QUEUE_USER: ${MESSAGE_QUEUE_USER:-test}
+      MESSAGE_QUEUE_PASSWORD: ${MESSAGE_QUEUE_PASSWORD:-test}
       OS_PLACES_API_KEY: ${OS_PLACES_API_KEY:-test}
       OS_PLACES_API_BASE_URL: ${OS_PLACES_API_BASE_URL:-test}
       POLICE_API_BASE_URL: ${POLICE_API_BASE_URL:-test}
@@ -33,7 +36,7 @@ services:
       EVENTS_TOPIC_ADDRESS: aphw-ddi-events-localtest
 
   aphw-ddi-api-azurite:
-    image: mcr.microsoft.com/azure-storage/azurite:3.23.0
+    image: mcr.microsoft.com/azure-storage/azurite:3.37.0
 
   aphw-ddi-api-postgres:
     volumes:

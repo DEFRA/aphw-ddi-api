@@ -1,4 +1,4 @@
-version: '3.8'
+version: "3.8"
 
 x-common-migration: &common-migration
   POSTGRES_HOST: ${POSTGRES_HOST:-aphw-ddi-api-postgres-api-tests}
@@ -17,7 +17,7 @@ services:
   database-up:
     image: liquibase/liquibase:4.27.0
     environment:
-      <<: [ *common-migration, *common-postgres ]
+      <<: [*common-migration, *common-postgres]
     entrypoint: >
       sh -c "/scripts/migration/database-up-seed-api-tests"
     depends_on:
@@ -85,7 +85,7 @@ services:
       POSTGRES_PASSWORD: ppp
 
   aphw-ddi-api-azurite:
-    image: mcr.microsoft.com/azure-storage/azurite:3.23.0
+    image: mcr.microsoft.com/azure-storage/azurite:3.37.0
     command: "azurite-blob --skipApiVersionCheck --loose --blobHost 0.0.0.0 -l data"
     volumes:
       - azurite_data:/opt/azurite/data

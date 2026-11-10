@@ -402,9 +402,7 @@ describe('CdoTaskList', () => {
 
     test('should be completable given insurance renewal date is today', () => {
       const today = new Date()
-      today.setHours(0)
-      today.setMinutes(0)
-      today.setMilliseconds(0)
+      today.setUTCHours(0, 0, 0, 0)
 
       const exemptionProperties = buildExemption({
         applicationPackSent: new Date('2024-06-25'),
@@ -532,7 +530,7 @@ describe('CdoTaskList', () => {
         verificationDatesRecorded: new Date('2024-08-07'),
         insurance: [buildCdoInsurance({
           company: 'Dogs R Us',
-          renewalDate: new Date('2026-08-25')
+          renewalDate: in60Days
         })]
       })
       const dogProperties = buildCdoDog({
@@ -565,7 +563,7 @@ describe('CdoTaskList', () => {
         verificationDatesRecorded: new Date('2024-08-07'),
         insurance: [buildCdoInsurance({
           company: 'Dogs R Us',
-          renewalDate: new Date('2026-08-25')
+          renewalDate: in60Days
         })]
       })
       const dogProperties = buildCdoDog({
@@ -1009,7 +1007,7 @@ describe('CdoTaskList', () => {
         verificationDatesRecorded: new Date('2024-08-07'),
         insurance: [buildCdoInsurance({
           company: 'Dogs R Us',
-          renewalDate: new Date('2026-08-25')
+          renewalDate: in60Days
         })],
         ...exemptionPartial
       })
@@ -1454,7 +1452,7 @@ describe('CdoTaskList', () => {
           verificationDatesRecorded: new Date('2024-08-07'),
           insurance: [buildCdoInsurance({
             company: 'Dogs R Us',
-            renewalDate: new Date('2026-08-25')
+            renewalDate: in60Days
           })]
         })
         const dogProperties = buildCdoDog({

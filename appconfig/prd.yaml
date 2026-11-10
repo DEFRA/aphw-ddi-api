@@ -1,1 +1,54 @@
 ---
+environment: production
+environmentCode: prd
+container:
+  authServerUrl: https://oidc.account.gov.uk
+  messageQueueHost: PRDFFCINFSB1001.servicebus.windows.net
+  osPlacesBaseUrl: https://api.os.uk/search/places/v1
+  policeApiBaseUrl: https://data.police.uk/api
+  redisHostname: PRDFFCINFRD1001.redis.cache.windows.net
+  redisPort: 6380
+  eventsTopicAddress: aphw-ddi-events
+  notificationsTopicAddress: aphw-ddi-notifications
+  certificateRequestQueue: aphw-ddi-certificate-request
+  ddiDocumentsBaseUrl: http://aphw-ddi-documents.aphw-ddi-prd
+  enforcementUrl: https://dogsindex.defra.gov.uk/
+ingress:
+  server: azure.defra.cloud
+  endpoint: aphw-ddi-api-prd
+secretProviderClass:
+  azure:
+    keyvaultName: PRDFFCINFKV1001
+    objects:
+      - objectName: prd-ffcahwr-appinsights-connectionString
+        objectType: secret
+      - objectName: prd-aphw-ddi-os-places-key
+        objectType: secret
+      - objectName: PRD-aphw-ddi-portal-jwt-public-key
+        objectType: secret
+      - objectName: PRD-aphw-ddi-enforcement-jwt-public-key
+        objectType: secret
+      - objectName: PRD-aphw-ddi-api-jwt-public-key
+        objectType: secret
+      - objectName: PRD-aphw-ddi-api-jwt-private-key
+        objectType: secret
+      - objectName: prd-redisPassword
+        objectType: secret
+  secretObjects:
+    - secretName: aphw-ddi-api
+      type: Opaque
+      data:
+        - objectName: prd-ffcahwr-appinsights-connectionString
+          key: APPLICATIONINSIGHTS_CONNECTION_STRING
+        - objectName: prd-aphw-ddi-os-places-key
+          key: OS_PLACES_API_KEY
+        - objectName: PRD-aphw-ddi-portal-jwt-public-key
+          key: PORTAL_PUBLIC_KEY
+        - objectName: PRD-aphw-ddi-enforcement-jwt-public-key
+          key: ENFORCEMENT_PUBLIC_KEY
+        - objectName: PRD-aphw-ddi-api-jwt-public-key
+          key: API_PUBLIC_KEY
+        - objectName: PRD-aphw-ddi-api-jwt-private-key
+          key: API_PRIVATE_KEY
+        - objectName: prd-redisPassword
+          key: REDIS_PASSWORD

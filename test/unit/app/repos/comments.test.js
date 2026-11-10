@@ -26,7 +26,7 @@ describe('Comments repo', () => {
 
       expect(comments).toHaveLength(3)
       expect(comments).toEqual(mockComments)
-      expect(sequelize.models.comment.findAll).toBeCalledWith({ attributes: ['id', 'registration_id', 'comment'], include: expect.anything() })
+      expect(sequelize.models.comment.findAll).toHaveBeenCalledWith({ attributes: ['id', 'registration_id', 'comment'], include: expect.anything() })
     })
 
     test('getComments should limit', async () => {
@@ -46,7 +46,7 @@ describe('Comments repo', () => {
           })
         })
       })])
-      expect(sequelize.models.comment.findAll).toBeCalledWith({ limit: 1, attributes: expect.anything(), include: expect.anything() })
+      expect(sequelize.models.comment.findAll).toHaveBeenCalledWith({ limit: 1, attributes: expect.anything(), include: expect.anything() })
     })
 
     test('getComments should throw if error', async () => {
@@ -59,7 +59,7 @@ describe('Comments repo', () => {
   describe('removeComment', () => {
     test('should remove the comment', async () => {
       await removeComment(1234)
-      expect(sequelize.models.comment.destroy).toBeCalledWith({
+      expect(sequelize.models.comment.destroy).toHaveBeenCalledWith({
         where: {
           id: 1234
         }
