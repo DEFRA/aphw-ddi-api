@@ -1,13 +1,30 @@
 resources:
   identity: aphw-ddi-api
-  queues:
-    - name: aphw-ddi-notifications
-      role: sender
+  service_bus:
+    queues:
+      - name: aphw-ddi-notifications
+        roles:
+          - name: sender
+    topics:
+      - name: aphw-ddi-events
+        requiresDuplicateDetection: true
+        duplicateDetectionHistoryTimeWindow: PT10M30S
+        defaultMessageTimeToLive: P100D
+        roles:
+          - name: sender
+  storage_accounts:
+    - name: aphw
+      containers:
+        - name: uploads
+          roles:
+            - name: blobContributor
+        - name: attachments
+          roles:
+            - name: blobContributor
+        - name: certificates
+          roles:
+            - name: blobContributor
   postgreSql:
     name: aphw-ddi-api
     extensions:
       - name: pg_trgm
-  topics:
-    - name: aphw-ddi-events
-      role: sender
-      duplicateDetection: true

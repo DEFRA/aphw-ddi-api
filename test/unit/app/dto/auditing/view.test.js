@@ -72,7 +72,7 @@ describe('view audit', () => {
       const entity = buildRegisteredPersonDao({
         person: undefined
       })
-      expect(() => determineViewAuditPk(VIEW_OWNER, entity)).toThrowError()
+      expect(() => determineViewAuditPk(VIEW_OWNER, entity)).toThrow()
     })
   })
 

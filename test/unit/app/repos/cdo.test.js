@@ -150,10 +150,10 @@ describe('CDO repo', () => {
       expect(cdo.owner).toEqual(expectedOwner)
       expect(cdo.dogs).toEqual(dogs)
       expect(createPeople).not.toHaveBeenCalled()
-      expect(updatePersonFields).toBeCalledWith(1, {
+      expect(updatePersonFields).toHaveBeenCalledWith(1, {
         dateOfBirth: '1951-09-25'
       }, expect.anything(), expect.anything())
-      expect(reloadMock).toBeCalledWith({ transaction: expect.anything() })
+      expect(reloadMock).toHaveBeenCalledWith({ transaction: expect.anything() })
       expect(getPersonByReference).toHaveBeenCalledWith('P-6076-A37C', expect.anything())
     })
 

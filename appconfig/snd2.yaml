@@ -1,1 +1,18 @@
 ---
+environment: production
+environmentCode: snd
+container:
+  messageQueueHost: SNDFFCINFSB2001.servicebus.windows.net
+  osPlacesBaseUrl: https://api.os.uk/search/places/v1
+  policeApiBaseUrl: https://data.police.uk/api
+  redisHostname: SNDFFCINFRD2001.redis.cache.windows.net
+  redisPort: 6380
+  eventsTopicAddress: aphw-ddi-events
+  notificationsTopicAddress: aphw-ddi-notifications
+  certificateRequestQueue: aphw-ddi-certificate-request
+  authServerUrl: https://aphw-ddi-simulator-snd2.azure.defra.cloud
+  ddiDocumentsBaseUrl: http://aphw-ddi-documents.aphw-ddi-snd2
+  enforcementUrl: https://aphw-ddi-enforcement-snd2.azure.defra.cloud/
+ingress:
+  server: azure.defra.cloud
+  endpoint: aphw-ddi-api-snd2

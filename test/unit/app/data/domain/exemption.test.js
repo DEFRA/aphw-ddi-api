@@ -3,7 +3,7 @@ const { inXDays } = require('../../../../time-helper')
 const { InvalidDateError } = require('../../../../../app/errors/domain/invalidDate')
 const { IncompleteDataError } = require('../../../../../app/errors/domain/incompleteData')
 const { buildExemption, buildCdoInsurance, buildCdoDog } = require('../../../../mocks/cdo/domain')
-const { SequenceViolationError } = require('../../../../../app/errors/domain/sequenceViolation')
+const { InvalidDataError } = require('../../../../../app/errors/domain/invalidData')
 const { Dog } = require('../../../../../app/data/domain')
 const { ExemptionActionNotAllowedException } = require('../../../../../app/errors/domain/exemptionActionNotAllowedException')
 
@@ -272,8 +272,8 @@ describe('Exemption', () => {
 
     test('should throw if either microchipVerification or neuteringConfirmation is missing', () => {
       const exemption = new Exemption(verifyDatesProperties)
-      expect(() => exemption.verifyDates(undefined, neuteringConfirmation, callback)).toThrow(new InvalidDateError('Microchip verification required'))
-      expect(() => exemption.verifyDates(microchipVerification, undefined, callback)).toThrow(new InvalidDateError('Neutering confirmation required'))
+      expect(() => exemption.verifyDates(undefined, neuteringConfirmation, callback)).toThrow(new Error('Microchip verification required'))
+      expect(() => exemption.verifyDates(microchipVerification, undefined, callback)).toThrow(new Error('Neutering confirmation required'))
     })
   })
 
@@ -526,7 +526,7 @@ describe('Exemption', () => {
           })
         ]
       }))
-      expect(() => exemption.issueCertificate(auditDate, callback)).toThrow(new SequenceViolationError('CDO must be complete in order to issue certificate'))
+      expect(() => exemption.issueCertificate(auditDate, callback)).toThrow(new InvalidDataError('CDO must be complete in order to issue certificate'))
 
       expect(exemption.certificateIssued).toBeNull()
     })

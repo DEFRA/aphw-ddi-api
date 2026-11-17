@@ -72,7 +72,7 @@ describe('SendAudit test', () => {
     test('should send event to audit', async () => {
       const hal3000 = { username: 'hal-9000', displayname: 'Hal 9000' }
       await sendEventToAudit('CREATE', 'DDI Create Something', 'created something', hal3000)
-      expect(sendEvent).toBeCalledWith({
+      expect(sendEvent).toHaveBeenCalledWith({
         type: 'CREATE',
         source: 'aphw-ddi-portal',
         id: expect.any(String),
@@ -412,7 +412,7 @@ describe('SendAudit test', () => {
       test('should send search event to audit', async () => {
         await sendViewToAudit(guid, SEARCH, 'enforcement user searched something', searchDetails, roboCop)
 
-        expect(sendEvent).toBeCalledWith({
+        expect(sendEvent).toHaveBeenCalledWith({
           type: SEARCH,
           source: 'aphw-ddi-enforcement',
           id: expect.any(String),
@@ -430,7 +430,7 @@ describe('SendAudit test', () => {
       test('should send owner record view to audit', async () => {
         const ownerDetails = { pk: 'P-8AD0-561A', dogIndexNumbers: ['ED300097'] }
         await sendViewToAudit('P-8AD0-561A', VIEW_OWNER, 'enforcement user viewed an owner', ownerDetails, roboCop)
-        expect(sendEvent).toBeCalledWith({
+        expect(sendEvent).toHaveBeenCalledWith({
           type: VIEW_OWNER,
           source: 'aphw-ddi-enforcement',
           id: expect.any(String),
@@ -449,7 +449,7 @@ describe('SendAudit test', () => {
         const pk = 'ED300097'
         const dogDetails = { pk }
         await sendViewToAudit('ED300097', VIEW_DOG, 'enforcement user viewed a dog', dogDetails, roboCop)
-        expect(sendEvent).toBeCalledWith({
+        expect(sendEvent).toHaveBeenCalledWith({
           type: VIEW_DOG,
           source: 'aphw-ddi-enforcement',
           id: expect.any(String),
@@ -472,7 +472,7 @@ describe('SendAudit test', () => {
     describe('sendLoginToAudit', () => {
       test('should audit a login record', async () => {
         await sendLoginToAudit(roboCop, 'Robo-Client')
-        expect(sendEvent).toBeCalledWith({
+        expect(sendEvent).toHaveBeenCalledWith({
           type: LOGIN,
           source: 'aphw-ddi-enforcement',
           id: expect.any(String),

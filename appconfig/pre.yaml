@@ -1,1 +1,54 @@
 ---
+environment: production
+environmentCode: pre
+container:
+  authServerUrl: https://oidc.integration.account.gov.uk
+  messageQueueHost: PREFFCINFSB1001.servicebus.windows.net
+  osPlacesBaseUrl: https://api.os.uk/search/places/v1
+  policeApiBaseUrl: https://data.police.uk/api
+  redisHostname: PREFFCINFRD1001.redis.cache.windows.net
+  redisPort: 6380
+  eventsTopicAddress: aphw-ddi-events
+  notificationsTopicAddress: aphw-ddi-notifications
+  certificateRequestQueue: aphw-ddi-certificate-request
+  ddiDocumentsBaseUrl: http://aphw-ddi-documents.aphw-ddi-pre
+  enforcementUrl: https://aphw-ddi-enforcement-pre.azure.defra.cloud/
+ingress:
+  server: azure.defra.cloud
+  endpoint: aphw-ddi-api-pre
+secretProviderClass:
+  azure:
+    keyvaultName: PREFFCINFKV1001
+    objects:
+      - objectName: pre-ffcahwr-appinsights-connectionString
+        objectType: secret
+      - objectName: PRE-aphw-ddi-os-places-key
+        objectType: secret
+      - objectName: PRE-aphw-ddi-portal-jwt-public-key
+        objectType: secret
+      - objectName: PRE-aphw-ddi-enforcement-jwt-public-key
+        objectType: secret
+      - objectName: PRE-aphw-ddi-api-jwt-public-key
+        objectType: secret
+      - objectName: PRE-aphw-ddi-api-jwt-private-key
+        objectType: secret
+      - objectName: pre-redisPassword
+        objectType: secret
+  secretObjects:
+    - secretName: aphw-ddi-api
+      type: Opaque
+      data:
+        - objectName: pre-ffcahwr-appinsights-connectionString
+          key: APPLICATIONINSIGHTS_CONNECTION_STRING
+        - objectName: PRE-aphw-ddi-os-places-key
+          key: OS_PLACES_API_KEY
+        - objectName: PRE-aphw-ddi-portal-jwt-public-key
+          key: PORTAL_PUBLIC_KEY
+        - objectName: PRE-aphw-ddi-enforcement-jwt-public-key
+          key: ENFORCEMENT_PUBLIC_KEY
+        - objectName: PRE-aphw-ddi-api-jwt-public-key
+          key: API_PUBLIC_KEY
+        - objectName: PRE-aphw-ddi-api-jwt-private-key
+          key: API_PRIVATE_KEY
+        - objectName: pre-redisPassword
+          key: REDIS_PASSWORD

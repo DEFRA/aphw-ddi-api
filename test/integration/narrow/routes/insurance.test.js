@@ -37,7 +37,7 @@ describe('Insurance endpoint', () => {
 
       const response = await server.inject(options)
       expect(response.statusCode).toBe(200)
-      expect(getCompanies).toBeCalledWith({
+      expect(getCompanies).toHaveBeenCalledWith({
         key: 'company_name',
         order: 'ASC'
       })
@@ -54,7 +54,7 @@ describe('Insurance endpoint', () => {
 
       const response = await server.inject(options)
       expect(response.statusCode).toBe(200)
-      expect(getCompanies).toBeCalledWith({
+      expect(getCompanies).toHaveBeenCalledWith({
         key: 'updated_at',
         order: 'DESC'
       })

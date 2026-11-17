@@ -65,7 +65,7 @@ describe('drop cache', () => {
       await drop(request, key)
     }
 
-    await expect(wrapper).rejects.toThrowError()
+    await expect(wrapper).rejects.toThrow()
   })
 
   test('should throw Error when getCache throws Error', async () => {
@@ -75,7 +75,7 @@ describe('drop cache', () => {
       await drop(request, key)
     }
 
-    await expect(wrapper).rejects.toThrowError(Error)
+    await expect(wrapper).rejects.toThrow(Error)
   })
 
   test('should throw "Redis retreival error" error when getCache throws "Redis retreival error" error', async () => {
@@ -85,7 +85,7 @@ describe('drop cache', () => {
       await drop(request, key)
     }
 
-    expect(wrapper).rejects.toThrowError(/^Redis retreival error$/)
+    expect(wrapper).rejects.toThrow(/^Redis retreival error$/)
   })
 
   test('should throw when dropCacheKey throws', async () => {
@@ -95,7 +95,7 @@ describe('drop cache', () => {
       await drop(request, key)
     }
 
-    expect(wrapper).rejects.toThrowError()
+    expect(wrapper).rejects.toThrow()
   })
 
   test('should throw Error when dropCacheKey throws Error', async () => {
@@ -105,7 +105,7 @@ describe('drop cache', () => {
       await drop(request, key)
     }
 
-    expect(wrapper).rejects.toThrowError(Error)
+    expect(wrapper).rejects.toThrow(Error)
   })
 
   test('should throw "Redis drop error" error when dropCacheKey throws "Redis drop error" error', async () => {
@@ -115,6 +115,6 @@ describe('drop cache', () => {
       await drop(request, key)
     }
 
-    expect(wrapper).rejects.toThrowError(/^Redis drop error$/)
+    expect(wrapper).rejects.toThrow(/^Redis drop error$/)
   })
 })

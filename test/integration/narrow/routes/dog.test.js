@@ -353,7 +353,7 @@ describe('Dog endpoint', () => {
       const response = await server.inject(options)
 
       expect(response.statusCode).toBe(204)
-      expect(deleteDogByIndexNumber).toBeCalledWith('ED123', {
+      expect(deleteDogByIndexNumber).toHaveBeenCalledWith('ED123', {
         displayname: 'User, Internal',
         username: 'internal-user'
       })

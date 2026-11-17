@@ -73,7 +73,7 @@ describe('set cache', () => {
       await set(request, key, value)
     }
 
-    await expect(wrapper).rejects.toThrowError()
+    await expect(wrapper).rejects.toThrow()
   })
 
   test('should throw Error when getCache throws Error', async () => {
@@ -83,7 +83,7 @@ describe('set cache', () => {
       await set(request, key, value)
     }
 
-    await expect(wrapper).rejects.toThrowError(Error)
+    await expect(wrapper).rejects.toThrow(Error)
   })
 
   test('should throw "Redis retreival error" error when getCache throws "Redis retreival error" error', async () => {
@@ -93,7 +93,7 @@ describe('set cache', () => {
       await set(request, key, value)
     }
 
-    expect(wrapper).rejects.toThrowError(/^Redis retreival error$/)
+    expect(wrapper).rejects.toThrow(/^Redis retreival error$/)
   })
 
   test('should throw when setCacheValue throws', async () => {
@@ -103,7 +103,7 @@ describe('set cache', () => {
       await set(request, key, value)
     }
 
-    expect(wrapper).rejects.toThrowError()
+    expect(wrapper).rejects.toThrow()
   })
 
   test('should throw Error when setCacheValue throws Error', async () => {
@@ -113,7 +113,7 @@ describe('set cache', () => {
       await set(request, key, value)
     }
 
-    expect(wrapper).rejects.toThrowError(Error)
+    expect(wrapper).rejects.toThrow(Error)
   })
 
   test('should throw "Redis write error" error when setCacheValue throws "Redis write error" error', async () => {
@@ -123,6 +123,6 @@ describe('set cache', () => {
       await set(request, key, value)
     }
 
-    expect(wrapper).rejects.toThrowError(/^Redis write error$/)
+    expect(wrapper).rejects.toThrow(/^Redis write error$/)
   })
 })

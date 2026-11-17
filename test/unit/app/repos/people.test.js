@@ -285,7 +285,7 @@ describe('People repo', () => {
 
       const createdPeople = await createPeople(people, transaction, {})
 
-      expect(sequelize.models.person.count).toBeCalledTimes(3)
+      expect(sequelize.models.person.count).toHaveBeenCalledTimes(3)
       expect(createdPeople).toEqual([
         {
           id: 1,
@@ -1180,7 +1180,7 @@ describe('People repo', () => {
       }, dummyUser, {})
 
       expect(personModelMock.update).toHaveBeenCalledTimes(1)
-      expect(personModelMock.update).toBeCalledWith({
+      expect(personModelMock.update).toHaveBeenCalledWith({
         birth_date: new Date('1990-01-01')
       }, expect.anything())
       expect(personModelMock.save).toHaveBeenCalledTimes(1)
